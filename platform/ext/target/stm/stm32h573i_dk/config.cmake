@@ -34,6 +34,4 @@ set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable secu
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
 set(TFM_PARTITION_PROTECTED_STORAGE     ON         CACHE BOOL      "Disable Protected Storage partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL      "Disable Initial Attestation partition")
-set(TEST_NS                             ON          CACHE BOOL      "Disable NS PS Test")
-set(TEST_S                              ON          CACHE BOOL      "Disable S PS Test")
 set(STSAFEA                             ON          CACHE BOOL      "Activate ST SAFE SUPPORT")

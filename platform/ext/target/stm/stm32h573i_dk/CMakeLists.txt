@@ -41,3 +41,27 @@ set (BL2_FILE_TO_PREPROCESS ${CMAKE_CURRENT_BINARY_DIR}/image_macros_to_preproce
 file(WRITE ${BL2_FILE_TO_PREPROCESS} ${BL2_PREPROCESSING})
 install(FILES ${BL2_FILE_TO_PREPROCESS}
         DESTINATION ${CMAKE_BINARY_DIR} )
+
+################# Install platform files for NS build #################
+
+# cpuarch.cmake is used to set things that related to the platform that are both
+install(FILES       ${TARGET_PLATFORM_PATH}/cpuarch.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/ns/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/include
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/accelerator/crypto_accelerator_config.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
+
+install(DIRECTORY   ${PLATFORM_DIR}/ext/cmsis
+                    ${PLATFORM_DIR}/ext/common
+                    ${PLATFORM_DIR}/ext/driver
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

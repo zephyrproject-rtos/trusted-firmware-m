@@ -6,7 +6,7 @@
 #
 #-------------------------------------------------------------------------------
 
-# preload.cmake is used to set things that related to the platform that are both
+# cpuarch.cmake is used to set things that related to the platform that are both
 # immutable and global, which is to say they should apply to any kind of project
 # that uses this platform. In practise this is normally compiler definitions and
 # variables related to hardware.
@@ -20,4 +20,3 @@ add_compile_definitions(
     USE_HAL_DRIVER
 
 )
-set(PSA_API_TEST_TARGET stm32l562e_dk)
