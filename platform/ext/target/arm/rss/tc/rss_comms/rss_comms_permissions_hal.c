@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -150,6 +150,10 @@ enum tfm_plat_err_t comms_permissions_service_check(psa_handle_t handle,
             goto out_err;
         }
 #endif /* TFM_PARTITION_PLATFORM */
+#ifdef TFM_PARTITION_DPE
+    case TFM_DPE_SERVICE_HANDLE:
+        return TFM_PLAT_ERR_SUCCESS;
+#endif /* TFM_PARTITION_DPE */
     default:
         goto out_err;
     }
