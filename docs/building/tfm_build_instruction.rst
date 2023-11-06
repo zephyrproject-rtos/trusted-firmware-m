@@ -12,8 +12,13 @@ As you know from the :doc:`introduction </introduction/readme>` TF-M implements
 TF-M application as :term:`NSPE` client uses those services through isolation boundary via
 :term:`PSA-FF-M` API.
 Both SPE and NSPE are separate binaries and built independently.
-This document describes the process of building both of them and the interface between.
-SPE and NSPE binaries are combined and signed making the final image for downloading onto targets.
+SPE and NSPE binaries are combined and signed making the final image for downloading onto targets
+when building NSPE.
+
+.. Note::
+    This document describes the process of building a single SPE alone.
+    Refer to :doc:`Building Tests </building/tests_build_instruction>` on how to build TF-M
+    regression tests and PSA Arch tests to verify TF-M.
 
 TF-M uses `CMake <https://cmake.org/overview/>`__ **v3.15** or higher.
 Before starting please make sure you have all required software installed and
@@ -29,6 +34,7 @@ The additional building materials you can find in the following links:TF-M sourc
 .. toctree::
     :maxdepth: 1
 
+    Build Tests <tests_build_instruction>
     Run TF-M tests and applications <run_tfm_examples_on_arm_platforms>
     Building the documentation <documentation_generation>
     IAR toolchain <tfm_build_instruction_iar>
@@ -247,9 +253,6 @@ The recommended versions of the dependencies are listed in ``config/config_base.
    An alternative is to copy out the auto-downloaded repos under the ``<build_dir>/lib/ext``.
    They have been applied with patches and can be used directly.
 
- - **tf-m-tests** is a special dependency used for testing purpose only as described in
-   :ref:`Building Tests`
-
 Example: building TF-M with local Mbed Crypto repo
 --------------------------------------------------
 
@@ -322,8 +325,7 @@ These folders have the following content:
 - **platform** - source code for a selected hardware platform.
 - **CMakeLists.txt** - CMake script for the artifacts integration in NSPE.
 
-The content of ``<Artifact Dir>`` is a prepared directory for integration with
-CMake project as shown in the :ref:`NSPE CmakeLists.txt` below.
+The content of ``<Artifact Dir>`` is a prepared directory for integration with CMake projects.
 
 .. _NSPE toolchains:
 
@@ -334,95 +336,11 @@ SPE prepares and exports CMake toolchain files for building NSPE in all
 supported :ref:`Toolchains` in ``<Artifact Dir>/cmake`` folder.
 Toolchain used to build NSPE can be different from what is used to build SPE.
 
-.. _NSPE CmakeLists.txt:
-
 Basic SPE integration
 =====================
-Refer to the example of TF-M applications in **tf-m-extras** repository.
-
-.. _Building Tests:
-
-**************
-Building Tests
-**************
-The tests is a TF-M application which verifies TF-M functionality on both SPE and NSPE sides.
-Conceptually, it builds the same way as described above in 2 consequent steps (SPE then NSPE).
-
-However, tests require an extension of SPE side with test code and extra functionality
-for some Non-Secure test cases. To inject that test code into SPE the
-``CONFIG_TFM_TEST_DIR`` option is used. When SPE build system sees this option
-it adds the corresponding folder via ``add_subdirectory(${CONFIG_TFM_TEST_DIR} tf-m-test)``
-and includes it to SPE binary.
-Also, test configurations should be passed to SPE build to include building Secure Tests.
-
-To hide these complexities to developers, TF-M implements a wrapper CMake in **tf-m-tests**
-repository to build the SPE for testing.
-
-The recommended tf-m-tests repo commit to verify TF-M can be found at
-``<TF-M source dir>/lib/ext/tf-m-tests/version.txt``.
-It does not support auto-downloading as builds start from it.
-You need to download it manually before building any tests.
-
-Regression Tests
-================
-For instructions on configuring, building and executing the regression tests
-please refer to the documentation in **tf-m-tests** repository (to be added).
-The regression test application is located under **/tests_reg** folder.
-It is recommended to build both SPE and NSPE from that folder.
-
-The basic commands for building the regression tests will be:
-
-.. code-block:: bash
-
-    cd </tf-m-tests/tests_reg>
-    cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir>
-          -DTEST_S=ON -DTEST_NS=ON
-    cmake --build build_spe -- install
-
-    cmake -S . -B build_test -DCONFIG_SPE_PATH=<Absolute path to>/build_spe/api_ns
-    cmake --build build_test
-
-Instead of enable all the supported Secure (``TEST_S``) and NS (``TEST_NS`` tests, you can also
-enable individual test suites by using ``-DTEST_S_<SUITE>=ON`` or ``-DTEST_NS_<SUITE>=ON``.
-For the available test suites, refer to the ``default_s_test_config.cmake`` and
-``default_ns_test_config.cmake`` files in tf-m-tests repo.
-
-PSA API tests
-=============
-PSA API tests from https://github.com/ARM-software/psa-arch-tests use the same
-mechanism for SPE extension as the regression tests above utilising ``CONFIG_TFM_TEST_DIR`` option.
-PSA API tests are selected by the TEST_PSA_API variable. Enabling both regression tests and
-PSA API tests simultaneously is **not** supported.
-
-TF-M implements a wrapper CMake for PSA API tests as well.
-
-For instructions on building and executing the regression tests
-please refer to the documentation in **tf-m-tests** repository (to be added).
-The PSA API test codes are located under **/tests_psa_arch** folder.
-
-Here is a brief description of the basic flow:
-There are 5 different TEST_PSA_API test suites to be run.
-
-.. code-block:: bash
-
-    -DTEST_PSA_API=INTERNAL_TRUSTED_STORAGE
-    -DTEST_PSA_API=PROTECTED_STORAGE
-    -DTEST_PSA_API=STORAGE
-    -DTEST_PSA_API=CRYPTO
-    -DTEST_PSA_API=INITIAL_ATTESTATION
-
-Respectively for the corresponding service. For example, to enable the PSA API
-tests for the Crypto service:
-
-.. code-block:: bash
-
-    cd </tf-m-tests/tests_psa_arch folder>
-    cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir>
-          -DTEST_PSA_API=CRYPTO
-    cmake --build build_spe -- install
-
-    cmake -S . -B build_test -DCONFIG_SPE_PATH=<Absolute path to>/build_spe/api_ns
-    cmake --build build_test
+Refer to the
+`example <https://git.trustedfirmware.org/TF-M/tf-m-extras.git/tree/examples/tf-m-example-ns-app>`__
+of TF-M applications in **tf-m-extras** repository.
 
 --------------
 
