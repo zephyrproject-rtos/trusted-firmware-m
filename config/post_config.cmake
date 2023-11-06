@@ -34,9 +34,6 @@ if(CONFIG_PSA_ARCH_TESTS_CONFIG_FILE)
     include(${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE})
 endif()
 
-# Load regression configs overrided by platform
-include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake OPTIONAL)
-
 # Load defaults, setting options not already set
 include(config/config_base.cmake)
 
