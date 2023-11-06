@@ -7,6 +7,7 @@
 
 #include "rss_comms_permissions_hal.h"
 
+#include "device_definition.h"
 #include "psa_manifest/sid.h"
 #include "tfm_hal_platform.h"
 
@@ -56,25 +57,20 @@ static void counter_check(void) {
     return;
 }
 
-/* This interface is accessed only from root world, so we don't care about the
- * owners of host memory. However, we should still be somewhat discerning about
- * where data is coming from or going to.
- */
 enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
                                                    uint64_t host_ptr,
                                                    uint32_t size,
                                                    bool is_write)
 {
-    /* Accessed only from root world - can be ignored */
-    (void)owner;
+    if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_MONITOR_DEV) {
+        /* Is fully within the Secure ROM and is a read */
+        if (host_ptr >= 0x0 && host_ptr + size < 0x80000 && !is_write) {
+            return TFM_PLAT_ERR_SUCCESS;
+        }
 
-    /* Is fully within the Secure ROM and is a read */
-    if (host_ptr >= 0x0 && host_ptr + size < 0x80000 && !is_write) {
-        return TFM_PLAT_ERR_SUCCESS;
-    }
-
-    if (host_ptr >= 0x4000000 && host_ptr + size < 0x4080000) {
-        return TFM_PLAT_ERR_SUCCESS;
+        if (host_ptr >= 0x4000000 && host_ptr + size < 0x4080000) {
+            return TFM_PLAT_ERR_SUCCESS;
+        }
     }
 
     /* Is fully within the Non-secure ROM and is a read */
@@ -86,6 +82,13 @@ enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
     if (host_ptr >= 0x6000000 && host_ptr + size < 0x6080000) {
         return TFM_PLAT_ERR_SUCCESS;
     }
+
+#ifdef TFM_PARTITION_DPE
+    /* Is fully within the Non-secure SDRAM (BL33) */
+    if (host_ptr >= 0x80000000 && host_ptr + size < 0xf9000000) {
+        return TFM_PLAT_ERR_SUCCESS;
+    }
+#endif /* TFM_PARTITION_DPE */
 
     invalid_region_counter++;
     counter_check();

@@ -121,6 +121,10 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
         err = TFM_PLAT_ERR_SYSTEM_ERR;
         goto out_return_err;
     }
+    memset(req, 0, sizeof(struct client_request_t));
+
+    /* Record the MHU sender device to be used for the reply */
+    req->mhu_sender_dev = mhu_sender_dev;
 
     err = rss_protocol_deserialize_msg(req, &msg, msg_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -128,9 +132,6 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
         SPMLOG_DBGMSGVAL("[COMMS] Deserialize message failed: ", err);
         goto out_return_err;
     }
-
-    /* Record the MHU sender device to be used for the reply */
-    req->mhu_sender_dev = mhu_sender_dev;
 
     if (queue_enqueue(req) != 0) {
         /* No queue capacity, drop message */

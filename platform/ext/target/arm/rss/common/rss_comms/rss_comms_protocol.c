@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,6 @@ enum tfm_plat_err_t rss_protocol_deserialize_msg(
         struct client_request_t *req, struct serialized_psa_msg_t *msg,
         size_t msg_len)
 {
-    memset(req, 0, sizeof(struct client_request_t));
-
     if (msg_len < sizeof(msg->header)) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }

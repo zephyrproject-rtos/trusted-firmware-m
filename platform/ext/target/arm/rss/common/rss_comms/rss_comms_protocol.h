@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -73,6 +73,9 @@ __PACKED_STRUCT serialized_psa_reply_t {
  * \param[out] req               The client_request_t to fill.
  * \param[in]  msg               The serialized message to extract data from.
  * \param[in]  msg_len           The size of the message.
+ *
+ * \note   The sanitization of the client request structure is the
+ *         responsibility of the caller.
  *
  * \retval TFM_PLAT_ERR_SUCCESS  Operation succeeded.
  * \retval Other return code     Operation failed with an error code.
