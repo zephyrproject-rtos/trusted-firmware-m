@@ -841,8 +841,14 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM2, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM3, false);
+#ifdef NRF_PDM
+    spu_peripheral_config_non_secure((uint32_t)NRF_PDM, false);
+#endif
 #ifdef NRF_PDM0
     spu_peripheral_config_non_secure((uint32_t)NRF_PDM0, false);
+#endif
+#ifdef NRF_I2S
+    spu_peripheral_config_non_secure((uint32_t)NRF_I2S, false);
 #endif
 #ifdef NRF_I2S0
     spu_peripheral_config_non_secure((uint32_t)NRF_I2S0, false);
