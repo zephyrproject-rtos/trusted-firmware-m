@@ -114,7 +114,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/wrapper/wrapper.py
                 --version ${MCUBOOT_IMAGE_VERSION_NS}
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_ns.o
-                --key ${MCUBOOT_KEY_NS}
+                --key ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_ns_signing_private_key.pem
                 --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
                 --align ${MCUBOOT_ALIGN_VAL}
                 --pad
@@ -123,11 +123,11 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 -s ${MCUBOOT_SECURITY_COUNTER_NS}
                 -L ${MCUBOOT_ENC_KEY_LEN}
                 -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
-                $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
                 $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
                 $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
-                $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+                $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_enc_key.pem>
                 $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
+                $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
                 tfm_ns_signed.bin
             COMMAND ${CMAKE_COMMAND} -E copy tfm_ns_signed.bin ${CMAKE_BINARY_DIR}/bin
         )
@@ -179,7 +179,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/wrapper/wrapper.py
                 --version ${MCUBOOT_IMAGE_VERSION_S}
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
-                --key ${MCUBOOT_KEY_S}
+                --key ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_s_signing_private_key.pem
                 --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
                 --align ${MCUBOOT_ALIGN_VAL}
                 --pad
@@ -189,7 +189,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 -L ${MCUBOOT_ENC_KEY_LEN}
                 $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
                 $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
-                $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+                $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_enc_key.pem>
                 $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
                 tfm_s_ns.bin
                 tfm_s_ns_signed.bin

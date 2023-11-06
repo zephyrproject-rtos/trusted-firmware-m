@@ -176,28 +176,27 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
 
     if (MCUBOOT_ENC_IMAGES)
         install(FILES ${MCUBOOT_KEY_ENC}
+                RENAME image_enc_key.pem
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
     endif()
 
-    if (PLATFORM_DEFAULT_IMAGE_SIGNING)
-        install(FILES $<TARGET_OBJECTS:signing_layout_s>
+    install(FILES $<TARGET_OBJECTS:signing_layout_s>
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
-        install(FILES ${MCUBOOT_KEY_S}
+    install(FILES ${MCUBOOT_KEY_S}
+            RENAME image_s_signing_private_key.pem
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-        install(FILES $<TARGET_FILE_DIR:bl2>/image_s_signing_public_key.pem
+    install(FILES $<TARGET_FILE_DIR:bl2>/image_s_signing_public_key.pem
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-        if(MCUBOOT_IMAGE_NUMBER GREATER 1)
-            install(FILES $<TARGET_OBJECTS:signing_layout_ns>
-                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
-            install(FILES ${MCUBOOT_KEY_NS}
-                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-            install(FILES $<TARGET_FILE_DIR:bl2>/image_ns_signing_public_key.pem
-                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-        endif()
-    endif()
 
-    install(FILES ${MCUBOOT_KEY_NS} ${MCUBOOT_KEY_S}
-            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+    if(MCUBOOT_IMAGE_NUMBER GREATER 1)
+        install(FILES $<TARGET_OBJECTS:signing_layout_ns>
+                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+        install(FILES ${MCUBOOT_KEY_NS}
+                RENAME image_ns_signing_private_key.pem
+                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys/)
+        install(FILES $<TARGET_FILE_DIR:bl2>/image_ns_signing_public_key.pem
+                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+    endif()
 endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
