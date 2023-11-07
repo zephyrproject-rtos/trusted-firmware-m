@@ -45,6 +45,7 @@ target_compile_definitions(platform_region_defs
         RSE_TP_MODE=LCM_TP_MODE_${RSE_TP_MODE}
         LCM_DCU_PARITY
         $<$<BOOL:${PLAT_MHU_VERSION}>:PLAT_MHU_VERSION=${PLAT_MHU_VERSION}>
+        $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
 )
 
 #========================= Platform common defs ===============================#

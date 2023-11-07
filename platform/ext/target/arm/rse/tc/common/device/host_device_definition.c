@@ -80,6 +80,16 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
 };
 #endif
 
+#define _MHU_SENDER_BASE_S(_device)     MHU ## _device ## _SENDER_BASE_S
+#define _MHU_RECEIVER_BASE_S(_device)   MHU ## _device ## _RECEIVER_BASE_S
+#define MHU_SENDER_BASE_S(_device)     _MHU_SENDER_BASE_S(_device)
+#define MHU_RECEIVER_BASE_S(_device)   _MHU_RECEIVER_BASE_S(_device)
+
+/* Different platforms use a different MHU device for
+ * RSE<->SCP communication */
+#define MHU_RSE_SCP_SENDER_BASE_S       MHU_SENDER_BASE_S(RSE_MHU_SCP_DEVICE)
+#define MHU_RSE_SCP_RECEIVER_BASE_S     MHU_RECEIVER_BASE_S(RSE_MHU_SCP_DEVICE)
+
 #if PLAT_MHU_VERSION == 2
 /* Message Handling Units (MHU) */
 #ifdef MHU_AP_MONITOR_TO_RSE
@@ -108,13 +118,13 @@ struct mhu_v2_x_dev_t MHU_RSE_TO_AP_NS_DEV = {
 
 #ifdef MHU_SCP_TO_RSE
 struct mhu_v2_x_dev_t MHU_SCP_TO_RSE_DEV = {
-    MHU2_RECEIVER_BASE_S,
+    MHU_RSE_SCP_RECEIVER_BASE_S,
     MHU_V2_X_RECEIVER_FRAME};
 #endif
 
 #ifdef MHU_RSE_TO_SCP
 struct mhu_v2_x_dev_t MHU_RSE_TO_SCP_DEV = {
-    MHU2_SENDER_BASE_S,
+    MHU_RSE_SCP_SENDER_BASE_S,
     MHU_V2_X_SENDER_FRAME};
 #endif
 
@@ -150,14 +160,14 @@ struct mhu_v3_x_dev_t MHU_RSE_TO_AP_NS_DEV = {
 
 #ifdef MHU_SCP_TO_RSE
 struct mhu_v3_x_dev_t MHU_SCP_TO_RSE_DEV = {
-    MHU2_RECEIVER_BASE_S,
+    MHU_RSE_SCP_RECEIVER_BASE_S,
     MHU_V3_X_MBX_FRAME,
 };
 #endif
 
 #ifdef MHU_RSE_TO_SCP
 struct mhu_v3_x_dev_t MHU_RSE_TO_SCP_DEV = {
-    MHU2_SENDER_BASE_S,
+    MHU_RSE_SCP_SENDER_BASE_S,
     MHU_V3_X_PBX_FRAME,
 };
 #endif

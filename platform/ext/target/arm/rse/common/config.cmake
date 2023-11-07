@@ -121,6 +121,8 @@ set(TFM_MULTI_CORE_TOPOLOGY             ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
 
+set(RSE_MHU_SCP_DEVICE                  2          CACHE STRING  "MHU device index to use for communications with the SCP")
+
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
