@@ -16,22 +16,6 @@
 
 #ifdef CONFIG_TFM_USE_TRUSTZONE
 
-/*!
- * \def __tfm_nspm_secure_gateway_attributes__
- *
- * \brief Attributes for secure gateway functions for NSPM
- */
-#if !defined(__ARMCC_VERSION) && !defined(__ICCARM__)
-/*
- * GNUARM requires noclone attribute to protect gateway function symbol from
- * being renamed and cloned
- */
-#define __tfm_nspm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noclone))
-#else
-#define __tfm_nspm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry))
-#endif /* !defined(__ARMCC_VERSION) && !defined(__ICCARM__) */
 #endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /**

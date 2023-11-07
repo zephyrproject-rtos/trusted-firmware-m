@@ -10,7 +10,6 @@
 #include "tfm_platform_api.h"
 #include "tfm_ioctl_api.h"
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_set_pin_alt_func(uint32_t alt_func, uint64_t pin_mask,
                               uint32_t *result)
@@ -43,7 +42,6 @@ tfm_platform_set_pin_alt_func(uint32_t alt_func, uint64_t pin_mask,
     return TFM_PLATFORM_ERR_SUCCESS;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_set_pin_default_in(uint32_t alt_func, uint32_t pin_value,
                               bool default_in_value, uint32_t *result)
@@ -77,7 +75,6 @@ tfm_platform_set_pin_default_in(uint32_t alt_func, uint32_t pin_value,
     return TFM_PLATFORM_ERR_SUCCESS;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_set_pin_mode(uint64_t pin_mask, uint32_t pin_mode,
                           uint32_t *result)
@@ -110,7 +107,6 @@ tfm_platform_set_pin_mode(uint64_t pin_mask, uint32_t pin_mode,
     return TFM_PLATFORM_ERR_SUCCESS;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t tfm_platform_gpio_init(uint32_t *result)
 {
     psa_status_t ret;
@@ -136,7 +132,6 @@ enum tfm_platform_err_t tfm_platform_gpio_init(uint32_t *result)
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_pin_config(uint32_t pin_num, uint32_t direction,
                              uint32_t *result)
@@ -166,7 +161,6 @@ tfm_platform_gpio_pin_config(uint32_t pin_num, uint32_t direction,
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_pin_write(uint32_t pin_num, uint32_t value, uint32_t *result)
 {
@@ -195,7 +189,6 @@ tfm_platform_gpio_pin_write(uint32_t pin_num, uint32_t value, uint32_t *result)
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_pin_read(uint32_t pin_num, uint32_t *data, uint32_t *result)
 {
@@ -224,7 +217,6 @@ tfm_platform_gpio_pin_read(uint32_t pin_num, uint32_t *data, uint32_t *result)
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_port_config(uint32_t pin_mask, uint32_t direction,
                              uint32_t *result)
@@ -254,7 +246,6 @@ tfm_platform_gpio_port_config(uint32_t pin_mask, uint32_t direction,
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_port_write(uint32_t pin_mask, uint32_t value,
                              uint32_t *result)
@@ -284,7 +275,6 @@ tfm_platform_gpio_port_write(uint32_t pin_mask, uint32_t value,
     return ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t
 tfm_platform_gpio_port_read(uint32_t pin_mask, uint32_t *data, uint32_t *result)
 {

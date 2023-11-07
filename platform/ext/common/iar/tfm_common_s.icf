@@ -49,7 +49,6 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
 };
 
 define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-       section SFN,
        readonly
        };
 

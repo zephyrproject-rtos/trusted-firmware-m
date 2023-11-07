@@ -28,7 +28,6 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
 };
 
 define block TFM_UNPRIV_CODE_START with alignment = GTZC_FLASH_ALIGN {
-       section SFN,
        ro section .rodata object tfm_*_secure_api.o,
        ro object *6M_tl*.a,
        ro object *7M_tl*.a,

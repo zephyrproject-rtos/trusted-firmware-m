@@ -231,7 +231,6 @@ SECTIONS
 
     .TFM_UNPRIV_CODE ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT) :
     {
-        *(SFN)
         *(SORT_BY_ALIGNMENT(.text*))
 
         KEEP(*(.init))

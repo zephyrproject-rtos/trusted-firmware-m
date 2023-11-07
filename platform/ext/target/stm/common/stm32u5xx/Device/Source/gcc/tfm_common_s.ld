@@ -331,7 +331,6 @@ SECTIONS
 
     .TFM_UNPRIV_CODE : ALIGN(GTZC_FLASH_ALIGN)
     {
-        *(SFN)
         *(.text*)
 
         KEEP(*(.init))
