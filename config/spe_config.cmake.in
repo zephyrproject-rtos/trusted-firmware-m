@@ -76,3 +76,6 @@ set(CONFIG_TFM_ENABLE_FP                   @CONFIG_TFM_ENABLE_FP@    CACHE BOOL 
 
 set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)
+
+# Recommended tf-m-tests version
+set(RECOMMEND_TFM_TESTS_VERSION            @TFM_TESTS_VERSION@)

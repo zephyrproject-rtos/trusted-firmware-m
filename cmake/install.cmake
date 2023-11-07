@@ -211,6 +211,10 @@ install(FILES       ${CMAKE_SOURCE_DIR}/config/cp_config_default.cmake
                     ${CMAKE_SOURCE_DIR}/config/cp_check.cmake
         DESTINATION ${INSTALL_CONFIG_DIR})
 
+################### Read recommended tf-m-tests version ########################
+
+include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/read_version.cmake)
+
 ###################### Install NS platform sources #############################
 
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
