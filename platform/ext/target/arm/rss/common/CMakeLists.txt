@@ -29,6 +29,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
+        $<$<BOOL:${RSS_LOAD_NS_IMAGE}>:RSS_LOAD_NS_IMAGE>
 )
 
 #========================= Platform common defs ===============================#

@@ -196,6 +196,17 @@ int boot_platform_post_load(uint32_t image_id)
     return 0;
 }
 
+bool boot_platform_should_load_image(uint32_t image_id)
+{
+#ifndef RSS_LOAD_NS_IMAGE
+    if (image_id == RSS_BL2_IMAGE_NS) {
+        return false;
+    }
+#endif /* RSS_LOAD_NS_IMAGE */
+
+    return true;
+}
+
 void boot_platform_quit(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.
