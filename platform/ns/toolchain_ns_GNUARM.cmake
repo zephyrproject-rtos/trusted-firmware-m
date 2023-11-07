@@ -42,10 +42,10 @@ EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VE
 # ===================== Set toolchain CPU and Arch =============================
 
 if (DEFINED TFM_SYSTEM_PROCESSOR)
-    if(TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85")
-        # GNUARM does not support the -mcpu=cortex-m85 flag yet
-        # TODO: Remove this exception when the cortex-m85 support comes out.
-        message(WARNING "Cortex-m85 is not supported by GCC. Falling back to -march usage.")
+    if(TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85" AND GCC_VERSION VERSION_LESS "13.0.0")
+        # GNUARM until version 13 does not support the -mcpu=cortex-m85 flag
+        message(WARNING "Cortex-m85 is only supported from GCC13. "
+                        "Falling back to -march usage for earlier versions.")
     else()
         set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
 
