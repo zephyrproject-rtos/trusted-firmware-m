@@ -56,9 +56,6 @@ include(config/tfm_fwu_config.cmake)
 # Include coprocessor configs
 include(config/cp_config_default.cmake)
 
-# Set profiling test
-include(config/tfm_profiling.cmake)
-
 # Set secure log configs
 # It also depends on regression test config.
 include(config/tfm_secure_log.cmake)

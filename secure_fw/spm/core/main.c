@@ -18,7 +18,7 @@
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
 
-#ifdef CONFIG_TFM_ENALBE_PROFILING
+#ifdef CONFIG_TFM_ENABLE_PROFILING
 #include "prof_intf_s.h"
 #endif
 
@@ -87,7 +87,7 @@ static fih_int tfm_core_init(void)
 
 int main(void)
 {
-#ifdef CONFIG_TFM_ENALBE_PROFILING
+#ifdef CONFIG_TFM_ENABLE_PROFILING
     PROFILING_INIT();
 #endif
 
