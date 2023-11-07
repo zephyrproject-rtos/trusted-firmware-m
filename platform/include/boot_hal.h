@@ -97,6 +97,15 @@ int boot_platform_pre_load(uint32_t image_id);
 int boot_platform_post_load(uint32_t image_id);
 
 /**
+ * \brief Platform operation to check if a particular image should be loaded.
+ *
+ * \param[in] image_id  The ID of the image that is being queried.
+ *
+ * \return Returns true if image should be loaded, false otherwise
+ */
+bool boot_platform_should_load_image(uint32_t image_id);
+
+/**
  * Version of a SW component, to be encoded as "major.minor.revision+build_num".
  */
 struct boot_measurement_version {

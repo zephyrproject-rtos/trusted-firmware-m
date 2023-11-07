@@ -245,6 +245,11 @@ __WEAK int boot_platform_post_load(uint32_t image_id)
     return 0;
 }
 
+__WEAK bool boot_platform_should_load_image(uint32_t image_id)
+{
+    return true;
+}
+
 #ifdef TFM_MEASURED_BOOT_API
 static int boot_add_data_to_shared_area(uint8_t        major_type,
                                         uint16_t       minor_type,
