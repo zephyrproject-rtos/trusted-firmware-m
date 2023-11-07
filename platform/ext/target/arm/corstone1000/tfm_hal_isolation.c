@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -14,9 +14,11 @@
 #include "tfm_hal_isolation.h"
 #include "mpu_config.h"
 #include "mmio_defs.h"
+#include "flash_layout.h"
 
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+#define MPU_REGION_MIN_SIZE (0x100)
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 
@@ -31,20 +33,38 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
-static void configure_mpu(uint32_t rnr, uint32_t base, uint32_t limit,
-                          uint32_t is_xn_exec, uint32_t ap_permissions)
+static enum tfm_hal_status_t configure_mpu(uint32_t rnr, uint32_t base,
+                          uint32_t limit, uint32_t is_xn_exec, uint32_t ap_permissions)
 {
-    uint32_t size; /* region size */
+    uint32_t rbar_size_field; /* region size as it is used in the RBAR */
     uint32_t rasr; /* region attribute and size register */
     uint32_t rbar; /* region base address register */
 
-    size = get_rbar_size_field(limit - base);
+    rbar_size_field = get_rbar_size_field(limit - base);
+
+    /* The MPU region's base address has to be aligned to the region
+     * size for a valid MPU configuration */
+    if ((base % (1 << (rbar_size_field + 1))) != 0) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    /* The MPU supports only 8 memory regions */
+    if (rnr > 7) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    /* The minimum size for a region is 0x100 bytes */
+    if((limit - base) < MPU_REGION_MIN_SIZE) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
 
     rasr = ARM_MPU_RASR(is_xn_exec, ap_permissions, TEX, NOT_SHAREABLE,
-            NOT_CACHEABLE, NOT_BUFFERABLE, SUB_REGION_DISABLE, size);
+            NOT_CACHEABLE, NOT_BUFFERABLE, SUB_REGION_DISABLE, rbar_size_field);
     rbar = base & MPU_RBAR_ADDR_Msk;
 
     ARM_MPU_SetRegionEx(rnr, rbar, rasr);
+
+    return TFM_HAL_SUCCESS;
 }
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
@@ -56,33 +76,60 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     uint32_t rnr = TFM_ISOLATION_REGION_START_NUMBER; /* current region number */
     uint32_t base; /* start address */
     uint32_t limit; /* end address */
+    enum tfm_hal_status_t ret;
 
     ARM_MPU_Disable();
 
-    /* TFM Core unprivileged code region */
-    base = (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-    limit = (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
+    /* Armv6-M MPU allows region overlapping. The region with the higher RNR
+     * will decide the attributes.
+     *
+     * The default attributes are set to XN_EXEC_OK and AP_RO_PRIV_UNPRIV for the
+     * whole SRAM so the PSA_ROT_LINKER_CODE, TFM_UNPRIV_CODE and APP_ROT_LINKER_CODE
+     * don't have to be aligned and memory space can be saved.
+     * This region has the lowest RNR so the next regions can overwrite these
+     * attributes if it's needed.
+     */
+    base = SRAM_BASE;
+    limit = SRAM_BASE + SRAM_SIZE;
 
-    configure_mpu(rnr++, base, limit, XN_EXEC_OK, AP_RO_PRIV_UNPRIV);
+    ret = configure_mpu(rnr++, base, limit,
+                            XN_EXEC_OK, AP_RO_PRIV_UNPRIV);
+    if (ret != TFM_HAL_SUCCESS) {
+        return ret;
+    }
 
-    /* RO region */
-    base = (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
-    limit = (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base);
-
-    configure_mpu(rnr++, base, limit, XN_EXEC_OK, AP_RO_PRIV_UNPRIV);
 
     /* RW, ZI and stack as one region */
     base = (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
     limit = (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base);
 
-    configure_mpu(rnr++, base, limit, XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+    /* The section size can be bigger than the alignment size, else the code would
+     * not fit into the memory. Because of this, the sections can use multiple MPU
+     * regions. */
+    do {
+        ret = configure_mpu(rnr++, base, base + TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT,
+                                XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+        if (ret != TFM_HAL_SUCCESS) {
+            return ret;
+        }
+        base += TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT;
+    } while (base < limit);
+
 
 #ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     base = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     limit = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 
-    configure_mpu(rnr++, base, limit, XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+    do {
+        ret = configure_mpu(rnr++, base, base + TFM_LINKER_SP_META_PTR_ALIGNMENT,
+                                XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+        if (ret != TFM_HAL_SUCCESS) {
+            return ret;
+        }
+        base += TFM_LINKER_SP_META_PTR_ALIGNMENT;
+    } while (base < limit);
+
 #endif
 
     arm_mpu_enable();

@@ -22,6 +22,25 @@ target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
+
+# The Armv6-M MPU requires that the MPU regions be aligned to the region sizes.
+# The minimal region size is 0x100 bytes.
+#
+# The alignments have to be a power of two and ideally bigger than the section size (which
+# can be checked in the map file).
+# In some cases the alignment value is smaller than the actual section
+# size to save memory. In that case, multiple MPU region has to be configured to cover it.
+#
+# To save memory, the attributes are set to XN_EXEC_OK and AP_RO_PRIV_UNPRIV for
+# the SRAM so the PSA_ROT_LINKER_CODE, TFM_UNPRIV_CODE and APP_ROT_LINKER_CODE don't have to
+# be aligned. The higher-priority regions will overwrite these attributes if needed.
+# The RAM is also located in the SRAM so it has to be configured to overwrite these default
+# attributes.
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT=0x2000
+        TFM_LINKER_SP_META_PTR_ALIGNMENT=0x100
+)
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.

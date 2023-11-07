@@ -8,7 +8,7 @@
 
 ######################################################################
 # This script is to create a flash gpt image for corstone platform
-# 
+#
 #  Flash image layout:
 #       |------------------------------|
 #       |        Protective MBR        |
@@ -82,15 +82,15 @@ sgdisk  --mbrtogpt \
         --new=4:56:+4K --typecode=4:$PRIVATE_METADATA_TYPE_UUID --partition-guid=4:$(uuidgen) --change-name=4:'private_metadata_replica_1' \
         --new=5:64:+4k --typecode=5:$PRIVATE_METADATA_TYPE_UUID --partition-guid=5:$(uuidgen) --change-name=5:'private_metadata_replica_2' \
         --new=6:72:+100k --typecode=6:$SE_BL2_TYPE_UUID --partition-guid=6:$(uuidgen) --change-name=6:'bl2_primary' \
-        --new=7:272:+376K --typecode=7:$TFM_TYPE_UUID --partition-guid=7:$(uuidgen) --change-name=7:'tfm_primary' \
+        --new=7:272:+368K --typecode=7:$TFM_TYPE_UUID --partition-guid=7:$(uuidgen) --change-name=7:'tfm_primary' \
         --new=8:32784:+100k --typecode=8:$SE_BL2_TYPE_UUID --partition-guid=8:$(uuidgen) --change-name=8:'bl2_secondary' \
-        --new=9:32984:+376K --typecode=9:$TFM_TYPE_UUID --partition-guid=9:$(uuidgen) --change-name=9:'tfm_secondary' \
+        --new=9:32984:+368K --typecode=9:$TFM_TYPE_UUID --partition-guid=9:$(uuidgen) --change-name=9:'tfm_secondary' \
         --new=10:65496:65501  --partition-guid=10:$(uuidgen) --change-name=10:'reserved_2' \
         $IMAGE
 
 [ $? -ne 0 ] && echo "Error occurs while writing the GPT layout" && exit 1
 
-# Write partitions 
+# Write partitions
 # conv=notrunc avoids truncation to keep the geometry of the image.
 dd if=$BIN_DIR/bl2_signed.bin of=${IMAGE}  seek=72 conv=notrunc
 dd if=$BIN_DIR/tfm_s_signed.bin of=${IMAGE} seek=272 conv=notrunc
