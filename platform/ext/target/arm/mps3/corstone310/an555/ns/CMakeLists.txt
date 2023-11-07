@@ -17,8 +17,3 @@ add_library(platform_ns STATIC)
 
 include(${CORSTONE310_COMMON_DIR}/common.cmake)
 
-target_include_directories(device_definition
-    INTERFACE
-        libraries
-        native_drivers
-)

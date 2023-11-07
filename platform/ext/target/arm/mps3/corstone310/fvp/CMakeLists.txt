@@ -124,6 +124,12 @@ target_sources(tfm_spm
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/device
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/native_drivers
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/libraries
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
 install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
         RENAME      cpuarch.cmake)
