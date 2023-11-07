@@ -69,7 +69,7 @@
 
 /* Enable PSA Crypto Cipher module */
 #ifndef CRYPTO_CIPHER_MODULE_ENABLED
-#define CRYPTO_CIPHER_MODULE_ENABLED           1
+#define CRYPTO_CIPHER_MODULE_ENABLED           0
 #endif
 
 /* Enable PSA Crypto asymmetric key signature module */
