@@ -84,6 +84,7 @@ enum tfm_otp_element_id_t {
 
     PLAT_OTP_ID_DMA_ICS,
     PLAT_OTP_ID_SAM_CONFIG,
+    PLAT_OTP_ID_SCP_DATA,
 
     PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY,
 

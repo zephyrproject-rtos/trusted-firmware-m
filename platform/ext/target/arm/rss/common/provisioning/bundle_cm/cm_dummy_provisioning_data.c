@@ -14,6 +14,8 @@ const struct cm_provisioning_data data = {
     {},
     /* DMA ICS */
     {},
+    /* SCP data */
+    {},
     /* RSS_ID */
     0,
     /* SAM config placeholder */

@@ -49,9 +49,10 @@ __PACKED_STRUCT plat_user_area_layout_t {
             /* Things after this point are not touched by BL1_1, and hence are
              * modifiable by new provisioning code.
              */
-                uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE/ sizeof(uint32_t)];
+                uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
                 uint32_t cca_system_properties;
                 uint32_t rss_id;
+                uint32_t scp_data[OTP_SCP_DATA_SIZE / sizeof(uint32_t)];
             } cm_locked;
 
             __PACKED_STRUCT {
@@ -209,6 +210,7 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
+    [PLAT_OTP_ID_SCP_DATA] = USER_AREA_OFFSET(cm_locked.scp_data),
 
     [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
 };
@@ -313,6 +315,7 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
+    [PLAT_OTP_ID_SCP_DATA] = USER_AREA_SIZE(cm_locked.scp_data),
 
     [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
 };
@@ -611,6 +614,10 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     if (otp_size < OTP_OFFSET(user_data) +
+                   sizeof(struct plat_user_area_layout_t)) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    if (OTP_TOTAL_SIZE < OTP_OFFSET(user_data) +
                    sizeof(struct plat_user_area_layout_t)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

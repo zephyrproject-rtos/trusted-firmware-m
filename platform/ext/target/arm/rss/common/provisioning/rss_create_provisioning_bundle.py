@@ -68,6 +68,7 @@ parser.add_argument("--bundle_output_file", help="bundle output file", required=
 parser.add_argument("--key_file", help="the AES-CCM key file", required=True)
 parser.add_argument("--krtl_derivation_label", help="The provisioning key derivation label", required=True)
 parser.add_argument("--provisioning_lcs", help="The LCS in which provisioning will be run", required=True)
+parser.add_argument("--scp_data_input_file", help="The data input file", required=False)
 args = parser.parse_args()
 
 with open(args.provisioning_code, "rb") as in_file:
@@ -113,10 +114,17 @@ if args.rss_id != None:
 else:
     rss_id = bytes(0)
 
+if args.scp_data_input_file:
+    with open(args.scp_data_input_file, "rb") as in_file:
+        scp_data = in_file.read()
+else:
+    scp_data = bytes(0)
+
 patch_bundle = struct_pack([
     bl1_2_padded_hash,
     bl1_2,
     otp_dma_ics,
+    scp_data,
     rss_id,
 ])
 

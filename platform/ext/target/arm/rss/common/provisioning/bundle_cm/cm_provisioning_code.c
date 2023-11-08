@@ -78,6 +78,13 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_SCP_DATA,
+                             sizeof(data.scp_data),
+                             (uint8_t*)&data.scp_data);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     int_err = bl1_trng_generate_random(generated_key_buf,
                                        sizeof(generated_key_buf));
     if (int_err != 0) {
