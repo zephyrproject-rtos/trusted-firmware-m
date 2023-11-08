@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,16 @@
 /* A handle to a mailbox message in use */
 typedef int32_t    mailbox_msg_handle_t;
 
-#define MAILBOX_MSG_NULL_HANDLE          ((mailbox_msg_handle_t)0)
+#define MAILBOX_MSG_NULL_HANDLE             ((mailbox_msg_handle_t)0)
+
+#ifndef MAILBOX_ENABLE_INTERRUPTS
+#define MAILBOX_ENABLE_INTERRUPTS() \
+                        (psa_irq_enable(MAILBOX_INTERRUPT_SIGNAL))
+#define MAILBOX_SIGNAL_IS_ACTIVE(signals) \
+                        ((signals) & MAILBOX_INTERRUPT_SIGNAL)
+#define MAILBOX_SIGNAL_GET_ACTIVE(signals) \
+                        (MAILBOX_INTERRUPT_SIGNAL)
+#endif /* MAILBOX_ENABLE_INTERRUPTS */
 
 /* A single slot structure in SPE mailbox queue */
 struct secure_mailbox_slot_t {
