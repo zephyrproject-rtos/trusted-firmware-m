@@ -34,14 +34,18 @@ if(BL2)
     )
 endif()
 
-install(FILES ${STM32H573I_DK_DIR}/include/flash_layout.h
-              ${STM32H573I_DK_DIR}/include/region_defs.h
-        DESTINATION  ${CMAKE_BINARY_DIR} )
+install(FILES
+    ${STM32H573I_DK_DIR}/include/flash_layout.h
+    ${STM32H573I_DK_DIR}/include/region_defs.h
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
 set (BL2_FILE_TO_PREPROCESS ${CMAKE_CURRENT_BINARY_DIR}/image_macros_to_preprocess_bl2.c)
 file(WRITE ${BL2_FILE_TO_PREPROCESS} ${BL2_PREPROCESSING})
-install(FILES ${BL2_FILE_TO_PREPROCESS}
-        DESTINATION ${CMAKE_BINARY_DIR} )
 
+install(FILES
+    ${BL2_FILE_TO_PREPROCESS}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+)
 ################# Install platform files for NS build #################
 
 # cpuarch.cmake is used to set things that related to the platform that are both
