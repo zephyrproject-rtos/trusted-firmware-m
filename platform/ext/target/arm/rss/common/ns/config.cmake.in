@@ -8,7 +8,6 @@
 # This CMake script template contains the set of options settled on secure side
 # build but necessary for building the non-secure side too.
 
-
 set(RSS_XIP                                 @RSS_XIP@ CACHE BOOL "Whether to use XIP via SIC")
 set(RSS_DEBUG_UART                          @RSS_DEBUG_UART@ CACHE BOOL "Whether to use the RSS debug UART")
 set(RSS_USE_HOST_UART                       @RSS_USE_HOST_UART@ CACHE BOOL "Whether to use the host system UART")
