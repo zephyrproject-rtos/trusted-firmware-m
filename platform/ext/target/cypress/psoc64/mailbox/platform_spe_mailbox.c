@@ -15,7 +15,7 @@
 #include "cy_sysint.h"
 
 #include "spe_ipc_config.h"
-#include "tfm_spe_mailbox.h"
+#include "tfm_hal_mailbox.h"
 #include "platform_multicore.h"
 
 /* -------------------------------------- HAL API ------------------------------------ */
