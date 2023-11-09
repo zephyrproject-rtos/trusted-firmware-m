@@ -22,6 +22,67 @@ enum rse_supported_chip_ids {
 
 #define MHU_SEND_FRAME_SIZE     (RSE_MAX_SUPPORTED_CHIPS - 1)
 
+/* System Control NI-Tower component nodes */
+const struct ni_tower_component_node sysctrl_rse_main_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_RSE_MAIN_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_scp_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_SCP_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_mcp_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_MCP_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_RSE_SCP_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_app_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_APP_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_lcp_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_LCP_ASNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_rsm_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_RSM_AMNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_rsm_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = SYSCTRL_RSM_PMNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_rse_scp_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_RSE_SCP_AMNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_rse_mcp_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_RSE_MCP_AMNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_app_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_APP_AMNI_ID,
+};
+
+const struct ni_tower_component_node sysctrl_lcp_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_LCP_AMNI_ID,
+};
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP/MCP and the CMN interconnect. Following block diagram depicts an
@@ -1001,52 +1062,52 @@ static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
     /* Populates all address maps into a table array to enable desired PSAMs */
     const struct ni_tower_psam_cfgs psam_table[] = {
         {
-            .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_rse_main_asni,
             .nh_region_count = ARRAY_SIZE(rse_main_axis_0_psam),
             .regions = rse_main_axis_0_psam,
             .add_chip_addr_offset = true,
         },
         {
-            .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_rse_main_asni,
             .nh_region_count = ARRAY_SIZE(rse_main_axis_1_psam),
             .regions = rse_main_axis_1_psam,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_rse_main_asni,
             .nh_region_count = MHU_SEND_FRAME_SIZE,
             .regions = rse_main_axis_psam_mhu_send_frame[chip_id],
         },
         {
-            .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_scp_asni,
             .nh_region_count = ARRAY_SIZE(scp_axis_0_psam),
             .regions = scp_axis_0_psam,
             .add_chip_addr_offset = true,
         },
         {
-            .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_scp_asni,
             .nh_region_count = ARRAY_SIZE(scp_axis_1_psam),
             .regions = scp_axis_1_psam,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_scp_asni,
             .nh_region_count = MHU_SEND_FRAME_SIZE,
             .regions = scp_axis_psam_mhu_send_frame[chip_id],
         },
         {
-            .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_mcp_asni,
             .nh_region_count = ARRAY_SIZE(mcp_axis_psam),
             .regions = mcp_axis_psam,
             .add_chip_addr_offset = true,
         },
         {
-            .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_mcp_asni,
             .nh_region_count = MHU_SEND_FRAME_SIZE,
             .regions = mcp_axis_psam_mhu_send_frame[chip_id],
         },
         {
-            .dev_cfg = &SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_rse_scp_asni,
             .nh_region_count = ARRAY_SIZE(rse_scp_axis_psam),
             .regions = rse_scp_axis_psam,
             .add_chip_addr_offset = false,
@@ -1077,31 +1138,31 @@ static int32_t program_sysctrl_apu_aon(void)
      */
     const struct ni_tower_apu_cfgs apu_table[] = {
         {
-            .dev_cfg = &SYSCTRL_MCP_ASNI_APU_DEV_CFG,
+            .component = &sysctrl_mcp_asni,
             .region_count = ARRAY_SIZE(mcp_axis_apu),
             .regions = mcp_axis_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_RSM_AMNI_APU_DEV_CFG,
+            .component = &sysctrl_rsm_amni,
             .region_count = ARRAY_SIZE(rsm_axim_apu),
             .regions = rsm_axim_apu,
             .add_chip_addr_offset = true,
         },
         {
-            .dev_cfg = &SYSCTRL_RSM_PMNI_APU_DEV_CFG,
+            .component = &sysctrl_rsm_pmni,
             .region_count = ARRAY_SIZE(rsm_apbm_apu),
             .regions = rsm_apbm_apu,
             .add_chip_addr_offset = true,
         },
         {
-            .dev_cfg = &SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG,
+            .component = &sysctrl_rse_scp_amni,
             .region_count = ARRAY_SIZE(rse_scp_axim_apu),
             .regions = rse_scp_axim_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG,
+            .component = &sysctrl_rse_mcp_amni,
             .region_count = ARRAY_SIZE(rse_mcp_axim_apu),
             .regions = rse_mcp_axim_apu,
             .add_chip_addr_offset = false,
@@ -1129,13 +1190,13 @@ static int32_t program_sysctrl_psam_systop(void)
     /* Populates all address maps into a table array to enable desired PSAMs */
     const struct ni_tower_psam_cfgs psam_table[] = {
         {
-            .dev_cfg = &SYSCTRL_APP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_app_asni,
             .nh_region_count = ARRAY_SIZE(app_axis_psam),
             .regions = app_axis_psam,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_LCP_ASNI_PSAM_DEV_CFG,
+            .component = &sysctrl_lcp_asni,
             .nh_region_count = ARRAY_SIZE(lcp_axis_psam),
             .regions = lcp_axis_psam,
             .add_chip_addr_offset = false,
@@ -1166,25 +1227,25 @@ static int32_t program_sysctrl_apu_systop(void)
      */
     const struct ni_tower_apu_cfgs apu_table[] = {
         {
-            .dev_cfg = &SYSCTRL_APP_ASNI_APU_DEV_CFG,
+            .component = &sysctrl_app_asni,
             .region_count = ARRAY_SIZE(app_axis_apu),
             .regions = app_axis_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_APP_AMNI_APU_DEV_CFG,
+            .component = &sysctrl_app_amni,
             .region_count = ARRAY_SIZE(app_axim_apu),
             .regions = app_axim_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_LCP_AMNI_APU_DEV_CFG,
+            .component = &sysctrl_lcp_amni,
             .region_count = ARRAY_SIZE(lcp_axim_apu),
             .regions = lcp_axim_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &SYSCTRL_LCP_ASNI_APU_DEV_CFG,
+            .component = &sysctrl_lcp_asni,
             .region_count = ARRAY_SIZE(lcp_axis_apu),
             .regions = lcp_axis_apu,
             .add_chip_addr_offset = false,

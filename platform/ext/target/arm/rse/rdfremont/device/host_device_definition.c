@@ -24,6 +24,8 @@
 #include "host_device_definition.h"
 #include "platform_base_address.h"
 
+#include <stddef.h>
+
 /* Message Handling Units (MHU) */
 #ifdef MHU_V3_AP_MONITOR_TO_RSE
 struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV = {
@@ -58,152 +60,21 @@ struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV = {
 #endif
 
 #ifdef RD_SYSCTRL_NI_TOWER
-/* System Control NI-Tower PSAM device configurations */
-const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_RSE_MAIN_ASNI_ID,
-};
-
-const struct ni_tower_psam_dev_cfg SYSCTRL_SCP_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_SCP_ASNI_ID,
-};
-
-const struct ni_tower_psam_dev_cfg SYSCTRL_MCP_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_MCP_ASNI_ID,
-};
-
-const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_RSE_SCP_ASNI_ID,
-};
-
-const struct ni_tower_psam_dev_cfg SYSCTRL_APP_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_APP_ASNI_ID,
-};
-
-const struct ni_tower_psam_dev_cfg SYSCTRL_LCP_ASNI_PSAM_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_LCP_ASNI_ID,
-};
-
-/* System Control NI-Tower APU device configurations */
-const struct ni_tower_apu_dev_cfg SYSCTRL_MCP_ASNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_MCP_ASNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_RSM_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = SYSCTRL_RSM_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_RSM_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = SYSCTRL_RSM_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = SYSCTRL_RSE_SCP_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = SYSCTRL_RSE_MCP_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_APP_ASNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_APP_ASNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_APP_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = SYSCTRL_APP_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_LCP_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = SYSCTRL_LCP_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg SYSCTRL_LCP_ASNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_ASNI,
-    .component_node_id = SYSCTRL_LCP_ASNI_ID,
-};
-
 /* System Control NI-Tower device */
 struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,
     .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .skip_discovery_list = NULL,
     .chip_addr_offset = 0, /* Updated at boot time */
 };
 #endif
 
 #ifdef RD_PERIPH_NI_TOWER
-/* Peripheral NI-Tower APU device configurations */
-const struct ni_tower_apu_dev_cfg PERIPH_RAM_AMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_AMNI,
-    .component_node_id = PERIPH_RAM_AMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_NSUART0_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_NSUART0_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_SECUART_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_SECUART_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_NSUART1_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_NSUART1_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_NSGENWDOG_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_NSGENWDOG_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_ROOTGENWDOG_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_ROOTGENWDOG_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_SECGENWDOG_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_SECGENWDOG_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_ECCREG_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_ECCREG_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_GTIMERCTRL_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_GTIMERCTRL_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_SECGTIMER_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_SECGTIMER_PMNI_ID,
-};
-
-const struct ni_tower_apu_dev_cfg PERIPH_NSGTIMER_PMNI_APU_DEV_CFG  = {
-    .component_node_type = NI_TOWER_PMNI,
-    .component_node_id = PERIPH_NSGTIMER_PMNI_ID,
-};
-
 /* Peripheral NI-Tower device */
 struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,
     .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .skip_discovery_list = NULL,
     .chip_addr_offset = 0, /* Updated at boot time */
 };
 #endif

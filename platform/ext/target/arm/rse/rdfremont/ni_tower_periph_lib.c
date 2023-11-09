@@ -14,6 +14,62 @@
 #define RAM_AXIS_RO_APU_REGION_IDX  (0)
 #define RAM_AXIS_RW_APU_REGION_IDX  (1)
 
+/* Peripheral NI-Tower component nodes */
+const struct ni_tower_component_node periph_ram_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = PERIPH_RAM_AMNI_ID,
+};
+
+const struct ni_tower_component_node periph_nsuart0_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSUART0_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_secuart_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_SECUART_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_nsuart1_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSUART1_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_nsgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSGENWDOG_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_rootgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_ROOTGENWDOG_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_secgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_SECGENWDOG_PMNI_ID,
+};
+
+const struct ni_tower_component_node PERIPH_ECCREG_PMNI_APU_DEV_CFG  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_ECCREG_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_gtimerctrl_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_GTIMERCTRL_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_secgtimer_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_SECGTIMER_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_nsgtimer_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSGTIMER_PMNI_ID,
+};
+
 /*
  * Software implementation defined region for SRAM and is accessible by AP,
  * RSE, SCP and MCP. First region (AP BL1 code region) will be changed to Read
@@ -160,67 +216,67 @@ static int32_t program_periph_apu(void)
      */
     const struct ni_tower_apu_cfgs apu_table[] = {
         {
-            .dev_cfg = &PERIPH_RAM_AMNI_APU_DEV_CFG,
+            .component = &periph_ram_amni,
             .region_count = ARRAY_SIZE(ram_axim_apu),
             .regions = ram_axim_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_NSUART0_PMNI_APU_DEV_CFG,
+            .component = &periph_nsuart0_pmni,
             .region_count = ARRAY_SIZE(nsuart0_apbm_apu),
             .regions = nsuart0_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_SECUART_PMNI_APU_DEV_CFG,
+            .component = &periph_secuart_pmni,
             .region_count = ARRAY_SIZE(secuart_apbm_apu),
             .regions = secuart_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_NSUART1_PMNI_APU_DEV_CFG,
+            .component = &periph_nsuart1_pmni,
             .region_count = ARRAY_SIZE(nsuart1_apbm_apu),
             .regions = nsuart1_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_NSGENWDOG_PMNI_APU_DEV_CFG,
+            .component = &periph_nsgenwdog_pmni,
             .region_count = ARRAY_SIZE(nsgenwdog_apbm_apu),
             .regions = nsgenwdog_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_ROOTGENWDOG_PMNI_APU_DEV_CFG,
+            .component = &periph_rootgenwdog_pmni,
             .region_count = ARRAY_SIZE(rootgenwdog_apbm_apu),
             .regions = rootgenwdog_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_SECGENWDOG_PMNI_APU_DEV_CFG,
+            .component = &periph_secgenwdog_pmni,
             .region_count = ARRAY_SIZE(secgenwdog_apbm_apu),
             .regions = secgenwdog_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_ECCREG_PMNI_APU_DEV_CFG,
+            .component = &PERIPH_ECCREG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(eccreg_apbm_apu),
             .regions = eccreg_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_GTIMERCTRL_PMNI_APU_DEV_CFG,
+            .component = &periph_gtimerctrl_pmni,
             .region_count = ARRAY_SIZE(gtimerctrl_apbm_apu),
             .regions = gtimerctrl_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_SECGTIMER_PMNI_APU_DEV_CFG,
+            .component = &periph_secgtimer_pmni,
             .region_count = ARRAY_SIZE(secgtimer_apbm_apu),
             .regions = secgtimer_apbm_apu,
             .add_chip_addr_offset = false,
         },
         {
-            .dev_cfg = &PERIPH_NSGTIMER_PMNI_APU_DEV_CFG,
+            .component = &periph_nsgtimer_pmni,
             .region_count = ARRAY_SIZE(nsgtimer_apbm_apu),
             .regions = nsgtimer_apbm_apu,
             .add_chip_addr_offset = false,
@@ -254,7 +310,7 @@ int32_t program_periph_ni_tower_post_ap_bl1_load(void)
 
     /* Initialize APU device */
     err = ni_tower_apu_dev_init(&PERIPH_NI_TOWER_DEV,
-                                &PERIPH_RAM_AMNI_APU_DEV_CFG,
+                                &periph_ram_amni,
                                 PERIPH_NI_TOWER_DEV.chip_addr_offset,
                                 &apu_dev);
     if (err != NI_TOWER_SUCCESS) {
