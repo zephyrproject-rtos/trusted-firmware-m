@@ -21,7 +21,7 @@
  */
 struct ni_tower_psam_cfgs {
     /* Pointer to the PSAM device configuration */
-    const struct ni_tower_psam_dev_cfg* dev_cfg;
+    const struct ni_tower_component_node* component;
     /* Number of non-hashed regions that needs to be configured */
     const uint32_t nh_region_count;
     /* List of all region configuration information */
@@ -35,7 +35,7 @@ struct ni_tower_psam_cfgs {
  */
 struct ni_tower_apu_cfgs {
     /* Pointer to the APU device configuration */
-    const struct ni_tower_apu_dev_cfg* dev_cfg;
+    const struct ni_tower_component_node* component;
     /* Number of address regions that needs to be configured */
     const uint32_t region_count;
     /* List of all region configuration information */

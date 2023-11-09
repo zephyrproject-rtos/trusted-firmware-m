@@ -60,6 +60,42 @@ enum ni_tower_granularity {
 };
 
 /**
+ * \brief NI-Tower component node structure
+ */
+struct ni_tower_component_node{
+    /* Component type of the node */
+    const enum ni_tower_node_type_value type;
+    /* Component id of the node */
+    const uint32_t id;
+};
+
+/**
+ * \brief NI-Tower skip component discovery node data structure
+ */
+struct ni_tower_skip_component_discovery_node_data {
+    /* Parent component node of the node to be skipped */
+    const struct ni_tower_component_node *parent_node;
+    /*
+     * Index of the child node of the \ref
+     * ni_tower_skip_component_discovery_node_data.parent_node to be skipped.
+     */
+    const uint32_t node_idx;
+};
+
+/**
+ * \brief NI-Tower skip component discovery list structure
+ */
+struct ni_tower_skip_component_discovery_list {
+    /*
+     * List of all skip node data to be skipped during discovery as specified
+     * in struct \ref ni_tower_skip_component_discovery_list_node.
+     */
+    const struct ni_tower_skip_component_discovery_node_data *skip_node_data;
+    /* Number of component nodes to be skipped */
+    const uint32_t skip_node_count;
+};
+
+/**
  * \brief NI-Tower device structure
  */
 struct ni_tower_dev {
@@ -71,6 +107,13 @@ struct ni_tower_dev {
      * nodes.
      */
     const enum ni_tower_granularity config_node_granularity;
+    /*
+     * Pointer to skip component discovery node list structure. This includes
+     * list of all component nodes to be skipped during the discovery process.
+     * This can be updated during runtime since the discovery reach of a
+     * component node can depend on state of the host system.
+     */
+    struct ni_tower_skip_component_discovery_list *skip_discovery_list;
     /*
      * Address space offset for the current chip. This is typically updated
      * during the boot time by reading the current chip id (in case of RSE

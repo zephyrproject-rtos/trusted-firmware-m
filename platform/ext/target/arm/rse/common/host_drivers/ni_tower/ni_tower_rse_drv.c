@@ -27,7 +27,7 @@ enum ni_tower_err ni_tower_program_psam_table(
 
     for (p_idx = 0; p_idx < psam_table_count; ++p_idx) {
         err = ni_tower_psam_dev_init(
-            dev, psam_table[p_idx].dev_cfg,
+            dev, psam_table[p_idx].component,
             psam_table[p_idx].add_chip_addr_offset ? dev->chip_addr_offset : 0,
             &psam_dev);
         if (err != NI_TOWER_SUCCESS) {
@@ -72,7 +72,7 @@ enum ni_tower_err ni_tower_program_apu_table(
 
     for (a_idx = 0; a_idx < apu_table_count; ++a_idx) {
         err = ni_tower_apu_dev_init(
-            dev, apu_table[a_idx].dev_cfg,
+            dev, apu_table[a_idx].component,
             apu_table[a_idx].add_chip_addr_offset ? dev->chip_addr_offset : 0,
             &apu_dev);
         if (err != NI_TOWER_SUCCESS) {

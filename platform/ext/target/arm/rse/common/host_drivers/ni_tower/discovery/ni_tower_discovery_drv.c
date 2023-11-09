@@ -96,8 +96,9 @@ enum ni_tower_err ni_tower_discover_offset(
     enum ni_tower_err err;
     struct ni_tower_discovery_node node;
     struct ni_tower_domain_cfg_hdr *domain_cfg_ptr, *c_hdr;
-    uint32_t c_off_addr, c_idx;
+    uint32_t c_off_addr, c_idx, s_idx;
     uint32_t hdr_base;
+    bool should_skip_discovery;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
@@ -136,6 +137,30 @@ enum ni_tower_err ni_tower_discover_offset(
     if (ni_tower_type_is_domain(cfg_node->node_type)) {
         domain_cfg_ptr = (struct ni_tower_domain_cfg_hdr *)hdr_base;
         for(c_idx = 0; c_idx < domain_cfg_ptr->child_node_info; ++c_idx) {
+            /* Skip discovering node based on the skip node list */
+            should_skip_discovery = false;
+            if (dev->skip_discovery_list != NULL) {
+                for (s_idx = 0;
+                     s_idx < dev->skip_discovery_list->skip_node_count;
+                     ++s_idx) {
+                    if (dev->skip_discovery_list->skip_node_data[s_idx]
+                         .parent_node->type == cfg_node->node_type &&
+                        dev->skip_discovery_list->skip_node_data[s_idx]
+                         .parent_node->id == cfg_node->node_id)
+                    {
+                        if (dev->skip_discovery_list->skip_node_data[s_idx]
+                             .node_idx == s_idx) {
+                            should_skip_discovery = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (should_skip_discovery) {
+                continue;
+            }
+
             c_off_addr = domain_cfg_ptr->x_pointers[c_idx];
             c_hdr = (struct ni_tower_domain_cfg_hdr *)(dev->periphbase +
                                                                 c_off_addr);

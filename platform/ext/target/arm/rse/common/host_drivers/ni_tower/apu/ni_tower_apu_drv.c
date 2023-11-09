@@ -321,7 +321,7 @@ enum ni_tower_err ni_tower_apu_sync_err_enable(
 
 enum ni_tower_err ni_tower_apu_dev_init(
     const struct ni_tower_dev *ni_tower_dev,
-    const struct ni_tower_apu_dev_cfg *cfg,
+    const struct ni_tower_component_node *component,
     const uint64_t region_mapping_offset,
     struct ni_tower_apu_dev *dev)
 {
@@ -337,15 +337,15 @@ enum ni_tower_err ni_tower_apu_dev_init(
         return NI_TOWER_ERR_INVALID_ARG;
     }
 
-    if (cfg == NULL || dev == NULL) {
+    if (component == NULL || dev == NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
     }
 
     /* Discover offset address for the APU */
     err = ni_tower_discover_offset(
             ni_tower_dev, &root,
-            cfg->component_node_type,
-            cfg->component_node_id,
+            component->type,
+            component->id,
             NI_TOWER_APU, &off_addr);
     if (err != NI_TOWER_SUCCESS) {
         return err;

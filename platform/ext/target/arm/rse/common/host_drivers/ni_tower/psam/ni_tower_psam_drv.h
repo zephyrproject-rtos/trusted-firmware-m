@@ -25,16 +25,6 @@ struct ni_tower_psam_reg_cfg_info {
 };
 
 /**
- * \brief NI-Tower PSAM device configuration structure
- */
-struct ni_tower_psam_dev_cfg {
-    /* Component node type of PSAM's parent component */
-    const enum ni_tower_node_type_value component_node_type;
-    /* Component node id of PSAM's parent component */
-    const uint32_t component_node_id;
-};
-
-/**
  * \brief NI-Tower PSAM device structure
  */
 struct ni_tower_psam_dev {
@@ -47,8 +37,8 @@ struct ni_tower_psam_dev {
  * \brief Initialize and return PSAM device
  *
  * \param[in]  ni_tower_dev          NI-Tower device struct \ref ni_tower_dev.
- * \param[in]  cfg                   NI-Tower PSAM device configuration struct
- *                                   \ref ni_tower_psam_dev_cfg.
+ * \param[in]  component             NI-Tower component node struct \ref
+ *                                   ni_tower_component_node.
  * \param[in]  region_mapping_offset Offset which will added to the memory map
  *                                   base and end addresses.
  * \param[out] dev                   NI-Tower PSAM device struct \ref
@@ -58,7 +48,7 @@ struct ni_tower_psam_dev {
  */
 enum ni_tower_err ni_tower_psam_dev_init(
     const struct ni_tower_dev *ni_tower_dev,
-    const struct ni_tower_psam_dev_cfg *cfg,
+    const struct ni_tower_component_node* component,
     const uint64_t region_mapping_offset,
     struct ni_tower_psam_dev *dev);
 
