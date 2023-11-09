@@ -127,5 +127,6 @@ install(DIRECTORY   ns/
 install(FILES       cpuarch.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config/subplatform/)
 
-install(FILES       tests/tfm_tests_config.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/tests/)
+install(FILES       tests/tfm_tests_ns_config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/tests
+        RENAME      tfm_tests_config.cmake)
