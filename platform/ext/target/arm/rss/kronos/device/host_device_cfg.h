@@ -39,8 +39,8 @@
 #define CFI_S
 
 /* MHU */
-#define MHU_AP_TO_RSS
-#define MHU_RSS_TO_AP
+#define MHU_AP_MONITOR_TO_RSS
+#define MHU_RSS_TO_AP_MONITOR
 #define MHU_SCP_TO_RSS
 #define MHU_RSS_TO_SCP
 

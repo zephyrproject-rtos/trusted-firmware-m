@@ -50,15 +50,17 @@ static enum tfm_plat_err_t initialize_mhu(void)
 {
     enum mhu_error_t err;
 
-    err = mhu_init_sender(&MHU_RSS_TO_AP_DEV);
+    err = mhu_init_sender(&MHU_RSS_TO_AP_MONITOR_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] RSS to AP MHU driver init failed: ", err);
+        SPMLOG_ERRMSGVAL("[COMMS] RSS to AP_MONITOR MHU driver init failed: ",
+                         err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = mhu_init_receiver(&MHU_AP_TO_RSS_DEV);
+    err = mhu_init_receiver(&MHU_AP_MONITOR_TO_RSS_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] AP to RSS MHU driver init failed: ", err);
+        SPMLOG_ERRMSGVAL("[COMMS] AP_MONITOR to RSS MHU driver init failed: ",
+                         err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 

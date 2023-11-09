@@ -46,7 +46,8 @@ static struct irq_t mbox_irq_info = {0};
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
 {
-    (void)tfm_multi_core_hal_receive(&MHU_AP_TO_RSS_DEV, &MHU_RSS_TO_AP_DEV);
+    (void)tfm_multi_core_hal_receive(&MHU_AP_MONITOR_TO_RSS_DEV,
+                                     &MHU_RSS_TO_AP_MONITOR_DEV);
 
     /*
      * SPM will send a MAILBOX_SIGNAL to the corresponding partition

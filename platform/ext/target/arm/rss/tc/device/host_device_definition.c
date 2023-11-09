@@ -81,14 +81,14 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
 #endif
 
 /* Message Handling Units (MHU) */
-#ifdef MHU_AP_TO_RSS
-struct mhu_v2_x_dev_t MHU_AP_TO_RSS_DEV = {
+#ifdef MHU_AP_MONITOR_TO_RSS
+struct mhu_v2_x_dev_t MHU_AP_MONITOR_TO_RSS_DEV = {
     MHU0_RECEIVER_BASE_S,
     MHU_V2_X_RECEIVER_FRAME};
 #endif
 
-#ifdef MHU_RSS_TO_AP
-struct mhu_v2_x_dev_t MHU_RSS_TO_AP_DEV = {
+#ifdef MHU_RSS_TO_AP_MONITOR
+struct mhu_v2_x_dev_t MHU_RSS_TO_AP_MONITOR_DEV = {
     MHU0_SENDER_BASE_S,
     MHU_V2_X_SENDER_FRAME};
 #endif

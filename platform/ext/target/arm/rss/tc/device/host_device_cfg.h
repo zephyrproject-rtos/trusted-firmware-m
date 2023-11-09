@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@
 #define CFI_S
 
 /* MHU */
-#define MHU_AP_TO_RSS
-#define MHU_RSS_TO_AP
+#define MHU_AP_MONITOR_TO_RSS
+#define MHU_RSS_TO_AP_MONITOR
 #define MHU_SCP_TO_RSS
 #define MHU_RSS_TO_SCP
 
