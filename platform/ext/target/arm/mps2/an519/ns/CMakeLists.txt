@@ -32,6 +32,11 @@ target_include_directories(platform_ns
         ext/common
 )
 
+target_compile_definitions(platform_ns
+    PRIVATE
+        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
+)
+
 # Include region_defs.h and flash_layout.h
 target_include_directories(platform_region_defs
     INTERFACE

@@ -37,6 +37,11 @@ target_include_directories(platform_ns
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:services/include>
 )
 
+target_compile_definitions(platform_ns
+    PRIVATE
+        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
+)
+
 target_include_directories(platform_region_defs
     INTERFACE
         partition
