@@ -104,8 +104,9 @@ TF-M supports 3 toolchains for cross-compiling and building the project binaries
 - IAR
 
 Each toolchain has a configuration file for the compiler and linker.
-Use ``TFM_TOOLCHAIN_FILE`` option to provide a path to a preferred toolchain file or the toolchain
-file name.
+They are located at the root directory of TF-M.
+Use ``TFM_TOOLCHAIN_FILE`` option to provide the absolute path to the preferred toolchain file,
+or relative path to working directory.
 The default **toolchain_GNUARM.cmake** is selected by `config_base.cmake`
 file if the option is omitted.
 
