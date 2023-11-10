@@ -24,7 +24,7 @@ As a result, TF-M in multi-core topology requires a dedicated access check
 process which can work without CMSE support. This document discuss about the
 design of the memory access check in multi-core topology.
 
-.. _Armv8-M Security Extension: https://developer.arm.com/architectures/cpu-architecture/m-profile/docs/100720/0100/secure-software-guidelines/armv8m-security-extension
+.. _Armv8-M Security Extension: https://developer.arm.com/documentation/100720/0100/Secure-Software-Guidelines/ARMv8-M-Security-Extension
 
 **************
 Overall Design

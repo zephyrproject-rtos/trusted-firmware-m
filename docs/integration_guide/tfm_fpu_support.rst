@@ -139,7 +139,7 @@ Reference
 
 .. [4] `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
 
-.. [5] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://armkeil.blob.core.windows.net/developer/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf>`_
+.. [5] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/documentation/den0063/latest/>`_
 
 .. [6] :doc:`Secure Interrupt Integration Guide </integration_guide/tfm_secure_irq_integration_guide>`
 
