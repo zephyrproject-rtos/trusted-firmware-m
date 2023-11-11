@@ -73,7 +73,19 @@ set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PAT
 set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@       CACHE BOOL      "This variable controls whether the legacy driver interface is used for CC-312")
 
 # Other common options
-set(CONFIG_TFM_ENABLE_FP                   @CONFIG_TFM_ENABLE_FP@    CACHE BOOL      "Enable/disable FP usage")
+
+# Coprocessor settings
+# It is difficult to sort out coprocessor settings and their dependencies.
+# Export all the essential settings and therefore NS users don't have to figure them out again or
+# include other config files.
+# Also export other coprocessor settings to enable NS integration to validate the whole settings
+# and toolchain compatibility via installed cp_config_check.cmake.
+set(CONFIG_TFM_ENABLE_FP                   @CONFIG_TFM_ENABLE_FP@       CACHE BOOL   "Enable/disable FP usage")
+set(CONFIG_TFM_ENABLE_MVE                  @CONFIG_TFM_ENABLE_MVE@      CACHE BOOL   "Enable/disable integer MVE usage")
+set(CONFIG_TFM_ENABLE_MVE_FP               @CONFIG_TFM_ENABLE_MVE_FP@   CACHE BOOL   "Enable/disable floating-point MVE usage")
+set(CONFIG_TFM_FLOAT_ABI                   @CONFIG_TFM_FLOAT_ABI@)
+set(CONFIG_TFM_ENABLE_CP10CP11             @CONFIG_TFM_ENABLE_CP10CP11@ CACHE BOOL   "Make FPU and MVE operational when SPE and/or NSPE require FPU or MVE usage. This alone only enables the coprocessors CP10-CP11, whereas CONFIG_TFM_FLOAT_ABI=hard along with  CONFIG_TFM_ENABLE_FP, CONFIG_TFM_ENABLE_MVE or CONFIG_TFM_ENABLE_MVE_FP compiles the code with hardware FP or MVE instructions and ABI.")
+set(CONFIG_TFM_LAZY_STACKING               @CONFIG_TFM_LAZY_STACKING@   CACHE BOOL   "Enable/disable lazy stacking")
 
 set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)
