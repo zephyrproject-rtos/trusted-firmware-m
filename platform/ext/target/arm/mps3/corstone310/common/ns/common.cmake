@@ -91,13 +91,3 @@ target_sources(platform_ns
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
 )
-
-#========================= platform_region_defs ===============================#
-target_compile_definitions(platform_region_defs
-    INTERFACE
-        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
-        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
-        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
-        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
-        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
-)

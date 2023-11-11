@@ -238,6 +238,14 @@ add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisi
 endif()
 
 #========================= Files for building NS side platform ================#
+target_compile_definitions(tfm_config
+    INTERFACE
+        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
+        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
+        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
+        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+)
 
 install(FILES       ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
                     ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure/cmsis_driver_config.h

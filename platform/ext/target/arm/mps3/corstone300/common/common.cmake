@@ -237,14 +237,20 @@ endif()
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
     INTERFACE
-        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
-        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
 )
 
 #========================= Files for building NS side platform ================#
+target_compile_definitions(tfm_config
+    INTERFACE
+        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
+        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
+        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
+        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+)
 
 install(FILES       ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
                     ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure/cmsis_driver_config.h

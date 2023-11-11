@@ -101,13 +101,3 @@ target_link_libraries(platform_ns
     PRIVATE
         device_definition_ns
 )
-
-#========================= platform_region_defs ===============================#
-target_compile_definitions(platform_region_defs
-    INTERFACE
-        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
-        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
-        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
-        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
-        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
-)
