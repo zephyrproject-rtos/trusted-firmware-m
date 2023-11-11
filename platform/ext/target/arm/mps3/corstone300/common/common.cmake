@@ -87,7 +87,25 @@ target_include_directories(cmsis_includes
 )
 
 add_library(cmsis_includes_s INTERFACE)
+add_library(cmsis_includes_bl2 INTERFACE)
 target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes)
+target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes)
+target_include_directories(cmsis_includes_bl2
+    INTERFACE
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
+)
+
+target_compile_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_link_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_LINKER_CP_OPTION}
+)
+
+
 target_include_directories(cmsis_includes_s
     INTERFACE
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
@@ -96,16 +114,10 @@ target_include_directories(cmsis_includes_s
 target_compile_options(cmsis_includes_s
     INTERFACE
         ${COMPILER_CMSE_FLAG}
-)
-
-add_library(cp_flags INTERFACE)
-
-target_compile_options(cp_flags
-    INTERFACE
         ${COMPILER_CP_FLAG}
 )
 
-target_link_options(cp_flags
+target_link_options(cmsis_includes_s
     INTERFACE
         ${LINKER_CP_OPTION}
 )
@@ -120,7 +132,7 @@ target_link_libraries(platform_bl2
         cmsis_includes
     PRIVATE
         device_definition_s
-        cmsis_includes_s
+        cmsis_includes_bl2
 )
 
 target_link_libraries(platform_s
@@ -237,6 +249,8 @@ endif()
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
     INTERFACE
+FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}

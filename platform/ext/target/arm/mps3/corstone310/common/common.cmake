@@ -85,7 +85,25 @@ target_include_directories(cmsis_includes
 )
 
 add_library(cmsis_includes_s INTERFACE)
+add_library(cmsis_includes_bl2 INTERFACE)
 target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes)
+target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes)
+target_include_directories(cmsis_includes_bl2
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
+)
+
+target_compile_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_link_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_LINKER_CP_OPTION}
+)
+
+
 target_include_directories(cmsis_includes_s
     INTERFACE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
@@ -94,10 +112,6 @@ target_include_directories(cmsis_includes_s
 target_compile_options(cmsis_includes_s
     INTERFACE
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_options(cmsis_includes_s
-    INTERFACE
         ${COMPILER_CP_FLAG}
 )
 
@@ -116,7 +130,7 @@ target_link_libraries(platform_bl2
         cmsis_includes
     PRIVATE
         device_definition_s
-        cmsis_includes_s
+        cmsis_includes_bl2
 )
 
 target_link_libraries(platform_s
@@ -126,7 +140,6 @@ target_link_libraries(platform_s
         device_definition
     PRIVATE
         device_definition_s
-
 )
 
 #========================= Platform Secure ====================================#
@@ -171,6 +184,13 @@ target_sources(tfm_sprt
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+# To configure S and NS timer in S side for FP interrupt test
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+        $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
 )
 
 target_compile_definitions(platform_s

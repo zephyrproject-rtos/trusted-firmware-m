@@ -7,6 +7,9 @@
 
 cmake_policy(SET CMP0076 NEW)
 
+set(CONFIG_TFM_FP_ARCH "fpv5-d16")
+set(CONFIG_TFM_FP_ARCH_ASM "FPv5_D16")
+
 #========================= Platform region defs ===============================#
 
 target_include_directories(platform_region_defs

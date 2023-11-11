@@ -17,6 +17,3 @@ add_definitions(
 set(CORSTONE300_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/../common")
 
 include(${CORSTONE300_COMMON_DIR}/cpuarch.cmake)
-
-set(CONFIG_TFM_FP_ARCH "fpv5-d16")
-set(CONFIG_TFM_FP_ARCH_ASM "FPv5_D16")
