@@ -66,6 +66,8 @@ you can alter that behaviour using :ref:`Dependency management`.
    in :doc:`TF-M getting started </getting_started/tfm_getting_started>`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`IAR software requirements <tfm_build_instruction_iar>`
+ - Please use "/" instead of "\\" for paths when running CMAKE commands under
+   Windows Command Prompt.
 
 Configuring
 ===========

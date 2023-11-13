@@ -268,6 +268,10 @@ as an example:
 
     .. group-tab:: Windows
 
+        .. important::
+            Use "/" instead of "\\" when assigning Windows paths to CMAKE
+            variables, for example, use "c:/build" instead of "c:\\\\build".
+
         .. code-block:: bash
 
             cd trusted-firmware-m
