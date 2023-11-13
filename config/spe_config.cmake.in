@@ -11,12 +11,13 @@
 # TF-M Profile
 set(TFM_PROFILE                            @TFM_PROFILE@    CACHE STRING "The TF-M profile")
 
-set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE @TFM_PARTITION_INTERNAL_TRUSTED_STORAGE@ CACHE BOOL      "Enable Internal Trusted Storage partition")
-set(TFM_PARTITION_CRYPTO                   @TFM_PARTITION_CRYPTO@                CACHE BOOL      "Enable Crypto partition")
-set(TFM_PARTITION_INITIAL_ATTESTATION      @TFM_PARTITION_INITIAL_ATTESTATION@   CACHE BOOL      "Enable Initial Attestation partition")
-set(TFM_PARTITION_PROTECTED_STORAGE        @TFM_PARTITION_PROTECTED_STORAGE@     CACHE BOOL      "Enable Protected Storage partition")
-set(TFM_PARTITION_PLATFORM                 @TFM_PARTITION_PLATFORM@              CACHE BOOL      "Enable Platform partition")
-set(TFM_PARTITION_FIRMWARE_UPDATE          @TFM_PARTITION_FIRMWARE_UPDATE@       CACHE BOOL      "Enable firmware update partition")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE @TFM_PARTITION_INTERNAL_TRUSTED_STORAGE@ CACHE BOOL "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_CRYPTO                   @TFM_PARTITION_CRYPTO@                   CACHE BOOL "Enable Crypto partition")
+set(TFM_PARTITION_INITIAL_ATTESTATION      @TFM_PARTITION_INITIAL_ATTESTATION@      CACHE BOOL "Enable Initial Attestation partition")
+set(TFM_PARTITION_PROTECTED_STORAGE        @TFM_PARTITION_PROTECTED_STORAGE@        CACHE BOOL "Enable Protected Storage partition")
+set(TFM_PARTITION_PLATFORM                 @TFM_PARTITION_PLATFORM@                 CACHE BOOL "Enable Platform partition")
+set(TFM_PARTITION_FIRMWARE_UPDATE          @TFM_PARTITION_FIRMWARE_UPDATE@          CACHE BOOL "Enable firmware update partition")
+set(TFM_PARTITION_NS_AGENT_MAILBOX         @TFM_PARTITION_NS_AGENT_MAILBOX@         CACHE BOOL "Enable the Mailbox agents")
 
 # The options necessary for signing the final image
 set(BL2                                    @BL2@)
@@ -46,19 +47,15 @@ set(PLATFORM_DEFAULT_IMAGE_SIGNING         @PLATFORM_DEFAULT_IMAGE_SIGNING@)
 
 # The common options describing a platform configuration
 
-set(TFM_PLATFORM                           @TFM_PLATFORM@          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
-set(CONFIG_TFM_USE_TRUSTZONE               @CONFIG_TFM_USE_TRUSTZONE@   CACHE BOOL "Use TrustZone")
-set(CONFIG_TFM_SPM_BACKEND                 @CONFIG_TFM_SPM_BACKEND@     CACHE STRING "The SPM backend")
-set(TFM_MULTI_CORE_TOPOLOGY                @TFM_MULTI_CORE_TOPOLOGY@    CACHE BOOL "Platform has multi core")
-set(TFM_PARTITION_NS_AGENT_MAILBOX         @TFM_PARTITION_NS_AGENT_MAILBOX@ CACHE BOOL "Enable the Mailbox agents")
-set(PSA_FRAMEWORK_HAS_MM_IOVEC             @PSA_FRAMEWORK_HAS_MM_IOVEC@     CACHE BOOL  "Enable the MM-IOVEC feature")
-set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@        CACHE   STRING  "The TFM isolation level")
+set(TFM_PLATFORM                           @TFM_PLATFORM@                   CACHE STRING "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
+set(CONFIG_TFM_USE_TRUSTZONE               @CONFIG_TFM_USE_TRUSTZONE@       CACHE BOOL   "Use TrustZone")
+set(CONFIG_TFM_SPM_BACKEND                 @CONFIG_TFM_SPM_BACKEND@         CACHE STRING "The SPM backend")
+set(TFM_MULTI_CORE_TOPOLOGY                @TFM_MULTI_CORE_TOPOLOGY@        CACHE BOOL   "Platform has multi core")
+set(PSA_FRAMEWORK_HAS_MM_IOVEC             @PSA_FRAMEWORK_HAS_MM_IOVEC@     CACHE BOOL   "Enable the MM-IOVEC feature")
+set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@            CACHE STRING "The TFM isolation level")
 
-#set(TFM_MULTI_CORE_NS_OS                  @TFM_MULTI_CORE_NS_OS@)
-#set(TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD   @TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD@)
-
-set(PLATFORM_DEFAULT_CRYPTO_KEYS           @PLATFORM_DEFAULT_CRYPTO_KEYS@   CACHE BOOL "Use the default crypto keys")
-set(PLATFORM_DEFAULT_UART_STDOUT           @PLATFORM_DEFAULT_UART_STDOUT@   CACHE BOOL "Use default uart stdout implementation.")
+set(PLATFORM_DEFAULT_CRYPTO_KEYS           @PLATFORM_DEFAULT_CRYPTO_KEYS@   CACHE BOOL   "Use the default crypto keys")
+set(PLATFORM_DEFAULT_UART_STDOUT           @PLATFORM_DEFAULT_UART_STDOUT@   CACHE BOOL   "Use default uart stdout implementation.")
 
 # Testing related options.
 
@@ -66,11 +63,11 @@ set(TEST_PSA_API                           @TEST_PSA_API@          CACHE STRING 
 set(PSA_ARCH_TESTS_PATH                    @PSA_ARCH_TESTS_PATH@   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
 set(INCLUDE_PANIC_TESTS                    @INCLUDE_PANIC_TESTS@   CACHE BOOL      "Include panic tests")
 
-set(ATTEST_KEY_BITS                        @ATTEST_KEY_BITS@                       CACHE STRING    "The size of the initial attestation key in bits")
-set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@         CACHE BOOL      "Use symmetric crypto for inital attestation")
-set(ATTEST_INCLUDE_TEST_CODE               @ATTEST_INCLUDE_TEST_CODE@              CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
-set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@ CACHE STRING    "Config to use psa crypto setting for Mbed Crypto")
-set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@       CACHE BOOL      "This variable controls whether the legacy driver interface is used for CC-312")
+set(ATTEST_KEY_BITS                        @ATTEST_KEY_BITS@                        CACHE STRING "The size of the initial attestation key in bits")
+set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@          CACHE BOOL   "Use symmetric crypto for inital attestation")
+set(ATTEST_INCLUDE_TEST_CODE               @ATTEST_INCLUDE_TEST_CODE@               CACHE BOOL   "Include minimal development tests in the initial attestation regression test suite")
+set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@  CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
+set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@        CACHE BOOL   "This variable controls whether the legacy driver interface is used for CC-312")
 
 # Other common options
 
