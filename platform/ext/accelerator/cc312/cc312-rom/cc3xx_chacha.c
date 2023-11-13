@@ -266,15 +266,26 @@ cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len)
 
 static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
 {
+    uint32_t idx;
+    uint32_t tag_word_size = POLY1305_TAG_LEN / sizeof(uint32_t);
+    uint8_t permutation_buf[tag_word_size];
+    bool are_different = 0;
+
     if (chacha_state.direction == CC3XX_CHACHA_DIRECTION_DECRYPT) {
-        if (memcmp(tag, calculated_tag, POLY1305_TAG_LEN) != 0) {
-            return CC3XX_ERR_INVALID_TAG;
+        cc3xx_random_permutation_generate(permutation_buf, tag_word_size);
+
+        for (idx = 0; idx < tag_word_size; idx++) {
+            are_different |= tag[permutation_buf[idx]] ^ calculated_tag[permutation_buf[idx]];
         }
     } else {
-        memcpy(tag, calculated_tag, POLY1305_TAG_LEN);
+        cc3xx_dpa_hardened_word_copy(tag, calculated_tag, tag_word_size);
     }
 
-    return CC3XX_ERR_SUCCESS;
+    if (are_different) {
+        return CC3XX_ERR_INVALID_TAG;
+    } else {
+        return CC3XX_ERR_SUCCESS;
+    }
 }
 
 cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size)

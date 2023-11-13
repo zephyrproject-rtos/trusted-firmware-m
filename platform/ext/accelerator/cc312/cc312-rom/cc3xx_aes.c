@@ -889,17 +889,28 @@ cc3xx_err_t cc3xx_aes_update(const uint8_t* in, size_t in_len)
 #if defined(CC3XX_CONFIG_AES_CCM_ENABLE) \
     || defined (CC3XX_CONFIG_AES_GCM_ENABLE) \
     || defined (CC3XX_CONFIG_AES_CMAC_ENABLE)
-cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
+static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
 {
+    uint32_t idx;
+    uint32_t tag_word_size = (aes_state.aes_tag_len + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+    uint8_t permutation_buf[tag_word_size];
+    bool are_different = 0;
+
     if (aes_state.direction == CC3XX_AES_DIRECTION_DECRYPT) {
-        if (memcmp(tag, calculated_tag, aes_state.aes_tag_len) != 0) {
-            return CC3XX_ERR_INVALID_TAG;
+        cc3xx_random_permutation_generate(permutation_buf, tag_word_size);
+
+        for (idx = 0; idx < tag_word_size; idx++) {
+            are_different |= tag[permutation_buf[idx]] ^ calculated_tag[permutation_buf[idx]];
         }
     } else {
-        memcpy(tag, calculated_tag, aes_state.aes_tag_len);
+        cc3xx_dpa_hardened_word_copy(tag, calculated_tag, tag_word_size);
     }
 
-    return CC3XX_ERR_SUCCESS;
+    if (are_different) {
+        return CC3XX_ERR_INVALID_TAG;
+    } else {
+        return CC3XX_ERR_SUCCESS;
+    }
 }
 #endif
 
