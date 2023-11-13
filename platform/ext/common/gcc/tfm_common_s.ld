@@ -80,6 +80,8 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
+    ASSERT(__vectors_start__ != __vectors_end__, ".vectors should not be empty")
+
 #if defined(S_CODE_VECTOR_TABLE_SIZE)
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
