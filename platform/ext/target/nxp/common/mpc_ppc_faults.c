@@ -25,7 +25,7 @@ void C_SEC_VIO_IRQHandler(void)
 
 __attribute__((naked)) void SEC_VIO_IRQHandler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_SEC_VIO_IRQHandler    \n"

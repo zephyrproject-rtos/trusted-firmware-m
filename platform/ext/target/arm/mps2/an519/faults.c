@@ -29,7 +29,7 @@ void C_MPC_Handler(void)
 
 __attribute__((naked)) void MPC_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_MPC_Handler           \n"
@@ -57,7 +57,7 @@ void C_PPC_Handler(void)
 
 __attribute__((naked)) void PPC_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_PPC_Handler           \n"

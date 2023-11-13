@@ -26,7 +26,7 @@
 #include "exception_info.h"
 
 __NO_RETURN __attribute__((naked)) void default_tfm_IRQHandler(void) {
-	EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+	EXCEPTION_INFO();
 
 	__ASM volatile(
         "BL        default_irq_handler     \n"
