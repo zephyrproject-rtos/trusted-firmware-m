@@ -66,10 +66,11 @@ set(TEST_PSA_API                           @TEST_PSA_API@          CACHE STRING 
 set(PSA_ARCH_TESTS_PATH                    @PSA_ARCH_TESTS_PATH@   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
 set(INCLUDE_PANIC_TESTS                    @INCLUDE_PANIC_TESTS@   CACHE BOOL      "Include panic tests")
 
-set(ATTEST_KEY_BITS     @ATTEST_KEY_BITS@   CACHE STRING    "The size of the initial attestation key in bits")
-set(SYMMETRIC_INITIAL_ATTESTATION @SYMMETRIC_INITIAL_ATTESTATION@   CACHE BOOL      "Use symmetric crypto for inital attestation")
-set(ATTEST_INCLUDE_TEST_CODE    @ATTEST_INCLUDE_TEST_CODE@         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
-set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@ CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
+set(ATTEST_KEY_BITS                        @ATTEST_KEY_BITS@                       CACHE STRING    "The size of the initial attestation key in bits")
+set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@         CACHE BOOL      "Use symmetric crypto for inital attestation")
+set(ATTEST_INCLUDE_TEST_CODE               @ATTEST_INCLUDE_TEST_CODE@              CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
+set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@ CACHE STRING    "Config to use psa crypto setting for Mbed Crypto")
+set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@       CACHE BOOL      "This variable controls whether the legacy driver interface is used for CC-312")
 
 # Other common options
 set(CONFIG_TFM_ENABLE_FP                   @CONFIG_TFM_ENABLE_FP@    CACHE BOOL      "Enable/disable FP usage")
