@@ -74,9 +74,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/target_cfg.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
 if(TFM_PARTITION_PLATFORM)
 install(FILES       ${TARGET_PLATFORM_PATH}/plat_test.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

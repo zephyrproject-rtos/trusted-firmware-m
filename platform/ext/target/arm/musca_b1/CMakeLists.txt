@@ -221,8 +221,7 @@ install(FILES       Device/Source/startup_musca.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/Device/Source
 )
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
                     CMSIS_Driver/Driver_USART.c
                     Libraries/mt25ql_flash_lib.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
@@ -247,7 +246,6 @@ install(FILES       target_cfg.h
                     tfm_peripherals_def.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
                     ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 

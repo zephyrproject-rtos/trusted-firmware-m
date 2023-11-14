@@ -32,6 +32,7 @@ target_include_directories(platform_ns
     PUBLIC
         include
         ext/cmsis
+        ext/common
         Device/Include
         hal/Inc
 )

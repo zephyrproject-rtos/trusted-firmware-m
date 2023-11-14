@@ -127,7 +127,6 @@ install(DIRECTORY
 )
 
 install(FILES
-    ${PLATFORM_DIR}/ext/common/uart_stdout.h
     ${PLATFORM_DIR}/ext/common/test_interrupt.h
     ${PLATFORM_DIR}/ext/driver/Driver_USART.h
     ${PLATFORM_DIR}/ext/driver/Driver_Common.h

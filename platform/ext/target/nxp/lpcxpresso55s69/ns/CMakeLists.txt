@@ -51,6 +51,7 @@ target_include_directories(platform_ns
     PUBLIC
         include
         ext/cmsis
+        ext/common
         ext/driver
         Native_Driver
         Device/Include

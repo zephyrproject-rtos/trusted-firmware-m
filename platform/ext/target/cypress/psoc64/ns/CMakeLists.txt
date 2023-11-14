@@ -61,6 +61,7 @@ target_include_directories(platform_ns
         ./partition
         Device/Config
         Device/Include
+        ext/common
         ${CY_MTB_PDL_CAT1_LIB_PATH}/drivers/include
         ${CY_MTB_PDL_CAT1_LIB_PATH}/devices/COMPONENT_CAT1A/include
         ${CY_CORE_LIB_PATH}/include

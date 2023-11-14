@@ -142,8 +142,7 @@ target_sources(tfm_spm
 
 #========================= Files for building NS platform =====================#
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    ${PLATFORM_DIR}/ext/common/test_interrupt.c
+install(FILES       ${PLATFORM_DIR}/ext/common/test_interrupt.c
                     ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.c
                     ${TARGET_PLATFORM_PATH}/native_drivers/timer_cmsdk/timer_cmsdk.c
                     ${TARGET_PLATFORM_PATH}/cmsis_drivers/Driver_USART.c
@@ -170,7 +169,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/partition/region_defs.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
                     ${TARGET_PLATFORM_PATH}/cmsis_driver_config.h
                     ${TARGET_PLATFORM_PATH}/RTE_Device.h
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
                     ${PLATFORM_DIR}/ext/common/test_interrupt.h
                     ${PLATFORM_DIR}/ext/driver/Driver_USART.h
                     ${PLATFORM_DIR}/ext/driver/Driver_Common.h

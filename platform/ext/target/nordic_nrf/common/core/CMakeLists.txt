@@ -178,15 +178,13 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    startup.c
+install(FILES       startup.c
                     nrfx_glue.c
                     pal_plat_test.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.h
-                    startup.h
+install(FILES       startup.h
                     nrfx_config.h
                     ns/CMakeLists.txt
                     config.cmake

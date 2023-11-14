@@ -251,9 +251,7 @@ install(FILES       ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
                     ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure/RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/cmsis_drivers)
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
-                    ${PLATFORM_DIR}/ext/common/common_target_cfg.h
+install(FILES       ${PLATFORM_DIR}/ext/common/common_target_cfg.h
                     ${PLATFORM_DIR}/ext/common/test_interrupt.h
                     ${PLATFORM_DIR}/ext/common/test_interrupt.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
