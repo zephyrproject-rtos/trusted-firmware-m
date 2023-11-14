@@ -1,10 +1,10 @@
-RSS provisioning
+RSE provisioning
 ================
 
 Provisioning theory
 -------------------
 
-The LifeCycle Manager (LCM) controls access to the RSS OTP, and includes a
+The LifeCycle Manager (LCM) controls access to the RSE OTP, and includes a
 state-machine that controls Lifecycle-state (LCS) transitions. The LCM is
 derived from the OTP management and state machine subsystems of the
 CryptoCell-3XX series accelerators, and will be familiar to those who have
@@ -29,37 +29,37 @@ provisioning bundle via a debugger. This bundle must be placed at the start of
 VM0. This bundle contains the keys and also code to perform the provisioning
 such as a driver for the LCM, and a function to randomly generate the HUK via
 the CryptoCell TRNG. The chip must then enter secure provisioning mode by
-setting the SP_ENABLE register. This causes a reset (but does not clear the RSS
+setting the SP_ENABLE register. This causes a reset (but does not clear the RSE
 SRAMs), and allows access to the RTL key by exporting it to the KMU, though in
-secure provisioning mode the ability to debug the RSS is disabled, to prevent
-disclosure of the decrypted provisioning bundle values. The RSS will then
+secure provisioning mode the ability to debug the RSE is disabled, to prevent
+disclosure of the decrypted provisioning bundle values. The RSE will then
 decrypt and authenticate the bundle using the RTL key. Under TCI mode the RTL
 key is zeroed, the bundle generation tool must use a zeroed key to encrypt and
-sign the bundle. Once the CM provisioning bundle has been unpacked, the RSS will
-execute the code which will provision the CM provisioning data into OTP. The RSS
+sign the bundle. Once the CM provisioning bundle has been unpacked, the RSE will
+execute the code which will provision the CM provisioning data into OTP. The RSE
 must be cold-reset, which will disable secure provisioning mode. If
 ``TFM_DUMMY_PROVISIONING`` is enabled the reset will happen automatically, else
 the external provisioning device should read the provisioning state from the
 GPIO/PSI (which is set via the ``rss_sysctrl`` register) and perform the reset.
 
-After the cold reset, the RSS will automatically transition to Device
+After the cold reset, the RSE will automatically transition to Device
 Manufacturer provisioning state "DM" as the LCM hardware state-machine reads the
 values of the cm_config_1 and cm_config_2 fields as non-zero. This state is
 designed to provision the DM provisioning key, the DM code-encryption key and
 the DM config. The procedure follows the same steps as the CM provisioning flow,
 with the exception that the bundle will now be encrypted and signed using the CM
 provisioning key and must be placed at the base of VM1. As before, once the
-provisioning bundle has been unpacked/run, the RSS must either be cold-reset or
+provisioning bundle has been unpacked/run, the RSE must either be cold-reset or
 will perform this automatically.
 
 After the cold reset, the device will now be in Secure Enable "SE" mode, due to
 the dm_config_1 field being non-zero. Debug may be limited based on the hardware
 DCU mask for SE state. Provisioning will not be run on boot.
 
-Practical RSS provisioning
+Practical RSE provisioning
 --------------------------
 
-The RSS buildsystem produces two provisioning bundles (containing both code and
+The RSE buildsystem produces two provisioning bundles (containing both code and
 data), and then encrypts and signs them with the RTL key to produce
 ``encrypted_cm_provisioning_bundle.bin`` and
 ``encrypted_dm_provisioning_bundle.bin``.
@@ -70,24 +70,24 @@ data), and then encrypts and signs them with the RTL key to produce
    encrypted_*_provisioning_bundle.bin files should still be used, but note that
    their contents are not encrypted.
 
-On first boot, the RSS is in Virgin state. If the RSS firmware was built with
+On first boot, the RSE is in Virgin state. If the RSE firmware was built with
 ``TFM_DUMMY_PROVISIONING`` enabled then it will automatically set the chip to
 TCI mode and cold-reset. Production ROM implementations must disable
-``TFM_DUMMY_PROVISIONING``, which will cause RSS to loop in the ROM until either
+``TFM_DUMMY_PROVISIONING``, which will cause RSE to loop in the ROM until either
 TCI or PCI mode is set with a debugger. It is possible to set the TP mode in the
 LCS registers directly, however it may be easier to set the ``tp_mode`` variable
-in the frame where RSS is looping, at which point the loop will exit and the TP
+in the frame where RSE is looping, at which point the loop will exit and the TP
 mode will be set by the ROM code.
 
-On non-virgin boot in CM lifecycle state, RSS checks the start of VM0 for the
+On non-virgin boot in CM lifecycle state, RSE checks the start of VM0 for the
 magic constant ``0xC0DEFEED``, which is required to be the first word in the CM
 provisioning bundle. There is also a second check for a constant at the end of
-the bundle to ensure the bundle has finished writing. The RSS will perform this
+the bundle to ensure the bundle has finished writing. The RSE will perform this
 check in a loop until a bundle is found.
 
 This procedure is repeated for DM LCS, except that the magic constant is
 ``0xBEEFFEED`` and the bundle must be loaded to the base of VM1. Note that the
-size of RSS memory may vary depending on implementation, so the load address of
+size of RSE memory may vary depending on implementation, so the load address of
 the DM bundle may change.
 
 In production systems it is intended that these bundles are loaded by a
@@ -99,9 +99,9 @@ on other systems. An alternative solution is to perform provisioning manually
 once, and then to save the state of the OTP in SE LCS and then preload that on
 subsequent boots.
 
-RSS provisioning GPIO signalling
+RSE provisioning GPIO signalling
 --------------------------------
-The state of the RSS ROM boot/provisioning flow is signalled outside of the RSS
+The state of the RSE ROM boot/provisioning flow is signalled outside of the RSE
 subsystem via the GPIOs as part of the Persistent State Interface (PSI). The PSI
 signals the lifecycle state as a hardware signal, but additionally the software
 can signal over the PSI by setting the ``rss_sysctrl`` register.
@@ -112,7 +112,7 @@ and has meaning as follows:
 +--------+------------------------------------------------------------------+
 | Signal | State                                                            |
 +========+==================================================================+
-| 0x0    | RSS cold boot default                                            |
+| 0x0    | RSE cold boot default                                            |
 +--------+------------------------------------------------------------------+
 | 0x1    | Virgin chip idle, ready to set PCI/TCI mode                      |
 +--------+------------------------------------------------------------------+

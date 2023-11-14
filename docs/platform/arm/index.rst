@@ -11,7 +11,7 @@ Arm platforms
     Corstone-310 FPGA (AN555) and FVP <mps3/corstone310/README.rst>
     Musca-B1 <musca_b1/readme.rst>
     Musca-S1 <musca_s1/readme.rst>
-    Runtime Security Subsystem <rss/index>
+    Runtime Security Engine <rss/index>
 
 --------------
 

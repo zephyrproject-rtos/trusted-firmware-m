@@ -1,23 +1,23 @@
-Runtime Security Subsystem (RSS)
-================================
+Runtime Security Engine (RSE)
+=============================
 
 Introduction
 ------------
 
-Runtime Security Subsystem (RSS) is an Arm subsystem that provides a reference
+Runtime Security Engine (RSE) is an Arm subsystem that provides a reference
 implementation of the HES Host in the
 `Arm Confidential Compute Architecture (CCA) <https://www.arm.com/architecture/security-features/arm-confidential-compute-architecture>`_.
 It is designed to be integrated into A-profile compute subsystems that implement
 Arm CCA, where it serves as the Root of Trust.
 
-RSS initially boots from immutable code (BL1_1) in its internal ROM, before
-jumping to BL1_2, which is provisioned and hash-locked in RSS OTP. The updatable
-MCUBoot BL2 boot stage is loaded from host system flash into RSS SRAM, where it
-is authenticated. BL2 loads and authenticates the TF-M runtime into RSS SRAM
+RSE initially boots from immutable code (BL1_1) in its internal ROM, before
+jumping to BL1_2, which is provisioned and hash-locked in RSE OTP. The updatable
+MCUBoot BL2 boot stage is loaded from host system flash into RSE SRAM, where it
+is authenticated. BL2 loads and authenticates the TF-M runtime into RSE SRAM
 from host flash. BL2 is also responsible for loading initial boot code into
 other subsystems within the host.
 
-The RSS platform port supports the TF-M Crypto, TF-M Initial Attestation,
+The RSE platform port supports the TF-M Crypto, TF-M Initial Attestation,
 Measured Boot and TF-M Platform services along with the corresponding
 regression tests. It supports the IPC model in multi-core topology with
 Isolation Level 1 and 2.
@@ -28,13 +28,13 @@ Building TF-M
 Follow the instructions in :doc:`Build instructions </building/tfm_build_instruction>`.
 Build TF-M with platform name: `arm/rss/<rss platform name>`
 
-For example for building RSS for Total Compute platforms:
+For example for building RSE for Total Compute platforms:
 ``-DTFM_PLATFORM=arm/rss/tc``
 
 Signing host images
 -------------------
 
-RSS BL2 can load boot images into other subsystems within the host system. It
+RSE BL2 can load boot images into other subsystems within the host system. It
 expects images to be signed, with the signatures attached to the images in the
 MCUBoot metadata format.
 
@@ -57,11 +57,11 @@ key distributed with TF-M, use the following command::
         <binary infile> \
         <signed binary outfile>
 
-The ``load address`` is the logical address in the RSS memory map to which BL2
-will load the image. RSS FW expects the first host image to be loaded to address
-``0x70000000`` (the beginning of the RSS ATU host access region), and each
+The ``load address`` is the logical address in the RSE memory map to which BL2
+will load the image. RSE FW expects the first host image to be loaded to address
+``0x70000000`` (the beginning of the RSE ATU host access region), and each
 subsequent host image to be loaded at an offset of ``0x1000000`` from the
-previous image. The RSS ATU should be configured to map these logical addresses
+previous image. The RSE ATU should be configured to map these logical addresses
 to the physical addresses in the host system that the images need to be loaded
 to.
 
@@ -88,7 +88,7 @@ Then, the flash image must be created by concatenating the images that are
 output from the build. To create the flash image, the following ``fiptool``
 command should be run. ``fiptool`` documentation can be found `here
 <https://trustedfirmware-a.readthedocs.io/en/latest/getting_started/tools-build.html?highlight=fiptool#building-and-using-the-fip-tool>`_.
-Note that an up-to-date fiptool that supports the RSS UUIDs must be used.::
+Note that an up-to-date fiptool that supports the RSE UUIDs must be used.::
 
     fiptool create \
         --align 8192 --rss-bl2     bl2_signed.bin \
@@ -98,7 +98,7 @@ Note that an up-to-date fiptool that supports the RSS UUIDs must be used.::
         --align 8192 --rss-ap-bl1  <signed Host AP BL1 image> \
         fip.bin
 
-If you already have a ``fip.bin`` containing host firmware images, RSS FIP
+If you already have a ``fip.bin`` containing host firmware images, RSE FIP
 images can be patched in::
 
     fiptool update --align 8192 --rss-bl2 bl2_signed.bin fip.bin
@@ -125,7 +125,7 @@ Once the FIP is prepared, a host flash image can be created using ``srec_cat``::
             -o host_flash.bin -Binary
 
 If GPT support is enabled, and a host ``fip.bin`` and ``fip_gpt.bin`` has been
-obtained, RSS images can be inserted by first patching the host FIP and then
+obtained, RSE images can be inserted by first patching the host FIP and then
 inserting that patched FIP into the GPT image::
 
     sector_size=$(gdisk -l fip_gpt.bin | grep -i "sector size (logical):" | \
@@ -166,11 +166,11 @@ image::
             fip_gpt.bin -Binary -offset 0x0 \
             -o host_flash.bin -Binary
 
-The RSS ROM binary should be placed in RSS ROM at ``0x11000000`` and the host
+The RSE ROM binary should be placed in RSE ROM at ``0x11000000`` and the host
 flash binary should be placed at the base of the host flash. For the TC
 platform, this is at ``0x80000000``.
 
-The RSS OTP must be provisioned. On a development platform with
+The RSE OTP must be provisioned. On a development platform with
 ``TFM_DUMMY_PROVISIONING`` enabled, BL1_1 expects provisioning bundles to be
 preloaded into SRAM. Preload ``encrypted_cm_provisioning_bundle_0.bin`` to the
 base of VM0, and ``encrypted_dm_provisioning_bundle.bin`` to the base of VM1.
@@ -182,7 +182,7 @@ wait for provisioning bundles to be loaded to VM0 and VM1 in the same way as
 when ``TFM_DUMMY_PROVISIONING`` is enabled, except that it will not
 automatically perform the reset once each provisioning state is complete. For
 more details about provisioning flows, see
-:doc:`RSS provisioning </platform/arm/rss/rss_provisioning>`.
+:doc:`RSE provisioning </platform/arm/rss/rss_provisioning>`.
 
 --------------
 

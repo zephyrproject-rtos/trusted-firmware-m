@@ -1,10 +1,10 @@
-RSS key management
+RSE key management
 ==================
 
-The RSS has a set of hardware components that act together to prevent hardware
+The RSE has a set of hardware components that act together to prevent hardware
 protected keys being disclosed to compromised software. This chain involves the
 LifeCycle Manager "LCM", the Key Management Unit "KMU", and the cryptographic
-accelerator in the integration layer of the RSS (which in reference RSS builds
+accelerator in the integration layer of the RSE (which in reference RSE builds
 is a CryptoCell-3XX series accelerator).
 
 Hardware protected keys (henceforth "Hardware Keys") are stored in the LCM, in
@@ -16,7 +16,7 @@ keys by comparing the amount of zeroes with a stored zero-count which, because
 of the property of the OTP that does not allow 1-bits to be set to 0-bits,
 allows detection of any changes in the keys. If the check succeeds it exports
 the keys to the KMU over a private memory bus (one that is not accessible
-programs running on the RSS' CPU or other controllers on the main bus such as
+programs running on the RSE' CPU or other controllers on the main bus such as
 the DMA).
 
 The KMU has between 2 and 32 hardware keyslots, which are 256 bit (32 byte) in
@@ -37,10 +37,10 @@ series, this is limited to AES. As with the previous stages, software cannot
 retrieve the key, only use it. Note that currently this can only be used with
 the cc3xx_rom_lib driver, not the cryptocell-312-runtime driver, as the latter
 requires modification. Note that this path is the only way to use hardware
-protected keys on the RSS, they cannot be used by software cryptographic
+protected keys on the RSE, they cannot be used by software cryptographic
 libraries that require key material to be accessible by software.
 
-The RSS uses this functionality to allow key derivation (based on NIST SP800-108
+The RSE uses this functionality to allow key derivation (based on NIST SP800-108
 with an RSA-based PRF that can utilise the hardware keys as described above)
 from the HUK and GUK. This allows the derivation of the CCA platform attestation
 key / delegated attestation root key without allowing access to the GUK
@@ -50,4 +50,4 @@ firmware and BL2.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*

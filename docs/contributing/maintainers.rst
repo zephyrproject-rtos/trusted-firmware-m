@@ -137,7 +137,7 @@ Emekcan Aras
     :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
     :github: `ememarar <https://github.com/ememarar>`__
 
-RSS
+RSE
 ^^^
 
 Jamie Fox

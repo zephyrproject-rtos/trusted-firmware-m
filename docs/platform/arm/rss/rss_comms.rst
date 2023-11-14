@@ -1,8 +1,8 @@
 ########################
-RSS communication design
+RSE communication design
 ########################
 
-The RSS communication protocol is designed to be a lightweight serialization of
+The RSE communication protocol is designed to be a lightweight serialization of
 the psa_call() API through a combination of in-band MHU (Message Handling Unit)
 transport and parameter-passing through shared memory.
 
@@ -10,12 +10,12 @@ transport and parameter-passing through shared memory.
 Message format
 **************
 
-To call an RSS service, the client must send a message in-band over the MHU
-sender link to RSS and wait for a reply message on the MHU receiver (either by
+To call an RSE service, the client must send a message in-band over the MHU
+sender link to RSE and wait for a reply message on the MHU receiver (either by
 polling the MHU or waiting for interrupt). The messages are defined as packed C
 structs, which are serialized in byte-order over the MHU links.
 
-Messages encoding a psa_call() to RSS take the form::
+Messages encoding a psa_call() to RSE take the form::
 
     __PACKED_STRUCT serialized_psa_msg_t {
         struct serialized_rss_comms_header_t header;
@@ -25,7 +25,7 @@ Messages encoding a psa_call() to RSS take the form::
         } msg;
     };
 
-Replies from RSS take the form::
+Replies from RSE take the form::
 
     __PACKED_STRUCT serialized_psa_reply_t {
         struct serialized_rss_comms_header_t header;
@@ -44,7 +44,7 @@ All messages (calls and replies), in all protocols carry the following header::
     };
 
 The ``client_id`` can be used by the caller to identify different clients at the
-endpoint for access control purposes. It is combined with an RSS-internal
+endpoint for access control purposes. It is combined with an RSE-internal
 identifier for the endpoint to create the PSA Client ID for the call.
 
 The sequence number, ``seq_num``, is returned in the reply message to allow the
@@ -126,7 +126,7 @@ The reply message has the form::
 The ``return_val`` and ``out_size`` have the same meaning as in the embed
 protocol.
 
-RSS writes the outvec data to the pointers supplied in the call message prior to
+RSE writes the outvec data to the pointers supplied in the call message prior to
 sending the MHU reply message, so no further payload is sent in the reply
 message.
 
@@ -134,23 +134,23 @@ message.
 Implementation structure
 ************************
 
-The RSS side of the communication implementation is located in
+The RSE side of the communication implementation is located in
 ``platform/ext/target/arm/rss/common/rss_comms``. The implementation is
 structured as follows:
 
-- ``rss_comms.c``: Implements the TF-M RPC layer using RSS comms implementation.
+- ``rss_comms.c``: Implements the TF-M RPC layer using RSE comms implementation.
 - ``rss_comms_hal.c``: Abstracts MHU message sending and receiving.
 
-- ``rss_comms_protocol.c``: The common part of the RSS comms protocol.
-- ``rss_comms_protocol_embed.c``: The embed RSS comms protocol.
-- ``rss_comms_protocol_protocol_access.c``: The pointer access RSS comms protocol.
+- ``rss_comms_protocol.c``: The common part of the RSE comms protocol.
+- ``rss_comms_protocol_embed.c``: The embed RSE comms protocol.
+- ``rss_comms_protocol_protocol_access.c``: The pointer access RSE comms protocol.
 
 - ``rss_comms_atu.c``: Allocates and frees ATU regions for host pointer access.
 - ``rss_comms_permissions_hal.c``: Checks service access permissions and pointer validity.
 
-A reference implementation of the client side of the RSS comms is available in
+A reference implementation of the client side of the RSE comms is available in
 the Trusted Firmware-A repository.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
