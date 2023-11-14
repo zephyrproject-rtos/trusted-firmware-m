@@ -65,6 +65,23 @@ void spu_enable_interrupts(void)
         NRF_SPU_INT_PERIPHACCERR_MASK);
 }
 
+uint32_t spu_events_get(void)
+{
+    uint32_t events = 0;
+
+    if (nrf_spu_event_check(NRF_SPU, NRF_SPU_EVENT_RAMACCERR)) {
+        events |= SPU_EVENT_RAMACCERR;
+    }
+    if (nrf_spu_event_check(NRF_SPU, NRF_SPU_EVENT_FLASHACCERR)) {
+        events |= SPU_EVENT_FLASHACCERR;
+    }
+    if (nrf_spu_event_check(NRF_SPU, NRF_SPU_EVENT_PERIPHACCERR)) {
+        events |= SPU_EVENT_PERIPHACCERR;
+    }
+
+    return events;
+}
+
 void spu_clear_events(void)
 {
     nrf_spu_event_clear(NRF_SPU, NRF_SPU_EVENT_RAMACCERR);

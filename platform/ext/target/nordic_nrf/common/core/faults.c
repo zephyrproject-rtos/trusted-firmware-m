@@ -8,35 +8,17 @@
 
 #include <stdio.h>
 #include "cmsis.h"
-#include "tfm_spm_log.h"
 #include "spu.h"
 #include "utilities.h"
+#include "nrf_exception_info.h"
 /* "exception_info.h" must be the last include because of the IAR pragma */
 #include "exception_info.h"
 
-static void spu_dump_context(void)
-{
-    SPMLOG_ERRMSG("Platform Exception: SPU Fault\r\n");
-
-    /* Report which type of violation occured */
-    if(NRF_SPU->EVENTS_RAMACCERR)
-    {
-        SPMLOG_DBGMSG("  RAMACCERR\r\n");
-    }
-    if(NRF_SPU->EVENTS_PERIPHACCERR)
-    {
-        SPMLOG_DBGMSG("  PERIPHACCERR\r\n");
-    }
-    if(NRF_SPU->EVENTS_FLASHACCERR)
-    {
-        SPMLOG_DBGMSG("  FLASHACCERR\r\n");
-    }
-}
-
 void SPU_Handler(void)
 {
-    spu_dump_context();
-
+#ifdef TFM_EXCEPTION_INFO_DUMP
+    nrf_exception_info_store_context();
+#endif
     /* Clear SPU interrupt flag and pending SPU IRQ */
     spu_clear_events();
 

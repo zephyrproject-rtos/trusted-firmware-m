@@ -36,6 +36,17 @@
  */
 void spu_enable_interrupts(void);
 
+enum spu_events {
+       SPU_EVENT_RAMACCERR = 1 << 0,
+       SPU_EVENT_FLASHACCERR = 1 << 1,
+       SPU_EVENT_PERIPHACCERR= 1 << 2,
+};
+
+/**
+ * \brief Retrieve bitmask of SPU events.
+ */
+uint32_t spu_events_get(void);
+
 /**
  * \brief SPU event clearing
  *
