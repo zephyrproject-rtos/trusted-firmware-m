@@ -8,7 +8,6 @@
  *
  */
 
-#include "critical_section.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "load/service_defs.h"
@@ -42,7 +41,6 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
 {
     const struct service_t *service;
     struct connection_t *connection;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = (client_id < 0) ? true : false;
 
     /*
@@ -78,10 +76,13 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
     /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
+     *
+     * Current SPM doesn't support multiple context management. There is only one
+     * instance in SPM to call the connection pool allocation. It is no need to be
+     * protected.
+     * Protection should be established after the context management is implemented.
      */
-    CRITICAL_SECTION_ENTER(cs_assert);
     connection = spm_allocate_connection();
-    CRITICAL_SECTION_LEAVE(cs_assert);
     if (!connection) {
         return PSA_ERROR_CONNECTION_BUSY;
     }

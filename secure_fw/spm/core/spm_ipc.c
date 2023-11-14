@@ -211,7 +211,6 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
     struct connection_t *connection;
     const struct service_t *service;
     uint32_t sid, version, index;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
 
     SPM_ASSERT(p_connection);
@@ -246,9 +245,13 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        CRITICAL_SECTION_ENTER(cs_assert);
+        /*
+         * Current SPM doesn't support multiple context management. There is only one
+         * instance in SPM to call the connection pool allocation. It is no need to be
+         * protected.
+         * Protection should be established after the context management is implemented.
+         */
         connection = spm_allocate_connection();
-        CRITICAL_SECTION_LEAVE(cs_assert);
         if (!connection) {
             return PSA_ERROR_CONNECTION_BUSY;
         }
