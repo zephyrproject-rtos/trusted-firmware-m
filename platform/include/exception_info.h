@@ -40,6 +40,7 @@ struct exception_info_t {
     uint32_t PSP;               /* (Secure) PSP. */
     uint32_t *EXC_FRAME;        /* Exception frame on stack. */
     uint32_t EXC_FRAME_COPY[8]; /* Copy of the basic exception frame. */
+    uint32_t CALLEE_SAVED_COPY[8]; /* Copy of the callee saved registers. */
     uint32_t xPSR;              /* Program Status Registers. */
 
 #ifdef FAULT_STATUS_PRESENT
@@ -68,20 +69,54 @@ void tfm_exception_info_get_context(struct exception_info_t *ctx);
 /* Store context for an exception, then print the info.
  * Call EXCEPTION_INFO() instead of calling this directly.
  */
-void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in);
+void store_and_dump_context(uint32_t MSP_in, uint32_t PSP_in, uint32_t LR_in,
+                            uint32_t *callee_saved);
 
 /* IAR Specific */
 #if defined(__ICCARM__)
 #pragma required = store_and_dump_context
 #endif
 
-#define EXCEPTION_INFO()                                \
-    __ASM volatile(                                     \
-        "MOV     r0, lr\n"                              \
-        "MRS     r1, MSP\n"                             \
-        "MRS     r2, PSP\n"                             \
-        "BL      store_and_dump_context\n"              \
+#if defined(__ARM_ARCH_8M_BASE__) || defined(__ARCM_ARCH_V6_M__)
+#define EXCEPTION_INFO()                   \
+    __ASM volatile(                        \
+        "MRS    R0, MSP\n"                 \
+        "MRS    R1, PSP\n"                 \
+        "MOV    R2, R11\n"                 \
+        "MOV    R3, R10\n"                 \
+        "PUSH   {R2, R3}\n"                \
+        "MOV    R2, R9\n"                  \
+        "MOV    R3, R8\n"                  \
+        "PUSH   {R2, R3}\n"                \
+        "PUSH   {R4-R7}\n"                 \
+        "MOV    R3, SP\n"                  \
+        "MOV    R2, LR\n"                  \
+        "BL     store_and_dump_context\n"  \
+        "ADD    SP, #32\n"                 \
     )
+#elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__) || \
+      defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+#define EXCEPTION_INFO()                   \
+    __ASM volatile(                        \
+        "MRS    R0, MSP\n"                 \
+        "MRS    R1, PSP\n"                 \
+        "PUSH   {R4-R11}\n"                \
+        "MOV    R3, SP\n"                  \
+        "MOV    R2, LR\n"                  \
+        "BL     store_and_dump_context\n"  \
+        "ADD    SP, #32\n"                 \
+    )
+#else
+/* Unhandled arch, call store_and_dump_context with callee_saved = NULL */
+#define EXCEPTION_INFO()                   \
+    __ASM volatile(                        \
+        "MRS    R0, MSP\n"                 \
+        "MRS    R1, PSP\n"                 \
+        "MOV    R2, LR\n"                  \
+        "MOV    R3, #0\n"                  \
+        "BL     store_and_dump_context\n"  \
+    )
+#endif
 
 #else /* TFM_EXCEPTION_INFO_DUMP */
 #define EXCEPTION_INFO()

@@ -117,6 +117,16 @@ static void dump_exception_info(bool stack_error,
     SPMLOG_DBGMSGVAL("        PC:   ", ctx->EXC_FRAME_COPY[6]);
     SPMLOG_DBGMSGVAL("        xPSR: ", ctx->EXC_FRAME_COPY[7]);
 
+    SPMLOG_DBGMSG("    Callee saved register state:");
+    SPMLOG_DBGMSGVAL("        R4:   ", ctx->CALLEE_SAVED_COPY[0]);
+    SPMLOG_DBGMSGVAL("        R5:   ", ctx->CALLEE_SAVED_COPY[1]);
+    SPMLOG_DBGMSGVAL("        R6:   ", ctx->CALLEE_SAVED_COPY[2]);
+    SPMLOG_DBGMSGVAL("        R7:   ", ctx->CALLEE_SAVED_COPY[3]);
+    SPMLOG_DBGMSGVAL("        R8:   ", ctx->CALLEE_SAVED_COPY[4]);
+    SPMLOG_DBGMSGVAL("        R9:   ", ctx->CALLEE_SAVED_COPY[5]);
+    SPMLOG_DBGMSGVAL("        R10:  ", ctx->CALLEE_SAVED_COPY[6]);
+    SPMLOG_DBGMSGVAL("        R11:  ", ctx->CALLEE_SAVED_COPY[7]);
+
 #ifdef FAULT_STATUS_PRESENT
     SPMLOG_DBGMSGVAL("    CFSR:  ", ctx->CFSR);
     SPMLOG_DBGMSGVAL("    BFSR:  ",
@@ -196,7 +206,8 @@ void tfm_exception_info_get_context(struct exception_info_t *ctx)
     memcpy(ctx, &exception_info, sizeof(exception_info));
 }
 
-void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in)
+void store_and_dump_context(uint32_t MSP_in, uint32_t PSP_in, uint32_t LR_in,
+                            uint32_t *callee_saved)
 {
     struct exception_info_t *ctx = &exception_info;
 
@@ -207,6 +218,10 @@ void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in)
     ctx->PSP = PSP_in;
     ctx->EXC_FRAME = get_exception_frame(ctx->EXC_RETURN, ctx->MSP, ctx->PSP);
     memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME, sizeof(ctx->EXC_FRAME_COPY));
+
+    if (callee_saved) {
+        memcpy(ctx->CALLEE_SAVED_COPY, callee_saved, sizeof(ctx->CALLEE_SAVED_COPY));
+    }
 
 #ifdef FAULT_STATUS_PRESENT
     ctx->CFSR = SCB->CFSR;
