@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,28 +44,68 @@ error_mapping_to_mhu_error_t(enum mhu_v2_x_error_t err)
     }
 }
 
-static enum mhu_v2_x_error_t
-signal_and_wait_for_clear(struct mhu_v2_x_dev_t *dev)
+enum mhu_error_t
+signal_and_wait_for_clear(void *mhu_sender_dev, uint32_t value)
 {
     enum mhu_v2_x_error_t err;
-    uint32_t val;
-    /* Using the last channel for notifications */
-    uint32_t channel_notify = mhu_v2_x_get_num_channel_implemented(dev) - 1;
+    struct mhu_v2_x_dev_t *dev;
+    uint32_t channel_notify;
+    uint32_t wait_val;
+
+    if (mhu_sender_dev == NULL) {
+        return MHU_ERR_INVALID_ARG;
+    }
+
+    dev = (struct mhu_v2_x_dev_t *)mhu_sender_dev;
+
+    /* Use the last channel for notifications */
+    channel_notify = mhu_v2_x_get_num_channel_implemented(dev) - 1;
 
     /* FIXME: Avoid wasting a whole channel for notifying */
-    err = mhu_v2_x_channel_send(dev, channel_notify, MHU_NOTIFY_VALUE);
+    err = mhu_v2_x_channel_send(dev, channel_notify, value);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return err;
+        return error_mapping_to_mhu_error_t(err);
     }
 
     do {
-        err = mhu_v2_x_channel_poll(dev, channel_notify, &val);
+        err = mhu_v2_x_channel_poll(dev, channel_notify, &wait_val);
         if (err != MHU_V_2_X_ERR_NONE) {
             break;
         }
-    } while (val != 0);
+    } while (wait_val != 0);
 
-    return err;
+    return error_mapping_to_mhu_error_t(err);
+}
+
+enum mhu_error_t
+wait_for_signal_and_clear(void *mhu_receiver_dev, uint32_t value)
+{
+    enum mhu_v2_x_error_t err;
+    struct mhu_v2_x_dev_t *dev;
+    uint32_t channel_notify;
+    uint32_t wait_val;
+
+    if (mhu_receiver_dev == NULL) {
+        return MHU_ERR_INVALID_ARG;
+    }
+
+    dev = (struct mhu_v2_x_dev_t *)mhu_receiver_dev;
+
+    /* Use the last channel for notifications */
+    channel_notify = mhu_v2_x_get_num_channel_implemented(dev) - 1;
+
+    do {
+        /* Using the last channel for notifications */
+        err = mhu_v2_x_channel_receive(dev, channel_notify, &wait_val);
+        if (err != MHU_V_2_X_ERR_NONE) {
+            return error_mapping_to_mhu_error_t(err);
+        }
+    } while (wait_val != value);
+
+    /* Clear the last channel */
+    err = mhu_v2_x_channel_clear(dev, channel_notify);
+
+    return error_mapping_to_mhu_error_t(err);
 }
 
 static enum mhu_v2_x_error_t
@@ -165,6 +205,7 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
                                size_t size)
 {
     enum mhu_v2_x_error_t err;
+    enum mhu_error_t mhu_err;
     struct mhu_v2_x_dev_t *dev = mhu_sender_dev;
     uint32_t num_channels = mhu_v2_x_get_num_channel_implemented(dev);
     uint32_t chan = 0;
@@ -201,9 +242,9 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
             return error_mapping_to_mhu_error_t(err);
         }
         if (++chan == (num_channels - 1)) {
-            err = signal_and_wait_for_clear(dev);
-            if (err != MHU_V_2_X_ERR_NONE) {
-                return error_mapping_to_mhu_error_t(err);
+            mhu_err = signal_and_wait_for_clear(dev, MHU_NOTIFY_VALUE);
+            if (mhu_err != MHU_ERR_NONE) {
+                return mhu_err;
             }
             chan = 0;
         }
@@ -215,9 +256,9 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
      *   round) preventing it from signaling twice at the end of transfer.
      */
     if (chan != 0) {
-        err = signal_and_wait_for_clear(dev);
-        if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+        mhu_err = signal_and_wait_for_clear(dev, MHU_NOTIFY_VALUE);
+        if (mhu_err != MHU_ERR_NONE) {
+            return mhu_err;
         }
     }
 

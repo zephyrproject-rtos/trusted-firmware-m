@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,29 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
                                   uint8_t *receive_buffer,
                                   size_t *size);
 
+/**
+ * \brief Signals an interrupt over the last available channel and wait for the
+ *        values to be cleared by the receiver.
+ *
+ * \param[in]     mhu_sender_dev   Pointer to the sender MHU.
+ * \param[in]     value            Value that will be used while signaling.
+ *
+ * \return Returns mhu_error_t error code.
+ */
+enum mhu_error_t signal_and_wait_for_clear(void *mhu_sender_dev,
+                                           uint32_t value);
+
+/**
+ * \brief Wait for signal on the last available channel in a loop and
+ *        acknowledge the transfer by clearing the status on that channel.
+ *
+ * \param[in]     mhu_receiver_dev Pointer to the receiver MHU.
+ * \param[in]     value            Value that will be used while waiting.
+ *
+ * \return Returns mhu_error_t error code.
+ */
+enum mhu_error_t wait_for_signal_and_clear(void *mhu_receiver_dev,
+                                           uint32_t value);
 #ifdef __cplusplus
 }
 #endif
