@@ -69,6 +69,8 @@ set(ATTEST_INCLUDE_TEST_CODE               @ATTEST_INCLUDE_TEST_CODE@           
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@  CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
 set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@        CACHE BOOL   "This variable controls whether the legacy driver interface is used for CC-312")
 
+set(TFM_FWU_BOOTLOADER_LIB                 @TFM_FWU_BOOTLOADER_LIB@              CACHE STRING    "Bootloader configure file for Firmware Update partition")
+
 # Other common options
 
 # Coprocessor settings
