@@ -37,11 +37,11 @@ set(MCUBOOT_HW_KEY                         @MCUBOOT_HW_KEY@)
 
 set(MCUBOOT_SECURITY_COUNTER_S             @MCUBOOT_SECURITY_COUNTER_S@)
 set(MCUBOOT_IMAGE_VERSION_S                @MCUBOOT_IMAGE_VERSION_S@)
-set(MCUBOOT_KEY_S                          ${CONFIG_SPE_PATH}/image_signing/keys/root-RSA-3072.pem)
+set(MCUBOOT_KEY_S                          @MCUBOOT_INSTALL_KEY_S@)
 
 set(MCUBOOT_SECURITY_COUNTER_NS            @MCUBOOT_SECURITY_COUNTER_NS@)
 set(MCUBOOT_IMAGE_VERSION_NS               @MCUBOOT_IMAGE_VERSION_NS@)
-set(MCUBOOT_KEY_NS                         ${CONFIG_SPE_PATH}/image_signing/keys/root-RSA-3072_1.pem)
+set(MCUBOOT_KEY_NS                         @MCUBOOT_INSTALL_KEY_NS@)
 set(PLATFORM_DEFAULT_IMAGE_SIGNING         @PLATFORM_DEFAULT_IMAGE_SIGNING@)
 
 # The common options describing a platform configuration
