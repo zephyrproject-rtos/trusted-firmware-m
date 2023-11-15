@@ -325,6 +325,12 @@ uint32_t backend_system_run(void)
 
     SPM_ASSERT(SPM_THREAD_CONTEXT);
 
+#ifndef CONFIG_TFM_USE_TRUSTZONE
+    /* Seal the standalone SPM thraed when NS Agent is not there. */
+    ARCH_CTXCTRL_ALLOCATE_STACK(SPM_THREAD_CONTEXT, sizeof(uint64_t));
+    arch_seal_thread_stack(ARCH_CTXCTRL_ALLOCATED_PTR(SPM_THREAD_CONTEXT));
+#endif
+
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);
 
