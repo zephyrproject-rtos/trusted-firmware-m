@@ -79,7 +79,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
     if (err != TFM_PLAT_ERR_SUCCESS) {
         /* Deserialisation failed, drop message */
         SPMLOG_DBGMSGVAL("[COMMS] Deserialize message failed: ", err);
-        goto out_free_req;
+        goto out_return_err;
     }
 
     /* Record the MHU sender device to be used for the reply */
@@ -88,14 +88,11 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
     if (queue_enqueue(req) != 0) {
         /* No queue capacity, drop message */
         err = TFM_PLAT_ERR_SYSTEM_ERR;
-        goto out_free_req;
+        goto out_return_err;
     }
 
     /* Message successfully received */
     return TFM_PLAT_ERR_SUCCESS;
-
-out_free_req:
-    tfm_pool_free(req_pool, req);
 
 out_return_err:
     /* Attempt to respond with a failure message */
@@ -104,6 +101,10 @@ out_return_err:
                                      &reply, &reply_size)
         == TFM_PLAT_ERR_SUCCESS) {
         mhu_send_data(mhu_sender_dev, (uint8_t *)&reply, reply_size);
+    }
+
+    if (req) {
+        tfm_pool_free(req_pool, req);
     }
 
     return err;
