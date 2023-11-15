@@ -190,6 +190,10 @@ add_compile_options(
     -funsigned-char
     -mthumb
     -nostdlib
+    $<$<COMPILE_LANGUAGE:C>:-std=c99>
+    $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+    $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
 )
 
 add_link_options(
