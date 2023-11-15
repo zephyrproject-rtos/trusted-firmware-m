@@ -325,6 +325,17 @@ uint32_t backend_system_run(void)
 
     SPM_ASSERT(SPM_THREAD_CONTEXT);
 
+#ifndef CONFIG_TFM_USE_TRUSTZONE
+    /*
+     * TZ NS Agent is mandatory when Trustzone is enabled. SPM borrows its
+     * stack to improve the stack usage efficiency.
+     * Hence SPM needs to have a dedicated stack when Trustzone is not enabled,
+     * and this stack needs to be sealed before upcoming usage.
+     */
+    ARCH_CTXCTRL_ALLOCATE_STACK(SPM_THREAD_CONTEXT, sizeof(uint64_t));
+    arch_seal_thread_stack(ARCH_CTXCTRL_ALLOCATED_PTR(SPM_THREAD_CONTEXT));
+#endif
+
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);
 

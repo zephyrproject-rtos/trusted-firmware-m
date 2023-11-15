@@ -94,26 +94,26 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 
 static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 {
-    uint32_t sp = __get_PSP();
-    uint32_t sp_limit = tfm_arch_get_psplim();
     AAPCS_DUAL_U32_T sp_info;
     struct context_ctrl_t      ctxctl;
-    struct tfm_state_context_t *p_statctx = NULL;
-    uint64_t                   *p_seal = NULL;
+    struct tfm_state_context_t *p_statctx;
+    uint32_t sp = __get_PSP();
+    uint32_t sp_limit = tfm_arch_get_psplim();
 
     saved_psp       = sp;
     saved_psp_limit = sp_limit;
 
-    sp_info.u64_val = backend_abi_entering_spm();
+    ctxctl.sp       = sp;
+    ctxctl.sp_limit = sp_limit;
 
+    sp_info.u64_val = backend_abi_entering_spm();
     /* SPM SP is saved in R0 */
     if (sp_info.u32_regs.r0 != 0) {
         ctxctl.sp       = sp_info.u32_regs.r0;
         ctxctl.sp_limit = sp_info.u32_regs.r1;
     }
 
-    ARCH_CTXCTRL_ALLOCATE_STACK(&ctxctl, sizeof(*p_statctx) + sizeof(uint64_t));
-
+    ARCH_CTXCTRL_ALLOCATE_STACK(&ctxctl, sizeof(*p_statctx));
     /* Check if enough space on stack */
     if (ctxctl.sp < ctxctl.sp_limit) {
         tfm_core_panic();
@@ -122,10 +122,6 @@ static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
     p_statctx = (struct tfm_state_context_t *)ARCH_CTXCTRL_ALLOCATED_PTR(&ctxctl);
     ARCH_CTXCTRL_EXCRET_PATTERN(p_statctx, ctx[0], ctx[1], ctx[2], ctx[3],
                                 svc_func, tfm_svc_thread_mode_spm_return);
-
-    /* p_statctx will be released and the top is the higher address. */
-    p_seal = (uint64_t *)(p_statctx + 1);
-    *p_seal = TFM_STACK_SEAL_VALUE_64;
 
     arch_update_process_sp(ctxctl.sp, ctxctl.sp_limit);
 }
