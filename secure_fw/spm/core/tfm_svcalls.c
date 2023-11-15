@@ -34,6 +34,9 @@ extern int32_t platform_svc_handlers(uint8_t svc_number,
 #endif
 
 #if TFM_ISOLATION_LEVEL > 1
+
+extern uintptr_t spm_boundary;
+
 /*
  * TODO: To be updated after secure context management is going to implemented.
  * The variables are used to save PSP, PSPLimit and the EXC_RETURN payload because
@@ -43,7 +46,6 @@ extern int32_t platform_svc_handlers(uint8_t svc_number,
 static uint32_t saved_psp;
 static uint32_t saved_psp_limit;
 static uint32_t saved_exc_return;
-static uint32_t saved_control;
 
 typedef psa_status_t (*psa_api_svc_func_t)(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 
@@ -78,7 +80,17 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
 
 static uint32_t thread_mode_spm_return(uint32_t result)
 {
+    fih_int fih_rc = FIH_FAILURE;
+    struct partition_t *p_part_next = GET_CURRENT_COMPONENT();
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
+
+    if (tfm_hal_boundary_need_switch(spm_boundary, p_part_next->boundary)) {
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                 p_part_next->p_ldinf, p_part_next->boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
+    }
 
     backend_abi_leaving_spm(result);
 
@@ -86,9 +98,6 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 
     tfm_arch_set_psplim(saved_psp_limit);
     __set_PSP(saved_psp);
-
-    /* Restore the previous CONTROL register value */
-    __set_CONTROL(saved_control);
 
     return saved_exc_return;
 }
@@ -129,6 +138,8 @@ static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 
 static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uint32_t exc_return)
 {
+    fih_int fih_rc = FIH_FAILURE;
+    struct partition_t *p_curr_sp;
     psa_api_svc_func_t svc_func = NULL;
     uint8_t svc_idx = svc_number & TFM_SVC_NUM_INDEX_MSK;
 
@@ -152,13 +163,15 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 
     saved_exc_return = exc_return;
 
-    init_spm_func_context(svc_func, ctx);
+    p_curr_sp = GET_CURRENT_COMPONENT();
+    if (tfm_hal_boundary_need_switch(p_curr_sp->boundary, spm_boundary)) {
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc, NULL, spm_boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
+    }
 
-    /* svc_func can be executed in privileged Thread mode. Save the current
-     * CONTROL register value so that it can be restored afterwards.
-     */
-    saved_control = __get_CONTROL();
-    __set_CONTROL_nPRIV(0);
+    init_spm_func_context(svc_func, ctx);
 
     ctx[0] = PSA_SUCCESS;
 

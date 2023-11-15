@@ -27,8 +27,15 @@
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
+
+#if TFM_ISOLATION_LEVEL == 3
+#define PROT_BOUNDARY_VAL \
+    (((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK) | \
+     ((1U << HANDLE_ATTR_SPM_POS) & HANDLE_ATTR_SPM_MASK))
+#else
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+#endif
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
@@ -383,6 +390,7 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 #if TFM_ISOLATION_LEVEL == 3
+    bool is_spm = !!(local_handle & HANDLE_ATTR_SPM_MASK);
     struct mpu_armv8m_region_cfg_t localcfg;
     uint32_t i, mmio_index;
     struct platform_data_t *plat_data_ptr;
@@ -395,6 +403,10 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     __set_CONTROL(ctrl.w);
 
 #if TFM_ISOLATION_LEVEL == 3
+    if (is_spm) {
+        FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
+    }
+
     if (!p_ldinf) {
         return TFM_HAL_ERROR_GENERIC;
     }
