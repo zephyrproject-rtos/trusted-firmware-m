@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,3 +18,4 @@ set(PLATFORM_HAS_PS_NV_OTP_COUNTERS         @PLATFORM_HAS_PS_NV_OTP_COUNTERS@ CA
 set(RSS_ENABLE_BRINGUP_HELPERS              @RSS_ENABLE_BRINGUP_HELPERS@ CACHE BOOL "Whether RSS bringup helpers are enabled")
 set(RSS_OTP_TRNG                            @RSS_OTP_TRNG@ CACHE BOOL "Whether to use the TRNG from the OTP")
 set(RSS_TP_MODE                             @RSS_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")
+set(RSS_ENABLE_TRAM                         @RSS_ENABLE_TRAM@ CACHE BOOL "Whether TRAM encryption is enabled")

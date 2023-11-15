@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,9 +134,15 @@ enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
         return KMU_ERROR_INVALID_SLOT;
+    }
+
+    err = kmu_get_key_export_config_locked(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     p_kmu->kmudkpa[slot] = config->export_address;

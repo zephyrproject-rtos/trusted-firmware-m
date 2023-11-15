@@ -40,6 +40,13 @@ static const struct sic_dev_cfg_t SIC_DEV_CFG_S = {
 struct sic_dev_t SIC_DEV_S = {&SIC_DEV_CFG_S};
 #endif
 
+/* Arm TRAM driver structures */
+#ifdef TRAM_S
+static const struct tram_dev_cfg_t TRAM_DEV_CFG_S = {
+    .base = TRAM_BASE_S};
+struct tram_dev_t TRAM_DEV_S = {&TRAM_DEV_CFG_S};
+#endif
+
 /* UART CMSDK driver structures */
 #ifdef UART0_CMSDK_S
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {

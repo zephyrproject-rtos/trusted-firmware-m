@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited
+ * Copyright (c) 2019-2024 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,7 @@
 #define CC3XX_BASE_S                     0x50154000 /* CryptoCell CC3XX Secure base address */
 #define SYSCNTR_CNTRL_BASE_S             0x5015A000 /* System Counter Control Secure base address */
 #define SYSCNTR_READ_BASE_S              0x5015B000 /* System Counter Read Secure base address */
+#define TRAM_BASE_S                      0x5015D000 /* TRAM Secure base address */
 #define MHU0_SENDER_BASE_S               0x50160000 /* Combined MHU 0 Sender Secure base address */
 #define MHU0_RECEIVER_BASE_S             0x50170000 /* Combined MHU 0 Receiver Secure base address */
 #define MHU1_SENDER_BASE_S               0x50180000 /* Combined MHU 1 Sender Secure base address */

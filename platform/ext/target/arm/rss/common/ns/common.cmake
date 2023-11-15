@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -50,6 +50,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
+        $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
 )
 
 # Include region_defs.h and flash_layout.h

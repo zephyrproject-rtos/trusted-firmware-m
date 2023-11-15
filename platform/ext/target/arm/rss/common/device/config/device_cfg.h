@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,11 @@
 /* ARM SIC */
 #define SIC_S
 #endif
+
+/* ARM TRAM */
+#ifdef RSS_ENABLE_TRAM
+#define TRAM_S
+#endif /* RSS_ENABLE_TRAM */
 
 /** System Counter Armv8-M */
 #define SYSCOUNTER_CNTRL_ARMV8_M_S

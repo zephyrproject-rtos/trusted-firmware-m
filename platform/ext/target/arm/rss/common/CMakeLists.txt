@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -30,6 +30,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
         $<$<BOOL:${RSS_LOAD_NS_IMAGE}>:RSS_LOAD_NS_IMAGE>
+        $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
 )
 
 #========================= Platform common defs ===============================#
@@ -67,7 +68,7 @@ target_compile_definitions(bootutil
 
 target_sources(bl1_1
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_bl1_1.c
 )
 target_add_scatter_file(bl1_1
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_bl1_1.sct>
@@ -302,6 +303,7 @@ target_sources(platform_bl1_1
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
+        ./native_drivers/tram_drv.c
         ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c

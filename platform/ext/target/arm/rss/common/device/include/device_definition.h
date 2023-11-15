@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,12 @@ extern struct atu_dev_t ATU_DEV_S;
 #ifdef SIC_S
 #include "sic_drv.h"
 extern struct sic_dev_t SIC_DEV_S;
+#endif
+
+/* TRAM driver structures */
+#ifdef TRAM_S
+#include "tram_drv.h"
+extern struct tram_dev_t TRAM_DEV_S;
 #endif
 
 /* UART CMSDK driver structures */

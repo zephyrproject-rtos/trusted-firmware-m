@@ -92,5 +92,6 @@ set(RSS_RTL_KEY_PATH                    ${CMAKE_CURRENT_LIST_DIR}/provisioning/t
 set(RSS_SCP_DATA_PATH                   ${CMAKE_CURRENT_LIST_DIR}/provisioning/dummy_scp_data.bin CACHE FILEPATH "Path to SCP data to provision")
 
 set(RSS_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
+set(RSS_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
 
 set(RSS_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
