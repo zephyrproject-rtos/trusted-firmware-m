@@ -24,6 +24,7 @@ locations:
         # This has to be manually calculated, and must be updated if the OTP
         # layout changes
         base_address: 0x500A1114
+        size: 0x60
     sam:
         base_address: 0x5009F000
     dma350:
@@ -78,6 +79,7 @@ program:
     commands:
       - !include include/program3_cmd0.yaml         # Program 3 - Command 0
       - !include include/program3_cmd1.yaml         # Program 3 - Command 1
+      - !include include/program3_cmd2.yaml         # Program 3 - Command 2
 
   - storage_location: "rom"
     execution_location: "rom"
@@ -114,3 +116,4 @@ program:
       - !include include/program6_cmd5.yaml         # Program 6 - Command 5
       - !include include/program6_cmd6.yaml         # Program 6 - Command 6
       - !include include/program6_cmd7.yaml         # Program 6 - Command 7
+      - !include include/program6_cmd8.yaml         # Program 6 - Command 8

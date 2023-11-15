@@ -5,25 +5,25 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command disables the DCU force disable overrides by writing 0x00AAAAAA to
-# the LCM_DCU_FORCE_DISABLE_REGISTER
+# This command reads 8 words from the OTP TRNG to VM0, overwriting the TRAM
+# conditioning values
 
 Header:
   - REGCLEAR: 0
   - Reserved: 0
   - INTREN: 0
   - CTRL: 1
-  - SRCADDR: 0
+  - SRCADDR: 1
   - SRCADDRHI: 0
   - DESADDR: 1
   - DESADDRHI: 0
   - XSIZE: 1
   - XSIZEHI: 0
   - SRCTRANSCFG: 0
-  - DESTRANSCFG: 0
-  - XADDRINC: 0
+  - DESTRANSCFG: 1
+  - XADDRINC: 1
   - YADDRSTRIDE: 0
-  - FILLVAL: 1
+  - FILLVAL: 0
   - YSIZE: 0
   - TMPLTCFG: 0
   - SRCTMPLT: 0
@@ -41,9 +41,11 @@ Header:
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
-CTRL: 0x10000602
-DESADDR: 'rss_system_control_registers_base_address + 0x25C'
-XSIZE: 0x00010000
-FILLVAL: 0x00AAAAAA
-GPOVAL0: 0x0000001F
+CTRL: 0x10000202
+SRCADDR: 'trng_base_address'
+DESADDR: 'vm0_base_address'
+XSIZE: 0x00080008
+DESTRANSCFG: 0x00000000
+XADDRINC: 0x00010000
+GPOVAL0: 0x0000001E
 LINKADDR: "program6_cmd7_exec_addr"

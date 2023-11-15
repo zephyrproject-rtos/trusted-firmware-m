@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command disables the DCU force disable overrides by writing 0x00AAAAAA to
+# the LCM_DCU_FORCE_DISABLE_REGISTER
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,9 +42,8 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 0x58021120
+DESADDR: 'rss_system_control_registers_base_address + 0x25C'
 XSIZE: 0x00010000
-FILLVAL: 0x0000000E
+FILLVAL: 0x00AAAAAA
 GPOVAL0: 0x0000001F
-LINKADDR: 0x00000000
-execute_link: false
+LINKADDR: "program6_cmd8_exec_addr"
