@@ -9,8 +9,7 @@
 # to be built as a standalone lib and loaded to a predefined
 # address in SRAM memory. The linker places it to the
 # ER_CODE_SRAM address.
-add_library(flash_drivers_s STATIC)
-add_library(flash_drivers_bl2 STATIC)
+
 target_link_libraries(flash_drivers_s
     PRIVATE
         flash_drivers

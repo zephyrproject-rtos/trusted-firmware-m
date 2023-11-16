@@ -10,6 +10,8 @@ cmake_policy(SET CMP0076 NEW)
 include(${CORSTONE310_COMMON_DIR}/common.cmake)
 
 add_library(platform_fvp)
+add_library(flash_drivers_s STATIC)
+add_library(flash_drivers_bl2 STATIC)
 
 target_sources(platform_fvp
     PRIVATE
