@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -242,7 +242,7 @@
 #define PROVISIONING_BUNDLE_DATA_SIZE (BL1_2_DATA_SIZE - \
                                        PROVISIONING_BUNDLE_VALUES_SIZE)
 
-#define CM_PROVISIONING_BUNDLE_START VM0_BASE_S
+#define CM_PROVISIONING_BUNDLE_START (VM0_BASE_S + OTP_DMA_ICS_SIZE)
 #define DM_PROVISIONING_BUNDLE_START VM1_BASE_S
 
 #endif /* __REGION_DEFS_H__ */

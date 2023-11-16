@@ -26,21 +26,22 @@ provisioning state "CM". This mode is intended for the provisioning of the HUK,
 GUK, CM provisioning key, CM code-encryption key, the root-of-trust public key
 and the CM config. To provision these fields, The firmware must first receive a
 provisioning bundle via a debugger. This bundle must be placed at the start of
-VM0. This bundle contains the keys and also code to perform the provisioning
-such as a driver for the LCM, and a function to randomly generate the HUK via
-the CryptoCell TRNG. The chip must then enter secure provisioning mode by
-setting the SP_ENABLE register. This causes a reset (but does not clear the RSE
-SRAMs), and allows access to the RTL key by exporting it to the KMU, though in
-secure provisioning mode the ability to debug the RSE is disabled, to prevent
-disclosure of the decrypted provisioning bundle values. The RSE will then
-decrypt and authenticate the bundle using the RTL key. Under TCI mode the RTL
-key is zeroed, the bundle generation tool must use a zeroed key to encrypt and
-sign the bundle. Once the CM provisioning bundle has been unpacked, the RSE will
-execute the code which will provision the CM provisioning data into OTP. The RSE
-must be cold-reset, which will disable secure provisioning mode. If
-``TFM_DUMMY_PROVISIONING`` is enabled the reset will happen automatically, else
-the external provisioning device should read the provisioning state from the
-GPIO/PSI (which is set via the ``rss_sysctrl`` register) and perform the reset.
+VM0 + an offset the size of the OTP DMA ICS (usually 0x400). This bundle
+contains the keys and also code to perform the provisioning such as a driver for
+the LCM, and a function to randomly generate the HUK via the CryptoCell TRNG.
+The chip must then enter secure provisioning mode by setting the SP_ENABLE
+register. This causes a reset (but does not clear the RSE SRAMs), and allows
+access to the RTL key by exporting it to the KMU, though in secure provisioning
+mode the ability to debug the RSE is disabled, to prevent disclosure of the
+decrypted provisioning bundle values. The RSE will then decrypt and authenticate
+the bundle using the RTL key. Under TCI mode the RTL key is zeroed, the bundle
+generation tool must use a zeroed key to encrypt and sign the bundle. Once the
+CM provisioning bundle has been unpacked, the RSE will execute the code which
+will provision the CM provisioning data into OTP. The RSE must be cold-reset,
+which will disable secure provisioning mode. If ``TFM_DUMMY_PROVISIONING`` is
+enabled the reset will happen automatically, else the external provisioning
+device should read the provisioning state from the GPIO/PSI (which is set via
+the ``rss_sysctrl`` register) and perform the reset.
 
 After the cold reset, the RSE will automatically transition to Device
 Manufacturer provisioning state "DM" as the LCM hardware state-machine reads the
@@ -143,4 +144,4 @@ and has meaning as follows:
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited. All rights reserved.*
