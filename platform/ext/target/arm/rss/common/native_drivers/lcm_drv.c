@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
  */
 
 #include "lcm_drv.h"
+
+#include "cmsis.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -207,11 +210,22 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
     enum lcm_error_t err;
+    uint32_t idx;
 
     /* High hamming-weight magic constant used to trigger secure provisioning
      * mode
      */
     p_lcm->sp_enable = 0x5EC10E1Eu;
+
+    /* Perform a >2000 cycle wait in order for the secure provisioning reset to
+     * happen, before checking if it has worked.
+     */
+    for (idx = 0; idx < 4000; idx++) {
+        __NOP();
+    }
+
+    /* Put the CPU into an idle state so that the reset can occur */
+    __WFI();
 
     while(p_lcm->sp_enable != LCM_TRUE) {}
 
