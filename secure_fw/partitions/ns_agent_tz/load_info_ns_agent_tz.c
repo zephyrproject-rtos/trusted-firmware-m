@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -70,6 +70,8 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
         .stack_size                 = TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED,
         .heap_size                  = 0,
+        .client_id_base             = -0x3c00ffff,
+        .client_id_limit            = -0x3c000000,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
 #if TFM_ISOLATION_LEVEL == 3

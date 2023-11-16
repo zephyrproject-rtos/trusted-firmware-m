@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -30,5 +30,14 @@ void tfm_nspm_ctx_init(void);
  *         returned in case of error.
  */
 int32_t tfm_nspm_get_current_client_id(void);
+
+/**
+ * \brief Register a non-secure client ID range.
+ *
+ * \param[in] client_id_base  The minimum client ID for this client.
+ * \param[in] client_id_limit The maximum client ID for this client.
+ */
+void tz_ns_agent_register_client_id_range(int32_t client_id_base,
+                                          int32_t client_id_limit);
 
 #endif /* __TFM_NSPM_H__ */

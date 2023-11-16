@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -13,6 +13,7 @@
 #include "current.h"
 #include "runtime_defs.h"
 #include "tfm_hal_platform.h"
+#include "tfm_nspm.h"
 #include "ffm/backend.h"
 #include "stack_watermark.h"
 #include "load/partition_defs.h"
@@ -137,6 +138,10 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
      * It needs to be specific cared here.
      */
     if (IS_NS_AGENT(p_pldi)) {
+        if (IS_NS_AGENT_TZ(p_pldi)) {
+            tz_ns_agent_register_client_id_range(p_pt->p_ldinf->client_id_base,
+                                                 p_pt->p_ldinf->client_id_limit);
+        }
         SET_CURRENT_COMPONENT(p_pt);
     }
 }

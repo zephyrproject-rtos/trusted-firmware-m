@@ -8,11 +8,13 @@
  *
  */
 
+#include "internal_status_code.h"
 #include "tfm_hal_device_header.h"
 #include "device_definition.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_peripherals_def.h"
+#include "tfm_multi_core.h"
 #include "interrupt.h"
 #include "load/interrupt_defs.h"
 #include "platform_irq.h"
@@ -88,9 +90,16 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     NVIC_ClearTargetState(CMU_MHU0_Receiver_IRQn);
     NVIC_DisableIRQ(CMU_MHU0_Receiver_IRQn);
 
+    if (tfm_multi_core_register_client_id_range(&MHU_RSE_TO_AP_MONITOR_DEV,
+                                                p_ildi->client_id_base,
+                                                p_ildi->client_id_limit)
+        != SPM_SUCCESS) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef MHU_AP_NS_TO_RSE
 enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
                                          const struct irq_load_info_t *p_ildi)
 {
@@ -106,8 +115,24 @@ enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
     NVIC_ClearTargetState(CMU_MHU1_Receiver_IRQn);
     NVIC_DisableIRQ(CMU_MHU1_Receiver_IRQn);
 
+    if (tfm_multi_core_register_client_id_range(&MHU_RSE_TO_AP_NS_DEV,
+                                                p_ildi->client_id_base,
+                                                p_ildi->client_id_limit)
+        != SPM_SUCCESS) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
     return TFM_HAL_SUCCESS;
 }
+#else /* MHU_AP_NS_TO_RSE */
+enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
+                                         const struct irq_load_info_t *p_ildi)
+{
+    (void)p_pt;
+    (void)p_ildi;
+
+    return TFM_HAL_ERROR_NOT_SUPPORTED;
+}
+#endif /* MHU_AP_NS_TO_RSE */
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
 
 static struct irq_t dma0_ch0_irq = {0};

@@ -359,24 +359,40 @@ Code Example
 
 Customized manifest attribute
 =============================
-Two extra customized manifest attributes are added:
+Three extra customized manifest attributes are added:
 
-============= ====================================================
-Name          Description
-============= ====================================================
-ns_agent      Indicate if manifest owner is an Agent.
-------------- ----------------------------------------------------
-ns_client_ids Possible non-secure Client ID values (<0).
-============= ====================================================
+=============== ====================================================
+Name            Description
+=============== ====================================================
+ns_agent        Indicate if manifest owner is an Agent.
+--------------- ----------------------------------------------------
+client_id_base  The minimum client ID value (<0)
+--------------- ----------------------------------------------------
+client_id_limit The maximum client ID value (<0)
+=============== ====================================================
 
-Attribute 'ns_client_ids' can be a set of numbers, or it can use a range
-expression such as [min, max]. The tooling can detect ID overlap between
-multiple non-secure agents.
+``client_id_base`` and ``client_id_limit`` are negative numbers. This means that
+``client_id_base <= client_id_limit``, but
+``abs(client_id_base) >= abs(client_id_limit)``. SPM can detect ID overlap when
+initialising secure partitions
 
-.. note::
-  Per-non-secure-client dependencies scheme is now assumed to be implemented
-  by agent customization. Feedback if there are requirements for a unified
-  scheme.
+The Non-secure callers are expected to provide a negative (<0) client ID when
+calling PSA API. A uniform mapping is implemented across all the NS agents,
+where the mapping is defined as the following:
+
++---------------------------------------------+---------------------+
+|NS client ID                                 |Transformed client ID|
++=============================================+=====================+
+|  -1                                         | client_id_limit     |
++---------------------------------------------+---------------------+
+|  -2                                         | client_id_limit - 1 |
++---------------------------------------------+---------------------+
+| ...                                                               |
++---------------------------------------------+---------------------+
+|-(abs(client_id_limit)-abs(client_id_base)+1)| client_id_base      |
++---------------------------------------------+---------------------+
+
+Any other IDs provided by the NSPE will result in PSA_ERROR_INVALID_ARGUMENT.
 
 ***********************
 Manifest tooling update

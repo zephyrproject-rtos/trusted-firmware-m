@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -100,6 +100,8 @@ struct partition_load_info_t {
     uint32_t        nservices;          /* Service number                   */
     uint32_t        nassets;            /* Asset numbers                    */
     uint32_t        nirqs;              /* Number of IRQ owned by Partition */
+    int32_t         client_id_base;     /* The min translated client ID     */
+    int32_t         client_id_limit;    /* The max translated client ID     */
 } __attribute__((aligned(4)));
 
 #endif /* __PARTITION_DEFS_H__ */

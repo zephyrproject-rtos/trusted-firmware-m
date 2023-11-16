@@ -36,7 +36,8 @@ sid_list = []
 
 # Summary of manifest attributes defined by FFM for use in the Secure Partition manifest file.
 ffm_manifest_attributes = ['psa_framework_version', 'name', 'type', 'priority', 'model', 'entry_point', \
-'stack_size', 'description', 'entry_init', 'heap_size', 'mmio_regions', 'services', 'irqs', 'dependencies']
+'stack_size', 'description', 'entry_init', 'heap_size', 'mmio_regions', 'services', 'irqs', 'dependencies',\
+'client_id_base', 'client_id_limit']
 
 class TemplateLoader(BaseLoader):
     """

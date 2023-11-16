@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "internal_status_code.h"
 #include "rse_comms_hal.h"
 #include "rse_comms_queue.h"
 #include "tfm_rpc.h"
@@ -23,7 +24,6 @@
 
 static psa_status_t message_dispatch(struct client_request_t *req)
 {
-    int32_t client_id;
     enum tfm_plat_err_t plat_err;
 
     /* Create the call parameters */
@@ -71,14 +71,14 @@ static psa_status_t message_dispatch(struct client_request_t *req)
         return PSA_ERROR_NOT_PERMITTED;
     }
 
-    client_id = tfm_hal_client_id_translate(req->mhu_sender_dev,
-                                            (int32_t)(req->client_id));
-    if (client_id >= 0) {
+    plat_err = tfm_multi_core_hal_client_id_translate(req->mhu_sender_dev,
+                                                      -1 * (int32_t)(req->client_id),
+                                                      &params.ns_client_id_stateless);
+    if (plat_err != SPM_SUCCESS) {
         SPMLOG_ERRMSGVAL("[RSE-COMMS] Invalid client_id: ",
                          (uint32_t)(req->client_id));
         return PSA_ERROR_INVALID_ARGUMENT;
     }
-    params.ns_client_id_stateless = client_id;
 
     return tfm_rpc_psa_call(req->handle,
                             PARAM_PACK(req->type,

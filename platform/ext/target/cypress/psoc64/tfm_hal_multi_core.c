@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -145,11 +145,4 @@ void tfm_hal_get_ns_access_attr(const void *p, size_t s,
     tfm_get_ns_mem_region_attr(p, s, p_attr);
 
     combine_mem_attr(p_attr, &smpu_attr);
-}
-
-int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
-{
-    /* TODO: Implement platform specific client ID translation. */
-    (void)owner;
-    return client_id_in;
 }

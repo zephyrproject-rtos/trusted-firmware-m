@@ -21,6 +21,7 @@
 #include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
+#include "tfm_nspm.h"
 #include "ffm/backend.h"
 #include "utilities.h"
 #include "memory_symbols.h"
@@ -276,6 +277,9 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
     (void)service_setting;
     SPM_ASSERT(p_pt);
     SPM_ASSERT(param);
+
+    tz_ns_agent_register_client_id_range(p_pt->p_ldinf->client_id_base,
+                                         p_pt->p_ldinf->client_id_limit);
 
     /* Get the context from ns_agent_tz */
     SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;

@@ -24,35 +24,6 @@
 static __ALIGNED(4) struct serialized_psa_msg_t msg;
 static __ALIGNED(4) struct serialized_psa_reply_t reply;
 
-/* The 32bit client ID is constructed as following:
- * bit31:       always 1
- * bit30~bit16: client source identifier.
-                0x0000  First  mailbox agent client(MHU) (by default)
-                0x1000  Second mailbox agent client(MHU)
-                ...
- * bit15~bit0:  client input client ID
- */
-#define CLIENT_ID_USER_INPUT_OFFSET (0)
-#define CLIENT_ID_USER_INPUT_MASK (0xFFFFUL << CLIENT_ID_USER_INPUT_OFFSET)
-
-#define CLIENT_ID_MHU_BASE_OFFSET (16)
-#define CLIENT_ID_MHU_BASE_MASK (0x7FFFUL << CLIENT_ID_MHU_BASE_OFFSET)
-
-#define NS_CLIENT_ID_FLAG_OFFSET (31)
-#define NS_CLIENT_ID_FLAG_MASK (0x1UL << NS_CLIENT_ID_FLAG_OFFSET)
-
-/* MHU for RSE <> AP_MONITOR communication */
-#ifndef MHU0_CLIENT_ID_BASE
-#define MHU0_CLIENT_ID_BASE (0x0000UL << CLIENT_ID_MHU_BASE_OFFSET)
-#endif
-
-#ifdef MHU_RSE_TO_AP_NS
-/* MHU for RSE <> AP_NS communication */
-#ifndef MHU1_CLIENT_ID_BASE
-#define MHU1_CLIENT_ID_BASE (0x1000UL << CLIENT_ID_MHU_BASE_OFFSET)
-#endif
-#endif /* MHU_RSE_TO_AP_NS */
-
 TFM_POOL_DECLARE(req_pool, sizeof(struct client_request_t),
                  RSE_COMMS_MAX_CONCURRENT_REQ);
 
@@ -217,22 +188,4 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void)
     }
 
     return initialize_mhu();
-}
-
-int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
-{
-    if ((uintptr_t)owner == (uintptr_t)&MHU_RSE_TO_AP_MONITOR_DEV) {
-        return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
-               (MHU0_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
-               (NS_CLIENT_ID_FLAG_MASK));
-#ifdef MHU_RSE_TO_AP_NS
-    } else if ((uintptr_t)owner == (uintptr_t)&MHU_RSE_TO_AP_NS_DEV) {
-        return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
-               (MHU1_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
-               (NS_CLIENT_ID_FLAG_MASK));
-#endif
-    } else {
-        SPMLOG_DBGMSG("[COMMS] client_id translation failed: invalid owner\r\n");
-        return 0;
-    }
 }

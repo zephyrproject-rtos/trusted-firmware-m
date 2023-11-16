@@ -19,16 +19,22 @@
   "model": "IPC",
   "entry_point": "ns_agent_mailbox_entry",
   "stack_size": "NS_AGENT_MAILBOX_STACK_SIZE",
+  "client_id_base": "-0x0800ffff",
+  "client_id_limit": "-0x04000000",
   "irqs": [
     {
       "source": "MAILBOX_IRQ",
       "name": "MAILBOX_INTERRUPT",
-      "handling": "SLIH"
+      "handling": "SLIH",
+      "client_id_base": "-0x0400ffff",
+      "client_id_limit": "-0x04000000",
     },
     {
       "source": "MAILBOX_IRQ_1",
       "name": "MAILBOX_INTERRUPT_1",
-      "handling": "SLIH"
+      "handling": "SLIH",
+      "client_id_base": "-0x0800ffff",
+      "client_id_limit": "-0x08000000",
     }
   ],
 }

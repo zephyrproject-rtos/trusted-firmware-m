@@ -14,6 +14,7 @@
 
 #include "async.h"
 #include "config_impl.h"
+#include "internal_status_code.h"
 #include "psa/error.h"
 #include "utilities.h"
 #include "tfm_arch.h"
@@ -239,9 +240,12 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 
         control = PARAM_SET_NS_OUTVEC(control);
 
-        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
-        if (client_id >= 0) {
+        if (tfm_multi_core_hal_client_id_translate(CLIENT_ID_OWNER_MAGIC,
+                                                   msg_ptr->client_id,
+                                                   &client_id) != SPM_SUCCESS) {
             sync = true;
+            psa_ret = PSA_ERROR_INVALID_ARGUMENT;
+            break;
         }
         client_params.ns_client_id_stateless = client_id;
         client_params.p_invecs = vectors[idx].in_vec;
@@ -256,9 +260,12 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 /* Following cases are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
     case MAILBOX_PSA_CONNECT:
-        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
-        if (client_id >= 0) {
+        if (tfm_multi_core_hal_client_id_translate(CLIENT_ID_OWNER_MAGIC,
+                                                   msg_ptr->client_id,
+                                                   &client_id) != SPM_SUCCESS) {
             sync = true;
+            psa_ret = PSA_ERROR_INVALID_ARGUMENT;
+            break;
         }
         psa_ret = tfm_rpc_psa_connect(params->psa_connect_params.sid,
                                       params->psa_connect_params.version,
@@ -270,9 +277,12 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_CLOSE:
-        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
-        if (client_id >= 0) {
+        if (tfm_multi_core_hal_client_id_translate(CLIENT_ID_OWNER_MAGIC,
+                                                   msg_ptr->client_id,
+                                                   &client_id) != SPM_SUCCESS) {
             sync = true;
+            psa_ret = PSA_ERROR_INVALID_ARGUMENT;
+            break;
         }
         psa_ret = tfm_rpc_psa_close(params->psa_close_params.handle, client_id);
         if (psa_ret != PSA_SUCCESS) {
