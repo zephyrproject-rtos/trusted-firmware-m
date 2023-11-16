@@ -210,6 +210,11 @@ extern struct sam_dev_t SAM_DEV_S;
 extern struct lcm_dev_t LCM_DEV_S;
 #endif
 
+#ifdef INTEGRITY_CHECKER_S
+#include "integrity_checker_drv.h"
+extern struct integrity_checker_dev_t INTEGRITY_CHECKER_DEV_S;
+#endif
+
 #ifdef DMA350_DMA0_S
 #include "dma350_drv.h"
 #include "dma350_ch_drv.h"

@@ -70,6 +70,9 @@
 #define TRAM_S
 #endif /* RSS_ENABLE_TRAM */
 
+/* ARM Integrity Checker */
+#define INTEGRITY_CHECKER_S
+
 /** System Counter Armv8-M */
 #define SYSCOUNTER_CNTRL_ARMV8_M_S
 #define SYSCOUNTER_CNTRL_ARMV8_M_DEV    SYSCOUNTER_CNTRL_ARMV8_M_DEV_S

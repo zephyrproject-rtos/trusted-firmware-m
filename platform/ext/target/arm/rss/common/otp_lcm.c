@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,11 +26,14 @@
 #define BL2_ROTPK_HASH_SIZE (8)
 #endif
 
-#define OTP_OFFSET(x)       (offsetof(struct lcm_otp_layout_t, x))
-#define OTP_SIZE(x)         (sizeof(((struct lcm_otp_layout_t *)0)->x))
-#define USER_AREA_OFFSET(x) (OTP_OFFSET(user_data) + \
-                             offsetof(struct plat_user_area_layout_t, x))
-#define USER_AREA_SIZE(x)   (sizeof(((struct plat_user_area_layout_t *)0)->x))
+#define OTP_OFFSET(x)        (offsetof(struct lcm_otp_layout_t, x))
+#define OTP_SIZE(x)          (sizeof(((struct lcm_otp_layout_t *)0)->x))
+#define USER_AREA_OFFSET(x)  (OTP_OFFSET(user_data) + \
+                              offsetof(struct plat_user_area_layout_t, x))
+#define USER_AREA_SIZE(x)    (sizeof(((struct plat_user_area_layout_t *)0)->x))
+
+#define OTP_ADDRESS(x)       ((LCM_BASE_S) + 0x1000 + OTP_OFFSET(x))
+#define USER_AREA_ADDRESS(x) ((LCM_BASE_S) + 0x1000 + USER_AREA_OFFSET(x))
 
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
@@ -331,22 +334,6 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_SIZE(dm_locked.dm_config_flags),
 };
 
-static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
-{
-    size_t byte_index;
-    uint8_t byte;
-    uint32_t one_count = 0;
-
-    for (byte_index = 0; byte_index < size; byte_index++) {
-        byte = buf[byte_index];
-        for (int bit_index = 0; bit_index < 8; bit_index++) {
-            one_count += (byte >> bit_index) & 1;
-        }
-    }
-
-    return (size * 8) - one_count;
-}
-
 static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
                                     uint32_t buf_len, uint8_t *buf)
 {
@@ -467,93 +454,69 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
 #endif
 }
 
-static uint32_t count_otp_zero_bits(uint32_t offset, uint32_t len)
-{
-    uint8_t buf[128];
-    uint32_t zero_count = 0;
-
-    while (len > sizeof(buf)) {
-        otp_read(offset, sizeof(buf), sizeof(buf), buf);
-        zero_count += count_buffer_zero_bits(buf, sizeof(buf));
-        len -= sizeof(buf);
-        offset += sizeof(buf);
-    }
-
-    otp_read(offset, len, len, buf);
-    zero_count += count_buffer_zero_bits(buf, len);
-
-    return zero_count;
-}
-
-static enum tfm_plat_err_t verify_zero_bits_count(uint32_t offset,
-                                                  uint32_t len_offset,
-                                                  uint32_t len_zero_count_offset,
-                                                  uint32_t zero_count_offset)
-{
-    enum lcm_error_t lcm_err;
-    uint32_t zero_count;
-    uint32_t len;
-
-    lcm_err = lcm_otp_read(&LCM_DEV_S, len_offset, sizeof(len),
-                           (uint8_t*)&len);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    lcm_err = lcm_otp_read(&LCM_DEV_S, len_zero_count_offset, sizeof(zero_count),
-                           (uint8_t*)&zero_count);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    if (zero_count != count_buffer_zero_bits((uint8_t *)&len, sizeof(len))) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    lcm_err = lcm_otp_read(&LCM_DEV_S, zero_count_offset, sizeof(zero_count),
-                           (uint8_t*)&zero_count);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    if (zero_count != count_otp_zero_bits(offset, len)) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
 {
-    enum lcm_error_t lcm_err;
     enum tfm_plat_err_t err;
-    uint32_t cm_locked_size;
+    enum integrity_checker_error_t ic_err;
+    uint32_t cm_size;
+    uint32_t dm_size;
 
     if (lcs == LCM_LCS_DM || lcs == LCM_LCS_SE) {
-            err = verify_zero_bits_count(USER_AREA_OFFSET(cm_locked),
-                                         USER_AREA_OFFSET(cm_locked_size),
-                                         USER_AREA_OFFSET(cm_locked_size_zero_count),
-                                         USER_AREA_OFFSET(cm_zero_count));
+            ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
+                                                   INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                   (uint32_t *)USER_AREA_ADDRESS(cm_locked_size),
+                                                   USER_AREA_SIZE(cm_locked_size),
+                                                   (uint32_t *)USER_AREA_ADDRESS(cm_locked_size_zero_count),
+                                                   USER_AREA_SIZE(cm_locked_size_zero_count));
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
+
+            err = otp_read(USER_AREA_OFFSET(cm_locked_size),
+                           USER_AREA_SIZE(cm_locked_size),
+                           sizeof(cm_size), (uint8_t*)&cm_size);
             if (err != TFM_PLAT_ERR_SUCCESS) {
                 return err;
+            }
+
+            ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
+                                                   INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                   (uint32_t *)USER_AREA_ADDRESS(cm_locked),
+                                                   cm_size,
+                                                   (uint32_t *)USER_AREA_ADDRESS(cm_zero_count),
+                                                   USER_AREA_SIZE(cm_zero_count));
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
             }
     }
 
     if (lcs == LCM_LCS_SE) {
-        /* Already been verified, don't need to check the zero-count */
-        lcm_err = lcm_otp_read(&LCM_DEV_S, USER_AREA_OFFSET(cm_locked_size),
-                               sizeof(cm_locked_size), (uint8_t*)&cm_locked_size);
-        if (lcm_err != LCM_ERROR_NONE) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
+            ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
+                                                   INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                   (uint32_t *)USER_AREA_ADDRESS(dm_locked_size),
+                                                   USER_AREA_SIZE(dm_locked_size),
+                                                   (uint32_t *)USER_AREA_ADDRESS(dm_locked_size_zero_count),
+                                                   USER_AREA_SIZE(dm_locked_size_zero_count));
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
 
-        err = verify_zero_bits_count(USER_AREA_OFFSET(cm_locked) + cm_locked_size,
-                                     USER_AREA_OFFSET(dm_locked_size),
-                                     USER_AREA_OFFSET(dm_locked_size_zero_count),
-                                     USER_AREA_OFFSET(dm_zero_count));
-        if (err != TFM_PLAT_ERR_SUCCESS) {
-            return err;
-        }
+            err = otp_read(USER_AREA_OFFSET(dm_locked_size),
+                           USER_AREA_SIZE(dm_locked_size),
+                           sizeof(dm_size), (uint8_t*)&dm_size);
+            if (err != TFM_PLAT_ERR_SUCCESS) {
+                return err;
+            }
+
+            ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
+                                                   INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                   (uint32_t *)(USER_AREA_ADDRESS(cm_locked) + cm_size),
+                                                   dm_size,
+                                                   (uint32_t *)USER_AREA_ADDRESS(dm_zero_count),
+                                                   USER_AREA_SIZE(dm_zero_count));
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -692,7 +655,8 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
     enum lcm_error_t lcm_err;
     uint16_t gppc_val = 0;
     uint32_t zero_bit_count;
-    size_t region_size;
+    uint32_t region_size;
+    enum integrity_checker_error_t ic_err;
 
     if (in_len != sizeof(lcs)) {
         return TFM_PLAT_ERR_INVALID_INPUT;
@@ -710,8 +674,16 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             }
 
             /* Write the zero-bit count of the CM locked area size */
-            zero_bit_count = count_buffer_zero_bits((uint8_t *)&region_size,
-                                                    sizeof(region_size));
+            ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                                     INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                     &region_size,
+                                                     sizeof(region_size),
+                                                     &zero_bit_count,
+                                                     sizeof(zero_bit_count),
+                                                     NULL);
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
             err = otp_write(USER_AREA_OFFSET(cm_locked_size_zero_count),
                             USER_AREA_SIZE(cm_locked_size_zero_count),
                             sizeof(zero_bit_count), (uint8_t *)&zero_bit_count);
@@ -720,8 +692,16 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             }
 
             /* Write the zero-count of the CM locked area */
-            zero_bit_count = count_otp_zero_bits(USER_AREA_OFFSET(cm_locked),
-                                                 region_size);
+            ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                                     INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                     (uint32_t *)USER_AREA_ADDRESS(cm_locked),
+                                                     region_size,
+                                                     &zero_bit_count,
+                                                     sizeof(zero_bit_count),
+                                                     NULL);
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
             err = otp_write(USER_AREA_OFFSET(cm_zero_count),
                             USER_AREA_SIZE(cm_zero_count), sizeof(zero_bit_count),
                             (uint8_t *)&zero_bit_count);
@@ -740,8 +720,16 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             }
 
             /* Write the zero-bit count of the DM locked area size */
-            zero_bit_count = count_buffer_zero_bits((uint8_t*)&region_size,
-                                                    sizeof(region_size));
+            ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                                     INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                     &region_size,
+                                                     sizeof(region_size),
+                                                     &zero_bit_count,
+                                                     sizeof(zero_bit_count),
+                                                     NULL);
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
             err = otp_write(USER_AREA_OFFSET(dm_locked_size_zero_count),
                             USER_AREA_SIZE(dm_locked_size_zero_count),
                             sizeof(zero_bit_count), (uint8_t *)&zero_bit_count);
@@ -750,8 +738,16 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             }
 
             /* Write the zero-count of the DM locked area */
-            zero_bit_count = count_otp_zero_bits(USER_AREA_OFFSET(dm_locked),
-                                                 region_size);
+            ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                                     INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                                     (uint32_t *)USER_AREA_ADDRESS(dm_locked),
+                                                     region_size,
+                                                     &zero_bit_count,
+                                                     sizeof(zero_bit_count),
+                                                     NULL);
+            if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
             err = otp_write(USER_AREA_OFFSET(dm_zero_count),
                             USER_AREA_SIZE(dm_zero_count), sizeof(zero_bit_count),
                             (uint8_t *)&zero_bit_count);

@@ -608,6 +608,22 @@ struct lcm_dev_t LCM_DEV_S = {
 };
 #endif
 
+#ifdef INTEGRITY_CHECKER_S
+static struct integrity_checker_dev_cfg_t INTEGRITY_CHECKER_DEV_CFG_S = {
+    .base = INTEGRITY_CHECKER_BASE_S,
+    .remap_cpusel = 0,
+    .remap_regions = {
+        {ITCM_BASE_S, ITCM_SIZE, ITCM_CPU0_BASE_S, 0x01000000},
+        {ITCM_BASE_NS, ITCM_SIZE, ITCM_CPU0_BASE_NS, 0x01000000},
+        {DTCM_BASE_S, DTCM_SIZE, DTCM_CPU0_BASE_S, 0x01000000},
+        {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
+    }
+};
+struct integrity_checker_dev_t INTEGRITY_CHECKER_DEV_S = {
+    .cfg = &(INTEGRITY_CHECKER_DEV_CFG_S)
+};
+#endif
+
 #ifdef DMA350_DMA0_S
 static const struct dma350_dev_cfg_t DMA350_DMA0_DEV_CFG_S = {
     .dma_sec_cfg =   (DMASECCFG_TypeDef*)   (DMA_350_BASE_S + 0x0UL),

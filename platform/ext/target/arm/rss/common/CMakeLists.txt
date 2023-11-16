@@ -149,6 +149,7 @@ target_sources(platform_s
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         native_drivers/ppc_rss_drv.c
+        native_drivers/integrity_checker_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
@@ -242,6 +243,7 @@ target_sources(platform_bl2
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         native_drivers/lcm_drv.c
+        native_drivers/integrity_checker_drv.c
         otp_lcm.c
         nv_counters.c
         $<$<BOOL:${RSS_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
@@ -304,6 +306,7 @@ target_sources(platform_bl1_1
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         ./native_drivers/tram_drv.c
+        ./native_drivers/integrity_checker_drv.c
         ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
