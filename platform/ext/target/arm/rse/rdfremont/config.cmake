@@ -14,7 +14,13 @@ set(TFM_ATTESTATION_SCHEME              "CCA"    CACHE STRING  "Attestation sche
 set(PLATFORM_HAS_BOOT_DMA               OFF      CACHE BOOL    "Enable dma support for memory transactions for bootloader")
 set(PLATFORM_HAS_NI_TOWER               ON       CACHE BOOL    "Enable NI-Tower support")
 set(PLATFORM_HAS_SMMU_V3                ON       CACHE BOOL    "Enable SMMU V3 support")
-set(PLAT_MHU_VERSION                    3        CACHE STRING  "Supported MHU version by platform")
+
+# This sub-platform uses a mix of MHUv2 in BL1 and MHUv3 in other firmware.
+# Because of this, PLAT_MHU_VERSION cannot be set to 2 or 3, which would add
+# either MHUv2 or MHUv3 for all firmware. To work around this, set
+# PLAT_MHU_VERSION to 0 so neither gets added by the common cmake and
+# sub-platform specific cmake can be used to handle the mix of MHUv2 and MHUv3.
+set(PLAT_MHU_VERSION                    0        CACHE STRING  "Supported MHU version by platform")
 set(MCUBOOT_IMAGE_NUMBER                6        CACHE STRING  "Number of images supported by MCUBoot")
 set(RSE_USE_HOST_UART                   OFF      CACHE BOOL    "Whether RSE should use the UART from the host system (opposed to dedicated UART private to RSE)")
 set(RSE_USE_HOST_FLASH                  OFF      CACHE BOOL    "Enable RSE using the host flash.")

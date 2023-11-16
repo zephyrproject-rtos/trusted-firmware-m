@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,17 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
 #include "spi_strataflashj3_flash_lib.h"
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
 #endif
+
+/* Sideband RSE to RSE MHUs */
+#ifdef MHU_RSE_TO_RSE_SIDEBAND_RECEIVER_COUNT
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSE_TO_RSE_RECEIVER_DEVS[RSE_AMOUNT - 1];
+#endif /* MHU_RSE_TO_RSE_SIDEBAND_RECEIVER_COUNT */
+
+#ifdef MHU_RSE_TO_RSE_SIDEBAND_SENDER_COUNT
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSE_TO_RSE_SENDER_DEVS[RSE_AMOUNT - 1];
+#endif /* MHU_RSE_TO_RSE_SIDEBAND_SENDER_COUNT */
 
 #ifdef __cplusplus
 }

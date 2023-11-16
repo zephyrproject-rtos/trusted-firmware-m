@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,5 +33,11 @@
 
 /* CFI Controller */
 #define CFI_S
+
+#if RSE_AMOUNT > 1
+/* One MHU for each other RSE in system */
+#define MHU_RSE_TO_RSE_SIDEBAND_RECEIVER_COUNT (RSE_AMOUNT - 1)
+#define MHU_RSE_TO_RSE_SIDEBAND_SENDER_COUNT (RSE_AMOUNT - 1)
+#endif
 
 #endif  /* __RSE_EXPANSION_DEVICE_CFG_H__ */

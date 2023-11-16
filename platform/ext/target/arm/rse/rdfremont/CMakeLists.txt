@@ -57,6 +57,8 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         rse_expansion_peripherals_def.c
         rse_comms/rse_comms_permissions_hal.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_v3_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_wrapper_v3_x.c>
 )
 
 #========================= Platform BL2 =======================================#
@@ -77,6 +79,8 @@ target_sources(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         ni_tower_periph_lib.c
         ni_tower_sysctrl_lib.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_v3_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_wrapper_v3_x.c>
 )
 
 target_compile_definitions(platform_bl2
@@ -114,6 +118,8 @@ target_sources(platform_bl1_1
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_wrapper_v2_x.c>
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/rse_bringup_helpers_hal.c>
 )
 

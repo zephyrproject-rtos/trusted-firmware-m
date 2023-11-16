@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,5 +28,12 @@
 #define UART0_BASE_S            0x58101000
 /* Boot flash */
 #define BOOT_FLASH_BASE_S       0xB0000000
+
+#define MHU_SIDEBAND_0_SENDER_BASE_S          0xC0000000
+#define MHU_SIDEBAND_0_RECEIVER_BASE_S        0xC0010000
+#define MHU_SIDEBAND_1_SENDER_BASE_S          0xC0020000
+#define MHU_SIDEBAND_1_RECEIVER_BASE_S        0xC0030000
+#define MHU_SIDEBAND_2_SENDER_BASE_S          0xC0040000
+#define MHU_SIDEBAND_2_RECEIVER_BASE_S        0xC0050000
 
 #endif  /* __RSE_EXPANSION_BASE_ADDRESS_H__ */
