@@ -49,6 +49,12 @@ static fih_int tfm_core_init(void)
         FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
     }
 
+    /*
+     * Print the TF-M version now that the platform has initialized
+     * the logging backend.
+     */
+    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
+
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
@@ -105,9 +111,6 @@ int main(void)
 
     /* All isolation should have been set up at this point */
     FIH_LABEL_CRITICAL_POINT();
-
-    /* Print the TF-M version */
-    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
 
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
