@@ -88,16 +88,6 @@ enum tfm_plat_err_t spu_init_cfg(void);
 enum tfm_plat_err_t spu_periph_init_cfg(void);
 
 /**
- * \brief Restrict access to peripheral to secure
- */
-void spu_periph_configure_to_secure(uint32_t periph_num);
-
-/**
- * \brief Allow non-secure access to peripheral
- */
-void spu_periph_configure_to_non_secure(uint32_t periph_num);
-
-/**
  * \brief Clears SPU interrupt.
  */
 void spu_clear_irq(void);

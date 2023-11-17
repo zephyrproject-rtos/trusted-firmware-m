@@ -283,11 +283,8 @@ uint32_t spu_regions_sram_get_region_size(void) {
     return SRAM_SECURE_ATTRIBUTION_REGION_SIZE;
 }
 
-void spu_peripheral_config_secure(uint32_t periph_base_addr, bool periph_lock)
+void spu_peripheral_config_secure(const uint8_t periph_id, bool periph_lock)
 {
-    /* Determine peripheral ID */
-    const uint8_t periph_id = NRFX_PERIPHERAL_ID_GET(periph_base_addr);
-
     /* ASSERT checking that this is not an explicit Non-Secure peripheral */
     NRFX_ASSERT((NRF_SPU->PERIPHID[periph_id].PERM &
         SPU_PERIPHID_PERM_SECUREMAPPING_Msk) !=
@@ -300,11 +297,8 @@ void spu_peripheral_config_secure(uint32_t periph_base_addr, bool periph_lock)
         periph_lock);
 }
 
-void spu_peripheral_config_non_secure(uint32_t periph_base_addr, bool periph_lock)
+void spu_peripheral_config_non_secure(const uint8_t periph_id, bool periph_lock)
 {
-    /* Determine peripheral ID */
-    const uint8_t periph_id = NRFX_PERIPHERAL_ID_GET(periph_base_addr);
-
     /* ASSERT checking that this is not an explicit Secure peripheral */
     NRFX_ASSERT((NRF_SPU->PERIPHID[periph_id].PERM &
         SPU_PERIPHID_PERM_SECUREMAPPING_Msk) !=
