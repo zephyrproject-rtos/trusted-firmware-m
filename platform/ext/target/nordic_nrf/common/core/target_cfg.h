@@ -20,16 +20,17 @@
 
 /**
  * \file target_cfg.h
- * \brief nRF9160 target configuration header
+ * \brief Target configuration header
  *
  * This file contains the platform specific functions to configure
- * the Cortex-M33 core, memory permissions and security attribution
- * on the nRF9160 platform.
+ * the Cortex-M33 core, memory permissions and security attribution.
+ * on the nordic_nrf platform.
  *
  * Memory permissions and security attribution are configured via
  * the System Protection Unit (SPU) which is the nRF specific Implementation
  * Defined Attribution Unit (IDAU).
  */
+
 
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
@@ -79,6 +80,8 @@ enum tfm_plat_err_t spu_init_cfg(void);
  * - grants Non-Secure access to nRF peripherals that are not Secure-only
  * - grants Non-Secure access to DDPI channels
  * - grants Non-Secure access to GPIO pins
+ * - On nrf5340 enforces that the external domain is still at the HW reset value
+ *   of non-secure and locking it
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
