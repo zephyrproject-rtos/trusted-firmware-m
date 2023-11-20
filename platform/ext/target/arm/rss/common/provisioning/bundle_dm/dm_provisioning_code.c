@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #include "tfm_plat_otp.h"
 #include "rss_provisioning_bundle.h"
+
+#include "trng.h"
 
 /* This is a stub to make the linker happy */
 void __Vectors(){}
@@ -16,6 +18,20 @@ extern const struct dm_provisioning_data data;
 enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) {
     enum tfm_plat_err_t err;
     uint32_t new_lcs;
+    uint8_t generated_key_buf[32];
+    int32_t int_err;
+
+    int_err = bl1_trng_generate_random(generated_key_buf,
+                                       sizeof(generated_key_buf));
+    if (int_err != 0) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY,
+                             sizeof(generated_key_buf), generated_key_buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_BL2_ENCRYPTION,
                              sizeof(data.bl2_encryption_key),

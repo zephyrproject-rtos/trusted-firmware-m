@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include "tfm_plat_otp.h"
 #include "rss_provisioning_bundle.h"
+
 #include "trng.h"
 
 /* This is a stub to make the linker happy */
@@ -21,6 +22,13 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     uint8_t generated_key_buf[32];
     int32_t int_err;
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
+                             sizeof(data.bl1_2_image_hash),
+                             data.bl1_2_image_hash);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_RSS_ID,
                              sizeof(data.rss_id),
                              (const uint8_t *)&data.rss_id);
@@ -32,13 +40,6 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
                              sizeof(data.guk),
                              data.guk);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
-                             sizeof(data.bl1_2_image_hash),
-                             data.bl1_2_image_hash);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
