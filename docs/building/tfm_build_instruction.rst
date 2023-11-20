@@ -328,7 +328,11 @@ These folders have the following content:
 - **platform** - source code for a selected hardware platform.
 - **CMakeLists.txt** - CMake script for the artifacts integration in NSPE.
 
-The content of ``<Artifact Dir>`` is a prepared directory for integration with CMake projects.
+The content of ``<Artifact Dir>`` is an exported directory for integration with CMake projects.
+
+.. Note::
+    Attempting to change any file in <Artifact Dir> may cause incompatibility issues.
+    Instead, please change the corresponding file in the <TF-M source dir>.
 
 .. _NSPE toolchains:
 
