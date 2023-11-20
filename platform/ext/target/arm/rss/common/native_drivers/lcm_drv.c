@@ -22,6 +22,7 @@
 #include "lcm_drv.h"
 
 #include "cmsis.h"
+#include "device_definition.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -303,16 +304,27 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
     return LCM_ERROR_NONE;
 }
 
-/* Armclang attempts to inline this function, which causes huge code size
- * increases. It is marked as __attribute__((noinline)) explicitly to prevent
- * this.
- */
-__attribute__((noinline))
-static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
-                                            uint32_t offset, uint32_t len,
-                                            uint32_t *zero_bits)
+#ifdef INTEGRITY_CHECKER_S
+static enum lcm_error_t count_zero_bits(const uint32_t *addr, uint32_t len,
+                                        uint32_t *zero_bits)
 {
-    enum lcm_error_t err;
+    enum integrity_checker_error_t ic_err;
+
+    ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                             INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                             addr, len, zero_bits, sizeof(uint32_t),
+                                             NULL);
+
+    if (ic_err == INTEGRITY_CHECKER_ERROR_NONE) {
+        return LCM_ERROR_NONE;
+    } else {
+        return LCM_ERROR_INTERNAL_ERROR;
+    }
+}
+#else
+static enum lcm_error_t count_zero_bits(const uint32_t *addr, uint32_t len,
+                                        uint32_t *zero_bits)
+{
     uint32_t idx;
     uint32_t word;
     uint32_t bit_index;
@@ -320,10 +332,7 @@ static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
     *zero_bits = 0;
 
     for (idx = 0; idx < len; idx += sizeof(uint32_t)) {
-        err = lcm_otp_read(dev, offset + idx, sizeof(uint32_t), (uint8_t *)&word);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
+        word = addr[idx / sizeof(uint32_t)];
 
         for (bit_index = 0; bit_index < sizeof(word) * 8; bit_index++) {
             *zero_bits += 1 - ((word >> bit_index) & 1);
@@ -331,6 +340,29 @@ static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
     }
 
     return LCM_ERROR_NONE;
+}
+#endif /* INTEGRITY_CHECKER_DEV_S */
+
+static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
+                                            uint32_t offset, uint32_t len,
+                                            uint32_t *zero_bits)
+{
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+
+    return count_zero_bits((uint32_t *)(((uint8_t *)p_lcm->raw_otp) + offset),
+                           len, zero_bits);
+}
+
+static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
+                                uint32_t len, uint32_t *p_buf_word)
+{
+    uint32_t idx;
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+
+    /* Perform the actual write */
+    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
+        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
+    }
 }
 
 static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
@@ -393,12 +425,8 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
         }
     }
 
-    err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, cm_config_1),
-                        sizeof(uint32_t), (uint8_t *)&config_val);
-    /* This OTP field doesn't read-back as written, but that isn't an error */
-    if (!(err == LCM_ERROR_NONE || err == LCM_ERROR_WRITE_VERIFY_FAIL)) {
-        return err;
-    }
+    otp_write_unchecked(dev, offsetof(struct lcm_otp_layout_t, cm_config_1),
+                        sizeof(uint32_t), &config_val);
 
     err = lcm_otp_read(dev, offsetof(struct lcm_otp_layout_t, cm_config_1),
                        sizeof(uint32_t), (uint8_t *)&config_val);
@@ -602,6 +630,103 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
     return LCM_ERROR_INTERNAL_ERROR;
 }
 
+static const struct lcm_hw_slot_zero_count_mapping {
+    uint32_t offset;
+    uint32_t size;
+    uint32_t zero_count_offset;
+    uint32_t shift;
+} zero_count_mappings[] = {
+    {
+        offsetof(struct lcm_otp_layout_t, huk),
+        sizeof(((struct lcm_otp_layout_t*)0)->huk),
+        offsetof(struct lcm_otp_layout_t, cm_config_1),
+        0,
+    },
+    {
+        offsetof(struct lcm_otp_layout_t, guk),
+        sizeof(((struct lcm_otp_layout_t*)0)->guk),
+        offsetof(struct lcm_otp_layout_t, cm_config_1),
+        8,
+    },
+    {
+        offsetof(struct lcm_otp_layout_t, kp_cm),
+        sizeof(((struct lcm_otp_layout_t*)0)->kp_cm),
+        offsetof(struct lcm_otp_layout_t, cm_config_1),
+        16,
+    },
+    {
+        offsetof(struct lcm_otp_layout_t, kce_cm),
+        sizeof(((struct lcm_otp_layout_t*)0)->kce_cm),
+        offsetof(struct lcm_otp_layout_t, cm_config_1),
+        24,
+    },
+
+    {
+        offsetof(struct lcm_otp_layout_t, rotpk),
+        sizeof(((struct lcm_otp_layout_t*)0)->rotpk),
+        offsetof(struct lcm_otp_layout_t, cm_config_2),
+        0,
+    },
+
+    {
+        offsetof(struct lcm_otp_layout_t, kp_dm),
+        sizeof(((struct lcm_otp_layout_t*)0)->kp_dm),
+        offsetof(struct lcm_otp_layout_t, dm_config),
+        0,
+    },
+    {
+        offsetof(struct lcm_otp_layout_t, kce_dm),
+        sizeof(((struct lcm_otp_layout_t*)0)->kce_dm),
+        offsetof(struct lcm_otp_layout_t, dm_config),
+        8,
+    },
+};
+
+static enum lcm_error_t write_zero_count_if_needed(struct lcm_dev_t *dev,
+                                                   uint32_t offset,
+                                                   uint32_t len,
+                                                   const uint8_t *buf)
+{
+    enum lcm_error_t err;
+    uint32_t idx;
+    uint32_t zero_bits = 0;
+    uint32_t otp_word;
+    const struct lcm_hw_slot_zero_count_mapping *mapping;
+    bool zero_count_needed = false;
+
+    for (idx = 0;
+         idx < (sizeof(zero_count_mappings) / sizeof(zero_count_mappings[0]));
+         idx++) {
+        mapping = &zero_count_mappings[idx];
+        if (offset == mapping->offset) {
+            zero_count_needed = true;
+            break;
+        }
+    }
+
+    /* No zero count needed */
+    if (!zero_count_needed) {
+        return LCM_ERROR_NONE;
+    }
+
+    err = count_zero_bits((uint32_t *)buf, len, &zero_bits);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
+
+    err = lcm_otp_read(dev, mapping->zero_count_offset, sizeof(otp_word),
+                        (uint8_t *)&otp_word);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
+
+    otp_word |= zero_bits << mapping->shift;
+
+    otp_write_unchecked(dev, mapping->zero_count_offset,
+                        sizeof(otp_word), &otp_word);
+
+    return LCM_ERROR_NONE;
+}
 
 /* Armclang attempts to inline this function, which causes huge code size
  * increases. It is marked as __attribute__((noinline)) explicitly to prevent
@@ -630,7 +755,7 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
     }
 
     err = lcm_get_otp_size(dev, &otp_size);
-    if (err) {
+    if (err != LCM_ERROR_NONE) {
         return err;
     }
 
@@ -646,10 +771,16 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
         }
     }
 
-    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
-        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
+    /* Write the zero count if needed */
+    err = write_zero_count_if_needed(dev, offset, len, buf);
+    if (err != LCM_ERROR_NONE) {
+        return err;
     }
 
+    /* Perform the actual write */
+    otp_write_unchecked(dev, offset, len, p_buf_word);
+
+    /* Verify the write is correct */
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         if (p_buf_word[idx] != p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx]) {
             return LCM_ERROR_WRITE_VERIFY_FAIL;
@@ -687,7 +818,7 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
     }
 
     err = lcm_get_otp_size(dev, &otp_size);
-    if (err) {
+    if (err != LCM_ERROR_NONE) {
         return err;
     }
 
@@ -809,4 +940,3 @@ enum lcm_error_t lcm_dcu_get_disable_mask(struct lcm_dev_t *dev, uint8_t *val)
 
     return LCM_ERROR_NONE;
 }
-

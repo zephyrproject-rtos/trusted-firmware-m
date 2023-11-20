@@ -1,6 +1,8 @@
 ATU_DEV_S
 Driver_FLASH0
 KMU_DEV_S
+INTEGRITY_CHECKER_DEV_S
+LCM_DEV_S
 SystemInit
 atu_initialize_region
 bl1_aes_256_ctr_decrypt
@@ -18,6 +20,7 @@ dpa_hardened_word_copy
 get_supported_region_count
 host_flash_atu_init_regions_for_image
 host_flash_atu_uninit_regions
+integrity_checker_compute_value
 kmu_init
 kmu_get_key_buffer_ptr
 kmu_set_key_locked
@@ -25,6 +28,7 @@ kmu_set_slot_invalid
 kmu_random_delay
 kmu_set_key_export_config
 kmu_set_key_export_config_locked
+lcm_otp_write
 pq_crypto_verify
 pq_crypto_get_pub_key_hash
 rss_derive_cpak_seed
