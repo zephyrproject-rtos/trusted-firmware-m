@@ -85,7 +85,7 @@ Headers
     ###################
 
     ******************
-    Chapter Ttitle(H2)
+    Chapter Title (H2)
     ******************
 
     Chapter Section (H3)
