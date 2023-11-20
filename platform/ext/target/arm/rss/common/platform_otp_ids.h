@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -89,7 +89,8 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_SAM_CONFIG,
     PLAT_OTP_ID_SCP_DATA,
 
-    PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY,
+    PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY,
+    PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY,
 
     PLAT_OTP_ID_MAX,
 

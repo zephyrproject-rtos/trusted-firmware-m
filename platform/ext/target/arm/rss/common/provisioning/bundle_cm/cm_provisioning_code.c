@@ -103,7 +103,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = tfm_plat_otp_write(PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY,
+    err = tfm_plat_otp_write(PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY,
                              sizeof(generated_key_buf), generated_key_buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
