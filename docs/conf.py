@@ -61,6 +61,10 @@ intersphinx_mapping = {
 
 intersphinx_disabled_reftypes = ["*"]
 
+#PlantUML
+if 'PLANTUML_JAR_PATH' in os.environ:
+    plantuml = 'java -jar ' + os.environ['PLANTUML_JAR_PATH']
+
 # Make auto section labels generated be prefixed with file name.
 autosectionlabel_prefix_document=True
 # Add auto section label for level 2 headers only.
