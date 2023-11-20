@@ -3,7 +3,7 @@ Build instructions
 ##################
 
 .. warning::
-    The build process was changed a lot in Q3 2023 and included into the release after v1.9.
+    The build process was changed a lot in Q3 2023 and included into the release v2.0.
     For building instructions for early versions please refer to the documentation of respective
     versions.
 
