@@ -243,15 +243,32 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
     int flags = 0;
     int32_t range_access_allowed_by_mpu;
 
-    /* If size is zero, this indicates an empty buffer, we can ignore base. */
+    /* If size is zero, this indicates an empty buffer and base is ignored */
     if (size == 0) {
         return TFM_HAL_SUCCESS;
+    }
+
+    if (!base) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= CMSE_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= CMSE_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (access_type & TFM_HAL_ACCESS_NS) {
+        flags |= CMSE_NONSECURE;
     }
 
     if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
         flags |= CMSE_MPU_UNPRIV;
     }
 
+    /* This check is only done for ns_agent_tz */
     if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
@@ -261,14 +278,6 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
             flags &= ~CMSE_MPU_UNPRIV;
         }
         flags |= CMSE_NONSECURE;
-    }
-
-    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
-        flags |= CMSE_MPU_READWRITE;
-    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
-        flags |= CMSE_MPU_READ;
-    } else {
-        return TFM_HAL_ERROR_INVALID_INPUT;
     }
 
     /* Use the TT instruction to check access to the partition's regions*/
