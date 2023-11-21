@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ enum lcm_error_t {
     LCM_ERROR_INVALID_POINTER,
     LCM_ERROR_INTERNAL_ERROR,
     LCM_ERROR_WRITE_VERIFY_FAIL,
+    LCM_ERROR_READ_VERIFY_FAIL,
     LCM_ERROR_FATAL_ERR,
 };
 

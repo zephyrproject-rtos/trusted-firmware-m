@@ -814,6 +814,7 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
     enum lcm_error_t err;
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     uint32_t *p_buf_word = (uint32_t *)buf;
+    uint32_t validation_word;
     uint32_t otp_size;
     uint32_t idx;
 
@@ -840,6 +841,19 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
 
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         p_buf_word[idx] = p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx];
+
+#ifdef KMU_S
+        kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+#endif /* KMU_S */
+        /* Double read verify is done in hardware for addresses outside of the
+         * LCM OTP user area. In that case, don't perform a software check.
+         */
+        if (offset >= sizeof(struct lcm_otp_layout_t)) {
+            validation_word = p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx];
+            if (validation_word != p_buf_word[idx]) {
+                return LCM_ERROR_READ_VERIFY_FAIL;
+            }
+        }
     }
 
     return LCM_ERROR_NONE;
