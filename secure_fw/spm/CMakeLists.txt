@@ -42,7 +42,6 @@ target_include_directories(tfm_spm
 
 target_sources(tfm_spm
     PRIVATE
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/agent_api.c>
         core/tfm_boot_data.c
         core/utilities.c
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:core/spm_log.c>
@@ -52,6 +51,7 @@ target_sources(tfm_spm
         core/rom_loader.c
         core/psa_api.c
         core/psa_call_api.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/mailbox_agent_api.c>
         core/psa_version_api.c
         core/psa_read_write_skip_api.c
         $<$<BOOL:${PSA_FRAMEWORK_HAS_MM_IOVEC}>:core/psa_mmiovec_api.c>
