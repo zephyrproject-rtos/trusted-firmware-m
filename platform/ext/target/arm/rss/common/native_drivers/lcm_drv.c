@@ -100,6 +100,26 @@ static int is_pointer_word_aligned(void *ptr) {
     return !((uint32_t)ptr & (sizeof(uint32_t) - 1));
 }
 
+static enum lcm_error_t rma_erase_all_keys(struct lcm_dev_t *dev)
+{
+    enum lcm_error_t err;
+    uint32_t idx;
+    uint32_t otp_overwrite_val = 0xFFFFFFFFu;
+
+    /* Overwrite all secret keys, and rotpk, with all-one words */
+    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, tp_mode_config);
+         idx += sizeof(uint32_t)) {
+        err = lcm_otp_write(dev, idx, sizeof(otp_overwrite_val),
+                            (uint8_t *)&otp_overwrite_val);
+        /* The HW keys are writable in RMA state, but not readable */
+        if (err != LCM_ERROR_NONE && err != LCM_ERROR_WRITE_VERIFY_FAIL) {
+            return err;
+        }
+    }
+
+    return LCM_ERROR_NONE;
+}
+
 enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
@@ -114,6 +134,11 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
     if (lcs == LCM_LCS_SE) {
         if (p_lcm->key_err) {
             return LCM_ERROR_INVALID_KEY;
+        }
+    } else if (lcs == LCM_LCS_RMA) {
+        err = rma_erase_all_keys(dev);
+        if (err != LCM_ERROR_NONE) {
+            return err;
         }
     }
 
@@ -515,28 +540,19 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
     return LCM_ERROR_NONE;
 }
 
-static enum lcm_error_t se_to_rma(struct lcm_dev_t *dev)
+static enum lcm_error_t any_to_rma(struct lcm_dev_t *dev)
 {
     enum lcm_error_t err;
     uint32_t rma_flag = LCM_TRUE;
-    uint32_t idx;
-    uint32_t otp_overwrite_val = 0xFFFFFFFFu;
 
-    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, tp_mode_config);
-         idx += sizeof(uint32_t)) {
-        err = lcm_otp_write(dev, idx, sizeof(otp_overwrite_val),
-                            (uint8_t *)&otp_overwrite_val);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
-    }
-
+    /* Write the CM RMA flag */
     err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, cm_rma_flag),
                         sizeof(uint32_t), (uint8_t *)&rma_flag);
     if (err != LCM_ERROR_NONE) {
         return err;
     }
 
+    /* Write the DM RMA flag */
     err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, dm_rma_flag),
                         sizeof(uint32_t), (uint8_t *)&rma_flag);
     if (err != LCM_ERROR_NONE) {
@@ -616,11 +632,7 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
         return dm_to_se(dev);
 
     case LCM_LCS_RMA:
-        if (curr_lcs != LCM_LCS_SE) {
-            return LCM_ERROR_INVALID_TRANSITION;
-        }
-
-        return se_to_rma(dev);
+        return any_to_rma(dev);
 
     case LCM_LCS_INVALID:
         return LCM_ERROR_INVALID_LCS;
