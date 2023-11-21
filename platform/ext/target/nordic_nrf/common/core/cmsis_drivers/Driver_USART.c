@@ -23,7 +23,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <nrf-pinctrl.h>
-#include <array.h>
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
+#endif
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  (void)arg
