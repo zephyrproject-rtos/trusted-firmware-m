@@ -36,10 +36,10 @@
  * 0x0002_8000 NV counters area (16 KB)
  * 0x0002_c000 Secure Storage Area (16 KB)
  * 0x0003_0000 Internal Trusted Storage Area (16 KB)
- * 0x0003_4000 Secure image     primary slot (384 KB)
- * 0x0009_4000 Non-secure image primary slot (512 KB)
- * 0x0011_4000 Secure image     secondary slot (384 KB)
- * 0x0017_4000 Non-secure image secondary slot (512 KB)
+ * 0x0003_8000 Secure image     primary slot (384 KB)
+ * 0x0009_8000 Non-secure image primary slot (512 KB)
+ * 0x0011_8000 Secure image     secondary slot (384 KB)
+ * 0x0017_8000 Non-secure image secondary slot (512 KB)
  *
  * Bl2 binary is written at 0x1_2000:
  * it contains bl2_counter init value, OTP write protect, NV counters area init.
