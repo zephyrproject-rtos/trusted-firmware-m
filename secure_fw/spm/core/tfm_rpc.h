@@ -205,7 +205,5 @@ void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
 /* RPC is only available in multi-core scenario */
 #define is_tfm_rpc_msg(x)                       (false)
 
-#define tfm_rpc_client_call_reply(owner, ret)   do {} while (0)
-
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */
