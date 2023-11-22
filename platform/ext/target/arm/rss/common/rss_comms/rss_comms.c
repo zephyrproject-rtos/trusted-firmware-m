@@ -24,11 +24,11 @@ static struct client_request_t *req_to_process;
 
 static psa_status_t message_dispatch(struct client_request_t *req)
 {
+    int32_t client_id;
     enum tfm_plat_err_t plat_err;
 
     /* Create the call parameters */
     struct client_params_t params = {
-        .ns_client_id_stateless = -((int32_t)req->client_id),
         .p_invecs = req->in_vec,
         .p_outvecs = req->out_vec,
     };
@@ -71,6 +71,15 @@ static psa_status_t message_dispatch(struct client_request_t *req)
         SPMLOG_ERRMSG("[RSS-COMMS] Call not permitted\r\n");
         return PSA_ERROR_NOT_PERMITTED;
     }
+
+    client_id = tfm_hal_client_id_translate(req->mhu_sender_dev,
+                                            (int32_t)(req->client_id));
+    if (client_id >= 0) {
+        SPMLOG_ERRMSGVAL("[RSS-COMMS] Invalid client_id: ",
+                         (uint32_t)(req->client_id));
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    params.ns_client_id_stateless = client_id;
 
     return tfm_rpc_psa_call(req->handle,
                             PARAM_PACK(req->type,

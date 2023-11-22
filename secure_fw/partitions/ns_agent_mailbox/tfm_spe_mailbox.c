@@ -21,9 +21,9 @@
 #include "tfm_psa_call_pack.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
+#include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
 #include "ffm/agent_api.h"
-
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
@@ -182,6 +182,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
     uint32_t control = PARAM_PACK(params->psa_call_params.type,
                                   params->psa_call_params.in_len,
                                   params->psa_call_params.out_len);
+    int32_t client_id;
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
@@ -234,7 +235,11 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 
         control = PARAM_SET_NS_OUTVEC(control);
 
-        client_params.ns_client_id_stateless = msg_ptr->client_id;
+        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
+        if (client_id >= 0) {
+            sync = true;
+        }
+        client_params.ns_client_id_stateless = client_id;
         client_params.p_invecs = vectors[idx].in_vec;
         client_params.p_outvecs = vectors[idx].out_vec;
         psa_ret = tfm_rpc_psa_call(params->psa_call_params.handle,
@@ -247,9 +252,13 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 /* Following cases are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
     case MAILBOX_PSA_CONNECT:
+        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
+        if (client_id >= 0) {
+            sync = true;
+        }
         psa_ret = tfm_rpc_psa_connect(params->psa_connect_params.sid,
                                       params->psa_connect_params.version,
-                                      msg_ptr->client_id,
+                                      client_id,
                                       NULL);
         if (psa_ret != PSA_SUCCESS) {
             sync = true;
@@ -257,7 +266,11 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_CLOSE:
-        tfm_rpc_psa_close(params->psa_close_params.handle, msg_ptr->client_id);
+        client_id = tfm_hal_client_id_translate(NULL, msg_ptr->client_id);
+        if (client_id >= 0) {
+            sync = true;
+        }
+        tfm_rpc_psa_close(params->psa_close_params.handle, client_id);
         break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 

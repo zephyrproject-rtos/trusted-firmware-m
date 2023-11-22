@@ -146,3 +146,10 @@ void tfm_hal_get_ns_access_attr(const void *p, size_t s,
 
     combine_mem_attr(p_attr, &smpu_attr);
 }
+
+int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
+{
+    /* TODO: Implement platform specific client ID translation. */
+    (void)owner;
+    return client_id_in;
+}

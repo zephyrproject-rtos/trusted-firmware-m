@@ -154,3 +154,10 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void)
 
     return initialize_mhu();
 }
+
+int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
+{
+    (void)owner;
+
+    return -client_id_in;
+}

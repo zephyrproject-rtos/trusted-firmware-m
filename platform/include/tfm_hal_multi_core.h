@@ -68,4 +68,15 @@ void tfm_hal_get_secure_access_attr(const void *p, size_t s,
 void tfm_hal_get_ns_access_attr(const void *p, size_t s,
                                 struct mem_attr_info_t *p_attr);
 
+/**
+ * \brief Retrieve the non-secure memory protection configuration information
+ *        and fills the \ref mem_attr_info_t.
+ *
+ * \param[in]  owner               The identifier of the owner for translation
+ * \param[in]  client_id_in        Input client ID
+ *
+ * \return Translated client ID in success. 0 in error.
+ */
+int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in);
+
 #endif /* __TFM_HAL_MULTI_CORE_H__ */

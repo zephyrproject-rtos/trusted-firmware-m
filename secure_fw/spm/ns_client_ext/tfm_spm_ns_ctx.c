@@ -17,15 +17,22 @@
 
 #define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
 
+static int32_t tz_ns_agent_client_id_translate(int32_t client_id_in)
+{
+    /* TODO: Implement the client ID translation for TZ clients. */
+    return client_id_in;
+}
+
 int32_t tfm_nspm_get_current_client_id(void)
 {
+    int32_t input_client_id;
+
 #ifdef TFM_NS_MANAGE_NSID
-    int32_t client_id;
-    client_id = get_nsid_from_active_ns_ctx();
-    return (client_id < 0 ? client_id:TFM_NS_CLIENT_INVALID_ID);
+    input_client_id = get_nsid_from_active_ns_ctx();
 #else
-    return DEFAULT_NS_CLIENT_ID;
+    input_client_id = DEFAULT_NS_CLIENT_ID;
 #endif
+    return tz_ns_agent_client_id_translate(input_client_id);
 }
 
 void tfm_nspm_ctx_init(void)
