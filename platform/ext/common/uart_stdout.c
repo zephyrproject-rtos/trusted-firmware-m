@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited
+ * Copyright (c) 2017-2023 ARM Limited
  *
  * Licensed under the Apace License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ int stdio_output_string(const unsigned char *str, uint32_t len)
 {
     int32_t ret;
 
+    /* Add a busy wait before sending. */
+    while (STDIO_DRIVER.GetStatus().tx_busy);
     ret = STDIO_DRIVER.Send(str, len);
     if (ret != ARM_DRIVER_OK) {
         return 0;
