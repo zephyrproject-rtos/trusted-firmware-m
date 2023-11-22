@@ -55,6 +55,7 @@ int stdio_output_string(const unsigned char *str, uint32_t len)
  * STDIO_DRIVER
  */
 FILE __stdout;
+FILE __stderr;
 /* __ARMCC_VERSION is only defined starting from Arm compiler version 6 */
 int fputc(int ch, FILE *f)
 {
