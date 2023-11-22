@@ -223,8 +223,8 @@ Reference
 
 .. [1] `FF-M v1.0 Specification <https://developer.arm.com/documentation/den0063/latest/>`__
 
-.. [2] `FF-M v1.1 Extention <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`__
+.. [2] `FF-M v1.1 Extension <https://developer.arm.com/documentation/aes0039/latest/>`__
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
