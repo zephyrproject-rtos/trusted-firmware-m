@@ -11,12 +11,17 @@ and includes it to SPE binary.
 Also, test configurations should be passed to SPE build to include building Secure Tests.
 
 To hide these complexities to developers, TF-M implements a wrapper CMake in **tf-m-tests**
-repository to build the SPE for testing rather than building it from the TF-M repository.
+repository [1]_ to build the SPE for testing rather than building it from the TF-M repository.
 
 The recommended tf-m-tests repo commit to verify TF-M can be found at
 ``<TF-M source dir>/lib/ext/tf-m-tests/version.txt``.
 It does not support auto-downloading as builds start from it.
-You need to download it manually before building any tests.
+You need to download it manually before building any tests with the following commands:
+
+.. code-block:: bash
+
+    git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
+    git checkout <recommended tf-m-tests commit>
 
 Regression Tests
 ================
@@ -84,6 +89,12 @@ tests for the Crypto service:
 
     cmake -S . -B build_test -DCONFIG_SPE_PATH=<Absolute path to>/build_spe/api_ns
     cmake --build build_test
+
+*********
+Reference
+*********
+
+.. [1] `tf-m-tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/about/>`__
 
 --------------
 
