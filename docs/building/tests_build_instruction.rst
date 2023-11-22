@@ -67,7 +67,7 @@ TF-M implements a wrapper CMake for PSA API tests as well.
 The PSA API test codes are located under **/tests_psa_arch** folder.
 
 Here is a brief description of the basic flow:
-There are 5 different TEST_PSA_API test suites to be run.
+Select one of the following test suites to be run.
 
 .. code-block:: bash
 
@@ -76,9 +76,13 @@ There are 5 different TEST_PSA_API test suites to be run.
     -DTEST_PSA_API=STORAGE
     -DTEST_PSA_API=CRYPTO
     -DTEST_PSA_API=INITIAL_ATTESTATION
+    -DTEST_PSA_API=IPC
 
-Respectively for the corresponding service. For example, to enable the PSA API
-tests for the Crypto service:
+Respectively for the corresponding service. For detailed information,
+please refer to **PSA Certified APIs Architecture Test Suite** section [2]_
+in the documentation of **psa-arch-tests** repository.
+
+For example, to enable the PSA API tests for the Crypto service:
 
 .. code-block:: bash
 
@@ -95,6 +99,8 @@ Reference
 *********
 
 .. [1] `tf-m-tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/about/>`__
+
+.. [2] `PSA Certified APIs Architecture Test Suite <https://github.com/ARM-software/psa-arch-tests/blob/v23.06_API1.5_ADAC_EAC/api-tests/dev_apis/README.md>`__
 
 --------------
 
