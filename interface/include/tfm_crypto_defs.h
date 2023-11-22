@@ -142,7 +142,7 @@ enum tfm_crypto_group_id {
     X(TFM_CRYPTO_ASYMMETRIC_SIGN_HASH)             \
     X(TFM_CRYPTO_ASYMMETRIC_VERIFY_HASH)
 
-#define AYSMMETRIC_ENCRYPT_FUNCS                   \
+#define ASYMMETRIC_ENCRYPT_FUNCS                   \
     X(TFM_CRYPTO_ASYMMETRIC_ENCRYPT)               \
     X(TFM_CRYPTO_ASYMMETRIC_DECRYPT)
 
@@ -185,7 +185,7 @@ enum tfm_crypto_asym_sign_func_id {
     ASYMMETRIC_SIGN_FUNCS
 };
 enum tfm_crypto_asym_encrypt_func_id {
-    AYSMMETRIC_ENCRYPT_FUNCS
+    ASYMMETRIC_ENCRYPT_FUNCS
 };
 enum tfm_crypto_key_derivation_func_id {
     KEY_DERIVATION_FUNCS
@@ -256,7 +256,7 @@ enum tfm_crypto_func_sid {
 #undef X
 #define X(func_id)      func_id ## _SID = (uint16_t)((FUNC_ID(func_id)) | \
                                      (TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT & 0xFF)),
-    AYSMMETRIC_ENCRYPT_FUNCS
+    ASYMMETRIC_ENCRYPT_FUNCS
 
 #undef X
 #define X(func_id)      func_id ## _SID = (uint16_t)((FUNC_ID(func_id)) | \
