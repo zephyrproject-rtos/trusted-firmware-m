@@ -181,6 +181,7 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
 install(FILES       startup.c
                     nrfx_glue.c
                     pal_plat_test.c
+                    pal_plat_test.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
