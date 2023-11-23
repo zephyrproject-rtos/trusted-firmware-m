@@ -62,7 +62,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
     tfm_sp_ns_agent_tz_load __attribute__((used, section(".part_load_priority_00"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
-        .pid                        = 0,
+        .pid                        = TFM_SP_TZ_AGENT,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
                                     | PARTITION_MODEL_PSA_ROT

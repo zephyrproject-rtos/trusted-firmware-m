@@ -15,8 +15,9 @@
 #include <stdint.h>
 
 /* TF-M internal partition ID */
-#define TFM_SP_IDLE_ID                          (1)
-#define INVALID_PARTITION_ID                    (~0U)
+#define TFM_SP_IDLE                          (1U)
+#define TFM_SP_TZ_AGENT                      (2U)
+#define INVALID_PARTITION_ID                 (0U)
 
 /* Encode a magic number into version for validating partition info */
 #define PARTITION_INFO_VERSION_MASK             (0x0000FFFF)
