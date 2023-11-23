@@ -77,8 +77,7 @@ install(FILES       nrfx_config_nrf5340_application.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf5340
 )
 
-install(DIRECTORY    partition
-                     gcc
+install(DIRECTORY    gcc
                      tests
         DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf5340
 )
