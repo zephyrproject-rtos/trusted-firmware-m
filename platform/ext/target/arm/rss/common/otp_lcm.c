@@ -52,7 +52,10 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
                 uint32_t cca_system_properties;
                 uint32_t rss_id;
+
                 uint32_t scp_data[OTP_SCP_DATA_SIZE / sizeof(uint32_t)];
+
+                uint32_t cm_config_flags;
             } cm_locked;
 
             __PACKED_STRUCT {
@@ -72,6 +75,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t host_rotpk_s[24];
                 uint32_t host_rotpk_ns[24];
                 uint32_t host_rotpk_cca[24];
+
+                uint32_t dm_config_flags;
 
                 __PACKED_STRUCT {
                     uint32_t bl2_encryption_key[8];
@@ -213,6 +218,9 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_SCP_DATA] = USER_AREA_OFFSET(cm_locked.scp_data),
 
     [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
+
+    [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_OFFSET(cm_locked.cm_config_flags),
+    [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_OFFSET(dm_locked.dm_config_flags),
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
@@ -318,6 +326,9 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_SCP_DATA] = USER_AREA_SIZE(cm_locked.scp_data),
 
     [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
+
+    [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_SIZE(cm_locked.cm_config_flags),
+    [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_SIZE(dm_locked.dm_config_flags),
 };
 
 static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
