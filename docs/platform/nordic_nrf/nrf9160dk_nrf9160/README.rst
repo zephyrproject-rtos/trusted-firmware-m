@@ -24,8 +24,6 @@ Building TF-M on nRF9160
 To build an S and NS application image for the nRF9160 run the
 following commands:
 
-    **Note**: On OS X change ``readlink`` to ``greadlink``, available by
-    running ``brew install coreutils``.
 
 .. code:: bash
 
