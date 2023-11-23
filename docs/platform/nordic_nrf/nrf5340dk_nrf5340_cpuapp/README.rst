@@ -133,8 +133,8 @@ Secure UART Console on nRF5340 DK
 **********************************
 
 SECURE_UART1 is enabled by default when building TF-M on nRF5340 DK, so the secure firmware console output
-is available via USART1. To route the USART1 output to one of the serial ports, wire the default USART1 TxD
-and RxD (pins P0.25 and P0.26) to RxD and TxD pins on the DK.
+is available via USART1.
+When using the nRF5340 network MCU make sure to configure different UART pins or disable SECURE_UART1.
 
 Non-Secure console output is available via USART0.
 
