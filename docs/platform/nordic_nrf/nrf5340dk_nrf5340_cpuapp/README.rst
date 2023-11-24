@@ -32,13 +32,17 @@ To build an S and NS application image for the nRF5340 Application MCU run the
 following commands:
 
 
-.. code:: bash
+.. code-block:: bash
 
-    $ mkdir build && cd build
-    $ cmake -DTFM_PLATFORM=nordic_nrf/nrf5340dk_nrf5340_cpuapp \
-            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
-            -G"Unix Makefiles" ../
-    $ make install
+   cmake -S <TF-M base folder> -B build_spe \
+           -DTFM_PLATFORM=nordic_nrf/nrf9160dk_nrf9160 \
+           -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+   cmake --build build_spe -- install
+
+   cmake -S <Application base folder> -B build_app \
+           -DCONFIG_SPE_PATH<Absolute path to TF-M base folder>/build_spe/api_ns
+           -DTFM_TOOLCHAIN_FILE=cmake/toolchain_ns_GNUARM.cmake
+   cmake --build
 
     **Note**: Currently, applications can only be built using GCC
     (GNU ARM Embedded toolchain).
@@ -92,7 +96,8 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   srec_cat install/outputs/NORDIC_NRF/NRF5340DK_NRF5340_CPUAPP/tfm_s_ns_signed.bin -binary --offset=0x10000 -o install/outputs/NORDIC_NRF/NRF5340DK_NRF5340_CPUAPP/tfm_s_ns_signed.hex -intel
+   srec_cat build_app/tfm_s_ns_signed.bin -binary --offset 0x10000 \
+         -o build_app/tfm_s_ns_signed.hex -intel
 
 * Connect the micro-USB cable to the nRF5340 DK and to your computer
 * Erase the flash memory in the nRF5340 IC:
@@ -105,8 +110,8 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --program <sample folder>/install/outputs/NORDIC_NRF/NRF5340DK_NRF5340_CPUAPP/bl2.hex -f nrf53 --sectorerase
-   nrfjprog --program <sample folder>/install/outputs/NORDIC_NRF/NRF5340DK_NRF5340_CPUAPP/tfm_s_ns_signed.hex -f nrf53 --sectorerase
+   nrfjprog --program build_spe/bin/bl2.hex -f nrf91 --sectorerase
+   nrfjprog --program build_app/tfm_s_ns_signed.hex -f nrf91 --sectorerase
 
 * Reset and start TF-M:
 

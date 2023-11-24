@@ -24,14 +24,17 @@ Building TF-M on nRF9160
 To build an S and NS application image for the nRF9160 run the
 following commands:
 
+.. code-block:: bash
 
-.. code:: bash
+   cmake -S <TF-M base folder> -B build_spe \
+           -DTFM_PLATFORM=nordic_nrf/nrf9160dk_nrf9160 \
+           -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+   cmake --build build_spe -- install
 
-    $ mkdir build && cd build
-    $ cmake -DTFM_PLATFORM=nordic_nrf/nrf9160dk_nrf9160 \
-            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
-            ../
-    $ make install
+   cmake -S <Application base folder> -B build_app \
+           -DCONFIG_SPE_PATH<Absolute path to TF-M base folder>/build_spe/api_ns
+           -DTFM_TOOLCHAIN_FILE=cmake/toolchain_ns_GNUARM.cmake
+   cmake --build
 
     **Note**: Currently, applications can only be built using GCC
     (GNU ARM Embedded toolchain).
@@ -85,7 +88,8 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   srec_cat install/outputs/NORDIC_NRF/NRF9160DK_NRF9160/tfm_s_ns_signed.bin -binary --offset=0x10000 -o install/outputs/NORDIC_NRF/NRF9160DK_NRF9160/tfm_s_ns_signed.hex -intel
+   srec_cat build_app/tfm_s_ns_signed.bin -binary --offset 0x10000 \
+         -o build_app/tfm_s_ns_signed.hex -intel
 
 * Connect the micro-USB cable to the nRF9160 DK and to your computer
 * Erase the flash memory in the nRF9160 IC:
@@ -98,8 +102,8 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --program <sample folder>/install/outputs/NORDIC_NRF/NRF9160DK_NRF9160/bl2.hex -f nrf91 --sectorerase
-   nrfjprog --program <sample folder>/install/outputs/NORDIC_NRF/NRF9160DK_NRF9160/tfm_s_ns_signed.hex -f nrf91 --sectorerase
+   nrfjprog --program build_spe/bin/bl2.hex -f nrf91 --sectorerase
+   nrfjprog --program build_app/tfm_s_ns_signed.hex -f nrf91 --sectorerase
 
 * Reset and start TF-M:
 
