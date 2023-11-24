@@ -44,11 +44,13 @@ following commands:
            -DTFM_TOOLCHAIN_FILE=cmake/toolchain_ns_GNUARM.cmake
    cmake --build
 
-    **Note**: Currently, applications can only be built using GCC
-    (GNU ARM Embedded toolchain).
+.. note::
+   Currently, applications can only be built using GCC (GNU ARM Embedded
+   toolchain).
 
-    **Note**: For BL2 (MCUBoot) logging output to be available, the project needs
-    to be built with Debug configuration (CMAKE_BUILD_TYPE=Debug).
+.. note::
+   BL2 (MCUBoot) logging output to be available, the project needs to be built
+   with Debug configuration (CMAKE_BUILD_TYPE=Debug).
 
 Flashing and debugging with Nordic nRF Segger J-Link
 -----------------------------------------------------
@@ -129,7 +131,8 @@ and RxD (pins P0.25 and P0.26) to RxD and TxD pins on the DK.
 
 Non-Secure console output is available via USART0.
 
-    **Note**: By default USART0 and USART1 outputs are routed to separate serial ports.
+.. note::
+   By default USART0 and USART1 outputs are routed to separate serial ports.
 
 .. _nRF Command-Line Tools: https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools
 
