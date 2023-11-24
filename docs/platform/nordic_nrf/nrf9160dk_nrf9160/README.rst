@@ -100,6 +100,13 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
    nrfjprog --eraseall -f nrf91
 
+* (Optionally) Erase the flash memory and reset flash protection and disable
+   the read back protection mechanism if enabled.
+
+.. code-block:: console
+
+   nrfjprog --recover -f nrf91
+
 * Flash the BL2 and TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
