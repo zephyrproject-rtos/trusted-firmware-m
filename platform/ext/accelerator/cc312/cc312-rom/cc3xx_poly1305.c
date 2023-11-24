@@ -72,12 +72,12 @@ void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s)
     poly1305_init_from_state();
 }
 
-static void poly_process_block(const uint32_t *buf, size_t len)
+static void poly_process_block(const uint32_t *buf)
 {
-    cc3xx_pka_write_reg(poly_state.data_input_reg, buf, len);
+    cc3xx_pka_write_reg(poly_state.data_input_reg, buf, POLY1305_BLOCK_SIZE);
 
     /* Set the 129th bit to 1 */
-    cc3xx_pka_set_to_power_of_two(poly_state.mask_reg, len * 8);
+    cc3xx_pka_set_to_power_of_two(poly_state.mask_reg, POLY1305_BLOCK_SIZE * 8);
     cc3xx_pka_or(poly_state.data_input_reg,
                  poly_state.mask_reg, poly_state.data_input_reg);
 
@@ -112,7 +112,7 @@ void cc3xx_poly1305_update(const uint8_t *buf, size_t length)
          * we don't need to keep a block of data around for finalization).
          */
         if (poly_state.block_buf_size_in_use == POLY1305_BLOCK_SIZE) {
-            poly_process_block(poly_state.block_buf, POLY1305_BLOCK_SIZE);
+            poly_process_block(poly_state.block_buf);
             poly_state.block_buf_size_in_use = 0;
         }
     }
@@ -128,7 +128,7 @@ void cc3xx_poly1305_update(const uint8_t *buf, size_t length)
          * buf to fix this.
          */
         memcpy(temp_block, buf, POLY1305_BLOCK_SIZE);
-        poly_process_block(temp_block, POLY1305_BLOCK_SIZE);
+        poly_process_block(temp_block);
         data_to_process_length -= POLY1305_BLOCK_SIZE;
         length -= POLY1305_BLOCK_SIZE;
         buf += POLY1305_BLOCK_SIZE;
@@ -185,7 +185,10 @@ void cc3xx_poly1305_finish(uint32_t *tag)
 {
     /* Flush the final block */
     if (poly_state.block_buf_size_in_use != 0) {
-        poly_process_block(poly_state.block_buf, poly_state.block_buf_size_in_use);
+        /* Zero any unused block */
+        memset(((uint8_t*)poly_state.block_buf) + poly_state.block_buf_size_in_use,
+               0, POLY1305_BLOCK_SIZE - poly_state.block_buf_size_in_use);
+        poly_process_block(poly_state.block_buf);
     }
 
     /* Finally, the tag is a + s */
