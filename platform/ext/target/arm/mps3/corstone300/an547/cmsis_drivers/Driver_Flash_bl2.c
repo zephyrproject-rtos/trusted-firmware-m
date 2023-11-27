@@ -24,11 +24,28 @@
 
 #if (RTE_FLASH0)
 
+static int8_t setup(struct arm_flash_sst26vf064b_flash_dev_t* flash_dev) {
+    if(flash_dev->dev->is_initialized &&
+       (select_qspi_mode(flash_dev->dev->controller) != AXI_QSPI_ERR_NONE)) {
+            return -1;
+    }
+    return 0;
+}
+
+static int8_t release(struct arm_flash_sst26vf064b_flash_dev_t* flash_dev) {
+    enum axi_qspi_error_t ret = select_xip_mode(flash_dev->dev->controller);
+
+    if(ret != AXI_QSPI_ERR_NONE) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
 static struct arm_flash_sst26vf064b_flash_dev_t ARM_FLASH0_DEV = {
     .dev    = &SPI_SST26VF064B_DEV,
     .data   = &SST26VF064B_DEV_DATA,
-    .setup_qspi = NULL,
-    .release_qspi = NULL,
+    .setup_qspi = setup,
+    .release_qspi = release,
     .memory_base_s = QSPI_SRAM_BASE_S,
     .memory_base_ns = QSPI_SRAM_BASE_NS,
 };
