@@ -20,4 +20,7 @@
 /* The stack size of the NS Agent Mailbox Secure Partition */
 #define NS_AGENT_MAILBOX_STACK_SIZE            0x1000
 
+/* Run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
+#define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

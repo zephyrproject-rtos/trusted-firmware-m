@@ -14,4 +14,7 @@
 
 #define NS_AGENT_MAILBOX_STACK_SIZE            0xC00
 
+/* Run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
+#define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
+
 #endif /* __CONFIG_TFM_TARGET_H__ */
