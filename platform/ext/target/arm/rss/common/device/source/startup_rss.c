@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -88,7 +88,7 @@ DEFAULT_IRQ_HANDLER(SAM_Sec_Fault_S_Handler)
 DEFAULT_IRQ_HANDLER(GPIO_Combined_S_Handler)
 DEFAULT_IRQ_HANDLER(SDC_Handler)
 DEFAULT_IRQ_HANDLER(FPU_Handler)
-DEFAULT_IRQ_HANDLER(SRAM_TRAM_ECC_Err_Combined_S_Handler)
+DEFAULT_IRQ_HANDLER(SRAM_TRAM_ECC_Err_S_Handler)
 DEFAULT_IRQ_HANDLER(SIC_S_Handler)
 DEFAULT_IRQ_HANDLER(ATU_S_Handler)
 DEFAULT_IRQ_HANDLER(CMU_MHU0_Sender_Handler)
@@ -112,6 +112,8 @@ DEFAULT_IRQ_HANDLER(CMU_MHU8_Receiver_Handler)
 DEFAULT_IRQ_HANDLER(Crypto_Engine_S_Handler)
 DEFAULT_IRQ_HANDLER(SoC_System_Timer0_AON_Handler)
 DEFAULT_IRQ_HANDLER(SoC_System_Timer1_AON_Handler)
+DEFAULT_IRQ_HANDLER(SRAM_ECC_Partial_Write_S_Handler)
+DEFAULT_IRQ_HANDLER(Integrity_Checker_Handler)
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -124,7 +126,7 @@ DEFAULT_IRQ_HANDLER(SoC_System_Timer1_AON_Handler)
 
 extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
        const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
-  (VECTOR_TABLE_Type)(&__INITIAL_SP),            /*      Initial Stack Pointer */
+  (VECTOR_TABLE_Type)(&__INITIAL_SP), /*     Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
   NMI_Handler,                       /* -14: NMI Handler */
   HardFault_Handler,                 /* -13: Hard Fault Handler */
@@ -180,10 +182,8 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   GPIO_Combined_S_Handler,           /*  34: GPIO Combined (Secure) Handler */
   SDC_Handler,                       /*  35: Secure Debug Channel Handler */
   FPU_Handler,                       /*  36: FPU Exception Handler */
-  SRAM_TRAM_ECC_Err_Combined_S_Handler,
-                                     /*  37: SRAM and TRAM Corrected ECC Error
-                                      *  Combined (Secure) Handler */
-  SIC_S_Handler,                     /*  38: SICache (Secure) Handler */
+  SRAM_TRAM_ECC_Err_S_Handler,       /*  37: SRAM or TRAM Corrected ECC Error (Secure) Handler */
+  SIC_S_Handler,                     /*  38: Secure I-Cache (Secure) Handler */
   ATU_S_Handler,                     /*  39: ATU (Secure) Handler */
   CMU_MHU0_Sender_Handler,           /*  40: CMU MHU 0 Sender Handler */
   CMU_MHU0_Receiver_Handler,         /*  41: CMU MHU 0 Receiver Handler */
@@ -206,6 +206,41 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   Crypto_Engine_S_Handler,           /*  58: Crypto Engine (Secure) Handler */
   SoC_System_Timer0_AON_Handler,     /*  59: SoC System Timer 0 AON Handler */
   SoC_System_Timer1_AON_Handler,     /*  60: SoC System Timer 1 AON Handler */
+  SRAM_ECC_Partial_Write_S_Handler,  /*  61: SRAM ECC Detected Partial Write (Secure) Handler */
+  Integrity_Checker_Handler,         /*  62: Integrity Checker Handler */
+  0,                                 /*  63: Reserved */
+  0,                                 /*  64: Reserved */
+  0,                                 /*  65: Reserved */
+  0,                                 /*  66: Reserved */
+  0,                                 /*  67: Reserved */
+  0,                                 /*  68: Reserved */
+  0,                                 /*  69: Reserved */
+  0,                                 /*  70: Reserved */
+  0,                                 /*  71: Reserved */
+  0,                                 /*  72: Reserved */
+  0,                                 /*  73: Reserved */
+  0,                                 /*  74: Reserved */
+  0,                                 /*  75: Reserved */
+  0,                                 /*  76: Reserved */
+  0,                                 /*  77: Reserved */
+  0,                                 /*  78: Reserved */
+  0,                                 /*  79: Reserved */
+  0,                                 /*  80: Reserved */
+  0,                                 /*  81: Reserved */
+  0,                                 /*  82: Reserved */
+  0,                                 /*  83: Reserved */
+  0,                                 /*  84: Reserved */
+  0,                                 /*  85: Reserved */
+  0,                                 /*  86: Reserved */
+  0,                                 /*  87: Reserved */
+  0,                                 /*  88: Reserved */
+  0,                                 /*  89: Reserved */
+  0,                                 /*  90: Reserved */
+  0,                                 /*  91: Reserved */
+  0,                                 /*  92: Reserved */
+  0,                                 /*  93: Reserved */
+  0,                                 /*  94: Reserved */
+  0,                                 /*  95: Reserved */
 };
 
 #if defined ( __GNUC__ )

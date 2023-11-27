@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ typedef enum _IRQn_Type {
     GPIO_Combined_S_IRQn               = 34,   /* GPIO Combined (Secure) Interrupt */
     SDC_IRQn                           = 35,   /* Secure Debug channel Interrupt */
     FPU_IRQn                           = 36,   /* FPU Exceptions */
-    SRAM_TRAM_ECC_Err_Combined_S_IRQn  = 37,
-    /* SRAM and TRAM Corrected ECC Error Combined (Secure) Interrupt */
-    SIC_S_IRQn                         = 38,   /* SICache (Secure) Interrupt */
+    SRAM_TRAM_ECC_Err_S_IRQn           = 37,
+    /* SRAM or TRAM Corrected ECC Error (Secure) Interrupt */
+    SIC_S_IRQn                         = 38,   /* Secure I-Cache (Secure) Interrupt */
     ATU_S_IRQn                         = 39,   /* ATU (Secure) Interrupt */
     CMU_MHU0_Sender_IRQn               = 40,   /* CMU MHU0 Sender Interrupt */
     CMU_MHU0_Receiver_IRQn             = 41,   /* CMU MHU0 Receiver Interrupt */
@@ -87,7 +87,9 @@ typedef enum _IRQn_Type {
     Crypto_Engine_S_IRQn               = 58,   /* Crypto Engine (Secure) Interrupt */
     SoC_System_Timer0_AON_IRQn         = 59,   /* SoC System Timer 0 AON Interrupt */
     SoC_System_Timer1_AON_IRQn         = 60,   /* SoC System Timer 1 AON Interrupt */
-    /* Reserved                        = 61:95,   Reserved */
+    SRAM_ECC_Partial_Write_S_IRQn      = 61,   /* SRAM ECC Detected Partial Write (Secure) Interrupt */
+    Integrity_Checker_IRQn             = 62,   /* Integrity Checker Interrupt */
+    /* Reserved                        = 63:95,   Reserved */
 } IRQn_Type;
 
 #endif  /* __PLATFORM_IRQ_H__ */
