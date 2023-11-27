@@ -110,35 +110,34 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 {
     AAPCS_DUAL_U32_T sp_info;
-    struct context_ctrl_t      ctxctl;
     struct tfm_state_context_t *p_statctx;
     uint32_t sp = __get_PSP();
     uint32_t sp_limit = tfm_arch_get_psplim();
+    const uint32_t stack_alloc_size = (sizeof(*p_statctx) + 7UL) & ~0x7UL;
 
     saved_psp       = sp;
     saved_psp_limit = sp_limit;
 
-    ctxctl.sp       = sp;
-    ctxctl.sp_limit = sp_limit;
-
     sp_info.u64_val = backend_abi_entering_spm();
     /* SPM SP is saved in R0 */
     if (sp_info.u32_regs.r0 != 0) {
-        ctxctl.sp       = sp_info.u32_regs.r0;
-        ctxctl.sp_limit = sp_info.u32_regs.r1;
+        sp       = sp_info.u32_regs.r0;
+        sp_limit = sp_info.u32_regs.r1;
     }
 
-    ARCH_CTXCTRL_ALLOCATE_STACK(&ctxctl, sizeof(*p_statctx));
-    /* Check if enough space on stack */
-    if (ctxctl.sp < ctxctl.sp_limit) {
+    /* Check if there is enough space on stack. */
+    if ((sp_limit + stack_alloc_size) > sp) {
         tfm_core_panic();
     }
 
-    p_statctx = (struct tfm_state_context_t *)ARCH_CTXCTRL_ALLOCATED_PTR(&ctxctl);
+    /* Allocate memory for p_statctx on the stack. */
+    sp -= stack_alloc_size;
+
+    p_statctx = (struct tfm_state_context_t *)sp;
     ARCH_CTXCTRL_EXCRET_PATTERN(p_statctx, ctx[0], ctx[1], ctx[2], ctx[3],
                                 svc_func, tfm_svc_thread_mode_spm_return);
 
-    arch_update_process_sp(ctxctl.sp, ctxctl.sp_limit);
+    arch_update_process_sp(sp, sp_limit);
 }
 
 static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uint32_t exc_return)
