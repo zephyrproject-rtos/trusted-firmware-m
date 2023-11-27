@@ -74,7 +74,6 @@
 #else
 /* All the other supported signing algorithms use SHA-256 to compute the image hash */
 #define MBEDTLS_SHA256_C
-#define MBEDTLS_SHA224_C
 #endif /* MCUBOOT_SIGN_EC384 */
 
 #ifdef MCUBOOT_SIGN_EC256
