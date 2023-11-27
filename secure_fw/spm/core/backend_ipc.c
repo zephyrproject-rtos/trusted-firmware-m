@@ -20,7 +20,6 @@
 #include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_rpc.h"
 #include "ffm/backend.h"
 #include "utilities.h"
 #include "memory_symbols.h"
@@ -193,7 +192,7 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
      * If it is a NS request via RPC, it is unnecessary to block current
      * thread.
      */
-    if (is_tfm_rpc_msg(p_connection)) {
+    if (tfm_spm_is_rpc_msg(p_connection)) {
         ret = PSA_SUCCESS;
     } else {
         signal = backend_wait_signals(p_connection->p_client, ASYNC_MSG_REPLY);
@@ -211,7 +210,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     struct partition_t *client = handle->p_client;
 
-    if (is_tfm_rpc_msg(handle)) {
+    if (tfm_spm_is_rpc_msg(handle)) {
         /*
          * Add to the list of outstanding responses.
          * Note that we use the partition's p_handles pointer.

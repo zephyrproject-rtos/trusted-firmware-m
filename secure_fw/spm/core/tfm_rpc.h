@@ -17,7 +17,6 @@
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 
-#include <stdbool.h>
 #include <stdint.h>
 #include "cmsis_compiler.h"
 #include "psa/client.h"
@@ -160,39 +159,6 @@ void tfm_rpc_client_call_handler(void);
  */
 void tfm_rpc_client_call_reply(void);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
-
-/*
- * Check if the message was allocated for a non-secure request via RPC
- *
- * \param[in] handle        The connection handle context pointer
- *                          \ref connection_t structures
- *
- * \retval true             The message was allocated for a NS request via RPC.
- * \retval false            Otherwise.
- */
-__STATIC_INLINE bool is_tfm_rpc_msg(const struct connection_t *handle)
-{
-    /*
-     * FIXME
-     * The ID should be smaller than 0 if the message is allocated by a
-     * non-secure caller.
-     * However, current TF-M implementation use 0 as the default non-secure
-     * caller ID. Therefore, treat the caller as non-secure when client_id == 0.
-     *
-     * This condition check should be improved after TF-M non-secure client ID
-     * management is implemented.
-     */
-    if (handle && (handle->client_data) && (handle->msg.client_id <= 0)) {
-        return true;
-    }
-
-    return false;
-}
-
-#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
-
-/* RPC is only available in multi-core scenario */
-#define is_tfm_rpc_msg(x)                       (false)
 
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */

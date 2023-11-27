@@ -28,7 +28,6 @@
 #include "spm.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_nspm.h"
-#include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
 #include "lists.h"
 #include "tfm_pools.h"

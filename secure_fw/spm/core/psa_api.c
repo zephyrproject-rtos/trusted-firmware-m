@@ -25,7 +25,6 @@
 #include "utilities.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
-#include "tfm_rpc.h"
 #include "tfm_hal_platform.h"
 #include "tfm_plat_otp.h"
 #include "tfm_psa_call_pack.h"
@@ -306,7 +305,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * until the response has been collected by the agent.
      */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    if (is_tfm_rpc_msg(handle)) {
+    if (tfm_spm_is_rpc_msg(handle)) {
         return ret;
     }
 #endif

@@ -11,6 +11,7 @@
 #ifndef __SPM_H__
 #define __SPM_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "config_impl.h"
 #include "config_spm.h"
@@ -368,5 +369,31 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
 psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t client_id);
 
 #endif /* #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+
+/*
+ * Check if the message was allocated for a non-secure request via RPC
+ *
+ *  param[in] handle        The connection handle context pointer
+ *                          connection_t structures
+ *
+ *  retval true             The message was allocated for a NS request via RPC.
+ *  retval false            Otherwise.
+ */
+__STATIC_INLINE bool tfm_spm_is_rpc_msg(const struct connection_t *handle)
+{
+    if (handle && (handle->client_data) && (handle->msg.client_id < 0)) {
+        return true;
+    }
+
+    return false;
+}
+#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
+
+/* RPC is only available in multi-core scenario */
+#define tfm_spm_is_rpc_msg(x)                       (false)
+
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 #endif /* __SPM_H__ */
