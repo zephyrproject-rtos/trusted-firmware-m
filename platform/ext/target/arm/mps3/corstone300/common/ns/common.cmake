@@ -79,9 +79,7 @@ target_include_directories(cmsis_includes_ns
 
 target_sources(platform_ns
     PRIVATE
-        ${CORSTONE300_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     INTERFACE
         $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone300_ns_init.c>

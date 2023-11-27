@@ -93,4 +93,12 @@ target_sources(platform_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+    INTERFACE
+        $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone310_ns_init.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${PLATFORM_DIR}/ext/common/test_interrupt.c>
+)
+
+target_compile_definitions(platform_ns
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
 )
