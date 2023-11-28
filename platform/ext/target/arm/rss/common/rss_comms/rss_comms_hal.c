@@ -180,7 +180,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void)
 
 int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
 {
-    if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_DEV) {
+    if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_MONITOR_DEV) {
         return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
                (MHU0_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
                (NS_CLIENT_ID_IDENTIFIER_FLAG_MASK));
