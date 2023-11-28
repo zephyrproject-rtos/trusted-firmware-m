@@ -133,8 +133,8 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     watermark_stack(p_pt);
 
     /*
-     * Built-in partitions have only one thread instance: NS Agent (TZ) and it
-     * needs to be specific cared here.
+     * Built-in partitions have only one thread instance: NS Agent (TZ or Mailbox)
+     * It needs to be specific cared here.
      */
     if (IS_NS_AGENT(p_pldi)) {
         SET_CURRENT_COMPONENT(p_pt);
@@ -153,11 +153,11 @@ uint32_t backend_system_run(void)
 
     pldi = partition->p_ldinf;
 
-    if (!IS_NS_AGENT_TZ(pldi)) {
+    if (!IS_NS_AGENT(pldi)) {
         tfm_core_panic();
     }
 
-    /* NS agent TZ expects NSPE entry point as the parameter */
+    /* NS agent expects NSPE entry point as the parameter */
     param      = (void *)tfm_hal_get_ns_entry_point();
 
     /* Assign stack and stack limit. */
