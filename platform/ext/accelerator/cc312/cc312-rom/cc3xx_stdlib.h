@@ -16,6 +16,16 @@ extern "C" {
 #endif
 
 /**
+ * @brief                        Generate a randomized sequence of integers from
+ *                               0 to len-1 inclusive, in randomized order.
+ *
+ * @param[out] permutation_buf   Destination buffer to copy into. Must be len
+ *                               bytes in length.
+ * @param[in]  len               The size of the sequence to generate.
+ */
+void cc3xx_random_permutation_generate(uint8_t *permutation_buf, size_t len);
+
+/**
  * @brief                        Copy a series of words in a randomised order.
  *                               Intended to be used as a DPA countermeasure
  *                               when copying key materal.
