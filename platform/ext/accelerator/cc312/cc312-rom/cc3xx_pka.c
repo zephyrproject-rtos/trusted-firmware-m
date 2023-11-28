@@ -38,24 +38,25 @@
 #define PKA_PHYS_REG_TEMP_0 30
 #define PKA_PHYS_REG_TEMP_1 31
 
+#define CC3XX_PKA_REG_N_MASK 2
+
 #define CC3XX_PKA_PHYS_REG_AMOUNT 32
-#define PKA_RESERVED_PHYS_REG_AMOUNT 4
-#define PKA_PHYS_REG_FIRST_MAPPABLE (CC3XX_PKA_REG_NP + 1)
-#define PKA_VIRT_REG_FIRST_ALLOCATABLE (CC3XX_PKA_REG_NP + 1)
+#define PKA_RESERVED_PHYS_REG_AMOUNT 5
+#define PKA_PHYS_REG_FIRST_MAPPABLE (CC3XX_PKA_REG_N_MASK + 1)
+#define PKA_PHYS_REG_LAST_MAPPABLE (PKA_PHYS_REG_TEMP_0 - 1)
+#define PKA_VIRT_REG_FIRST_ALLOCATABLE (CC3XX_PKA_REG_N_MASK + 1)
 
 #define CC3XX_PKA_RANDOM_BUF_SIZE 32
+
+#ifdef CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE
+#define CC3XX_ATTRIBUTE_INLINE inline __attribute__((always_inline))
+#else
+#define CC3XX_ATTRIBUTE_INLINE
+#endif
 
 enum pka_op_size_t {
     PKA_OP_SIZE_N = 0,
     PKA_OP_SIZE_REGISTER = 1,
-};
-
-enum pka_arg_mapping_slots_t {
-    PKA_MAPPING_SLOT_R0 = 0,
-    PKA_MAPPING_SLOT_R1,
-    PKA_MAPPING_SLOT_R2,
-    PKA_MAPPING_SLOT_RES,
-    PKA_MAPPING_SLOT_AMOUNT,
 };
 
 /* Where an opcode claims it performs multiple operations, that is achieved by
@@ -98,23 +99,23 @@ enum cc3xx_pka_operation_t {
  * reasonable approach.
  */
 static uint32_t pka_reg_am_max;
-struct {
-    bool in_use;
-    bool is_mapped;
-    uint32_t phys_reg;
-    uint32_t sram_addr;
-} virt_regs[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
-
-cc3xx_pka_reg_id_t phys_reg_mapping[CC3XX_PKA_PHYS_REG_AMOUNT];
 uint32_t phys_reg_next_mapped;
-
-/* So we can prevent arguments in the same call taking each others' physical
- * registers.
- */
-static cc3xx_pka_reg_id_t arg_mapping_slots[PKA_MAPPING_SLOT_AMOUNT];
+static uint32_t virt_reg_sram_addr[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+#ifdef CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE
+static uint32_t virt_reg_in_use[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static uint32_t virt_reg_is_mapped[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static uint32_t virt_reg_needs_n_mask[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static uint32_t virt_reg_phys_reg[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static uint32_t phys_reg_mapping_list[CC3XX_PKA_PHYS_REG_AMOUNT];
+#else
+static bool virt_reg_in_use[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static bool virt_reg_is_mapped[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static bool virt_reg_needs_n_mask[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static uint8_t virt_reg_phys_reg[CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT];
+static cc3xx_pka_reg_id_t phys_reg_mapping_list[CC3XX_PKA_PHYS_REG_AMOUNT];
+#endif /* CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE */
 
 static struct cc3xx_pka_state_t pka_state;
-
 
 static inline uint32_t pka_addr_from_byte_addr(uint32_t offset)
 {
@@ -125,6 +126,33 @@ static inline uint32_t pad_to_pka_word_size(uint32_t byte_size)
 {
     /* round up to the nearest PKA word */
     return (((byte_size + PKA_WORD_SIZE - 1) / PKA_WORD_SIZE) * PKA_WORD_SIZE);
+}
+
+void cc3xx_pka_unmap_physical_registers(void)
+{
+    uint32_t idx;
+    cc3xx_pka_reg_id_t virt_reg;
+
+    /* Wait for the pipeline to finish */
+    while(!P_CC3XX->pka.pka_done){}
+
+    for (idx = PKA_PHYS_REG_FIRST_MAPPABLE; idx <= PKA_PHYS_REG_LAST_MAPPABLE; idx++) {
+        virt_reg = phys_reg_mapping_list[idx];
+        if (virt_reg != 0 && virt_reg_is_mapped[virt_reg]) {
+            virt_reg_sram_addr[virt_reg] = P_CC3XX->pka.memory_map[idx];
+            virt_reg_phys_reg[virt_reg] = 0;
+            virt_reg_is_mapped[virt_reg] = false;
+        }
+
+    }
+
+    memset(phys_reg_mapping_list, 0, sizeof(phys_reg_mapping_list));
+
+    for (idx = 0; idx < PKA_PHYS_REG_FIRST_MAPPABLE; idx++) {
+        phys_reg_mapping_list[idx] = idx;
+    }
+
+    phys_reg_next_mapped = PKA_PHYS_REG_FIRST_MAPPABLE;
 }
 
 static void pka_init_from_state(void)
@@ -153,23 +181,26 @@ static void pka_init_from_state(void)
     assert(pka_reg_am_max > 4);
 
     /* Unmap all the physical registers */
-    phys_reg_next_mapped = PKA_PHYS_REG_FIRST_MAPPABLE;
+    cc3xx_pka_unmap_physical_registers();
 
-    /* Set up the first two regions as N and Np. These are special, so map them
-     * now.
+    /* Set up the first three regions as N and Np, and N_mask. These are
+     * special, so map them now.
      */
     for (idx = 0; idx < PKA_PHYS_REG_FIRST_MAPPABLE; idx++) {
-        virt_regs[idx].is_mapped = true;
-        virt_regs[idx].phys_reg = idx;
-        phys_reg_mapping[idx] = idx;
+        virt_reg_is_mapped[idx] = true;
+        virt_reg_phys_reg[idx] = idx;
         P_CC3XX->pka.memory_map[idx] =
+            pka_addr_from_byte_addr(pka_state.reg_size * idx);
+        virt_reg_sram_addr[idx] =
             pka_addr_from_byte_addr(pka_state.reg_size * idx);
     }
 
     /* Then reserve all but two regions for the general purpose registers */
     for (; idx < pka_reg_am_max - 2; idx++) {
-        virt_regs[idx].sram_addr =
+        virt_reg_sram_addr[idx] =
             pka_addr_from_byte_addr(pka_state.reg_size * idx);
+        virt_reg_is_mapped[idx] = 0;
+        virt_reg_phys_reg[idx] = 0;
     }
 
     P_CC3XX->pka.memory_map[PKA_PHYS_REG_TEMP_0] =
@@ -204,117 +235,64 @@ void cc3xx_pka_init(uint32_t size)
     /* Calculate the register size based on the requested operation size + the
      * size by which operations can overflow */
     pka_state.reg_size = pad_to_pka_word_size(size + PKA_MAX_OVERFLOW_SIZE);
+    pka_state.virt_reg_next_mapped = PKA_VIRT_REG_FIRST_ALLOCATABLE;
 
     pka_init_from_state();
 }
 
-static void allocate_phys_reg(cc3xx_pka_reg_id_t virt_reg,
-                              enum pka_arg_mapping_slots_t slot)
+static void allocate_phys_reg(cc3xx_pka_reg_id_t virt_reg)
 {
     uint32_t phys_reg;
-    cc3xx_pka_reg_id_t old_virt_reg;
 
-    assert(virt_reg <= pka_reg_am_max);
+    assert(phys_reg_next_mapped <= PKA_PHYS_REG_LAST_MAPPABLE);
+    assert(phys_reg_mapping_list[PKA_PHYS_REG_TEMP_0] == 0);
+    assert(phys_reg_mapping_list[PKA_PHYS_REG_TEMP_1] == 0);
 
-    /* Wait for outstanding operations to finish before remapping registers */
+    phys_reg = phys_reg_next_mapped;
+    phys_reg_next_mapped += 1;
+
+    while(!P_CC3XX->pka.pka_done) {}
+    P_CC3XX->pka.memory_map[phys_reg] = virt_reg_sram_addr[virt_reg];
     while(!P_CC3XX->pka.pka_done) {}
 
-    /* Check we aren't taking a reg which is being used in this function
-     * call. If we are, then just skip it, since we have a large amount of
-     * physical registers and only a small amount of arguments.
-     */
-    do {
-        phys_reg = phys_reg_next_mapped++;
-
-        if (phys_reg_next_mapped == PKA_PHYS_REG_TEMP_0) {
-            phys_reg_next_mapped = PKA_PHYS_REG_FIRST_MAPPABLE;
-        }
-
-        old_virt_reg = phys_reg_mapping[phys_reg];
-    } while (phys_reg == arg_mapping_slots[PKA_MAPPING_SLOT_R0] ||
-             phys_reg == arg_mapping_slots[PKA_MAPPING_SLOT_R1] ||
-             phys_reg == arg_mapping_slots[PKA_MAPPING_SLOT_R2] ||
-             phys_reg == arg_mapping_slots[PKA_MAPPING_SLOT_RES]);
-    arg_mapping_slots[slot] = phys_reg;
-
-    assert(virt_reg != CC3XX_PKA_REG_N);
-    assert(virt_reg != CC3XX_PKA_REG_NP);
-    assert(old_virt_reg != CC3XX_PKA_REG_NP);
-    assert(phys_reg != CC3XX_PKA_REG_N);
-    assert(phys_reg != CC3XX_PKA_REG_NP);
-
-    if (old_virt_reg != 0) {
-        /* If this register was previously mapped, update the virtual register.
-         * Note that no physical register except 0 can be mapped to virtual
-         * address 0, and the next mappable physical register can never be 0,
-         * so this check catches uninitialised physical registers only.
-         * Since the physical registers here are actually hardware virtual
-         * registers, it's important to actually update the SRAM address as it
-         * might have been swapped.
-         */
-        virt_regs[old_virt_reg].sram_addr = P_CC3XX->pka.memory_map[phys_reg];
-        virt_regs[old_virt_reg].is_mapped = false;
-    }
-
-    /* Since the physical registers here are actually hardware virtual
-     * registers, it's important to actually update the SRAM address as it might
-     * have been swapped.
-     */
-    P_CC3XX->pka.memory_map[phys_reg] = virt_regs[virt_reg].sram_addr;
-    while(!P_CC3XX->pka.pka_done) {}
-
-    virt_regs[virt_reg].is_mapped = true;
-    virt_regs[virt_reg].phys_reg = phys_reg;
-    phys_reg_mapping[phys_reg] = virt_reg;
-}
-
-static cc3xx_pka_reg_id_t allocate_virt_reg(void)
-{
-    cc3xx_pka_reg_id_t reg_id = 0;
-    size_t idx;
-
-    for (idx = PKA_VIRT_REG_FIRST_ALLOCATABLE; idx < pka_reg_am_max; idx++) {
-        if (!virt_regs[idx].in_use) {
-            reg_id = idx;
-            break;
-        }
-    }
-
-    assert(idx != pka_reg_am_max);
-    assert(reg_id != 0);
-
-    virt_regs[idx].in_use = true;
-
-    cc3xx_pka_clear(reg_id);
-
-    return reg_id;
+    phys_reg_mapping_list[phys_reg] = virt_reg;
+    virt_reg_is_mapped[virt_reg] = true;
+    virt_reg_phys_reg[virt_reg] = phys_reg;
 }
 
 cc3xx_pka_reg_id_t cc3xx_pka_allocate_reg(void)
 {
-    /* We allocate virtual registers to the outside world, but this is an
-     * implementation detail so we don't mention this in the function name
-     */
-    return allocate_virt_reg();
+    cc3xx_pka_reg_id_t reg_id = 0;
+
+    reg_id = pka_state.virt_reg_next_mapped;
+    assert(reg_id != pka_reg_am_max);
+
+    pka_state.virt_reg_next_mapped += 1;
+
+    virt_reg_in_use[reg_id] = true;
+
+    return reg_id;
 }
 
+/* To make this faster, it's only possible to free the most recently allocated
+ * register. Register freeing must match this pattern.
+ */
 void cc3xx_pka_free_reg(cc3xx_pka_reg_id_t reg_id)
 {
-    assert(reg_id <= pka_reg_am_max);
-    assert(virt_regs[reg_id].in_use);
+    assert(reg_id == pka_state.virt_reg_next_mapped - 1);
+    assert(virt_reg_in_use[reg_id]);
 
-    virt_regs[reg_id].in_use = false;
+    pka_state.virt_reg_next_mapped -= 1;
+
+    virt_reg_in_use[reg_id] = false;
 }
 
-static void ensure_virt_reg_is_mapped(cc3xx_pka_reg_id_t reg_id,
-                                      enum pka_arg_mapping_slots_t slot)
+static void CC3XX_ATTRIBUTE_INLINE ensure_virt_reg_is_mapped(cc3xx_pka_reg_id_t reg_id)
 {
     assert(reg_id <= pka_reg_am_max);
 
-    if (virt_regs[reg_id].is_mapped) {
-        arg_mapping_slots[slot] = virt_regs[reg_id].phys_reg;
-    } else {
-        allocate_phys_reg(reg_id, slot);
+    if (!virt_reg_is_mapped[reg_id]) {
+        allocate_phys_reg(reg_id);
     }
 }
 
@@ -331,19 +309,22 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
 
     /* Check slot */
     assert(reg_id < pka_reg_am_max);
-    assert(virt_regs[reg_id].in_use);
+    assert(virt_reg_in_use[reg_id]);
     assert(len <= pka_state.reg_size);
 
+    /* clear the register, so we don't have to explicitly write the upper words
+     */
+    cc3xx_pka_clear(reg_id);
 
     /* Make sure we have a physical register mapped for the virtual register */
-    ensure_virt_reg_is_mapped(reg_id, PKA_MAPPING_SLOT_RES);
+    ensure_virt_reg_is_mapped(reg_id);
 
     /* Wait for any outstanding operations to finish before performing reads or
      * writes on the PKA SRAM
      */
     while(!P_CC3XX->pka.pka_done) {}
     P_CC3XX->pka.pka_sram_addr =
-        P_CC3XX->pka.memory_map[virt_regs[reg_id].phys_reg];
+        P_CC3XX->pka.memory_map[virt_reg_phys_reg[reg_id]];
     while(!P_CC3XX->pka.pka_done) {}
 
     /* Write data */
@@ -352,13 +333,6 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
                                                   : data[idx];
         while(!P_CC3XX->pka.pka_done) {}
     }
-
-    /* Zero the rest of the register */
-    for (; idx < pka_state.reg_size / sizeof(uint32_t); idx++) {
-        P_CC3XX->pka.pka_sram_wdata = 0;
-        while(!P_CC3XX->pka.pka_done) {}
-    }
-
 }
 
 void cc3xx_pka_write_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
@@ -384,11 +358,11 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
 
     /* Check slot */
     assert(reg_id < pka_reg_am_max);
-    assert(virt_regs[reg_id].in_use);
+    assert(virt_reg_in_use[reg_id]);
     assert(len <= pka_state.reg_size);
 
     /* Make sure we have a physical register mapped for the virtual register */
-    ensure_virt_reg_is_mapped(reg_id, PKA_MAPPING_SLOT_RES);
+    ensure_virt_reg_is_mapped(reg_id);
 
     /* The PKA registers can be remapped by the hardware (by swapping value
      * values of the memory_map registers), so we need to read the memory_map
@@ -396,7 +370,7 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
      */
     while(!P_CC3XX->pka.pka_done) {}
     P_CC3XX->pka.pka_sram_raddr =
-        P_CC3XX->pka.memory_map[virt_regs[reg_id].phys_reg];
+        P_CC3XX->pka.memory_map[virt_reg_phys_reg[reg_id]];
     while(!P_CC3XX->pka.pka_done) {}
 
     /* Read data */
@@ -412,13 +386,11 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
 void cc3xx_pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
 {
     pka_read_reg(reg_id, data, len, false);
-
 }
 
 void cc3xx_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
 {
     pka_read_reg(reg_id, (uint32_t *)data, len, true);
-
 }
 
 /* Calculate the Barrett Tag (https://en.wikipedia.org/wiki/Barrett_reduction)
@@ -451,11 +423,9 @@ static inline void calc_Np(void)
         power = PKA_MAX_OVERFLOW_BIT_SIZE * 3 - 1;
         cc3xx_pka_set_to_power_of_two(reg_temp_0, power);
 
+        /* Divide N by 2^(N_bit_size - 2 * PKA_MAX_OVERFLOW_BIT_SIZE) */
         power = N_bit_size - 2 * PKA_MAX_OVERFLOW_BIT_SIZE;
-        cc3xx_pka_set_to_power_of_two(reg_temp_1, power);
-
-        /* Use Np reg to hold unneeded remainder, to save an allocation */
-        cc3xx_pka_div(CC3XX_PKA_REG_N, reg_temp_1, reg_temp_1, CC3XX_PKA_REG_NP);
+        cc3xx_pka_shift_right_fill_0_ui(CC3XX_PKA_REG_N, power, reg_temp_1);
 
         /* Ceiling */
         cc3xx_pka_add_si(reg_temp_1, 1, reg_temp_1);
@@ -469,30 +439,45 @@ static inline void calc_Np(void)
         cc3xx_pka_div(reg_temp_0, CC3XX_PKA_REG_N, CC3XX_PKA_REG_NP, reg_temp_1);
     }
 
-    cc3xx_pka_free_reg(reg_temp_0);
     cc3xx_pka_free_reg(reg_temp_1);
+    cc3xx_pka_free_reg(reg_temp_0);
 }
 
-void cc3xx_pka_set_modulus(const uint32_t *N, size_t N_len,
-                           const uint32_t *Np, size_t Np_len)
+void cc3xx_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
+                           cc3xx_pka_reg_id_t barrett_tag)
 {
-    assert(N != NULL);
-    assert(N_len <= pka_state.reg_size);
+    uint32_t N_bit_size;
 
-    virt_regs[CC3XX_PKA_REG_N].in_use = true;
-    cc3xx_pka_write_reg(CC3XX_PKA_REG_N, N, N_len);
+    assert(modulus < pka_reg_am_max);
+    assert(virt_reg_in_use[modulus]);
+
+    virt_reg_in_use[CC3XX_PKA_REG_N] = true;
+    cc3xx_pka_copy(modulus, CC3XX_PKA_REG_N);
 
     /* This operation size must correspond exactly to the bit-size of the
      * modulus, so a bit-counting operation is performed.
      */
-    P_CC3XX->pka.pka_l[PKA_OP_SIZE_N] = cc3xx_pka_get_bit_size(CC3XX_PKA_REG_N);
+    N_bit_size = cc3xx_pka_get_bit_size(CC3XX_PKA_REG_N);
+    P_CC3XX->pka.pka_l[PKA_OP_SIZE_N] = N_bit_size;
 
-    virt_regs[CC3XX_PKA_REG_NP].in_use = true;
-    if (Np != NULL) {
-        assert(Np_len <= pka_state.reg_size);
-        cc3xx_pka_write_reg(CC3XX_PKA_REG_NP, Np, Np_len);
-    } else {
+    virt_reg_in_use[CC3XX_PKA_REG_N_MASK] = true;
+    cc3xx_pka_set_to_power_of_two(CC3XX_PKA_REG_N_MASK, N_bit_size);
+    cc3xx_pka_sub_si(CC3XX_PKA_REG_N_MASK, 1, CC3XX_PKA_REG_N_MASK);
+
+#ifndef CC3XX_CONFIG_PKA_CALC_NP_ENABLE
+    assert(!calculate_tag);
+#endif /* !CC3XX_CONFIG_PKA_CALC_NP_ENABLE */
+
+    virt_reg_in_use[CC3XX_PKA_REG_NP] = true;
+    if (calculate_tag) {
+#ifdef CC3XX_CONFIG_PKA_CALC_NP_ENABLE
         calc_Np();
+#endif /* CC3XX_CONFIG_PKA_CALC_NP_ENABLE */
+    } else {
+        assert(barrett_tag < pka_reg_am_max);
+        assert(virt_reg_in_use[barrett_tag]);
+
+        cc3xx_pka_copy(barrett_tag, CC3XX_PKA_REG_NP);
     }
 }
 
@@ -509,7 +494,7 @@ void cc3xx_pka_get_state(struct cc3xx_pka_state_t *state, uint32_t save_reg_am,
     for (idx = 0; idx < save_reg_am; idx++) {
         reg_id = save_reg_list[idx];
         assert(reg_id < pka_reg_am_max);
-        assert(virt_regs[reg_id].in_use);
+        assert(virt_reg_in_use[reg_id]);
 
         cc3xx_pka_read_reg(reg_id, save_reg_ptr_list[idx], save_reg_size_list[idx]);
     }
@@ -530,7 +515,7 @@ void cc3xx_pka_set_state(const struct cc3xx_pka_state_t *state,
     for (idx = 0; idx < load_reg_am; idx++) {
         reg_id = load_reg_list[idx];
         assert(reg_id < pka_reg_am_max);
-        assert(virt_regs[reg_id].in_use);
+        assert(virt_reg_in_use[reg_id]);
 
         cc3xx_pka_write_reg(reg_id, load_reg_ptr_list[idx], load_reg_size_list[idx]);
     }
@@ -539,18 +524,22 @@ void cc3xx_pka_set_state(const struct cc3xx_pka_state_t *state,
 void cc3xx_pka_uninit(void)
 {
     memset(&pka_state, 0, sizeof(pka_state));
-    memset(virt_regs, 0, sizeof(virt_regs));
-    memset(phys_reg_mapping, 0, sizeof(phys_reg_mapping));
-    memset(arg_mapping_slots, 0, sizeof(arg_mapping_slots));
+    memset(virt_reg_in_use, 0, sizeof(virt_reg_in_use));
+    memset(virt_reg_is_mapped, 0, sizeof(virt_reg_is_mapped));
+    memset(virt_reg_phys_reg, 0, sizeof(virt_reg_phys_reg));
+    memset(virt_reg_sram_addr, 0, sizeof(virt_reg_sram_addr));
+    memset(virt_reg_needs_n_mask, 0, sizeof(virt_reg_needs_n_mask));
+    memset(phys_reg_mapping_list, 0, sizeof(phys_reg_mapping_list));
+    phys_reg_next_mapped = 0;
 
     P_CC3XX->misc.pka_clk_enable = 0;
 }
 
-static uint32_t opcode_construct(enum cc3xx_pka_operation_t op,
-                                 enum pka_op_size_t size,
-                                 bool r0_is_immediate, uint32_t r0,
-                                 bool r1_is_immediate, uint32_t r1,
-                                 bool discard_result, uint32_t res)
+static uint32_t CC3XX_ATTRIBUTE_INLINE opcode_construct(enum cc3xx_pka_operation_t op,
+                                                        enum pka_op_size_t size,
+                                                        bool r0_is_immediate, uint32_t r0,
+                                                        bool r1_is_immediate, uint32_t r1,
+                                                        bool discard_result, uint32_t res)
 {
     uint32_t opcode = 0;
 
@@ -570,10 +559,10 @@ static uint32_t opcode_construct(enum cc3xx_pka_operation_t op,
     if (!discard_result) {
         assert(res >= 0);
         assert(res < pka_reg_am_max);
-        assert(virt_regs[res].in_use);
+        assert(virt_reg_in_use[res]);
         /* Make sure we have a physical register mapped for the virtual register */
-        ensure_virt_reg_is_mapped(res, PKA_MAPPING_SLOT_RES);
-        opcode |= (virt_regs[res].phys_reg & 0b11111) << 6;
+        ensure_virt_reg_is_mapped(res);
+        opcode |= (virt_reg_phys_reg[res] & 0b11111) << 6;
     } else {
         opcode |= (discard_result & 0b1) << 11;
     }
@@ -589,10 +578,18 @@ static uint32_t opcode_construct(enum cc3xx_pka_operation_t op,
     } else {
         assert(r1 >= 0);
         assert(r1 < pka_reg_am_max);
-        assert(virt_regs[r1].in_use);
+        assert(virt_reg_in_use[r1]);
         /* Make sure we have a physical register mapped for the virtual register */
-        ensure_virt_reg_is_mapped(r1, PKA_MAPPING_SLOT_R1);
-        opcode |= (virt_regs[r1].phys_reg & 0b11111) << 12;
+        ensure_virt_reg_is_mapped(r1);
+        opcode |= (virt_reg_phys_reg[r1] & 0b11111) << 12;
+    }
+
+    /* For unclear reasons, the immediate (shift amount) for shift opcodes
+     * doesn't use the upper bit to denote that it isn't a register.
+     * Possibly because this opcode doesn't support register input?
+     */
+    if (op >= CC3XX_PKA_OPCODE_SHR0 && op <= CC3XX_PKA_OPCODE_SHL1) {
+        opcode &= ~(0b1 << 17);
     }
 
     /* The top bit of the REG_B field is a toggle between being a register ID
@@ -606,10 +603,31 @@ static uint32_t opcode_construct(enum cc3xx_pka_operation_t op,
     } else {
         assert(r0 >= 0);
         assert(r0 <= pka_reg_am_max);
-        assert(virt_regs[r0].in_use);
+        assert(virt_reg_in_use[r0]);
         /* Make sure we have a physical register mapped for the virtual register */
-        ensure_virt_reg_is_mapped(r0, PKA_MAPPING_SLOT_R0);
-        opcode |= (virt_regs[r0].phys_reg & 0b11111) << 18;
+        ensure_virt_reg_is_mapped(r0);
+        opcode |= (virt_reg_phys_reg[r0] & 0b11111) << 18;
+    }
+
+    if (!r0_is_immediate) {
+        assert(virt_reg_is_mapped[r0]);
+    }
+
+    if (!r1_is_immediate) {
+        assert(virt_reg_is_mapped[r1]);
+        if (!r0_is_immediate && r0 != r1) {
+            assert(virt_reg_phys_reg[r1] != virt_reg_phys_reg[r0]);
+        }
+    }
+
+    if (!discard_result) {
+        assert(virt_reg_is_mapped[res]);
+        if (!r0_is_immediate && r0 != res) {
+            assert(virt_reg_phys_reg[res] != virt_reg_phys_reg[r0]);
+        }
+        if (!r1_is_immediate && r1 != res) {
+            assert(virt_reg_phys_reg[res] != virt_reg_phys_reg[r1]);
+        }
     }
 
     /* Select which of the pka_l register is used for the bit-length of the
@@ -620,6 +638,11 @@ static uint32_t opcode_construct(enum cc3xx_pka_operation_t op,
     /* Set the actual operation */
     opcode |= (op & 0b11111) << 27;
 
+    /* Wait for a pipeline slot to be free before submitting this operation.
+     * Note that the previous operations may still be in progress at this point.
+     */
+    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+
     return opcode;
 }
 
@@ -628,7 +651,7 @@ uint32_t cc3xx_pka_get_bit_size(cc3xx_pka_reg_id_t r0)
     int32_t idx;
     uint32_t word;
 
-    ensure_virt_reg_is_mapped(r0, PKA_MAPPING_SLOT_R0);
+    ensure_virt_reg_is_mapped(r0);
 
     /* This isn't an operation that can use the PKA pipeline, so we need to wait
      * for the pipeline to be finished before reading the SRAM.
@@ -638,7 +661,7 @@ uint32_t cc3xx_pka_get_bit_size(cc3xx_pka_reg_id_t r0)
     for (idx = pka_state.reg_size - sizeof(uint32_t); idx >= 0;
         idx -= sizeof(uint32_t)) {
         P_CC3XX->pka.pka_sram_raddr =
-            P_CC3XX->pka.memory_map[virt_regs[r0].phys_reg] +
+            P_CC3XX->pka.memory_map[virt_reg_phys_reg[r0]] +
             pka_addr_from_byte_addr(idx);
         while(!P_CC3XX->pka.pka_done) {}
 
@@ -663,7 +686,7 @@ void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
 
     cc3xx_pka_clear(r0);
 
-    ensure_virt_reg_is_mapped(r0, PKA_MAPPING_SLOT_R0);
+    ensure_virt_reg_is_mapped(r0);
 
     /* This isn't an operation that can use the PKA pipeline, so we need to wait
      * for the pipeline to be finished before reading the SRAM.
@@ -671,7 +694,7 @@ void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
     while(!P_CC3XX->pka.pka_done) {}
 
     P_CC3XX->pka.pka_sram_addr =
-        P_CC3XX->pka.memory_map[virt_regs[r0].phys_reg] + word_offset;
+        P_CC3XX->pka.memory_map[virt_reg_phys_reg[r0]] + word_offset;
     while(!P_CC3XX->pka.pka_done) {}
 
     P_CC3XX->pka.pka_sram_wdata = final_word;
@@ -679,17 +702,41 @@ void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
 }
 
 #ifdef CC3XX_CONFIG_RNG_ENABLE
-cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0)
+cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_len)
 {
-    uint32_t random_buf[pka_state.reg_size / sizeof(uint32_t)];
+    uint32_t byte_size = (bit_len + 7) / 8;
+    uint32_t word_size = (byte_size + 3) / sizeof(uint32_t);
+    uint32_t random_buf[word_size];
     cc3xx_err_t err;
 
-    err = cc3xx_rng_get_random((uint8_t*)random_buf, sizeof(random_buf));
+    err = cc3xx_rng_get_random((uint8_t*)random_buf, word_size * sizeof(uint32_t));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
+    /* Take off any extra bits */
+    random_buf[word_size - 1] = random_buf[word_size - 1] >> (32 - (bit_len % 32));
+
     cc3xx_pka_write_reg(r0, random_buf, sizeof(random_buf));
+
+    return CC3XX_ERR_SUCCESS;
+}
+
+cc3xx_err_t cc3xx_pka_set_to_random_within_modulus(cc3xx_pka_reg_id_t r0)
+{
+    cc3xx_err_t err;
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
+
+    do {
+        /* This uses the simple discard method from SP800-90A, because the modular
+         * methods are impractical due to the pka_reduce function not working for
+         * numbers significantly greater than OP_SIZE_N.
+         */
+        err = cc3xx_pka_set_to_random(r0, P_CC3XX->pka.pka_l[PKA_OP_SIZE_N]);
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
+    } while (!cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
 
     return CC3XX_ERR_SUCCESS;
 }
@@ -697,8 +744,6 @@ cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0)
 
 void cc3xx_pka_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_ADD_INC,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -709,11 +754,6 @@ void cc3xx_pka_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_ADD_INC,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, imm, false, res);
@@ -721,11 +761,6 @@ void cc3xx_pka_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
 
 void cc3xx_pka_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -736,11 +771,6 @@ void cc3xx_pka_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, imm, false, res);
@@ -748,11 +778,6 @@ void cc3xx_pka_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
 
 void cc3xx_pka_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            true, 0, false, r0, false, res);
@@ -760,14 +785,9 @@ void cc3xx_pka_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 
 void cc3xx_pka_mod_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODADD_MODINC,
                                            PKA_OP_SIZE_REGISTER,
@@ -776,18 +796,13 @@ void cc3xx_pka_mod_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
 
 void cc3xx_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODADD_MODINC,
                                            PKA_OP_SIZE_REGISTER,
@@ -796,14 +811,9 @@ void cc3xx_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
 
 void cc3xx_pka_mod_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
@@ -812,18 +822,13 @@ void cc3xx_pka_mod_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
 
 void cc3xx_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
@@ -832,13 +837,8 @@ void cc3xx_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
 
 void cc3xx_pka_mod_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
@@ -847,11 +847,6 @@ void cc3xx_pka_mod_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 
 void cc3xx_pka_and(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -861,47 +856,38 @@ void cc3xx_pka_and_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t r
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, mask, false, res);
 }
 
-bool cc3xx_pka_test_bit(cc3xx_pka_reg_id_t r0, uint32_t idx)
+uint32_t cc3xx_pka_test_bits_ui(cc3xx_pka_reg_id_t r0, uint32_t idx, uint32_t bit_am)
 {
-    assert((0x1 << idx) <= PKA_MAX_UNSIGNED_IMMEDIATE);
+    uint32_t bits;
+    uint32_t word_offset = idx / (8 * sizeof(uint32_t));
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    assert(bit_am <= 4);
+    /* This prevents us from needing to read two words */
+    assert(idx % bit_am == 0);
 
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
-                                           PKA_OP_SIZE_REGISTER,
-                                           false, r0, true, 0x1 << idx, true, 0);
+    ensure_virt_reg_is_mapped(r0);
 
-    /* We need the pipeline to finish before we read the status register for the
-     * result.
-     */
+    while(!P_CC3XX->pka.pka_done) {}
+    P_CC3XX->pka.pka_sram_raddr =
+        P_CC3XX->pka.memory_map[virt_reg_phys_reg[r0]] + word_offset;
+    while(!P_CC3XX->pka.pka_done) {}
+
+    bits = (P_CC3XX->pka.pka_sram_rdata >> (idx % 32)) & ((1 << bit_am) - 1);
     while(!P_CC3XX->pka.pka_done) {}
 
     /* Return the inverted value of ALU_OUT_ZERO */
-    return !(P_CC3XX->pka.pka_status & (0b1 << 12));
+    return bits;
 }
 
 void cc3xx_pka_clear_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
 {
     /* Check that we can construct the required mask */
     assert((0x1 << idx) <= PKA_MAX_UNSIGNED_IMMEDIATE);
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
@@ -910,11 +896,6 @@ void cc3xx_pka_clear_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t
 
 void cc3xx_pka_clear(cc3xx_pka_reg_id_t r0)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 0, false, r0);
@@ -922,11 +903,6 @@ void cc3xx_pka_clear(cc3xx_pka_reg_id_t r0)
 
 void cc3xx_pka_or(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_OR_COPY_SET0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -936,11 +912,6 @@ void cc3xx_pka_or_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t re
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_OR_COPY_SET0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, mask, false, res);
@@ -948,11 +919,6 @@ void cc3xx_pka_or_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t re
 
 void cc3xx_pka_copy(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_OR_COPY_SET0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 0, false, res);
@@ -962,11 +928,6 @@ void cc3xx_pka_set_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t r
 {
     assert(idx < 32);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 1 << idx, false, res);
@@ -974,11 +935,6 @@ void cc3xx_pka_set_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t r
 
 void cc3xx_pka_xor(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -987,11 +943,6 @@ void cc3xx_pka_xor(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
 void cc3xx_pka_xor_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
@@ -1002,11 +953,6 @@ void cc3xx_pka_flip_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t 
 {
     assert(idx < 32);
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 1 << idx, false, res);
@@ -1014,14 +960,10 @@ void cc3xx_pka_flip_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t 
 
 bool cc3xx_pka_are_equal(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, true, 0);
+
 
     /* We need the pipeline to finish before we read the status register for the
      * result.
@@ -1034,14 +976,10 @@ bool cc3xx_pka_are_equal(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 
 bool cc3xx_pka_are_equal_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, imm, true, 0);
+
 
     /* We need the pipeline to finish before we read the status register for the
      * result.
@@ -1054,11 +992,6 @@ bool cc3xx_pka_are_equal_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 
 bool cc3xx_pka_less_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, true, 0);
@@ -1074,11 +1007,6 @@ bool cc3xx_pka_less_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 
 bool cc3xx_pka_less_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, imm, true, 0);
@@ -1106,94 +1034,88 @@ bool cc3xx_pka_greater_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 
 void cc3xx_pka_shift_right_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
-    assert(shift <= PKA_MAX_UNSIGNED_IMMEDIATE);
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    uint32_t shift_am;
 
     /* The shift operations shifts by 1 more than the number requested, so for
      * the sake of sensible semantics we decrease the shift number by 1.
      * Shifting by 0 is technically reasonable, but we can decrease code-size by
      * disallowing it via this assert.
      */
-    assert(shift != 0);
-    shift -= 1;
 
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHR0,
-                                           PKA_OP_SIZE_REGISTER,
-                                           false, r0, true, shift, false, res);
+    if (shift == 0) {
+        cc3xx_pka_copy(r0, res);
+    }
+
+    while(shift > 0) {
+        shift_am = shift <= (PKA_MAX_UNSIGNED_IMMEDIATE + 1) ? shift : (PKA_MAX_UNSIGNED_IMMEDIATE + 1);
+
+        P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHR0,
+                                               PKA_OP_SIZE_REGISTER,
+                                               false, r0, true, shift_am - 1, false, res);
+        shift -= shift_am;
+        r0 = res;
+    }
 }
 
 void cc3xx_pka_shift_right_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
-    assert(shift <= PKA_MAX_UNSIGNED_IMMEDIATE);
+    uint32_t shift_am;
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    if (shift == 0) {
+        cc3xx_pka_copy(r0, res);
+    }
 
-    /* The shift operations shifts by 1 more than the number requested, so for
-     * the sake of sensible semantics we decrease the shift number by 1.
-     * Shifting by 0 is technically reasonable, but we can decrease code-size by
-     * disallowing it via this assert.
-     */
-    assert(shift != 0);
-    shift -= 1;
+    while(shift > 0) {
+        shift_am = shift <= (PKA_MAX_UNSIGNED_IMMEDIATE + 1) ? shift : (PKA_MAX_UNSIGNED_IMMEDIATE + 1);
 
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHR1,
-                                           PKA_OP_SIZE_REGISTER,
-                                           false, r0, true, shift, false, res);
+        P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHR1,
+                                               PKA_OP_SIZE_REGISTER,
+                                               false, r0, true, shift_am - 1, false, res);
+        shift -= shift_am;
+        r0 = res;
+    }
 }
 
 void cc3xx_pka_shift_left_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
-    assert(shift <= PKA_MAX_UNSIGNED_IMMEDIATE);
+    uint32_t shift_am;
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    if (shift == 0) {
+        cc3xx_pka_copy(r0, res);
+    }
 
-    /* The shift operations shifts by 1 more than the number requested, so for
-     * the sake of sensible semantics we decrease the shift number by 1.
-     * Shifting by 0 is technically reasonable, but we can decrease code-size by
-     * disallowing it via this assert.
-     */
-    assert(shift != 0);
-    shift -= 1;
+    while(shift > 0) {
+        shift_am = shift <= (PKA_MAX_UNSIGNED_IMMEDIATE + 1) ? shift : (PKA_MAX_UNSIGNED_IMMEDIATE + 1);
 
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHL0,
-                                           PKA_OP_SIZE_REGISTER,
-                                           false, r0, true, shift, false, res);
+        P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHL0,
+                                               PKA_OP_SIZE_REGISTER,
+                                               false, r0, true, shift_am - 1, false, res);
+        shift -= shift_am;
+        r0 = res;
+    }
 }
 
 void cc3xx_pka_shift_left_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
-    assert(shift <= PKA_MAX_UNSIGNED_IMMEDIATE);
-    assert(shift != 0);
+    uint32_t shift_am;
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    if (shift == 0) {
+        cc3xx_pka_copy(r0, res);
+    }
 
-    shift -= 1;
+    while(shift > 0) {
+        shift_am = shift <= (PKA_MAX_UNSIGNED_IMMEDIATE + 1) ? shift : (PKA_MAX_UNSIGNED_IMMEDIATE + 1);
 
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHL1,
-                                           PKA_OP_SIZE_REGISTER,
-                                           false, r0, true, shift, false, res);
+        P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SHL1,
+                                               PKA_OP_SIZE_REGISTER,
+                                               false, r0, true, shift_am - 1, false, res);
+        shift -= shift_am;
+        r0 = res;
+    }
 }
 
 void cc3xx_pka_mul_low_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MULLOW,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -1201,11 +1123,6 @@ void cc3xx_pka_mul_low_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_
 
 void cc3xx_pka_mul_high_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MULHIGH,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
@@ -1232,11 +1149,6 @@ void cc3xx_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
         temp_r1 = r1;
     }
 
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_DIV,
                                            PKA_OP_SIZE_REGISTER,
                                            false, temp_r0, false, temp_r1,
@@ -1244,23 +1156,18 @@ void cc3xx_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
 
     /* Now clobber the remainder register */
     cc3xx_pka_copy(temp_r0, remainder);
-    cc3xx_pka_free_reg(temp_r0);
 
     if (temp_r1 != r1) {
         cc3xx_pka_free_reg(temp_r1);
     }
+    cc3xx_pka_free_reg(temp_r0);
 }
 
 void cc3xx_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
      * because it performs reduction, since mod_add uses _REGISTER, but because
@@ -1269,18 +1176,38 @@ void cc3xx_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODMUL,
                                            PKA_OP_SIZE_N,
                                            false, r0, false, r1, false, res);
+
+
+    /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
+     * top words. Do a mask operation to clear these
+     */
+    cc3xx_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
+}
+
+void cc3xx_pka_mod_mul_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+{
+    cc3xx_pka_reg_id_t temp_reg = cc3xx_pka_allocate_reg();
+
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
+    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+
+    /* This operation doesn't work with negative numbers */
+    assert(imm >= 0);
+
+    /* temp_reg starts at 0, so this is effectively a set */
+    cc3xx_pka_clear(temp_reg);
+    cc3xx_pka_add_si(temp_reg, imm, temp_reg);
+
+    cc3xx_pka_mod_mul(r0, temp_reg, res);
+
+    cc3xx_pka_free_reg(temp_reg);
 }
 
 void cc3xx_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
 
     /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
      * because it performs reduction, since mod_add uses _REGISTER, but because
@@ -1289,13 +1216,18 @@ void cc3xx_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODEXP,
                                            PKA_OP_SIZE_N,
                                            false, r0, false, r1, false, res);
+
+    /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
+     * top words. Do a mask operation to clear these
+     */
+    cc3xx_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
 }
 
 void cc3xx_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
     cc3xx_pka_reg_id_t temp_reg = cc3xx_pka_allocate_reg();
 
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
@@ -1304,6 +1236,7 @@ void cc3xx_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
     assert(imm >= 0);
 
     /* temp_reg starts at 0, so this is effectively a set */
+    cc3xx_pka_clear(temp_reg);
     cc3xx_pka_add_si(temp_reg, imm, temp_reg);
 
     cc3xx_pka_mod_exp(r0, temp_reg, res);
@@ -1311,13 +1244,12 @@ void cc3xx_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
     cc3xx_pka_free_reg(temp_reg);
 }
 
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 void cc3xx_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
     cc3xx_pka_reg_id_t n_minus_2 = cc3xx_pka_allocate_reg();
 
     /* Use the special-case Euler theorem  a^-1 = a^N-2 mod N */
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
     assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
 
     cc3xx_pka_sub_si(CC3XX_PKA_REG_N, 2, n_minus_2);
@@ -1325,36 +1257,10 @@ void cc3xx_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 
     cc3xx_pka_free_reg(n_minus_2);
 }
-#else
-void cc3xx_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+
+void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0)
 {
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
-
-    /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
-     * because it performs reduction, since mod_add uses _REGISTER, but because
-     * it does not use the ALU, but the special-purpose modular multiplier.
-     */
-    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODINV,
-                                           PKA_OP_SIZE_N,
-                                           true, 1, false, r0, false, res);
-}
-#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
-
-void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
-{
-    assert(virt_regs[CC3XX_PKA_REG_N].in_use);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-
-    /* Wait for a pipeline slot to be free before submitting this operation.
-     * Note that the previous operations may still be in progress at this point.
-     */
-    while(!P_CC3XX->pka.pka_pipe_rdy) {}
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
     /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
      * because it performs reduction, since mod_add uses _REGISTER, but because
@@ -1362,5 +1268,11 @@ void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
      */
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_REDUCTION,
                                            PKA_OP_SIZE_N,
-                                           false, r0, false, 0, false, res);
+                                           false, r0, false, 0, false, r0);
+
+    /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
+     * top words. Do a mask operation to clear these
+     */
+    cc3xx_pka_and(r0, CC3XX_PKA_REG_N_MASK, r0);
 }
+

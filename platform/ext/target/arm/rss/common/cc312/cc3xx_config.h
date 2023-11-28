@@ -113,6 +113,22 @@
 #define CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT 64
 #endif /* CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT */
 
+/* Whether barrett tags will be calculated if they are not known. Note that
+ * barrett tags are required for modular reduction. If disabled, this may
+ * decrease code size.
+ */
+#define CC3XX_CONFIG_PKA_CALC_NP_ENABLE
+
+/* Whether PKA operations will be inlined to increase performance at the cost of
+ * code size
+ */
+#define CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE
+
+/* Whether PKA variables will be aligned to word-size to increase performance at
+ * the cost of code size
+ */
+#define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE
+
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 

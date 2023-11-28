@@ -26,6 +26,8 @@ extern "C" {
 struct cc3xx_poly1305_state_t {
     struct cc3xx_pka_state_t pka_state;
 
+    cc3xx_pka_reg_id_t modulus_reg;
+    cc3xx_pka_reg_id_t barrett_tag_reg;
     cc3xx_pka_reg_id_t key_r_reg;
     cc3xx_pka_reg_id_t key_s_reg;
     cc3xx_pka_reg_id_t accumulator_reg;

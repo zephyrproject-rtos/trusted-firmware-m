@@ -43,16 +43,12 @@ const size_t reg_sizes_list[POLY1305_PKA_SAVE_REG_AM] = {
 
 static void poly1305_init_from_state(void)
 {
-    cc3xx_pka_set_modulus(poly_prime, sizeof(poly_prime),
-                          poly_barrett_tag, sizeof(poly_barrett_tag));
+    cc3xx_pka_write_reg(poly_state.modulus_reg, poly_prime, sizeof(poly_prime));
+    cc3xx_pka_write_reg(poly_state.barrett_tag_reg, poly_barrett_tag,
+                        sizeof(poly_barrett_tag));
 
-    /* Before we use the bit 129 mask reg for the 129th bit or mask, use it for
-     * the key_r mask.
-     */
-    cc3xx_pka_write_reg(poly_state.mask_reg, poly_key_r_mask,
-                        sizeof(poly_key_r_mask));
-    cc3xx_pka_and(poly_state.key_r_reg,
-                  poly_state.mask_reg, poly_state.key_r_reg);
+    cc3xx_pka_set_modulus(poly_state.modulus_reg, false,
+                          poly_state.barrett_tag_reg);
 }
 
 
@@ -60,6 +56,8 @@ void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s)
 {
     cc3xx_pka_init(sizeof(poly_prime));
 
+    poly_state.modulus_reg = cc3xx_pka_allocate_reg();
+    poly_state.barrett_tag_reg = cc3xx_pka_allocate_reg();
     poly_state.key_r_reg = cc3xx_pka_allocate_reg();
     poly_state.key_s_reg = cc3xx_pka_allocate_reg();
     poly_state.accumulator_reg = cc3xx_pka_allocate_reg();
@@ -68,6 +66,17 @@ void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s)
 
     cc3xx_pka_write_reg(poly_state.key_r_reg, poly_key_r, POLY1305_KEY_SIZE);
     cc3xx_pka_write_reg(poly_state.key_s_reg, poly_key_s, POLY1305_KEY_SIZE);
+
+    /* zero the accumulator register */
+    cc3xx_pka_clear(poly_state.accumulator_reg);
+
+    /* Before we use the bit 129 mask reg for the 129th bit or mask, use it for
+     * the key_r mask.
+     */
+    cc3xx_pka_write_reg(poly_state.mask_reg, poly_key_r_mask,
+                        sizeof(poly_key_r_mask));
+    cc3xx_pka_and(poly_state.key_r_reg,
+                  poly_state.mask_reg, poly_state.key_r_reg);
 
     poly1305_init_from_state();
 }

@@ -29,6 +29,16 @@ target_sources(cc312_rom
         ./cc3xx_drbg.c
 )
 
+# This file is the performance-limit for ECDSA, so should be compiled with the
+# highest possible optimizations for speed, even when we are optimizing for
+# code size.
+string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
+if (${BUILD_TYPE_LOWER} STREQUAL "release" OR ${BUILD_TYPE_LOWER} STREQUAL "minsizerel")
+    set_source_files_properties(./cc3xx_pka.c
+        PROPERTIES COMPILE_FLAGS -Ofast
+    )
+endif()
+
 target_include_directories(cc312_rom
     PUBLIC
         .

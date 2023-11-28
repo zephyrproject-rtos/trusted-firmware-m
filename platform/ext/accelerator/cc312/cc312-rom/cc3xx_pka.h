@@ -21,10 +21,11 @@
 extern "C" {
 #endif
 
-typedef uint8_t cc3xx_pka_reg_id_t;
+typedef uint32_t cc3xx_pka_reg_id_t;
 
 struct cc3xx_pka_state_t {
     uint32_t reg_size;
+    uint32_t virt_reg_next_mapped;
 };
 
 /**
@@ -62,6 +63,9 @@ cc3xx_pka_reg_id_t cc3xx_pka_allocate_reg(void);
  * @param[in]  id                The register ID to be freed.
  */
 void cc3xx_pka_free_reg(cc3xx_pka_reg_id_t reg_id);
+
+
+void cc3xx_pka_unmap_physical_registers(void);
 
 /**
  * @brief                        Write data into a PKA register.
@@ -114,21 +118,15 @@ void cc3xx_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t id, uint32_t *data, size_
  *                              pka_mod_* operations, this function does not
  *                              need to be called.
  *
- * @param[in]  N                The buffer than N (the modulus) will be read
- *                              from.
- * @param[in]  N_len            The size of the N buffer, in bytes. Must be a
- *                              multiple of sizeof(uint32_t). Must be smaller
- *                              than the operation size.
- * @param[in]  Np               The buffer that Np (the Barrett tag) will be
- *                              read from. If this is set to NULL, the Barrett
- *                              tag will be calculated from the value of N.
- * @param[in]  Np_len           The size of the NP buffer, in bytes. Must be a
- *                              multiple of sizeof(uint32_t). Must be smaller
- *                              than the operation size. If NP is NULL, this
- *                              should be 0.
+ * @param[in]  modulus          The register that will be used as the modulus.
+ * @param[in]  calculate_tag    Whether the barrett tag should be calculated. If
+ *                              this is set then the barrett_tag argument will
+ *                              be ignored.
+ * @param[in]  barrett_tag      The register that will be used as the barrett
+ *                              tag.
  */
-void cc3xx_pka_set_modulus(const uint32_t *N, size_t N_len,
-                           const uint32_t *Np, size_t Np_len);
+void cc3xx_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
+                           cc3xx_pka_reg_id_t barrett_tag);
 
 /**
  * @brief                       Get the state of the PKA engine, and save the
@@ -219,11 +217,26 @@ void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power);
  *                              the register will be set to random values.
  *
  * @param[in]  r0               The register ID to set.
+ * @param[in]  bit_len          Amount of bits of randomness to input. Must not
+ *                              be larger than the size the PKA operation was
+ *                              instanciated with.
  *
  * @return                      CC3XX_ERR_SUCCESS on success, another
  *                              cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0);
+cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_len);
+
+/**
+ * @brief                       Set a register to a random value which is less
+ *                              than the modulus register. Will retry to avoid
+ *                              bias.
+ *
+ * @param[in]  r0               The register ID to set.
+ *
+ * @return                      CC3XX_ERR_SUCCESS on success, another
+ *                              cc3xx_err_t on error.
+ */
+cc3xx_err_t cc3xx_pka_set_to_random_within_modulus(cc3xx_pka_reg_id_t r0);
 
 /**
  * @brief                       Add the values in two registers. res = r0 + r1.
@@ -392,15 +405,15 @@ void cc3xx_pka_and(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
 void cc3xx_pka_and_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res);
 
 /**
- * @brief                       Check if a bit is set in a register.
+ * @brief                       Check if a bits are set in a register.
  *
  * @param[in]  r0               The register ID of the first operand.
- * @param[in]  imm              The index of the bit to check, which must be in
- *                              the range 0 to 32.
+ * @param[in]  idx              The index of the bits to check.
+ * @param[in]  bit_am           The amount of bits to check.
  *
- * @return                      true if the bit is set, false otherwise.
+ * @return                      The bits requested.
  */
-bool cc3xx_pka_test_bit(cc3xx_pka_reg_id_t r0, uint32_t idx);
+uint32_t cc3xx_pka_test_bits_ui(cc3xx_pka_reg_id_t r0, uint32_t idx, uint32_t bit_am);
 
 /**
  * @brief                       Clear a bit in a register.
@@ -681,6 +694,21 @@ void cc3xx_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
 void cc3xx_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res);
 
 /**
+ * @brief                       Perform multiplication of the input register and
+ *                              a signed immediate, and then modular reduction.
+ *                              res = (r0 * imm) mod N.
+ *
+ * @param[in]  r0               The register ID of the first operand.
+ * @param[in]  imm              The signed immediate, which must be in the range
+ *                              0 to 15 inclusive.
+ * @param[out] res              The register ID the result will be stored in.
+ *
+ * @note                        It is acceptable to have some or all of the
+ *                              register IDs be identical.
+ */
+void cc3xx_pka_mod_mul_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res);
+
+/**
  * @brief                       Perform exponentiation and then modular
  *                              reduction. res = (r0 ^ r1) mod N.
  *
@@ -697,7 +725,8 @@ void cc3xx_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
  *                              then modular reduction. res = (r0 ^ imm) mod N.
  *
  * @param[in]  r0               The register ID of the first operand.
- * @param[in]  r1               The register ID of the second operand.
+ * @param[in]  imm              The signed immediate, which must be in the range
+ *                              0 to 15 inclusive.
  * @param[out] res              The register ID the result will be stored in.
  *
  * @note                        It is acceptable to have some or all of the
@@ -720,13 +749,12 @@ void cc3xx_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res);
 /**
  * @brief                       Perform modular reduction. res = r0 mod N.
  *
- * @param[in]  r0               The register ID of the first operand.
- * @param[out] res              The register ID the result will be stored in.
+ * @param[in/out]  r0           The register ID of the first operand.
  *
  * @note                        It is acceptable to have some or all of the
  *                              register IDs be identical.
  */
-void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res);
+void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0);
 
 #ifdef __cplusplus
 }
