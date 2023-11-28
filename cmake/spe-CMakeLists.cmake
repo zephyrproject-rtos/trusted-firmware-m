@@ -33,20 +33,41 @@ target_sources(tfm_api_ns
         $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${INTERFACE_SRC_DIR}/tfm_fwu_api.c>
 )
 
-target_sources(tfm_api_ns
-    PRIVATE
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c>
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c>
-        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c>
-)
-
 # Include interface headers exported by TF-M
 target_include_directories(tfm_api_ns
     PUBLIC
         ${INTERFACE_INC_DIR}
         ${INTERFACE_INC_DIR}/crypto_keys
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_INC_DIR}/multi_core>
 )
+
+if (CONFIG_TFM_USE_TRUSTZONE)
+    add_library(tfm_api_ns_tz INTERFACE)
+
+    target_sources(tfm_api_ns_tz
+        INTERFACE
+            ${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c
+    )
+
+    target_link_libraries(tfm_api_ns_tz
+        INTERFACE
+            ${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o
+    )
+endif()
+
+if (TFM_PARTITION_NS_AGENT_MAILBOX)
+    add_library(tfm_api_ns_mailbox INTERFACE)
+
+    target_sources(tfm_api_ns_mailbox
+        INTERFACE
+            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
+            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
+    )
+
+    target_include_directories(tfm_api_ns_mailbox
+        INTERFACE
+            ${INTERFACE_INC_DIR}/multi_core
+    )
+endif()
 
 add_library(platform_region_defs INTERFACE)
 
@@ -87,7 +108,6 @@ target_compile_definitions(platform_ns
 target_link_libraries(tfm_api_ns
     PUBLIC
         platform_region_defs
-        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o>
         platform_ns
 )
 

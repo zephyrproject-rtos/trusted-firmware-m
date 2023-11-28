@@ -635,10 +635,6 @@ install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(FILES       platform_ns_mailbox.c
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
-)
-
 install(DIRECTORY native_drivers
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )

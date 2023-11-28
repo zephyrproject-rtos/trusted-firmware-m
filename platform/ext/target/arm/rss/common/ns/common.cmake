@@ -16,7 +16,6 @@ target_sources(platform_ns
         device/source/device_definition.c
         device/source/startup_rss.c
         device/source/system_core_init.c
-        platform_ns_mailbox.c
         uart_stdout.c
 )
 
