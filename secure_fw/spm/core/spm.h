@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -85,10 +85,10 @@ struct connection_t {
     size_t outvec_written[PSA_MAX_IOVEC];    /* Size of data written by psa_write */
     psa_outvec *caller_outvec;               /* Save caller outvec pointer for write length update*/
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-    const void *caller_data;                 /*
+    const void *client_data;                 /*
                                               * Pointer to the private data of the
-                                              * caller. It identifies the NSPE PSA
-                                              * client calls in multi-core topology
+                                              * client. It saves the mailbox private
+                                              * data in multi-core topology.
                                               */
 #endif
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
@@ -332,6 +332,7 @@ void update_caller_outvec_len(struct connection_t *handle);
 
 /* Handler for \ref psa_connect.
  *
+ * \param[in] p_connection      The address of connection pointer.
  * \param[in] sid               RoT Service identity.
  * \param[in] version           The version of the RoT Service.
  * \param[in] client_id         Client id of the service caller. It should be
@@ -346,7 +347,8 @@ void update_caller_outvec_len(struct connection_t *handle);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t spm_psa_connect_client_id_associated(uint32_t sid, uint32_t version,
+psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
+                                                  uint32_t sid, uint32_t version,
                                                   int32_t client_id);
 
 /* Handler for \ref psa_close.

@@ -37,11 +37,6 @@ struct secure_mailbox_queue_t {
 
     struct secure_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
     struct ns_mailbox_queue_t    *ns_queue;
-    uint8_t                      cur_proc_slot_idx; /*
-                                                     * The index of mailbox
-                                                     * queue slot currently
-                                                     * under processing.
-                                                     */
 };
 
 /**

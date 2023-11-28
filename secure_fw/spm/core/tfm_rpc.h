@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -38,13 +38,10 @@
  * handle_req() - Handle PSA client call request from NSPE
  * reply()      - Reply PSA client call return result to NSPE. The parameter
  *                owner identifies the owner of the PSA client call.
- * get_caller_data() - Get the private data of NSPE client from mailbox to
- *                     identify the PSA client call.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);
     void (*reply)(const void *owner, int32_t ret);
-    const void * (*get_caller_data)(int32_t client_id);
 };
 
 /**
@@ -185,21 +182,12 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct connection_t *handle)
      * This condition check should be improved after TF-M non-secure client ID
      * management is implemented.
      */
-    if (handle && (handle->caller_data) && (handle->msg.client_id <= 0)) {
+    if (handle && (handle->client_data) && (handle->msg.client_id <= 0)) {
         return true;
     }
 
     return false;
 }
-
-/*
- * \brief Set the private data of the NS caller in \ref connection_t, to
- *        identify the caller after PSA client call is compeleted.
- *
- * \param[in] handle        The address of \ref connection_t structure
- * \param[in] client_id     The client ID of the NS caller.
- */
-void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
 
 #else /* TFM_PARTITION_NS_AGENT_MAILBOX */
 

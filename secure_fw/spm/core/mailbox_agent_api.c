@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -28,8 +28,6 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
     fih_int fih_rc = FIH_FAILURE;
     psa_status_t status;
 
-    (void)client_data_stateless;
-
     FIH_CALL(tfm_hal_memory_check, fih_rc,
              curr_partition->boundary, (uintptr_t)params,
              sizeof(struct client_params_t),
@@ -48,6 +46,9 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
         return status;
     }
 
+    /* Set Mailbox client data in connection handle for message reply. */
+    p_connection->client_data = client_data_stateless;
+
     return backend_messaging(p_connection);
 }
 
@@ -57,9 +58,9 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
                                        int32_t ns_client_id,
                                        const void *client_data)
 {
-    (void)client_data;
-
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    struct connection_t *p_connection;
+    psa_status_t status;
 
     if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
         tfm_core_panic();
@@ -68,7 +69,15 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
         tfm_core_panic();
     }
 
-    return spm_psa_connect_client_id_associated(sid, version, ns_client_id);
+    status = spm_psa_connect_client_id_associated(&p_connection, sid, version, ns_client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Set Mailbox client data in connection handle for message reply. */
+    p_connection->client_data = client_data;
+
+    return backend_messaging(p_connection);
 }
 
 psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle,

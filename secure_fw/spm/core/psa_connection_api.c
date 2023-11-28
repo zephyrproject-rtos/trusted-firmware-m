@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -20,16 +20,25 @@
 psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 {
     int32_t client_id;
+    struct connection_t *p_connection;
+    psa_status_t status;
+
     bool ns_caller = tfm_spm_is_ns_caller();
 
     client_id = tfm_spm_get_client_id(ns_caller);
-    return spm_psa_connect_client_id_associated(sid, version, client_id);
+    status = spm_psa_connect_client_id_associated(&p_connection, sid, version, client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return backend_messaging(p_connection);
 }
 
-psa_status_t spm_psa_connect_client_id_associated(uint32_t sid, uint32_t version, int32_t client_id)
+psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
+                                                  uint32_t sid, uint32_t version, int32_t client_id)
 {
     struct service_t *service;
-    struct connection_t *p_connection;
+    struct connection_t *connection;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = (client_id < 0) ? true : false;
 
@@ -68,16 +77,18 @@ psa_status_t spm_psa_connect_client_id_associated(uint32_t sid, uint32_t version
      * code to client when creation fails.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    p_connection = spm_allocate_connection();
+    connection = spm_allocate_connection();
     CRITICAL_SECTION_LEAVE(cs_assert);
-    if (!p_connection) {
+    if (!connection) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    spm_init_connection(p_connection, service, client_id);
-    p_connection->msg.type = PSA_IPC_CONNECT;
+    spm_init_connection(connection, service, client_id);
+    connection->msg.type = PSA_IPC_CONNECT;
 
-    return backend_messaging(p_connection);
+    *p_connection = connection;
+
+    return PSA_SUCCESS;
 }
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)

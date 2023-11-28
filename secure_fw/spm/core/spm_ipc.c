@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -315,13 +315,7 @@ void spm_init_connection(struct connection_t *p_connection,
 #endif
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-    /* Set the private data of NSPE client caller in multi-core topology */
-    if (IS_NS_AGENT_MAILBOX(p_connection->p_client->p_ldinf)
-         && TFM_CLIENT_ID_IS_NS(client_id)) {
-        tfm_rpc_set_caller_data(p_connection, client_id);
-    } else {
-        p_connection->caller_data = NULL;
-    }
+    p_connection->client_data = NULL;
 #endif
 }
 

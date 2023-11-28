@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -184,6 +184,8 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                                   params->psa_call_params.out_len);
     int32_t client_id;
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
+    struct mailbox_msg_handle_t *mb_msg_handle =
+        &spe_mailbox_queue.queue[idx].msg_handle;
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     /* Assume asynchronous. Set to synchronous when an error happens. */
@@ -243,7 +245,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         client_params.p_invecs = vectors[idx].in_vec;
         client_params.p_outvecs = vectors[idx].out_vec;
         psa_ret = tfm_rpc_psa_call(params->psa_call_params.handle,
-                                   control, &client_params, NULL);
+                                   control, &client_params, mb_msg_handle);
         if (psa_ret != PSA_SUCCESS) {
             sync = true;
         }
@@ -259,7 +261,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         psa_ret = tfm_rpc_psa_connect(params->psa_connect_params.sid,
                                       params->psa_connect_params.version,
                                       client_id,
-                                      NULL);
+                                      mb_msg_handle);
         if (psa_ret != PSA_SUCCESS) {
             sync = true;
         }
@@ -335,20 +337,10 @@ int32_t tfm_mailbox_handle_msg(void)
         get_spe_mailbox_msg_handle(idx,
                                    &spe_mailbox_queue.queue[idx].msg_handle);
 
-        /*
-         * Set the current slot index under processing.
-         * The value is used in mailbox_get_caller_data() to identify the
-         * mailbox queue slot.
-         */
-        spe_mailbox_queue.cur_proc_slot_idx = idx;
-
         if (tfm_mailbox_dispatch(msg_ptr, idx, &reply_slots) != MAILBOX_SUCCESS) {
             mailbox_clean_queue_slot(idx);
             continue;
         }
-
-        /* Clean up the current slot index under processing */
-        spe_mailbox_queue.cur_proc_slot_idx = NUM_MAILBOX_QUEUE_SLOT;
     }
 
     tfm_mailbox_hal_enter_critical();
@@ -428,26 +420,10 @@ static void mailbox_reply(const void *owner, int32_t ret)
     (void)tfm_mailbox_reply_msg(handle, ret);
 }
 
-/* RPC get_caller_data() callback */
-static const void *mailbox_get_caller_data(int32_t client_id)
-{
-    uint8_t idx;
-
-    (void)client_id;
-
-    idx = spe_mailbox_queue.cur_proc_slot_idx;
-    if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        return (const void *)&spe_mailbox_queue.queue[idx].msg_handle;
-    }
-
-    return NULL;
-}
-
 /* Mailbox specific operations callback for TF-M RPC */
 static const struct tfm_rpc_ops_t mailbox_rpc_ops = {
     .handle_req = mailbox_handle_req,
     .reply      = mailbox_reply,
-    .get_caller_data = mailbox_get_caller_data,
 };
 
 static int32_t tfm_mailbox_init(void)

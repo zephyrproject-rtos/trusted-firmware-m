@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,8 +13,6 @@
 #include "tfm_spm_log.h"
 #include "utilities.h"
 
-static void *registered_msg = NULL;
-
 /* Process call from the other core. */
 void callback_from_openamp(const void *ns_msg, size_t len)
 {
@@ -27,13 +25,9 @@ void callback_from_openamp(const void *ns_msg, size_t len)
     }
 
     /*
-     * registered_msg will be used inside get_caller_private_data.
-     * get_caller_private_data will be called in the same context:
-     * deliver_msg* => tfm_rpc_xxx => tfm_spm_xxx => spm_init_connection
-     * => tfm_rpc_set_caller_data => get_caller_private_data
+     * priv will be used as the client_data parameter of tfm_rpc_psa_call() so
+     * that it will be sent back in the RPC reply callback.
      */
-    registered_msg = priv;
-
     deliver_msg_to_tfm_spe(priv);
 }
 
@@ -43,23 +37,11 @@ static void service_reply(const void *priv, int32_t ret)
     send_service_reply_to_non_secure(ret, (void*)priv);
 }
 
-/* RPC get_caller_data() callback */
-static const void *get_caller_private_data(int32_t client_id)
-{
-    if (!registered_msg) {
-        SPMLOG_ERRMSG("FATAL_ERROR: Map pointer cannot be NULL.\r\n");
-        SPM_ASSERT(0);
-    }
-
-    return registered_msg;
-}
-
 /* Openamp specific operations callback for TF-M RPC */
 static const struct tfm_rpc_ops_t openamp_rpc_ops = {
     .handle_req = tfm_to_openamp_notify, /* notify openamp for pendsv/irq
                                           * received from the non-secure */
     .reply      = service_reply,
-    .get_caller_data = get_caller_private_data,
 };
 
 void notify_request_from_openamp(void)

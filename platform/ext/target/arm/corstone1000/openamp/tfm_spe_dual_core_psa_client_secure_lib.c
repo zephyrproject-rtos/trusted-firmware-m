@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -270,7 +270,7 @@ void deliver_msg_to_tfm_spe(void *private)
                                        PARAM_PACK(s_map_entry->msg.params.psa_call_params.type,
                                                   s_map_entry->msg.params.psa_call_params.in_len,
                                                   s_map_entry->msg.params.psa_call_params.out_len),
-                                       &params, NULL);
+                                       &params, private);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
                 break;
@@ -281,7 +281,7 @@ void deliver_msg_to_tfm_spe(void *private)
             psa_ret = tfm_rpc_psa_connect(s_map_entry->msg.params.psa_connect_params.sid,
                                           s_map_entry->msg.params.psa_connect_params.version,
                                           s_map_entry->msg.client_id,
-                                          NULL);
+                                          private);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
             }

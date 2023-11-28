@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -20,8 +20,6 @@
 #include "tfm_psa_call_pack.h"
 #include "tfm_spm_log.h"
 #include "rse_comms_permissions_hal.h"
-
-static struct client_request_t *req_to_process;
 
 static psa_status_t message_dispatch(struct client_request_t *req)
 {
@@ -87,7 +85,7 @@ static psa_status_t message_dispatch(struct client_request_t *req)
                                        req->in_len,
                                        req->out_len),
                             &params,
-                            NULL);
+                            req);
 }
 
 static void rse_comms_reply(const void *owner, int32_t ret)
@@ -115,14 +113,15 @@ static void rse_comms_handle_req(void)
 {
     psa_status_t status;
     void *queue_entry;
+    struct client_request_t *req;
 
     /* FIXME: consider memory limitations that may prevent dispatching all
      * messages in one go.
      */
     while (queue_dequeue(&queue_entry) == 0) {
         /* Deliver PSA Client call request to handler in SPM. */
-        req_to_process = queue_entry;
-        status = message_dispatch(req_to_process);
+        req = queue_entry;
+        status = message_dispatch(req);
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         /*
          * If status == PSA_SUCCESS, peer will be replied when mailbox agent
@@ -133,26 +132,18 @@ static void rse_comms_handle_req(void)
          */
         if (status != PSA_SUCCESS) {
             SPMLOG_DBGMSGVAL("[RSE-COMMS] Message dispatch failed: ", status);
-            rse_comms_reply(req_to_process, status);
+            rse_comms_reply(req, status);
         }
 #else
         /* In SFN model, the service call has been finished. Reply to the peer directly. */
-        rse_comms_reply(req_to_process, status);
+        rse_comms_reply(req, status);
 #endif
     }
-}
-
-static const void *rse_comms_get_caller_data(int32_t client_id)
-{
-    (void)client_id;
-
-    return req_to_process;
 }
 
 static struct tfm_rpc_ops_t rpc_ops = {
     .handle_req = rse_comms_handle_req,
     .reply = rse_comms_reply,
-    .get_caller_data = rse_comms_get_caller_data,
 };
 
 int32_t tfm_inter_core_comm_init(void)
