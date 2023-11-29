@@ -24,7 +24,7 @@
 #include "psa/service.h"
 #include "thread.h"
 #include "spm.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)

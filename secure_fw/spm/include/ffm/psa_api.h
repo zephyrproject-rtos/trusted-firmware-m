@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "config_spm.h"
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 #endif
 #include "psa/client.h"
 #include "psa/service.h"

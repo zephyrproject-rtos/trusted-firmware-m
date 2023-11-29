@@ -17,7 +17,7 @@
 #include "psa/client.h"
 #include "psa/error.h"
 #include "psa/service.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 
 /* SFN defs */
 typedef psa_status_t (*service_fn_t)(psa_msg_t *msg);

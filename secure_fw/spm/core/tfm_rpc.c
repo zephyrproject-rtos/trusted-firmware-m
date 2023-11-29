@@ -10,7 +10,7 @@
 #include "async.h"
 #include "config_impl.h"
 #include "spm.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"

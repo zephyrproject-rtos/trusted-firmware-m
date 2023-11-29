@@ -13,7 +13,7 @@
 #include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_multi_core.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "psa/error.h"

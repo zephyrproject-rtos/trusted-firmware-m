@@ -23,7 +23,7 @@
 #include "tfm_rpc.h"
 #include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
