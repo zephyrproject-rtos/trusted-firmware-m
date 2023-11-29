@@ -19,7 +19,7 @@
   "irqs": [
     {
       "source": "MAILBOX_IRQ",
-      "name": "MAILBOX",
+      "name": "MAILBOX_INTERRUPT",
       "handling": "SLIH"
     }
   ],

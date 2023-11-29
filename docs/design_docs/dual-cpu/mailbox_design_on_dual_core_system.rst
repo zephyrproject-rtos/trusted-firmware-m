@@ -449,7 +449,7 @@ to corresponding NSPE mailbox queue slot.
 
 Platform specific Inter-Processor Communication interrupt handler in SPE should
 call ``spm_handle_interrupt()`` to notify SPM of the interrupt. SPM will then
-send the ``SIGNAL_MAILBOX`` signal to the ``ns_agent_mailbox`` partition, which
+send the ``MAILBOX_INTERRUPT_SIGNAL`` signal to the ``ns_agent_mailbox`` partition, which
 will call ``tfm_rpc_client_call_handler()``.
 
 **********************

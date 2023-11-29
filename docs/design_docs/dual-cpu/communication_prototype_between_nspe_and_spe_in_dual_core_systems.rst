@@ -155,7 +155,7 @@ The sequence of handling PSA Client call request in TF-M is listed as below
 1. Platform specific Inter-Processor Communication interrupt handler is
    triggered after the mailbox event is asserted by NSPE. The interrupt handler
    shall call ``spm_handle_interrupt()``
-2. SPM will send a ``SIGNAL_MAILBOX`` to ``ns_agent_mailbox`` partition
+2. SPM will send a ``MAILBOX_INTERRUPT_SIGNAL`` to ``ns_agent_mailbox`` partition
 3. ``ns_agent_mailbox`` partition deals with the mailbox message(s) which
    contain(s) the PSA client call information and parameters.
    Then the PSA client call request is dispatched to dedicated PSA client call
@@ -235,7 +235,7 @@ A partition will be dedicated to interacting with the NSPE through the mailbox.
 This partition will call ``tfm_hal_boot_ns_cpu()`` and
 tfm_hal_wait_for_ns_cpu_ready() to ensure that the non-secure core is running.
 It will then initialise the SPE mailbox and enable the IPC interrupt. Once these
-tasks are complete, it will enter an infinite loop waiting for a MAILBOX_SIGNAL
+tasks are complete, it will enter an infinite loop waiting for a ``MAILBOX_INTERRUPT_SIGNAL``
 signal indicating that a mailbox message has arrived.
 
 Mailbox handling will be done in the context of the ``ns_agent_mailbox``

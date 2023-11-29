@@ -50,7 +50,7 @@ void CMU_MHU0_Receiver_Handler(void)
                                      &MHU_RSS_TO_AP_MONITOR_DEV);
 
     /*
-     * SPM will send a MAILBOX_SIGNAL to the corresponding partition
+     * SPM will send a MAILBOX_INTERRUPT_SIGNAL to the corresponding partition
      * indicating that a message has arrived and can be processed.
      */
     spm_handle_interrupt(mbox_irq_info.p_pt, mbox_irq_info.p_ildi);
