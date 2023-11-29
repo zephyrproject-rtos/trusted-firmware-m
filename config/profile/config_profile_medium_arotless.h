@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -228,9 +228,11 @@
 
 /* SPM Partition Configs */
 
+#ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
 /* The maximal number of secure services that are connected or requested at the same time */
 #ifndef CONFIG_TFM_CONN_HANDLE_MAX_NUM
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
+#endif
 #endif
 
 /* Disable the doorbell APIs */
