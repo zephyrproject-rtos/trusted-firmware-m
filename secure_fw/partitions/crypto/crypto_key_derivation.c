@@ -94,6 +94,10 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
         return psa_key_derivation_input_bytes(operation, iov->step, data,
                                               data_length);
     }
+    case TFM_CRYPTO_KEY_DERIVATION_INPUT_INTEGER_SID:
+    {
+        return psa_key_derivation_input_integer(operation, iov->step, iov->value);
+    }
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID:
     {
         uint8_t *output = out_vec[0].base;
