@@ -133,8 +133,8 @@ target_sources(platform_s
         device/source/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
         libraries/dma350_lib.c
-        libraries/sds.c
-        libraries/sds_svc.c
+        $<$<BOOL:${RSS_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds.c>
+        $<$<BOOL:${RSS_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds_svc.c>
         native_drivers/atu_rss_drv.c
         native_drivers/dma350_drv.c
         native_drivers/dma350_ch_drv.c
@@ -185,6 +185,7 @@ target_compile_definitions(platform_s
         # Needed for DMA-350 library
         CMSIS_device_header="rss.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
+        $<$<BOOL:${RSS_USE_SDS_LIB}>:RSS_USE_SDS_LIB>
 )
 
 target_compile_options(platform_s
