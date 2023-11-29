@@ -18,7 +18,6 @@ target_sources(platform_ns
         device/source/system_core_init.c
         device_definition.c
         uart_cmsdk_drv.c
-        ext/common/uart_stdout.c
         timer_cmsdk_drv.c
 )
 

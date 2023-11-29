@@ -27,6 +27,7 @@ sphinx:
 # The documentation will also be built in a pdf format
 formats:
    - pdf
+   - htmlzip
 
 # Configuration of the Python environment
 python:

@@ -249,7 +249,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/project_template/ns/app.h
                     ${TARGET_PLATFORM_PATH}/target_cfg.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
                     ${NXP_COMMON_DIR}/target_cfg_common.h
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/partition

@@ -19,13 +19,13 @@ target_sources(platform_ns
         Native_Driver/timer_cmsdk_drv.c
         Driver_USART.c
         uart_pl011_drv.c
-        uart_stdout.c
 )
 
 target_include_directories(platform_ns
     PUBLIC
         include
         ext/cmsis
+        ext/common
         ext/driver
         Native_Driver
         Device/Include

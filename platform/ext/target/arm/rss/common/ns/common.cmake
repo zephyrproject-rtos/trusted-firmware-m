@@ -30,6 +30,7 @@ target_include_directories(platform_ns
         device
         include
         ext/cmsis
+        ext/common
         ext/driver
         device/config
 )

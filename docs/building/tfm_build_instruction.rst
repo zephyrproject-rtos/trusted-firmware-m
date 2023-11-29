@@ -3,7 +3,7 @@ Build instructions
 ##################
 
 .. warning::
-    The build process was changed a lot in Q3 2023 and included into the release after v1.9.
+    The build process was changed a lot in Q3 2023 and included into the release v2.0.
     For building instructions for early versions please refer to the documentation of respective
     versions.
 
@@ -66,6 +66,8 @@ you can alter that behaviour using :ref:`Dependency management`.
    in :doc:`TF-M getting started </getting_started/tfm_getting_started>`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`IAR software requirements <tfm_build_instruction_iar>`
+ - Please use "/" instead of "\\" for paths when running CMAKE commands under
+   Windows Command Prompt.
 
 Configuring
 ===========
@@ -102,8 +104,9 @@ TF-M supports 3 toolchains for cross-compiling and building the project binaries
 - IAR
 
 Each toolchain has a configuration file for the compiler and linker.
-Use ``TFM_TOOLCHAIN_FILE`` option to provide a path to a preferred toolchain file or the toolchain
-file name.
+They are located at the root directory of TF-M.
+Use ``TFM_TOOLCHAIN_FILE`` option to provide the absolute path to the preferred toolchain file,
+or relative path to working directory.
 The default **toolchain_GNUARM.cmake** is selected by `config_base.cmake`
 file if the option is omitted.
 
@@ -325,7 +328,11 @@ These folders have the following content:
 - **platform** - source code for a selected hardware platform.
 - **CMakeLists.txt** - CMake script for the artifacts integration in NSPE.
 
-The content of ``<Artifact Dir>`` is a prepared directory for integration with CMake projects.
+The content of ``<Artifact Dir>`` is an exported directory for integration with CMake projects.
+
+.. Note::
+    Attempting to change any file in <Artifact Dir> may cause incompatibility issues.
+    Instead, please change the corresponding file in the <TF-M source dir>.
 
 .. _NSPE toolchains:
 

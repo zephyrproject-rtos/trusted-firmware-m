@@ -156,7 +156,7 @@ overwritten, the header and trailer of the new image in the secondary slot is
 erased to prevent the triggering of another unnecessary image upgrade after a
 restart. The overwrite operation is fail-safe and resistant to power-cut
 failures. For more details please refer to the MCUBoot
-`documentation <https://www.mcuboot.com/mcuboot/design.html>`__.
+`documentation <https://docs.mcuboot.com/>`__.
 
 Swapping operation
 ==================
@@ -172,7 +172,7 @@ successful. The boot loader can revert the swapping as a fall-back mechanism to
 recover the previous working firmware version after a faulty update. The swap
 operation is fail-safe and resistant to power-cut failures. For more details
 please refer to the MCUBoot
-`documentation <https://www.mcuboot.com/mcuboot/design.html>`__.
+`documentation <https://docs.mcuboot.com/>`__.
 
 .. Note::
 

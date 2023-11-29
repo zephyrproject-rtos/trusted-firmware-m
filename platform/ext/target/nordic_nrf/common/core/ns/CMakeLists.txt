@@ -45,6 +45,7 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/include
         ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/driver
+        ${PLATFORM_DIR}/ext/common
         services/include
 )
 

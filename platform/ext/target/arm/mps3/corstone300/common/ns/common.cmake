@@ -7,6 +7,9 @@
 
 cmake_policy(SET CMP0076 NEW)
 
+set(CONFIG_TFM_FP_ARCH "fpv5-d16")
+set(CONFIG_TFM_FP_ARCH_ASM "FPv5_D16")
+
 #========================= Platform region defs ===============================#
 
 target_include_directories(platform_region_defs
@@ -76,9 +79,7 @@ target_include_directories(cmsis_includes_ns
 
 target_sources(platform_ns
     PRIVATE
-        ${CORSTONE300_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     INTERFACE
         $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone300_ns_init.c>
@@ -100,14 +101,4 @@ target_link_libraries(platform_ns
         cmsis_includes_ns
     PRIVATE
         device_definition_ns
-)
-
-#========================= platform_region_defs ===============================#
-target_compile_definitions(platform_region_defs
-    INTERFACE
-        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
-        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
-        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
-        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
-        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
 )

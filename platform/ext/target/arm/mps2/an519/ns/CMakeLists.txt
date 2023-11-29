@@ -15,7 +15,6 @@ target_sources(platform_ns
     PRIVATE
         arm_uart_drv.c
         timer_cmsdk.c
-        ext/common/uart_stdout.c
         Driver_USART.c
         cmsis_core/startup_an519.c
         cmsis_core/system_core_init.c

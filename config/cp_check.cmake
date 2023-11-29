@@ -9,6 +9,22 @@ if(POLICY CMP0123)
     cmake_policy(SET CMP0123 NEW)
 endif()
 
+if(NOT COMMAND tfm_invalid_config)
+    function(tfm_invalid_config)
+        if (${ARGV})
+            string (REPLACE ";" " " ARGV_STRING "${ARGV}")
+            string (REPLACE "STREQUAL"     "=" ARGV_STRING "${ARGV_STRING}")
+            string (REPLACE "GREATER"      ">" ARGV_STRING "${ARGV_STRING}")
+            string (REPLACE "LESS"         "<" ARGV_STRING "${ARGV_STRING}")
+            string (REPLACE "VERSION_LESS" "<" ARGV_STRING "${ARGV_STRING}")
+            string (REPLACE "EQUAL"        "=" ARGV_STRING "${ARGV_STRING}")
+            string (REPLACE "IN_LIST"      "in" ARGV_STRING "${ARGV_STRING}")
+
+            message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
+        endif()
+    endfunction()
+endif()
+
 ########################## FPU and MVE #########################################
 
 tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND (CONFIG_TFM_ENABLE_MVE OR CONFIG_TFM_ENABLE_MVE_FP))

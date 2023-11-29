@@ -186,6 +186,9 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
     install(FILES ${MCUBOOT_KEY_S}
             RENAME image_s_signing_private_key.pem
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+    # Specify the MCUBOOT_KEY_S path for NS build
+    set(MCUBOOT_INSTALL_KEY_S
+        ${INSTALL_IMAGE_SIGNING_DIR}/keys/image_s_signing_private_key.pem)
     install(FILES $<TARGET_FILE_DIR:bl2>/image_s_signing_public_key.pem
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
 
@@ -194,7 +197,10 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
         install(FILES ${MCUBOOT_KEY_NS}
                 RENAME image_ns_signing_private_key.pem
-                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys/)
+                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+        # Specify the MCUBOOT_KEY_NS path for NS build
+        set(MCUBOOT_INSTALL_KEY_NS
+            ${INSTALL_IMAGE_SIGNING_DIR}/keys/image_ns_signing_private_key.pem)
         install(FILES $<TARGET_FILE_DIR:bl2>/image_ns_signing_public_key.pem
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
     endif()
@@ -207,8 +213,7 @@ endif()
 
 ######################### Export common configurations #########################
 
-install(FILES       ${CMAKE_SOURCE_DIR}/config/cp_config_default.cmake
-                    ${CMAKE_SOURCE_DIR}/config/cp_check.cmake
+install(FILES       ${CMAKE_SOURCE_DIR}/config/cp_check.cmake
         DESTINATION ${INSTALL_CONFIG_DIR})
 
 ################### Read recommended tf-m-tests version ########################

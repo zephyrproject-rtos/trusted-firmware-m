@@ -10,6 +10,18 @@ cmake_policy(SET CMP0076 NEW)
 include(${CORSTONE300_COMMON_DIR}/common.cmake)
 
 add_library(flash_drivers INTERFACE)
+add_library(flash_drivers_s STATIC)
+add_library(flash_drivers_bl2 STATIC)
+
+target_sources(flash_drivers_s
+    PRIVATE
+        cmsis_drivers/Driver_Flash.c
+)
+
+target_sources(flash_drivers_bl2
+    PRIVATE
+        cmsis_drivers/Driver_Flash_bl2.c
+)
 
 target_include_directories(flash_drivers
     INTERFACE
@@ -23,7 +35,6 @@ target_include_directories(flash_drivers
 
 target_sources(flash_drivers
     INTERFACE
-        cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c
         device/source/flash_device_definition.c

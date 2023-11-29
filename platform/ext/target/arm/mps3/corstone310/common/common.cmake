@@ -85,7 +85,25 @@ target_include_directories(cmsis_includes
 )
 
 add_library(cmsis_includes_s INTERFACE)
+add_library(cmsis_includes_bl2 INTERFACE)
 target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes)
+target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes)
+target_include_directories(cmsis_includes_bl2
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
+)
+
+target_compile_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_link_options(cmsis_includes_bl2
+    INTERFACE
+        ${BL2_LINKER_CP_OPTION}
+)
+
+
 target_include_directories(cmsis_includes_s
     INTERFACE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
@@ -94,10 +112,6 @@ target_include_directories(cmsis_includes_s
 target_compile_options(cmsis_includes_s
     INTERFACE
         ${COMPILER_CMSE_FLAG}
-)
-
-target_compile_options(cmsis_includes_s
-    INTERFACE
         ${COMPILER_CP_FLAG}
 )
 
@@ -116,7 +130,7 @@ target_link_libraries(platform_bl2
         cmsis_includes
     PRIVATE
         device_definition_s
-        cmsis_includes_s
+        cmsis_includes_bl2
 )
 
 target_link_libraries(platform_s
@@ -126,7 +140,6 @@ target_link_libraries(platform_s
         device_definition
     PRIVATE
         device_definition_s
-
 )
 
 #========================= Platform Secure ====================================#
@@ -171,6 +184,13 @@ target_sources(tfm_sprt
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+# To configure S and NS timer in S side for FP interrupt test
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+        $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
 )
 
 target_compile_definitions(platform_s
@@ -238,15 +258,19 @@ add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisi
 endif()
 
 #========================= Files for building NS side platform ================#
+target_compile_definitions(tfm_config
+    INTERFACE
+        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
+        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
+        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
+        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+)
 
 install(FILES       ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
                     ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure/cmsis_driver_config.h
                     ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure/RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/cmsis_drivers)
-
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
 
 install(DIRECTORY   ${CORSTONE310_COMMON_DIR}/device
                     ${CORSTONE310_COMMON_DIR}/native_drivers

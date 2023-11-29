@@ -15,7 +15,6 @@ target_sources(platform_ns
     PRIVATE
         arm_uart_drv.c
         timer_cmsdk.c
-        uart_stdout.c
         Driver_USART.c
         cmsis_core/startup_an521.c
         cmsis_core/system_core_init.c
@@ -32,6 +31,7 @@ target_include_directories(platform_ns
         include
         ext/cmsis
         cmsis_core
+        ext/common
 )
 
 target_compile_definitions(platform_ns

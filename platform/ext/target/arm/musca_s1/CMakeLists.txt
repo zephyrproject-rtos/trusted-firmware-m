@@ -145,8 +145,7 @@ target_sources(tfm_spm
 
 #========================= Files for building NS side platform ================#
 
-install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
                     Libraries/mt25ql_flash_lib.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
@@ -164,7 +163,6 @@ install(FILES       target_cfg.h
                     Device/Config/device_cfg.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
                     ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
-                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )

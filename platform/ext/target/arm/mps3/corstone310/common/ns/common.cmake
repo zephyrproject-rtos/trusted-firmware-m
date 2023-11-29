@@ -7,6 +7,9 @@
 
 cmake_policy(SET CMP0076 NEW)
 
+set(CONFIG_TFM_FP_ARCH "fpv5-d16")
+set(CONFIG_TFM_FP_ARCH_ASM "FPv5_D16")
+
 #========================= Platform region defs ===============================#
 
 target_include_directories(platform_region_defs
@@ -90,14 +93,12 @@ target_sources(platform_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+    INTERFACE
+        $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone310_ns_init.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${PLATFORM_DIR}/ext/common/test_interrupt.c>
 )
 
-#========================= platform_region_defs ===============================#
-target_compile_definitions(platform_region_defs
-    INTERFACE
-        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
-        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
-        PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
-        PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
-        PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+target_compile_definitions(platform_ns
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
 )

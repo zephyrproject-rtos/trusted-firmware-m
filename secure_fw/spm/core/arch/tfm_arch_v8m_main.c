@@ -319,7 +319,11 @@ void tfm_arch_config_extensions(void)
                   | FPU_FPCCR_LSPENS_Msk;
 
     /* Prevent non-secure from modifying FPU’s power setting. */
+#if defined(__ARM_ARCH_8_1M_MAIN__) && defined(ICB)
+    ICB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+#else
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+#endif
 #endif /* CONFIG_TFM_FLOAT_ABI >= 1 */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)

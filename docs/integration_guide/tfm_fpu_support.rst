@@ -14,8 +14,7 @@ Environment (NSPE).
 * Support GNU Arm Embedded Toolchain [3]_. ``GNU Arm Embedded Toolchain 10.3-
   2021.10`` and later version shall be used to mitigate VLLDM instruction
   security vulnerability [4]_.
-* Support Inter-Process Communication (IPC) [5]_ model in TF-M, and doesn't
-  support SFN model.
+* Support both IPC [5]_ and SFN [11]_ models in TF-M.
 * Support Armv8-M mainline.
 * Support isolation level 1,2,3.
 * Support Arm Compiler for Embedded [10]_. ``Arm Compiler for Embedded 6.17``
@@ -139,7 +138,7 @@ Reference
 
 .. [4] `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
 
-.. [5] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://armkeil.blob.core.windows.net/developer/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf>`_
+.. [5] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/documentation/den0063/latest/>`_
 
 .. [6] :doc:`Secure Interrupt Integration Guide </integration_guide/tfm_secure_irq_integration_guide>`
 
@@ -151,6 +150,8 @@ Reference
 
 .. [10] `Arm Compiler for Embedded <https://developer.arm.com/Tools%20and%20Software/Arm%20Compiler%20for%20Embedded>`_
 
+.. [11] `FF-M v1.1 Extension <https://developer.arm.com/documentation/aes0039/latest/>`__
+
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*

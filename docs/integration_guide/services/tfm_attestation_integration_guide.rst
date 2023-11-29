@@ -645,10 +645,7 @@ that user has license for DS-5 and FVP models:
      ``check_iat -m mac -p -K -k platform/ext/common/template/tfm_symmetric_iak.key <PATH>/iat_hmac_02.cbor``
 
  - Documentation of the iat-verifier can be found in the
-   `tf-m-tools-iat-verifer-readme`_ .
-
-.. _tf-m-tools-iat-verifer-readme: https://git.trustedfirmware.org/TF-M/
-  tf-m-tools.git/tree/iat-verifier/README.rst
+   :doc:`tf-m-tools-iat-verifer<TF-M-Tools:iat-verifier>`.
 
 --------------
 
