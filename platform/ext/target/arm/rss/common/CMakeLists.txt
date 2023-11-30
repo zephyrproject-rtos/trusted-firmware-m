@@ -653,8 +653,11 @@ install(FILES       ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_con
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )
 
-install(DIRECTORY   device/config
-                    device/include
+install(FILES       device/config/device_cfg_ns.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/device/config
+        RENAME      device_cfg.h)
+
+install(DIRECTORY   device/include
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/device
 )
 
