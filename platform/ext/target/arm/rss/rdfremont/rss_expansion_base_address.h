@@ -22,9 +22,11 @@
 #ifndef __RSS_EXPANSION_BASE_ADDRESS_H__
 #define __RSS_EXPANSION_BASE_ADDRESS_H__
 
+/* RSS Integration Layer register block */
+#define RSS_INTEG_LAYER_BASE_S  0x58100000
 /* UART 0 Secure base address */
-#define UART0_BASE_S        0x58101000
+#define UART0_BASE_S            0x58101000
 /* Boot flash */
-#define BOOT_FLASH_BASE_S   0xB0000000
+#define BOOT_FLASH_BASE_S       0xB0000000
 
 #endif  /* __RSS_EXPANSION_BASE_ADDRESS_H__ */
