@@ -7,7 +7,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 # CMake 3.21 and above requests projects to specify cpu/arch compile and link flags explicitly in
 # Armclang. Link: https://cmake.org/cmake/help/latest/policy/CMP0123.html

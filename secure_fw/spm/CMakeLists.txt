@@ -8,7 +8,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 if(PSA_FRAMEWORK_HAS_MM_IOVEC)
     message(NOTICE "**** MM-IOVEC is enabled for memory and runtime optimizations for larger buffers, ****\n"

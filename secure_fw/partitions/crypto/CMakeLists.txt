@@ -11,7 +11,7 @@ endif()
 
 find_package(Python3)
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_crypto STATIC)
