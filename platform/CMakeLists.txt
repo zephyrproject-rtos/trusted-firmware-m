@@ -7,8 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.21)
-cmake_policy(SET CMP0076 NEW)
-cmake_policy(SET CMP0079 NEW)
 
 add_library(platform_s STATIC)
 add_library(platform_region_defs INTERFACE)

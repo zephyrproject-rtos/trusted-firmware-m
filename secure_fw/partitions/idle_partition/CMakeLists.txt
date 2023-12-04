@@ -13,7 +13,6 @@ if (NOT CONFIG_TFM_FLIH_API AND NOT CONFIG_TFM_SLIH_API AND
 endif()
 
 cmake_minimum_required(VERSION 3.21)
-cmake_policy(SET CMP0079 NEW)
 
 target_sources(tfm_spm
     PRIVATE

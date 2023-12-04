@@ -4,10 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-# Allow linking to things 'upwards' in the directory tree (in this case bl2 / tfm_psa_rot_partition_crypto)
-cmake_policy(SET CMP0079 NEW)
-# Allow relative paths
-cmake_policy(SET CMP0076 NEW)
 
 if(NOT DEFINED CC312_PATH)
     set(CC312_PATH ../../../../lib/ext/cryptocell-312-runtime CACHE PATH "Path to CC312 lib")

@@ -5,9 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-if(POLICY CMP0123)
-    cmake_policy(SET CMP0123 NEW)
-endif()
+cmake_minimum_required(VERSION 3.21)
 
 if(NOT COMMAND tfm_invalid_config)
     function(tfm_invalid_config)

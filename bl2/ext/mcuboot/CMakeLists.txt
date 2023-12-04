@@ -6,7 +6,6 @@
 #------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.21)
-cmake_policy(SET CMP0079 NEW)
 
 add_library(mcuboot_config INTERFACE)
 

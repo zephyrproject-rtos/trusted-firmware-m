@@ -8,8 +8,6 @@
 #-------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.21)
-cmake_policy(SET CMP0076 NEW)
-cmake_policy(SET CMP0079 NEW)
 
 # Generate framework feature
 set(PSA_FRAMEWORK_ISOLATION_LEVEL   ${TFM_ISOLATION_LEVEL})

@@ -5,8 +5,6 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_policy(SET CMP0079 NEW)
-
 if(BL2)
     add_library(bl2_crypto_hw STATIC)
 endif()

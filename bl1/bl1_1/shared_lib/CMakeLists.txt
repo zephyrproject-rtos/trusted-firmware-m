@@ -58,8 +58,6 @@ target_compile_definitions(bl1_1_shared_lib_interface
 )
 
 if(TFM_BL1_SOFTWARE_CRYPTO)
-    cmake_policy(SET CMP0079 NEW)
-
     set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
     set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
     set(ENABLE_TESTING OFF)

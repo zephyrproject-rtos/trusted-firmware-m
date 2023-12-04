@@ -12,7 +12,6 @@ endif()
 find_package(Python3)
 
 cmake_minimum_required(VERSION 3.21)
-cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_crypto STATIC)
 
@@ -118,8 +117,6 @@ target_link_libraries(crypto_service_mbedcrypto_config
         tfm_config
         psa_crypto_config
 )
-
-cmake_policy(SET CMP0079 NEW)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
