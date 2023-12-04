@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,6 @@
 
 #include <stdint.h>
 
-int32_t rse_handshake(void);
+int32_t rse_handshake(uint32_t *vhuk_seeds_buf);
 
 #endif /* __RSE_HANDSHAKE_H__ */

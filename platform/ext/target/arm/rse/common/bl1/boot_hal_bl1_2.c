@@ -317,13 +317,7 @@ int32_t boot_platform_post_init(void)
         false, /* Don't disable the masking */
     };
 
-#if RSE_AMOUNT > 1
-    rc = rse_handshake();
-    if (rc) {
-        return rc;
-    }
-#else
-    uint32_t vhuk_seed[8];
+    uint32_t vhuk_seed[8 * RSE_AMOUNT];
     size_t vhuk_seed_len;
 
     rc = rse_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
@@ -331,11 +325,17 @@ int32_t boot_platform_post_init(void)
         return rc;
     }
 
+#if RSE_AMOUNT > 1
+    rc = rse_handshake(vhuk_seed);
+    if (rc) {
+        return rc;
+    }
+#endif /* RSE_AMOUNT > 1 */
+
     rc = rse_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSE_KMU_SLOT_VHUK);
     if (rc) {
         return rc;
     }
-#endif
 
     rc = rse_derive_cpak_seed(RSE_KMU_SLOT_CPAK_SEED);
     if (rc) {

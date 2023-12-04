@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -219,7 +219,7 @@ int rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
     uint8_t vhuk_seed_label[]  = "VHUK_SEED_DERIVATION";
     int rc;
 
-    if (vhuk_seed_buf_len != 32) {
+    if (vhuk_seed_buf_len < 32) {
         return 1;
     }
 
