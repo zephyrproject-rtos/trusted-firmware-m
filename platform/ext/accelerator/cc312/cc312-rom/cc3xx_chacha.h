@@ -11,7 +11,9 @@
 #include "cc3xx_error.h"
 #include "cc3xx_config.h"
 #include "cc3xx_dma.h"
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
 #include "cc3xx_poly1305.h"
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -22,6 +24,8 @@ extern "C" {
 #endif
 
 #define CC3XX_CHACHA_KEY_SIZE 32
+
+#define CC3XX_CHACHA_BLOCK_SIZE 64
 
 typedef enum {
     CC3XX_CHACHA_MODE_CHACHA = 0b0,
@@ -39,7 +43,6 @@ struct cc3xx_chacha_state_t {
     bool iv_is_96_bit;
     uint32_t key[8];
 
-    size_t bytes_since_dma_output_addr_set;
     size_t crypted_len;
     size_t authed_len;
 
@@ -47,7 +50,9 @@ struct cc3xx_chacha_state_t {
     uint32_t iv[3];
 
     struct cc3xx_dma_state_t dma_state;
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     struct cc3xx_poly1305_state_t poly_state;
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 };
 
 /**

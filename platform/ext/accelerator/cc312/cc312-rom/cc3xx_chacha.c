@@ -14,8 +14,6 @@
 #include <string.h>
 #include <assert.h>
 
-#define CHACHA_BLOCK_SIZE 64
-
 struct cc3xx_chacha_state_t chacha_state;
 
 static void set_iv(const uint32_t *iv)
@@ -74,6 +72,13 @@ static inline void set_key(const uint32_t *key)
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 }
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
+static void cc3xx_chacha20_reset_current_output_size(void)
+{
+    dma_state.current_bytes_output = 0;
+}
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
+
 void chacha_init_from_state(void)
 {
     P_CC3XX->misc.chacha_clk_enable = 0x1U;
@@ -81,7 +86,7 @@ void chacha_init_from_state(void)
     cc3xx_set_engine(CC3XX_ENGINE_CHACHA);
 
     /* This is the block size */
-    cc3xx_dma_set_buffer_size(CHACHA_BLOCK_SIZE);
+    cc3xx_dma_set_buffer_size(CC3XX_CHACHA_BLOCK_SIZE);
 
     set_key(chacha_state.key);
 
@@ -94,10 +99,12 @@ void chacha_init_from_state(void)
         P_CC3XX->chacha.chacha_control_reg |= 0b1 << 10;
     }
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         /* Set to output the poly1305 key */
         P_CC3XX->chacha.chacha_control_reg |= (chacha_state.mode & 0b1) << 2;
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 }
 
 cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
@@ -106,12 +113,16 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
                                 uint64_t initial_counter,
                                 const uint32_t *iv, size_t iv_len)
 {
-    uint32_t poly_key[CHACHA_BLOCK_SIZE / sizeof(uint32_t)] = {0};
     uint32_t idx;
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
+    uint32_t poly_key[CC3XX_CHACHA_BLOCK_SIZE / sizeof(uint32_t)] = {0};
 
     if (mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         assert(initial_counter == 0);
     }
+#else
+    assert(mode == CC3XX_CHACHA_MODE_CHACHA);
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     cc3xx_chacha20_uninit();
 
@@ -142,6 +153,7 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
      */
     P_CC3XX->chacha.chacha_control_reg |= 0b1 << 1;
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     /* Calculate the poly1305 key by inputting an all-zero block. This uses
      * counter value 0, leaving the encryption to start on counter value 1.
      */
@@ -150,9 +162,13 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
         cc3xx_dma_buffered_input_data(poly_key, sizeof(poly_key), true);
         cc3xx_dma_flush_buffer(true);
 
+        /* This is a preparatory operation so no need to count it in the output size */
+        cc3xx_chacha20_reset_current_output_size();
+
         cc3xx_poly1305_init(poly_key,
                             poly_key + (POLY1305_KEY_SIZE / sizeof(uint32_t)));
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     return CC3XX_ERR_SUCCESS;
 }
@@ -162,9 +178,11 @@ void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state)
     memcpy(state, &chacha_state, sizeof(struct cc3xx_chacha_state_t));
     memcpy(&state->dma_state, &dma_state, sizeof(dma_state));
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         cc3xx_poly1305_get_state(&state->poly_state);
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     get_iv(state->iv);
     state->counter = get_ctr();
@@ -175,9 +193,11 @@ cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state)
     memcpy(&chacha_state, state, sizeof(struct cc3xx_chacha_state_t));
     memcpy(&dma_state, &state->dma_state, sizeof(dma_state));
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         cc3xx_poly1305_set_state(&state->poly_state);
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     chacha_init_from_state();
 
@@ -197,49 +217,41 @@ size_t cc3xx_chacha20_get_current_output_size(void)
 
 void cc3xx_chacha20_set_output_buffer(uint8_t *out, size_t out_len)
 {
-    uintptr_t prev_addr = dma_state.output_addr + dma_state.block_buf_size_in_use
-                          - chacha_state.bytes_since_dma_output_addr_set;
-
     cc3xx_dma_set_output(out, out_len);
-
-    /* If we've switched output pointer and we're doing and AEAD encrypt, then
-     * input all of the data we've encrypted so for (or since the last output
-     * pointer switch) as otherwise we won't know where that data is.
-     */
-    if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305 &&
-        chacha_state.direction == CC3XX_CHACHA_DIRECTION_ENCRYPT &&
-        chacha_state.bytes_since_dma_output_addr_set != 0) {
-        cc3xx_poly1305_update((uint8_t *)prev_addr,
-                              chacha_state.bytes_since_dma_output_addr_set);
-    }
-    chacha_state.bytes_since_dma_output_addr_set = 0;
 }
 
 void cc3xx_chacha20_update_authed_data(const uint8_t* in, size_t in_len)
 {
-    if(in_len == 0) {
+    if (in_len == 0) {
         return;
     }
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         chacha_state.authed_len += in_len;
+        cc3xx_poly1305_update(in, in_len);
     }
-    cc3xx_poly1305_update(in, in_len);
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 }
 
 cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len)
 {
     cc3xx_err_t err;
-    uint8_t zero_block[POLY1305_BLOCK_SIZE] = {0};
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
+    size_t block_buf_size_before_update = dma_state.block_buf_size_in_use;
+    size_t bytes_outputted_from_dma;
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     if (in_len == 0) {
         return CC3XX_ERR_SUCCESS;
     }
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     /* Input into poly1305 before into the DMA, in case we're doing an in-place
      * operation.
      */
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
+        const uint8_t zero_block[POLY1305_BLOCK_SIZE] = {0};
         if (chacha_state.crypted_len == 0) {
             /* Pad poly1305 between AAD and plaintext */
             cc3xx_poly1305_update(zero_block, POLY1305_BLOCK_SIZE -
@@ -247,7 +259,6 @@ cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len)
                                                POLY1305_BLOCK_SIZE));
         }
 
-        chacha_state.bytes_since_dma_output_addr_set += in_len;
         chacha_state.crypted_len += in_len;
 
         /* If we're decrypting, then input the input data to poly1305. If we're
@@ -258,12 +269,38 @@ cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len)
             cc3xx_poly1305_update(in, in_len);
         }
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     err = cc3xx_dma_buffered_input_data(in, in_len, true);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return err;
+    }
+
+
+    /* Flush the block straight away if we have enough data */
+    if (dma_state.block_buf_size_in_use == CC3XX_CHACHA_BLOCK_SIZE) {
+        cc3xx_dma_flush_buffer(false);
+    }
+
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
+    /* If we're encrypting, we now need to input any blocks that got outputted
+     * in this operation into poly1305.
+     */
+    bytes_outputted_from_dma = (block_buf_size_before_update + in_len)
+                                / CC3XX_CHACHA_BLOCK_SIZE * CC3XX_CHACHA_BLOCK_SIZE;
+
+    if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305 &&
+        chacha_state.direction == CC3XX_CHACHA_DIRECTION_ENCRYPT &&
+        bytes_outputted_from_dma > 0) {
+        cc3xx_poly1305_update((uint8_t *)(dma_state.output_addr - bytes_outputted_from_dma),
+                              bytes_outputted_from_dma);
+    }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     return err;
 }
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
 static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
 {
     uint32_t idx;
@@ -278,7 +315,11 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
             are_different |= tag[permutation_buf[idx]] ^ calculated_tag[permutation_buf[idx]];
         }
     } else {
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(tag, calculated_tag, tag_word_size);
+#else
+        memcpy(tag, calculated_tag, POLY1305_TAG_LEN);
+#endif
     }
 
     if (are_different) {
@@ -287,28 +328,34 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
         return CC3XX_ERR_SUCCESS;
     }
 }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
 cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size)
 {
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     uint64_t len_block[2] = {0};
     uint32_t calculated_tag[POLY1305_TAG_LEN / sizeof(uint32_t)];
     size_t pad_len;
+    uint32_t final_data_size = dma_state.block_buf_size_in_use;
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
+    cc3xx_err_t err;
 
     /* Check alignment */
     assert(((uintptr_t)tag & 0b11) == 0);
 
     cc3xx_dma_flush_buffer(false);
 
+    if (size != NULL) {
+        *size = cc3xx_chacha20_get_current_output_size();
+    }
+
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
-        /* If we're encrypting, input the ciphertext into poly1305 at the end,
-         * since we know the DMA buffer is empty now. If we've performed an
-         * output buffer switch, then just input the ciphertext that's been
-         * output since then.
+        /* Finish inputting the last of the flushed blocks
          */
         if (chacha_state.direction == CC3XX_CHACHA_DIRECTION_ENCRYPT) {
-            cc3xx_poly1305_update((uint8_t *)dma_state.output_addr -
-                                  chacha_state.bytes_since_dma_output_addr_set,
-                                  chacha_state.bytes_since_dma_output_addr_set);
+            cc3xx_poly1305_update((uint8_t *)(dma_state.output_addr - final_data_size),
+                                  final_data_size);
         }
 
         if (chacha_state.crypted_len == 0) {
@@ -327,14 +374,16 @@ cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size)
                               sizeof(len_block));
         cc3xx_poly1305_finish(calculated_tag);
 
-        return tag_cmp_or_copy(tag, calculated_tag);
+        err = tag_cmp_or_copy(tag, calculated_tag);
+    } else
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
+    {
+        err = CC3XX_ERR_SUCCESS;
     }
 
-    if (size != NULL) {
-        *size = cc3xx_chacha20_get_current_output_size();
-    }
+    cc3xx_chacha20_uninit();
 
-    return CC3XX_ERR_SUCCESS;
+    return err;
 }
 
 void cc3xx_chacha20_uninit(void)
@@ -342,9 +391,11 @@ void cc3xx_chacha20_uninit(void)
     uint32_t zero_iv[3] = {0};
     memset(&chacha_state, 0, sizeof(chacha_state));
 
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         cc3xx_poly1305_uninit();
     }
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     set_ctr(0);
     set_iv(zero_iv);
