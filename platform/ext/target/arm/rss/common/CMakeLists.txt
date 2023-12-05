@@ -99,6 +99,8 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
 
+# Set which PLATFORM depedency must be used by the CC3XX driver
+set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
 add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
 
 target_include_directories(platform_s

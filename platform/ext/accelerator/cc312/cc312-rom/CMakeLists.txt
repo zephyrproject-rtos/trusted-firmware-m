@@ -5,9 +5,15 @@
 #
 #-------------------------------------------------------------------------------
 
-add_library(cc312_rom STATIC)
+set(CC3XX_TARGET_NAME ${CC3XX_TARGET_PREFIX}cc312_rom)
 
-target_sources(cc312_rom
+add_library(${CC3XX_TARGET_NAME} STATIC)
+
+if (NOT DEFINED CC3XX_PLATFORM_INTERFACE)
+    message(FATAL "When building cc312-rom, the platform dependency must be specified")
+endif()
+
+target_sources(${CC3XX_TARGET_NAME}
     PRIVATE
         ./cc3xx_lcs.c
         ./cc3xx_otp.c
@@ -39,12 +45,14 @@ if (${BUILD_TYPE_LOWER} STREQUAL "release" OR ${BUILD_TYPE_LOWER} STREQUAL "mins
     )
 endif()
 
-target_include_directories(cc312_rom
+target_include_directories(${CC3XX_TARGET_NAME}
     PUBLIC
         .
 )
 
-target_link_libraries(cc312_rom
+target_link_libraries(${CC3XX_TARGET_NAME}
     PRIVATE
-        platform_bl1_1_interface
+        ${CC3XX_PLATFORM_INTERFACE}
 )
+
+add_subdirectory(psa_driver_api)
