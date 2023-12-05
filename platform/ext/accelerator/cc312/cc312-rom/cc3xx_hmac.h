@@ -36,10 +36,10 @@ struct cc3xx_hmac_state_t {
 /**
  * @brief Sets the key for the HMAC operation on the state
  *
- * @param[out] state   A pointer to a state structure
- * @param[in] key      Buffer containing the key
- * @param[in] key_size Size in bytes of the buffer \param key
- * @param[in] alg      Underlying hashing algorithm
+ * @param[out] state    A pointer to a state structure
+ * @param[in]  key      Buffer containing the key
+ * @param[in]  key_size Size in bytes of the buffer \param key
+ * @param[in]  alg      Underlying hashing algorithm
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_lowlevel_hmac_set_key(
@@ -49,11 +49,23 @@ cc3xx_err_t cc3xx_lowlevel_hmac_set_key(
     cc3xx_hash_alg_t alg);
 
 /**
+ * @brief Set tag length for truncated HMAC algorithms. This must be called
+ *        after cc3xx_hmac_set_key is called, otherwise the default hash
+ *        length will be used instead
+ *
+ * @param[out] state   A pointer to a state structure
+ * @param[in]  tag_len Desired tag length
+ */
+void cc3xx_lowlevel_hmac_set_tag_length(
+    struct cc3xx_hmac_state_t *state,
+    size_t tag_len);
+
+/**
  * @brief Update the HMAC operation with a new chunk of data to authenticate
  *
- * @param[in,out] state   A pointer to a state structure
- * @param[in] data        Buffer containing the data to use for the update
- * @param[in] data_length Size in bytes of the buffer \param data
+ * @param[in,out] state       A pointer to a state structure
+ * @param[in]     data        Buffer containing the data to use for the update
+ * @param[in]     data_length Size in bytes of the buffer \param data
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_lowlevel_hmac_update(
@@ -64,15 +76,46 @@ cc3xx_err_t cc3xx_lowlevel_hmac_update(
 /**
  * @brief Finalize the HMAC operation by producing the authentication tag
  *
- * @param[in,out] state A pointer to a state structure
- * @param[out] tag      Output buffer
- * @param[in] tag_size  Size in bytes of the buffer \param tag
+ * @param[in,out] state    A pointer to a state structure
+ * @param[out]    tag      Output buffer
+ * @param[in]     tag_size Size in bytes of the buffer \param tag
+ * @param[out]    tag_len  Length of the generated tag
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_lowlevel_hmac_finish(
     struct cc3xx_hmac_state_t *state,
     uint32_t *tag,
-    size_t tag_size);
+    size_t tag_size,
+    size_t *tag_len);
+
+/**
+ * @brief Perform the computation of HMAC as an integrated operation. When
+ *        this function is normally called by the PSA MAC API layer, the
+ *        cc3xx_psa_api_config.h must have the configuration option named
+ *        \ref CC3XX_CONFIG_ENABLE_MAC_INTEGRATED_API must be set, otherwise
+ *        the MAC layer resorts to using multipart APIs to implement single part
+ *
+ * @param[in]  tag_len     Desired tag length (i.e. truncates the hash output to leftmost N bits)
+ * @param[in]  key         Buffer containing the key material
+ * @param[in]  key_size    Size in bytes of the key to be used
+ * @param[in]  alg         Hash algorithm to be used in HMAC, as a \ref cc3xx_hash_alg_t type
+ * @param[in]  data        Data to be authenticated
+ * @param[in]  data_length Size in bytes of the data to be authenticated
+ * @param[out] tag         Buffer that contains the MAC produced if the operation succeeds
+ * @param[in]  tag_size    Size in byte of the \ref tag buffer
+ * @param[out] tag_length  Size in bytes of the produced tag (i.e. depends on the underlying hash)
+ * @return cc3xx_err_t
+ */
+cc3xx_err_t cc3xx_lowlevel_hmac_compute(
+    size_t tag_len,
+    const uint8_t *key,
+    size_t key_size,
+    cc3xx_hash_alg_t alg,
+    const uint8_t *data,
+    size_t data_length,
+    uint32_t *tag,
+    size_t tag_size,
+    size_t *tag_length);
 
 #ifdef __cplusplus
 }

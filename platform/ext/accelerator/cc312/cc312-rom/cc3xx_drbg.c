@@ -19,7 +19,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_init(
 
     state->id = id;
 
-    switch(id) {
+    switch (id) {
 #ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
     case CC3XX_DRBG_CTR:
         return cc3xx_lowlevel_drbg_ctr_init(
@@ -54,7 +54,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_generate(
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len)
 {
-    switch(state->id) {
+    switch (state->id) {
 #ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
     case CC3XX_DRBG_CTR:
         return cc3xx_lowlevel_drbg_ctr_generate(
@@ -80,7 +80,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_reseed(
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len)
 {
-    switch(state->id) {
+    switch (state->id) {
 #ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
     case CC3XX_DRBG_CTR:
         return cc3xx_lowlevel_drbg_ctr_reseed(
@@ -103,7 +103,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_reseed(
 
 cc3xx_err_t cc3xx_lowlevel_drbg_uninit(struct cc3xx_drbg_state_t *state)
 {
-    switch(state->id) {
+    switch (state->id) {
 #ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
     case CC3XX_DRBG_CTR:
         return cc3xx_lowlevel_drbg_ctr_uninit(&state->ctr);

@@ -88,10 +88,10 @@ static cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
 {
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
     volatile uint32_t *hw_key_buf_ptr;
-    size_t key_word_size = 4 + (key_size * 2);
 
-#if defined(CC3XX_CONFIG_AES_CCM_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE)
+#if !defined(CC3XX_CONFIG_AES_CCM_ENABLE) || !defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE)
     if (is_tun1) {
+        assert(0); /* Wrong programming for this driver configuration */
         return CC3XX_ERR_INVALID_STATE;
     }
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
@@ -135,6 +135,8 @@ static cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         }
     } else {
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
+        size_t key_word_size = 4 + (key_size * 2);
+
         cc3xx_dpa_hardened_word_copy(hw_key_buf_ptr, key, key_word_size - 1);
         hw_key_buf_ptr[key_word_size - 1] = key[key_word_size - 1];
 #else
@@ -207,6 +209,11 @@ static inline void set_tun1_mode(cc3xx_aes_mode_t mode)
 }
 
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
+static void cc3xx_aes_reset_current_output_size(void)
+{
+    dma_state.current_bytes_output = 0;
+}
+
 #ifdef CC3XX_CONFIG_AES_GCM_VARIABLE_IV_ENABLE
 static void gcm_calc_initial_counter_from_iv(uint32_t *counter,
                                              const uint32_t *iv,
@@ -264,6 +271,9 @@ static void gcm_init_iv(const uint32_t *iv, size_t iv_len)
     cc3xx_lowlevel_dma_set_output(aes_state.ghash_key, sizeof(aes_state.ghash_key));
     cc3xx_lowlevel_dma_buffered_input_data(zero_iv, sizeof(zero_iv), true);
     cc3xx_lowlevel_dma_flush_buffer(false);
+
+    /* This is a preparatory operation so no need to count it in the output size */
+    cc3xx_aes_reset_current_output_size();
 
     /* Set GHASH_INIT and set the key */
     P_CC3XX->ghash.ghash_subkey_0[0] = aes_state.ghash_key[0];
@@ -462,39 +472,39 @@ cc3xx_err_t cc3xx_lowlevel_aes_init(
         return err;
     }
 
-    switch(mode) {
+    switch (mode) {
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
         /* No IV to set up for CMAC */
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 #ifdef CC3XX_CONFIG_AES_ECB_ENABLE
-        case CC3XX_AES_MODE_ECB:
+    case CC3XX_AES_MODE_ECB:
         /* No IV to set up for ECB */
 #endif /* CC3XX_CONFIG_AES_ECB_ENABLE */
         break;
 #ifdef CC3XX_CONFIG_AES_CTR_ENABLE
-        case CC3XX_AES_MODE_CTR:
+    case CC3XX_AES_MODE_CTR:
         assert(iv_len == 16);
         set_ctr(iv);
         break;
 #endif /* CC3XX_CONFIG_AES_CTR_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CBC_ENABLE
-        case CC3XX_AES_MODE_CBC:
+    case CC3XX_AES_MODE_CBC:
         assert(iv_len == 16);
         set_iv(iv);
         break;
 #endif /* CC3XX_CONFIG_AES_CBC_ENABLE */
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         gcm_init_iv(iv, iv_len);
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
         ccm_init_iv(iv, iv_len);
         break;
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
-        default:
+    default:
         return CC3XX_ERR_NOT_IMPLEMENTED;
     }
 
@@ -593,7 +603,7 @@ void cc3xx_lowlevel_aes_set_tag_len(uint32_t tag_len)
 
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
         /* NIST SP800-38C recommends 8 as a lower bound. IEEE 802.15 specifies
          * that 0, 4, 6, 8, 10, 12, 14, 16 are valid for CCM*.
          */
@@ -601,19 +611,19 @@ void cc3xx_lowlevel_aes_set_tag_len(uint32_t tag_len)
         break;
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         /* NIST SP800-38D recommends 12 as a lower bound. */
         assert(tag_len >= 12 && tag_len <= 16);
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
         /* NIST SP800-38B recommends 8 as a lower bound. */
         assert(tag_len >= 8 && tag_len <= 16);
         break;
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
-        default:
-        ;
+    default:
+        break;
     }
 #endif
 }
@@ -636,7 +646,7 @@ size_t cc3xx_lowlevel_aes_get_current_output_size(void)
 }
 
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-void ccm_calc_iv(bool from_auth)
+static void ccm_calc_iv(bool from_auth)
 {
     uint8_t __attribute__((__aligned__(4))) b0_block[AES_BLOCK_SIZE] = {0};
     uint64_t crypt_length_be = bswap_64((uint64_t)aes_state.aes_to_crypt_len);
@@ -832,17 +842,18 @@ static void configure_engine_for_crypted_data(bool *write_output)
 
 cc3xx_err_t cc3xx_lowlevel_aes_update(const uint8_t* in, size_t in_len)
 {
+    cc3xx_err_t err;
     bool write_output;
 
     /* MAC modes have no concept of encryption/decryption
      * so cc3xx_lowlevel_aes_update is a no-op.
      */
-    switch(aes_state.mode) {
+    switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
         return CC3XX_ERR_SUCCESS;
-        default:
+    default:
         break;
     }
 
@@ -884,7 +895,16 @@ cc3xx_err_t cc3xx_lowlevel_aes_update(const uint8_t* in, size_t in_len)
     configure_engine_for_crypted_data(&write_output);
 
     aes_state.crypted_length += in_len;
-    return cc3xx_lowlevel_dma_buffered_input_data(in, in_len, write_output);
+    err = cc3xx_lowlevel_dma_buffered_input_data(in, in_len, write_output);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return err;
+    }
+
+    if (dma_state.block_buf_size_in_use == AES_BLOCK_SIZE) {
+        cc3xx_lowlevel_dma_flush_buffer(false);
+    }
+
+    return CC3XX_ERR_SUCCESS;
 }
 
 #if defined(CC3XX_CONFIG_AES_CCM_ENABLE) \
@@ -977,7 +997,7 @@ static cc3xx_err_t cmac_finish(uint32_t *tag)
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-cc3xx_err_t ccm_finish(uint32_t *tag)
+static cc3xx_err_t ccm_finish(uint32_t *tag)
 {
     uint32_t calculated_tag[AES_IV_LEN / sizeof(uint32_t)];
 
@@ -1047,28 +1067,29 @@ cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size)
         break;
     }
 
+    /* Get the size before any tag is produced */
+    if (size != NULL) {
+        *size = cc3xx_lowlevel_aes_get_current_output_size();
+    }
+
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         err = gcm_finish(tag);
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
         err = cmac_finish(tag);
         break;
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
         err = ccm_finish(tag);
         break;
-        default:
-        ;
-    }
-
-    if (size != NULL) {
-        *size = cc3xx_lowlevel_aes_get_current_output_size();
+    default:
+        break;
     }
 
     cc3xx_lowlevel_aes_uninit();

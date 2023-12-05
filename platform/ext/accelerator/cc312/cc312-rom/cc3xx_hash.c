@@ -12,6 +12,7 @@
 #include "cc3xx_dma.h"
 #include "cc3xx_engine_state.h"
 #include "cc3xx_endian_helpers.h"
+#include "cc3xx_stdlib.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -91,7 +92,7 @@ cc3xx_err_t cc3xx_lowlevel_hash_init(cc3xx_hash_alg_t alg)
     P_CC3XX->hash.hash_cur_len[0] = 0x0U;
     P_CC3XX->hash.hash_cur_len[1] = 0x0U;
 
-    switch(alg) {
+    switch (alg) {
 #ifdef CC3XX_CONFIG_HASH_SHA224_ENABLE
     case CC3XX_HASH_ALG_SHA224:
         iv = iv_sha224;
@@ -171,16 +172,16 @@ void cc3xx_lowlevel_hash_finish(uint32_t *res, size_t length)
     /* Check alignment */
     assert(((uintptr_t)res & 0b11) == 0);
     /* Check size */
-    switch(P_CC3XX->hash.hash_control & 0b1111) {
-        case CC3XX_HASH_ALG_SHA256:
-            assert(length == SHA256_OUTPUT_SIZE);
-            break;
-        case CC3XX_HASH_ALG_SHA224:
-            assert(length == SHA224_OUTPUT_SIZE);
-            break;
-        case CC3XX_HASH_ALG_SHA1:
-            assert(length == SHA1_OUTPUT_SIZE);
-            break;
+    switch (P_CC3XX->hash.hash_control & 0b1111) {
+    case CC3XX_HASH_ALG_SHA256:
+        assert(length >= SHA256_OUTPUT_SIZE);
+        break;
+    case CC3XX_HASH_ALG_SHA224:
+        assert(length >= SHA224_OUTPUT_SIZE);
+        break;
+    case CC3XX_HASH_ALG_SHA1:
+        assert(length >= SHA1_OUTPUT_SIZE);
+        break;
     }
 
     /* If any data has been input to the hash, the DMA block buf will be

@@ -11,9 +11,7 @@
 #include "cc3xx_drbg_hash.h"
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_pka.h"
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 #include "cc3xx_stdlib.h"
-#endif
 
 /**
  * @brief Ceiling of a / b

@@ -277,7 +277,6 @@ cc3xx_err_t cc3xx_lowlevel_chacha20_update(const uint8_t* in, size_t in_len)
         return err;
     }
 
-
     /* Flush the block straight away if we have enough data */
     if (dma_state.block_buf_size_in_use == CC3XX_CHACHA_BLOCK_SIZE) {
         cc3xx_lowlevel_dma_flush_buffer(false);

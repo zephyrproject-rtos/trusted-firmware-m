@@ -63,6 +63,7 @@ static void check_features(void)
 #endif
 }
 
+#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
     uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
@@ -86,7 +87,9 @@ static cc3xx_err_t setup_dfa_countermeasures(void)
 
     return CC3XX_ERR_SUCCESS;
 }
+#endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static cc3xx_err_t setup_dpa_countermeasures(void)
 {
     cc3xx_err_t err;
@@ -97,7 +100,7 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
     case 0xC1:
         P_CC3XX->aes.aes_dummy_rounds_enable = 0x1;
         while(!P_CC3XX->aes.aes_rbg_seeding_rdy){}
-        err = cc3xx_lowlevel_rng_get_random((uint8_t*)&aes_rbg_seed, 1);
+        err = cc3xx_lowlevel_rng_get_random((uint8_t *)&aes_rbg_seed, 1);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -107,10 +110,13 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
 
     return CC3XX_ERR_SUCCESS;
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
 cc3xx_err_t cc3xx_lowlevel_init(void)
 {
+#if defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) || defined(CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE)
     cc3xx_err_t err;
+#endif
     /* If on a debug build, check that the CC3XX has all the features that have
      * been chosen by config */
     check_features();

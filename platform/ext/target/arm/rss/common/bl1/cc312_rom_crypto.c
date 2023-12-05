@@ -73,7 +73,7 @@ fih_int bl1_sha256_compute(const uint8_t *data,
 
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data,
                                                                      data_length));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
     cc3xx_lowlevel_hash_finish(tmp_buf, 32);

@@ -5,6 +5,13 @@
  *
  */
 
+/** @file cc3xx_assert.h
+ *
+ * Contains the definition of the macro for CC3XX_ASSERT(). The macro
+ * can be configured at build time to behave differently, i.e. asserting,
+ * returning an error code, or not doing anything
+ */
+
 #ifndef __CC3XX_ASSERT_H__
 #define __CC3XX_ASSERT_H__
 

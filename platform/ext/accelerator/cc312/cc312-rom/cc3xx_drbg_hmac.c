@@ -54,7 +54,7 @@ static cc3xx_err_t hmac_update(
         }
     }
 
-    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k), NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -68,7 +68,7 @@ static cc3xx_err_t hmac_update(
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v), NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -98,7 +98,7 @@ static cc3xx_err_t hmac_update(
         }
     }
 
-    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k), NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -112,7 +112,7 @@ static cc3xx_err_t hmac_update(
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v), NULL);
 
     /* return updated (K, V) state */
     return err;
@@ -184,7 +184,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_hmac_generate(
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_lowlevel_hmac_finish(&state->h, temp, CC3XX_DRBG_HMAC_OUTLEN);
+        err = cc3xx_lowlevel_hmac_finish(&state->h, temp, CC3XX_DRBG_HMAC_OUTLEN, NULL);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }

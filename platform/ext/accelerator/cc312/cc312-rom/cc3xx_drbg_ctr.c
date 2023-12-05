@@ -12,9 +12,7 @@
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_drbg_ctr.h"
 #include "cc3xx_rng.h"
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 #include "cc3xx_stdlib.h"
-#endif
 
 static void long_inc_int(uint32_t *acc, size_t acc_size, bool is_increment)
 {
