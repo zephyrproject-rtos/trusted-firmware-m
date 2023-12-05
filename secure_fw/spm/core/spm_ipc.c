@@ -88,7 +88,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     /* Return the last found message which applies a FIFO mechanism. */
     UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, p_handle_iter,
-                                p_ptn, p_handles) {
+                                p_ptn, p_reqs) {
         if (p_handle_iter->service->p_ldinf->signal == signal) {
             last_found_handle_holder = pr_handle_iter;
             nr_found_msgs++;
@@ -97,7 +97,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     if (last_found_handle_holder) {
         p_handle_iter = *last_found_handle_holder;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_handles);
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_reqs);
 
         if (nr_found_msgs == 1) {
             p_ptn->signals_asserted &= ~signal;
