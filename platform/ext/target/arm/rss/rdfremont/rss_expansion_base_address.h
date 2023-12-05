@@ -22,6 +22,8 @@
 #ifndef __RSS_EXPANSION_BASE_ADDRESS_H__
 #define __RSS_EXPANSION_BASE_ADDRESS_H__
 
+/* UART 0 Secure base address */
+#define UART0_BASE_S        0x58101000
 /* Boot flash */
 #define BOOT_FLASH_BASE_S   0xB0000000
 

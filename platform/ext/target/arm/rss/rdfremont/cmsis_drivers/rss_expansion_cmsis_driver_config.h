@@ -21,6 +21,8 @@
 #include "device_definition.h"
 #include "RTE_Device.h"
 
+#define UART0_DEV                    UART0_PL011_DEV_S
+
 #define FLASH0_DEV                   SPI_STRATAFLASHJ3_DEV
 
 #endif  /* __RSS_EXPANSION_CMSIS_DRIVER_CONFIG_H__ */

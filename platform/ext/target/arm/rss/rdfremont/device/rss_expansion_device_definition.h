@@ -29,6 +29,12 @@
 extern "C" {
 #endif
 
+/* UART PL011 driver structures */
+#ifdef UART0_PL011_S
+#include "uart_pl011_drv.h"
+extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
+#endif
+
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
 #include "spi_strataflashj3_flash_lib.h"
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;

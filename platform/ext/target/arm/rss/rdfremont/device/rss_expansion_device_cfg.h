@@ -23,6 +23,11 @@
  *        defined and configured via the secure and/or non-secure base address.
  */
 
+/* ARM UART PL011 */
+#define DEFAULT_UART_CONTROL 0
+#define DEFAULT_UART_BAUDRATE 38400
+#define UART0_PL011_S
+
 /* Intel Strata Flash Device */
 #define SPI_STRATAFLASHJ3_S
 
