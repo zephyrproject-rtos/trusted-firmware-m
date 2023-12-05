@@ -50,7 +50,7 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
     }
 
     p_target = p_connection->service->partition;
-    p_target->p_handles = p_connection;
+    p_target->p_reqs = p_connection;
 
     SET_CURRENT_COMPONENT(p_target);
 
@@ -126,7 +126,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
-    p_pt->p_handles = NULL;
+    p_pt->p_reqs = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
 
     watermark_stack(p_pt);
