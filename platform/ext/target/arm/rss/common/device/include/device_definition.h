@@ -194,6 +194,11 @@ extern struct mpc_sie_dev_t MPC_SIC_DEV_S;
 extern struct kmu_dev_t KMU_DEV_S;
 #endif
 
+#ifdef SAM_S
+#include "sam_drv.h"
+extern struct sam_dev_t SAM_DEV_S;
+#endif
+
 #ifdef LCM_S
 #include "lcm_drv.h"
 extern struct lcm_dev_t LCM_DEV_S;

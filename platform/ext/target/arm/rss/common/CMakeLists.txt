@@ -120,6 +120,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
@@ -148,6 +149,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
@@ -158,6 +160,7 @@ target_sources(platform_s
         otp_lcm.c
         nv_counters.c
         attest_hal.c
+        sam_interrupts.c
         tfm_hal_platform_reset.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
@@ -258,6 +261,7 @@ target_include_directories(platform_bl2
         libraries
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
@@ -317,6 +321,7 @@ target_include_directories(platform_bl1_1_interface
         ./native_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common

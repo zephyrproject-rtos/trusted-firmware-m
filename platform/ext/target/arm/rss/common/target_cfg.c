@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -208,6 +208,12 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
     NVIC_ClearTargetState(MPC_IRQn);
     NVIC_ClearTargetState(PPC_IRQn);
 
+    /* Make sure that SAM interrupts target S state */
+    NVIC_ClearTargetState(SAM_Critical_Sec_Fault_S_IRQn);
+    NVIC_ClearTargetState(SAM_Sec_Fault_S_IRQn);
+    NVIC_ClearTargetState(SRAM_TRAM_ECC_Err_S_IRQn);
+    NVIC_ClearTargetState(SRAM_ECC_Partial_Write_S_IRQn);
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -248,6 +254,31 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
     NVIC_ClearPendingIRQ(PPC_IRQn);
     NVIC_EnableIRQ(PPC_IRQn);
+
+    /* Enable SAM interrupts. Set SAM critical security fault to the highest
+     * priority and other SAM faults to one lower priority.
+     */
+    NVIC_SetPriority(SAM_Critical_Sec_Fault_S_IRQn, 0);
+    NVIC_SetPriority(SAM_Sec_Fault_S_IRQn, 1);
+    NVIC_SetPriority(SRAM_TRAM_ECC_Err_S_IRQn, 1);
+    NVIC_SetPriority(SRAM_ECC_Partial_Write_S_IRQn, 1);
+
+    NVIC_EnableIRQ(SAM_Critical_Sec_Fault_S_IRQn);
+    NVIC_EnableIRQ(SAM_Sec_Fault_S_IRQn);
+    NVIC_EnableIRQ(SRAM_TRAM_ECC_Err_S_IRQn);
+    NVIC_EnableIRQ(SRAM_ECC_Partial_Write_S_IRQn);
+
+    /* Set the SAM watchdog counter to trigger if NMI, Critical Sec Fault
+     * interrupt or Sec Fault interrupt are not handled within 64K cycles.
+     */
+    sam_set_watchdog_counter_initial_value(&SAM_DEV_S, 0xFFFF,
+                                           SAM_RESPONSE_NMI |
+                                           SAM_RESPONSE_CRITICAL_FAULT_INTERRUPT |
+                                           SAM_RESPONSE_FAULT_INTERRUPT);
+
+    /* Set watchdog event response to reset */
+    sam_set_event_response(&SAM_DEV_S, SAM_EVENT_WATCHDOG_TIMER,
+                           SAM_RESPONSE_COLD_RESET, true);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

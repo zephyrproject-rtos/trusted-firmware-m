@@ -86,6 +86,9 @@
 /* Arm KMU */
 #define KMU_S
 
+/* Arm SAM */
+#define SAM_S
+
 /* Arm LCM */
 #define LCM_S
 
