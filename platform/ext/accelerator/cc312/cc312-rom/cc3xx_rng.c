@@ -202,6 +202,10 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint)
 #else
 cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t *buf, size_t length)
 {
+    /* The function rng_get_random() is external to the driver and must
+     * be provided by the integration. This option must be selected in
+     * the cc3xx_config.h file when building CC3XX driver code
+     */
     return rng_get_random(buf, length);
 }
 #endif /* !CC3XX_CONFIG_RNG_EXTERNAL_TRNG */

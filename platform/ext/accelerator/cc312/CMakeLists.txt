@@ -123,38 +123,10 @@ endif()
 ############################ Crypto Service ####################################
 
 if (TFM_PARTITION_CRYPTO)
-    set(CC312_LIB_PREFIX crypto_service_)
-    # Platform depedency needed to access platform specific dx_reg_base_host.h
-    set(CC312_PLATFORM_DEPENDENCY platform_s)
 
-    target_sources(crypto_service_crypto_hw
-        PRIVATE
-            cc312.c
-            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
-    )
-
-    target_include_directories(crypto_service_crypto_hw
-        PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-
-    target_link_libraries(crypto_service_crypto_hw
-        PUBLIC
-            ${CC312_LIB_PREFIX}cc312
-        PRIVATE
-            crypto_service_mbedcrypto
-            platform_s
-    )
-
-    set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
-
-    target_sources(${CC312_LIB_PREFIX}cc312
-        PRIVATE
-            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
-    )
+    option(CC3XX_RUNTIME_ENABLED
+           "EXPERIMENTAL: This variable controls whether the cc312-rom is being used in runtime FW. \
+           Enable it only for testing purposes." OFF)
 
     # Control the enablement of the legacy CC-312 driver interface or the PSA
     # driver interface. Default value is for the legacy interface
@@ -189,10 +161,77 @@ if (TFM_PARTITION_CRYPTO)
             TFM_PLATFORM: ${TFM_PLATFORM}) for the PSA Cryptoprocessor driver interface due to flash memory constraints.")
     endif()
 
+    if (${CC3XX_RUNTIME_ENABLED} AND ${CC312_LEGACY_DRIVER_API_ENABLED})
+        message(FATAL_ERROR "CC3xx and the Legacy Crypto driver API can't be enabled at the same time.")
+    endif()
+
+    if ((NOT ${CC312_LEGACY_DRIVER_API_ENABLED}) AND ${CC3XX_RUNTIME_ENABLED})
+        target_sources(crypto_service_crypto_hw
+            PRIVATE
+                cc312_rom_crypto_hw.c
+        )
+
+        target_link_libraries(crypto_service_crypto_hw
+            PRIVATE
+                crypto_service_mbedcrypto
+        )
+    endif()
+
+    if (${CC312_LEGACY_DRIVER_API_ENABLED} OR (NOT ${CC3XX_RUNTIME_ENABLED}))
+        set(CC312_LIB_PREFIX crypto_service_)
+
+        target_sources(crypto_service_crypto_hw
+            PRIVATE
+                cc312.c
+                $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+        )
+
+        target_include_directories(crypto_service_crypto_hw
+            PUBLIC
+                ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+
+        target_link_libraries(crypto_service_crypto_hw
+            PUBLIC
+                ${CC312_LIB_PREFIX}cc312
+            PRIVATE
+                crypto_service_mbedcrypto
+                platform_s
+        )
+
+        # Platform depedency needed to access platform specific dx_reg_base_host.h
+        set(CC312_PLATFORM_DEPENDENCY platform_s)
+
+        set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+        set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
+        add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
+        set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+
+        target_sources(${CC312_LIB_PREFIX}cc312
+            PRIVATE
+                $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+        )
+
+        target_compile_options(${CC312_LIB_PREFIX}cc312
+            PUBLIC
+                $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+                $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
+        )
+    endif()
+
     if (${CC312_LEGACY_DRIVER_API_ENABLED})
         set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
     else()
-        set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
+        if (${CC3XX_RUNTIME_ENABLED})
+            set(CC312_DRIVER_API_TARGET cc312_rom_psa_driver_api)
+        else()
+            set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
+        endif()
+    endif()
+
+    if (NOT ${CC312_LEGACY_DRIVER_API_ENABLED} AND ${CC3XX_RUNTIME_ENABLED})
+        set(CC3XX_PLATFORM_INTERFACE platform_s)
+        add_subdirectory(cc312-rom)
     endif()
 
     # Adding two targets as link-time dependencies of each other seems bad, but
@@ -215,17 +254,12 @@ if (TFM_PARTITION_CRYPTO)
             MBEDTLS_ECDH_LEGACY_CONTEXT
             $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:LEGACY_DRIVER_API_ENABLED>
             $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
+            $<$<NOT:$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>>:PSA_CRYPTO_DRIVER_CC3XX>
     )
 
     target_include_directories(psa_crypto_config
         INTERFACE
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    )
-
-    target_compile_options(crypto_service_cc312
-        PUBLIC
-            $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
 
     target_compile_options(crypto_service_mbedcrypto
