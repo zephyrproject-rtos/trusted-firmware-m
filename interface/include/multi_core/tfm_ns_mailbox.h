@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #if !defined(TFM_MULTI_CORE_NS_OS) && (NUM_MAILBOX_QUEUE_SLOT > 1)
-#error "NUM_MAILBOX_QUEUE_SLOT should be set to 1 for NS bare metal environment"
+#pragma message("Note: NUM_MAILBOX_QUEUE_SLOT is set to more than 1 in NS bare metal environment")
 #endif
 
 /**
