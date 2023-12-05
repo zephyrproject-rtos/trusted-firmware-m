@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,5 +40,10 @@
 
 /* How much space in OTP can be used for the SCP data */
 #define OTP_SCP_DATA_SIZE 0x1000
+
+/* The maximum size for code in the provisioning bundle */
+#define PROVISIONING_BUNDLE_CODE_SIZE   (0xB000)
+/* The maximum size for secret values in the provisioning bundle */
+#define PROVISIONING_BUNDLE_VALUES_SIZE (0x3800)
 
 #endif /* __RSS_MEMORY_SIZES_H__ */

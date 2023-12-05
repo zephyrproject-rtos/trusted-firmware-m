@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -128,7 +128,7 @@ patch_bundle = struct_pack([
     rss_id,
 ])
 
-code = struct_pack([code], pad_to=0x8000)
+code = struct_pack([code], pad_to=0xB000)
 values = struct_pack([patch_bundle, values[len(patch_bundle):]], pad_to=0x3800)
 data = struct_pack([values, data], pad_to=0x3E00)
 
