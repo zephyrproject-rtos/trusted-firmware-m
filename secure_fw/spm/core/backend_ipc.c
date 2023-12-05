@@ -205,7 +205,7 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
     p_owner = p_connection->service->partition;
     signal = p_connection->service->p_ldinf->signal;
 
-    UNI_LIST_INSERT_AFTER(p_owner, p_connection, p_handles);
+    UNI_LIST_INSERT_AFTER(p_owner, p_connection, p_reqs);
 
     /* Messages put. Update signals */
     ret = backend_assert_signal(p_owner, signal);
@@ -268,7 +268,7 @@ static thrd_fn_t partition_init(struct partition_t *p_pt,
         p_pt->signals_allowed |= ASYNC_MSG_REPLY;
     }
 
-    UNI_LIST_INIT_NODE(p_pt, p_handles);
+    UNI_LIST_INIT_NODE(p_pt, p_reqs);
     UNI_LIST_INIT_NODE(p_pt, p_replied);
 
     if (IS_IPC_MODEL(p_pt->p_ldinf)) {
