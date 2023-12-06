@@ -14,5 +14,4 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_TAG             ${HAL_NORDIC_VERSION}
         GIT_REPOSITORY      ${HAL_NORDIC_REMOTE}
-        GIT_SHALLOW         ${HAL_NORDIC_SHALLOW_FETCH}
 )
