@@ -106,6 +106,10 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
         ns_access = TFM_HAL_ACCESS_NS;
     }
 
+    /* Make sure in_size and out_size arrays in the msg structure are cleared first */
+    spm_memset(p_connection->msg.in_size, 0, sizeof(p_connection->msg.in_size));
+    spm_memset(p_connection->msg.out_size, 0, sizeof(p_connection->msg.out_size));
+
     /*
      * For client input vector, it is a PROGRAMMER ERROR if the provided payload
      * memory reference was invalid or not readable.
