@@ -23,7 +23,6 @@
  * platform's device definition
  */
 
-#define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
 
 /**

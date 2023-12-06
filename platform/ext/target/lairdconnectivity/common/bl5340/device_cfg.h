@@ -25,7 +25,6 @@
  * address.
  */
 
-#define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
 
 #endif /* __ARM_LTD_DEVICE_CFG_H__ */

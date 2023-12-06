@@ -28,7 +28,6 @@
 #include "NuMicro.h"
 
 /* ARM UART CMSDK */
-#define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE 115200
 #define UART0_CMSDK_S
 #define UART0_CMSDK_NS

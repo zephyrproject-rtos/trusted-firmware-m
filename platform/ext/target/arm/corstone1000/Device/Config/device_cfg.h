@@ -20,7 +20,6 @@
 /*ARM UART Controller PL011*/
 #define UART0_PL011
 
-#define DEFAULT_UART_CONTROL 0
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
 

@@ -39,7 +39,6 @@
 /*ARM UART Controller */
 //TBD
 
-#define DEFAULT_UART_CONTROL 0
 /* Default UART baud rate */
 #define DEFAULT_UART_BAUDRATE 115200
 
