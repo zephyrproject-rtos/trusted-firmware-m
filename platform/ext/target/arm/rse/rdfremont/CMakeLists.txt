@@ -84,6 +84,7 @@ target_include_directories(platform_bl2
 
 target_compile_definitions(platform_bl2
     PRIVATE
+        PLAT_LCP_COUNT=${PLAT_LCP_COUNT}
         PLATFORM_HOST_HAS_SCP
         PLATFORM_HOST_HAS_MCP
 )

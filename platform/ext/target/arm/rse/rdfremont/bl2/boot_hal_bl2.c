@@ -441,6 +441,10 @@ static int boot_platform_pre_load_lcp(void)
 static int boot_platform_post_load_lcp(void)
 {
     enum atu_error_t atu_err;
+    struct boot_rsp rsp;
+    int lcp_idx;
+    fih_ret fih_rc = FIH_FAILURE;
+    fih_ret recovery_succeeded = FIH_FAILURE;
 
     BOOT_LOG_INF("BL2: LCP post load start");
 
@@ -455,6 +459,63 @@ static int boot_platform_post_load_lcp(void)
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_ERR("BL2: ATU could not uninit LCP code load region");
         return 1;
+    }
+
+    /*
+     * Load LCP firmware to remaining LCP devices 1 to N
+     *
+     * MCUBoot currently only supports loading each image to one location.
+     * There are multiple LCPs that require the same image so to load the
+     * firmware to the remaining LCP devices, call the MCUBoot load function
+     * for each device with the ATU destination modified for each LCP.
+     */
+    for (lcp_idx = 1; lcp_idx < PLAT_LCP_COUNT; lcp_idx++) {
+        /*
+         * Configure RSE ATU region to access the Cluster utility space and map
+         * to the i-th LCP's ITCM
+         */
+        atu_err = atu_initialize_region(&ATU_DEV_S,
+                                        RSE_ATU_IMG_CODE_LOAD_ID,
+                                        HOST_LCP_IMG_CODE_BASE_S,
+                                        HOST_LCP_N_PHYS_BASE(lcp_idx),
+                                        HOST_LCP_ATU_SIZE);
+        if (atu_err != ATU_ERR_NONE) {
+            BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");
+            return 1;
+        }
+
+        do {
+            /*
+             * Cleaning 'rsp' to avoid accidentally loading
+             * the NS image in case of a fault injection attack.
+             */
+            memset(&rsp, 0, sizeof(struct boot_rsp));
+
+            FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, RSE_FIRMWARE_LCP_ID);
+
+            if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
+                BOOT_LOG_ERR("BL2: Unable to find bootable LCP image");
+
+                recovery_succeeded = fih_ret_encode_zero_equality(
+                            boot_initiate_recovery_mode(RSE_FIRMWARE_LCP_ID));
+                if (FIH_NOT_EQ(recovery_succeeded, FIH_SUCCESS)) {
+                    FIH_PANIC;
+                }
+            }
+        } while FIH_NOT_EQ(fih_rc, FIH_SUCCESS);
+
+        /*
+         * Since the measurement are taken at this point, clear the image
+         * header part in the ITCM before releasing LCP out of reset.
+         */
+        memset(HOST_LCP_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+        /* Close RSE ATU region configured to access LCP ITCM region */
+        atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+        if (atu_err != ATU_ERR_NONE) {
+            BOOT_LOG_ERR("BL2: ATU could not uninit LCP code load region");
+            return 1;
+        }
     }
 
     /* Close RSE ATU region configured to access RSE header region for LCP */

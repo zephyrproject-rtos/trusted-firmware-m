@@ -179,6 +179,12 @@ enum rse_atu_ids {
 
 /* LCP */
 
+/*
+ * All LCP use the same ATU region but map it to a different physical address
+ * The physical address is the cluster utility space in SCP which has an
+ * address translation window for each LCP.
+ */
+
 /* LCP ATU HEADER logical address start */
 #define HOST_LCP_HDR_ATU_WINDOW_BASE_S  (HOST_MCP_IMG_CODE_BASE_S +         \
                                          HOST_MCP_ATU_SIZE)
@@ -191,6 +197,11 @@ enum rse_atu_ids {
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 /* LCP0 ITCM window in AP address start */
 #define HOST_LCP_0_PHYS_BASE            (HOST_CLUST_UTIL_PHYS_BASE + 0x50000ULL)
+/* Offset between LCP ITCM windows */
+#define HOST_LCP_N_PHYS_OFFSET          0x200000U /* 2 MB */
+/* LCP ITCM window in AP address start for LCP N */
+#define HOST_LCP_N_PHYS_BASE(n)         (HOST_LCP_0_PHYS_BASE +             \
+                                         HOST_LCP_N_PHYS_OFFSET * (n))
 /* LCP ATU CODE size (aligned size of LCP image) */
 #define HOST_LCP_ATU_SIZE               ALIGN_UP(SIZE_DEF_LCP_IMAGE,        \
                                                  RSE_ATU_PAGE_SIZE)
