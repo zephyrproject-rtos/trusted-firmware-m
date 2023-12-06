@@ -26,6 +26,13 @@ include(hal_nordic.cmake)
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
+set(nvm_sources)
+if(HAS_NVMC)
+    set(nvm_sources
+      cmsis_drivers/Driver_Flash.c
+      ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+    )
+endif()
 
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
@@ -65,8 +72,7 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        cmsis_drivers/Driver_Flash.c
-        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+        ${nvm_sources}
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
@@ -122,10 +128,9 @@ target_compile_definitions(platform_s
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            cmsis_drivers/Driver_Flash.c
+            ${nvm_sources}
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
-            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
             nrfx_glue.c
     )
     target_sources(bl2

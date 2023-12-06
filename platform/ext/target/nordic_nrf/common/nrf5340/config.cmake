@@ -6,4 +6,6 @@
 #
 #-------------------------------------------------------------------------------
 
+set(HAS_NVMC 1)
+
 include(${PLATFORM_PATH}/common/core/config.cmake)
