@@ -11,7 +11,6 @@ cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 set(NRF_FOLDER_PATH ${NRF_PLATFORM_PATH}/common/core)
-set(NRF5340_FOLDER_PATH ${NRF_PLATFORM_PATH}/common/nrf5340)
 
 #========================= Platform dependencies ===============================#
 
@@ -46,7 +45,6 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        ${NRF5340_FOLDER_PATH}
         ${NRF_FOLDER_PATH}/native_drivers
         ${HAL_NORDIC_PATH}/nrfx
         ${HAL_NORDIC_PATH}/nrfx/mdk
@@ -106,7 +104,6 @@ target_compile_definitions(platform_s
 target_include_directories(platform_ns
     PUBLIC
         .
-        ${NRF5340_FOLDER_PATH}
         ${HAL_NORDIC_PATH}/nrfx
         ${HAL_NORDIC_PATH}/nrfx/mdk
         ${HAL_NORDIC_PATH}/nrfx/drivers/include
@@ -133,7 +130,6 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             .
-            ${NRF5340_FOLDER_PATH}
             ${HAL_NORDIC_PATH}/nrfx
             ${HAL_NORDIC_PATH}/nrfx/mdk
             ${HAL_NORDIC_PATH}/nrfx/drivers/include
