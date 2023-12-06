@@ -9,6 +9,7 @@
 
 #include <string.h>
 
+#include "bootutil/bootutil.h"
 #include "bootutil/bootutil_log.h"
 #include "device_definition.h"
 #include "flash_map/flash_map.h"
@@ -390,6 +391,85 @@ static int boot_platform_post_load_mcp(void)
 }
 
 /*
+ * =================================== LCP ====================================
+ */
+
+/* Fuction called before LCP firmware is loaded. */
+static int boot_platform_pre_load_lcp(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: LCP pre load start");
+
+    /* Configure ATUs for loading to areas not directly addressable by RSE. */
+
+    /*
+     * Configure RSE ATU to access header region for LCP0. The header part of
+     * the image is loaded at the end of the ITCM to allow the code part of the
+     * image to be placed at the start of the ITCM. For this, setup a separate
+     * ATU region for the image header.
+     */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_HDR_LOAD_ID,
+                                    HOST_LCP_HDR_ATU_WINDOW_BASE_S,
+                                    HOST_LCP_0_PHYS_HDR_BASE,
+                                    RSE_IMG_HDR_ATU_WINDOW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: ATU could not init LCP header load region");
+        return 1;
+    }
+
+    /*
+     * Configure RSE ATU region to access the Cluster utility space.
+     */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_CODE_LOAD_ID,
+                                    HOST_LCP_IMG_CODE_BASE_S,
+                                    HOST_LCP_0_PHYS_BASE,
+                                    HOST_LCP_ATU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: LCP pre load complete");
+
+    return 0;
+}
+
+/* Fuction called after LCP firmware is loaded. */
+static int boot_platform_post_load_lcp(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: LCP post load start");
+
+    /*
+     * Since the measurement are taken at this point, clear the image header
+     * part in the ITCM before releasing LCP out of reset.
+     */
+    memset(HOST_LCP_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU region configured to access LCP ITCM region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: ATU could not uninit LCP code load region");
+        return 1;
+    }
+
+    /* Close RSE ATU region configured to access RSE header region for LCP */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: ATU could not uninit LCP header load region");
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: LCP post load complete");
+
+    return 0;
+}
+
+/*
  * ================================= VECTORS ==================================
  */
 
@@ -404,6 +484,7 @@ static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
 #endif /* RSE_LOAD_NS_IMAGE */
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_pre_load_scp,
     [RSE_FIRMWARE_MCP_ID]           = boot_platform_pre_load_mcp,
+    [RSE_FIRMWARE_LCP_ID]           = boot_platform_pre_load_lcp,
 };
 
 /*
@@ -417,6 +498,7 @@ static int (*boot_platform_post_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
 #endif /* RSE_LOAD_NS_IMAGE */
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_post_load_scp,
     [RSE_FIRMWARE_MCP_ID]           = boot_platform_post_load_mcp,
+    [RSE_FIRMWARE_LCP_ID]           = boot_platform_post_load_lcp,
 };
 
 /*

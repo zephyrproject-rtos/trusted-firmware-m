@@ -177,9 +177,31 @@ enum rse_atu_ids {
                                          HOST_MCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
-/* Last RSE logical address used for loading images */
-#define RSE_IMAGE_LOADING_END           (HOST_MCP_IMG_CODE_BASE_S +         \
+/* LCP */
+
+/* LCP ATU HEADER logical address start */
+#define HOST_LCP_HDR_ATU_WINDOW_BASE_S  (HOST_MCP_IMG_CODE_BASE_S +         \
                                          HOST_MCP_ATU_SIZE)
+/* LCP Image address start, offset so end of HEADER is at end of ATU HEADER */
+#define HOST_LCP_IMG_HDR_BASE_S         (HOST_LCP_HDR_ATU_WINDOW_BASE_S +   \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE -      \
+                                         BL2_HEADER_SIZE)
+/* LCP Code region and LCP ATU CODE logical address start */
+#define HOST_LCP_IMG_CODE_BASE_S        (HOST_LCP_HDR_ATU_WINDOW_BASE_S +   \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* LCP0 ITCM window in AP address start */
+#define HOST_LCP_0_PHYS_BASE            (HOST_CLUST_UTIL_PHYS_BASE + 0x50000ULL)
+/* LCP ATU CODE size (aligned size of LCP image) */
+#define HOST_LCP_ATU_SIZE               ALIGN_UP(SIZE_DEF_LCP_IMAGE,        \
+                                                 RSE_ATU_PAGE_SIZE)
+/* LCP HEADER physical address start (mapped to end of LCP0 ITCM) */
+#define HOST_LCP_0_PHYS_HDR_BASE        (HOST_LCP_0_PHYS_BASE +             \
+                                         HOST_LCP_ATU_SIZE -                \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+/* Last RSE logical address used for loading images */
+#define RSE_IMAGE_LOADING_END           (HOST_LCP_IMG_CODE_BASE_S +         \
+                                         HOST_LCP_ATU_SIZE)
 
 /* SCP sysctrl region logical address start */
 #define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END

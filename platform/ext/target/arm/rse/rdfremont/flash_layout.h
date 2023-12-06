@@ -21,7 +21,7 @@
 #include "platform_base_address.h"
 #include "size_defs.h"
 
-/* Flash layout on RSE:
+/* Flash layout on RSE with BL2 (multiple image boot):
  *
  * Offset    Image (Size)
  *       0x0 BL2 - MCUBoot primary slot (128 KB)
@@ -34,6 +34,8 @@
  * 0x24_0000 SCP secondary slot (512 KB)
  * 0x2C_0000 MCP primary slot (512 KB)
  * 0x34_0000 MCP secondary slot (512 KB)
+ * 0x3C_0000 LCP primary slot (64 KB)
+ * 0x3D_0000 LCP secondary slot (64 KB)
  */
 
 /*
@@ -50,6 +52,7 @@
 #define FLASH_NS_PARTITION_SIZE         (SIZE_DEF_NS_IMAGE)  /* NS  partition */
 #define FLASH_SCP_PARTITION_SIZE        (SIZE_DEF_SCP_IMAGE) /* SCP partition */
 #define FLASH_MCP_PARTITION_SIZE        (SIZE_DEF_MCP_IMAGE) /* MCP  partition */
+#define FLASH_LCP_PARTITION_SIZE        (SIZE_DEF_LCP_IMAGE) /* LCP  partition */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -114,13 +117,21 @@
 #define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
 #define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
 #define FLASH_AREA_9_SIZE          (FLASH_MCP_PARTITION_SIZE)
+/* LCP image primary slot */
+#define FLASH_AREA_10_ID            (FLASH_AREA_9_ID + 1)
+#define FLASH_AREA_10_OFFSET        (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE)
+#define FLASH_AREA_10_SIZE          (FLASH_LCP_PARTITION_SIZE)
+/* LCP image secondary slot */
+#define FLASH_AREA_11_ID            (FLASH_AREA_10_ID + 1)
+#define FLASH_AREA_11_OFFSET        (FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE)
+#define FLASH_AREA_11_SIZE          (FLASH_LCP_PARTITION_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Check that all the images can fit in the Flash area. */
-#if (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE > FLASH_TOTAL_SIZE)
+#if (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE > FLASH_TOTAL_SIZE)
 #error "Out of Flash memory!"
 #endif
 
@@ -129,12 +140,14 @@
          ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_3_ID : \
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_6_ID : \
          ((x) == RSE_FIRMWARE_MCP_ID)        ? FLASH_AREA_8_ID : \
+         ((x) == RSE_FIRMWARE_LCP_ID)        ? FLASH_AREA_10_ID : \
                                               255)
 #define FLASH_AREA_IMAGE_SECONDARY(x) \
         (((x) == RSE_FIRMWARE_SECURE_ID)     ? FLASH_AREA_4_ID : \
          ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_5_ID : \
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_7_ID : \
          ((x) == RSE_FIRMWARE_MCP_ID)        ? FLASH_AREA_9_ID : \
+         ((x) == RSE_FIRMWARE_LCP_ID)        ? FLASH_AREA_11_ID : \
                                               255)
 
 /* Scratch area is not used with RAM loading firmware upgrade */
