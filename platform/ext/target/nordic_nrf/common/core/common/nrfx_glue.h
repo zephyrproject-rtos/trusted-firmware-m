@@ -241,6 +241,45 @@ void nrfx_critical_section_exit(void);
 
 //------------------------------------------------------------------------------
 
+/**
+ * @brief Macro for writing back cache lines associated with the specified buffer.
+ *
+ * @param[in] p_buffer Pointer to the buffer.
+ * @param[in] size     Size of the buffer.
+ */
+#define NRFY_CACHE_WB(p_buffer, size) \
+    do {                              \
+        (void)p_buffer;               \
+        (void)size;                   \
+    } while (0)
+
+/**
+ * @brief Macro for invalidating cache lines associated with the specified buffer.
+ *
+ * @param[in] p_buffer Pointer to the buffer.
+ * @param[in] size     Size of the buffer.
+ */
+#define NRFY_CACHE_INV(p_buffer, size) \
+    do {                               \
+        (void)p_buffer;                \
+        (void)size;                    \
+    } while (0)
+
+/**
+ * @brief Macro for writing back and invalidating cache lines associated with
+ *        the specified buffer.
+ *
+ * @param[in] p_buffer Pointer to the buffer.
+ * @param[in] size     Size of the buffer.
+ */
+#define NRFY_CACHE_WBINV(p_buffer, size) \
+    do {                                 \
+        (void)p_buffer;                  \
+        (void)size;                      \
+    } while (0)
+
+//------------------------------------------------------------------------------
+
 /** @brief Bitmask that defines DPPI channels that are reserved for use outside of the nrfx library. */
 #define NRFX_DPPI_CHANNELS_USED   0
 

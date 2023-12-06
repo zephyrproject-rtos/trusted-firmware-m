@@ -73,7 +73,7 @@ static int32_t ARM_USARTx_Initialize(ARM_USART_SignalEvent_t cb_event,
 
     uart_resources->tx_count = 0;
     uart_resources->rx_count = 0;
-    uart_resources->hal_cfg  = uart_resources->initial_config->hal_cfg;
+    uart_resources->hal_cfg  = uart_resources->initial_config->config;
     uart_resources->baudrate = uart_resources->initial_config->baudrate;
 
     uart_resources->initialized = true;
@@ -131,7 +131,7 @@ static int32_t ARM_USARTx_Send(const void *data, uint32_t num,
             }
         }
     } else {
-        nrfx_err_t err_code = nrfx_uarte_tx(&uart_resources->uarte, data, num);
+        nrfx_err_t err_code = nrfx_uarte_tx(&uart_resources->uarte, data, num, 0);
         if (err_code == NRFX_ERROR_BUSY) {
             return ARM_DRIVER_ERROR_BUSY;
         } else if (err_code != NRFX_SUCCESS) {
@@ -300,13 +300,13 @@ static ARM_USART_MODEM_STATUS ARM_USART_GetModemStatus(void)
 
 #define DRIVER_USART(idx)                                                 \
     static nrfx_uarte_config_t UART##idx##_initial_config = {             \
-        .pseltxd  = RTE_USART##idx##_TXD_PIN,                             \
-        .pselrxd  = RTE_USART##idx##_RXD_PIN,                             \
-        .pselrts  = RTE_USART##idx##_RTS_PIN,                             \
-        .pselcts  = RTE_USART##idx##_CTS_PIN,                             \
+        .txd_pin  = RTE_USART##idx##_TXD_PIN,                             \
+        .rxd_pin  = RTE_USART##idx##_RXD_PIN,                             \
+        .rts_pin  = RTE_USART##idx##_RTS_PIN,                             \
+        .cts_pin  = RTE_USART##idx##_CTS_PIN,                             \
         .baudrate = NRF_UARTE_BAUDRATE_115200,                            \
         .interrupt_priority = NRFX_UARTE_DEFAULT_CONFIG_IRQ_PRIORITY,     \
-        .hal_cfg  = {                                                     \
+        .config  = {                                                     \
             .hwfc   = NRF_UARTE_HWFC_DISABLED,                            \
             .parity = NRF_UARTE_PARITY_EXCLUDED,                          \
             .stop   = NRF_UARTE_STOP_ONE,                                 \
