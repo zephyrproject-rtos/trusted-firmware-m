@@ -355,15 +355,19 @@ macro(add_convert_to_bin_target target)
     )
 endmacro()
 
-macro(target_share_symbols target symbol_name_file)
+macro(target_share_symbols target)
     get_target_property(TARGET_TYPE ${target} TYPE)
     if (NOT TARGET_TYPE STREQUAL "EXECUTABLE")
         message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
     endif()
 
-    FILE(STRINGS ${symbol_name_file} KEEP_SYMBOL_LIST
-        LENGTH_MINIMUM 1
-    )
+    foreach(symbol_list ${ARGN})
+        FILE(STRINGS ${symbol_file} SYMBOLS
+            LENGTH_MINIMUM 1
+        )
+        list(APPEND KEEP_SYMBOL_LIST ${SYMBOLS})
+    endforeach()
+
 
     # strip all the symbols except those proveded as arguments. Long inline
     # python scripts aren't ideal, but this is both portable and possibly easier
