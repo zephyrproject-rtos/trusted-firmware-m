@@ -208,6 +208,12 @@ target_include_directories(${MBEDTLS_TARGET_PREFIX}p256m
         .
 )
 
+# FPU flags for p256m
+target_compile_options(${MBEDTLS_TARGET_PREFIX}p256m
+    PRIVATE
+        ${COMPILER_CP_FLAG}
+)
+
 target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         psa_interface
