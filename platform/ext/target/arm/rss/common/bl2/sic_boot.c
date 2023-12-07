@@ -73,6 +73,7 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
     enum rss_kmu_slot_id_t decrypt_key_slot;
     uint32_t decrypt_region;
     uint32_t xip_region_base_addr;
+    uint32_t xip_host_base_addr;
     size_t xip_region_size;
     size_t max_region_size;
     uint64_t fip_offsets[2];
@@ -118,7 +119,8 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
         decrypt_key_slot = RSS_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY;
         atu_region = RSS_ATU_NS_IMAGE_XIP_REGION;
         decrypt_region = RSS_SIC_NS_IMAGE_DECRYPT_REGION;
-        xip_region_base_addr = RSS_RUNTIME_NS_XIP_BASE_S;
+        xip_region_base_addr = RSS_RUNTIME_NS_XIP_BASE_NS;
+        xip_host_base_addr = SIC_HOST_BASE_NS;
         max_region_size = NS_CODE_SIZE;
         image_uuid = UUID_RSS_FIRMWARE_NS;
         image_offset = &ns_image_offset;
@@ -141,6 +143,7 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
         atu_region = RSS_ATU_S_IMAGE_XIP_REGION;
         decrypt_region = RSS_SIC_S_IMAGE_DECRYPT_REGION;
         xip_region_base_addr = RSS_RUNTIME_S_XIP_BASE_S;
+        xip_host_base_addr = SIC_HOST_BASE_S;
         max_region_size = S_CODE_SIZE;
         image_uuid = UUID_RSS_FIRMWARE_S;
         image_offset = &s_image_offset;
@@ -179,7 +182,7 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
 
     sic_err = sic_auth_table_set(&SIC_DEV_S, (uint32_t*)(table->htr),
                                  table->htr_size, (xip_region_base_addr
-                                                   - SIC_HOST_BASE_S)
+                                                   - xip_host_base_addr)
                                                   / sic_page_size * 32);
     if (sic_err != SIC_ERROR_NONE) {
         return 1;
