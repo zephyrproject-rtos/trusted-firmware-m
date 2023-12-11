@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -58,7 +60,7 @@ static inline void set_queue_slot_all_empty(mailbox_queue_status_t completed)
 static inline void set_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        *mailbox_queue_ptr->queue[idx].reply.woken_flag = WOKEN_UP;
+        *mailbox_queue_ptr->slots_ns[idx].woken_flag = WOKEN_UP;
     }
 }
 

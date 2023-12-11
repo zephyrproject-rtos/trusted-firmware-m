@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -66,23 +66,23 @@ __STATIC_INLINE bool get_spe_queue_empty_status(uint8_t idx)
 }
 
 __STATIC_INLINE mailbox_queue_status_t get_nspe_queue_pend_status(
-                                    const struct ns_mailbox_queue_t *ns_queue)
+                                    const struct mailbox_status_t *ns_status)
 {
-    return ns_queue->pend_slots;
+    return ns_status->pend_slots;
 }
 
 __STATIC_INLINE void set_nspe_queue_replied_status(
-                                            struct ns_mailbox_queue_t *ns_queue,
+                                            struct mailbox_status_t *ns_status,
                                             mailbox_queue_status_t mask)
 {
-    ns_queue->replied_slots |= mask;
+    ns_status->replied_slots |= mask;
 }
 
 __STATIC_INLINE void clear_nspe_queue_pend_status(
-                                            struct ns_mailbox_queue_t *ns_queue,
+                                            struct mailbox_status_t *ns_status,
                                             mailbox_queue_status_t mask)
 {
-    ns_queue->pend_slots &= ~mask;
+    ns_status->pend_slots &= ~mask;
 }
 
 __STATIC_INLINE int32_t get_spe_mailbox_msg_handle(uint8_t idx,
@@ -125,12 +125,15 @@ __STATIC_INLINE struct mailbox_reply_t *get_nspe_reply_addr(uint8_t idx)
     uint8_t ns_slot_idx;
 
     if (idx >= NUM_MAILBOX_QUEUE_SLOT) {
-        return NULL;
+        psa_panic();
     }
 
     ns_slot_idx = spe_mailbox_queue.queue[idx].ns_slot_idx;
+    if ((ns_slot_idx >= NUM_MAILBOX_QUEUE_SLOT) || (ns_slot_idx >= spe_mailbox_queue.ns_slot_count)) {
+        psa_panic();
+    }
 
-    return &spe_mailbox_queue.ns_queue->queue[ns_slot_idx].reply;
+    return &spe_mailbox_queue.ns_slots[ns_slot_idx].reply;
 }
 
 static void mailbox_direct_reply(uint8_t idx, uint32_t result)
@@ -184,7 +187,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                                   params->psa_call_params.out_len);
     int32_t client_id;
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
-    struct mailbox_msg_handle_t *mb_msg_handle =
+    mailbox_msg_handle_t *mb_msg_handle =
         &spe_mailbox_queue.queue[idx].msg_handle;
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
@@ -295,14 +298,14 @@ int32_t tfm_mailbox_handle_msg(void)
 {
     uint8_t idx;
     mailbox_queue_status_t mask_bits, pend_slots, reply_slots = 0;
-    struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
+    struct mailbox_status_t *ns_status = spe_mailbox_queue.ns_status;
     struct mailbox_msg_t *msg_ptr;
 
-    SPM_ASSERT(ns_queue != NULL);
+    SPM_ASSERT(ns_status != NULL);
 
     tfm_mailbox_hal_enter_critical();
 
-    pend_slots = get_nspe_queue_pend_status(ns_queue);
+    pend_slots = get_nspe_queue_pend_status(ns_status);
 
     tfm_mailbox_hal_exit_critical();
 
@@ -311,7 +314,7 @@ int32_t tfm_mailbox_handle_msg(void)
         return MAILBOX_NO_PEND_EVENT;
     }
 
-    for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
+    for (idx = 0; idx < spe_mailbox_queue.ns_slot_count; idx++) {
         mask_bits = (1 << idx);
         /* Check if current NSPE mailbox queue slot is pending for handling */
         if (!(pend_slots & mask_bits)) {
@@ -329,7 +332,7 @@ int32_t tfm_mailbox_handle_msg(void)
         spe_mailbox_queue.queue[idx].ns_slot_idx = idx;
 
         msg_ptr = &spe_mailbox_queue.queue[idx].msg;
-        spm_memcpy(msg_ptr, &ns_queue->queue[idx].msg, sizeof(*msg_ptr));
+        spm_memcpy(msg_ptr, &spe_mailbox_queue.ns_slots[idx].msg, sizeof(*msg_ptr));
 
         if (check_mailbox_msg(msg_ptr) != MAILBOX_SUCCESS) {
             mailbox_clean_queue_slot(idx);
@@ -348,10 +351,10 @@ int32_t tfm_mailbox_handle_msg(void)
     tfm_mailbox_hal_enter_critical();
 
     /* Clean the NSPE mailbox pending status. */
-    clear_nspe_queue_pend_status(ns_queue, pend_slots);
+    clear_nspe_queue_pend_status(ns_status, pend_slots);
 
     /* Set the NSPE mailbox replied status */
-    set_nspe_queue_replied_status(ns_queue, reply_slots);
+    set_nspe_queue_replied_status(ns_status, reply_slots);
 
     tfm_mailbox_hal_exit_critical();
 
@@ -366,9 +369,9 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
 {
     uint8_t idx;
     int32_t ret;
-    struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
+    struct mailbox_status_t *ns_status = spe_mailbox_queue.ns_status;
 
-    SPM_ASSERT(ns_queue != NULL);
+    SPM_ASSERT(ns_status != NULL);
 
     /*
      * If handle == MAILBOX_MSG_NULL_HANDLE, reply to the mailbox message
@@ -394,7 +397,7 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
     tfm_mailbox_hal_enter_critical();
 
     /* Set the NSPE mailbox replied status */
-    set_nspe_queue_replied_status(ns_queue, (1 << idx));
+    set_nspe_queue_replied_status(ns_status, (1 << idx));
 
     tfm_mailbox_hal_exit_critical();
 

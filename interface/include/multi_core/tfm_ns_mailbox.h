@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,6 +24,55 @@ extern "C" {
 #if !defined(TFM_MULTI_CORE_NS_OS) && (NUM_MAILBOX_QUEUE_SLOT > 1)
 #pragma message("Note: NUM_MAILBOX_QUEUE_SLOT is set to more than 1 in NS bare metal environment")
 #endif
+
+/*
+ * A single slot structure in NSPE mailbox queue for NS side only.
+ * This information is needed to handle mailbox requests/responses on NS side.
+ * It may contain information about thread that initiated request and is waiting on response.
+ */
+struct ns_mailbox_slot_t {
+    const void *owner;                      /* Handle of owner task. */
+    int32_t    *reply;                      /* Address of reply value belonging
+                                             * to owner task.
+                                             */
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+    uint8_t    *woken_flag;                 /* Indicate that owner task has been
+                                             * or should be woken up, after the
+                                             * reply is received.
+                                             */
+#else
+    bool        is_woken;                   /* Indicate that owner task has been
+                                             * or should be woken up, after the
+                                             * reply is received.
+                                             */
+#endif
+};
+
+/* NSPE mailbox queue */
+struct ns_mailbox_queue_t {
+    struct mailbox_status_t status;
+    struct mailbox_slot_t slots[NUM_MAILBOX_QUEUE_SLOT];
+
+    /* Following data are not shared with secure */
+    struct ns_mailbox_slot_t slots_ns[NUM_MAILBOX_QUEUE_SLOT];
+
+    mailbox_queue_status_t   empty_slots;       /* Bitmask of empty slots */
+
+#ifdef TFM_MULTI_CORE_TEST
+    uint32_t                 nr_tx;             /* The total number of
+                                                 * submission of NS PSA Client
+                                                 * calls from NS task via
+                                                 * mailbox.
+                                                 */
+    uint32_t                 nr_used_slots;     /* The total number of used
+                                                 * mailbox queue slots each time
+                                                 * NS thread requests a mailbox
+                                                 * queue slot.
+                                                 */
+#endif
+
+    bool                     is_full;           /* Queue if full */
+};
 
 /**
  * \brief NSPE mailbox initialization
@@ -299,16 +350,16 @@ static inline void set_queue_slot_pend(struct ns_mailbox_queue_t *queue_ptr,
                                        uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        queue_ptr->pend_slots |= (1UL << idx);
+        queue_ptr->status.pend_slots |= (1UL << idx);
     }
 }
 
 static inline mailbox_queue_status_t clear_queue_slot_all_replied(
                                            struct ns_mailbox_queue_t *queue_ptr)
 {
-    mailbox_queue_status_t status = queue_ptr->replied_slots;
+    mailbox_queue_status_t status = queue_ptr->status.replied_slots;
 
-    queue_ptr->replied_slots = 0;
+    queue_ptr->status.replied_slots = 0;
     return status;
 }
 

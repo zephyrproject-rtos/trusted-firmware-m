@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,7 +38,12 @@ struct secure_mailbox_queue_t {
     mailbox_queue_status_t       empty_slots;      /* bitmask of empty slots */
 
     struct secure_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
-    struct ns_mailbox_queue_t    *ns_queue;
+    /* Shared data with fixed size */
+    struct mailbox_status_t       *ns_status;
+    /* Number of slots allocated by NS. */
+    uint32_t                     ns_slot_count;
+    /* Pointer to struct mailbox_slot_t[slot_count] allocated by NS */
+    struct mailbox_slot_t        *ns_slots;
 };
 
 /**

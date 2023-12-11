@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -46,7 +47,7 @@ static void mailbox_ipc_config(void)
 
 int32_t tfm_mailbox_hal_init(struct secure_mailbox_queue_t *s_queue)
 {
-    struct ns_mailbox_queue_t *ns_queue = NULL;
+    struct mailbox_init_t *ns_init = NULL;
 
     /* Inform NSPE that NSPE mailbox initialization can start */
     platform_mailbox_send_msg_data(NS_MAILBOX_INIT_ENABLE);
@@ -54,15 +55,20 @@ int32_t tfm_mailbox_hal_init(struct secure_mailbox_queue_t *s_queue)
     platform_mailbox_wait_for_notify();
 
     /* Receive the address of NSPE mailbox queue */
-    platform_mailbox_fetch_msg_ptr((void **)&ns_queue);
+    platform_mailbox_fetch_msg_ptr((void **)&ns_init);
 
     /*
      * FIXME
      * Necessary sanity check of the address of NPSE mailbox queue should
      * be implemented there.
      */
+    if (ns_init->slot_count > NUM_MAILBOX_QUEUE_SLOT) {
+        return MAILBOX_INIT_ERROR;
+    }
 
-    s_queue->ns_queue = ns_queue;
+    s_queue->ns_status = ns_init->status;
+    s_queue->ns_slot_count = ns_init->slot_count;
+    s_queue->ns_slots = ns_init->slots;
 
     mailbox_ipc_config();
 
