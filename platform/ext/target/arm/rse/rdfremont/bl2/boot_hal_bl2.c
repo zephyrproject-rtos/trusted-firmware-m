@@ -34,6 +34,9 @@
 #include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 
+#define MHU_SCP_READY_SIGNAL_CHANNEL 1
+#define MHU_SCP_READY_SIGNAL_PAYLOAD 0x1
+
 static uint8_t lcp_measurement[PSA_HASH_LENGTH(MEASURED_BOOT_HASH_ALG)];
 static struct boot_measurement_metadata lcp_measurement_metadata = {0};
 
@@ -229,6 +232,24 @@ int32_t boot_platform_post_init(void)
  */
 static int boot_platform_finish(void)
 {
+    enum mhu_v3_x_error_t mhu_error;
+
+    /*
+     * Send doorbell to SCP to indicate that the RSE initialization is
+     * complete and that the SCP can release the LCPs and turn on the
+     * primary AP core.
+     */
+    mhu_error = mhu_v3_x_doorbell_write(&MHU_V3_RSE_TO_SCP_DEV,
+                                        MHU_SCP_READY_SIGNAL_CHANNEL,
+                                        MHU_SCP_READY_SIGNAL_PAYLOAD);
+
+    if (mhu_error != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP doorbell failed to send: %d",
+                     mhu_error);
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: RSE to SCP doorbell set!");
+
     /*
      * Disable SCP to RSE MHUv3 Interrupt to ensure interrupt doesn't trigger
      * while switching to runtime.
