@@ -108,7 +108,7 @@ extern "C" {
  * All ints are replaced with two int - the normal one and a backup which is
  * XORed with the mask.
  */
-typedef volatile struct {
+typedef struct {
     volatile int32_t val;
     volatile int32_t msk;
 } fih_int;
