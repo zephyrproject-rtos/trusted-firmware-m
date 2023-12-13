@@ -45,7 +45,6 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
 #include "spi_strataflashj3_flash_lib.h"
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
-extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH;
 #endif
 
 /* Message Handling Units (MHU) */
