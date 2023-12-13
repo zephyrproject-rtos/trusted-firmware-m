@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #define LCM_DCU_WIDTH_IN_BYTES (16)
+#define LCM_OTP_OFFSET 0x1000
 
 struct lcm_otp_layout_t {
     volatile uint32_t huk[8];

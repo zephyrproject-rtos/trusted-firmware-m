@@ -334,6 +334,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers>
+        ./bl1/bringup_helpers
 )
 
 target_compile_definitions(platform_bl1_1_interface

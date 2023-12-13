@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -77,6 +77,7 @@ target_sources(platform_bl1_1
         $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         device/host_device_definition.c
+        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/rss_bringup_helpers_hal.c>
 )
 
 target_include_directories(platform_bl1_1_interface
