@@ -77,6 +77,7 @@ Trusted Firmware-M Documentation
     Getting Started <getting_started/index>
     security/index
     releases/index
+    roadmap
     Glossary <glossary>
 
 .. toctree::
