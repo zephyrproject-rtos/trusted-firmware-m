@@ -31,6 +31,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
         $<$<BOOL:${RSS_LOAD_NS_IMAGE}>:RSS_LOAD_NS_IMAGE>
         $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
+        $<$<BOOL:${RSS_BIT_PROGRAMMABLE_OTP}>:RSS_BIT_PROGRAMMABLE_OTP>
 )
 
 #========================= Platform common defs ===============================#

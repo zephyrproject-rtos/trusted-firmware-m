@@ -95,3 +95,5 @@ set(RSS_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in O
 set(RSS_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
 
 set(RSS_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
+
+set(RSS_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSS OTP words can be programmed bit by bit, or whole words must be programmed at once")
