@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -56,6 +56,9 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
         struct __attribute__((__packed__)) dm_provisioning_data {
+            uint32_t rse_to_rse_sender_routing_table[RSE_AMOUNT];
+            uint32_t rse_to_rse_receiver_routing_table[RSE_AMOUNT];
+
             uint8_t bl1_rotpk_0[56];
             uint8_t bl2_encryption_key[32];
             uint8_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][BL2_ROTPK_HASH_SIZE];

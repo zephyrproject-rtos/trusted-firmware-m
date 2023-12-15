@@ -117,6 +117,22 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+#if RSE_AMOUNT > 1
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RSE_TO_RSE_SENDER_ROUTING_TABLE,
+                             sizeof(data.rse_to_rse_sender_routing_table),
+                             (uint8_t *)data.rse_to_rse_sender_routing_table);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RSE_TO_RSE_RECEIVER_ROUTING_TABLE,
+                             sizeof(data.rse_to_rse_receiver_routing_table),
+                             (uint8_t *)data.rse_to_rse_receiver_routing_table);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+#endif /* RSE_AMOUNT > 1 */
+
     new_lcs = PLAT_OTP_LCS_SECURED;
     err = tfm_plat_otp_write(PLAT_OTP_ID_LCS,
                              sizeof(new_lcs),

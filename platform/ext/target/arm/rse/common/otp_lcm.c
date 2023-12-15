@@ -85,6 +85,11 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
                 uint32_t dm_config_flags;
 
+#if RSE_AMOUNT > 1
+                uint32_t rse_to_rse_sender_routing_table[RSE_AMOUNT];
+                uint32_t rse_to_rse_receiver_routing_table[RSE_AMOUNT];
+#endif /* RSE_AMOUNT > 1 */
+
                 __PACKED_STRUCT {
                     uint32_t bl2_encryption_key[8];
                     uint32_t s_image_encryption_key[8];
@@ -238,6 +243,11 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_OFFSET(cm_locked.cm_config_flags),
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_OFFSET(dm_locked.dm_config_flags),
+
+#if RSE_AMOUNT > 1
+    [PLAT_OTP_ID_RSE_TO_RSE_SENDER_ROUTING_TABLE] = USER_AREA_OFFSET(dm_locked.rse_to_rse_sender_routing_table),
+    [PLAT_OTP_ID_RSE_TO_RSE_RECEIVER_ROUTING_TABLE] = USER_AREA_OFFSET(dm_locked.rse_to_rse_receiver_routing_table),
+#endif /* RSE_AMOUNT > 1 */
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
@@ -347,6 +357,11 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_SIZE(cm_locked.cm_config_flags),
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_SIZE(dm_locked.dm_config_flags),
+
+#if RSE_AMOUNT > 1
+    [PLAT_OTP_ID_RSE_TO_RSE_SENDER_ROUTING_TABLE] = USER_AREA_SIZE(dm_locked.rse_to_rse_sender_routing_table),
+    [PLAT_OTP_ID_RSE_TO_RSE_RECEIVER_ROUTING_TABLE] = USER_AREA_SIZE(dm_locked.rse_to_rse_receiver_routing_table),
+#endif /* RSE_AMOUNT > 1 */
 };
 
 #ifdef RSE_BRINGUP_OTP_EMULATION

@@ -34,6 +34,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_BIT_PROGRAMMABLE_OTP}>:RSE_BIT_PROGRAMMABLE_OTP>
         $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:RSE_USE_ROM_LIB_FROM_SRAM>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
+        RSE_AMOUNT=${RSE_AMOUNT}
 )
 
 #========================= Platform common defs ===============================#
@@ -346,7 +347,6 @@ target_compile_definitions(platform_bl1_1_interface
     INTERFACE
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
-        RSE_AMOUNT=${RSE_AMOUNT}
         KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
         $<$<BOOL:${RSE_ENCRYPTED_OTP_KEYS}>:RSE_ENCRYPTED_OTP_KEYS>
 )
@@ -436,7 +436,6 @@ target_compile_definitions(platform_bl1_2
     PUBLIC
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
-        $<$<BOOL:${RSE_AMOUNT}>:RSE_AMOUNT=${RSE_AMOUNT}>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 

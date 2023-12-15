@@ -9,3 +9,4 @@ PyYAML
 pyhsslms ~= 2.0.0
 ecdsa
 kconfiglib
+networkx ~= 3.2.1

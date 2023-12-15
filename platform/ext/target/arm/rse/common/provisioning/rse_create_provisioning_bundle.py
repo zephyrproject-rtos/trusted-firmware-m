@@ -13,6 +13,65 @@ from cryptography.hazmat.primitives.ciphers.aead import AESCCM
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import hashlib
+import networkx as nx
+
+def load_graph(filename):
+    assert(filename[-4:] == ".tgf")
+
+    with open(filename, 'rt') as graph_file:
+        lines = graph_file.readlines()
+
+    graph = nx.DiGraph()
+
+    for line in lines:
+        line = line.rstrip()
+        if line == '':
+            continue
+
+        # First see if it is a valid line
+        try:
+            edge = line.split(" ", 2)
+            edge[0] = int(edge[0])
+            edge[1] = int(edge[1])
+
+            assert("Send" in edge[2])
+            assert("Recieve" in edge[2])
+            edge[2] = edge[2].replace("Send ", "").rstrip()
+            edge[2] = edge[2].replace("Recieve ", "").rstrip()
+
+            send, recieve = [int(x) for x in edge[2].split()]
+
+            graph.add_edge(edge[0], edge[1], send=send, recieve=recieve)
+        except ValueError as e:
+            # Then see if it is a valid node
+            node = line.split(" ", 1)
+            node[0] = int(node[0])
+            graph.add_node(node[0])
+    return graph
+
+def routing_tables_from_graph(graph, rse_id, rse_amount):
+    send_table = [0] * rse_amount
+    recieve_table = [0] * rse_amount
+
+    for destination in range(rse_amount):
+        if destination is rse_id:
+            continue
+
+        print("Finding path from {} to {}".format(rse_id, destination))
+        path = nx.shortest_path(graph, rse_id, destination)
+        nexthop = path[1]
+        send_table[destination] = graph[rse_id][nexthop]['send']
+        recieve_table[destination] = graph[rse_id][nexthop]['recieve']
+
+    send_table_bytes = bytes(0)
+    for table_entry in send_table:
+        send_table_bytes += table_entry.to_bytes(4, byteorder='little')
+
+    recieve_table_bytes = bytes(0)
+    for table_entry in recieve_table:
+        recieve_table_bytes += table_entry.to_bytes(4, byteorder='little')
+
+    return send_table_bytes, recieve_table_bytes
 
 def struct_pack(objects, pad_to=0):
     defstring = "<"
@@ -62,6 +121,7 @@ parser.add_argument("--magic", help="the magic constant to insert at the start a
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=False)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=False)
 parser.add_argument("--rse_id", help="the ID of the RSE", required=False)
+parser.add_argument("--rse_amount", help="the amount of RSEes in the system", required=False)
 parser.add_argument("--tp_mode", help="the test or production mode", required=True)
 parser.add_argument("--otp_dma_ics_input_file", help="OTP DMA ICS input file", required=False)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=False)
@@ -69,6 +129,7 @@ parser.add_argument("--key_file", help="the AES-CCM key file", required=True)
 parser.add_argument("--krtl_derivation_label", help="The provisioning key derivation label", required=True)
 parser.add_argument("--provisioning_lcs", help="The LCS in which provisioning will be run", required=True)
 parser.add_argument("--scp_data_input_file", help="The data input file", required=False)
+parser.add_argument("--multi_rse_topology_graph_file", help="The topology graph of a multi-rse system", required=False)
 args = parser.parse_args()
 
 with open(args.provisioning_code, "rb") as in_file:
@@ -120,12 +181,23 @@ if args.scp_data_input_file:
 else:
     scp_data = bytes(0)
 
+if args.multi_rse_topology_graph_file:
+    graph = load_graph(args.multi_rse_topology_graph_file);
+    send_table, recieve_table = routing_tables_from_graph(graph,
+                                                          int(args.rse_id),
+                                                          int(args.rse_amount))
+else:
+    send_table = bytes(0)
+    recieve_table = bytes(0)
+
 patch_bundle = struct_pack([
     bl1_2_padded_hash,
     bl1_2,
     otp_dma_ics,
     scp_data,
     rse_id,
+    send_table,
+    recieve_table,
 ])
 
 code = struct_pack([code], pad_to=0xB000)

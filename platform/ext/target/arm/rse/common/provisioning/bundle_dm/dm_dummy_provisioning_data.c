@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -69,6 +69,10 @@
 #endif /* MCUBOOT_SIGNATURE_TYPE */
 
 const struct dm_provisioning_data data = {
+    /* RSE to RSE sender table */
+    {},
+    /* RSE to RSE receiver table */
+    {},
     /* BL1 ROTPK 0 */
     {
         0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x04,

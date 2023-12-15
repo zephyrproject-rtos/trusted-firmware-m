@@ -11,6 +11,7 @@ Previously known as Runtime Security Subsystem (RSS).
     RSE communication design <rse_comms.rst>
     RSE hardware key management <rse_key_management.rst>
     RSE provisioning <rse_provisioning.rst>
+    RSE routing table <rse_routing_table.rst>
 
 RSE also includes the following extra partitions:
 
