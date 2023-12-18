@@ -40,6 +40,14 @@ target_compile_definitions(platform_region_defs
     INTERFACE
         TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT=0x2000
         TFM_LINKER_SP_META_PTR_ALIGNMENT=0x100
+
+        # The RAM MPU Region block sizes are calculated manually. The RAM has to be covered
+        # with the MPU regions. These regions also have to be the power of 2 and
+        # the start addresses have to be aligned to these sizes. The sizes can be calculated
+        # from the S_DATA_START and S_DATA_SIZE defines.
+        RAM_MPU_REGION_BLOCK_1_SIZE=0x4000
+        RAM_MPU_REGION_BLOCK_2_SIZE=0x20000
+
 )
 #========================= Platform common defs ===============================#
 

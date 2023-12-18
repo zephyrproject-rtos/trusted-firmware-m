@@ -15,6 +15,7 @@
 #include "mpu_config.h"
 #include "mmio_defs.h"
 #include "flash_layout.h"
+#include "region_defs.h"
 
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
@@ -131,6 +132,27 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     } while (base < limit);
 
 #endif
+
+    /* Set the RAM attributes. It is needed because the first region overlaps the whole
+     * SRAM and it has to be overridden.
+     * The RAM_MPU_REGION_BLOCK_1_SIZE and RAM_MPU_REGION_BLOCK_2_SIZE are calculated manually
+     * and added to the platform_region_defs compile definitions.
+     */
+    base = S_DATA_START;
+    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
+    ret = configure_mpu(rnr++, base, limit,
+                            XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+    if (ret != TFM_HAL_SUCCESS) {
+        return ret;
+    }
+
+    base = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
+    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE + RAM_MPU_REGION_BLOCK_2_SIZE;
+    ret = configure_mpu(rnr++, base, limit,
+                            XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
+    if (ret != TFM_HAL_SUCCESS) {
+        return ret;
+    }
 
     arm_mpu_enable();
 
