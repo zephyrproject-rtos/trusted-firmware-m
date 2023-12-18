@@ -176,9 +176,9 @@ Greg Leach
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Joakim Andersson
-    :email: `joakim.andersson@nordicsemi.no <joakim.andersson@nordicsemi.no>`__
-    :github: `joerchan <https://github.com/joerchan>`__
+Georgios Vasilakis
+    :email: `georgios.vasilakis@nordicsemi.no <georgios.vasilakis@nordicsemi.no>`__
+    :github: `Vge0rge <https://github.com/Vge0rge>`__
 
 
 Nuvoton Platform:
