@@ -30,7 +30,7 @@ static uint32_t xorshift_plus_128_lfsr(void)
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
-        cc3xx_rng_get_random((uint8_t *)&state, sizeof(state));
+        cc3xx_lowlevel_rng_get_random((uint8_t *)&state, sizeof(state));
         seed_done = true;
     }
 

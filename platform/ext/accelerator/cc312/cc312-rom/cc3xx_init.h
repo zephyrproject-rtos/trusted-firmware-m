@@ -23,7 +23,7 @@ extern "C" {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_init(void);
+cc3xx_err_t cc3xx_lowlevel_init(void);
 
 /**
  * @brief                        Uninitialize the CC3XX accelerator.
@@ -31,7 +31,7 @@ cc3xx_err_t cc3xx_init(void);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_uninit(void);
+cc3xx_err_t cc3xx_lowlevel_uninit(void);
 
 #ifdef __cplusplus
 }

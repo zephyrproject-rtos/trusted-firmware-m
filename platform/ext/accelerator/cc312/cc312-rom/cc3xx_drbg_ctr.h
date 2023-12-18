@@ -75,7 +75,7 @@ struct cc3xx_drbg_ctr_state_t {
  *
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_ctr_init(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_init(
     struct cc3xx_drbg_ctr_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *nonce, size_t nonce_len,
@@ -92,7 +92,7 @@ cc3xx_err_t cc3xx_drbg_ctr_init(
  *
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_ctr_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_generate(
     struct cc3xx_drbg_ctr_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -108,7 +108,7 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
  *
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_ctr_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_reseed(
     struct cc3xx_drbg_ctr_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -120,7 +120,7 @@ cc3xx_err_t cc3xx_drbg_ctr_reseed(
  *
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_ctr_uninit(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_uninit(
     struct cc3xx_drbg_ctr_state_t *state);
 
 #ifdef __cplusplus

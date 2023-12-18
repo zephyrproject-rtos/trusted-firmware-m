@@ -62,7 +62,7 @@ static void init_without_iv_set(cc3xx_hash_alg_t alg)
     P_CC3XX->misc.hash_clk_enable = 0x1U;
 
     /* Select hash engine */
-    cc3xx_set_engine(CC3XX_ENGINE_HASH);
+    cc3xx_lowlevel_set_engine(CC3XX_ENGINE_HASH);
 
     /* Select HASH mode, not MAC */
     P_CC3XX->hash.hash_sel_aes_mac  = 0x0U;
@@ -75,12 +75,12 @@ static void init_without_iv_set(cc3xx_hash_alg_t alg)
 
     P_CC3XX->hash.hash_control = alg & 0b1111;
 
-    cc3xx_dma_set_buffer_size(64);
+    cc3xx_lowlevel_dma_set_buffer_size(64);
 }
 
-cc3xx_err_t cc3xx_hash_init(cc3xx_hash_alg_t alg)
+cc3xx_err_t cc3xx_lowlevel_hash_init(cc3xx_hash_alg_t alg)
 {
-    cc3xx_hash_uninit();
+    cc3xx_lowlevel_hash_uninit();
 
     const uint32_t *iv;
     size_t iv_len;
@@ -93,26 +93,26 @@ cc3xx_err_t cc3xx_hash_init(cc3xx_hash_alg_t alg)
 
     switch(alg) {
 #ifdef CC3XX_CONFIG_HASH_SHA224_ENABLE
-        case CC3XX_HASH_ALG_SHA224:
-            iv = iv_sha224;
-            iv_len = sizeof(iv_sha224);
-            break;
+    case CC3XX_HASH_ALG_SHA224:
+        iv = iv_sha224;
+        iv_len = sizeof(iv_sha224);
+        break;
 #endif /* CC3XX_CONFIG_HASH_SHA224_ENABLE */
 #ifdef CC3XX_CONFIG_HASH_SHA256_ENABLE
-        case CC3XX_HASH_ALG_SHA256:
-            iv = iv_sha256;
-            iv_len = sizeof(iv_sha256);
-            break;
+    case CC3XX_HASH_ALG_SHA256:
+        iv = iv_sha256;
+        iv_len = sizeof(iv_sha256);
+        break;
 #endif /* CC3XX_CONFIG_HASH_SHA256_ENABLE */
 #ifdef CC3XX_CONFIG_HASH_SHA1_ENABLE
-        case CC3XX_HASH_ALG_SHA1:
-            iv = iv_sha1;
-            iv_len = sizeof(iv_sha1);
-            break;
+    case CC3XX_HASH_ALG_SHA1:
+        iv = iv_sha1;
+        iv_len = sizeof(iv_sha1);
+        break;
 #endif /* CC3XX_CONFIG_HASH_SHA1_ENABLE */
-        default:
-            cc3xx_hash_uninit();
-            return CC3XX_ERR_NOT_IMPLEMENTED;
+    default:
+        cc3xx_lowlevel_hash_uninit();
+        return CC3XX_ERR_NOT_IMPLEMENTED;
     }
 
     set_hash_h(iv, iv_len);
@@ -120,10 +120,10 @@ cc3xx_err_t cc3xx_hash_init(cc3xx_hash_alg_t alg)
     return CC3XX_ERR_SUCCESS;
 }
 
-void cc3xx_hash_uninit(void)
+void cc3xx_lowlevel_hash_uninit(void)
 {
     static const uint32_t zero_buf[9] = {0};
-    cc3xx_dma_uninit();
+    cc3xx_lowlevel_dma_uninit();
 
     set_hash_h(zero_buf, sizeof(zero_buf));
 
@@ -132,18 +132,18 @@ void cc3xx_hash_uninit(void)
     P_CC3XX->hash.auto_hw_padding = 0x0U;
 
     /* Reset engine */
-    cc3xx_set_engine(CC3XX_ENGINE_NONE);
+    cc3xx_lowlevel_set_engine(CC3XX_ENGINE_NONE);
 
     /* Disable the hash engine clock */
     P_CC3XX->misc.hash_clk_enable = 0x0U;
 }
 
-cc3xx_err_t cc3xx_hash_update(const uint8_t *buf, size_t length)
+cc3xx_err_t cc3xx_lowlevel_hash_update(const uint8_t *buf, size_t length)
 {
-    return cc3xx_dma_buffered_input_data(buf, length, false);
+    return cc3xx_lowlevel_dma_buffered_input_data(buf, length, false);
 }
 
-void cc3xx_hash_get_state(struct cc3xx_hash_state_t *state)
+void cc3xx_lowlevel_hash_get_state(struct cc3xx_hash_state_t *state)
 {
     state->curr_len = P_CC3XX->hash.hash_cur_len[0];
     state->curr_len |= (uint64_t)P_CC3XX->hash.hash_cur_len[1] << 32;
@@ -153,7 +153,7 @@ void cc3xx_hash_get_state(struct cc3xx_hash_state_t *state)
     memcpy(&state->dma_state, &dma_state, sizeof(state->dma_state));
 }
 
-void cc3xx_hash_set_state(const struct cc3xx_hash_state_t *state)
+void cc3xx_lowlevel_hash_set_state(const struct cc3xx_hash_state_t *state)
 {
     init_without_iv_set(state->alg);
     size_t hash_h_len = state->alg != CC3XX_HASH_ALG_SHA1 ? SHA256_OUTPUT_SIZE
@@ -166,7 +166,7 @@ void cc3xx_hash_set_state(const struct cc3xx_hash_state_t *state)
     memcpy(&dma_state, &state->dma_state, sizeof(dma_state));
 }
 
-void cc3xx_hash_finish(uint32_t *res, size_t length)
+void cc3xx_lowlevel_hash_finish(uint32_t *res, size_t length)
 {
     /* Check alignment */
     assert(((uintptr_t)res & 0b11) == 0);
@@ -188,7 +188,7 @@ void cc3xx_hash_finish(uint32_t *res, size_t length)
      */
     if (dma_state.block_buf_size_in_use != 0) {
         P_CC3XX->hash.auto_hw_padding = 0x1U;
-        cc3xx_dma_flush_buffer(false);
+        cc3xx_lowlevel_dma_flush_buffer(false);
     } else {
         /* Special-case for hardware padding when the length is 0 */
         P_CC3XX->hash.hash_pad_cfg = 0x4U;
@@ -196,5 +196,5 @@ void cc3xx_hash_finish(uint32_t *res, size_t length)
 
     get_hash_h(res, length);
 
-    cc3xx_hash_uninit();
+    cc3xx_lowlevel_hash_uninit();
 }

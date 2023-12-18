@@ -97,7 +97,7 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
     case 0xC1:
         P_CC3XX->aes.aes_dummy_rounds_enable = 0x1;
         while(!P_CC3XX->aes.aes_rbg_seeding_rdy){}
-        err = cc3xx_rng_get_random((uint8_t*)&aes_rbg_seed, 1);
+        err = cc3xx_lowlevel_rng_get_random((uint8_t*)&aes_rbg_seed, 1);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -108,7 +108,7 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_init(void)
+cc3xx_err_t cc3xx_lowlevel_init(void)
 {
     cc3xx_err_t err;
     /* If on a debug build, check that the CC3XX has all the features that have
@@ -142,7 +142,7 @@ cc3xx_err_t cc3xx_init(void)
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_uninit(void)
+cc3xx_err_t cc3xx_lowlevel_uninit(void)
 {
     return CC3XX_ERR_SUCCESS;
 }

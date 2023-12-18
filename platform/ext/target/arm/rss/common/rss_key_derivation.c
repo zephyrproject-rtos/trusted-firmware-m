@@ -71,31 +71,31 @@ static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
         return lcm_err;
     }
 
-    err = cc3xx_hash_init(CC3XX_HASH_ALG_SHA256);
+    err = cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256);
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
 
-    err = cc3xx_hash_update((uint8_t *)&lcs, sizeof(lcs));
+    err = cc3xx_lowlevel_hash_update((uint8_t *)&lcs, sizeof(lcs));
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
 
-    err = cc3xx_hash_update((uint8_t *)&tp_mode, sizeof(tp_mode));
+    err = cc3xx_lowlevel_hash_update((uint8_t *)&tp_mode, sizeof(tp_mode));
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
 
-    err = cc3xx_hash_update((uint8_t *)&reprovisioning_bits, sizeof(reprovisioning_bits));
+    err = cc3xx_lowlevel_hash_update((uint8_t *)&reprovisioning_bits, sizeof(reprovisioning_bits));
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
-    err = cc3xx_hash_update(computed_bl1_2_hash, 32);
+    err = cc3xx_lowlevel_hash_update(computed_bl1_2_hash, 32);
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
 
-    cc3xx_hash_finish((uint32_t *)state, SHA256_OUTPUT_SIZE);
+    cc3xx_lowlevel_hash_finish((uint32_t *)state, SHA256_OUTPUT_SIZE);
     *state_size = SHA256_OUTPUT_SIZE;
 
     return 0;
@@ -125,9 +125,9 @@ static int rss_derive_key(enum kmu_hardware_keyslot_t key_id, uint32_t *key_buf,
         return -1;
     }
 
-    rc = cc3xx_kdf_cmac(key_id, key_buf, CC3XX_AES_KEYSIZE_256, label,
-                        label_len, context, context_len,
-                        (uint32_t *)p_kmu_slot_buf, 32);
+    rc = cc3xx_lowlevel_kdf_cmac(key_id, key_buf, CC3XX_AES_KEYSIZE_256, label,
+                                 label_len, context, context_len,
+                                 (uint32_t *)p_kmu_slot_buf, 32);
     if (rc) {
         return rc;
     }
@@ -223,9 +223,9 @@ int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
         return 1;
     }
 
-    rc = cc3xx_kdf_cmac(KMU_HW_SLOT_HUK, NULL, CC3XX_AES_KEYSIZE_256,
-                        vhuk_seed_label, sizeof(vhuk_seed_label), NULL, 0,
-                        vhuk_seed, 32);
+    rc = cc3xx_lowlevel_kdf_cmac(KMU_HW_SLOT_HUK, NULL, CC3XX_AES_KEYSIZE_256,
+                                 vhuk_seed_label, sizeof(vhuk_seed_label), NULL, 0,
+                                 vhuk_seed, 32);
     if (rc) {
         return rc;
     }

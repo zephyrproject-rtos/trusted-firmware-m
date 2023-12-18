@@ -63,8 +63,8 @@ static int32_t rss_handshake_header_init(struct rss_handshake_msg *msg,
     if (err != 0)
         return err;
 
-    err = cc3xx_rng_get_random((uint8_t *)&msg->header.ccm_iv,
-                               sizeof(msg->header.ccm_iv));
+    err = cc3xx_lowlevel_rng_get_random((uint8_t *)&msg->header.ccm_iv,
+                                        sizeof(msg->header.ccm_iv));
     if (err != 0) {
         return err;
     }
@@ -81,8 +81,8 @@ static int32_t rss_handshake_session_init(struct rss_handshake_msg *msg)
         return err;
     }
 
-    err = cc3xx_rng_get_random((uint8_t*)msg->body.session_key_iv,
-                               sizeof(msg->body.session_key_iv));
+    err = cc3xx_lowlevel_rng_get_random((uint8_t*)msg->body.session_key_iv,
+                                        sizeof(msg->body.session_key_iv));
     if (err != 0) {
         return err;
     }
@@ -115,31 +115,31 @@ static int32_t rss_handshake_msg_crypt(cc3xx_aes_direction_t direction,
 {
     int32_t err;
 
-    err = cc3xx_aes_init(direction, CC3XX_AES_MODE_CCM, RSS_KMU_SLOT_SESSION_KEY_0,
-                         NULL, CC3XX_AES_KEYSIZE_256,
-                         (uint32_t *)msg->header.ccm_iv, sizeof(msg->header.ccm_iv));
+    err = cc3xx_lowlevel_aes_init(direction, CC3XX_AES_MODE_CCM, RSS_KMU_SLOT_SESSION_KEY_0,
+                                  NULL, CC3XX_AES_KEYSIZE_256,
+                                  (uint32_t *)msg->header.ccm_iv, sizeof(msg->header.ccm_iv));
     if (err != 0) {
         return err;
     }
 
-    cc3xx_aes_set_tag_len(sizeof(msg->trailer.ccm_tag));
-    cc3xx_aes_set_data_len(sizeof(msg->body),
-                           sizeof(msg->header));
+    cc3xx_lowlevel_aes_set_tag_len(sizeof(msg->trailer.ccm_tag));
+    cc3xx_lowlevel_aes_set_data_len(sizeof(msg->body),
+                                    sizeof(msg->header));
 
-    cc3xx_aes_update_authed_data((uint8_t *)msg,
-                                 sizeof(msg->header));
+    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)msg,
+                                          sizeof(msg->header));
 
-    cc3xx_aes_set_output_buffer((uint8_t*)&msg->body,
-                                sizeof(msg->body));
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t*)&msg->body,
+                                         sizeof(msg->body));
 
-    err = cc3xx_aes_update((uint8_t*)&msg->body,
-                           sizeof(msg->body));
+    err = cc3xx_lowlevel_aes_update((uint8_t*)&msg->body,
+                                    sizeof(msg->body));
     if (err != 0) {
         return err;
     }
 
-    err = cc3xx_aes_finish((uint32_t*)&msg->trailer.ccm_tag,
-                           sizeof(msg->trailer.ccm_tag));
+    err = cc3xx_lowlevel_aes_finish((uint32_t*)&msg->trailer.ccm_tag,
+                                    sizeof(msg->trailer.ccm_tag));
     if (err != 0) {
         return err;
     }

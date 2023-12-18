@@ -64,7 +64,7 @@ struct cc3xx_drbg_state_t {
  * @param[in] personalization_len Size in bytes of the personalization buffer \param personalization
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_init(
+cc3xx_err_t cc3xx_lowlevel_drbg_init(
     cc3xx_drbg_id_t id,
     struct cc3xx_drbg_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
@@ -81,7 +81,7 @@ cc3xx_err_t cc3xx_drbg_init(
  * @param[in] additional_input_len Size in bytes of the additional input to be used
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_generate(
     struct cc3xx_drbg_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -96,7 +96,7 @@ cc3xx_err_t cc3xx_drbg_generate(
  * @param[in] additional_input_len Size in bytes of the buffer pointed by \param additional_input
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_reseed(
     struct cc3xx_drbg_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -107,7 +107,7 @@ cc3xx_err_t cc3xx_drbg_reseed(
  * @param[out] state Pointer to the structure
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_uninit(struct cc3xx_drbg_state_t *state);
+cc3xx_err_t cc3xx_lowlevel_drbg_uninit(struct cc3xx_drbg_state_t *state);
 
 #ifdef __cplusplus
 }

@@ -606,7 +606,7 @@ int32_t boot_platform_init(void)
 
 
 #ifdef CRYPTO_HW_ACCELERATOR
-    result = cc3xx_init();
+    result = cc3xx_lowlevel_init();
     if (result) {
         return 1;
     }

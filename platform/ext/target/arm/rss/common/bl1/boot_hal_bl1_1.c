@@ -107,13 +107,13 @@ int32_t boot_platform_init(void)
         {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
     };
 
-    result = cc3xx_init();
+    result = cc3xx_lowlevel_init();
     if (result != CC3XX_ERR_SUCCESS) {
         return 1;
     }
 
     for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
-        cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
+        cc3xx_lowlevel_dma_remap_region_init(idx, &remap_regions[idx]);
     }
 
     (void)fih_delay_init();

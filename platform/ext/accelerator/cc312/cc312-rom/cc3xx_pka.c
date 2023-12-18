@@ -128,7 +128,7 @@ static inline uint32_t pad_to_pka_word_size(uint32_t byte_size)
     return (((byte_size + PKA_WORD_SIZE - 1) / PKA_WORD_SIZE) * PKA_WORD_SIZE);
 }
 
-void cc3xx_pka_unmap_physical_registers(void)
+void cc3xx_lowlevel_pka_unmap_physical_registers(void)
 {
     uint32_t idx;
     cc3xx_pka_reg_id_t virt_reg;
@@ -181,7 +181,7 @@ static void pka_init_from_state(void)
     assert(pka_reg_am_max > 4);
 
     /* Unmap all the physical registers */
-    cc3xx_pka_unmap_physical_registers();
+    cc3xx_lowlevel_pka_unmap_physical_registers();
 
     /* Set up the first three regions as N and Np, and N_mask. These are
      * special, so map them now.
@@ -217,9 +217,9 @@ static void pka_init_from_state(void)
     pka_reg_am_max -= 2;
 }
 
-void cc3xx_pka_init(uint32_t size)
+void cc3xx_lowlevel_pka_init(uint32_t size)
 {
-    cc3xx_pka_uninit();
+    cc3xx_lowlevel_pka_uninit();
 
     /* Minimum size is 16 bytes (128 bits), but just transparently increase it
      * if needed
@@ -260,7 +260,7 @@ static void allocate_phys_reg(cc3xx_pka_reg_id_t virt_reg)
     virt_reg_phys_reg[virt_reg] = phys_reg;
 }
 
-cc3xx_pka_reg_id_t cc3xx_pka_allocate_reg(void)
+cc3xx_pka_reg_id_t cc3xx_lowlevel_pka_allocate_reg(void)
 {
     cc3xx_pka_reg_id_t reg_id = 0;
 
@@ -277,7 +277,7 @@ cc3xx_pka_reg_id_t cc3xx_pka_allocate_reg(void)
 /* To make this faster, it's only possible to free the most recently allocated
  * register. Register freeing must match this pattern.
  */
-void cc3xx_pka_free_reg(cc3xx_pka_reg_id_t reg_id)
+void cc3xx_lowlevel_pka_free_reg(cc3xx_pka_reg_id_t reg_id)
 {
     assert(reg_id == pka_state.virt_reg_next_mapped - 1);
     assert(virt_reg_in_use[reg_id]);
@@ -314,7 +314,7 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
 
     /* clear the register, so we don't have to explicitly write the upper words
      */
-    cc3xx_pka_clear(reg_id);
+    cc3xx_lowlevel_pka_clear(reg_id);
 
     /* Make sure we have a physical register mapped for the virtual register */
     ensure_virt_reg_is_mapped(reg_id);
@@ -335,13 +335,13 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
     }
 }
 
-void cc3xx_pka_write_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
+void cc3xx_lowlevel_pka_write_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
                                      size_t len)
 {
     pka_write_reg(reg_id, (uint32_t *)data, len, true);
 }
 
-void cc3xx_pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data, size_t len)
+void cc3xx_lowlevel_pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data, size_t len)
 {
     pka_write_reg(reg_id, data, len, false);
 }
@@ -383,12 +383,12 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
     }
 }
 
-void cc3xx_pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
+void cc3xx_lowlevel_pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
 {
     pka_read_reg(reg_id, data, len, false);
 }
 
-void cc3xx_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
+void cc3xx_lowlevel_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
 {
     pka_read_reg(reg_id, (uint32_t *)data, len, true);
 }
@@ -406,9 +406,9 @@ void cc3xx_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, uint32_t *data, s
  */
 static inline void calc_Np(void)
 {
-    cc3xx_pka_reg_id_t reg_temp_0 = cc3xx_pka_allocate_reg();
-    cc3xx_pka_reg_id_t reg_temp_1 = cc3xx_pka_allocate_reg();
-    uint32_t N_bit_size = cc3xx_pka_get_bit_size(CC3XX_PKA_REG_N);
+    cc3xx_pka_reg_id_t reg_temp_0 = cc3xx_lowlevel_pka_allocate_reg();
+    cc3xx_pka_reg_id_t reg_temp_1 = cc3xx_lowlevel_pka_allocate_reg();
+    uint32_t N_bit_size = cc3xx_lowlevel_pka_get_bit_size(CC3XX_PKA_REG_N);
     uint32_t power;
 
     /* If N is large, we perform a special-case operation to avoid having to
@@ -421,30 +421,30 @@ static inline void calc_Np(void)
      */
     if (N_bit_size > PKA_MAX_OVERFLOW_BIT_SIZE * 2) {
         power = PKA_MAX_OVERFLOW_BIT_SIZE * 3 - 1;
-        cc3xx_pka_set_to_power_of_two(reg_temp_0, power);
+        cc3xx_lowlevel_pka_set_to_power_of_two(reg_temp_0, power);
 
         /* Divide N by 2^(N_bit_size - 2 * PKA_MAX_OVERFLOW_BIT_SIZE) */
         power = N_bit_size - 2 * PKA_MAX_OVERFLOW_BIT_SIZE;
-        cc3xx_pka_shift_right_fill_0_ui(CC3XX_PKA_REG_N, power, reg_temp_1);
+        cc3xx_lowlevel_pka_shift_right_fill_0_ui(CC3XX_PKA_REG_N, power, reg_temp_1);
 
         /* Ceiling */
-        cc3xx_pka_add_si(reg_temp_1, 1, reg_temp_1);
-        cc3xx_pka_div(reg_temp_0, reg_temp_1, CC3XX_PKA_REG_NP, reg_temp_1);
+        cc3xx_lowlevel_pka_add_si(reg_temp_1, 1, reg_temp_1);
+        cc3xx_lowlevel_pka_div(reg_temp_0, reg_temp_1, CC3XX_PKA_REG_NP, reg_temp_1);
     } else {
         /* set r0 to 2^(N_bit_size + PKA_WORD_SIZE - 1) */
         power = N_bit_size + PKA_MAX_OVERFLOW_BIT_SIZE - 1;
-        cc3xx_pka_set_to_power_of_two(reg_temp_0, power);
+        cc3xx_lowlevel_pka_set_to_power_of_two(reg_temp_0, power);
 
         /* Finally, perform the division */
-        cc3xx_pka_div(reg_temp_0, CC3XX_PKA_REG_N, CC3XX_PKA_REG_NP, reg_temp_1);
+        cc3xx_lowlevel_pka_div(reg_temp_0, CC3XX_PKA_REG_N, CC3XX_PKA_REG_NP, reg_temp_1);
     }
 
-    cc3xx_pka_free_reg(reg_temp_1);
-    cc3xx_pka_free_reg(reg_temp_0);
+    cc3xx_lowlevel_pka_free_reg(reg_temp_1);
+    cc3xx_lowlevel_pka_free_reg(reg_temp_0);
 }
 
-void cc3xx_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
-                           cc3xx_pka_reg_id_t barrett_tag)
+void cc3xx_lowlevel_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
+                                    cc3xx_pka_reg_id_t barrett_tag)
 {
     uint32_t N_bit_size;
 
@@ -452,17 +452,17 @@ void cc3xx_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
     assert(virt_reg_in_use[modulus]);
 
     virt_reg_in_use[CC3XX_PKA_REG_N] = true;
-    cc3xx_pka_copy(modulus, CC3XX_PKA_REG_N);
+    cc3xx_lowlevel_pka_copy(modulus, CC3XX_PKA_REG_N);
 
     /* This operation size must correspond exactly to the bit-size of the
      * modulus, so a bit-counting operation is performed.
      */
-    N_bit_size = cc3xx_pka_get_bit_size(CC3XX_PKA_REG_N);
+    N_bit_size = cc3xx_lowlevel_pka_get_bit_size(CC3XX_PKA_REG_N);
     P_CC3XX->pka.pka_l[PKA_OP_SIZE_N] = N_bit_size;
 
     virt_reg_in_use[CC3XX_PKA_REG_N_MASK] = true;
-    cc3xx_pka_set_to_power_of_two(CC3XX_PKA_REG_N_MASK, N_bit_size);
-    cc3xx_pka_sub_si(CC3XX_PKA_REG_N_MASK, 1, CC3XX_PKA_REG_N_MASK);
+    cc3xx_lowlevel_pka_set_to_power_of_two(CC3XX_PKA_REG_N_MASK, N_bit_size);
+    cc3xx_lowlevel_pka_sub_si(CC3XX_PKA_REG_N_MASK, 1, CC3XX_PKA_REG_N_MASK);
 
 #ifndef CC3XX_CONFIG_PKA_CALC_NP_ENABLE
     assert(!calculate_tag);
@@ -477,14 +477,14 @@ void cc3xx_pka_set_modulus(cc3xx_pka_reg_id_t modulus, bool calculate_tag,
         assert(barrett_tag < pka_reg_am_max);
         assert(virt_reg_in_use[barrett_tag]);
 
-        cc3xx_pka_copy(barrett_tag, CC3XX_PKA_REG_NP);
+        cc3xx_lowlevel_pka_copy(barrett_tag, CC3XX_PKA_REG_NP);
     }
 }
 
-void cc3xx_pka_get_state(struct cc3xx_pka_state_t *state, uint32_t save_reg_am,
-                         cc3xx_pka_reg_id_t *save_reg_list,
-                         uint32_t **save_reg_ptr_list,
-                         const size_t *save_reg_size_list)
+void cc3xx_lowlevel_pka_get_state(struct cc3xx_pka_state_t *state, uint32_t save_reg_am,
+                                  cc3xx_pka_reg_id_t *save_reg_list,
+                                  uint32_t **save_reg_ptr_list,
+                                  const size_t *save_reg_size_list)
 {
     size_t idx;
     cc3xx_pka_reg_id_t reg_id;
@@ -496,14 +496,14 @@ void cc3xx_pka_get_state(struct cc3xx_pka_state_t *state, uint32_t save_reg_am,
         assert(reg_id < pka_reg_am_max);
         assert(virt_reg_in_use[reg_id]);
 
-        cc3xx_pka_read_reg(reg_id, save_reg_ptr_list[idx], save_reg_size_list[idx]);
+        cc3xx_lowlevel_pka_read_reg(reg_id, save_reg_ptr_list[idx], save_reg_size_list[idx]);
     }
 }
 
-void cc3xx_pka_set_state(const struct cc3xx_pka_state_t *state,
-                         uint32_t load_reg_am, cc3xx_pka_reg_id_t *load_reg_list,
-                         const uint32_t **load_reg_ptr_list,
-                         const size_t *load_reg_size_list)
+void cc3xx_lowlevel_pka_set_state(const struct cc3xx_pka_state_t *state,
+                                  uint32_t load_reg_am, cc3xx_pka_reg_id_t *load_reg_list,
+                                  const uint32_t **load_reg_ptr_list,
+                                  const size_t *load_reg_size_list)
 {
     size_t idx;
     cc3xx_pka_reg_id_t reg_id;
@@ -517,11 +517,11 @@ void cc3xx_pka_set_state(const struct cc3xx_pka_state_t *state,
         assert(reg_id < pka_reg_am_max);
         assert(virt_reg_in_use[reg_id]);
 
-        cc3xx_pka_write_reg(reg_id, load_reg_ptr_list[idx], load_reg_size_list[idx]);
+        cc3xx_lowlevel_pka_write_reg(reg_id, load_reg_ptr_list[idx], load_reg_size_list[idx]);
     }
 }
 
-void cc3xx_pka_uninit(void)
+void cc3xx_lowlevel_pka_uninit(void)
 {
     memset(&pka_state, 0, sizeof(pka_state));
     memset(virt_reg_in_use, 0, sizeof(virt_reg_in_use));
@@ -646,7 +646,7 @@ static uint32_t CC3XX_ATTRIBUTE_INLINE opcode_construct(enum cc3xx_pka_operation
     return opcode;
 }
 
-uint32_t cc3xx_pka_get_bit_size(cc3xx_pka_reg_id_t r0)
+uint32_t cc3xx_lowlevel_pka_get_bit_size(cc3xx_pka_reg_id_t r0)
 {
     int32_t idx;
     uint32_t word;
@@ -679,12 +679,12 @@ uint32_t cc3xx_pka_get_bit_size(cc3xx_pka_reg_id_t r0)
     }
 }
 
-void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
+void cc3xx_lowlevel_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
 {
     uint32_t final_word = 1 << (power % (sizeof(uint32_t) * 8));
     uint32_t word_offset = power / (8 * sizeof(uint32_t));
 
-    cc3xx_pka_clear(r0);
+    cc3xx_lowlevel_pka_clear(r0);
 
     ensure_virt_reg_is_mapped(r0);
 
@@ -702,14 +702,14 @@ void cc3xx_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t power)
 }
 
 #ifdef CC3XX_CONFIG_RNG_ENABLE
-cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_len)
+cc3xx_err_t cc3xx_lowlevel_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_len)
 {
     uint32_t byte_size = (bit_len + 7) / 8;
     uint32_t word_size = (byte_size + 3) / sizeof(uint32_t);
     uint32_t random_buf[word_size];
     cc3xx_err_t err;
 
-    err = cc3xx_rng_get_random((uint8_t*)random_buf, word_size * sizeof(uint32_t));
+    err = cc3xx_lowlevel_rng_get_random((uint8_t *)random_buf, word_size * sizeof(uint32_t));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -717,12 +717,12 @@ cc3xx_err_t cc3xx_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_len)
     /* Take off any extra bits */
     random_buf[word_size - 1] = random_buf[word_size - 1] >> (32 - (bit_len % 32));
 
-    cc3xx_pka_write_reg(r0, random_buf, sizeof(random_buf));
+    cc3xx_lowlevel_pka_write_reg(r0, random_buf, sizeof(random_buf));
 
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_pka_set_to_random_within_modulus(cc3xx_pka_reg_id_t r0)
+cc3xx_err_t cc3xx_lowlevel_pka_set_to_random_within_modulus(cc3xx_pka_reg_id_t r0)
 {
     cc3xx_err_t err;
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
@@ -732,24 +732,24 @@ cc3xx_err_t cc3xx_pka_set_to_random_within_modulus(cc3xx_pka_reg_id_t r0)
          * methods are impractical due to the pka_reduce function not working for
          * numbers significantly greater than OP_SIZE_N.
          */
-        err = cc3xx_pka_set_to_random(r0, P_CC3XX->pka.pka_l[PKA_OP_SIZE_N]);
+        err = cc3xx_lowlevel_pka_set_to_random(r0, P_CC3XX->pka.pka_l[PKA_OP_SIZE_N]);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-    } while (!cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    } while (!cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
 
     return CC3XX_ERR_SUCCESS;
 }
 #endif /* CC3XX_CONFIG_RNG_ENABLE */
 
-void cc3xx_pka_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_ADD_INC,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
@@ -759,14 +759,14 @@ void cc3xx_pka_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
                                            false, r0, true, imm, false, res);
 }
 
-void cc3xx_pka_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
@@ -776,32 +776,32 @@ void cc3xx_pka_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res
                                            false, r0, true, imm, false, res);
 }
 
-void cc3xx_pka_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
                                            true, 0, false, r0, false, res);
 }
 
-void cc3xx_pka_mod_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_add(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r1, CC3XX_PKA_REG_N));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODADD_MODINC,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODADD_MODINC,
@@ -809,25 +809,25 @@ void cc3xx_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
                                            false, r0, true, imm, false, res);
 }
 
-void cc3xx_pka_mod_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_sub(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r1, CC3XX_PKA_REG_N));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
@@ -835,24 +835,24 @@ void cc3xx_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
                                            false, r0, true, imm, false, res);
 }
 
-void cc3xx_pka_mod_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_neg(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
                                            true, 0, false, r0, false, res);
 }
 
-void cc3xx_pka_and(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_and(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_and_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_and_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
 
@@ -861,7 +861,7 @@ void cc3xx_pka_and_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t r
                                            false, r0, true, mask, false, res);
 }
 
-uint32_t cc3xx_pka_test_bits_ui(cc3xx_pka_reg_id_t r0, uint32_t idx, uint32_t bit_am)
+uint32_t cc3xx_lowlevel_pka_test_bits_ui(cc3xx_pka_reg_id_t r0, uint32_t idx, uint32_t bit_am)
 {
     uint32_t bits;
     uint32_t word_offset = idx / (8 * sizeof(uint32_t));
@@ -884,7 +884,7 @@ uint32_t cc3xx_pka_test_bits_ui(cc3xx_pka_reg_id_t r0, uint32_t idx, uint32_t bi
     return bits;
 }
 
-void cc3xx_pka_clear_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_clear_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
 {
     /* Check that we can construct the required mask */
     assert((0x1 << idx) <= PKA_MAX_UNSIGNED_IMMEDIATE);
@@ -894,21 +894,21 @@ void cc3xx_pka_clear_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t
                                            false, r0, true, ~(1 << idx), false, res);
 }
 
-void cc3xx_pka_clear(cc3xx_pka_reg_id_t r0)
+void cc3xx_lowlevel_pka_clear(cc3xx_pka_reg_id_t r0)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_AND_TST0_CLR0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 0, false, r0);
 }
 
-void cc3xx_pka_or(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_or(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_OR_COPY_SET0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_or_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_or_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
 
@@ -917,14 +917,14 @@ void cc3xx_pka_or_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t re
                                            false, r0, true, mask, false, res);
 }
 
-void cc3xx_pka_copy(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_copy(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_OR_COPY_SET0,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, true, 0, false, res);
 }
 
-void cc3xx_pka_set_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_set_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
 {
     assert(idx < 32);
 
@@ -933,14 +933,14 @@ void cc3xx_pka_set_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t r
                                            false, r0, true, 1 << idx, false, res);
 }
 
-void cc3xx_pka_xor(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_xor(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_xor_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_xor_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t res)
 {
     assert(mask <= PKA_MAX_UNSIGNED_IMMEDIATE);
 
@@ -949,7 +949,7 @@ void cc3xx_pka_xor_si(cc3xx_pka_reg_id_t r0, uint32_t mask, cc3xx_pka_reg_id_t r
                                            false, r0, true, mask, false, res);
 }
 
-void cc3xx_pka_flip_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_flip_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t res)
 {
     assert(idx < 32);
 
@@ -958,7 +958,7 @@ void cc3xx_pka_flip_bit(cc3xx_pka_reg_id_t r0, uint32_t idx, cc3xx_pka_reg_id_t 
                                            false, r0, true, 1 << idx, false, res);
 }
 
-bool cc3xx_pka_are_equal(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
+bool cc3xx_lowlevel_pka_are_equal(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
@@ -974,7 +974,7 @@ bool cc3xx_pka_are_equal(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
     return P_CC3XX->pka.pka_status & (0b1 << 12);
 }
 
-bool cc3xx_pka_are_equal_si(cc3xx_pka_reg_id_t r0, int32_t imm)
+bool cc3xx_lowlevel_pka_are_equal_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_XOR_FLIP0_INVERT_COMPARE,
                                            PKA_OP_SIZE_REGISTER,
@@ -990,7 +990,7 @@ bool cc3xx_pka_are_equal_si(cc3xx_pka_reg_id_t r0, int32_t imm)
     return P_CC3XX->pka.pka_status & (0b1 << 12);
 }
 
-bool cc3xx_pka_less_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
+bool cc3xx_lowlevel_pka_less_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
@@ -1005,7 +1005,7 @@ bool cc3xx_pka_less_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
     return P_CC3XX->pka.pka_status & (0b1 << 8);
 }
 
-bool cc3xx_pka_less_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
+bool cc3xx_lowlevel_pka_less_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_SUB_DEC_NEG,
                                            PKA_OP_SIZE_REGISTER,
@@ -1020,19 +1020,19 @@ bool cc3xx_pka_less_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
     return P_CC3XX->pka.pka_status & (0b1 << 8);
 }
 
-bool cc3xx_pka_greater_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
+bool cc3xx_lowlevel_pka_greater_than(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1)
 {
-    return !cc3xx_pka_less_than(r0, r1)
-        && !cc3xx_pka_are_equal(r0, r1);
+    return !cc3xx_lowlevel_pka_less_than(r0, r1)
+        && !cc3xx_lowlevel_pka_are_equal(r0, r1);
 }
 
-bool cc3xx_pka_greater_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
+bool cc3xx_lowlevel_pka_greater_than_si(cc3xx_pka_reg_id_t r0, int32_t imm)
 {
-    return !cc3xx_pka_less_than_si(r0, imm)
-        && !cc3xx_pka_are_equal_si(r0, imm);
+    return !cc3xx_lowlevel_pka_less_than_si(r0, imm)
+        && !cc3xx_lowlevel_pka_are_equal_si(r0, imm);
 }
 
-void cc3xx_pka_shift_right_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_shift_right_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
     uint32_t shift_am;
 
@@ -1043,7 +1043,7 @@ void cc3xx_pka_shift_right_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3x
      */
 
     if (shift == 0) {
-        cc3xx_pka_copy(r0, res);
+        cc3xx_lowlevel_pka_copy(r0, res);
     }
 
     while(shift > 0) {
@@ -1057,12 +1057,12 @@ void cc3xx_pka_shift_right_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3x
     }
 }
 
-void cc3xx_pka_shift_right_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_shift_right_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
     uint32_t shift_am;
 
     if (shift == 0) {
-        cc3xx_pka_copy(r0, res);
+        cc3xx_lowlevel_pka_copy(r0, res);
     }
 
     while(shift > 0) {
@@ -1076,12 +1076,12 @@ void cc3xx_pka_shift_right_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3x
     }
 }
 
-void cc3xx_pka_shift_left_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_shift_left_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
     uint32_t shift_am;
 
     if (shift == 0) {
-        cc3xx_pka_copy(r0, res);
+        cc3xx_lowlevel_pka_copy(r0, res);
     }
 
     while(shift > 0) {
@@ -1095,12 +1095,12 @@ void cc3xx_pka_shift_left_fill_0_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx
     }
 }
 
-void cc3xx_pka_shift_left_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_shift_left_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx_pka_reg_id_t res)
 {
     uint32_t shift_am;
 
     if (shift == 0) {
-        cc3xx_pka_copy(r0, res);
+        cc3xx_lowlevel_pka_copy(r0, res);
     }
 
     while(shift > 0) {
@@ -1114,37 +1114,37 @@ void cc3xx_pka_shift_left_fill_1_ui(cc3xx_pka_reg_id_t r0, uint32_t shift, cc3xx
     }
 }
 
-void cc3xx_pka_mul_low_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mul_low_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MULLOW,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_mul_high_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mul_high_half(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MULHIGH,
                                            PKA_OP_SIZE_REGISTER,
                                            false, r0, false, r1, false, res);
 }
 
-void cc3xx_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t quotient,
+void cc3xx_lowlevel_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t quotient,
                    cc3xx_pka_reg_id_t remainder)
 {
-    cc3xx_pka_reg_id_t temp_r0 = cc3xx_pka_allocate_reg();
+    cc3xx_pka_reg_id_t temp_r0 = cc3xx_lowlevel_pka_allocate_reg();
     cc3xx_pka_reg_id_t temp_r1;
 
     /* Since the div operation uses r0 to store the remainder, and we want to
      * avoid clobbering input registers, perform a copy first.
      */
-    cc3xx_pka_copy(r0, temp_r0);
+    cc3xx_lowlevel_pka_copy(r0, temp_r0);
 
     /* If r1 is also the quotient register, this produces no result. In this
      * case, copy to a temporary register.
      */
     if (r1 == quotient) {
-        temp_r1 = cc3xx_pka_allocate_reg();
-        cc3xx_pka_copy(r1, temp_r1);
+        temp_r1 = cc3xx_lowlevel_pka_allocate_reg();
+        cc3xx_lowlevel_pka_copy(r1, temp_r1);
     } else {
         temp_r1 = r1;
     }
@@ -1155,19 +1155,19 @@ void cc3xx_pka_div(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_i
                                            false, quotient);
 
     /* Now clobber the remainder register */
-    cc3xx_pka_copy(temp_r0, remainder);
+    cc3xx_lowlevel_pka_copy(temp_r0, remainder);
 
     if (temp_r1 != r1) {
-        cc3xx_pka_free_reg(temp_r1);
+        cc3xx_lowlevel_pka_free_reg(temp_r1);
     }
-    cc3xx_pka_free_reg(temp_r0);
+    cc3xx_lowlevel_pka_free_reg(temp_r0);
 }
 
-void cc3xx_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r1, CC3XX_PKA_REG_N));
 
     /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
      * because it performs reduction, since mod_add uses _REGISTER, but because
@@ -1181,33 +1181,33 @@ void cc3xx_pka_mod_mul(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
     /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
      * top words. Do a mask operation to clear these
      */
-    cc3xx_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
+    cc3xx_lowlevel_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
 }
 
-void cc3xx_pka_mod_mul_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_mul_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
-    cc3xx_pka_reg_id_t temp_reg = cc3xx_pka_allocate_reg();
+    cc3xx_pka_reg_id_t temp_reg = cc3xx_lowlevel_pka_allocate_reg();
 
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
 
     /* This operation doesn't work with negative numbers */
     assert(imm >= 0);
 
     /* temp_reg starts at 0, so this is effectively a set */
-    cc3xx_pka_clear(temp_reg);
-    cc3xx_pka_add_si(temp_reg, imm, temp_reg);
+    cc3xx_lowlevel_pka_clear(temp_reg);
+    cc3xx_lowlevel_pka_add_si(temp_reg, imm, temp_reg);
 
-    cc3xx_pka_mod_mul(r0, temp_reg, res);
+    cc3xx_lowlevel_pka_mod_mul(r0, temp_reg, res);
 
-    cc3xx_pka_free_reg(temp_reg);
+    cc3xx_lowlevel_pka_free_reg(temp_reg);
 }
 
-void cc3xx_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_reg_id_t res)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_less_than(r1, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r1, CC3XX_PKA_REG_N));
 
     /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
      * because it performs reduction, since mod_add uses _REGISTER, but because
@@ -1220,15 +1220,15 @@ void cc3xx_pka_mod_exp(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t r1, cc3xx_pka_r
     /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
      * top words. Do a mask operation to clear these
      */
-    cc3xx_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
+    cc3xx_lowlevel_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
 }
 
-void cc3xx_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t res)
 {
-    cc3xx_pka_reg_id_t temp_reg = cc3xx_pka_allocate_reg();
+    cc3xx_pka_reg_id_t temp_reg = cc3xx_lowlevel_pka_allocate_reg();
 
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
     assert(imm <= PKA_MAX_SIGNED_IMMEDIATE);
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
@@ -1236,29 +1236,29 @@ void cc3xx_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka_reg_id_t
     assert(imm >= 0);
 
     /* temp_reg starts at 0, so this is effectively a set */
-    cc3xx_pka_clear(temp_reg);
-    cc3xx_pka_add_si(temp_reg, imm, temp_reg);
+    cc3xx_lowlevel_pka_clear(temp_reg);
+    cc3xx_lowlevel_pka_add_si(temp_reg, imm, temp_reg);
 
-    cc3xx_pka_mod_exp(r0, temp_reg, res);
+    cc3xx_lowlevel_pka_mod_exp(r0, temp_reg, res);
 
-    cc3xx_pka_free_reg(temp_reg);
+    cc3xx_lowlevel_pka_free_reg(temp_reg);
 }
 
-void cc3xx_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+void cc3xx_lowlevel_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
-    cc3xx_pka_reg_id_t n_minus_2 = cc3xx_pka_allocate_reg();
+    cc3xx_pka_reg_id_t n_minus_2 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Use the special-case Euler theorem  a^-1 = a^N-2 mod N */
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
-    assert(cc3xx_pka_less_than(r0, CC3XX_PKA_REG_N));
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
 
-    cc3xx_pka_sub_si(CC3XX_PKA_REG_N, 2, n_minus_2);
-    cc3xx_pka_mod_exp(r0, n_minus_2, res);
+    cc3xx_lowlevel_pka_sub_si(CC3XX_PKA_REG_N, 2, n_minus_2);
+    cc3xx_lowlevel_pka_mod_exp(r0, n_minus_2, res);
 
-    cc3xx_pka_free_reg(n_minus_2);
+    cc3xx_lowlevel_pka_free_reg(n_minus_2);
 }
 
-void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0)
+void cc3xx_lowlevel_pka_reduce(cc3xx_pka_reg_id_t r0)
 {
     assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
 
@@ -1273,6 +1273,6 @@ void cc3xx_pka_reduce(cc3xx_pka_reg_id_t r0)
     /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
      * top words. Do a mask operation to clear these
      */
-    cc3xx_pka_and(r0, CC3XX_PKA_REG_N_MASK, r0);
+    cc3xx_lowlevel_pka_and(r0, CC3XX_PKA_REG_N_MASK, r0);
 }
 

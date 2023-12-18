@@ -32,7 +32,7 @@ extern "C" {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length);
+cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length);
 
 /**
  * @brief                        Get a random unsigned integer from the CC3XX
@@ -48,7 +48,7 @@ cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_rng_get_random_uint(uint32_t bound, uint32_t *uint);
+cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint);
 
 #ifdef __cplusplus
 }

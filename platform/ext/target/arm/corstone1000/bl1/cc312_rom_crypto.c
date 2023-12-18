@@ -22,7 +22,7 @@ fih_int bl1_sha256_init(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_init(CC3XX_HASH_ALG_SHA256));
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -34,7 +34,7 @@ fih_int bl1_sha256_finish(uint8_t *hash)
 {
     uint32_t tmp_buf[32 / sizeof(uint32_t)];
 
-    cc3xx_hash_finish(tmp_buf, 32);
+    cc3xx_lowlevel_hash_finish(tmp_buf, 32);
 
     memcpy(hash, tmp_buf, sizeof(tmp_buf));
 
@@ -45,8 +45,7 @@ fih_int bl1_sha256_update(uint8_t *data, size_t data_length)
 {
     fih_int fih_rc = FIH_FAILURE;
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_update(data,
-                                                            data_length));
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data, data_length));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -65,17 +64,16 @@ fih_int bl1_sha256_compute(const uint8_t *data,
         FIH_RET(FIH_FAILURE);
     }
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_init(CC3XX_HASH_ALG_SHA256));
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_update(data,
-                                                            data_length));
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data, data_length));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
-    cc3xx_hash_finish(tmp_buf, 32);
+    cc3xx_lowlevel_hash_finish(tmp_buf, 32);
 
     memcpy(hash, tmp_buf, sizeof(tmp_buf));
 
@@ -144,16 +142,16 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         input_key = key_material;
     }
 
-    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
-                         cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
-                         (uint32_t *)counter, 16);
+    err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
+                                  cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
+                                  (uint32_t *)counter, 16);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
     }
 
-    cc3xx_aes_set_output_buffer(plaintext, ciphertext_length);
-    cc3xx_aes_update(ciphertext, ciphertext_length);
-    cc3xx_aes_finish(NULL, NULL);
+    cc3xx_lowlevel_aes_set_output_buffer(plaintext, ciphertext_length);
+    cc3xx_lowlevel_aes_update(ciphertext, ciphertext_length);
+    cc3xx_lowlevel_aes_finish(NULL, NULL);
 
     return 0;
 }
@@ -181,17 +179,17 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
         return rc;
     }
 
-    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_ECB,
-                         cc3xx_key_type, (uint32_t *)key_buf,
-                         CC3XX_AES_KEYSIZE_256,
-                         NULL, 0);
+    err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_ECB,
+                                  cc3xx_key_type, (uint32_t *)key_buf,
+                                  CC3XX_AES_KEYSIZE_256,
+                                  NULL, 0);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
     }
 
-    cc3xx_aes_set_output_buffer(ciphertext, ciphertext_length);
-    cc3xx_aes_update(plaintext, ciphertext_length);
-    cc3xx_aes_finish(NULL, NULL);
+    cc3xx_lowlevel_aes_set_output_buffer(ciphertext, ciphertext_length);
+    cc3xx_lowlevel_aes_update(plaintext, ciphertext_length);
+    cc3xx_lowlevel_aes_finish(NULL, NULL);
 }
 
 /* This is a counter-mode KDF complying with NIST SP800-108 where the PRF is a
@@ -215,9 +213,9 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
         return rc;
     }
 
-    err = cc3xx_kdf_cmac(key_type, (uint32_t *)input_key,
-                         CC3XX_AES_KEYSIZE_256, label, label_length, context,
-                         context_length, (uint32_t *)output_key, output_length);
+    err = cc3xx_lowlevel_kdf_cmac(key_type, (uint32_t *)input_key,
+                                  CC3XX_AES_KEYSIZE_256, label, label_length, context,
+                                  context_length, (uint32_t *)output_key, output_length);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
     }

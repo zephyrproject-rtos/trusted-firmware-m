@@ -13,7 +13,7 @@
 /* SHA-1, SHA-224 and SHA-256 have all the same block size */
 #define SHA256_BLOCK_SIZE (64)
 
-cc3xx_err_t cc3xx_hmac_set_key(
+cc3xx_err_t cc3xx_lowlevel_hmac_set_key(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *key,
     size_t key_size,
@@ -27,14 +27,14 @@ cc3xx_err_t cc3xx_hmac_set_key(
     const uint8_t *p_key = key;
     size_t key_length = key_size;
 
-    err = cc3xx_hash_init(alg);
+    err = cc3xx_lowlevel_hash_init(alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
     if (key_size > CC3XX_HMAC_BLOCK_SIZE) {
         /* hash the key to L bytes */
-        err = cc3xx_hash_update(key, key_size);
+        err = cc3xx_lowlevel_hash_update(key, key_size);
         if (err != CC3XX_ERR_SUCCESS) {
             goto out;
         }
@@ -42,7 +42,7 @@ cc3xx_err_t cc3xx_hmac_set_key(
         key_length = CC3XX_HASH_LENGTH(alg);
     }
 
-    cc3xx_hash_finish(hash_key_output, sizeof(hash_key_output));
+    cc3xx_lowlevel_hash_finish(hash_key_output, sizeof(hash_key_output));
 
     /* K ^ ipad */
     for (idx = 0; idx < key_length; idx++) {
@@ -52,42 +52,49 @@ cc3xx_err_t cc3xx_hmac_set_key(
     memset(&state->key[key_length], ipad, CC3XX_HMAC_BLOCK_SIZE - key_length);
 
     /* H(K ^ ipad) */
-    err = cc3xx_hash_init(alg);
+    err = cc3xx_lowlevel_hash_init(alg);
     if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }
 
-    err = cc3xx_hash_update(state->key, CC3XX_HMAC_BLOCK_SIZE);
+    err = cc3xx_lowlevel_hash_update(state->key, CC3XX_HMAC_BLOCK_SIZE);
 
 out:
     if (err == CC3XX_ERR_SUCCESS) {
-        cc3xx_hash_get_state(&state->hash);
+        cc3xx_lowlevel_hash_get_state(&state->hash);
         state->alg = alg;
     }
-    cc3xx_hash_uninit();
+    cc3xx_lowlevel_hash_uninit();
     return err;
 }
 
-cc3xx_err_t cc3xx_hmac_update(
+void cc3xx_lowlevel_hmac_set_tag_length(
+    struct cc3xx_hmac_state_t *state,
+    size_t tag_len)
+{
+    state->tag_len = tag_len;
+}
+
+cc3xx_err_t cc3xx_lowlevel_hmac_update(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *data,
     size_t data_length)
 {
     cc3xx_err_t err;
 
-    cc3xx_hash_set_state(&state->hash);
+    cc3xx_lowlevel_hash_set_state(&state->hash);
 
     /* H(K ^ ipad | data)*/
-    err = cc3xx_hash_update(data, data_length);
+    err = cc3xx_lowlevel_hash_update(data, data_length);
 
     if (err == CC3XX_ERR_SUCCESS) {
-        cc3xx_hash_get_state(&state->hash);
+        cc3xx_lowlevel_hash_get_state(&state->hash);
     }
-    cc3xx_hash_uninit();
+    cc3xx_lowlevel_hash_uninit();
     return err;
 }
 
-cc3xx_err_t cc3xx_hmac_finish(
+cc3xx_err_t cc3xx_lowlevel_hmac_finish(
     struct cc3xx_hmac_state_t *state,
     uint32_t *tag,
     size_t tag_size)
@@ -99,10 +106,10 @@ cc3xx_err_t cc3xx_hmac_finish(
 
     assert(tag_size >= CC3XX_HASH_LENGTH(state->alg));
 
-    cc3xx_hash_set_state(&state->hash);
+    cc3xx_lowlevel_hash_set_state(&state->hash);
 
     /* Produce H(K ^ ipad | data) */
-    cc3xx_hash_finish(scratch, sizeof(scratch));
+    cc3xx_lowlevel_hash_finish(scratch, sizeof(scratch));
 
     /* K ^ opad */
     for (idx = 0; idx < CC3XX_HMAC_BLOCK_SIZE; idx++) {
@@ -110,27 +117,27 @@ cc3xx_err_t cc3xx_hmac_finish(
     }
 
     /* H( K ^ opad | H(K ^ ipad | data)) */
-    err = cc3xx_hash_init(state->alg);
+    err = cc3xx_lowlevel_hash_init(state->alg);
     if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }
 
-    err = cc3xx_hash_update(state->key, CC3XX_HMAC_BLOCK_SIZE);
+    err = cc3xx_lowlevel_hash_update(state->key, CC3XX_HMAC_BLOCK_SIZE);
     if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }
 
-    err = cc3xx_hash_update((const uint8_t *)scratch, sizeof(scratch));
+    err = cc3xx_lowlevel_hash_update((const uint8_t *)scratch, sizeof(scratch));
     if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }
 
-    cc3xx_hash_finish(tag, tag_size);
+    cc3xx_lowlevel_hash_finish(tag, tag_size);
 
 out:
     if (err == CC3XX_ERR_SUCCESS) {
-        cc3xx_hash_get_state(&state->hash);
+        cc3xx_lowlevel_hash_get_state(&state->hash);
     }
-    cc3xx_hash_uninit();
+    cc3xx_lowlevel_hash_uninit();
     return err;
 }

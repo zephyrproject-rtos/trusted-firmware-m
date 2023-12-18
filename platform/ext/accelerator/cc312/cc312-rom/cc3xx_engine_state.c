@@ -10,7 +10,7 @@
 
 enum cc3xx_engine_t cc3xx_engine_in_use = CC3XX_ENGINE_NONE;
 
-void cc3xx_set_engine(enum cc3xx_engine_t engine)
+void cc3xx_lowlevel_set_engine(enum cc3xx_engine_t engine)
 {
     /* Wait for the crypto engine to be ready */
     while (P_CC3XX->cc_ctl.crypto_busy) {}

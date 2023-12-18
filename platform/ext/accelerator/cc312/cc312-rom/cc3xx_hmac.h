@@ -30,6 +30,7 @@ struct cc3xx_hmac_state_t {
     uint8_t key[CC3XX_HMAC_BLOCK_SIZE];
     struct cc3xx_hash_state_t hash; /* Allows to restart low-level hash */
     cc3xx_hash_alg_t alg; /* Based on the hashing algorithm, sizes change */
+    size_t tag_len; /* Expected tag len, depending on the truncated length algorithm */
 } __attribute__((aligned(4)));
 
 /**
@@ -41,7 +42,7 @@ struct cc3xx_hmac_state_t {
  * @param[in] alg      Underlying hashing algorithm
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_hmac_set_key(
+cc3xx_err_t cc3xx_lowlevel_hmac_set_key(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *key,
     size_t key_size,
@@ -55,7 +56,7 @@ cc3xx_err_t cc3xx_hmac_set_key(
  * @param[in] data_length Size in bytes of the buffer \param data
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_hmac_update(
+cc3xx_err_t cc3xx_lowlevel_hmac_update(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *data,
     size_t data_length);
@@ -68,7 +69,7 @@ cc3xx_err_t cc3xx_hmac_update(
  * @param[in] tag_size  Size in bytes of the buffer \param tag
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_hmac_finish(
+cc3xx_err_t cc3xx_lowlevel_hmac_finish(
     struct cc3xx_hmac_state_t *state,
     uint32_t *tag,
     size_t tag_size);

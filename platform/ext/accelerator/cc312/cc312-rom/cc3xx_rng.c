@@ -116,7 +116,7 @@ static cc3xx_err_t fill_entropy_buf(uint32_t *buf) {
 
 #ifdef CC3XX_CONFIG_RNG_ENABLE
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
-cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
+cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t *buf, size_t length)
 {
     static uint32_t entropy_buf[6];
     static size_t entropy_buf_used_idx = sizeof(entropy_buf);
@@ -130,7 +130,7 @@ cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
                     sizeof(entropy_buf) - entropy_buf_used_idx : length;
 
         /* Fill from entropy buffer if we still have some */
-        memcpy(buf, ((uint8_t*)entropy_buf) + entropy_buf_used_idx, copy_size);
+        memcpy(buf, ((uint8_t *)entropy_buf) + entropy_buf_used_idx, copy_size);
         length -= copy_size;
         buf += copy_size;
         entropy_buf_used_idx += copy_size;
@@ -155,7 +155,7 @@ out:
 }
 
 /* As per NIST SP800-90A A.5.1 */
-cc3xx_err_t cc3xx_rng_get_random_uint(uint32_t bound, uint32_t *uint)
+cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint)
 {
     uint32_t value;
     uint32_t attempts = 0;
@@ -181,8 +181,8 @@ cc3xx_err_t cc3xx_rng_get_random_uint(uint32_t bound, uint32_t *uint)
 
     do {
         /* Only pull as much entropy as we need, as RNG reseeding is slow */
-        err = cc3xx_rng_get_random((uint8_t *)&value,
-                                   (32 - __builtin_clz(bound) + 7) / 8);
+        err = cc3xx_lowlevel_rng_get_random((uint8_t *)&value,
+                                            (32 - __builtin_clz(bound) + 7) / 8);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -200,7 +200,7 @@ cc3xx_err_t cc3xx_rng_get_random_uint(uint32_t bound, uint32_t *uint)
     return CC3XX_ERR_SUCCESS;
 }
 #else
-cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
+cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t *buf, size_t length)
 {
     return rng_get_random(buf, length);
 }

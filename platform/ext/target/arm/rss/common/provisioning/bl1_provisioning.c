@@ -115,40 +115,40 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
-                            RSS_KMU_SLOT_CM_PROVISIONING_KEY, NULL,
-                            CC3XX_AES_KEYSIZE_256,
-                            (uint32_t *)cm_encrypted_bundle->iv,
-                            sizeof(cm_encrypted_bundle->iv));
+    cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
+                                     RSS_KMU_SLOT_CM_PROVISIONING_KEY, NULL,
+                                     CC3XX_AES_KEYSIZE_256,
+                                     (uint32_t *)cm_encrypted_bundle->iv,
+                                     sizeof(cm_encrypted_bundle->iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] CC3XX setup failed\r\n");
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_set_tag_len(sizeof(cm_encrypted_bundle->tag));
-    cc3xx_aes_set_data_len(offsetof(struct cm_provisioning_bundle, iv) -
-                           offsetof(struct cm_provisioning_bundle, code),
-                           sizeof(cm_encrypted_bundle->magic));
+    cc3xx_lowlevel_aes_set_tag_len(sizeof(cm_encrypted_bundle->tag));
+    cc3xx_lowlevel_aes_set_data_len(offsetof(struct cm_provisioning_bundle, iv) -
+                                    offsetof(struct cm_provisioning_bundle, code),
+                                    sizeof(cm_encrypted_bundle->magic));
 
-    cc3xx_aes_update_authed_data((uint8_t *)&cm_encrypted_bundle->magic,
-                                 sizeof(cm_encrypted_bundle->magic));
+    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&cm_encrypted_bundle->magic,
+                                          sizeof(cm_encrypted_bundle->magic));
 
-    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
-                                PROVISIONING_BUNDLE_CODE_SIZE);
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
+                                         PROVISIONING_BUNDLE_CODE_SIZE);
 
-    cc3xx_aes_update((uint8_t *)cm_encrypted_bundle->code,
-                     PROVISIONING_BUNDLE_CODE_SIZE);
+    cc3xx_lowlevel_aes_update((uint8_t *)cm_encrypted_bundle->code,
+                              PROVISIONING_BUNDLE_CODE_SIZE);
 
-    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
-                                PROVISIONING_BUNDLE_VALUES_SIZE +
-                                PROVISIONING_BUNDLE_DATA_SIZE);
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
+                                         PROVISIONING_BUNDLE_VALUES_SIZE +
+                                         PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc3xx_aes_update((uint8_t *)&cm_encrypted_bundle->values,
-                     PROVISIONING_BUNDLE_VALUES_SIZE +
-                     PROVISIONING_BUNDLE_DATA_SIZE);
+    cc3xx_lowlevel_aes_update((uint8_t *)&cm_encrypted_bundle->values,
+                              PROVISIONING_BUNDLE_VALUES_SIZE +
+                              PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc_err = cc3xx_aes_finish((uint32_t *)cm_encrypted_bundle->tag, NULL);
+    cc_err = cc3xx_lowlevel_aes_finish((uint32_t *)cm_encrypted_bundle->tag, NULL);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] CM bundle decryption failed\r\n");
         gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
@@ -189,40 +189,40 @@ static enum tfm_plat_err_t provision_psa_rot(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
-                            RSS_KMU_SLOT_DM_PROVISIONING_KEY, NULL,
-                            CC3XX_AES_KEYSIZE_256,
-                            (uint32_t *)dm_encrypted_bundle->iv,
-                            sizeof(dm_encrypted_bundle->iv));
+    cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
+                                     RSS_KMU_SLOT_DM_PROVISIONING_KEY, NULL,
+                                     CC3XX_AES_KEYSIZE_256,
+                                     (uint32_t *)dm_encrypted_bundle->iv,
+                                     sizeof(dm_encrypted_bundle->iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] CC3XX setup failed\r\n");
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_set_tag_len(sizeof(dm_encrypted_bundle->tag));
-    cc3xx_aes_set_data_len(offsetof(struct dm_provisioning_bundle, iv) -
-                           offsetof(struct dm_provisioning_bundle, code),
-                           sizeof(dm_encrypted_bundle->magic));
+    cc3xx_lowlevel_aes_set_tag_len(sizeof(dm_encrypted_bundle->tag));
+    cc3xx_lowlevel_aes_set_data_len(offsetof(struct dm_provisioning_bundle, iv) -
+                                    offsetof(struct dm_provisioning_bundle, code),
+                                    sizeof(dm_encrypted_bundle->magic));
 
-    cc3xx_aes_update_authed_data((uint8_t *)&dm_encrypted_bundle->magic,
-                                 sizeof(dm_encrypted_bundle->magic));
+    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&dm_encrypted_bundle->magic,
+                                          sizeof(dm_encrypted_bundle->magic));
 
-    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
-                                PROVISIONING_BUNDLE_CODE_SIZE);
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
+                                         PROVISIONING_BUNDLE_CODE_SIZE);
 
-    cc3xx_aes_update((uint8_t *)dm_encrypted_bundle->code,
-                     PROVISIONING_BUNDLE_CODE_SIZE);
+    cc3xx_lowlevel_aes_update((uint8_t *)dm_encrypted_bundle->code,
+                              PROVISIONING_BUNDLE_CODE_SIZE);
 
-    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
-                                PROVISIONING_BUNDLE_VALUES_SIZE +
-                                PROVISIONING_BUNDLE_DATA_SIZE);
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
+                                         PROVISIONING_BUNDLE_VALUES_SIZE +
+                                         PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc3xx_aes_update((uint8_t *)&dm_encrypted_bundle->values,
-                     PROVISIONING_BUNDLE_VALUES_SIZE +
-                     PROVISIONING_BUNDLE_DATA_SIZE);
+    cc3xx_lowlevel_aes_update((uint8_t *)&dm_encrypted_bundle->values,
+                              PROVISIONING_BUNDLE_VALUES_SIZE +
+                              PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc_err = cc3xx_aes_finish((uint32_t *)dm_encrypted_bundle->tag, NULL);
+    cc_err = cc3xx_lowlevel_aes_finish((uint32_t *)dm_encrypted_bundle->tag, NULL);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] DM bundle decryption failed\r\n");
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);

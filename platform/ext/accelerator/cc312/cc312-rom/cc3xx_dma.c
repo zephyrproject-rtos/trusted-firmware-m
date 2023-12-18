@@ -18,18 +18,18 @@ struct cc3xx_dma_state_t dma_state;
 #ifdef CC3XX_CONFIG_DMA_REMAP_ENABLE
 static cc3xx_dma_remap_region_t remap_regions[CC3XX_CONFIG_DMA_REMAP_REGION_AM] = {0};
 
-void cc3xx_dma_remap_region_init(uint32_t remap_region_idx,
+void cc3xx_lowlevel_dma_remap_region_init(uint32_t remap_region_idx,
                                         cc3xx_dma_remap_region_t *region)
 {
     memcpy(&remap_regions[remap_region_idx], region, sizeof(*region));
 }
 
-void cc3xx_dma_remap_region_clear(uint32_t remap_region_idx)
+void cc3xx_lowlevel_dma_remap_region_clear(uint32_t remap_region_idx)
 {
     memset(&remap_regions[remap_region_idx], 0, sizeof(cc3xx_dma_remap_region_t));
 }
 
-void cc3xx_dma_tcm_cpusel(uint32_t cpuid)
+void cc3xx_lowlevel_dma_tcm_cpusel(uint32_t cpuid)
 {
     dma_state.remap_cpusel = cpuid;
 }
@@ -106,21 +106,21 @@ static void process_data(const void* buf, size_t length)
     P_CC3XX->misc.dma_clk_enable = 0x0U;
 }
 
-void cc3xx_dma_copy_data(void* dest, const void* src, size_t length)
+void cc3xx_lowlevel_dma_copy_data(void* dest, const void* src, size_t length)
 {
     /* Set to PASSTHROUGH engine */
-    cc3xx_set_engine(CC3XX_ENGINE_NONE);
+    cc3xx_lowlevel_set_engine(CC3XX_ENGINE_NONE);
 
     /* Set output target */
-    cc3xx_dma_set_output(dest, length);
+    cc3xx_lowlevel_dma_set_output(dest, length);
 
     /* This starts the copy */
-    cc3xx_dma_buffered_input_data(src, length, true);
-    cc3xx_dma_flush_buffer(false);
+    cc3xx_lowlevel_dma_buffered_input_data(src, length, true);
+    cc3xx_lowlevel_dma_flush_buffer(false);
 }
 
-cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
-                                          bool write_output)
+cc3xx_err_t cc3xx_lowlevel_dma_buffered_input_data(const void* buf, size_t length,
+                                                   bool write_output)
 {
     size_t block_buf_size_free =
         dma_state.block_buf_size - dma_state.block_buf_size_in_use;
@@ -142,7 +142,7 @@ cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
          * output, then the block buffer needs to be flushed
          */
         if (dma_state.block_buf_needs_output != write_output) {
-            cc3xx_dma_flush_buffer(false);
+            cc3xx_lowlevel_dma_flush_buffer(false);
         } else {
             data_to_process_length =
                 length < block_buf_size_free ? length : block_buf_size_free;
@@ -163,7 +163,7 @@ cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
     /* The block buf is now full, and we have remaining data. First dispatch the
      * block buf. If the buffer is empty, this is a no-op.
      */
-    cc3xx_dma_flush_buffer(false);
+    cc3xx_lowlevel_dma_flush_buffer(false);
 
     /* If we have any whole blocks left, flush them (but make sure at least some
      * data always remains to insert into the block buf.
@@ -188,7 +188,7 @@ cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
     return CC3XX_ERR_SUCCESS;
 }
 
-void cc3xx_dma_flush_buffer(bool zero_pad_first)
+void cc3xx_lowlevel_dma_flush_buffer(bool zero_pad_first)
 {
     if (dma_state.block_buf_size_in_use > 0) {
         if (zero_pad_first) {
@@ -202,19 +202,19 @@ void cc3xx_dma_flush_buffer(bool zero_pad_first)
     }
 }
 
-void cc3xx_dma_set_buffer_size(size_t size) {
+void cc3xx_lowlevel_dma_set_buffer_size(size_t size) {
     dma_state.block_buf_size = size;
     assert(size <= CC3XX_DMA_BLOCK_BUF_MAX_SIZE);
 }
 
-void cc3xx_dma_set_output(void* buf, size_t length)
+void cc3xx_lowlevel_dma_set_output(void* buf, size_t length)
 {
     if (buf != NULL) {
         /* If we're swapping the buffer location, flush remaining data, but only
          * if the data in the block buffer is marked as needed to be output.
          */
         if (dma_state.block_buf_needs_output) {
-            cc3xx_dma_flush_buffer(false);
+            cc3xx_lowlevel_dma_flush_buffer(false);
         }
 
         /* remap the address, particularly for TCMs */
@@ -224,7 +224,7 @@ void cc3xx_dma_set_output(void* buf, size_t length)
     dma_state.output_size = length;
 }
 
-void cc3xx_dma_uninit(void)
+void cc3xx_lowlevel_dma_uninit(void)
 {
     memset(&dma_state, 0, sizeof(dma_state));
 }

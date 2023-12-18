@@ -22,7 +22,7 @@ extern "C" {
  *
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs);
+cc3xx_err_t cc3xx_lowlevel_lcs_get(cc3xx_lcs_t* lcs);
 
 /**
  * @brief Returns a string which contains the name of the LCS value passed as input
@@ -31,7 +31,7 @@ cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs);
  *
  * @return const char*
  */
-const char* cc3xx_lcs_get_name(cc3xx_lcs_t lcs);
+const char* cc3xx_lowlevel_lcs_get_name(cc3xx_lcs_t lcs);
 
 #ifdef __cplusplus
 }

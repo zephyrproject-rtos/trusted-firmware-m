@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static uint32_t xorshift_plus_128_lfsr(void)
 {
     static uint64_t state[2] = {0};
@@ -24,7 +25,7 @@ static uint32_t xorshift_plus_128_lfsr(void)
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
-        cc3xx_rng_get_random((uint8_t *)&state, sizeof(state));
+        cc3xx_lowlevel_rng_get_random((uint8_t *)&state, sizeof(state));
         seed_done = true;
     }
 
@@ -40,6 +41,7 @@ static uint32_t xorshift_plus_128_lfsr(void)
 
     return (temp0 + temp1) >> 32;
 }
+
 
 static uint32_t xorshift_get_random_uint(uint32_t bound)
 {
@@ -93,6 +95,7 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len)
         permutation_buf[swap_idx] = temp_elem;
     }
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
 void cc3xx_random_permutation_generate(uint8_t *permutation_buf, size_t len)
 {
@@ -114,7 +117,7 @@ void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count)
     uint32_t random_val;
 
     /* Overwrites the input buffer with random values */
-    cc3xx_rng_get_random((uint8_t *)&random_val, sizeof(random_val));
+    cc3xx_lowlevel_rng_get_random((uint8_t *)&random_val, sizeof(random_val));
     for (idx = 0; idx < word_count; idx++) {
         buf[idx] = random_val;
     }

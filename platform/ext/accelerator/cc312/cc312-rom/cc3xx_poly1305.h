@@ -54,7 +54,7 @@ struct cc3xx_poly1305_state_t {
  *                              ``POLY1305_KEY_SIZE`` bytes in length.
  *
  */
-void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s);
+void cc3xx_lowlevel_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s);
 
 /**
  * @brief                        Input data into the poly1305 operation.
@@ -62,7 +62,7 @@ void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s);
  * @param[in]  buf               A pointer to the data to be input.
  * @param[in]  length            The size of the data to be input.
  */
-void cc3xx_poly1305_update(const uint8_t *buf, size_t length);
+void cc3xx_lowlevel_poly1305_update(const uint8_t *buf, size_t length);
 
 /**
  * @brief                        Get the current state of the poly1305 operation.
@@ -71,7 +71,7 @@ void cc3xx_poly1305_update(const uint8_t *buf, size_t length);
  * @param[out] state            The cc3xx_pooly1035_state_t to write the state
  *                              into.
  */
-void cc3xx_poly1305_get_state(struct cc3xx_poly1305_state_t *state);
+void cc3xx_lowlevel_poly1305_get_state(struct cc3xx_poly1305_state_t *state);
 
 /**
  * @brief                        Set the current state of the poly1305 operation.
@@ -84,7 +84,7 @@ void cc3xx_poly1305_get_state(struct cc3xx_poly1305_state_t *state);
  * @param[in]  state            The cc3xx_poly1305_state_t to read the state
  *                              from.
  */
-void cc3xx_poly1305_set_state(const struct cc3xx_poly1305_state_t *state);
+void cc3xx_lowlevel_poly1305_set_state(const struct cc3xx_poly1305_state_t *state);
 
 /**
  * @brief                        Finish a poly1305 operation, and write the tag
@@ -92,12 +92,12 @@ void cc3xx_poly1305_set_state(const struct cc3xx_poly1305_state_t *state);
  *
  * @param[out]  tag              The buffer to write the tag into.
  */
-void cc3xx_poly1305_finish(uint32_t *tag);
+void cc3xx_lowlevel_poly1305_finish(uint32_t *tag);
 
 /**
  * @brief                       Uninitialize the poly1305 operation.
  */
-void cc3xx_poly1305_uninit(void);
+void cc3xx_lowlevel_poly1305_uninit(void);
 
 #ifdef __cplusplus
 }

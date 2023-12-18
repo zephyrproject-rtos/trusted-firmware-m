@@ -13,13 +13,13 @@
 #include <stddef.h>
 #include <string.h>
 
-static void cc3xx_otp_wait_until_fuse_programming_complete(void) {
+static void wait_until_fuse_programming_complete(void) {
 
     while (! (P_CC3XX->nvm.aib_fuse_prog_completed & 1)) {}
 }
 
-cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
-                            size_t size, const uint8_t *buf)
+cc3xx_err_t cc3xx_lowlevel_otp_write(uint8_t *otp_addr,
+                                     size_t size, const uint8_t *buf)
 {
     uint32_t* word_ptr;
     uint32_t current_word;
@@ -68,7 +68,7 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
         memcpy(((uint8_t*)&word) + start_offset, buf + in_done, copy_size);
 
         *word_ptr = word;
-        cc3xx_otp_wait_until_fuse_programming_complete();
+        wait_until_fuse_programming_complete();
 
         in_done += copy_size;
     }
@@ -76,8 +76,8 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr,
-                           size_t size, uint8_t *buf)
+cc3xx_err_t cc3xx_lowlevel_otp_read(const uint8_t *otp_addr,
+                                    size_t size, uint8_t *buf)
 {
     uint32_t* word_ptr;
     uint32_t word;

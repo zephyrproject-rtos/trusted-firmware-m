@@ -11,7 +11,7 @@
 #include "cc3xx_lcs_defs.h"
 #include "cc3xx_error.h"
 
-cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs)
+cc3xx_err_t cc3xx_lowlevel_lcs_get(cc3xx_lcs_t* lcs)
 {
     uint32_t code = 0;
 
@@ -44,7 +44,7 @@ cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs)
     return CC3XX_ERR_SUCCESS;
 }
 
-const char* cc3xx_lcs_get_name(cc3xx_lcs_t lcs)
+const char* cc3xx_lowlevel_lcs_get_name(cc3xx_lcs_t lcs)
 {
     switch(lcs) {
         case cc3xx_lcs_cm:

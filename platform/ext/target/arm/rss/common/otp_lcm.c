@@ -382,22 +382,22 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
         return plat_err;
     }
 
-    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
-                            KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
-                            iv, sizeof(iv));
+    cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
+                                     KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
+                                     iv, sizeof(iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_set_output_buffer(buf, buf_len);
+    cc3xx_lowlevel_aes_set_output_buffer(buf, buf_len);
 
-    cc_err = cc3xx_aes_update((uint8_t *)tmp_buf, len);
+    cc_err = cc3xx_lowlevel_aes_update((uint8_t *)tmp_buf, len);
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        cc3xx_aes_uninit();
+        cc3xx_lowlevel_aes_uninit();
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_finish(NULL, NULL);
+    cc3xx_lowlevel_aes_finish(NULL, NULL);
 
     return TFM_PLAT_ERR_SUCCESS;
 #endif
@@ -436,29 +436,29 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
-    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CTR,
-                            KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
-                            iv, sizeof(iv));
+    cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CTR,
+                                     KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
+                                     iv, sizeof(iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_set_output_buffer((uint8_t *)tmp_buf, sizeof(tmp_buf));
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)tmp_buf, sizeof(tmp_buf));
 
-    cc_err = cc3xx_aes_update(buf, len);
+    cc_err = cc3xx_lowlevel_aes_update(buf, len);
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        cc3xx_aes_uninit();
+        cc3xx_lowlevel_aes_uninit();
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_finish(NULL, NULL);
+    cc3xx_lowlevel_aes_finish(NULL, NULL);
 
     plat_err = otp_write(offset, len, sizeof(tmp_buf), (uint8_t *)tmp_buf);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
 
-    cc_err = cc3xx_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
+    cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

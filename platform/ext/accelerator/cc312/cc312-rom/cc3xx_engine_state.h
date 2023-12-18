@@ -34,7 +34,7 @@ extern enum cc3xx_engine_t cc3xx_engine_in_use;
  *
  * @param engine Value of type \ref enum cc3xx_engine_t to be set
  */
-void cc3xx_set_engine(enum cc3xx_engine_t engine);
+void cc3xx_lowlevel_set_engine(enum cc3xx_engine_t engine);
 
 #ifdef __cplusplus
 }

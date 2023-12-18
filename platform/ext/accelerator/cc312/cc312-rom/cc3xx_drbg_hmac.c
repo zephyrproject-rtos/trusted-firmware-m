@@ -23,7 +23,7 @@
  * @param hmac_inputs_len Lengths for the update operation, passed as an array of hmac_inputs_num values
  * @return cc3xx_err_t
  */
-static cc3xx_err_t cc3xx_drbg_hmac_update(
+static cc3xx_err_t hmac_update(
     size_t hmac_inputs_num,
     struct cc3xx_drbg_hmac_state_t *state,
     const uint8_t **hmac_inputs, const size_t *hmac_inputs_len)
@@ -34,41 +34,41 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     const cc3xx_hash_alg_t alg = CC3XX_HASH_ALG_SHA256;
 
     /* 1. K = HMAC(K, V || 0x00 || provided_data) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
+    err = cc3xx_lowlevel_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, &byte0, sizeof(byte0));
+    err = cc3xx_lowlevel_hmac_update(&state->h, &byte0, sizeof(byte0));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
     /* provided_data can be given into up to 3 chunks, starting from 0 index */
     for (idx = 0; idx < hmac_inputs_num && hmac_inputs_len[idx] != 0; idx++) {
-        err = cc3xx_hmac_update(&state->h, hmac_inputs[idx], hmac_inputs_len[idx]);
+        err = cc3xx_lowlevel_hmac_update(&state->h, hmac_inputs[idx], hmac_inputs_len[idx]);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
     }
 
-    err = cc3xx_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
     /* 2. V = HMAC(K, V) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
+    err = cc3xx_lowlevel_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -79,46 +79,46 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     }
 
     /* 4. K = HMAC(K, V || 0x01 || provided_data) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
+    err = cc3xx_lowlevel_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, &byte1, sizeof(byte1));
+    err = cc3xx_lowlevel_hmac_update(&state->h, &byte1, sizeof(byte1));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
     for (idx = 0; idx < hmac_inputs_num && hmac_inputs_len[idx] != 0; idx++) {
-        err = cc3xx_hmac_update(&state->h, hmac_inputs[idx], hmac_inputs_len[idx]);
+        err = cc3xx_lowlevel_hmac_update(&state->h, hmac_inputs[idx], hmac_inputs_len[idx]);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
     }
 
-    err = cc3xx_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->key_k, sizeof(state->key_k));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
     /* 5. V = HMAC(K, V) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
+    err = cc3xx_lowlevel_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_hmac_finish(&state->h, state->block_v, sizeof(state->block_v));
 
     /* return updated (K, V) state */
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hmac_instantiate(
+cc3xx_err_t cc3xx_lowlevel_drbg_hmac_instantiate(
     struct cc3xx_drbg_hmac_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *nonce, size_t nonce_len,
@@ -134,14 +134,14 @@ cc3xx_err_t cc3xx_drbg_hmac_instantiate(
     const uint8_t *seed[3] = {entropy, nonce, personalization};
     const size_t seed_len[3] = {entropy_len, nonce_len, personalization_len};
 
-    err = cc3xx_drbg_hmac_update(3, state, seed, seed_len);
+    err = hmac_update(3, state, seed, seed_len);
 
     state->reseed_counter = 1;
 
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hmac_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_hmac_generate(
     struct cc3xx_drbg_hmac_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -162,7 +162,7 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
     if (additional_input_len && additional_input != NULL) {
         data[0] = additional_input;
         data_len[0] = additional_input_len;
-        err = cc3xx_drbg_hmac_update(1, state, data, data_len);
+        err = hmac_update(1, state, data, data_len);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -173,18 +173,18 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
         uint32_t temp[CC3XX_DRBG_HMAC_OUTLEN/4];
         size_t bytes_to_copy;
         /* V = HMAC(K, V) */
-        err = cc3xx_hmac_set_key(&state->h,
+        err = cc3xx_lowlevel_hmac_set_key(&state->h,
                                  (const uint8_t *)state->key_k,
                                  sizeof(state->key_k),
                                  alg);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
+        err = cc3xx_lowlevel_hmac_update(&state->h, (const uint8_t *)state->block_v, sizeof(state->block_v));
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_hmac_finish(&state->h, temp, CC3XX_DRBG_HMAC_OUTLEN);
+        err = cc3xx_lowlevel_hmac_finish(&state->h, temp, CC3XX_DRBG_HMAC_OUTLEN);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -215,14 +215,14 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
         last_hmac_update_num = 1;
     }
 
-    err = cc3xx_drbg_hmac_update(last_hmac_update_num, state, data, data_len);
+    err = hmac_update(last_hmac_update_num, state, data, data_len);
 
     state->reseed_counter++;
 
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hmac_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_hmac_reseed(
     struct cc3xx_drbg_hmac_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -233,7 +233,7 @@ cc3xx_err_t cc3xx_drbg_hmac_reseed(
     const uint8_t *data[3] = {entropy, additional_input, NULL};
     const size_t data_len[3] = {entropy_len, additional_input_len, 0};
 
-    err = cc3xx_drbg_hmac_update(2, state, data, data_len);
+    err = hmac_update(2, state, data, data_len);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -243,7 +243,7 @@ cc3xx_err_t cc3xx_drbg_hmac_reseed(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hmac_uninit(struct cc3xx_drbg_hmac_state_t *state)
+cc3xx_err_t cc3xx_lowlevel_drbg_hmac_uninit(struct cc3xx_drbg_hmac_state_t *state)
 {
     cc3xx_secure_erase_buffer((uint32_t *)state, sizeof(struct cc3xx_drbg_hmac_state_t)/4);
     return CC3XX_ERR_SUCCESS;

@@ -19,7 +19,7 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
         return -1;
     }
 
-    return cc3xx_rng_get_random(output, output_size);
+    return cc3xx_lowlevel_rng_get_random(output, output_size);
 }
 
 unsigned char fih_delay_random_uchar(void) {

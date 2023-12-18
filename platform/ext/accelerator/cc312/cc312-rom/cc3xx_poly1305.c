@@ -43,62 +43,62 @@ const size_t reg_sizes_list[POLY1305_PKA_SAVE_REG_AM] = {
 
 static void poly1305_init_from_state(void)
 {
-    cc3xx_pka_write_reg(poly_state.modulus_reg, poly_prime, sizeof(poly_prime));
-    cc3xx_pka_write_reg(poly_state.barrett_tag_reg, poly_barrett_tag,
-                        sizeof(poly_barrett_tag));
+    cc3xx_lowlevel_pka_write_reg(poly_state.modulus_reg, poly_prime, sizeof(poly_prime));
+    cc3xx_lowlevel_pka_write_reg(poly_state.barrett_tag_reg, poly_barrett_tag,
+                                 sizeof(poly_barrett_tag));
 
-    cc3xx_pka_set_modulus(poly_state.modulus_reg, false,
-                          poly_state.barrett_tag_reg);
+    cc3xx_lowlevel_pka_set_modulus(poly_state.modulus_reg, false,
+                                   poly_state.barrett_tag_reg);
 }
 
 
-void cc3xx_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s)
+void cc3xx_lowlevel_poly1305_init(uint32_t *poly_key_r, uint32_t *poly_key_s)
 {
-    cc3xx_pka_init(sizeof(poly_prime));
+    cc3xx_lowlevel_pka_init(sizeof(poly_prime));
 
-    poly_state.modulus_reg = cc3xx_pka_allocate_reg();
-    poly_state.barrett_tag_reg = cc3xx_pka_allocate_reg();
-    poly_state.key_r_reg = cc3xx_pka_allocate_reg();
-    poly_state.key_s_reg = cc3xx_pka_allocate_reg();
-    poly_state.accumulator_reg = cc3xx_pka_allocate_reg();
-    poly_state.data_input_reg = cc3xx_pka_allocate_reg();
-    poly_state.mask_reg = cc3xx_pka_allocate_reg();
+    poly_state.modulus_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.barrett_tag_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.key_r_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.key_s_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.accumulator_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.data_input_reg = cc3xx_lowlevel_pka_allocate_reg();
+    poly_state.mask_reg = cc3xx_lowlevel_pka_allocate_reg();
 
-    cc3xx_pka_write_reg(poly_state.key_r_reg, poly_key_r, POLY1305_KEY_SIZE);
-    cc3xx_pka_write_reg(poly_state.key_s_reg, poly_key_s, POLY1305_KEY_SIZE);
+    cc3xx_lowlevel_pka_write_reg(poly_state.key_r_reg, poly_key_r, POLY1305_KEY_SIZE);
+    cc3xx_lowlevel_pka_write_reg(poly_state.key_s_reg, poly_key_s, POLY1305_KEY_SIZE);
 
     /* zero the accumulator register */
-    cc3xx_pka_clear(poly_state.accumulator_reg);
+    cc3xx_lowlevel_pka_clear(poly_state.accumulator_reg);
 
     /* Before we use the bit 129 mask reg for the 129th bit or mask, use it for
      * the key_r mask.
      */
-    cc3xx_pka_write_reg(poly_state.mask_reg, poly_key_r_mask,
-                        sizeof(poly_key_r_mask));
-    cc3xx_pka_and(poly_state.key_r_reg,
-                  poly_state.mask_reg, poly_state.key_r_reg);
+    cc3xx_lowlevel_pka_write_reg(poly_state.mask_reg, poly_key_r_mask,
+                                 sizeof(poly_key_r_mask));
+    cc3xx_lowlevel_pka_and(poly_state.key_r_reg,
+                           poly_state.mask_reg, poly_state.key_r_reg);
 
     poly1305_init_from_state();
 }
 
 static void poly_process_block(const uint32_t *buf)
 {
-    cc3xx_pka_write_reg(poly_state.data_input_reg, buf, POLY1305_BLOCK_SIZE);
+    cc3xx_lowlevel_pka_write_reg(poly_state.data_input_reg, buf, POLY1305_BLOCK_SIZE);
 
     /* Set the 129th bit to 1 */
-    cc3xx_pka_set_to_power_of_two(poly_state.mask_reg, POLY1305_BLOCK_SIZE * 8);
-    cc3xx_pka_or(poly_state.data_input_reg,
-                 poly_state.mask_reg, poly_state.data_input_reg);
+    cc3xx_lowlevel_pka_set_to_power_of_two(poly_state.mask_reg, POLY1305_BLOCK_SIZE * 8);
+    cc3xx_lowlevel_pka_or(poly_state.data_input_reg,
+                          poly_state.mask_reg, poly_state.data_input_reg);
 
     /* Add the new data to the accumulator */
-    cc3xx_pka_mod_add(poly_state.accumulator_reg,
-                      poly_state.data_input_reg, poly_state.accumulator_reg);
+    cc3xx_lowlevel_pka_mod_add(poly_state.accumulator_reg,
+                               poly_state.data_input_reg, poly_state.accumulator_reg);
     /* Multiply the accumulator by r */
-    cc3xx_pka_mod_mul(poly_state.accumulator_reg,
-                      poly_state.key_r_reg, poly_state.accumulator_reg);
+    cc3xx_lowlevel_pka_mod_mul(poly_state.accumulator_reg,
+                               poly_state.key_r_reg, poly_state.accumulator_reg);
 }
 
-void cc3xx_poly1305_update(const uint8_t *buf, size_t length)
+void cc3xx_lowlevel_poly1305_update(const uint8_t *buf, size_t length)
 {
     size_t data_to_process_length;
     uint32_t temp_block[POLY1305_BLOCK_SIZE / sizeof(uint32_t)];
@@ -148,7 +148,7 @@ void cc3xx_poly1305_update(const uint8_t *buf, size_t length)
     poly_state.block_buf_size_in_use += length;
 }
 
-void cc3xx_poly1305_get_state(struct cc3xx_poly1305_state_t *state)
+void cc3xx_lowlevel_poly1305_get_state(struct cc3xx_poly1305_state_t *state)
 {
     cc3xx_pka_reg_id_t save_reg_list[POLY1305_PKA_SAVE_REG_AM] = {
         poly_state.key_r_reg,
@@ -164,11 +164,11 @@ void cc3xx_poly1305_get_state(struct cc3xx_poly1305_state_t *state)
 
     memcpy(state, &poly_state, sizeof(*state));
 
-    cc3xx_pka_get_state(&state->pka_state, POLY1305_PKA_SAVE_REG_AM, save_reg_list,
-                        save_reg_ptr_list, reg_sizes_list);
+    cc3xx_lowlevel_pka_get_state(&state->pka_state, POLY1305_PKA_SAVE_REG_AM, save_reg_list,
+                                 save_reg_ptr_list, reg_sizes_list);
 }
 
-void cc3xx_poly1305_set_state(const struct cc3xx_poly1305_state_t *state)
+void cc3xx_lowlevel_poly1305_set_state(const struct cc3xx_poly1305_state_t *state)
 {
     cc3xx_pka_reg_id_t load_reg_list[POLY1305_PKA_SAVE_REG_AM] = {
         poly_state.key_r_reg,
@@ -184,13 +184,13 @@ void cc3xx_poly1305_set_state(const struct cc3xx_poly1305_state_t *state)
 
     memcpy(&poly_state, state, sizeof(poly_state));
 
-    cc3xx_pka_set_state(&state->pka_state, POLY1305_PKA_SAVE_REG_AM, load_reg_list,
-                        load_reg_ptr_list, reg_sizes_list);
+    cc3xx_lowlevel_pka_set_state(&state->pka_state, POLY1305_PKA_SAVE_REG_AM, load_reg_list,
+                                 load_reg_ptr_list, reg_sizes_list);
 
     poly1305_init_from_state();
 }
 
-void cc3xx_poly1305_finish(uint32_t *tag)
+void cc3xx_lowlevel_poly1305_finish(uint32_t *tag)
 {
     /* Flush the final block */
     if (poly_state.block_buf_size_in_use != 0) {
@@ -201,18 +201,18 @@ void cc3xx_poly1305_finish(uint32_t *tag)
     }
 
     /* Finally, the tag is a + s */
-    cc3xx_pka_mod_add(poly_state.accumulator_reg,
+    cc3xx_lowlevel_pka_mod_add(poly_state.accumulator_reg,
                       poly_state.key_s_reg, poly_state.accumulator_reg);
 
     /* Read back the first 16 bytes for the accumulator into the tag */
-    cc3xx_pka_read_reg(poly_state.accumulator_reg, tag, POLY1305_TAG_LEN);
+    cc3xx_lowlevel_pka_read_reg(poly_state.accumulator_reg, tag, POLY1305_TAG_LEN);
 
-    cc3xx_poly1305_uninit();
+    cc3xx_lowlevel_poly1305_uninit();
 }
 
-void cc3xx_poly1305_uninit(void)
+void cc3xx_lowlevel_poly1305_uninit(void)
 {
     memset(&poly_state, 0, sizeof(poly_state));
 
-    cc3xx_pka_uninit();
+    cc3xx_lowlevel_pka_uninit();
 }

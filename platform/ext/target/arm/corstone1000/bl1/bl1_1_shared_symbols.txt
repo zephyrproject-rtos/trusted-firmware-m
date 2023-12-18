@@ -11,7 +11,7 @@ bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
 bl_fih_memeql
-cc3xx_uninit
+cc3xx_lowlevel_uninit
 computed_bl1_2_hash
 corstone1000_watchdog_reset_timer
 pq_crypto_verify
