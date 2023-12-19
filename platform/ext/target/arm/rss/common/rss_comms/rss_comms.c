@@ -16,6 +16,7 @@
 #include "rss_comms_queue.h"
 #include "tfm_rpc.h"
 #include "tfm_multi_core.h"
+#include "tfm_hal_multi_core.h"
 #include "tfm_psa_call_pack.h"
 #include "tfm_spm_log.h"
 #include "rss_comms_permissions_hal.h"
