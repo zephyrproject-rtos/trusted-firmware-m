@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -131,11 +131,11 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
                                     offsetof(struct cm_provisioning_bundle, code),
                                     sizeof(cm_encrypted_bundle->magic));
 
-    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&cm_encrypted_bundle->magic,
-                                          sizeof(cm_encrypted_bundle->magic));
-
     cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
                                          PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&cm_encrypted_bundle->magic,
+                                          sizeof(cm_encrypted_bundle->magic));
 
     cc3xx_lowlevel_aes_update((uint8_t *)cm_encrypted_bundle->code,
                               PROVISIONING_BUNDLE_CODE_SIZE);
@@ -205,11 +205,11 @@ static enum tfm_plat_err_t provision_psa_rot(void)
                                     offsetof(struct dm_provisioning_bundle, code),
                                     sizeof(dm_encrypted_bundle->magic));
 
-    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&dm_encrypted_bundle->magic,
-                                          sizeof(dm_encrypted_bundle->magic));
-
     cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
                                          PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_lowlevel_aes_update_authed_data((uint8_t *)&dm_encrypted_bundle->magic,
+                                          sizeof(dm_encrypted_bundle->magic));
 
     cc3xx_lowlevel_aes_update((uint8_t *)dm_encrypted_bundle->code,
                               PROVISIONING_BUNDLE_CODE_SIZE);
