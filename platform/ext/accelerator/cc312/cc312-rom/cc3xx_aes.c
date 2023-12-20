@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -342,11 +342,14 @@ static cc3xx_err_t init_from_state(void)
      * controlled here, and enabled for all non-tunnelling modes.
      */
 #if defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE)
+    assert(!(P_CC3XX->ao.host_ao_lock_bits & (0b1U << 7)));
+
     if (aes_state.mode == CC3XX_AES_MODE_CCM) {
         P_CC3XX->aes.aes_dfa_is_on = 0x0U;
     } else {
         P_CC3XX->aes.aes_dfa_is_on = 0x1U;
     }
+
 #endif /* defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
 
     /* Clear number of remaining bytes */

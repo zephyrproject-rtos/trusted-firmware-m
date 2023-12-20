@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -63,11 +63,14 @@ static void check_features(void)
 #endif
 }
 
-#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
     uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
+#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
     uint32_t lock_dfa_enabled = dfa_is_supported;
+#else
+    uint32_t lock_dfa_enabled = false;
+#endif
 
 #ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
     /* If tunnelling is enabled then the DFA countermeasures will need to be
@@ -87,7 +90,6 @@ static cc3xx_err_t setup_dfa_countermeasures(void)
 
     return CC3XX_ERR_SUCCESS;
 }
-#endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static cc3xx_err_t setup_dpa_countermeasures(void)
@@ -124,12 +126,10 @@ cc3xx_err_t cc3xx_lowlevel_init(void)
     /* Configure entire system to litte endian */
     P_CC3XX->host_rgf.host_rgf_endian = 0x0U;
 
-#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
     err = setup_dfa_countermeasures();
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-#endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     err = setup_dpa_countermeasures();
