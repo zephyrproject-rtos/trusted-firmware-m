@@ -21,7 +21,14 @@
 #include <RTE_Device.h>
 #include <flash_layout.h>
 #include <string.h>
+
+#include <nrf.h>
+
+#if defined(NRF_NVMC_S)
 #include <nrfx_nvmc.h>
+#else
+#error "Unrecognized platform"
+#endif
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  (void)arg
@@ -31,22 +38,13 @@
 
 #if RTE_FLASH0
 
-/**
- * Data width values for ARM_FLASH_CAPABILITIES::data_width
- * \ref ARM_FLASH_CAPABILITIES
+/*
+ * The data width for this driver is 4 bytes and a
+ * ARM_FLASH_CAPABILITIES.data_width field value of 2 means 4 bytes
+ * (see documentation for struct ARM_FLASH_CAPABILITIES).
  */
-enum {
-    DATA_WIDTH_8BIT = 0u,
-    DATA_WIDTH_16BIT,
-    DATA_WIDTH_32BIT,
-    DATA_WIDTH_ENUM_SIZE
-};
-
-static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
-    sizeof(uint8_t),
-    sizeof(uint16_t),
-    sizeof(uint32_t),
-};
+#define ARM_FLASH_CAPABILITIES_DATA_WIDTH 2
+#define ARM_FLASH_CAPABILITIES_DATA_WIDTH_SIZE 4
 
 static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_FLASH_API_VERSION,
@@ -55,7 +53,7 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     .event_ready = 0,
-    .data_width  = DATA_WIDTH_32BIT,
+    .data_width  = ARM_FLASH_CAPABILITIES_DATA_WIDTH,
     .erase_chip  = 1
 };
 
@@ -97,9 +95,6 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
 
-    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
-        return ARM_DRIVER_ERROR;
-    }
 
     return ARM_DRIVER_OK;
 }
@@ -126,7 +121,7 @@ static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
 static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
     /* Conversion between data items and bytes */
-    uint32_t bytes = cnt * data_width_byte[DriverCapabilities.data_width];
+    uint32_t bytes = cnt * ARM_FLASH_CAPABILITIES_DATA_WIDTH_SIZE;
 
     if (!is_range_valid(addr, bytes)) {
         return ARM_DRIVER_ERROR_PARAMETER;
@@ -141,7 +136,7 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
                                      uint32_t cnt)
 {
     /* Conversion between data items and bytes */
-    uint32_t bytes = cnt * data_width_byte[DriverCapabilities.data_width];
+    uint32_t bytes = cnt * ARM_FLASH_CAPABILITIES_DATA_WIDTH_SIZE;
 
     /* Only aligned writes of full 32-bit words are allowed. */
     if (addr % sizeof(uint32_t)) {
@@ -154,13 +149,13 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
 
     nrfx_nvmc_words_write(addr, data, cnt);
 
-    /* Conversion between bytes and data items */
     return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)
 {
     nrfx_err_t err_code = nrfx_nvmc_page_erase(addr);
+
     if (err_code != NRFX_SUCCESS) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
@@ -176,8 +171,10 @@ static int32_t ARM_Flash_EraseChip(void)
 
 static ARM_FLASH_STATUS ARM_Flash_GetStatus(void)
 {
+	bool ready = nrfx_nvmc_write_done_check();
+
     ARM_FLASH_STATUS status = {
-        .busy = !nrfx_nvmc_write_done_check()
+        .busy = !ready
     };
 
     return status;
