@@ -1,11 +1,11 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# This command disables the DCU force disable overrides by writing 0x00AAAAAA to
+# This command disables the DCU force disable overrides by writing 0x02AAAAAA to
 # the LCM_DCU_FORCE_DISABLE_REGISTER
 
 Header:
@@ -44,6 +44,6 @@ Header:
 CTRL: 0x10000602
 DESADDR: 'rss_system_control_registers_base_address + 0x25C'
 XSIZE: 0x00010000
-FILLVAL: 0x00AAAAAA
+FILLVAL: 0x02AAAAAA
 GPOVAL0: 0x0000001F
 LINKADDR: "program6_cmd8_exec_addr"
