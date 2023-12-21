@@ -30,6 +30,14 @@
 #include "tfm_spm_log.h"
 #endif
 
+#ifdef NRF_TIMER10
+#define SECURE_TIMER NRF_TIMER10
+#define NON_SECURE_TIMER NRF_TIMER20
+#else
+#define SECURE_TIMER NRF_TIMER0
+#define NON_SECURE_TIMER NRF_TIMER1
+#endif
+
 #define TIMER_RELOAD_VALUE (1*1000*1000)
 #define TIMER_FREQ_HZ      (1000000)
 
@@ -70,27 +78,27 @@ static void timer_event_clear(NRF_TIMER_Type *TIMER)
 
 void tfm_plat_test_secure_timer_start(void)
 {
-    timer_init(NRF_TIMER0, TIMER_RELOAD_VALUE);
-    timer_start(NRF_TIMER0);
+    timer_init(SECURE_TIMER, TIMER_RELOAD_VALUE);
+    timer_start(SECURE_TIMER);
 }
 
 void tfm_plat_test_secure_timer_clear_intr(void)
 {
-    timer_event_clear(NRF_TIMER0);
+    timer_event_clear(SECURE_TIMER);
 }
 
 void tfm_plat_test_secure_timer_stop(void)
 {
-    timer_stop(NRF_TIMER0);
+    timer_stop(SECURE_TIMER);
 }
 
 void tfm_plat_test_non_secure_timer_start(void)
 {
-    timer_init(NRF_TIMER1, TIMER_RELOAD_VALUE);
-    timer_start(NRF_TIMER1);
+    timer_init(NON_SECURE_TIMER, TIMER_RELOAD_VALUE);
+    timer_start(NON_SECURE_TIMER);
 }
 
 void tfm_plat_test_non_secure_timer_stop(void)
 {
-    timer_stop(NRF_TIMER1);
+    timer_stop(NON_SECURE_TIMER);
 }
