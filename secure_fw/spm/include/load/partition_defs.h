@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -70,12 +70,12 @@
 #ifdef CONFIG_TFM_USE_TRUSTZONE
 #define IS_NS_AGENT_TZ(pldi)                    (!!((pldi)->flags & PARTITION_NS_AGENT_TZ))
 #else
-#define IS_NS_AGENT_TZ(pldi)                    false
+#define IS_NS_AGENT_TZ(pldi)                    ((void)pldi, false)
 #endif
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 #define IS_NS_AGENT_MAILBOX(pldi)               (!!((pldi)->flags & PARTITION_NS_AGENT_MB))
 #else
-#define IS_NS_AGENT_MAILBOX(pldi)               false
+#define IS_NS_AGENT_MAILBOX(pldi)               ((void)pldi, false)
 #endif
 
 #define PARTITION_TYPE_TO_INDEX(type)           (!!((type) & PARTITION_NS_AGENT_TZ))
