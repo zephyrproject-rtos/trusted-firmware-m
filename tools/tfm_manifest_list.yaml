@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -31,7 +31,7 @@
       "conditional": "TFM_PARTITION_NS_AGENT_MAILBOX",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 0,
+      "pid": 262,
       "linker_pattern": {
         "library_list": [
            "*tfm_*ns_agent_mailbox.*"
