@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
 # Copyright 2021-2024 NXP. All rights reserved.
 #
@@ -201,9 +201,16 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        ${NXP_COMMON_DIR}/mpc_ppc_faults.c
         ${NXP_COMMON_DIR}/tfm_hal_isolation.c
         ${NXP_COMMON_DIR}/tfm_hal_platform.c
+)
+
+# If this is not added to the tfm_s it will not correctly override the weak
+# default handlers declared in assemebly, and will instead be discarded as they
+# are not in use.
+target_sources(tfm_s
+    PRIVATE
+        ${NXP_COMMON_DIR}/mpc_ppc_faults.c
 )
 
 #========================= Files for building NS side platform ================#

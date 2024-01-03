@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -120,10 +120,17 @@ target_sources(tfm_spm
         target_cfg.c
         tfm_hal_platform.c
         tfm_peripherals_def.c
-        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_platform_v8m.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
+)
+
+# If this is not added to the tfm_s it will not correctly override the weak
+# default handlers declared in assemebly, and will instead be discarded as they
+# are not in use.
+target_sources(tfm_s
+    PRIVATE
+        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
 )
 
 target_compile_definitions(platform_region_defs
