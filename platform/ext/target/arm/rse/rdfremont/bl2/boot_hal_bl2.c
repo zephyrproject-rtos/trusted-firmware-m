@@ -508,6 +508,8 @@ static int boot_platform_post_load_scp(void)
 static int boot_platform_pre_load_mcp(void)
 {
     enum atu_error_t atu_err;
+    struct rse_integ_t *integ_layer =
+            (struct rse_integ_t *)RSE_INTEG_LAYER_BASE_S;
 
     BOOT_LOG_INF("BL2: MCP pre load start");
 
@@ -539,6 +541,9 @@ static int boot_platform_pre_load_mcp(void)
     }
 
     BOOT_LOG_INF("BL2: MCP pre load complete");
+
+    /* Enable MCP's ATU Access Permission (ATU AP) */
+    integ_layer->atu_ap |= RSE_INTEG_ATU_AP_MCP_ATU;
 
     return 0;
 }
