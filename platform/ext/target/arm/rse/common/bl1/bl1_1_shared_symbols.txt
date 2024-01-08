@@ -19,6 +19,7 @@ dpa_hardened_word_copy
 get_supported_region_count
 host_flash_atu_init_regions_for_image
 host_flash_atu_uninit_regions
+integrity_checker_check_value
 integrity_checker_compute_value
 kmu_init
 kmu_get_key_buffer_ptr

@@ -69,6 +69,8 @@
 #endif /* MCUBOOT_SIGNATURE_TYPE */
 
 const struct dm_provisioning_data data = {
+    /* RSE ID */
+    0,
     /* RSE to RSE sender table */
     {},
     /* RSE to RSE receiver table */

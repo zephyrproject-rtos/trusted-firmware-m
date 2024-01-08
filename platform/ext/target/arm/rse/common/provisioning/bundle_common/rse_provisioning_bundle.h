@@ -34,8 +34,6 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
             uint8_t bl1_2_image_hash[32];
             uint8_t bl1_2_image[BL1_2_CODE_SIZE];
             uint8_t dma_otp_ics[OTP_DMA_ICS_SIZE];
-            uint8_t scp_data[OTP_SCP_DATA_SIZE];
-            uint32_t rse_id;
             uint32_t sam_config[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
             uint8_t guk[32];
             uint32_t cca_system_properties;
@@ -56,6 +54,7 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
         struct __attribute__((__packed__)) dm_provisioning_data {
+            uint32_t rse_id;
             uint32_t rse_to_rse_sender_routing_table[RSE_AMOUNT];
             uint32_t rse_to_rse_receiver_routing_table[RSE_AMOUNT];
 

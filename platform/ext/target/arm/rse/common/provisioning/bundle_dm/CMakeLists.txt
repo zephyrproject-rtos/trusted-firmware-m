@@ -68,7 +68,7 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
         bl1_2_padded_bin bl2_signed_bin dm_provisioning_bundle
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rse_create_provisioning_bundle.py
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_dm_provisioning_bundle.py
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf dm_provisioning_bundle_${RSE_ID}.axf
         COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle_${RSE_ID}.axf
                         --dump-section CODE=dm_provisioning_code.bin
@@ -76,19 +76,16 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
                         --dump-section DATA=dm_provisioning_data.bin
         COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle_${RSE_ID}.axf
                         --dump-section VALUES=dm_provisioning_values.bin
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rse_create_provisioning_bundle.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_dm_provisioning_bundle.py
                         --provisioning_code dm_provisioning_code.bin
                         --provisioning_data dm_provisioning_data.bin
                         --provisioning_values dm_provisioning_values.bin
-                        --bundle_output_file encrypted_dm_provisioning_bundle_${RSE_ID}.bin
-                        --magic "0xBEEFFEED"
                         --tp_mode ${RSE_TP_MODE}
-                        --key_file=${RSE_RTL_KEY_PATH}
-                        --krtl_derivation_label="DM_PROVISIONING"
-                        --provisioning_lcs 1
+                        --krtl_file=${RSE_RTL_KEY_PATH}
                         $<$<BOOL:${MULTI_RSE_TOPOLOGY_FILE}>:--multi_rse_topology_graph_file=${MULTI_RSE_TOPOLOGY_FILE}>
                         --rse_id ${RSE_ID}
                         --rse_amount ${RSE_AMOUNT}
+                        --bundle_output_file encrypted_dm_provisioning_bundle_${RSE_ID}.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_dm_provisioning_bundle_${RSE_ID}.bin ${CMAKE_BINARY_DIR}/bin/encrypted_dm_provisioning_bundle_${RSE_ID}.bin
     )
 endforeach()

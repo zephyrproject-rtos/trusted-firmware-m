@@ -33,6 +33,13 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RSE_ID,
+                             sizeof(data.rse_id),
+                             (const uint8_t *)&data.rse_id);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_BL2_ENCRYPTION,
                              sizeof(data.bl2_encryption_key),
                              data.bl2_encryption_key);

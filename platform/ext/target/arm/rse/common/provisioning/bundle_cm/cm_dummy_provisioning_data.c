@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,10 +14,6 @@ const struct cm_provisioning_data data = {
     {},
     /* DMA ICS */
     {},
-    /* SCP data */
-    {},
-    /* RSE_ID */
-    0,
     /* SAM config placeholder */
     {
         0xFFFFFFFF, 0x0000001F,

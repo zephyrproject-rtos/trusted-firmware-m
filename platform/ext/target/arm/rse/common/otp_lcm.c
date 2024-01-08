@@ -60,7 +60,6 @@ __PACKED_STRUCT plat_user_area_layout_t {
              */
                 uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
                 uint32_t cca_system_properties;
-                uint32_t rse_id;
 
                 uint32_t cm_config_flags;
             } cm_locked;
@@ -85,6 +84,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
                 uint32_t dm_config_flags;
 
+                uint32_t rse_id;
 #if RSE_AMOUNT > 1
                 uint32_t rse_to_rse_sender_routing_table[RSE_AMOUNT];
                 uint32_t rse_to_rse_receiver_routing_table[RSE_AMOUNT];
@@ -232,7 +232,7 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_OFFSET(cm_locked.cca_system_properties),
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
-    [PLAT_OTP_ID_RSE_ID] = USER_AREA_OFFSET(cm_locked.rse_id),
+    [PLAT_OTP_ID_RSE_ID] = USER_AREA_OFFSET(dm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
@@ -346,7 +346,7 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_SIZE(cm_locked.cca_system_properties),
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
-    [PLAT_OTP_ID_RSE_ID] = USER_AREA_SIZE(cm_locked.rse_id),
+    [PLAT_OTP_ID_RSE_ID] = USER_AREA_SIZE(dm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),

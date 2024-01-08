@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -57,7 +57,12 @@ int generate_boot_state(uint8_t *bl1_2_hash, uint8_t *boot_state)
     uint8_t context[PSA_HASH_LENGTH(PSA_ALG_SHA_256) + 3 * sizeof(uint32_t)];
     uint32_t reprovisioning_bits = 0;
     uint32_t lcs = 3;
-    uint32_t tp_mode = TP_MODE;
+#ifdef TP_MODE_TCI
+    uint32_t tp_mode = 0x111155AA;
+#endif
+#ifdef TP_MODE_PCI
+    uint32_t tp_mode = 0x2222AA55;
+#endif
 
     memcpy(context, &lcs, sizeof(uint32_t));
 

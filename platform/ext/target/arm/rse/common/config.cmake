@@ -91,13 +91,20 @@ set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU 
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
-set(RSE_RTL_KEY_PATH                    ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
 set(RSE_SCP_DATA_PATH                   ${CMAKE_CURRENT_LIST_DIR}/provisioning/dummy_scp_data.bin CACHE FILEPATH "Path to SCP data to provision")
+
+set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
+
+if (RSE_TP_MODE STREQUAL "TCI")
+    set(RSE_RTL_KEY_PATH                ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+elseif(RSE_TP_MODE STREQUAL "PCI")
+    set(RSE_RTL_KEY_PATH                ${CMAKE_CURRENT_LIST_DIR}/provisioning/pci_krtl_dummy.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+else()
+    message(FATAL_ERROR "Invalid TP mode ${RSE_TP_MODE}")
+endif()
 
 set(RSE_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
 set(RSE_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
-
-set(RSE_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
 
 set(RSE_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSE OTP words can be programmed bit by bit, or whole words must be programmed at once")
 

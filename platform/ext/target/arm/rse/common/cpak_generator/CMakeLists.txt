@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -36,7 +36,7 @@ target_compile_definitions(cpak_generator
         BL1_2_HASH_PATH=${BL1_2_HASH_PATH}
         GUK_PATH=${GUK_PATH}
         CPAK_OUTPUT_PATH=${CPAK_OUTPUT_PATH}
-        TP_MODE=${RSE_TP_MODE}
+        TP_MODE_${RSE_TP_MODE}
 )
 
 target_compile_options(cpak_generator

@@ -68,7 +68,7 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
         bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rse_create_provisioning_bundle.py
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_cm_provisioning_bundle.py
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf cm_provisioning_bundle_${RSE_ID}.axf
         COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSE_ID}.axf
                         --dump-section CODE=cm_provisioning_code.bin
@@ -76,21 +76,16 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
                         --dump-section DATA=cm_provisioning_data.bin
         COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSE_ID}.axf
                         --dump-section VALUES=cm_provisioning_values.bin
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rse_create_provisioning_bundle.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_cm_provisioning_bundle.py
                         --provisioning_code cm_provisioning_code.bin
                         --provisioning_data cm_provisioning_data.bin
                         --provisioning_values cm_provisioning_values.bin
                         --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                         --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
-                        --bundle_output_file encrypted_cm_provisioning_bundle_${RSE_ID}.bin
-                        --magic "0xC0DEFEED"
-                        --rse_id ${RSE_ID}
-                        --tp_mode ${RSE_TP_MODE}
                         --otp_dma_ics_input_file=$<TARGET_FILE_DIR:bl1_2>/otp_dma_ics.bin
-                        --key_file=${RSE_RTL_KEY_PATH}
-                        --scp_data_input_file=${RSE_SCP_DATA_PATH}
-                        --krtl_derivation_label="CM_PROVISIONING"
-                        --provisioning_lcs 0
+                        --tp_mode=${RSE_TP_MODE}
+                        --krtl_file=${RSE_RTL_KEY_PATH}
+                        --bundle_output_file encrypted_cm_provisioning_bundle_${RSE_ID}.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_cm_provisioning_bundle_${RSE_ID}.bin ${CMAKE_BINARY_DIR}/bin/encrypted_cm_provisioning_bundle_${RSE_ID}.bin
     )
 endforeach()
