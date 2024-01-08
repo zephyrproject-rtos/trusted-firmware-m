@@ -205,11 +205,14 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 /*
- * Define a variable to enable naked tfm_psa_connect_veneer() to return the error code.
+ * Define a constant to enable naked tfm_psa_connect_veneer() to return the error code.
  * It is not supported to directly return the error code in psa_status_t type in Basic Asm via
  * M2S.
+ * This is defined as a const in order to be placed in .rodata section which
+ * normally has least strict protection requirements and can be freely accessed
+ * during a call to "tfm_psa_connect_veneer()".
  */
-__used int32_t ret_err = (int32_t)PSA_ERROR_NOT_SUPPORTED;
+__used const int32_t ret_err = (int32_t)PSA_ERROR_NOT_SUPPORTED;
 #if defined(__ICCARM__)
 #pragma required = ret_err
 #endif
