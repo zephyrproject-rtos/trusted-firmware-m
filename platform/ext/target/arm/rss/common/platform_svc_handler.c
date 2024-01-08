@@ -10,6 +10,7 @@
 #include "platform_svc_numbers.h"
 #include "tfm_hal_platform.h"
 #include "tfm_platform_system.h"
+#include "sds.h"
 
 int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                                 uint32_t lr)
