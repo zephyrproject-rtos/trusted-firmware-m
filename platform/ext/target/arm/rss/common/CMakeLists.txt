@@ -292,8 +292,10 @@ target_sources(platform_bl1_1
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
         ./native_drivers/lcm_drv.c
-        ./native_drivers/mhu_v2_x.c
-        ./native_drivers/mhu_wrapper_v2_x.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
