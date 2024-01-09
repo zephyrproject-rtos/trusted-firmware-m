@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,11 +21,19 @@ extern "C" {
  * \brief Check that RSS comms callers have permission to access a memory
  *        buffer.
  *
+ * \param[in]  owner               The owner of host memory against which the
+ *                                 memory access is checked (e.g. MHU device).
+ * \param[in]  host_ptr            Address of the memory region to be accessed.
+ * \param[in]  size                Size of the memory region to be accessed.
+ * \param[in]  is_write            True, if the memory access is a write
+ *                                 operation, False otherwise.
+ *
  * \retval TFM_PLAT_ERR_SUCCESS  Caller has permission to access buffer.
  * \retval Other return code     Caller does not have permission, or an error
  *                               occurred.
  */
-enum tfm_plat_err_t comms_permissions_memory_check(uint64_t host_ptr,
+enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
+                                                   uint64_t host_ptr,
                                                    uint32_t size,
                                                    bool is_write);
 

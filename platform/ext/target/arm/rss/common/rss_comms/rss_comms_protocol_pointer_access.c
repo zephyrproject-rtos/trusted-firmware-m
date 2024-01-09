@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,8 +35,10 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
 
     /* Invecs */
     for (idx = 0; idx < req->in_len; idx++) {
-        err = comms_permissions_memory_check(msg->host_ptrs[idx],
-                                             msg->io_sizes[idx], false);
+        err = comms_permissions_memory_check(req->mhu_sender_dev,
+                                             msg->host_ptrs[idx],
+                                             msg->io_sizes[idx],
+                                             false);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
@@ -66,7 +68,8 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
 
     /* Outvecs */
     for (idx = 0; idx < req->out_len; idx++) {
-        err = comms_permissions_memory_check(msg->host_ptrs[idx + req->in_len],
+        err = comms_permissions_memory_check(req->mhu_sender_dev,
+                                             msg->host_ptrs[idx + req->in_len],
                                              msg->io_sizes[idx + req->in_len],
                                              true);
         if (err != TFM_PLAT_ERR_SUCCESS) {

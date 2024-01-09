@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -67,10 +67,14 @@ static void counter_check(void) {
  * owners of host memory. However, we should still be somewhat discerning about
  * where data is coming from or going to.
  */
-enum tfm_plat_err_t comms_permissions_memory_check(uint64_t host_ptr,
+enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
+                                                   uint64_t host_ptr,
                                                    uint32_t size,
                                                    bool is_write)
 {
+    /* Accessed only from root world - can be ignored */
+    (void)owner;
+
     /* Is fully within the AP Shared SRAM? */
     if (host_ptr >= HOST_AP_SHARED_SRAM_PHYS_BASE &&
         host_ptr + size <= HOST_AP_SHARED_SRAM_PHYS_LIMIT) {
