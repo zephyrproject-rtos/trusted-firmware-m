@@ -79,6 +79,9 @@ void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
 {
     struct tfm_pool_chunk_t *pchunk;
 
+    /* In debug builds, trap invalid frees. */
+    SPM_ASSERT(is_valid_chunk_data_in_pool(pool, ptr));
+
     pchunk = TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
 
     pchunk->magic = 0;
