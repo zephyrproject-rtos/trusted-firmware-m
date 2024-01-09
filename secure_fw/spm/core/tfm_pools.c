@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -77,6 +77,11 @@ void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
     pchunk = TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
 
     UNI_LIST_INSERT_AFTER(pool, pchunk, next);
+
+    /* In debug builds, overwrite the data to catch use-after-free bugs. */
+#ifndef NDEBUG
+    spm_memset(pchunk->data, 0xFF, pool->chunksz);
+#endif
 }
 
 bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
