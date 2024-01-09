@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,16 @@ extern struct mhu_v2_x_dev_t MHU_AP_MONITOR_TO_RSS_DEV;
 #ifdef MHU_RSS_TO_AP_MONITOR
 #include "mhu_v2_x.h"
 extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_MONITOR_DEV;
+#endif
+
+#ifdef MHU_AP_NS_TO_RSS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_AP_NS_TO_RSS_DEV;
+#endif
+
+#ifdef MHU_RSS_TO_AP_NS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_NS_DEV;
 #endif
 
 #ifdef MHU_SCP_TO_RSS
