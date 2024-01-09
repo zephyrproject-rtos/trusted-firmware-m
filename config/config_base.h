@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
- * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -239,12 +239,14 @@
 #define PS_STACK_SIZE                          0x700
 #endif
 
+/* NS Agent Mailbox Partition Configs */
+
 /* The stack size of the NS Agent Mailbox Secure Partition */
 #ifndef NS_AGENT_MAILBOX_STACK_SIZE
 #define NS_AGENT_MAILBOX_STACK_SIZE            0x800
 #endif
 
-/* SPM Partition Configs */
+/* SPM Configs */
 
 #ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
 /* The maximal number of secure services that are connected or requested at the same time */
