@@ -265,7 +265,7 @@ as an example:
             cmake --build build_spe -- install
 
             cmake -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
     .. group-tab:: Windows
@@ -291,7 +291,7 @@ as an example:
             cmake --build build_spe -- install
 
             cmake -G"Unix Makefiles" -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
         .. note::
