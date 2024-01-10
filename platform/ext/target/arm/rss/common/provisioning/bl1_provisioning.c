@@ -110,7 +110,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
 
     rc = rss_derive_cm_provisioning_key(RSS_KMU_SLOT_CM_PROVISIONING_KEY);
     if (rc) {
-        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         BL1_LOG("[ERR] CM provisioning key derivation failed\r\n");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -122,7 +122,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
                                      sizeof(cm_encrypted_bundle->iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] CC3XX setup failed\r\n");
-        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
