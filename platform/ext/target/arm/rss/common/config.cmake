@@ -97,3 +97,10 @@ set(RSS_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encr
 set(RSS_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
 
 set(RSS_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSS OTP words can be programmed bit by bit, or whole words must be programmed at once")
+
+if (RSS_USE_ROM_LIB_FROM_SRAM)
+    set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
+    set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols_in_sram.axf" CACHE STRING "Suffix to use for code-sharing input files")
+endif()
+
+set(RSS_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")

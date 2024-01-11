@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -56,6 +56,11 @@ uint32_t image_offsets[2];
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+
+#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+extern uint32_t __got_start__;
+extern uint32_t __got_end__;
+#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
@@ -213,11 +218,45 @@ static int32_t boot_platform_init_debug(void)
 }
 #endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
+#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+static void setup_rom_library(void)
+{
+    uint32_t got_entry;
+
+    /* Copy the ROM into VM1 */
+    memcpy((uint8_t *)VM1_BASE_S, (uint8_t *)ROM_BASE_S, BL1_1_CODE_SIZE);
+
+    /* Patch the GOT so that any address which pointed into ROM now points into
+     * VM1.
+     */
+    for (uint32_t * addr = &__got_start__; addr < &__got_end__; addr++) {
+        got_entry = *addr;
+
+        if (got_entry >= ROM_BASE_S && got_entry < ROM_BASE_S + ROM_SIZE) {
+            got_entry -= ROM_BASE_S;
+            got_entry += VM1_BASE_S;
+        }
+    }
+
+    __asm volatile(
+        "mov r9, %0 \n"
+        "mov r2, %1 \n"
+        "lsl r9, #16 \n"
+        "orr r9, r9, r2 \n"
+        : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r2"
+    );
+}
+#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
+
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
 {
     int32_t result;
     enum tfm_plat_err_t plat_err;
+
+#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+    setup_rom_library();
+#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
 
     /* Initialize stack limit register */
     uint32_t msp_stack_bottom =

@@ -32,6 +32,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_LOAD_NS_IMAGE}>:RSS_LOAD_NS_IMAGE>
         $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
         $<$<BOOL:${RSS_BIT_PROGRAMMABLE_OTP}>:RSS_BIT_PROGRAMMABLE_OTP>
+        $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:RSS_USE_ROM_LIB_FROM_SRAM>
 )
 
 #========================= Platform common defs ===============================#
@@ -317,6 +318,7 @@ target_sources(platform_bl1_1
         ./cc312/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers/rss_bringup_helpers.c>
         ./rss_key_derivation.c
+        $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -353,6 +355,51 @@ target_link_libraries(platform_bl1_1
         bl1_1_shared_lib_interface
 )
 
+if(RSS_USE_ROM_LIB_FROM_SRAM)
+    target_compile_options(platform_bl1_1
+        PUBLIC
+            # Enable position independent code
+            -fpic
+            # Tell the compiler that it can't assume the offset between the data
+            # and code sections doesn't change
+            -mno-pic-data-is-text-relative
+            # Set r9 as the register to use for the GOT. This register will not
+            # be used for any other purpose. If this is changed, some of the ASM
+            # setup functions will need to be changed.
+            -mpic-register=r9
+            # Tell the compiler it can assume that r9 will always contain the
+            # address of the GOT, and that it doesn't need to try to set r9
+            # itself (we do it in the initial setup).
+            -msingle-pic-base
+            # Insert stub function calls into every function which can then be
+            # replaced with calls to patched versions of the function.
+            -finstrument-functions
+            # Don't insert stub function into the stub functions, or the early
+            # startup files where we are still setting up the GOT
+            -finstrument-functions-exclude-file-list=bl1_patch_stubs,startup_rss_bl1_1
+            # Don't insert stub function into functions where the stack isn't
+            # valid.
+            -finstrument-functions-exclude-function-list=boot_platform_quit,boot_jump_to_next_image
+    )
+
+    add_custom_target(bl1_1_shared_symbols_in_sram
+        DEPENDS bl1_1
+        SOURCES ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
+    )
+
+    add_custom_command(
+        OUTPUT ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
+        DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+        COMMAND ${CMAKE_OBJCOPY} ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+                --change-section-address .text.\*+0x20010000
+                ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
+    )
+
+    add_dependencies(bl1_2
+        bl1_1_shared_symbols_in_sram
+    )
+endif()
+
 target_sources(bl1_1_shared_lib
     PRIVATE
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
@@ -369,6 +416,7 @@ target_link_libraries(cc312_rom
 
 target_sources(platform_bl1_2
     PRIVATE
+        device/source/system_core_init.c
         ./bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/lcm_drv.c>
@@ -392,6 +440,17 @@ target_compile_definitions(platform_bl1_2
 
 if(RSS_USE_HOST_FLASH)
     add_subdirectory(./fip_parser)
+endif()
+
+if(RSS_USE_ROM_LIB_FROM_SRAM)
+    target_compile_options(platform_bl1_2
+        PUBLIC
+            # Prevent BL1_2 from using r9
+            -ffixed-reg=r9
+            # Inlining causes gcc to generate reads and writes to r9. This is
+            # probably a bug, but work around it by not inlining functions.
+            -fno-inline
+    )
 endif()
 
 #========================= ns_agent_mailbox ===================================#

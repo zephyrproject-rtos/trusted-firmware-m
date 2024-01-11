@@ -24,8 +24,9 @@
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = BL1_1_CODE_START, LENGTH = BL1_1_CODE_SIZE
-    RAM   (rwx) : ORIGIN = BL1_1_DATA_START, LENGTH = BL1_1_DATA_SIZE
+    FLASH  (rx)  : ORIGIN = BL1_1_CODE_START, LENGTH = BL1_1_CODE_SIZE
+    SHARED (rwx) : ORIGIN = BOOT_TFM_SHARED_DATA_BASE, LENGTH = BOOT_TFM_SHARED_DATA_SIZE
+    RAM    (rwx) : ORIGIN = BL1_1_DATA_START, LENGTH = BL1_1_DATA_SIZE
 }
 
 __heap_size__  = BL1_1_HEAP_SIZE;
@@ -109,7 +110,7 @@ SECTIONS
     .tfm_bl2_shared_data : ALIGN(32)
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
-    } > RAM
+    } > SHARED
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
@@ -118,6 +119,12 @@ SECTIONS
     .data : AT (__etext)
     {
         __data_start__ = .;
+        __got_start__ = .;
+        *(.got)
+        *(.got*)
+        *(.rel*)
+        __got_end__ = .;
+
         *(vtable)
         *(.data*)
 

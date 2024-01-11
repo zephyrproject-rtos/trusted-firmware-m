@@ -184,7 +184,7 @@
 /* Bootloader regions */
 /* BL1_1 is XIP from ROM */
 #define BL1_1_CODE_START  (ROM_BASE_S)
-#define BL1_1_CODE_SIZE   (ROM_SIZE - ROM_DMA_ICS_SIZE) /* 28 KiB */
+#define BL1_1_CODE_SIZE   (0x10000) /* 64 KiB */
 #define BL1_1_CODE_LIMIT  (BL1_1_CODE_START + BL1_1_CODE_SIZE - 1)
 
 #define PROVISIONING_DATA_START (BL1_1_CODE_START + BL1_1_CODE_SIZE)

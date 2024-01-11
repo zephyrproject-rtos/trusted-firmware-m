@@ -3,7 +3,6 @@ Driver_FLASH0
 KMU_DEV_S
 INTEGRITY_CHECKER_DEV_S
 LCM_DEV_S
-SystemInit
 atu_initialize_region
 bl1_aes_256_ctr_decrypt
 bl1_derive_key
@@ -60,3 +59,5 @@ cc3xx_lowlevel_aes_set_data_len
 cc3xx_lowlevel_aes_set_output_buffer
 cc3xx_lowlevel_aes_update
 cc3xx_lowlevel_aes_finish
+__got_start__
+__got_end__

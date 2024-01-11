@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -49,6 +49,9 @@ target_link_libraries(dm_provisioning_bundle
         bl1_1_shared_lib_interface
 )
 
+# The provisioning code should link the ROM lib from ROM, not from SRAM. This
+# variable set only applies in this file scope
+set(CODE_SHARING_INPUT_FILE_SUFFIX ${CODE_SHARING_OUTPUT_FILE_SUFFIX})
 target_link_shared_code(dm_provisioning_bundle
     bl1_1
 )

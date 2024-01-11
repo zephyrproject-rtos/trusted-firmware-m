@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@
 #define ITS_RAM_FS_SIZE                TFM_HAL_ITS_FLASH_AREA_SIZE
 
 /* Sizes of a images */
-#define FLASH_BL2_PARTITION_SIZE        (0x18000) /* BL2 partition: 96 KiB */
+#define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 64 KiB */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
 #define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS  partition: 384 KiB */
 #define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
