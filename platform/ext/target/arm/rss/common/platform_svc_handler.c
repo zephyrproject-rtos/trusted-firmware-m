@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,9 @@
 #include "platform_svc_numbers.h"
 #include "tfm_hal_platform.h"
 #include "tfm_platform_system.h"
+#ifdef RSS_USE_SDS_LIB
 #include "sds.h"
+#endif /* RSS_USE_SDS_LIB */
 
 int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                                 uint32_t lr)
