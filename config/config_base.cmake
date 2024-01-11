@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -46,6 +46,9 @@ set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to sou
 set(PLATFORM_PSA_ADAC_VERSION           "4c35930fb6df95400ea4fe5722acaaa594ac3b8b" CACHE STRING "The version of psa-adac to use.")
 
 set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to enable FVP or FPGA build of the platform.")
+
+set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
+set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing input files")
 
 ####################################################################################################
 # These configurations below are also referred by Kconfig configuration system,

@@ -300,7 +300,7 @@ macro(target_share_symbols target symbol_name_file)
         TARGET ${target}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY}
-        ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.axf
+        ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 endmacro()
 
@@ -314,7 +314,7 @@ macro(target_link_shared_code target)
         endif()
 
         add_dependencies(${target} ${symbol_provider})
-        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}_shared_symbols.axf)
+        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
 

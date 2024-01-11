@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -371,7 +371,7 @@ macro(target_share_symbols target symbol_name_file)
     add_custom_command(TARGET ${target}
         POST_BUILD
         VERBATIM
-        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.txt ${KEEP_SYMBOL_LIST})
+        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX} ${KEEP_SYMBOL_LIST})
 
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --undefined=)
@@ -383,7 +383,7 @@ macro(target_share_symbols target symbol_name_file)
     # Ask armclang to produce a symdefs file that will
     target_link_options(${target}
         PRIVATE
-            --symdefs=$<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.txt
+            --symdefs=$<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 endmacro()
 
@@ -410,7 +410,7 @@ macro(target_link_shared_code target)
         # Set these properties so that cmake will allow us to use a source file
         # that doesn't exist at cmake-time, but we guarantee will exist at
         # compile-time.
-        set_source_files_properties(${SYMBOL_PROVIDER_OUTPUT_DIR}/${symbol_provider}_shared_symbols.txt
+        set_source_files_properties(${SYMBOL_PROVIDER_OUTPUT_DIR}/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX}
             DIRECTORY ${TARGET_SOURCE_DIR}
             PROPERTIES
                 EXTERNAL_OBJECT true
@@ -418,7 +418,7 @@ macro(target_link_shared_code target)
         )
         target_sources(${target}
             PRIVATE
-                $<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}_shared_symbols.txt
+            $<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX}
         )
     endforeach()
 endmacro()
