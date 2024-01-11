@@ -22,8 +22,8 @@
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
+#include "fih.h"
 #include "bl2_image_id.h"
 #include "Driver_Flash.h"
 #include "host_flash_atu.h"
@@ -158,9 +158,8 @@ int boot_platform_post_load(uint32_t image_id)
     int err;
 
 #ifdef RSE_XIP
-    err = sic_boot_post_load(image_id, rsp.br_image_off);
-    if (err) {
-        return err;
+    if (sic_boot_post_load(image_id, rsp.br_image_off) != SIC_BOOT_SUCCESS) {
+        return 1;
     }
 #endif /* RSE_XIP */
 
@@ -220,9 +219,8 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     vt_cpy = vt;
 
 #ifdef RSE_XIP
-    result = sic_boot_pre_quit(&vt_cpy);
-    if (result) {
-        while(1){}
+    if (sic_boot_pre_quit(&vt_cpy) != SIC_BOOT_SUCCESS) {
+        FIH_PANIC;
     }
 #endif /* RSE_XIP */
 
