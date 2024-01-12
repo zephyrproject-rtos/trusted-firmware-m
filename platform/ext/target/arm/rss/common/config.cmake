@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -73,7 +73,12 @@ set(TFM_PXN_ENABLE                      ON         CACHE BOOL     "Use Privilege
 set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
 
 # Platform-specific configurations
-set(CONFIG_TFM_USE_TRUSTZONE            ON)
+if (RSS_LOAD_NS_IMAGE)
+    set(CONFIG_TFM_USE_TRUSTZONE            ON)
+else()
+    set(CONFIG_TFM_USE_TRUSTZONE            OFF)
+endif()
+
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
 set(MCUBOOT_DATA_SHARING                ON)
 set(TFM_PARTITION_MEASURED_BOOT         ON)

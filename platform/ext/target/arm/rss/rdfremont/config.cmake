@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,9 +19,3 @@ set(RSS_LOAD_NS_IMAGE                   OFF      CACHE BOOL    "Whether to load 
 
 # Once all cache options are set, set common options as fallback
 include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)
-
-if (RSS_LOAD_NS_IMAGE)
-    set(CONFIG_TFM_USE_TRUSTZONE        ON)
-else()
-    set(CONFIG_TFM_USE_TRUSTZONE        OFF)
-endif()

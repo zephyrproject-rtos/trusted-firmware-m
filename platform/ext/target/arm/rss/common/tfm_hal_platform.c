@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -82,15 +82,30 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
 uint32_t tfm_hal_get_ns_VTOR(void)
 {
+#ifndef RSS_LOAD_NS_IMAGE
+    /* If an NS image hasn't been set up, then just return 0 */
+    return 0;
+#endif
+
     return memory_regions.non_secure_code_start;
 }
 
 uint32_t tfm_hal_get_ns_MSP(void)
 {
+#ifndef RSS_LOAD_NS_IMAGE
+    /* If an NS image hasn't been set up, then just return 0 */
+    return 0;
+#endif
+
     return *((uint32_t *)memory_regions.non_secure_code_start);
 }
 
 uint32_t tfm_hal_get_ns_entry_point(void)
 {
+#ifndef RSS_LOAD_NS_IMAGE
+    /* If an NS image hasn't been set up, then just return 0 */
+    return 0;
+#endif
+
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
