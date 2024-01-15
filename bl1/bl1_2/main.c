@@ -264,7 +264,9 @@ static fih_int validate_image(uint32_t image_id)
 
 int main(void)
 {
+    int rc;
     fih_int fih_rc = FIH_FAILURE;
+    fih_int recovery_succeeded = FIH_FAILURE;
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -286,15 +288,22 @@ int main(void)
         FIH_PANIC;
     }
 
-    BL1_LOG("[INF] Attempting to boot image 0\r\n");
-    FIH_CALL(validate_image, fih_rc, 0);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[INF] Attempting to boot image 1\r\n");
-        FIH_CALL(validate_image, fih_rc, 1);
+    do {
+        BL1_LOG("[INF] Attempting to boot image 0\r\n");
+        FIH_CALL(validate_image, fih_rc, 0);
+
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            FIH_PANIC;
+            BL1_LOG("[INF] Attempting to boot image 1\r\n");
+            FIH_CALL(validate_image, fih_rc, 1);
         }
-    }
+
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
+            if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
+                FIH_PANIC;
+            }
+        }
+    } while (fih_not_eq(fih_rc, FIH_SUCCESS));
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

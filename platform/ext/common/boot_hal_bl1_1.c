@@ -271,3 +271,11 @@ __WEAK int boot_store_measurement(
     return rc;
 }
 #endif /* TFM_MEASURED_BOOT_API */
+
+__WEAK int boot_initiate_recovery_mode(uint32_t image_id)
+{
+    (void)image_id;
+
+    /* We haven't done anything, therefore recovery has failed */
+    return 1;
+}

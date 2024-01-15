@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,9 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
+    int rc;
     fih_ret fih_rc = FIH_FAILURE;
+    fih_ret recovery_succeeded = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
     int32_t image_id;
 
@@ -172,16 +174,24 @@ int main(void)
             FIH_PANIC;
         }
 
-        /* Primary goal to zeroize the 'rsp' is to avoid to accidentally load
-         * the NS image in case of a fault injection attack. However, it is
-         * done anyway as a good practice to sanitize memory.
-         */
-        memset(&rsp, 0, sizeof(struct boot_rsp));
-        FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
-        if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
-            BOOT_LOG_ERR("Unable to find bootable image");
-            FIH_PANIC;
-        }
+        do {
+            /* Primary goal to zeroize the 'rsp' is to avoid to accidentally load
+             * the NS image in case of a fault injection attack. However, it is
+             * done anyway as a good practice to sanitize memory.
+             */
+            memset(&rsp, 0, sizeof(struct boot_rsp));
+
+            FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
+
+            if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
+                BOOT_LOG_ERR("Unable to find bootable image");
+
+                recovery_succeeded = fih_ret_encode_zero_equality(boot_initiate_recovery_mode(image_id));
+                if (FIH_NOT_EQ(recovery_succeeded, FIH_SUCCESS)) {
+                    FIH_PANIC;
+                }
+            }
+        } while FIH_NOT_EQ(fih_rc, FIH_SUCCESS);
 
         if (boot_platform_post_load(image_id)) {
             BOOT_LOG_ERR("Post-load step for image %d failed", image_id);

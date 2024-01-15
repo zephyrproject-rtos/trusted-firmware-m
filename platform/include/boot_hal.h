@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020 STMicroelectronics. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -151,6 +151,19 @@ int boot_store_measurement(uint8_t index,
                            size_t measurement_size,
                            const struct boot_measurement_metadata *metadata,
                            bool lock_measurement);
+
+/**
+ * \brief Run when boot has failed to load any images. Allows for a
+ *        platform-specific response.
+ *
+ * \note  Care must be taken when implementing this function that it preserves
+ *        the security of the secure-boot chain.
+ *
+ * \param[in] image_id  The ID of the image that failed to validate.
+ *
+ * \return Returns zero if recovery succeeded, non-zero otherwise.
+ */
+int boot_initiate_recovery_mode(uint32_t image_id);
 
 #ifdef __cplusplus
 }

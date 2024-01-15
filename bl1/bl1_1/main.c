@@ -87,7 +87,9 @@ static fih_int validate_image_at_addr(uint8_t *image)
 
 int main(void)
 {
+    int rc;
     fih_int fih_rc = FIH_FAILURE;
+    fih_int recovery_succeeded = FIH_FAILURE;
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -118,17 +120,24 @@ int main(void)
         FIH_PANIC;
     }
 
-    /* Copy BL1_2 from OTP into SRAM*/
-    FIH_CALL(bl1_read_bl1_2_image, fih_rc, (uint8_t *)BL1_2_CODE_START);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_PANIC;
-    }
+    do {
+        /* Copy BL1_2 from OTP into SRAM*/
+        FIH_CALL(bl1_read_bl1_2_image, fih_rc, (uint8_t *)BL1_2_CODE_START);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            FIH_PANIC;
+        }
 
-    FIH_CALL(validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");
-        FIH_PANIC;
-    }
+        FIH_CALL(validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
+
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");
+
+            recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
+            if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
+                FIH_PANIC;
+            }
+        }
+    } while (fih_not_eq(fih_rc, FIH_SUCCESS));
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
