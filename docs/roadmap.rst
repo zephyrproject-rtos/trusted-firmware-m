@@ -39,36 +39,39 @@ Supported Features
 - Arm v8.1-M Privileged Execute Never (PXN) attribute and Thread reentrancy disabled (TRD)
 - FPU, MVE Support
 - CC-312 PSA Cryptoprocessor Driver Interface
+- Secure Storage - Key Diversification Enhancements
+- Build System - Separate Secure and Non-Secure builds
 
 ******
-CQ4'23
+CQ1'24
 ******
-- TF-M v2.0.0 release
-- Mbed TLS 3.5.0, mcuboot 2.0.0 Integration
-- Design, prototype: Supporting multiple clients i.e. TF-M supporting multiple on
+- Supporting multiple clients (Hybrid Platforms) i.e. TF-M supporting multiple on
   core and off core clients on heterogeneous (e.g. Cortex-A + Cortex-M platforms)
-- Demonstrating TLS in Non-Secure using PSA Crypto APIs in TF-M
-- Build System Enhancements - Separate Secure, Non-Secure Builds
-- Mailbox interrupt handling
+  Mailbox API etc.
+- PSA Crypto layer for mcuboot/BL2
+- Enable PSA Crypto Client from Non-Secure via. IPC
+- Long Term Stable (LTS) Release preparations
 
 ******
 Future
 ******
-- Long Term Stable (LTS) support
-- Implement support for multiple clients
+- TF-M v2.1.0 Long Term Stable (LTS) Release
+- Demonstrating TLS in Non-Secure using PSA Crypto APIs in TF-M
+- Implement support for multiple clients (Hybrid Platforms)
+- Build System Enhancements - Separate Secure, Non-Secure Builds
 - Remote Test Infrastructure
-- MISRA testing
+- MISRA testing/documentation
 - TF-M Performance - Further Benchmarking and Optimization
 - Scheduler - Multiple Secure Context Implementation
 - Arm v8.1-M Architecture Enablement - PAC/BTI
 - PSA FWU Service Enhancements
 - PSA ADAC Spec - Enhancements and Testing
 - Arm v8.1-M Unprevileged Debug
-- [Secure Storage] Extended PSA APIs, Key Diversification Enhancements
+- [Secure Storage] Extended PSA APIs
 - [Audit Logs] Secure Storage, Policy Manager
 - PSA FF Lifecycle API
 - Fuzz Testing
 
 --------------
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
