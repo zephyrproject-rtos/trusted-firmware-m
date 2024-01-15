@@ -217,10 +217,12 @@ int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
         return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
                (MHU0_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
                (NS_CLIENT_ID_FLAG_MASK));
+#ifdef MHU_RSS_TO_AP_NS
     } else if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_NS_DEV) {
         return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
                (MHU1_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
                (NS_CLIENT_ID_FLAG_MASK));
+#endif
     } else {
         SPMLOG_DBGMSG("[COMMS] client_id translation failed: invalid owner\r\n");
         return 0;
