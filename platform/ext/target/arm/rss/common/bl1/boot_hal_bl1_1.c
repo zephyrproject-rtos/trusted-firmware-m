@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,6 +27,9 @@
 #ifdef RSS_ENABLE_BRINGUP_HELPERS
 #include "rss_bringup_helpers.h"
 #endif /* RSS_ENABLE_BRINGUP_HELPERS */
+#ifdef RSS_BRINGUP_OTP_EMULATION
+#include "rss_otp_emulation.h"
+#endif /* RSS_BRINGUP_OTP_EMULATION */
 #include "trng.h"
 
 /* Flash device name must be specified by target */
@@ -89,6 +92,15 @@ int32_t boot_platform_init(void)
         rss_run_bringup_helpers_if_requested();
     }
 #endif /* RSS_ENABLE_BRINGUP_HELPERS */
+
+#ifdef RSS_BRINGUP_OTP_EMULATION
+    if (rss_otp_emulation_is_enabled()) {
+        result = FLASH_DEV_NAME.Initialize(NULL);
+        if (result != ARM_DRIVER_OK) {
+            return 1;
+        }
+    }
+#endif /* RSS_BRINGUP_OTP_EMULATION */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     result = init_atu_regions();
@@ -157,6 +169,16 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
      * no effect on them.
      */
     static struct boot_arm_vector_table *vt_cpy;
+    int32_t result;
+
+#ifdef RSS_BRINGUP_OTP_EMULATION
+    if (rss_otp_emulation_is_enabled()) {
+        result = FLASH_DEV_NAME.Uninitialize();
+        if (result != ARM_DRIVER_OK) {
+            while (1){}
+        }
+    }
+#endif /* RSS_BRINGUP_OTP_EMULATION */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();

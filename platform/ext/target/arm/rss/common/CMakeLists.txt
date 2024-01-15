@@ -33,6 +33,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
         $<$<BOOL:${RSS_BIT_PROGRAMMABLE_OTP}>:RSS_BIT_PROGRAMMABLE_OTP>
         $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:RSS_USE_ROM_LIB_FROM_SRAM>
+        $<$<BOOL:${RSS_BRINGUP_OTP_EMULATION}>:RSS_BRINGUP_OTP_EMULATION>
 )
 
 #========================= Platform common defs ===============================#
@@ -129,6 +130,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ./bringup_helpers
 )
 
 target_sources(platform_s
@@ -272,7 +274,7 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
-
+        ./bringup_helpers
     PRIVATE
         ${PLATFORM_DIR}/..
 )
@@ -316,7 +318,8 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./dpa_hardened_word_copy.c
         ./cc312/cc3xx_aes_external_key_loader.c
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers/rss_bringup_helpers.c>
+        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rss_bringup_helpers.c>
+        $<$<BOOL:${RSS_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rss_bl1_2_image_otp_or_flash.c>
         ./rss_key_derivation.c
         $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
 )
@@ -336,8 +339,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers>
-        ./bl1/bringup_helpers
+        ./bringup_helpers
 )
 
 target_compile_definitions(platform_bl1_1_interface
