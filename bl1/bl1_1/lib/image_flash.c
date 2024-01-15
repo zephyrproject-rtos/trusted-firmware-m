@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,7 +16,6 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 fih_int bl1_read_bl1_2_image(uint8_t *image)
 {
-    uint32_t flash_offset;
     fih_int fih_rc;
 
     fih_rc = fih_int_encode(FLASH_DEV_NAME.ReadData(BL1_2_IMAGE_FLASH_OFFSET,

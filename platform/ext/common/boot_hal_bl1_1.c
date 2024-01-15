@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -105,11 +105,11 @@ __WEAK int32_t boot_platform_init(void)
         return 1;
     }
 
-#ifndef TFM_BL1_2_IN_OTP
+#ifdef TFM_BL1_2_IN_FLASH
     if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
-#endif /* !TFM_BL1_2_IN_OTP */
+#endif /* TFM_BL1_2_IN_FLASH */
 
     /* Clear boot data area */
     memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
@@ -131,11 +131,11 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     static struct boot_arm_vector_table *vt_cpy;
 
-#ifndef TFM_BL1_2_IN_OTP
+#ifdef TFM_BL1_2_IN_FLASH
     if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
-#endif /* !TFM_BL1_2_IN_OTP */
+#endif /* TFM_BL1_2_IN_FLASH */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
