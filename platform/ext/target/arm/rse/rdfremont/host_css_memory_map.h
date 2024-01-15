@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,17 @@
  */
 
 /**
- * \file host_base_address.h
- * \brief This file defines the host memory map addresses accessed by RSE.
+ * \file host_css_memory_map.h
+ * \brief This file contains addresses that are defined in the compute
+ *        subsystem (CSS) memory map.
  */
 
-#ifndef __HOST_BASE_ADDRESS_H__
-#define __HOST_BASE_ADDRESS_H__
+#ifndef __HOST_CSS_MEMORY_MAP_H__
+#define __HOST_CSS_MEMORY_MAP_H__
 
-#include "host_css_memory_map.h"
-#include "platform_base_address.h"
-#include "size_defs.h"
+/* AP Shared (ARSM) SRAM base address */
+#define HOST_AP_SHARED_SRAM_PHYS_BASE               0x000000000ULL
+/* AP Shared (ARSM) SRAM end address */
+#define HOST_AP_SHARED_SRAM_PHYS_LIMIT              0x0000FFFFFULL
 
-#endif  /* __HOST_BASE_ADDRESS_H__ */
+#endif /* __HOST_CSS_MEMORY_MAP_H__ */
