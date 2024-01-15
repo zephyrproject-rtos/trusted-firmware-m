@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -8,6 +8,8 @@
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import cmac
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import secrets
 import argparse
@@ -43,7 +45,7 @@ def parse_version(version_string):
                         version[2].to_bytes(2, "little"),
                         version[3].to_bytes(4, "little")])
 
-def derive_encryption_key(security_counter):
+def derive_encryption_key_cmac(security_counter):
     with open(args.encrypt_key_file, "rb") as encrypt_key_file:
         encrypt_key = encrypt_key_file.read()
 
@@ -61,7 +63,27 @@ def derive_encryption_key(security_counter):
         output_key += c.finalize()
     return output_key
 
+def derive_encryption_key_hkdf(security_counter):
+    with open(args.encrypt_key_file, "rb") as encrypt_key_file:
+        encrypt_key = encrypt_key_file.read()
 
+    state = struct_pack([
+                        # C keeps the null byte, python removes it, so we add
+                        # it back manually.
+                        "BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
+                        security_counter
+                        ])
+
+    output_key = bytes(0)
+    hkdf = HKDF(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=None,
+        info=state
+    )
+    output_key = hkdf.derive(encrypt_key)
+
+    return output_key
 
 def sign_binary_blob(blob):
     priv_key = pyhsslms.HssLmsPrivateKey(args.sign_key_file)
@@ -90,6 +112,7 @@ parser.add_argument("--img_output_file", help="image output file", required=True
 parser.add_argument("--hash_output_file", help="hash output file", required=False)
 parser.add_argument("--signing_layout_file", help="signing layout file", required=True)
 parser.add_argument("--header_size", help="size of the header", required=True)
+parser.add_argument("--kdf_alg", help="which KDF will be used", required=False, default="cmac")
 args = parser.parse_args()
 
 with open(args.input_file, "rb") as in_file:
@@ -110,7 +133,10 @@ plaintext = struct_pack([
     ],
     pad_to=bl2_partition_size - (1452 + 16 + 8 + 4))
 
-encrypt_key = derive_encryption_key(int(args.img_security_counter, 16).to_bytes(4, 'little'))
+if args.kdf_alg == "hkdf":
+    encrypt_key = derive_encryption_key_hkdf(int(args.img_security_counter, 16).to_bytes(4, 'little'))
+else:
+    encrypt_key = derive_encryption_key_cmac(int(args.img_security_counter, 16).to_bytes(4, 'little'))
 ciphertext = encrypt_binary_blob(plaintext, counter_val, encrypt_key)
 
 data_to_sign = struct_pack([

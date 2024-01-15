@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,6 +21,8 @@ extern "C" {
 #define MBEDTLS_SHA224_C
 
 #define MBEDTLS_AES_C
+#define MBEDTLS_HKDF_C
+#define MBEDTLS_MD_C
 #define MBEDTLS_CIPHER_MODE_CTR
 
 #ifdef __cplusplus
