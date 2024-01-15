@@ -31,12 +31,4 @@ int32_t tfm_mailbox_handle_msg(void);
  */
 int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply);
 
-/**
- * \brief SPE mailbox initialization
- *
- * \retval MAILBOX_SUCCESS      Operation succeeded.
- * \retval Other return code    Operation failed with an error code.
- */
-int32_t tfm_mailbox_init(void);
-
 #endif /* __TFM_SPE_MAILBOX_H__ */

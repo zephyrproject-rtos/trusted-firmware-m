@@ -450,7 +450,7 @@ static const struct tfm_rpc_ops_t mailbox_rpc_ops = {
     .get_caller_data = mailbox_get_caller_data,
 };
 
-int32_t tfm_mailbox_init(void)
+static int32_t tfm_mailbox_init(void)
 {
     int32_t ret;
 
