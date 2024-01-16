@@ -79,6 +79,7 @@ target_link_libraries(tfm_app_rot_partition_ps
         platform_s
         tfm_config
         tfm_sprt
+        psa_crypto_config
 )
 
 target_compile_definitions(tfm_app_rot_partition_ps

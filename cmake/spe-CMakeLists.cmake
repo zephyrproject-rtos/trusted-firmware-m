@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.21)
 include(spe_config)
 include(spe_export)
 
-set_target_properties(tfm_config psa_interface PROPERTIES IMPORTED_GLOBAL True)
+set_target_properties(tfm_config psa_interface psa_crypto_config PROPERTIES IMPORTED_GLOBAL True)
 target_link_libraries(tfm_config INTERFACE psa_interface)
 
 # In actual NS integration, NS side build should include the source files
@@ -66,6 +66,13 @@ if (TFM_PARTITION_NS_AGENT_MAILBOX)
     target_include_directories(tfm_api_ns_mailbox
         INTERFACE
             ${INTERFACE_INC_DIR}/multi_core
+    )
+endif()
+
+if (TFM_PARTITION_CRYPTO)
+    target_link_libraries(tfm_api_ns
+        PUBLIC
+            psa_crypto_config
     )
 endif()
 

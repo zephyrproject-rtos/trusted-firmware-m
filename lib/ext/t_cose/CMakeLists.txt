@@ -19,6 +19,7 @@ target_link_libraries(tfm_t_cose_s
         tfm_t_cose_defs
         psa_interface
         qcbor
+        platform_s
 )
 
 target_compile_options(tfm_t_cose_s
