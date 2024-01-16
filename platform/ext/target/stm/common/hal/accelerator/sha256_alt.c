@@ -40,10 +40,9 @@
 /* Private define ------------------------------------------------------------*/
 #define ST_SHA256_TIMEOUT     ((uint32_t) 3)
 
-/* Private macro -------------------------------------------------------------*/
-#define SHA256_VALIDATE_RET(cond)                           \
-    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_SHA256_BAD_INPUT_DATA )
-#define SHA256_VALIDATE(cond)  MBEDTLS_INTERNAL_VALIDATE( cond )
+/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
+#define SHA256_VALIDATE_RET( cond ) do { } while(0)
+#define SHA256_VALIDATE( cond ) do { } while(0)
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/

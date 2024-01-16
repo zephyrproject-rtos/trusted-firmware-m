@@ -18,6 +18,24 @@ target_compile_definitions(platform_bl2
         CRYPTO_HW_ACCELERATOR
 )
 
+if (PLATFORM_DEFAULT_PROVISIONING)
+    # mbedtls_accelerator_config.h is included from the profile config files and must
+    # be visible in the platform_s always, due to the compilation of provisioning.c
+    target_include_directories(platform_s
+        PUBLIC
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
+            ${PLATFORM_DIR}/ext/target/${CRYPTO_HW_ACCELERATOR_TYPE}/common/hal/accelerator/
+    )
+
+    # Same for platform_bl2
+    target_include_directories(platform_bl2
+        PUBLIC
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
+            ${PLATFORM_DIR}/ext/target/${CRYPTO_HW_ACCELERATOR_TYPE}/common/hal/accelerator/
+    )
+
+endif()
+
 ################################ BL2 ###########################################
 if(BL2)
 

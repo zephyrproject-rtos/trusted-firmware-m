@@ -17,5 +17,5 @@ fetch_remote_library(
         GIT_TAG             ${MBEDCRYPTO_VERSION}
         GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
-        GIT_SUBMODULES      ""
+        GIT_SUBMODULES      "framework"
 )

@@ -189,20 +189,6 @@
 #define MBEDTLS_ENTROPY_NV_SEED
 
 /**
- * \def MBEDTLS_PSA_CRYPTO_SPM
- *
- * When MBEDTLS_PSA_CRYPTO_SPM is defined, the code is built for SPM (Secure
- * Partition Manager) integration which separates the code into two parts: a
- * NSPE (Non-Secure Process Environment) and an SPE (Secure Process
- * Environment).
- *
- * Module:  library/psa_crypto.c
- * Requires: MBEDTLS_PSA_CRYPTO_C
- *
- */
-#define MBEDTLS_PSA_CRYPTO_SPM
-
-/**
  * \def MBEDTLS_SHA256_SMALLER
  *
  * Enable an implementation of SHA-256 that has lower ROM footprint but also
@@ -412,6 +398,55 @@
  *           the PSA ITS interface
  */
 #define MBEDTLS_PSA_CRYPTO_STORAGE_C
+
+/**
+ * \def MBEDTLS_PSA_CRYPTO_SPM
+ *
+ * When MBEDTLS_PSA_CRYPTO_SPM is defined, the code is built for SPM (Secure
+ * Partition Manager) integration which separates the code into two parts: a
+ * NSPE (Non-Secure Process Environment) and an SPE (Secure Process
+ * Environment).
+ *
+ * If you enable this option, your build environment must include a header
+ * file `"crypto_spe.h"` (either in the `psa` subdirectory of the Mbed TLS
+ * header files, or in another directory on the compiler's include search
+ * path). Alternatively, your platform may customize the header
+ * `psa/crypto_platform.h`, in which case it can skip or replace the
+ * inclusion of `"crypto_spe.h"`.
+ *
+ * Module:  library/psa_crypto.c
+ * Requires: MBEDTLS_PSA_CRYPTO_C
+ *
+ */
+#define MBEDTLS_PSA_CRYPTO_SPM
+
+/* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+ *
+ * Enable key identifiers that encode a key owner identifier.
+ *
+ * The owner of a key is identified by a value of type ::mbedtls_key_owner_id_t
+ * which is currently hard-coded to be int32_t.
+ *
+ * Note that this option is meant for internal use only and may be removed
+ * without notice.
+ */
+#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+
+/** \def MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+ *
+ * Enable support for platform built-in keys. If you enable this feature,
+ * you must implement the function mbedtls_psa_platform_get_builtin_key().
+ * See the documentation of that function for more information.
+ *
+ * Built-in keys are typically derived from a hardware unique key or
+ * stored in a secure element.
+ *
+ * Requires: MBEDTLS_PSA_CRYPTO_C.
+ *
+ * \warning This interface is experimental and may change or be removed
+ * without notice.
+ */
+#define MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
 
 /* \} name SECTION: mbed TLS modules */
 
