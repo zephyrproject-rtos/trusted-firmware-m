@@ -98,7 +98,6 @@ target_link_libraries(platform_s
         tfm_fih_headers
         cmsis_stack_override
     PRIVATE
-        psa_interface
         tfm_config
         tfm_spm_defs # For tfm_spm_log.h
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:platform_crypto_keys>
@@ -106,6 +105,7 @@ target_link_libraries(platform_s
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:tfm_attestation_defs>
         $<$<NOT:$<STREQUAL:${TFM_FIH_PROFILE},OFF>>:tfm_fih>
+        psa_crypto_library_config
 )
 
 target_compile_definitions(platform_s
@@ -159,7 +159,6 @@ if(TFM_PARTITION_CRYPTO)
 
     target_compile_definitions(platform_crypto_keys
         PRIVATE
-            MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
             $<$<BOOL:${TEST_S_ATTESTATION}>:TEST_S_ATTESTATION>

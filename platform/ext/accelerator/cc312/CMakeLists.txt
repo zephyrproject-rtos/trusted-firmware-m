@@ -20,6 +20,12 @@ if(BL2)
     )
 endif()
 
+# The config files need to access mbedtls_accelerator_config.h and crypto_accelerator_config.h
+target_include_directories(psa_crypto_library_config
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 ################################ BL2 ###########################################
 
 if(BL2)

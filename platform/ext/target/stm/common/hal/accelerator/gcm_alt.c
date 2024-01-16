@@ -37,11 +37,9 @@ extern psa_status_t tfm_crypto_get_caller_id(int32_t *id);
 #include "mbedtls/platform_util.h"
 #include "mbedtls/error.h"
 
-/* Parameter validation macros */
-#define GCM_VALIDATE_RET( cond ) \
-    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_GCM_BAD_INPUT )
-#define GCM_VALIDATE( cond ) \
-    MBEDTLS_INTERNAL_VALIDATE( cond )
+/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
+#define GCM_VALIDATE_RET( cond ) do { } while(0)
+#define GCM_VALIDATE( cond ) do { } while(0)
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/      
