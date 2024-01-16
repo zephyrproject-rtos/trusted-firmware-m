@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -75,7 +75,7 @@ static int boot_platform_post_load_non_secure(void)
  */
 static int (*boot_platform_pre_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
     [RSS_FIRMWARE_SECURE_ID]        = boot_platform_pre_load_secure,
-#ifndef RSS_LOAD_NS_IMAGE
+#ifdef RSS_LOAD_NS_IMAGE
     [RSS_FIRMWARE_NON_SECURE_ID]    = boot_platform_pre_load_non_secure,
 #endif /* RSS_LOAD_NS_IMAGE */
 };
@@ -86,7 +86,7 @@ static int (*boot_platform_pre_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
  */
 static int (*boot_platform_post_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
     [RSS_FIRMWARE_SECURE_ID]        = boot_platform_post_load_secure,
-#ifndef RSS_LOAD_NS_IMAGE
+#ifdef RSS_LOAD_NS_IMAGE
     [RSS_FIRMWARE_NON_SECURE_ID]    = boot_platform_post_load_non_secure,
 #endif /* RSS_LOAD_NS_IMAGE */
 };
