@@ -57,21 +57,33 @@ static enum ni_tower_err ni_tower_apu_set_access_perms(
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
     switch (id_select) {
-    case NI_T_ID_0_SELECT: reg->region[region].prid_low |=
-                                    (permission << NI_TOWER_APU_PERM_0_POS) &
-                                    NI_TOWER_APU_PERM_0_MSK;
+    case NI_T_ID_0_SELECT:
+        /* Clear permission */
+        reg->region[region].prid_low &= ~NI_TOWER_APU_PERM_0_MSK;
+        /* Set permission */
+        reg->region[region].prid_low |=
+            (permission << NI_TOWER_APU_PERM_0_POS) & NI_TOWER_APU_PERM_0_MSK;
         break;
-    case NI_T_ID_1_SELECT: reg->region[region].prid_low |=
-                                    (permission << NI_TOWER_APU_PERM_1_POS) &
-                                    NI_TOWER_APU_PERM_1_MSK;
+    case NI_T_ID_1_SELECT:
+        /* Clear permission */
+        reg->region[region].prid_low &= ~NI_TOWER_APU_PERM_1_MSK;
+        /* Set permission */
+        reg->region[region].prid_low |=
+            (permission << NI_TOWER_APU_PERM_1_POS) & NI_TOWER_APU_PERM_1_MSK;
         break;
-    case NI_T_ID_2_SELECT: reg->region[region].prid_high |=
-                                    (permission << NI_TOWER_APU_PERM_2_POS) &
-                                    NI_TOWER_APU_PERM_2_MSK;
+    case NI_T_ID_2_SELECT:
+        /* Clear permission */
+        reg->region[region].prid_high &= ~NI_TOWER_APU_PERM_2_MSK;
+        /* Set permission */
+        reg->region[region].prid_high |=
+            (permission << NI_TOWER_APU_PERM_2_POS) & NI_TOWER_APU_PERM_2_MSK;
         break;
-    case NI_T_ID_3_SELECT: reg->region[region].prid_high |=
-                                    (permission << NI_TOWER_APU_PERM_3_POS) &
-                                    NI_TOWER_APU_PERM_3_MSK;
+    case NI_T_ID_3_SELECT:
+        /* Clear permission */
+        reg->region[region].prid_high &= ~NI_TOWER_APU_PERM_3_MSK;
+        /* Set permission */
+        reg->region[region].prid_high |=
+            (permission << NI_TOWER_APU_PERM_3_POS) & NI_TOWER_APU_PERM_3_MSK;
         break;
     default:
         return NI_TOWER_ERR_INVALID_ARG;
@@ -94,21 +106,33 @@ static enum ni_tower_err ni_tower_apu_set_entity_id(
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
     switch (id_select) {
-    case NI_T_ID_0_SELECT: reg->region[region].prid_low |=
-                                        (id_value << NI_TOWER_APU_ID_0_POS) &
-                                        NI_TOWER_APU_ID_0_MSK;
+    case NI_T_ID_0_SELECT:
+        /* Clear apu id */
+        reg->region[region].prid_low &= ~NI_TOWER_APU_ID_0_MSK;
+        /* Set apu id */
+        reg->region[region].prid_low |=
+            (id_value << NI_TOWER_APU_ID_0_POS) & NI_TOWER_APU_ID_0_MSK;
         break;
-    case NI_T_ID_1_SELECT: reg->region[region].prid_low |=
-                                        (id_value << NI_TOWER_APU_ID_1_POS) &
-                                        NI_TOWER_APU_ID_1_MSK;
+    case NI_T_ID_1_SELECT:
+        /* Clear apu id */
+        reg->region[region].prid_low &= ~NI_TOWER_APU_ID_1_MSK;
+        /* Set apu id */
+        reg->region[region].prid_low |=
+            (id_value << NI_TOWER_APU_ID_1_POS) & NI_TOWER_APU_ID_1_MSK;
         break;
-    case NI_T_ID_2_SELECT: reg->region[region].prid_high |=
-                                        (id_value << NI_TOWER_APU_ID_2_POS) &
-                                        NI_TOWER_APU_ID_2_MSK;
+    case NI_T_ID_2_SELECT:
+        /* Clear apu id */
+        reg->region[region].prid_high &= ~NI_TOWER_APU_ID_2_MSK;
+        /* Set apu id */
+        reg->region[region].prid_high |=
+            (id_value << NI_TOWER_APU_ID_2_POS) & NI_TOWER_APU_ID_2_MSK;
         break;
-    case NI_T_ID_3_SELECT: reg->region[region].prid_high |=
-                                        (id_value << NI_TOWER_APU_ID_3_POS) &
-                                        NI_TOWER_APU_ID_3_MSK;
+    case NI_T_ID_3_SELECT:
+        /* Clear apu id */
+        reg->region[region].prid_high &= ~NI_TOWER_APU_ID_3_MSK;
+        /* Set apu id */
+        reg->region[region].prid_high |=
+            (id_value << NI_TOWER_APU_ID_3_POS) & NI_TOWER_APU_ID_3_MSK;
         break;
     default:
         return NI_TOWER_ERR_INVALID_ARG;
@@ -130,6 +154,7 @@ static enum ni_tower_err ni_tower_apu_set_lock(
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /* Once locked, the region cannot be unlocked unless APU is reset again. */
     reg->region[region].prbar_low |= (lock << NI_TOWER_APU_LOCK_POS) &
                                    NI_TOWER_APU_LOCK_MSK;
 
@@ -149,6 +174,9 @@ static enum ni_tower_err ni_tower_apu_set_br(
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /* Clear background bit */
+    reg->region[region].prbar_low &= ~NI_TOWER_APU_BR_MSK;
+    /* Set background bit */
     reg->region[region].prbar_low |= (background << NI_TOWER_APU_BR_POS) &
                                    NI_TOWER_APU_BR_MSK;
 
@@ -166,6 +194,9 @@ static enum ni_tower_err ni_tower_apu_set_region_enable(
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /* Clear apu region enable bit */
+    reg->region[region].prbar_low &= ~NI_TOWER_APU_REGION_ENABLE_MSK;
+    /* Set apu region enable bit */
     reg->region[region].prbar_low |= NI_TOWER_APU_REGION_ENABLE;
 
     return NI_TOWER_SUCCESS;
@@ -184,6 +215,9 @@ static enum ni_tower_err ni_tower_apu_set_id_valid(
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /* Clear id valid */
+    reg->region[region].prbar_low &= ~NI_TOWER_APU_ID_VALID_MSK;
+    /* Set id valid */
     reg->region[region].prlar_low |= (valid << NI_TOWER_APU_ID_VALID_POS) &
                                    NI_TOWER_APU_ID_VALID_MSK;
 
@@ -200,6 +234,10 @@ enum ni_tower_err ni_tower_apu_enable(struct ni_tower_apu_dev *dev)
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /*
+     * Cannot disable this field once enabled. This can only cleared by
+     * APU reset.
+     */
     reg->apu_ctlr |= NI_TOWER_APU_CTLR_APU_ENABLE;
 
     return NI_TOWER_SUCCESS;
@@ -215,6 +253,9 @@ enum ni_tower_err ni_tower_apu_sync_err_enable(struct ni_tower_apu_dev *dev)
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    /* Clear sync_err_en */
+    reg->apu_ctlr &= ~NI_TOWER_APU_CTLR_SYNC_ERROR_EN_MSK;
+    /* Set sync_err_en */
     reg->apu_ctlr |= NI_TOWER_APU_CTLR_SYNC_ERROR_EN;
 
     return NI_TOWER_SUCCESS;
@@ -225,11 +266,21 @@ enum ni_tower_err ni_tower_apu_configure_region(
                             const struct ni_tower_apu_reg_cfg_info *cfg_info,
                             uint32_t region)
 {
+    struct ni_tower_apu_reg_map *reg;
     enum ni_tower_err err;
     uint32_t id_idx;
 
-    if (dev == NULL) {
+    if (dev == NULL || dev->base == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    reg = (struct ni_tower_apu_reg_map *)dev->base;
+
+    /*
+     * If this region is locked, disallow re-configuration of this APU region
+     */
+    if (reg->region[region].prbar_low & NI_TOWER_APU_LOCK) {
+        return NI_TOWER_ERR_NOT_PERMITTED;
     }
 
     err = ni_tower_apu_set_addr_range(dev, region,

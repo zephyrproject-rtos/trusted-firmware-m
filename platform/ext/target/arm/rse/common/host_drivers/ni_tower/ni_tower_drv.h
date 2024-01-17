@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,7 @@ enum ni_tower_err {
     NI_TOWER_ERR_INVALID_ARG,
     NI_TOWER_ERR_NOT_FOUND,
     NI_TOWER_DEVICE_INVALID,
+    NI_TOWER_ERR_NOT_PERMITTED,
     NI_TOWER_ERR
 };
 
