@@ -54,8 +54,11 @@ static ARM_FLASH_INFO FlashInfo = {
     .sector_info  = NULL, /* Uniform sector layout */
     .sector_count = FLASH_TOTAL_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE,
     .sector_size  = FLASH_AREA_IMAGE_SECTOR_SIZE,
-    .page_size    = sizeof(uint32_t), /* 32-bit word = 4 bytes */
-    .program_unit = sizeof(uint32_t), /* 32-bit word = 4 bytes */
+	/* page_size denotes the optimal programming page size in bytes
+	 * for fast programming, but is currently unused by TF-M. */
+    .page_size    = sizeof(uint32_t),
+	/* Note that program_unit must match TFM_HAL_ITS_PROGRAM_UNIT */
+    .program_unit = sizeof(uint32_t),
     .erased_value = 0xFF
 };
 
