@@ -25,6 +25,11 @@ target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
 )
 
+target_sources(tfm_s
+    PRIVATE
+    ${NRF_FOLDER_PATH}/startup.c
+)
+
 if(NS)
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
@@ -32,6 +37,10 @@ if(NS)
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             CMSIS_5_RTX_V8MMN
+    )
+    target_sources(tfm_ns
+        PRIVATE
+            ${NRF_FOLDER_PATH}/startup.c
     )
 endif()
 
@@ -141,6 +150,10 @@ if(BL2)
         PRIVATE
             ${PLATFORM_DIR}/..
     )
+    target_sources(bl2
+        PRIVATE
+            ${NRF_FOLDER_PATH}/startup.c
+    )
 
     target_sources(platform_bl2
         PRIVATE
@@ -158,10 +171,10 @@ endif()
 
 if (TFM_PARTITION_PLATFORM)
 install(FILES       ${NRF_FOLDER_PATH}/services/include/tfm_ioctl_core_api.h
-        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_ns_api.c
-        DESTINATION ${TFM_INSTALL_PATH}/interface/src)
+        DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 
 endif()
 
@@ -172,4 +185,5 @@ target_sources(tfm_spm
         ${NRF_FOLDER_PATH}/faults.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
         ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
+        ${NRF_FOLDER_PATH}/target_cfg.c
 )

@@ -19,13 +19,6 @@ target_sources(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf91.c>
 )
 
-if(NS)
-    target_sources(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf91.c>
-    )
-endif()
-
 if(BL2)
     target_sources(bl2
         PRIVATE
@@ -50,24 +43,6 @@ target_compile_definitions(platform_s
         NRF_SKIP_FICR_NS_COPY_TO_RAM
 )
 
-#========================= Platform Non-Secure ================================#
-
-target_include_directories(platform_ns
-    PUBLIC
-        .
-)
-
-target_sources(platform_ns
-    PRIVATE
-        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
-)
-
-target_compile_definitions(platform_ns
-    PUBLIC
-        NRF_TRUSTZONE_NONSECURE
-        DOMAIN_NS=1
-)
-
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -87,18 +62,24 @@ if(BL2)
     )
 endif()
 
-#========================= Platform region defs ===============================#
-
-target_compile_definitions(platform_region_defs
-    INTERFACE
-        $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
-        $<$<BOOL:${NRF_NS_SECONDARY}>:NRF_NS_SECONDARY>
-)
-
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
     PRIVATE
-        target_cfg.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       nrfx_config_nrf91.h
+                    target_cfg.h
+                    ns/CMakeLists.txt
+                    config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
+)
+
+install(DIRECTORY    partition
+                     gcc
+                     tests
+        DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
 )

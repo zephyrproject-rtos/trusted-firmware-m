@@ -112,6 +112,21 @@ extern "C" {
 #define PSA_ALG_IS_VENDOR_HASH_AND_SIGN(alg)    \
     PSA_ALG_IS_DSA(alg)
 
+/* Workaround for build warnings when MBed TLS has enabled MBEDTLS_USE_PSA_CRYPTO
+ *
+ * Mbed TLS is not compatible with TF-Ms PSA API headers.
+ *
+ * In order to prevent build warnings for the follow functions we add the
+ * prototypes for them here.
+ * If the application tries to link with these functions it will get a link-time
+ * error. This use-case is not supported by TF-M.
+ */
+void psa_set_key_enrollment_algorithm(
+    psa_key_attributes_t *attributes,
+    psa_algorithm_t alg2);
+psa_algorithm_t psa_get_key_enrollment_algorithm(
+    const psa_key_attributes_t *attributes);
+
 /**@}*/
 
 #ifdef __cplusplus

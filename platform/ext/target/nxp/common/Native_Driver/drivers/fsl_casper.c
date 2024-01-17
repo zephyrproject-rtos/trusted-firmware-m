@@ -1058,9 +1058,13 @@ void CASPER_ModExp(
 void CASPER_Init(CASPER_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if defined(CASPER_CLOCKS)
     CLOCK_EnableClock(kCLOCK_Casper);
+#endif
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+#if defined(CASPER_RSTS)
     RESET_PeripheralReset(kCASPER_RST_SHIFT_RSTn);
+#endif
 #if defined(FSL_FEATURE_CASPER_RAM_HW_INTERLEAVE) && (FSL_FEATURE_CASPER_RAM_HW_INTERLEAVE > 0)
     /* Enable hardware interleaving to RAMX0 and RAMX1 for CASPER */
     SYSCON->CASPER_CTRL = SYSCON_CASPER_CTRL_INTERLEAVE(1);
@@ -1079,9 +1083,13 @@ void CASPER_Init(CASPER_Type *base)
  */
 void CASPER_Deinit(CASPER_Type *base)
 {
+#if defined(CASPER_RSTS)
     RESET_SetPeripheralReset(kCASPER_RST_SHIFT_RSTn);
+#endif
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if defined(CASPER_CLOCKS)
     CLOCK_DisableClock(kCLOCK_Casper);
+#endif
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
@@ -1118,9 +1126,9 @@ void CASPER_ecc_init(casper_algo_t curve)
 
 void CASPER_ECC_equal(int *res, uint32_t *op1, uint32_t *op2)
 {
-    uint32_t a[CASPER_MAX_ECC_SIZE_WORDLEN];
-    uint32_t b[CASPER_MAX_ECC_SIZE_WORDLEN];
-    uint32_t c = 0;
+    uint32_t a[CASPER_MAX_ECC_SIZE_WORDLEN] = {0};
+    uint32_t b[CASPER_MAX_ECC_SIZE_WORDLEN] = {0};
+    uint32_t c                              = 0;
     CASPER_MEMCPY(a, op1, N_wordlen * sizeof(uint32_t));
     CASPER_MEMCPY(b, op2, N_wordlen * sizeof(uint32_t));
 
@@ -1139,8 +1147,8 @@ void CASPER_ECC_equal(int *res, uint32_t *op1, uint32_t *op2)
 
 void CASPER_ECC_equal_to_zero(int *res, uint32_t *op1)
 {
-    uint32_t a[CASPER_MAX_ECC_SIZE_WORDLEN];
-    uint32_t c = 0;
+    uint32_t a[CASPER_MAX_ECC_SIZE_WORDLEN] = {0};
+    uint32_t c                              = 0;
     CASPER_MEMCPY(a, op1, N_wordlen * sizeof(uint32_t));
 
     do
@@ -2180,7 +2188,7 @@ static void recode(int8_t *c, uint32_t *k, int n, int w)
 {
     int i, t;
     uint32_t K[CASPER_MAX_ECC_SIZE_WORDLEN] = {0};
-    (void)memcpy(K, k, (size_t)ceil(((float)n / 8.)));
+    (void)memcpy(K, k, (size_t)ceil(((double)n / 8.)));
     t = (n + (w - 2)) / (w - 1);
     for (i = 0; i < t; i++)
     {

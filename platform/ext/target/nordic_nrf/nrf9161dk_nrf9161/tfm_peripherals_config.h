@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2023 Nordic Semiconductor ASA
  *
- * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #ifndef TFM_PERIPHERALS_CONFIG_H__
@@ -15,7 +15,7 @@ extern "C" {
 #define TFM_PERIPHERAL_UARTE1_SECURE 1
 #endif
 
-#if TEST_NS_SLIH_IRQ || TEST_NS_FLIH_IRQ
+#if TFM_PARTITION_SLIH_TEST || TFM_PARTITION_FLIH_TEST
 #define TFM_PERIPHERAL_TIMER0_SECURE 1
 #endif
 

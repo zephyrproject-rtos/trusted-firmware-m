@@ -38,13 +38,13 @@ target_link_libraries(tfm_sprt
     PUBLIC
         psa_interface
         tfm_spm_defs
-        tfm_partition_defs
+        tfm_config
         platform_s
     PRIVATE
         tfm_spm
 )
 
-target_compile_definitions(tfm_partition_defs
+target_compile_definitions(tfm_config
     INTERFACE
         TFM_PARTITION_LOG_LEVEL=${TFM_PARTITION_LOG_LEVEL}
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:TFM_SP_LOG_RAW_ENABLED>
