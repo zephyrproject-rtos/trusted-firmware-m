@@ -802,7 +802,7 @@ void cc3xx_lowlevel_pka_mod_add_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
     assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
+    assert(cc3xx_lowlevel_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODADD_MODINC,
                                            PKA_OP_SIZE_REGISTER,
@@ -828,7 +828,7 @@ void cc3xx_lowlevel_pka_mod_sub_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka
     assert(imm >= PKA_MIN_SIGNED_IMMEDIATE);
 
     assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
-    assert(cc3xx_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
+    assert(cc3xx_lowlevel_pka_greater_than_si(CC3XX_PKA_REG_N, imm));
 
     P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODSUB_MODDEC_MODNEG,
                                            PKA_OP_SIZE_REGISTER,
