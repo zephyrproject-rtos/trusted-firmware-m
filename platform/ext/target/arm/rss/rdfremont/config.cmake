@@ -16,6 +16,7 @@ set(RSS_USE_HOST_UART                   OFF      CACHE BOOL    "Whether RSS shou
 set(RSS_USE_HOST_FLASH                  OFF      CACHE BOOL    "Enable RSS using the host flash.")
 set(RSS_HAS_EXPANSION_PERIPHERALS       ON       CACHE BOOL    "Whether RSS has sub-platform specific peripherals in the expansion layer")
 set(RSS_LOAD_NS_IMAGE                   OFF      CACHE BOOL    "Whether to load an NS image")
+set(CONFIG_TFM_SPM_BACKEND              IPC      CACHE STRING  "The SPM backend")
 
 # Once all cache options are set, set common options as fallback
 include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)
