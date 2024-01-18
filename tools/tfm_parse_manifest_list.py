@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -366,8 +366,9 @@ def process_partition_manifests(manifest_lists, configs):
             # Priority mapping
             numbered_priority = priority_map[manifest['priority']]
 
-        if pid == None or pid >= TFM_PID_BASE:
-            # Count the number of IPC/SFN partitions
+        if (pid == None or pid >= TFM_PID_BASE) and not manifest['ns_agent']:
+            # Count the number of IPC/SFN partitions (excluding TF-M internal
+            # and agent partitions)
             if manifest['model'] == 'IPC':
                 partition_statistics['ipc_partitions'].append(manifest['name'])
 
