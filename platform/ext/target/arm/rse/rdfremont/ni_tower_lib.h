@@ -51,6 +51,24 @@
         .lock = NI_T_LOCK                                                 \
     }
 
+/*
+ * Platform specific apu region initialization macro wrapper without locking
+ * the region. This macros returns 'struct ni_tower_apu_reg_cfg_info'
+ * definition by providing the base and end address of APU region and the
+ * associated access permission.
+ */
+#define INIT_APU_REGION_UNLOCKED(base, end, perm)   \
+    {                                               \
+        .base_addr = base,                          \
+        .end_addr = end,                            \
+        .background = NI_T_FOREGROUND,              \
+        .permissions = { perm, 0, 0, 0 },           \
+        .entity_ids = { 0, 0, 0, 0 },               \
+        .id_valid = NI_T_ID_VALID_NONE,             \
+        .region_enable = NI_T_REGION_ENABLE,        \
+        .lock = NI_T_UNLOCK                         \
+    }
+
 /* Interface ID of xSNI components - completer interfaces */
 enum sysctrl_xSNI_ids {
     /* Request from AP */
@@ -151,5 +169,13 @@ int32_t program_sysctrl_ni_tower_systop(void);
  * \return Returns -1 if there is an error, else 0.
  */
 int32_t program_periph_ni_tower(void);
+
+/**
+ * \brief Program NI-Tower peripheral block APU to lock ram region after
+ *        limiting the region as read only.
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_periph_ni_tower_post_ap_bl1_load(void);
 
 #endif /* __NI_TOWER_LIB_H__ */

@@ -52,6 +52,9 @@ int host_system_prepare_mscp_access(void);
 
 void host_system_scp_signal_ap_ready(void);
 
+/* Finishes host system preparations */
+int host_system_finish(void);
+
 #ifdef __cplusplus
 }
 #endif

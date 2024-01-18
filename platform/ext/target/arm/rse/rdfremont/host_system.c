@@ -152,6 +152,34 @@ static int ni_tower_periph_init(void)
 
     return 0;
 }
+
+/*
+ * Programs the Peripheral NI-Tower for ram_axim AP_BL1_RO region.
+ */
+static int32_t ni_tower_periph_init_ap_bl1_post_load(void)
+{
+    int32_t err;
+
+    err = ni_tower_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    PERIPH_NI_TOWER_DEV.chip_addr_offset =
+        host_system_data.info.chip_ap_phys_base;
+    err = program_periph_ni_tower_post_ap_bl1_load();
+    if (err != 0) {
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
 #endif
 
 #ifdef HOST_SMMU
@@ -313,4 +341,21 @@ int host_system_prepare_ap_access(void)
 void host_system_scp_signal_ap_ready(void)
 {
     host_system_data.status.scp_systop_ready = true;
+}
+
+int host_system_finish(void)
+{
+    int res;
+
+    (void)res;
+
+#ifdef RD_PERIPH_NI_TOWER
+    /* Limit AP BL1 load region to read-only and lock the APU region */
+    res = ni_tower_periph_init_ap_bl1_post_load();
+    if (res != 0) {
+        return 1;
+    }
+#endif
+
+    return 0;
 }

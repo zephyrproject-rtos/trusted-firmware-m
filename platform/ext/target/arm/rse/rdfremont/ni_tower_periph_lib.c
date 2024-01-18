@@ -11,18 +11,24 @@
 
 #include <stddef.h>
 
+#define RAM_AXIS_RO_APU_REGION_IDX  (0)
+#define RAM_AXIS_RW_APU_REGION_IDX  (1)
+
 /*
  * Software implementation defined region for SRAM and is accessible by AP,
  * RSE, SCP and MCP. First region (AP BL1 code region) will be changed to Read
  * only access after RSE loads AP BL1 image.
  */
 static const struct ni_tower_apu_reg_cfg_info ram_axim_apu[] = {
-    INIT_APU_REGION(HOST_AP_BL1_RO_SRAM_PHYS_BASE,
-                    HOST_AP_BL1_RO_SRAM_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
-    INIT_APU_REGION(HOST_AP_BL1_RW_SRAM_PHYS_BASE,
-                    HOST_AP_BL1_RW_SRAM_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+    [RAM_AXIS_RO_APU_REGION_IDX] =
+        INIT_APU_REGION_UNLOCKED(
+                        HOST_AP_BL1_RO_SRAM_PHYS_BASE,
+                        HOST_AP_BL1_RO_SRAM_PHYS_LIMIT,
+                        NI_T_ROOT_RW),
+    [RAM_AXIS_RW_APU_REGION_IDX] =
+        INIT_APU_REGION(HOST_AP_BL1_RW_SRAM_PHYS_BASE,
+                        HOST_AP_BL1_RW_SRAM_PHYS_LIMIT,
+                        NI_T_ROOT_RW),
 };
 
 /* AP Non-secure UART */
@@ -233,4 +239,33 @@ static int32_t program_periph_apu(void)
 int32_t program_periph_ni_tower(void)
 {
     return program_periph_apu();
+}
+
+int32_t program_periph_ni_tower_post_ap_bl1_load(void)
+{
+    enum ni_tower_err err;
+    struct ni_tower_apu_dev apu_dev = {0};
+
+    /* Make AP_BL1_RO region read only access */
+    struct ni_tower_apu_reg_cfg_info ram_axim_region_0 =
+            INIT_APU_REGION(HOST_AP_BL1_RO_SRAM_PHYS_BASE,
+                            HOST_AP_BL1_RO_SRAM_PHYS_LIMIT,
+                            NI_T_ROOT_R);
+
+    /* Initialize APU device */
+    err = ni_tower_apu_dev_init(&PERIPH_NI_TOWER_DEV,
+                                &PERIPH_RAM_AMNI_APU_DEV_CFG,
+                                PERIPH_NI_TOWER_DEV.chip_addr_offset,
+                                &apu_dev);
+    if (err != NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
+    if (ni_tower_apu_configure_region(&apu_dev, &ram_axim_region_0,
+                                      RAM_AXIS_RO_APU_REGION_IDX) !=
+        NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
 }
