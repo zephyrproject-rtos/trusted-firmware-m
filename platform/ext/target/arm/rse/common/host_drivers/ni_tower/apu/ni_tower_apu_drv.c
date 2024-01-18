@@ -7,13 +7,20 @@
 
 #include "ni_tower_apu_drv.h"
 #include "ni_tower_apu_reg.h"
+#include "util/ni_tower_util.h"
 
 #include <stddef.h>
 
-#define NI_TOWER_APU_ADDRESS_GRAN      (1UL << 6)
+#define NI_TOWER_APU_ADDRESS_GRAN      (1ULL << 6)
 #define NI_TOWER_APU_ADDRESS_MASK      (~(NI_TOWER_APU_ADDRESS_GRAN - 1))
 #define NI_TOWER_APU_ADDRESS_H(addr)   ((addr) >> 32)
 #define NI_TOWER_APU_ADDRESS_L(addr)   ((addr) & NI_TOWER_APU_ADDRESS_MASK)
+
+#define NI_TOWER_APU_GET64_BASE_ADDRESS(addr, high, low)    \
+    addr = (((uint64_t)(high) << 32) | (low)) & NI_TOWER_APU_ADDRESS_MASK
+
+#define NI_TOWER_APU_GET64_END_ADDRESS(addr, high, low)     \
+    addr = (((uint64_t)(high) << 32) | (low)) | (NI_TOWER_APU_ADDRESS_GRAN - 1)
 
 static enum ni_tower_err ni_tower_apu_set_addr_range(
                         struct ni_tower_apu_dev *dev, uint32_t region,
@@ -186,7 +193,10 @@ static enum ni_tower_err ni_tower_apu_set_br(
 static enum ni_tower_err ni_tower_apu_set_region_enable(
                             struct ni_tower_apu_dev *dev, uint32_t region)
 {
+    enum ni_tower_apu_br_type temp_br_type, curr_br_type;
     struct ni_tower_apu_reg_map* reg;
+    uint64_t temp_base_addr, temp_end_addr, curr_base_addr, curr_end_addr;
+    uint32_t r_idx;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
@@ -196,6 +206,45 @@ static enum ni_tower_err ni_tower_apu_set_region_enable(
 
     /* Clear apu region enable bit */
     reg->region[region].prbar_low &= ~NI_TOWER_APU_REGION_ENABLE_MSK;
+
+    /*
+     * Check whether two foreground or two background region overlaps.
+     * Foreground region can overlap two different background region, APU
+     * prioritises the foreground access permissions.
+     */
+    curr_br_type = reg->region[region].prbar_low & NI_TOWER_APU_BR_MSK ?
+                                        NI_T_BACKGROUND : NI_T_FOREGROUND;
+
+    NI_TOWER_APU_GET64_BASE_ADDRESS(curr_base_addr,
+                                    reg->region[region].prbar_high,
+                                    reg->region[region].prbar_low);
+
+    NI_TOWER_APU_GET64_END_ADDRESS(curr_end_addr,
+                                   reg->region[region].prlar_high,
+                                   reg->region[region].prlar_low);
+
+    for (r_idx = 0; r_idx < NI_TOWER_MAX_APU_REGIONS; ++r_idx) {
+        temp_br_type = reg->region[r_idx].prbar_low & NI_TOWER_APU_BR_MSK ?
+                                        NI_T_BACKGROUND : NI_T_FOREGROUND;
+        if ((reg->region[r_idx].prbar_low & NI_TOWER_APU_REGION_ENABLE) &&
+            (temp_br_type == curr_br_type))
+        {
+            NI_TOWER_APU_GET64_BASE_ADDRESS(temp_base_addr,
+                                            reg->region[r_idx].prbar_high,
+                                            reg->region[r_idx].prbar_low);
+
+            NI_TOWER_APU_GET64_END_ADDRESS(temp_end_addr,
+                                           reg->region[r_idx].prlar_high,
+                                           reg->region[r_idx].prlar_low);
+
+            if (ni_tower_check_region_overlaps(curr_base_addr, curr_end_addr,
+                    temp_base_addr, temp_end_addr) !=
+                NI_TOWER_SUCCESS) {
+                return NI_TOWER_ERR_REGION_OVERLAPS;
+            }
+        }
+    }
+
     /* Set apu region enable bit */
     reg->region[region].prbar_low |= NI_TOWER_APU_REGION_ENABLE;
 

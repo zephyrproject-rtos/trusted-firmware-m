@@ -7,13 +7,21 @@
 
 #include "ni_tower_psam_drv.h"
 #include "ni_tower_psam_reg.h"
+#include "util/ni_tower_util.h"
 
 #include <stddef.h>
 
-#define NI_TOWER_PSAM_ADDRESS_GRAN      (1UL << 12)
+#define NI_TOWER_PSAM_ADDRESS_GRAN      (1ULL << 12)
 #define NI_TOWER_PSAM_ADDRESS_MASK      (~(NI_TOWER_PSAM_ADDRESS_GRAN - 1))
 #define NI_TOWER_PSAM_ADDRESS_H(addr)   ((addr) >> 32)
 #define NI_TOWER_PSAM_ADDRESS_L(addr)   ((addr) & NI_TOWER_PSAM_ADDRESS_MASK)
+
+#define NI_TOWER_PSAM_GET64_BASE_ADDRESS(addr, high, low)   \
+    addr = (((uint64_t)(high) << 32) | (low)) & NI_TOWER_PSAM_ADDRESS_MASK
+
+#define NI_TOWER_PSAM_GET64_END_ADDRESS(addr, high, low)    \
+    addr = (((uint64_t)(high) << 32) | (low)) |             \
+            (NI_TOWER_PSAM_ADDRESS_GRAN - 1)
 
 enum ni_tower_err ni_tower_psam_configure_nhregion(
                             struct ni_tower_psam_dev *dev,
@@ -21,6 +29,8 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
                             uint32_t region)
 {
     struct ni_tower_psam_reg_map* reg;
+    uint64_t temp_base_addr, temp_end_addr;
+    uint32_t r_idx;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
@@ -40,6 +50,26 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
 
     /* Disable region */
     reg->nh_region[region].cfg0 &= ~NI_TOWER_NH_REGION_REGION_VALID;
+
+    /* Check whether region overlaps with another valid region */
+    for (r_idx = 0; r_idx < NI_TOWER_MAX_NH_REGIONS; ++r_idx) {
+        if (reg->nh_region[r_idx].cfg0 & NI_TOWER_NH_REGION_REGION_VALID) {
+            NI_TOWER_PSAM_GET64_BASE_ADDRESS(temp_base_addr,
+                                             reg->nh_region[r_idx].cfg1,
+                                             reg->nh_region[r_idx].cfg0);
+
+            NI_TOWER_PSAM_GET64_END_ADDRESS(temp_end_addr,
+                                            reg->nh_region[r_idx].cfg3,
+                                            reg->nh_region[r_idx].cfg2);
+
+            if (ni_tower_check_region_overlaps(cfg_info->base_addr,
+                    cfg_info->end_addr, temp_base_addr, temp_end_addr) !=
+                NI_TOWER_SUCCESS) {
+                return NI_TOWER_ERR_REGION_OVERLAPS;
+            }
+        }
+    }
+
     /* Set base address */
     reg->nh_region[region].cfg0 = NI_TOWER_PSAM_ADDRESS_L(cfg_info->base_addr);
     reg->nh_region[region].cfg1 = NI_TOWER_PSAM_ADDRESS_H(cfg_info->base_addr);
