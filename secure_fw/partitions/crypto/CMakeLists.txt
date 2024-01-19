@@ -194,25 +194,27 @@ target_compile_definitions(${MBEDTLS_TARGET_PREFIX}mbedcrypto
         MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 )
 
-# FixMe: The p256m CmakeLists.txt in version 3.5.0 has an issue with target
-# names and for this reason we need to force those defines at this stage
-target_compile_definitions(${MBEDTLS_TARGET_PREFIX}p256m
-    PRIVATE
-        MBEDTLS_PSA_P256M_DRIVER_ENABLED
-        MBEDTLS_PSA_CRYPTO_SPM
-)
+if(MBEDTLS_P256M_ENABLED)
+    # FixMe: The p256m CmakeLists.txt in version 3.5.0 has an issue with target
+    # names and for this reason we need to force those defines at this stage
+    target_compile_definitions(${MBEDTLS_TARGET_PREFIX}p256m
+        PRIVATE
+            MBEDTLS_PSA_P256M_DRIVER_ENABLED
+            MBEDTLS_PSA_CRYPTO_SPM
+    )
 
-# The crypto_spe.h to be passed to p256m is here
-target_include_directories(${MBEDTLS_TARGET_PREFIX}p256m
-    PRIVATE
-        .
-)
+    # The crypto_spe.h to be passed to p256m is here
+    target_include_directories(${MBEDTLS_TARGET_PREFIX}p256m
+        PRIVATE
+            .
+    )
 
-# FPU flags for p256m
-target_compile_options(${MBEDTLS_TARGET_PREFIX}p256m
+    # FPU flags for p256m
+    target_compile_options(${MBEDTLS_TARGET_PREFIX}p256m
     PRIVATE
-        ${COMPILER_CP_FLAG}
-)
+    ${COMPILER_CP_FLAG}
+    )
+endif()
 
 target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
