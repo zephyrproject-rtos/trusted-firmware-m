@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,11 @@
 #define AP_TRUSTED_SRAM_BASE  0x4000000UL /* AP trusted SRAM base address */
 #define AP_SHARED_RAM_BASE    AP_TRUSTED_SRAM_BASE
 
-#define PLAT_RSS_AP_SDS_BASE  AP_SHARED_RAM_BASE
-#define PLAT_RSS_AP_SDS_SIZE  0x6E0U      /* 1760 bytes */
+#define PLAT_SCP_AP_SDS_SIZE          0xDC0U  /* 3520 bytes */
+#define PLAT_SCP_SCMI_S_PAYLOAD_SIZE  0x100U  /*  256 bytes */
+#define PLAT_RSS_AP_SDS_BASE  (AP_SHARED_RAM_BASE \
+                               + PLAT_SCP_AP_SDS_SIZE \
+                               + PLAT_SCP_SCMI_S_PAYLOAD_SIZE)
+#define PLAT_RSS_AP_SDS_SIZE  (64U)
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */
