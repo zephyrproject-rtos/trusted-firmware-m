@@ -31,92 +31,35 @@
  *----------------------------------------------------------------------------*/
 extern uint32_t __INITIAL_SP;
 extern uint32_t __STACK_LIMIT;
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-extern uint64_t __STACK_SEAL;
-#endif
 
 extern void __PROGRAM_START(void) __NO_RETURN;
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Reset_Handler  (void) __NO_RETURN;
+void Reset_Handler(void) __NO_RETURN;
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
-#define DEFAULT_IRQ_HANDLER(handler_name)  \
-void __WEAK handler_name(void) __NO_RETURN; \
-void handler_name(void) { \
-    while(1); \
+/* Exception handler that blocks execution. */
+__NO_RETURN void exception_handler(void)
+{
+    while (1);
 }
 
-/* Exceptions */
-DEFAULT_IRQ_HANDLER(NMI_Handler)
-DEFAULT_IRQ_HANDLER(HardFault_Handler)
-DEFAULT_IRQ_HANDLER(MemManage_Handler)
-DEFAULT_IRQ_HANDLER(BusFault_Handler)
-DEFAULT_IRQ_HANDLER(UsageFault_Handler)
-DEFAULT_IRQ_HANDLER(SecureFault_Handler)
-DEFAULT_IRQ_HANDLER(SVC_Handler)
-DEFAULT_IRQ_HANDLER(DebugMon_Handler)
-DEFAULT_IRQ_HANDLER(PendSV_Handler)
-DEFAULT_IRQ_HANDLER(SysTick_Handler)
-
-DEFAULT_IRQ_HANDLER(NONSEC_WATCHDOG_RESET_REQ_Handler)
-DEFAULT_IRQ_HANDLER(NONSEC_WATCHDOG_Handler)
-DEFAULT_IRQ_HANDLER(SLOWCLK_Timer_Handler)
-DEFAULT_IRQ_HANDLER(TFM_TIMER0_IRQ_Handler)
-DEFAULT_IRQ_HANDLER(TIMER1_Handler)
-DEFAULT_IRQ_HANDLER(TIMER2_Handler)
-DEFAULT_IRQ_HANDLER(MPC_Handler)
-DEFAULT_IRQ_HANDLER(PPC_Handler)
-DEFAULT_IRQ_HANDLER(MSC_Handler)
-DEFAULT_IRQ_HANDLER(BRIDGE_ERROR_Handler)
-DEFAULT_IRQ_HANDLER(PPU_Combined_Handler)
-DEFAULT_IRQ_HANDLER(NPU0_Handler)
-DEFAULT_IRQ_HANDLER(NPU1_Handler)
-DEFAULT_IRQ_HANDLER(NPU2_Handler)
-DEFAULT_IRQ_HANDLER(NPU3_Handler)
-DEFAULT_IRQ_HANDLER(KMU_Handler)
-DEFAULT_IRQ_HANDLER(DMA_Combined_S_Handler)
-DEFAULT_IRQ_HANDLER(DMA_Combined_NS_Handler)
-DEFAULT_IRQ_HANDLER(DMA_Security_Violation_Handler)
-DEFAULT_IRQ_HANDLER(TIMER3_AON_Handler)
-DEFAULT_IRQ_HANDLER(CPU0_CTI_0_Handler)
-DEFAULT_IRQ_HANDLER(CPU0_CTI_1_Handler)
-
-DEFAULT_IRQ_HANDLER(SAM_Critical_Sec_Fault_S_Handler)
-DEFAULT_IRQ_HANDLER(SAM_Sec_Fault_S_Handler)
-DEFAULT_IRQ_HANDLER(GPIO_Combined_S_Handler)
-DEFAULT_IRQ_HANDLER(SDC_Handler)
-DEFAULT_IRQ_HANDLER(FPU_Handler)
-DEFAULT_IRQ_HANDLER(SRAM_TRAM_ECC_Err_S_Handler)
-DEFAULT_IRQ_HANDLER(SIC_S_Handler)
-DEFAULT_IRQ_HANDLER(ATU_S_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU0_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU0_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU1_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU1_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU2_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU2_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU3_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU3_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU4_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU4_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU5_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU5_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU6_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU6_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU7_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU7_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU8_Sender_Handler)
-DEFAULT_IRQ_HANDLER(CMU_MHU8_Receiver_Handler)
-DEFAULT_IRQ_HANDLER(Crypto_Engine_S_Handler)
-DEFAULT_IRQ_HANDLER(SoC_System_Timer0_AON_Handler)
-DEFAULT_IRQ_HANDLER(SoC_System_Timer1_AON_Handler)
-DEFAULT_IRQ_HANDLER(SRAM_ECC_Partial_Write_S_Handler)
-DEFAULT_IRQ_HANDLER(Integrity_Checker_Handler)
+/* No IRQs are enabled in BL1, so this handler should be unreachable. In case it
+ * is ever reached, disable the IRQ that was triggered and return. In debug
+ * builds, block execution to catch the bug.
+ */
+void invalid_irq_handler(void)
+{
+#ifndef NDEBUG
+    while (1);
+#else
+    NVIC_DisableIRQ((IRQn_Type)((int32_t)__get_IPSR() - 16));
+#endif
+}
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -131,86 +74,86 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
        const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
   (VECTOR_TABLE_Type)(&__INITIAL_SP), /*     Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
-  NMI_Handler,                       /* -14: NMI Handler */
-  HardFault_Handler,                 /* -13: Hard Fault Handler */
-  MemManage_Handler,                 /* -12: MPU Fault Handler */
-  BusFault_Handler,                  /* -11: Bus Fault Handler */
-  UsageFault_Handler,                /* -10: Usage Fault Handler */
-  SecureFault_Handler,               /*  -9: Secure Fault Handler */
+  exception_handler,                 /* -14: NMI Handler */
+  exception_handler,                 /* -13: Hard Fault Handler */
+  exception_handler,                 /* -12: MPU Fault Handler */
+  exception_handler,                 /* -11: Bus Fault Handler */
+  exception_handler,                 /* -10: Usage Fault Handler */
+  exception_handler,                 /*  -9: Secure Fault Handler */
   0,                                 /*      Reserved */
   0,                                 /*      Reserved */
   0,                                 /*      Reserved */
-  SVC_Handler,                       /*  -5: SVCall Handler */
-  DebugMon_Handler,                  /*  -4: Debug Monitor Handler */
+  exception_handler,                 /*  -5: SVCall Handler */
+  exception_handler,                 /*  -4: Debug Monitor Handler */
   0,                                 /*      Reserved */
-  PendSV_Handler,                    /*  -2: PendSV Handler */
-  SysTick_Handler,                   /*  -1: SysTick Handler */
+  exception_handler,                 /*  -2: PendSV Handler */
+  exception_handler,                 /*  -1: SysTick Handler */
 
-  NONSEC_WATCHDOG_RESET_REQ_Handler, /*   0: Non-Secure Watchdog Reset Request Handler */
-  NONSEC_WATCHDOG_Handler,           /*   1: Non-Secure Watchdog Handler */
-  SLOWCLK_Timer_Handler,             /*   2: SLOWCLK Timer Handler */
-  TFM_TIMER0_IRQ_Handler,            /*   3: TIMER 0 Handler */
-  TIMER1_Handler,                    /*   4: TIMER 1 Handler */
-  TIMER2_Handler,                    /*   5: TIMER 2 Handler */
+  invalid_irq_handler,               /*   0: Non-Secure Watchdog Reset Request Handler */
+  invalid_irq_handler,               /*   1: Non-Secure Watchdog Handler */
+  invalid_irq_handler,               /*   2: SLOWCLK Timer Handler */
+  invalid_irq_handler,               /*   3: TIMER 0 Handler */
+  invalid_irq_handler,               /*   4: TIMER 1 Handler */
+  invalid_irq_handler,               /*   5: TIMER 2 Handler */
   0,                                 /*   6: Reserved */
   0,                                 /*   7: Reserved */
   0,                                 /*   8: Reserved */
-  MPC_Handler,                       /*   9: MPC Combined (Secure) Handler */
-  PPC_Handler,                       /*  10: PPC Combined (Secure) Handler */
-  MSC_Handler,                       /*  11: MSC Combined (Secure) Handler */
-  BRIDGE_ERROR_Handler,              /*  12: Bridge Error (Secure) Handler */
+  invalid_irq_handler,               /*   9: MPC Combined (Secure) Handler */
+  invalid_irq_handler,               /*  10: PPC Combined (Secure) Handler */
+  invalid_irq_handler,               /*  11: MSC Combined (Secure) Handler */
+  invalid_irq_handler,               /*  12: Bridge Error (Secure) Handler */
   0,                                 /*  13: Reserved */
-  PPU_Combined_Handler,              /*  14: PPU Combined (Secure) Handler */
+  invalid_irq_handler,               /*  14: PPU Combined (Secure) Handler */
   0,                                 /*  15: Reserved */
-  NPU0_Handler,                      /*  16: NPU0 Handler */
-  NPU1_Handler,                      /*  17: NPU1 Handler */
-  NPU2_Handler,                      /*  18: NPU2 Handler */
-  NPU3_Handler,                      /*  19: NPU3 Handler */
-  KMU_Handler,                       /*  20: KMU (Secure) Handler */
+  invalid_irq_handler,               /*  16: NPU0 Handler */
+  invalid_irq_handler,               /*  17: NPU1 Handler */
+  invalid_irq_handler,               /*  18: NPU2 Handler */
+  invalid_irq_handler,               /*  19: NPU3 Handler */
+  invalid_irq_handler,               /*  20: KMU (Secure) Handler */
   0,                                 /*  21: Reserved */
   0,                                 /*  22: Reserved */
   0,                                 /*  23: Reserved */
-  DMA_Combined_S_Handler,            /*  24: DMA350 Combined (Secure) Handler */
-  DMA_Combined_NS_Handler,           /*  25: DMA350 Combined (Non-Secure) Handler */
-  DMA_Security_Violation_Handler,    /*  26: DMA350 Security Violation Handler */
-  TIMER3_AON_Handler,                /*  27: TIMER 3 AON Handler */
-  CPU0_CTI_0_Handler,                /*  28: CPU0 CTI IRQ 0 Handler */
-  CPU0_CTI_1_Handler,                /*  29: CPU0 CTI IRQ 1 Handler */
+  invalid_irq_handler,               /*  24: DMA350 Combined (Secure) Handler */
+  invalid_irq_handler,               /*  25: DMA350 Combined (Non-Secure) Handler */
+  invalid_irq_handler,               /*  26: DMA350 Security Violation Handler */
+  invalid_irq_handler,               /*  27: TIMER 3 AON Handler */
+  invalid_irq_handler,               /*  28: CPU0 CTI IRQ 0 Handler */
+  invalid_irq_handler,               /*  29: CPU0 CTI IRQ 1 Handler */
   0,                                 /*  30: Reserved */
   0,                                 /*  31: Reserved */
 
   /* External interrupts */
-  SAM_Critical_Sec_Fault_S_Handler,  /*  32: SAM Critical Security Fault (Secure) Handler */
-  SAM_Sec_Fault_S_Handler,           /*  33: SAM Security Fault (Secure) Handler */
-  GPIO_Combined_S_Handler,           /*  34: GPIO Combined (Secure) Handler */
-  SDC_Handler,                       /*  35: Secure Debug Channel Handler */
-  FPU_Handler,                       /*  36: FPU Exception Handler */
-  SRAM_TRAM_ECC_Err_S_Handler,       /*  37: SRAM or TRAM Corrected ECC Error (Secure) Handler */
-  SIC_S_Handler,                     /*  38: Secure I-Cache (Secure) Handler */
-  ATU_S_Handler,                     /*  39: ATU (Secure) Handler */
-  CMU_MHU0_Sender_Handler,           /*  40: CMU MHU 0 Sender Handler */
-  CMU_MHU0_Receiver_Handler,         /*  41: CMU MHU 0 Receiver Handler */
-  CMU_MHU1_Sender_Handler,           /*  42: CMU MHU 1 Sender Handler */
-  CMU_MHU1_Receiver_Handler,         /*  43: CMU MHU 1 Receiver Handler */
-  CMU_MHU2_Sender_Handler,           /*  44: CMU MHU 2 Sender Handler */
-  CMU_MHU2_Receiver_Handler,         /*  45: CMU MHU 2 Receiver Handler */
-  CMU_MHU3_Sender_Handler,           /*  46: CMU MHU 3 Sender Handler */
-  CMU_MHU3_Receiver_Handler,         /*  47: CMU MHU 3 Receiver Handler */
-  CMU_MHU4_Sender_Handler,           /*  48: CMU MHU 4 Sender Handler */
-  CMU_MHU4_Receiver_Handler,         /*  49: CMU MHU 4 Receiver Handler */
-  CMU_MHU5_Sender_Handler,           /*  50: CMU MHU 5 Sender Handler */
-  CMU_MHU5_Receiver_Handler,         /*  51: CMU MHU 5 Receiver Handler */
-  CMU_MHU6_Sender_Handler,           /*  52: CMU MHU 6 Sender Handler */
-  CMU_MHU6_Receiver_Handler,         /*  53: CMU MHU 6 Receiver Handler */
-  CMU_MHU7_Sender_Handler,           /*  54: CMU MHU 7 Sender Handler */
-  CMU_MHU7_Receiver_Handler,         /*  55: CMU MHU 7 Receiver Handler */
-  CMU_MHU8_Sender_Handler,           /*  56: CMU MHU 8 Sender Handler */
-  CMU_MHU8_Receiver_Handler,         /*  57: CMU MHU 8 Receiver Handler */
-  Crypto_Engine_S_Handler,           /*  58: Crypto Engine (Secure) Handler */
-  SoC_System_Timer0_AON_Handler,     /*  59: SoC System Timer 0 AON Handler */
-  SoC_System_Timer1_AON_Handler,     /*  60: SoC System Timer 1 AON Handler */
-  SRAM_ECC_Partial_Write_S_Handler,  /*  61: SRAM ECC Detected Partial Write (Secure) Handler */
-  Integrity_Checker_Handler,         /*  62: Integrity Checker Handler */
+  invalid_irq_handler,               /*  32: SAM Critical Security Fault (Secure) Handler */
+  invalid_irq_handler,               /*  33: SAM Security Fault (Secure) Handler */
+  invalid_irq_handler,               /*  34: GPIO Combined (Secure) Handler */
+  invalid_irq_handler,               /*  35: Secure Debug Channel Handler */
+  invalid_irq_handler,               /*  36: FPU Exception Handler */
+  invalid_irq_handler,               /*  37: SRAM or TRAM Corrected ECC Error (Secure) Handler */
+  invalid_irq_handler,               /*  38: Secure I-Cache (Secure) Handler */
+  invalid_irq_handler,               /*  39: ATU (Secure) Handler */
+  invalid_irq_handler,               /*  40: CMU MHU 0 Sender Handler */
+  invalid_irq_handler,               /*  41: CMU MHU 0 Receiver Handler */
+  invalid_irq_handler,               /*  42: CMU MHU 1 Sender Handler */
+  invalid_irq_handler,               /*  43: CMU MHU 1 Receiver Handler */
+  invalid_irq_handler,               /*  44: CMU MHU 2 Sender Handler */
+  invalid_irq_handler,               /*  45: CMU MHU 2 Receiver Handler */
+  invalid_irq_handler,               /*  46: CMU MHU 3 Sender Handler */
+  invalid_irq_handler,               /*  47: CMU MHU 3 Receiver Handler */
+  invalid_irq_handler,               /*  48: CMU MHU 4 Sender Handler */
+  invalid_irq_handler,               /*  49: CMU MHU 4 Receiver Handler */
+  invalid_irq_handler,               /*  50: CMU MHU 5 Sender Handler */
+  invalid_irq_handler,               /*  51: CMU MHU 5 Receiver Handler */
+  invalid_irq_handler,               /*  52: CMU MHU 6 Sender Handler */
+  invalid_irq_handler,               /*  53: CMU MHU 6 Receiver Handler */
+  invalid_irq_handler,               /*  54: CMU MHU 7 Sender Handler */
+  invalid_irq_handler,               /*  55: CMU MHU 7 Receiver Handler */
+  invalid_irq_handler,               /*  56: CMU MHU 8 Sender Handler */
+  invalid_irq_handler,               /*  57: CMU MHU 8 Receiver Handler */
+  invalid_irq_handler,               /*  58: Crypto Engine (Secure) Handler */
+  invalid_irq_handler,               /*  59: SoC System Timer 0 AON Handler */
+  invalid_irq_handler,               /*  60: SoC System Timer 1 AON Handler */
+  invalid_irq_handler,               /*  61: SRAM ECC Detected Partial Write (Secure) Handler */
+  invalid_irq_handler,               /*  62: Integrity Checker Handler */
   0,                                 /*  63: Reserved */
   0,                                 /*  64: Reserved */
   0,                                 /*  65: Reserved */
@@ -297,29 +240,18 @@ static void setup_tram_encryption(void) {
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-    __disable_irq();
-#endif
-
 #ifdef RSS_ENABLE_TRAM
     /* Set MSP to be in VM0 to start with */
     __set_MSP(VM0_BASE_S + 0x2000);
-    __set_PSP(VM0_BASE_S + 0x2000);
 
     setup_tram_encryption();
-#endif /* RSS_ENABLE_TRAM */
 
     /* Now switch back to the right stack (which is in the TRAM) */
     __set_MSP((uint32_t)(&__INITIAL_SP));
-    __set_PSP((uint32_t)(&__INITIAL_SP));
+#endif /* RSS_ENABLE_TRAM */
 
     __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
-    __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
 
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-    __TZ_set_STACKSEAL_S((uint32_t *)(&__STACK_SEAL));
-#endif
-
-    SystemInit();                             /* CMSIS System Initialization */
-    __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
+    SystemInit();                    /* CMSIS System Initialization */
+    __PROGRAM_START();               /* Enter PreMain (C library entry point) */
 }
