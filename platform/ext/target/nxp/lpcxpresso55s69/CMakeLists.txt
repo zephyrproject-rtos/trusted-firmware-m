@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
-# Copyright 2021-2023 NXP. All rights reserved.
+# Copyright 2021-2024 NXP. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -103,18 +103,14 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_manager.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_port_uart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_gpio.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_hashcrypt.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_iap.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_rng.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_usart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
@@ -179,16 +175,12 @@ if(BL2)
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_manager.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_port_uart.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_hashcrypt.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_iap.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_rng.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_usart.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
     )
