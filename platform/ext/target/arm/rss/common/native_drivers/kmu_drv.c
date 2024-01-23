@@ -131,7 +131,7 @@ enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
 }
 
 enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
-                                           struct kmu_key_export_config_t *config)
+                                           const struct kmu_key_export_config_t *config)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
     enum kmu_error_t err;

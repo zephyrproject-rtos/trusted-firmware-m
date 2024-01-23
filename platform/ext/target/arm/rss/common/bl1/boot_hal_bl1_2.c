@@ -93,7 +93,7 @@ static int32_t init_atu_regions(void)
 
 static int setup_kmu_slot_from_otp(enum rss_kmu_slot_id_t slot,
                                    enum tfm_otp_element_id_t otp_id,
-                                   struct kmu_key_export_config_t *export_config)
+                                   const struct kmu_key_export_config_t *export_config)
 {
     int rc;
     enum kmu_error_t kmu_err;

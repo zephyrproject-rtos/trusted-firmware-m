@@ -258,7 +258,7 @@ enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed);
 enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config);
 enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
-                                           struct kmu_key_export_config_t *config);
+                                           const struct kmu_key_export_config_t *config);
 
 enum kmu_error_t kmu_set_key_locked(struct kmu_dev_t *dev, uint32_t slot);
 enum kmu_error_t kmu_get_key_locked(struct kmu_dev_t *dev, uint32_t slot);
