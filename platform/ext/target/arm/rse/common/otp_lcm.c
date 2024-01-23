@@ -41,6 +41,11 @@
 #define OTP_ROM_ENCRYPTION_KEY KMU_HW_SLOT_KCE_CM
 #define OTP_RUNTIME_ENCRYPTION_KEY KMU_HW_SLOT_KCE_DM
 
+#ifndef RSE_HAS_MANUFACTURING_DATA
+#undef OTP_MANUFACTURING_DATA_MAX_SIZE
+#define OTP_MANUFACTURING_DATA_MAX_SIZE 0
+#endif /* !RSE_HAS_MANUFACTURING_DATA */
+
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
         __PACKED_STRUCT {
@@ -108,26 +113,23 @@ __PACKED_STRUCT plat_user_area_layout_t {
             } unlocked_area;
         };
         uint8_t _pad0[OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - BL1_2_CODE_SIZE
-                      - OTP_SCP_DATA_SIZE - sizeof(struct lcm_otp_layout_t)];
+                      - OTP_MANUFACTURING_DATA_MAX_SIZE - sizeof(struct lcm_otp_layout_t)];
     };
 
-    /* These are aligned to the end of the OTP. The size of the DMA ICS is
-     * defined by the hardware, and the ROM knows the size of the bl1_2_image
-     * because of the size field, so it's possible to shrink the bootloader (and
-     * use the extra space for CM, DM, or unlocked data) without changing the
-     * ROM. Placing the image here means that it doesn't get zero-count checked
-     * with the rest of the CM data, since it's far faster to just calculate the
-     * hash using the CC DMA.
-     */
-    __PACKED_UNION {
-        __PACKED_STRUCT {
-            uint32_t zero_bit_count;
-            uint32_t data[(OTP_SCP_DATA_SIZE - sizeof(uint32_t)) / sizeof(uint32_t)];
-        };
-        uint8_t _pad1[OTP_SCP_DATA_SIZE];
-    } scp_data;
-
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
+
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    __PACKED_STRUCT {
+        uint32_t data[(OTP_MANUFACTURING_DATA_MAX_SIZE - 2 * sizeof(uint32_t)) / sizeof(uint32_t)];
+        /* Things before this point are not touched by BL1_1, and hence are
+         * modifiable by new provisioning code. Things after this point have
+         * fixed addresses which are used by BL1_1 and cannot be changed by
+         * new provisioning code.
+         */
+        uint32_t size;
+        uint32_t zero_count;
+    } manufacturing_data;
+#endif /* RSE_HAS_MANUFACTURING_DATA */
 
     __PACKED_UNION {
         __PACKED_STRUCT {
@@ -216,7 +218,6 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.dm_encrypted.s_image_encryption_key),
     [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.dm_encrypted.ns_image_encryption_key),
 
-    [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_OFFSET(bl1_2_image),
     [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
     [PLAT_OTP_ID_BL1_2_IMAGE_HASH] = OTP_OFFSET(rotpk),
     [PLAT_OTP_ID_BL1_ROTPK_0] = USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
@@ -236,7 +237,10 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
-    [PLAT_OTP_ID_SCP_DATA] = USER_AREA_OFFSET(scp_data),
+
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_OFFSET(manufacturing_data.size),
+#endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
     [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = OTP_OFFSET(kce_dm),
@@ -350,7 +354,10 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
-    [PLAT_OTP_ID_SCP_DATA] = USER_AREA_SIZE(scp_data),
+
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_SIZE(manufacturing_data.size),
+#endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
     [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = OTP_SIZE(kce_dm),
@@ -391,6 +398,14 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
 static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
                                     uint32_t buf_len, uint8_t *buf)
 {
+    if (len == 0) {
+        return TFM_PLAT_ERR_SUCCESS;
+    }
+
+    if (offset == 0) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+
 #ifdef RSE_BRINGUP_OTP_EMULATION
     enum tfm_plat_err_t plat_err;
 
@@ -415,6 +430,14 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
                                               uint32_t buf_len, uint8_t *buf,
                                               enum kmu_hardware_keyslot_t key)
 {
+    if (len == 0) {
+        return TFM_PLAT_ERR_SUCCESS;
+    }
+
+    if (offset == 0) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+
 #ifndef RSE_ENCRYPTED_OTP_KEYS
     return otp_read(offset, len, buf_len, buf);
 #else
@@ -530,8 +553,30 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
 {
     enum tfm_plat_err_t err;
     enum integrity_checker_error_t ic_err;
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    uint32_t manufacturing_size;
+#endif /* RSE_HAS_MANUFACTURING_DATA */
     uint32_t cm_size;
     uint32_t dm_size;
+
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
+                   USER_AREA_SIZE(manufacturing_data.size),
+                   sizeof(manufacturing_size), (uint8_t*)&manufacturing_size);
+    if (err == TFM_PLAT_ERR_SUCCESS) {
+        ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
+                                               INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                               (uint32_t *)(USER_AREA_ADDRESS(manufacturing_data.size) - manufacturing_size),
+                                               manufacturing_size + sizeof(uint32_t),
+                                               (uint32_t *)USER_AREA_ADDRESS(manufacturing_data.zero_count),
+                                               USER_AREA_SIZE(manufacturing_data.zero_count));
+        if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+    } else if (err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+#endif /* RSE_HAS_MANUFACTURING_DATA */
 
     if (lcs == LCM_LCS_DM || lcs == LCM_LCS_SE) {
             ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
@@ -692,7 +737,11 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
                                       size_t out_len, uint8_t *out)
 {
     enum tfm_plat_err_t err;
-    size_t size;
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    uint32_t manufacturing_data_size;
+#endif /* RSE_HAS_MANUFACTURING_DATA */
+    size_t bl1_2_size;
+    uint32_t bl1_2_offset;
 
     if (id >= PLAT_OTP_ID_MAX) {
         return TFM_PLAT_ERR_INVALID_INPUT;
@@ -716,13 +765,42 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_BL1_2_IMAGE:
         err = otp_read(USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
                        USER_AREA_SIZE(cm_locked.bl1_2_image_len),
-                       sizeof(size), (uint8_t *)&size);
+                       sizeof(bl1_2_size), (uint8_t *)&bl1_2_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
 
-        return otp_read(OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - size, size,
+#ifdef RSE_HAS_MANUFACTURING_DATA
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
+                       USER_AREA_SIZE(manufacturing_data.size),
+                       sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size - bl1_2_size;
+#else
+        bl1_2_offset = USER_AREA_OFFSET(dma_initial_command_sequence) - bl1_2_size;
+#endif
+
+        return otp_read(bl1_2_offset,
+                        bl1_2_size,
                         out_len, out);
+
+    case PLAT_OTP_ID_MANUFACTURING_DATA:
+#ifdef RSE_HAS_MANUFACTURING_DATA
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
+                       USER_AREA_SIZE(manufacturing_data.size),
+                       sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
+        return otp_read(USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size,
+                        manufacturing_data_size,
+                        out_len, out);
+#else
+        return TFM_PLAT_ERR_UNSUPPORTED;
+#endif
     default:
         return otp_read(otp_offsets[id], otp_sizes[id], out_len, out);
     }
@@ -858,6 +936,12 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
 enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                                        size_t in_len, const uint8_t *in)
 {
+#ifdef RSE_HAS_MANUFACTURING_DATA
+    enum tfm_plat_err_t err;
+    size_t manufacturing_data_size = 0;
+#endif
+    uint32_t bl1_2_offset;
+
     if (id >= PLAT_OTP_ID_MAX) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
@@ -877,6 +961,21 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
         return otp_write_encrypted(otp_offsets[id], otp_sizes[id], in_len, in,
                                    OTP_ROM_ENCRYPTION_KEY);
+    case PLAT_OTP_ID_BL1_2_IMAGE:
+#ifdef RSE_HAS_MANUFACTURING_DATA
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
+                       USER_AREA_SIZE(manufacturing_data.size),
+                       sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
+        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size - in_len;
+#else
+        bl1_2_offset = USER_AREA_OFFSET(dma_initial_command_sequence) - in_len;
+#endif
+
+        return otp_write(bl1_2_offset, otp_sizes[id], in_len, in);
     default:
         return otp_write(otp_offsets[id], otp_sizes[id], in_len, in);
     }

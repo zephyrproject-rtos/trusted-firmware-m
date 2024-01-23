@@ -35,6 +35,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:RSE_USE_ROM_LIB_FROM_SRAM>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
         RSE_AMOUNT=${RSE_AMOUNT}
+        $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
 )
 
 #========================= Platform common defs ===============================#

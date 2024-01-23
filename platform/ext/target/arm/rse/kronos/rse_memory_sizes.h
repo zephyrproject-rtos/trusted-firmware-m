@@ -38,8 +38,8 @@
 /* How much space in OTP can be used for the SAM configuration */
 #define OTP_SAM_CONFIGURATION_SIZE 0x60
 
-/* How much space in OTP can be used for the SCP data */
-#define OTP_SCP_DATA_SIZE 0x1000
+/* How much space in OTP can be used for the manufacturing data */
+#define OTP_MANUFACTURING_DATA_MAX_SIZE 0x1000
 
 /* The maximum size for code in the provisioning bundle */
 #define PROVISIONING_BUNDLE_CODE_SIZE   (0xB000)

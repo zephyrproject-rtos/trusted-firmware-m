@@ -91,8 +91,6 @@ set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU 
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
-set(RSE_SCP_DATA_PATH                   ${CMAKE_CURRENT_LIST_DIR}/provisioning/dummy_scp_data.bin CACHE FILEPATH "Path to SCP data to provision")
-
 set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
 
 if (RSE_TP_MODE STREQUAL "TCI")
@@ -114,3 +112,5 @@ if (RSE_USE_ROM_LIB_FROM_SRAM)
 endif()
 
 set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
+
+set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
