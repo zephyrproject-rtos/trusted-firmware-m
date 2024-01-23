@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2023 Arm Limited
+; * Copyright (c) 2009-2024 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -31,9 +31,6 @@ MEMORY
 
 __heap_size__  = BL2_HEAP_SIZE;
 __msp_stack_size__ = BL2_MSP_STACK_SIZE;
-
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
 
 ENTRY(Reset_Handler)
 

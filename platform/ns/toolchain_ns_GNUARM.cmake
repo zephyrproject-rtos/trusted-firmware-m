@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -178,6 +178,7 @@ endif()
 
 add_compile_options(
     -specs=nano.specs
+    -specs=nosys.specs
     -Wall
     -Wno-format
     -Wno-return-type
@@ -189,7 +190,6 @@ add_compile_options(
     -fshort-enums
     -funsigned-char
     -mthumb
-    -nostdlib
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
@@ -199,6 +199,7 @@ add_compile_options(
 add_link_options(
     --entry=Reset_Handler
     -specs=nano.specs
+    -specs=nosys.specs
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections

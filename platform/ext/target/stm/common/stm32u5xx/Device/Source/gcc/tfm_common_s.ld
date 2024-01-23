@@ -39,9 +39,6 @@ MEMORY
 __heap_size__  = S_HEAP_SIZE;
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2022 ARM Limited
+; * Copyright (c) 2009-2024 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -30,9 +30,6 @@ MEMORY
 
 __heap_size__  = NS_HEAP_SIZE;
 __stack_size__ = NS_STACK_SIZE;
-
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
 
 ENTRY(Reset_Handler)
 

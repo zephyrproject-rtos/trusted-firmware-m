@@ -31,9 +31,6 @@ MEMORY
 __heap_size__  = NS_HEAP_SIZE;
 __stack_size__ = NS_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS

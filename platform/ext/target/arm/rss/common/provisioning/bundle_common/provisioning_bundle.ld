@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2021-2023 Arm Limited. All rights reserved.
+; * Copyright (c) 2021-2024 Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ MEMORY
     DATA (rw) : ORIGIN = PROVISIONING_BUNDLE_DATA_START, LENGTH = PROVISIONING_BUNDLE_DATA_SIZE
     VALUES (r) : ORIGIN = PROVISIONING_BUNDLE_VALUES_START, LENGTH = PROVISIONING_BUNDLE_VALUES_SIZE
 }
-
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
 
 ENTRY(do_provisioning)
 

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2023 Arm Limited
+; * Copyright (c) 2009-2024 Arm Limited
 ; * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
 ; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
@@ -64,9 +64,6 @@ MEMORY
 } > FLASH
 
 __msp_stack_size__ = S_MSP_STACK_SIZE;
-
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
 
 ENTRY(Reset_Handler)
 
