@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2024, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -126,37 +126,3 @@ void CC_PalMemSetZeroPlat(    void* aTarget, /*!< [out]  The target buffer to se
 {
     memset(aTarget, 0x00, aSize);
 }/* End of CC_PalMemSetZeroPlat */
-
-/*!
- * @brief This function purpose is to allocate a memory buffer according to aSize.
- *
- *
- * @return The function returns a pointer to allocated buffer or NULL if allocation failed.
- */
-void* CC_PalMemMallocPlat(size_t  aSize /*!< [in] Number of bytes to allocate. */)
-{
-    return malloc(aSize);
-}/* End of CC_PalMemMallocPlat */
-
-/*!
- * @brief This function purpose is to reallocate a memory buffer according to aNewSize.
- *        The content of the old buffer is moved to the new location.
- *
- * @return The function returns a pointer to the newly allocated buffer or NULL if allocation failed.
- */
-void* CC_PalMemReallocPlat(  void* aBuffer,     /*!< [in] Pointer to allocated buffer. */
-                                     size_t  aNewSize   /*!< [in] Number of bytes to reallocate. */)
-{
-    return realloc(aBuffer, aNewSize);
-}/* End of CC_PalMemReallocPlat */
-
-/*!
- * @brief This function purpose is to free allocated buffer.
- *
- *
- * @return void.
- */
-void CC_PalMemFreePlat(void* aBuffer /*!< [in] Pointer to allocated buffer.*/)
-{
-    free(aBuffer);
-}/* End of CC_PalMemFreePlat */
