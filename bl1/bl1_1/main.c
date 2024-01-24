@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,9 @@
 #include "tfm_plat_provisioning.h"
 #include "tfm_plat_otp.h"
 #include "boot_hal.h"
+#ifdef TFM_MEASURED_BOOT_API
 #include "boot_measurement.h"
+#endif /* TFM_MEASURED_BOOT_API */
 #include "psa/crypto.h"
 #include "region_defs.h"
 #include "log.h"

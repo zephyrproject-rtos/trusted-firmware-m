@@ -8,7 +8,9 @@
 #include "crypto.h"
 #include "otp.h"
 #include "boot_hal.h"
+#ifdef TFM_MEASURED_BOOT_API
 #include "boot_measurement.h"
+#endif /* TFM_MEASURED_BOOT_API */
 #include "psa/crypto.h"
 #include "uart_stdout.h"
 #include "fih.h"
