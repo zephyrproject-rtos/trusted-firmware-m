@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -41,7 +41,7 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'tram_base_address + 0xC'
+DESADDR: 'tram_base_address + 0x4'
 XSIZE: 0x00010000
 FILLVAL: 0x00000001
 GPOVAL0: 0x0000001E
