@@ -32,7 +32,7 @@ set(ETHOSU_LOG_SEVERITY               "-1"        CACHE STRING    "Ethos-U Core 
 set(PLATFORM_SVC_HANDLERS               ON              CACHE BOOL     "Platform specific SVC handlers")
 set(PROVISIONING_CODE_PADDED_SIZE       "0x2000"        CACHE STRING   "")
 set(PROVISIONING_VALUES_PADDED_SIZE     "0x3800"        CACHE STRING   "")
-set(PROVISIONING_DATA_PADDED_SIZE       "0x400"         CACHE STRING   "")
+set(PROVISIONING_DATA_PADDED_SIZE       "0x1000"        CACHE STRING   "")
 set(CRYPTO_HW_ACCELERATOR               OFF             CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(BL1                                 ON              CACHE BOOL     "Whether to build BL1")
 set(PLATFORM_DEFAULT_BL1                ON              CACHE STRING   "Whether to use default BL1 or platform-specific one")

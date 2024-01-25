@@ -37,6 +37,10 @@ parser.add_argument("--bundle_output_file", help="bundle output file", required=
 parser.add_argument("--key_file", help="the AES-CCM key file", required=True)
 parser.add_argument("--krtl_derivation_label", help="The provisioning key derivation label", required=True)
 parser.add_argument("--provisioning_lcs", help="The LCS in which provisioning will be run", required=True)
+parser.add_argument("--code_pad_size", help="size to pad the code section", required=True)
+parser.add_argument("--values_pad_size", help="size to pad the values section", required=True)
+parser.add_argument("--data_pad_size", help="size to pad the data section", required=True)
+
 args = parser.parse_args()
 
 with open(args.provisioning_code, "rb") as in_file:
@@ -84,9 +88,12 @@ patch_bundle = struct_pack([
     bl1_2,
 ])
 
-code = struct_pack([code], pad_to=0x2000)
-values = struct_pack([patch_bundle, values[len(patch_bundle):]], pad_to=0x3800)
-data = struct_pack([values, rwdata, rodata], pad_to=0x4800)
+code = struct_pack([code],
+                   pad_to=int(args.code_pad_size, 0))
+values = struct_pack([patch_bundle, values[len(patch_bundle):]],
+                     pad_to=int(args.values_pad_size, 0))
+data = struct_pack([values, rwdata, rodata],
+                   pad_to=int(args.values_pad_size, 0)+int(args.data_pad_size, 0))
 
 bundle = struct_pack([
     int(args.magic, 16).to_bytes(4, 'little'),

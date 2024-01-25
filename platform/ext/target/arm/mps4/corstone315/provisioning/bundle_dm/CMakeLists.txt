@@ -78,5 +78,8 @@ add_custom_command(OUTPUT dm_provisioning_bundle.bin
                     --key_file=${RTL_KEY_PATH}
                     --krtl_derivation_label="DM_PROVISIONING"
                     --provisioning_lcs 1
+                    --code_pad_size ${PROVISIONING_CODE_PADDED_SIZE}
+                    --data_pad_size ${PROVISIONING_DATA_PADDED_SIZE}
+                    --values_pad_size ${PROVISIONING_VALUES_PADDED_SIZE}
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/dm_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/dm_provisioning_bundle.bin
 )
