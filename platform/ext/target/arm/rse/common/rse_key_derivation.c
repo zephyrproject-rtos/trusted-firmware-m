@@ -24,7 +24,7 @@ static struct kmu_key_export_config_t kmu_key0_export_config = {
     0x01, /* Increment by 4 bytes with each write */
     KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
     KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    false, /* Don't refresh the masking */
+    true,  /* refresh the masking */
     false, /* Don't disable the masking */
 };
 
@@ -34,7 +34,7 @@ static struct kmu_key_export_config_t kmu_key1_export_config = {
     0x01, /* Increment by 4 bytes with each write */
     KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
     KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    false, /* Don't refresh the masking */
+    true,  /* refresh the masking */
     false, /* Don't disable the masking */
 };
 
