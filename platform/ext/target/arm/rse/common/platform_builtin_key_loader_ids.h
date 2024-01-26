@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,9 @@ enum psa_drv_slot_number_t {
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
     TFM_BUILTIN_KEY_SLOT_DAK_SEED,
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
+#ifdef TFM_PARTITION_DPE
+    TFM_BUILTIN_KEY_SLOT_ROT_CDI,
+#endif /* TFM_PARTITION_DPE */
     TFM_BUILTIN_KEY_SLOT_HOST_S_ROTPK,
     TFM_BUILTIN_KEY_SLOT_HOST_NS_ROTPK,
     TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,6 +26,9 @@ enum tfm_key_id_builtin_t {
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
     TFM_BUILTIN_KEY_ID_DAK_SEED,
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
+#ifdef TFM_PARTITION_DPE
+    TFM_BUILTIN_KEY_ID_ROT_CDI,
+#endif /* TFM_PARTITION_DPE */
     TFM_BUILTIN_KEY_ID_PLAT_SPECIFIC_MIN = 0x7FFF816Bu,
     TFM_BUILTIN_KEY_ID_HOST_S_ROTPK,
     TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK,

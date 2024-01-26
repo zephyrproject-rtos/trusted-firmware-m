@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -176,6 +176,34 @@ static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
 }
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 
+#ifdef TFM_PARTITION_DPE
+static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
+                                                size_t *key_len,
+                                                size_t *key_bits,
+                                                psa_algorithm_t *algorithm,
+                                                psa_key_type_t *type)
+{
+    enum kmu_error_t kmu_err;
+
+    if (buf_len < 32) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    *key_len = 32;
+    *key_bits = 256;
+    *algorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
+    *type = PSA_KEY_TYPE_DERIVE;
+
+    /* RSE_KMU_SLOT_ROT_CDI = KMU_USER_SLOT_MIN + 3 */
+    kmu_err = kmu_get_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 3, buf, 32);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+#endif /* TFM_PARTITION_DPE */
+
 static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_len,
                                                      size_t *key_len,
                                                      size_t *key_bits,
@@ -268,6 +296,17 @@ static const tfm_plat_builtin_key_per_user_policy_t g_dak_seed_per_user_policy[]
 };
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 
+#ifdef TFM_PARTITION_DPE
+/**
+ * @brief Table describing per-user key policy for the RoT CDI
+ *
+ */
+static const tfm_plat_builtin_key_per_user_policy_t g_rot_cdi_per_user_policy[] = {
+    {.user = TFM_SP_DPE,
+     .usage = PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_EXPORT},
+};
+#endif /* TFM_PARTITION_DPE */
+
 /**
  * @brief Table describing per-user key policy for all the HOST RoTPK (S, NS, CCA)
  *
@@ -299,6 +338,11 @@ static const tfm_plat_builtin_key_policy_t g_builtin_keys_policy[] = {
     {.key_id = TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK,
      .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
      .policy_ptr = g_host_rotpk_per_user_policy},
+#ifdef TFM_PARTITION_DPE
+    {.key_id = TFM_BUILTIN_KEY_ID_ROT_CDI,
+     .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_rot_cdi_per_user_policy),
+     .policy_ptr = g_rot_cdi_per_user_policy},
+#endif /* TFM_PARTITION_DPE */
 };
 
 /**
@@ -333,6 +377,12 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
      .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
      .loader_key_func = tfm_plat_get_host_cca_rotpk},
+#ifdef TFM_PARTITION_DPE
+    {.key_id = TFM_BUILTIN_KEY_ID_ROT_CDI,
+     .slot_number = TFM_BUILTIN_KEY_SLOT_ROT_CDI,
+     .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
+     .loader_key_func = tfm_plat_get_rot_cdi},
+#endif /* TFM_PARTITION_DPE */
 };
 
 size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])
