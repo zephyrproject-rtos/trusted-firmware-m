@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+# Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,6 +33,11 @@ target_sources(${CC3XX_TARGET_NAME}
         ./cc3xx_drbg_hash.c
         ./cc3xx_drbg_hmac.c
         ./cc3xx_drbg.c
+        ./cc3xx_ecdsa.c
+        ./cc3xx_ec.c
+        ./cc3xx_ec_curve_data.c
+        ./cc3xx_ec_weierstrass.c
+        ./cc3xx_ec_projective_point.c
 )
 
 # This file is the performance-limit for ECDSA, so should be compiled with the

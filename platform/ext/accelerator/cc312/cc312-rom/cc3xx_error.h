@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,6 +35,12 @@ enum cc3xx_error {
     CC3XX_ERR_GCM_VARIABLE_IV_NOT_IMPLEMENTED,
     CC3XX_ERR_CHACHA_IV_SIZE_INCORRECT,
     CC3XX_ERR_DFA_VIOLATION,
+    CC3XX_ERR_EC_CURVE_NOT_SUPPORTED,
+    CC3XX_ERR_EC_POINT_OUTSIDE_FIELD,
+    CC3XX_ERR_EC_POINT_IS_INFINITY,
+    CC3XX_ERR_ECDSA_SIGNATURE_INVALID,
+    CC3XX_ERR_ECDSA_INVALID_HASH,
+    CC3XX_ERR_ECDSA_INVALID_KEY,
     CC3XX_ERR_DRBG_RESEED_REQUIRED,
     CC3XX_ERR_DRBG_INVALID_ID,
     CC3XX_ERR_MAX_VALUE = UINT32_MAX

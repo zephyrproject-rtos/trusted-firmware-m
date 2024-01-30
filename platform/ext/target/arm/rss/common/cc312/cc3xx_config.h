@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -128,6 +128,49 @@
  * the cost of code size
  */
 #define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE
+
+/* Whether various EC curve types are enabled */
+#define CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
+/* #define CC3XX_CONFIG_EC_CURVE_TYPE_MONTGOMERY_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
+
+/* Whether various EC curves are enabled */
+#define CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_224_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_192_K1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_224_K1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_256_K1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_192_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_224_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_256_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_320_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_384_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_512_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_FRP_256_V1_ENABLE
+
+/* #define CC3XX_CONFIG_EC_CURVE_25519_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_448_ENABLE */
+
+/* #define CC3XX_CONFIG_EC_CURVE_ED25519_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_ED448_ENABLE */
+
+/* What the maximum DPA countermeasure blinding multiple is for EC point-scalar
+ * multiplication.
+ */
+#define CC3XX_CONFIG_EC_DPA_MAX_BLIND_MULTIPLE 32
+
+/* Whether the Shamir trick will be used to improve performance of point-scalar
+ * multiplication on non-secret data. Has a code-size penalty.
+ */
+#define CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE
+
+/* Whether various ECDSA features are enabled */
+#define CC3XX_CONFIG_ECDSA_SIGN_ENABLE
+#define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE
+#define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE
 
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
