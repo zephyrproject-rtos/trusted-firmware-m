@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,12 +31,14 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void);
  *                              the message.
  * \param[in] mhu_sender_dev    Pointer to MHU sender device on which to write
  *                              the reply.
+ * \param[in] source            The number of the IRQ source for this MHU.
  *
  * \retval TFM_PLAT_ERR_SUCCESS  Operation succeeded.
  * \retval Other return code     Operation failed with an error code.
  */
 enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
-                                               void *mhu_sender_dev);
+                                               void *mhu_sender_dev,
+                                               uint32_t source);
 
 /**
  * \brief Notify NSPE that a PSA client call return result is replied.

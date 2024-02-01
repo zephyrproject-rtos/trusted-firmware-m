@@ -93,7 +93,8 @@ static enum tfm_plat_err_t initialize_mhu(void)
 }
 
 enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
-                                               void *mhu_sender_dev)
+                                               void *mhu_sender_dev,
+                                               uint32_t source)
 {
     enum mhu_error_t mhu_err;
     enum tfm_plat_err_t err;
@@ -105,6 +106,13 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
 
     /* Receive complete message */
     mhu_err = mhu_receive_data(mhu_receiver_dev, (uint8_t *)&msg, &msg_len);
+
+    /* Clear the pending interrupt for this MHU. This prevents the mailbox
+     * interrupt handler from being called without the next request arriving
+     * through the mailbox
+     */
+    NVIC_ClearPendingIRQ(source);
+
     if (mhu_err != MHU_ERR_NONE) {
         SPMLOG_DBGMSGVAL("[COMMS] MHU receive failed: ", mhu_err);
         /* Can't respond, since we don't know anything about the message */
