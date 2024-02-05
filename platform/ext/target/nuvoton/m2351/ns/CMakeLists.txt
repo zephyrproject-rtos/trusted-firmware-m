@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2023, Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -28,7 +28,8 @@ target_include_directories(platform_ns
         retarget
         partition
         include
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         ext/common
         cmsis_drivers/config
         device/config

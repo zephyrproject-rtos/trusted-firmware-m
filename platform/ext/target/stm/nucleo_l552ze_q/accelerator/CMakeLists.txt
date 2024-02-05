@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2021 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -23,13 +23,13 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-            ${PLATFORM_DIR}/ext/cmsis
     )
 
     target_link_libraries(bl2_crypto_hw
         PRIVATE
             bl2_mbedcrypto
             platform_bl2
+            cmsis
     )
 
     set(STM_LIB_TARGET bl2_crypto_hw)
@@ -37,6 +37,7 @@ if(BL2)
     target_link_libraries(bl2_mbedcrypto
         PUBLIC
             bl2_crypto_hw
+            cmsis
     )
     target_include_directories(bl2_mbedcrypto
         PUBLIC
@@ -45,7 +46,6 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-            ${PLATFORM_DIR}/ext/cmsis
     )
 
 endif()
@@ -66,7 +66,6 @@ if(TFM_PARTITION_CRYPTO)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-            ${PLATFORM_DIR}/ext/cmsis
     )
     target_include_directories(crypto_service_mbedcrypto
         PUBLIC
@@ -75,7 +74,6 @@ if(TFM_PARTITION_CRYPTO)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-            ${PLATFORM_DIR}/ext/cmsis
             ${PLATFORM_DIR}/include
     )
 
@@ -93,6 +91,12 @@ if(TFM_PARTITION_CRYPTO)
         PRIVATE
             crypto_service_mbedcrypto
             platform_s
+            cmsis
+    )
+
+    target_link_libraries(crypto_service_mbedcrypto
+        PUBLIC
+            cmsis
     )
 
     target_link_libraries(platform_s

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -59,7 +59,8 @@ target_include_directories(cmsis_includes
         ${CORSTONE300_COMMON_DIR}/device/config
         ${CORSTONE300_COMMON_DIR}/device/include
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers
-        ${PLATFORM_DIR}/ext/cmsis
+        ${PLATFORM_DIR}/ext/cmsis/Include
+        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
         ${CORSTONE300_COMMON_DIR}/partition
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/partition

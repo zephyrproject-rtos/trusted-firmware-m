@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -56,11 +56,12 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         .
-        ./cmsis
         ./include
         ./partition
         Device/Config
         Device/Include
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         ext/common
         ${CY_MTB_PDL_CAT1_LIB_PATH}/drivers/include
         ${CY_MTB_PDL_CAT1_LIB_PATH}/devices/COMPONENT_CAT1A/include

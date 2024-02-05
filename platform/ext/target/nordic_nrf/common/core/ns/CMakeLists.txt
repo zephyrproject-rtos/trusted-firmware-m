@@ -1,4 +1,5 @@
 #
+# Copyright (c) 2024, Arm Limited. All rights reserved.
 # Copyright (c) 2023, Nordic Semiconductor ASA.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -44,7 +45,8 @@ target_include_directories(platform_ns
         ${HAL_NORDIC_PATH}/nrfx/mdk
         ${HAL_NORDIC_PATH}/nrfx/drivers/include
         ${PLATFORM_DIR}/include
-        ${PLATFORM_DIR}/ext/cmsis
+        ${PLATFORM_DIR}/ext/cmsis/Include
+        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
         ${PLATFORM_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/common
         services/include

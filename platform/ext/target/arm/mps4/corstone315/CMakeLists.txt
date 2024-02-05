@@ -75,16 +75,15 @@ target_include_directories(cmsis_includes
     INTERFACE
         device/include
         cmsis_drivers
-        ${PLATFORM_DIR}/ext/cmsis
         partition
 )
 
 add_library(cmsis_includes_s INTERFACE)
 add_library(cmsis_includes_bl1 INTERFACE)
 add_library(cmsis_includes_bl2 INTERFACE)
-target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes)
-target_link_libraries(cmsis_includes_bl1 INTERFACE cmsis_includes)
-target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes)
+target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes cmsis)
+target_link_libraries(cmsis_includes_bl1 INTERFACE cmsis_includes cmsis)
+target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes cmsis)
 target_include_directories(cmsis_includes_bl2
     INTERFACE
         cmsis_drivers/config/secure
@@ -139,6 +138,7 @@ target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
 target_link_libraries(platform_bl2
     PUBLIC
         cmsis_includes
+        cmsis
     PRIVATE
         device_definition_s
         cmsis_includes_bl2

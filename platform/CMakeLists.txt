@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -52,7 +52,6 @@ target_compile_options(cmsis_stack_override
 target_include_directories(platform_common_interface
     INTERFACE
         ext
-        ext/cmsis
         ext/common
         ext/driver
         include
@@ -97,6 +96,7 @@ target_link_libraries(platform_s
         platform_region_defs
         tfm_fih_headers
         cmsis_stack_override
+        cmsis
     PRIVATE
         psa_interface
         tfm_config
@@ -197,6 +197,7 @@ if(BL2)
             platform_common_interface
             platform_region_defs
             cmsis_stack_override
+            cmsis
         PRIVATE
             bl2_hal
             mcuboot_config
@@ -232,7 +233,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         INTERFACE
             .
             include
-            ext/cmsis
             ext/driver
     )
 
@@ -241,6 +241,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
             platform_common_interface
             cmsis_stack_override
+            cmsis
     )
 
     target_compile_definitions(platform_bl1_1_interface
@@ -283,7 +284,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         PRIVATE
             .
             include
-            ext/cmsis
             ext/driver
     )
 
@@ -292,6 +292,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
             platform_common_interface
             cmsis_stack_override
+            cmsis
     )
 
     target_compile_definitions(platform_bl1_2

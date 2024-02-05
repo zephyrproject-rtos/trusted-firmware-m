@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -25,7 +25,8 @@ target_include_directories(platform_ns
     PRIVATE
         retarget
     PUBLIC
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         device
         device/config
         device/include
