@@ -157,9 +157,29 @@ enum rse_atu_ids {
                                          HOST_SCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
-/* Last RSE logical address used for loading images */
-#define RSE_IMAGE_LOADING_END           (HOST_SCP_IMG_CODE_BASE_S +         \
+/* MCP */
+
+/* MCP ATU HEADER logical address start */
+#define HOST_MCP_HDR_ATU_WINDOW_BASE_S  (HOST_SCP_IMG_CODE_BASE_S +         \
                                          HOST_SCP_ATU_SIZE)
+/* MCP Image address start, offset so end of HEADER is at end of ATU HEADER */
+#define HOST_MCP_IMG_HDR_BASE_S         (HOST_MCP_HDR_ATU_WINDOW_BASE_S +   \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE -      \
+                                         BL2_HEADER_SIZE)
+/* MCP Code region and MCP ATU CODE logical address start */
+#define HOST_MCP_IMG_CODE_BASE_S        (HOST_MCP_HDR_ATU_WINDOW_BASE_S +   \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* MCP ATU CODE size (aligned size of MCP image) */
+#define HOST_MCP_ATU_SIZE               ALIGN_UP(SIZE_DEF_MCP_IMAGE,        \
+                                                 RSE_ATU_PAGE_SIZE)
+/* MCP HEADER physical address start (mapped to end of MCP ITCM) */
+#define HOST_MCP_HDR_PHYS_BASE          (HOST_MCP_PHYS_BASE +               \
+                                         HOST_MCP_ATU_SIZE -                \
+                                         RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+/* Last RSE logical address used for loading images */
+#define RSE_IMAGE_LOADING_END           (HOST_MCP_IMG_CODE_BASE_S +         \
+                                         HOST_MCP_ATU_SIZE)
 
 /* ATU region mapping to access System Control NI-Tower */
 #define HOST_NI_TOWER_BASE      RSE_IMAGE_LOADING_END

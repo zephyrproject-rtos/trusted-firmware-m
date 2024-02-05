@@ -25,3 +25,4 @@
 
 /* Host Firmware */
 #define SIZE_DEF_SCP_IMAGE          (0x80000) /* 512 KB */
+#define SIZE_DEF_MCP_IMAGE          (0x80000) /* 512 KB */
