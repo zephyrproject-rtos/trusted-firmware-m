@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 
 #include "Driver_Flash.h"
 #include "bl2_image_id.h"
+#include "host_base_address.h"
 #include "target.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
@@ -51,10 +52,36 @@ const struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_5_OFFSET,
         .fa_size = FLASH_AREA_5_SIZE,
     },
+    {
+        .fa_id = FLASH_AREA_6_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_6_OFFSET,
+        .fa_size = FLASH_AREA_6_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_7_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_7_OFFSET,
+        .fa_size = FLASH_AREA_7_SIZE,
+    },
 };
 
 const int flash_map_entry_num = ARRAY_SIZE(flash_map);
 
+/*
+ * This function is used to validate that the image will load to a region that
+ * it can execute from and that the image fits inside the execution region
+ * specified.
+ *
+ * The address that an image is loaded to is specified in the image header.
+ *
+ * The execution region is specific for a particular firmware to ensure that a
+ * firmware image is not loaded to the execution region of a different
+ * firmware by comparing the load image address in the image header and
+ * exec_ram_start corresponding to the image_id.
+ */
 int boot_get_image_exec_ram_info(uint32_t image_id,
                                  uint32_t *exec_ram_start,
                                  uint32_t *exec_ram_size)
@@ -68,6 +95,10 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
     } else if (image_id == RSE_FIRMWARE_NON_SECURE_ID) {
         *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
+        rc = 0;
+    } else if (image_id == RSE_FIRMWARE_SCP_ID) {
+        *exec_ram_start = HOST_SCP_IMG_HDR_BASE_S;
+        *exec_ram_size  = HOST_SCP_ATU_SIZE;
         rc = 0;
     }
 

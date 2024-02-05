@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,3 +22,6 @@
 
 /* Non-Secure Firmware */
 #define SIZE_DEF_NS_IMAGE           (0x60000) /* 384 KB */
+
+/* Host Firmware */
+#define SIZE_DEF_SCP_IMAGE          (0x80000) /* 512 KB */
