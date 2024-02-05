@@ -45,8 +45,14 @@ __STATIC_INLINE bool is_return_psp(uint32_t lr)
     return ((lr == EXC_RETURN_THREAD_PSP) || (lr == EXC_RETURN_THREAD_PSP_FPU));
 #elif defined(__ARM_ARCH_8M_BASE__) || defined(__ARM_ARCH_8M_MAIN__) \
         || defined(__ARM_ARCH_8_1M_MAIN__)
-    /* PSP is used only if SPSEL is set, and we came from thread mode. */
-    return ((lr & EXC_RETURN_SPSEL) && is_return_thread_mode(lr));
+    if (is_return_secure_stack(lr)) {
+        /* PSP is used only if SPSEL is set, and we came from thread mode. */
+        return ((lr & EXC_RETURN_SPSEL) && is_return_thread_mode(lr));
+    } else {
+        /* PSP is used only if CONTROL_NS.SPSEL is set, and we came from thread mode. */
+        bool sp_sel = _FLD2VAL(CONTROL_SPSEL, __TZ_get_CONTROL_NS()) != 0;
+        return (sp_sel && is_return_thread_mode(lr));
+    }
 #else
     return (lr == EXC_RETURN_THREAD_PSP);
 #endif
