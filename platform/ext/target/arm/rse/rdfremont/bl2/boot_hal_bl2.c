@@ -200,6 +200,8 @@ static int boot_platform_pre_load_scp(void)
 static int boot_platform_post_load_scp(void)
 {
     enum atu_error_t atu_err;
+    struct rse_integ_t *integ_layer =
+            (struct rse_integ_t *)RSE_INTEG_LAYER_BASE_S;
     enum mscp_error_t mscp_err;
 
     BOOT_LOG_INF("BL2: SCP post load start");
@@ -209,6 +211,9 @@ static int boot_platform_post_load_scp(void)
      * part in the ITCM before releasing SCP out of reset.
      */
     memset(HOST_SCP_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Enable SCP's ATU Access Permission (ATU AP) */
+    integ_layer->atu_ap |= RSE_INTEG_ATU_AP_SCP_ATU;
 
     /* Configure RSE ATU to access SCP INIT_CTRL region */
     atu_err = atu_initialize_region(&ATU_DEV_S,
