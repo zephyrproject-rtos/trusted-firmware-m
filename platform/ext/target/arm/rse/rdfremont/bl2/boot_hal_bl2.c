@@ -510,6 +510,19 @@ static int boot_platform_pre_load_lcp(void)
 
     BOOT_LOG_INF("BL2: LCP pre load start");
 
+    BOOT_LOG_INF("BL2: Wait for doorbell from SCP before loading LCP...");
+
+    /*
+     * Ensure SCP has notified it is ready and setup anything needed for access
+     * to the application processor subsystem where LCP is located.
+     */
+    if (host_system_prepare_ap_access() != 0) {
+        BOOT_LOG_ERR("BL2: Could not setup access to AP systems.");
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: Doorbell received from SCP!");
+
     /* Configure ATUs for loading to areas not directly addressable by RSE. */
 
     /*
