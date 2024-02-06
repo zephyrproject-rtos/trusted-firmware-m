@@ -61,34 +61,41 @@
  *                                           |     |
  *                                           +-----+
  *
+ *                             +-----+
+ *                             |     |
+ *                             |     |
+ *  rse_scp_axis ------------->|     |--------------------------> lcp_axim
+ *                             |     |
+ *                             |     |
+ *                             +-----+
  *
  * The following matrix shows the connections within System Control NI-Tower.
  *
- * +------------+---------------+----------+----------+
- * |            | rse_main_axis | scp_axis | mcp_axis |
- * +============+===============+==========+==========+
- * |rse_scp_axim|       X       |          |          |
- * +------------+---------------+----------+----------+
- * |rse_mcp_axim|       X       |          |          |
- * +------------+---------------+----------+----------+
- * |  rsm_axim  |       X       |    X     |    X     |
- * +------------+---------------+----------+----------+
- * |  rsm_apbm  |       X       |    X     |    X     |
- * +------------+---------------+----------+----------+
- * |  cmn_apbm  |       X       |    X     |    X     |
- * +------------+---------------+----------+----------+
- * |  tcu_apbm  |       X       |          |          |
- * +------------+---------------+----------+----------+
- * |  lcp_axim  |               |          |          |
- * +------------+---------------+----------+----------+
- * |  app_axim  |       X       |    X     |    X     |
- * +------------+---------------+----------+----------+
- * |app_scp_axim|               |          |    X     |
- * +------------+---------------+----------+----------+
- * |app_mcp_axim|               |          |          |
- * +------------+---------------+----------+----------+
- * |lcp_scp_axim|               |          |          |
- * +------------+---------------+----------+----------+
+ * +------------+---------------+----------+----------+--------------+
+ * |            | rse_main_axis | scp_axis | mcp_axis | rse_scp_axis |
+ * +============+===============+==========+==========+==============+
+ * |rse_scp_axim|       X       |          |          |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |rse_mcp_axim|       X       |          |          |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |  rsm_axim  |       X       |    X     |    X     |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |  rsm_apbm  |       X       |    X     |    X     |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |  cmn_apbm  |       X       |    X     |    X     |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |  tcu_apbm  |       X       |          |          |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |  lcp_axim  |               |          |          |      X       |
+ * +------------+---------------+----------+----------+--------------+
+ * |  app_axim  |       X       |    X     |    X     |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |app_scp_axim|               |          |    X     |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |app_mcp_axim|               |          |          |              |
+ * +------------+---------------+----------+----------+--------------+
+ * |lcp_scp_axim|               |          |          |              |
+ * +------------+---------------+----------+----------+--------------+
  *  NOTE: 'X' means there is a connection.
  */
 
@@ -362,6 +369,21 @@ static const struct ni_tower_psam_reg_cfg_info mcp_axis_psam[] = {
 };
 
 /*
+ * Accesses from RSE and SCP targeting LCP address space are handled by a
+ * NIC-400 which then forwards only the bottom [20:0] address bits of the
+ * request to rse_scp_axis interface. The bottom [20:0] address bits
+ * (range: 0x0 - 0x1FFFFF) are sent from NIC-400 to System Control NI-Tower
+ * for APU filtering of request from RSE/SCP to LCPs.
+ */
+static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
+    {
+        HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_BASE,
+        HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
+        SYSCTRL_LCP_AMNI_ID
+    },
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -386,6 +408,11 @@ static int32_t program_sysctrl_psam_aon(void)
             .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(mcp_axis_psam),
             .regions = mcp_axis_psam,
+        },
+        {
+            .dev_cfg = &SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = ARRAY_SIZE(rse_scp_axis_psam),
+            .regions = rse_scp_axis_psam,
         },
     };
 
