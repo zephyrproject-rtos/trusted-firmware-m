@@ -59,6 +59,7 @@ target_sources(platform_bl2
     PRIVATE
         bl2/boot_hal_bl2.c
         bl2/flash_map_bl2.c
+        bl2/interrupts_bl2.c
         bl2/ni_tower_sysctrl_lib.c
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
