@@ -1,16 +1,12 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 #include <string.h>
 #include "tfm_builtin_key_loader.h"
-#if defined(TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA)
 #include "tfm_mbedcrypto_include.h"
-#else
-#include "mbedtls/hkdf.h"
-#endif /* TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA */
 #include "psa_manifest/pid.h"
 #include "tfm_plat_crypto_keys.h"
 #include "crypto_library.h"
@@ -117,7 +113,6 @@ static psa_status_t builtin_key_get_attributes(
  *        keys that are returned for usage to the PSA Crypto core, are differentiated
  *        based on the partition user. The derived keys are described as platform keys
  */
-#if defined(TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA)
 static psa_status_t derive_subkey_into_buffer(
         struct tfm_builtin_key_t *key_slot, int32_t user,
         uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length)
@@ -192,43 +187,6 @@ wrap_up:
 
     return status;
 }
-#else
-static psa_status_t derive_subkey_into_buffer(
-        struct tfm_builtin_key_t *key_slot, int32_t user,
-        uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length)
-{
-    int mbedtls_err;
-
-#ifdef TFM_PARTITION_TEST_PS
-    /* Hack to allow the PS tests to work, since they directly call
-     * ps_system_prepare from the test partition which would otherwise derive a
-     * different key.
-     */
-    if (user == TFM_SP_PS_TEST) {
-        user = TFM_SP_PS;
-    }
-#endif /* TFM_PARTITION_TEST_PS */
-
-    /* FIXME this should be moved to using the PSA APIs once key derivation is
-     * implemented in the PSA driver wrapper. Using the external PSA apis
-     * directly creates a keyslot and we'd need to read the data from it and
-     * then destroy it, so isn't ideal. In order to avoid infinite recursion,
-     * it'll be necessary to add a special case (probably if owner == 0) to make
-     * sure the new PSA derivation request doesn't end up back here.
-     */
-    mbedtls_err = mbedtls_hkdf(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256),
-                               NULL, 0, key_slot->key, key_slot->key_len,
-                               (uint8_t *)&user, sizeof(user), key_buffer,
-                               key_buffer_size);
-    if (mbedtls_err) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    *key_buffer_length = key_buffer_size;
-
-    return PSA_SUCCESS;
-}
-#endif /* TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA */
 
 static psa_status_t builtin_key_copy_to_buffer(
         struct tfm_builtin_key_t *key_slot, uint8_t *key_buffer,
