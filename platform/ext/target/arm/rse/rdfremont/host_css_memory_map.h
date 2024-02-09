@@ -313,6 +313,15 @@
 /* AP Memory Expansion region 2 end address */
 #define HOST_AP_MEM_EXP_2_PHYS_LIMIT                0x7FFFFFFFFULL
 
+/* Address offset of AP region of different chips */
+#define HOST_AP_CHIP_OFFSET                         0x1000000000ULL
+/* Base address of the AP region of the nth chip */
+#define HOST_AP_CHIP_N_PHYS_BASE(n)                 (0x0ULL  +                \
+                                                     HOST_AP_CHIP_OFFSET * (n))
+/* End address of the AP region of the nth chip */
+#define HOST_AP_CHIP_N_PHYS_LIMIT(n)                (0xFFFFFFFFFULL +         \
+                                                     HOST_AP_CHIP_OFFSET * (n))
+
 /* PCIe NCI Memory space 2 base address */
 #define HOST_PCIE_NCI_2_PHYS_BASE                   0x4000000000ULL
 /* PCIe NCI Memory space 2 end address */

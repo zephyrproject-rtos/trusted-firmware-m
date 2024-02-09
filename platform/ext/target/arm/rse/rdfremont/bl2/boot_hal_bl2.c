@@ -18,6 +18,7 @@
 #include "device_definition.h"
 #include "flash_map/flash_map.h"
 #include "host_base_address.h"
+#include "host_system.h"
 #include "interrupts_bl2.h"
 #include "mhu_v3_x.h"
 #include "ni_tower_lib.h"
@@ -39,6 +40,8 @@
 
 static uint8_t lcp_measurement[PSA_HASH_LENGTH(MEASURED_BOOT_HASH_ALG)];
 static struct boot_measurement_metadata lcp_measurement_metadata = {0};
+
+static struct host_system_info_t *host_system_info;
 
 /*
  * Store an entry of data in the shared area of memory so it can be used by the
@@ -209,6 +212,19 @@ int boot_store_measurement(uint8_t index,
 int32_t boot_platform_post_init(void)
 {
     int32_t result;
+
+    result = host_system_init();
+    if (result != 0) {
+        return result;
+    }
+
+    result = host_system_get_info(&host_system_info);
+    if (result != 0) {
+        return result;
+    }
+
+    BOOT_LOG_INF("CHIP ID: %d", host_system_info->chip_id);
+
     result = interrupts_bl2_init();
     if (result != 0) {
         return result;
@@ -616,7 +632,8 @@ static int boot_platform_pre_load_lcp(void)
     atu_err = atu_initialize_region(&ATU_DEV_S,
                                     RSE_ATU_IMG_HDR_LOAD_ID,
                                     HOST_LCP_HDR_ATU_WINDOW_BASE_S,
-                                    HOST_LCP_0_PHYS_HDR_BASE,
+                                    (host_system_info->chip_ap_phys_base +
+                                        HOST_LCP_0_PHYS_HDR_BASE),
                                     RSE_IMG_HDR_ATU_WINDOW_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_ERR("BL2: ATU could not init LCP header load region");
@@ -629,7 +646,8 @@ static int boot_platform_pre_load_lcp(void)
     atu_err = atu_initialize_region(&ATU_DEV_S,
                                     RSE_ATU_IMG_CODE_LOAD_ID,
                                     HOST_LCP_IMG_CODE_BASE_S,
-                                    HOST_LCP_0_PHYS_BASE,
+                                    (host_system_info->chip_ap_phys_base +
+                                        HOST_LCP_0_PHYS_BASE),
                                     HOST_LCP_ATU_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");
@@ -681,7 +699,8 @@ static int boot_platform_post_load_lcp(void)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSE_ATU_IMG_CODE_LOAD_ID,
                                         HOST_LCP_IMG_CODE_BASE_S,
-                                        HOST_LCP_N_PHYS_BASE(lcp_idx),
+                                        (host_system_info->chip_ap_phys_base +
+                                            HOST_LCP_N_PHYS_BASE(lcp_idx)),
                                         HOST_LCP_ATU_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");
@@ -907,6 +926,12 @@ bool boot_platform_should_load_image(uint32_t image_id)
         return false;
     }
 #endif /* RSE_LOAD_NS_IMAGE */
+
+    if ((image_id == RSE_FIRMWARE_AP_BL1_ID) &&
+                (host_system_info->chip_id > 0)) {
+        /* Skip AP-BL1 image loading for remote chips */
+        return false;
+    }
 
     if (image_id >= RSE_FIRMWARE_COUNT) {
         BOOT_LOG_WRN("BL2: Image %d beyond expected Firmware count: %d",
