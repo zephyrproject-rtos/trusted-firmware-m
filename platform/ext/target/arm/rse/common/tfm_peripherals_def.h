@@ -52,6 +52,48 @@ extern struct platform_data_t tfm_peripheral_dma0_ch0;
         ARM_MPU_RLAR_PXN(ROM_BASE_S + ROM_SIZE - 1, \
                          ARM_MPU_PRIVILEGE_EXECUTE_NEVER, \
                          0), \
+    }, \
+    /* Mark ITCM as privileged, read-only, execute-ok */ \
+    { \
+        ARM_MPU_RBAR(ITCM_BASE_NS, \
+                     ARM_MPU_SH_NON, \
+                     ARM_MPU_READ_ONLY, \
+                     ARM_MPU_PRIVILEGED, \
+                     ARM_MPU_EXECUTE_OK), \
+        ARM_MPU_RLAR_PXN(ITCM_BASE_NS + ITCM_SIZE - 1, \
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK, \
+                         0), \
+    }, \
+    { \
+        ARM_MPU_RBAR(ITCM_BASE_S, \
+                     ARM_MPU_SH_NON, \
+                     ARM_MPU_READ_ONLY, \
+                     ARM_MPU_PRIVILEGED, \
+                     ARM_MPU_EXECUTE_OK), \
+        ARM_MPU_RLAR_PXN(ITCM_BASE_S + ITCM_SIZE - 1, \
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK, \
+                         0), \
+    }, \
+    /* Mark DTCM as privileged, read-write, execute-never */ \
+    { \
+        ARM_MPU_RBAR(DTCM_BASE_NS, \
+                     ARM_MPU_SH_NON, \
+                     ARM_MPU_READ_WRITE, \
+                     ARM_MPU_PRIVILEGED, \
+                     ARM_MPU_EXECUTE_NEVER), \
+        ARM_MPU_RLAR_PXN(DTCM_BASE_NS + DTCM_SIZE - 1, \
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER, \
+                         0), \
+    }, \
+    { \
+        ARM_MPU_RBAR(DTCM_BASE_S, \
+                     ARM_MPU_SH_NON, \
+                     ARM_MPU_READ_WRITE, \
+                     ARM_MPU_PRIVILEGED, \
+                     ARM_MPU_EXECUTE_NEVER), \
+        ARM_MPU_RLAR_PXN(DTCM_BASE_S + DTCM_SIZE - 1, \
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER, \
+                         0), \
     },
 
 #ifdef __cplusplus
