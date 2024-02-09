@@ -32,7 +32,7 @@ extern "C" {
  * \param[out] type      \ref psa_key_type_t value associated to the retrieved key material
  *
  * \return Returns an error value as specified by the \ref tfm_plat_err_t type.
- * 
+ *
  */
 typedef enum tfm_plat_err_t (*key_loader_func_ptr)
     (uint8_t *buf, size_t buf_len, size_t *key_len, psa_key_bits_t *key_bits, psa_algorithm_t *algorithm, psa_key_type_t *type);

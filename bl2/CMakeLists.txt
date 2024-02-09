@@ -15,6 +15,7 @@ add_executable(bl2
     $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:src/default_flash_map.c>
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
     $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:src/provisioning.c>
+    $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:src/thin_psa_crypto_core.c>
     $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
@@ -90,6 +91,7 @@ target_compile_definitions(bl2_mbedcrypto_config
         $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:MCUBOOT_USE_PSA_CRYPTO>
         $<$<STREQUAL:${SIG_TYPE},EC>:MCUBOOT_SIGN_EC${SIG_LEN}>
         MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH}"
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
         $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
@@ -108,10 +110,9 @@ set(GEN_FILES OFF)
 # Set the prefix to be used by mbedTLS targets
 set(MBEDTLS_TARGET_PREFIX bl2_)
 
-# Mbedcrypto is quite a large lib, and it uses too much memory for it to be
-# reasonable to build it in debug info. As a compromise, if `debug` build type
-# is selected mbedcrypto will build under `relwithdebinfo` which preserved debug
-# symbols whild optimizing space.
+# Mbedcrypto in Debug builds uses too much memory. As a compromise, if `Debug` build type
+# is selected mbedcrypto will build under `RelWithDebInfo` which preserves debug
+# symbols while optimizing space.
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto EXCLUDE_FROM_ALL)
@@ -127,22 +128,22 @@ target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
         bl2_mbedcrypto_config
 )
 
+target_link_libraries(${MBEDTLS_TARGET_PREFIX}p256m
+    PUBLIC
+        ${MBEDTLS_TARGET_PREFIX}mbedcrypto
+)
+
 target_include_directories(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PUBLIC
         ${MBEDCRYPTO_PATH}/library
 )
 
-target_compile_options(bl2_mbedcrypto
+target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         ${BL2_COMPILER_CP_FLAG}
 )
 
-target_compile_options(bl2_mbedtls
-    PRIVATE
-        ${BL2_COMPILER_CP_FLAG}
-)
-
-target_compile_options(bl2_mbedx509
+target_compile_options(${MBEDTLS_TARGET_PREFIX}p256m
     PRIVATE
         ${BL2_COMPILER_CP_FLAG}
 )
@@ -154,7 +155,7 @@ if (TFM_CODE_SHARING)
 
     if (NOT EXISTS ${MBEDCRYPTO_PATH}/library/code_share.c)
         message(FATAL_ERROR "File ${MBEDCRYPTO_PATH}/library/code_share.c does not exist.
-        Have the patch ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/0005-Enable-crypto-code-sharing-between-independent-binar.patch
+        Have the patch ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/0002-Enable-crypto-code-sharing-between-independent-binar.patch
         been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH}?
         Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
     endif()

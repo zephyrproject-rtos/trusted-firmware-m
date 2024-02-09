@@ -43,7 +43,6 @@
  * Don't define MBEDTLS_PSA_CRYPTO_STORAGE_C to make sure that support
  * for permanent keys is not enabled, as it is not available during boot
  */
-#define MBEDTLS_PSA_CRYPTO_C
 #define MBEDTLS_PK_PARSE_C
 #define MBEDTLS_PK_WRITE_C
 #define MBEDTLS_PK_C
@@ -51,6 +50,10 @@
 #define MBEDTLS_CIPHER_C
 #define MBEDTLS_ENTROPY_C
 #define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
+#define MBEDTLS_PSA_CRYPTO_CONFIG
+#if defined(MCUBOOT_SIGN_EC256)
+#define MBEDTLS_PSA_P256M_DRIVER_ENABLED
+#endif
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 #if defined(MCUBOOT_SIGN_RSA)
