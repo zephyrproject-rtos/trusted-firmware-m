@@ -17,7 +17,7 @@
 #include "Driver_PPC.h"
 
 #include "Driver_Common.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 #include "ppc_rse_drv.h"

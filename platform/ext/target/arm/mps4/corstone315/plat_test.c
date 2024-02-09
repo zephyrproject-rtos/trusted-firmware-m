@@ -5,7 +5,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "systimer_armv8-m_drv.h"
 #include "tfm_plat_test.h"
 #include "platform_s_device_definition.h"

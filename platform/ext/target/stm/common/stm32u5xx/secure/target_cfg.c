@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited
+ * Copyright (c) 2018-2024, Arm Limited
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "target_cfg.h"
 #ifdef FLOW_CONTROL
 #include "target_flowcontrol.h"

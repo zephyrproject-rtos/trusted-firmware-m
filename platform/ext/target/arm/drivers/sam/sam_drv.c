@@ -16,7 +16,7 @@
 
 #include "sam_drv.h"
 #include "sam_reg_map.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
 

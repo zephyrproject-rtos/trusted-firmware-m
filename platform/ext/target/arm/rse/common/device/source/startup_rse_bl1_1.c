@@ -21,7 +21,7 @@
  * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #include "device_definition.h"
 #include "region_defs.h"

@@ -8,7 +8,7 @@
   * @attention
   *
   * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * <h2><center>&copy; Copyright (c) 2022 Arm Limited.
+  * <h2><center>&copy; Copyright (c) 2022-2024, Arm Limited.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -26,7 +26,7 @@
 #include "low_level_rng.h"
 #include "tfm_low_level_security.h"
 #include "target_cfg.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Flash.h"
 #include "region_defs.h"
 #ifdef CRYPTO_HW_ACCELERATOR

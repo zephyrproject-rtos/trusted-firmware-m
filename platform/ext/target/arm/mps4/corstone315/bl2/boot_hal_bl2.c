@@ -5,7 +5,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 int32_t boot_platform_post_init(void)
 {

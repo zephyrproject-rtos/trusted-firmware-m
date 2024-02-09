@@ -5,7 +5,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "dma350_checker_layer.h"
 #include "platform_svc_numbers.h"
 #include "tfm_hal_platform.h"

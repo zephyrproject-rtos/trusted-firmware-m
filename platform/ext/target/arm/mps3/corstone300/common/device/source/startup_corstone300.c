@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,7 +21,7 @@
  * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /*----------------------------------------------------------------------------
   External References

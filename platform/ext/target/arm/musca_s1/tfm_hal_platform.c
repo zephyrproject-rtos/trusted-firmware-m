@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "cache_drv.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_driver_config.h"
 #include "musca_s1_scc_drv.h"
 #include "target_cfg.h"

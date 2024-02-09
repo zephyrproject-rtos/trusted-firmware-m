@@ -5,7 +5,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "common_target_cfg.h"
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"

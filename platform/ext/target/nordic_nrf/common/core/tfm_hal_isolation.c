@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -9,7 +9,7 @@
  */
 
 #include <arm_cmse.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "spu.h"

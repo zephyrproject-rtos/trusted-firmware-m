@@ -21,7 +21,7 @@
 
 #include "tram_drv.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #ifdef TRAM_CONFIG_EXTERNAL_DPA_HARDENED_WORD_COPY
 #include "dpa_hardened_word_copy.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cy_pra.h"
 #include "region_defs.h"
 #include "target_cfg.h"

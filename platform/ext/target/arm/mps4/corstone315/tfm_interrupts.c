@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_peripherals_def.h"

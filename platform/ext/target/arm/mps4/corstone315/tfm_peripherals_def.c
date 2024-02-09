@@ -7,7 +7,7 @@
 
 #include "tfm_peripherals_def.h"
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /* Allowed named MMIO of this platform */
 const uintptr_t partition_named_mmio_list[] = {

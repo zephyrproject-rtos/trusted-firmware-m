@@ -21,7 +21,7 @@
 
 #include "lcm_drv.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "device_definition.h"
 
 #include <stddef.h>

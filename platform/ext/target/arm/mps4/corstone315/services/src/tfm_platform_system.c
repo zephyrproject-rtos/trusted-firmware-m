@@ -7,7 +7,7 @@
 
 #include "tfm_platform_system.h"
 #include "common_target_cfg.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_hal_platform.h"
 
 void tfm_platform_hal_system_reset(void)

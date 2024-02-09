@@ -33,7 +33,7 @@
 #include "rse_key_derivation.h"
 #include "rse_kmu_slot_ids.h"
 #include "mpu_armv8m_drv.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "dpa_hardened_word_copy.h"
 #if RSE_AMOUNT > 1
 #include "rse_handshake.h"

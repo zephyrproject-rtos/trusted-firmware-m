@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __HOST_CMSIS_DRIVER_CONFIG_H__
 #define __HOST_CMSIS_DRIVER_CONFIG_H__
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "device_definition.h"
 #include "RTE_Device.h"
 

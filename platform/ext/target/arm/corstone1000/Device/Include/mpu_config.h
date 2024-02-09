@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #ifndef __MPU_CONFIG_H__
 #define __MPU_CONFIG_H__
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "region.h"
 
 #ifdef __cplusplus

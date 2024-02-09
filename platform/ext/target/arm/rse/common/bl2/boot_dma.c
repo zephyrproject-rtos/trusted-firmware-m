@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "bootutil/bootutil_log.h"
 #include "boot_dma.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_plat_defs.h"
 #include "dma350_lib.h"
 #include "device_definition.h"

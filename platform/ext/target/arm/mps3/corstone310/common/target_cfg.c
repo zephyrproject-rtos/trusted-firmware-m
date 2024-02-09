@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "utilities.h"
 #include "common_target_cfg.h"
 #include "Driver_PPC.h"

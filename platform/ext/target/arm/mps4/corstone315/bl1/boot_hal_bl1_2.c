@@ -21,7 +21,7 @@
 #include "cmsis_compiler.h"
 #include "tfm_plat_nv_counters.h"
 #include "mpu_armv8m_drv.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Common.h"
 #include "mmio_defs.h"
 #include "mpu_armv8m_drv.h"

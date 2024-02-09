@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #ifndef __NI_TOWER_DISCOVERY_REG_H__
 #define __NI_TOWER_DISCOVERY_REG_H__
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #include <stdint.h>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -14,7 +14,7 @@
 #include "mhu_v2_x.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_log.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #define MHU1_SEH_NOTIFY_CH 0
 #define MHU1_SEH_NOTIFY_VAL 1234

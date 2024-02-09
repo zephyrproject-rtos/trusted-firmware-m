@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cy_ipc_drv.h"
 #include "spe_ipc_config.h"
 #include "spm.h"

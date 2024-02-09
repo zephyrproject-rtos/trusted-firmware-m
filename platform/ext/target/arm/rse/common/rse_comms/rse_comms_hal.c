@@ -10,7 +10,7 @@
 #include "rse_comms.h"
 #include "rse_comms_queue.h"
 #include "mhu.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "device_definition.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_spm_log.h"

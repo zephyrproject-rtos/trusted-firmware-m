@@ -8,7 +8,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "device_definition.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"

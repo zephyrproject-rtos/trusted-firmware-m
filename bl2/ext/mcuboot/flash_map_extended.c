@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018 Nordic Semiconductor ASA
  * Copyright (c) 2015 Runtime Inc
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2024, Arm Limited.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -14,7 +14,7 @@
 
 #include <errno.h>
 #include "target.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Flash.h"
 #include "sysflash/sysflash.h"
 #include "flash_map/flash_map.h"

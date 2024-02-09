@@ -8,7 +8,7 @@
 #ifndef __RSE_EXPANSION_REGS_H__
 #define __RSE_EXPANSION_REGS_H__
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #include <stdint.h>
 

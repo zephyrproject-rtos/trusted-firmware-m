@@ -20,7 +20,7 @@
 #include "RTE_Device.h"
 #include "flash_device_definition.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "armv8m_mpu.h"
 #include "assert.h"
 

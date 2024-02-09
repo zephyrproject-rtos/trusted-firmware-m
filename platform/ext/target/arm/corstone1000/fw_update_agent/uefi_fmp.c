@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include <stdbool.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "uefi_fmp.h"
 
 /* The count will increase when partial update is supported.

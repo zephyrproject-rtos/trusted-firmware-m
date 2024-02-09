@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 #include <stdint.h>
 #include <stdbool.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_ns_ctx.h"
 #include "tfm_nspm.h"
 

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "common_target_cfg.h"
 #include "utilities.h"
 /* "exception_info.h" must be the last include because of the IAR pragma */

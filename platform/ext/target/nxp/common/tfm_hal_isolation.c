@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright 2020-2022 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -10,7 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Common.h"
 #include "mmio_defs.h"
 #include "mpu_armv8m_drv.h"

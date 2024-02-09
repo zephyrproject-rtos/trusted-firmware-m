@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "utilities.h"
 #include "common_target_cfg.h"
 #include "Driver_PPC.h"

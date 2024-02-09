@@ -14,7 +14,7 @@
 #define __SAM_REG_MAP_H__
 
 #include <stdint.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #ifdef __cplusplus
 extern "C" {

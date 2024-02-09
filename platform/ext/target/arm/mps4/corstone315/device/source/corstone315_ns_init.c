@@ -5,7 +5,7 @@
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "Driver_USART.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited
+ * Copyright (c) 2019-2024, Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "Driver_SSE300_PPC.h"
 
 #include "Driver_Common.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 #include "ppc_sse300_drv.h"

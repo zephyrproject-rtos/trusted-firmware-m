@@ -21,7 +21,7 @@
 
 #include "integrity_checker_drv.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #include <stdbool.h>
 

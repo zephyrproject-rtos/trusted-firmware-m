@@ -1,12 +1,12 @@
 /*
  *
- * Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "xilinx_pg153_axi_qspi_controller_drv.h"
 
 __STATIC_INLINE void WRITE_REGISTER(uint32_t reg,

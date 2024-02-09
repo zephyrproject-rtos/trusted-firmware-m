@@ -180,6 +180,7 @@ target_include_directories(flash_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         ${PLATFORM_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/common
+        ${PLATFORM_DIR}/include
         Native_Driver
         CMSIS_Driver/Config
         Device/Config

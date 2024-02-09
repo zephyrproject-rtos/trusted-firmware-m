@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Nordic Semiconductor ASA. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -7,7 +7,7 @@
  */
 
 #include <stdio.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "spu.h"
 #include "utilities.h"
 #include "nrf_exception_info.h"

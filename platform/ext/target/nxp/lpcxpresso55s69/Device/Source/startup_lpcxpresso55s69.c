@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -29,7 +29,7 @@
 #include "cmsis_override.h"
 #endif
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /*----------------------------------------------------------------------------
   External References

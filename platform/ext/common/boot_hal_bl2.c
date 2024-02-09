@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <string.h>
 #include "target_cfg.h"
 #include "region.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"

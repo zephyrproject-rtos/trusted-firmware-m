@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /* -------------------------------------- Includes ----------------------------------- */
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
 
 #include "cy_device.h"
