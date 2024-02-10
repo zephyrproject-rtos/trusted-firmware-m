@@ -196,7 +196,6 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 #endif
 
     SPM_ASSERT(params != NULL);
-    SPM_ASSERT(psa_ret != NULL);
 
     switch (msg_ptr->call_type) {
     case MAILBOX_PSA_FRAMEWORK_VERSION:
