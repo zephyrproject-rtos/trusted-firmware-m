@@ -67,6 +67,7 @@ extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSM_PMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg SYSCTRL_APP_ASNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg SYSCTRL_APP_AMNI_APU_DEV_CFG;
 #endif
 
 #ifdef HOST_SCP

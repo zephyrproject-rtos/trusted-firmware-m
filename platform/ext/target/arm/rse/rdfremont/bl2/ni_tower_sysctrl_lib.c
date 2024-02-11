@@ -41,9 +41,9 @@
  *                                           |     |---| APU |---> rsm_apbm
  *                             +-----+       |     |   +-----+
  *                             |     |       |     |
- *                             |     |------>|     |
- *                             |     |       |     |-------------> app_axim
- *                             |     |       |     |
+ *                             |     |------>|     |   +-----+
+ *                             |     |       |     |---| APU |---> app_axim
+ *                             |     |       |     |   +-----+
  *                  +-----+    |     |       +-----+
  *      mcp_axis ---| APU |--->|     |
  *                  +-----+    |     |
@@ -607,6 +607,62 @@ static const struct ni_tower_apu_reg_cfg_info app_axis_apu[] = {
 };
 
 /*
+ * Completer side APP AXIM APU to check access permission targeting the IO
+ * block and the memory controller + MPE registers space
+ */
+static const struct ni_tower_apu_reg_cfg_info app_axim_apu[] = {
+    /*
+     * Full permission for the entire AP address expect for the following
+     * regions:
+     * 1. Root & Secure read-write permission for IO integration control
+     *    registers.
+     * 2. Deny full access to MCP for Memory Controller, MPE register
+     *    space, LCP peripherals and Cluster Utility region.
+     */
+    INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
+                    HOST_CMN_GPV_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_BLOCK_PHYS_BASE,
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(0),
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(0),
+                    HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(0),
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(0),
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(1),
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(1),
+                    HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(1),
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(1),
+                    HOST_IO_PCIE_CTRL_EXP_PHYS_LIMIT(1),
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_NCI_GPV_PHYS_BASE(2),
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(2),
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_NCI_GPV_PHYS_BASE(3),
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(3),
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_SYSCTRL_SMMU_PHYS_BASE,
+                    HOST_AP_MEM_EXP_3_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Allow only for RSE, SCP and AP */
+    INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_MPE_PHYS_BASE,
+                                       HOST_MPE_PHYS_LIMIT,
+                                       /* mcp_perm */ 0,
+                                       /* scp_perm */ NI_T_ALL_PERM,
+                                       /* rse_perm */ NI_T_ALL_PERM,
+                                       /* dap_perm */ 0),
+    /* Allow only for RSE, SCP and AP */
+    INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_CLUST_UTIL_PHYS_BASE,
+                                       HOST_CLUST_UTIL_PHYS_LIMIT,
+                                       /* mcp_perm */ 0,
+                                       /* scp_perm */ NI_T_ALL_PERM,
+                                       /* rse_perm */ NI_T_ALL_PERM,
+                                       /* dap_perm */ 0),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -748,6 +804,11 @@ static int32_t program_sysctrl_apu_systop(void)
             .dev_cfg = &SYSCTRL_APP_ASNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(app_axis_apu),
             .regions = app_axis_apu,
+        },
+        {
+            .dev_cfg = &SYSCTRL_APP_AMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(app_axim_apu),
+            .regions = app_axim_apu,
         },
     };
 

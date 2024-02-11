@@ -31,6 +31,26 @@
         .lock = NI_T_LOCK                       \
     }
 
+/*
+ * Platform specific apu region initialization macro wrapper with APU ID
+ * Filtering. This macro returns 'struct ni_tower_apu_reg_cfg_info' definition
+ * by providing the base and end address of APU region and the associated
+ * access permission for all four enitities.
+ */
+#define INIT_APU_REGION_WITH_ALL_ID_FILTER(base, end, mcp_perm, scp_perm, \
+                                           rse_perm, dap_perm)            \
+    {                                                                     \
+        .base_addr = base,                                                \
+        .end_addr = end,                                                  \
+        .background = NI_T_FOREGROUND,                                    \
+        .permissions = { mcp_perm, scp_perm, rse_perm, dap_perm },        \
+        .entity_ids = { SYSCTRL_MCP_APU_ID, SYSCTRL_SCP_APU_ID,           \
+                        SYSCTRL_RSE_APU_ID, SYSCTRL_DAP_APU_ID },         \
+        .id_valid = NI_T_ID_VALID_ALL,                                    \
+        .region_enable = NI_T_REGION_ENABLE,                              \
+        .lock = NI_T_LOCK                                                 \
+    }
+
 /* Interface ID of xSNI components - completer interfaces */
 enum sysctrl_xSNI_ids {
     /* Request from AP */
@@ -73,6 +93,14 @@ enum sysctrl_xMNI_ids {
     SYSCTRL_TCU_PMNI_ID,
     /* Targets the System Control NI-Tower registers (default target) */
     SYSCTRL_CONFIG_SPACE_ID = 0xF
+};
+
+/* APU IDs of the initiator for filter access */
+enum sysctrl_apu_filter_ids {
+    SYSCTRL_MCP_APU_ID = 0x3C,
+    SYSCTRL_SCP_APU_ID = 0x3D,
+    SYSCTRL_RSE_APU_ID = 0x3E,
+    SYSCTRL_DAP_APU_ID = 0x3F,
 };
 
 /**

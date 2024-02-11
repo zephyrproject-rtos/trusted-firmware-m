@@ -23,6 +23,8 @@
 #ifndef __HOST_CSS_MEMORY_MAP_H__
 #define __HOST_CSS_MEMORY_MAP_H__
 
+#include "host_css_io_block_memory_map.h"
+
 /* AP Shared (ARSM) SRAM base address */
 #define HOST_AP_SHARED_SRAM_PHYS_BASE               0x000000000ULL
 /* AP Shared (ARSM) SRAM end address */
@@ -293,9 +295,9 @@
 #define HOST_CLUST_UTIL_PHYS_LIMIT                  0x23FFFFFFFULL
 
 /* Base address for IO Block memory region */
-#define HOST_IO_BLOCK_PHYS_BASE                     0x280000000ULL
+#define HOST_IO_BLOCK_PHYS_BASE             HOST_IO_TCU_PHYS_BASE(0)
 /* End address for IO Block memory region */
-#define HOST_IO_BLOCK_PHYS_LIMIT                    0x30FFFFFFFULL
+#define HOST_IO_BLOCK_PHYS_LIMIT            HOST_IO_PCIE_CTRL_EXP_PHYS_LIMIT(11)
 
 /* SYSCTRL SMMU base address */
 #define HOST_SYSCTRL_SMMU_PHYS_BASE                 0x300000000ULL
