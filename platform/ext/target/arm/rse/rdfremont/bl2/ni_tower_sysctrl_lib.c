@@ -70,9 +70,9 @@
  *
  *                             +-----+
  *                             |     |
- *                             |     |
- *      lcp_axis ------------->|     |---------------------------> lcp_scp_axim
- *                             |     |
+ *                  +-----+    |     |
+ *      lcp_axis ---| APU |--->|     |---------------------------> lcp_scp_axim
+ *                  +-----+    |     |
  *                             |     |
  *                             +-----+
  *
@@ -684,6 +684,13 @@ static const struct ni_tower_apu_reg_cfg_info lcp_axim_apu[] = {
                     NI_T_SEC_RW | NI_T_ROOT_RW),
 };
 
+/* Requester side LCP AXIS APU to check access permission targeting the SCP */
+static const struct ni_tower_apu_reg_cfg_info lcp_axis_apu[] = {
+    INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
+                    HOST_AP_MEM_EXP_3_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
 /*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
@@ -836,6 +843,11 @@ static int32_t program_sysctrl_apu_systop(void)
             .dev_cfg = &SYSCTRL_LCP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(lcp_axim_apu),
             .regions = lcp_axim_apu,
+        },
+        {
+            .dev_cfg = &SYSCTRL_LCP_ASNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(lcp_axis_apu),
+            .regions = lcp_axis_apu,
         },
     };
 
