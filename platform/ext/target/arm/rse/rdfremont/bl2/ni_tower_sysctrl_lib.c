@@ -78,9 +78,9 @@
  *
  *                             +-----+
  *                             |     |
- *                             |     |
- *  rse_scp_axis ------------->|     |--------------------------> lcp_axim
- *                             |     |
+ *                             |     |          +-----+
+ *  rse_scp_axis ------------->|     |----------| APU |---------> lcp_axim
+ *                             |     |          +-----+
  *                             |     |
  *                             +-----+
  *
@@ -663,6 +663,28 @@ static const struct ni_tower_apu_reg_cfg_info app_axim_apu[] = {
 };
 
 /*
+ * Completer side LCP AXIM APU to check access permission targeting the Cluster
+ * Utility space.
+ */
+static const struct ni_tower_apu_reg_cfg_info lcp_axim_apu[] = {
+    INIT_APU_REGION(HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_LIMIT,
+                    NI_T_N_SEC_RW | NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_RAS_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -809,6 +831,11 @@ static int32_t program_sysctrl_apu_systop(void)
             .dev_cfg = &SYSCTRL_APP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(app_axim_apu),
             .regions = app_axim_apu,
+        },
+        {
+            .dev_cfg = &SYSCTRL_LCP_AMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(lcp_axim_apu),
+            .regions = lcp_axim_apu,
         },
     };
 
