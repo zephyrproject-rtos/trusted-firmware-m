@@ -65,7 +65,8 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
         /* Set region fields */
         for (r_idx = 0; r_idx < psam_table[p_idx].nh_region_count; ++r_idx) {
             r_info = &psam_table[p_idx].regions[r_idx];
-            err = ni_tower_psam_configure_nhregion(&psam_dev, r_info, r_idx);
+            err = ni_tower_psam_configure_next_available_nhregion(&psam_dev,
+                    r_info);
             if (err != NI_TOWER_SUCCESS) {
                 return err;
             }
@@ -120,7 +121,8 @@ enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
         /* Set region fields */
         for (r_idx = 0; r_idx < apu_table[a_idx].region_count; ++r_idx) {
             r_info = &apu_table[a_idx].regions[r_idx];
-            err = ni_tower_apu_configure_region(&apu_dev, r_info, r_idx);
+            err = ni_tower_apu_configure_next_available_region(&apu_dev,
+                    r_info);
             if (err != NI_TOWER_SUCCESS) {
                 return err;
             }

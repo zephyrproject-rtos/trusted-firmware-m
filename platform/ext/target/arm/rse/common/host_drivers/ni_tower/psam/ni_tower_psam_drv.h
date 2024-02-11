@@ -57,6 +57,20 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
                             uint32_t region);
 
 /**
+ * \brief Get the next available region number and configure the non-striped
+ *        (non-hashed) region.
+ *
+ * \param[in] dev         NI-Tower PSAM device struct \ref ni_tower_psam_dev.
+ * \param[in] cfg_info    Configuration info of a region to be configured.
+ *                        struct \ref ni_tower_psam_reg_cfg_info.
+ *
+ * \return Returns error code as specified in \ref ni_tower_err
+ */
+enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
+    struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_reg_cfg_info *cfg_info);
+
+/**
  * \brief Enables the PSAM device
  *
  * \param[in] dev         NI-Tower PSAM device struct \ref ni_tower_psam_dev.

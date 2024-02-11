@@ -12,6 +12,8 @@
 
 #include <stdint.h>
 
+#define NI_TOWER_MAX_NH_REGIONS     128
+
 /**
  * \brief NI-Tower PSAM register map
  */
@@ -34,7 +36,7 @@ __PACKED_STRUCT ni_tower_psam_reg_map {
         __IOM uint32_t cfg1;
         __IOM uint32_t cfg2;
         __IOM uint32_t cfg3;
-    } nh_region[128];
+    } nh_region[NI_TOWER_MAX_NH_REGIONS];
     __PACKED_STRUCT {
         __IOM uint32_t cfg0;
         __IOM uint32_t cfg1;

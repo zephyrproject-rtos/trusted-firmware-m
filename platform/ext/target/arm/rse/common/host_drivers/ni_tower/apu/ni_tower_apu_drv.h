@@ -141,6 +141,20 @@ enum ni_tower_err ni_tower_apu_configure_region(
                             uint32_t region);
 
 /**
+ * \brief Get the next available region number and configure NI-Tower APU
+ *        region
+ *
+ * \param[in] dev           NI-Tower APU device struct \ref ni_tower_apu_dev.
+ * \param[in] cfg_info      Configuration info of the region to be configured
+ *                          struct \ref ni_tower_apu_reg_cfg_info.
+ *
+ * \return Returns error code as specified in \ref ni_tower_err
+ */
+enum ni_tower_err ni_tower_apu_configure_next_available_region(
+    struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_reg_cfg_info *cfg_info);
+
+/**
  * \brief Enables NI-Tower APU
  *
  * \param[in] dev           NI-Tower APU device struct \ref ni_tower_apu_dev.

@@ -12,6 +12,8 @@
 
 #include <stdint.h>
 
+#define NI_TOWER_MAX_APU_REGIONS    32
+
 /**
  * \brief NI-Tower APU register map
  */
@@ -24,7 +26,7 @@ __PACKED_STRUCT ni_tower_apu_reg_map {
         __IOM uint32_t prid_low;
         __IOM uint32_t prid_high;
         const uint32_t reserved_2[2];
-    } region[32];
+    } region[NI_TOWER_MAX_APU_REGIONS];
     const uint32_t reserved_3[766];
     __IOM uint32_t apu_ctlr;
     __IM  uint32_t apu_iidr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -83,6 +83,45 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
     reg->nh_region[region].cfg0 |= NI_TOWER_NH_REGION_REGION_VALID;
 
     return NI_TOWER_SUCCESS;
+}
+
+static enum ni_tower_err get_next_available_region(
+    struct ni_tower_psam_dev *dev,
+    uint32_t *region)
+{
+    struct ni_tower_psam_reg_map* reg;
+    uint32_t r_idx;
+
+    if (dev == NULL || dev->base == (uintptr_t)NULL) {
+        return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    reg = (struct ni_tower_psam_reg_map*)dev->base;
+
+    for (r_idx = 0; r_idx < NI_TOWER_MAX_NH_REGIONS; ++r_idx) {
+        if (!(reg->nh_region[r_idx].cfg0 & NI_TOWER_NH_REGION_REGION_VALID)) {
+            *region = r_idx;
+            return NI_TOWER_SUCCESS;
+        }
+    }
+
+    return NI_TOWER_ERR;
+}
+
+enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
+    struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_reg_cfg_info *cfg_info)
+{
+    enum ni_tower_err err;
+    uint32_t next_available_region;
+
+    err = get_next_available_region(dev, &next_available_region);
+    if (err != NI_TOWER_SUCCESS) {
+        return err;
+    }
+
+    return ni_tower_psam_configure_nhregion(dev, cfg_info,
+            next_available_region);
 }
 
 enum ni_tower_err ni_tower_psam_enable(struct ni_tower_psam_dev *dev)
