@@ -60,6 +60,7 @@ extern const struct ni_tower_psam_dev_cfg SYSCTRL_MCP_ASNI_PSAM_DEV_CFG;
 extern const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG;
 
 extern const struct ni_tower_apu_dev_cfg SYSCTRL_MCP_ASNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSM_AMNI_APU_DEV_CFG;
 #endif
 
 #ifdef __cplusplus
