@@ -95,6 +95,11 @@ const struct ni_tower_apu_dev_cfg SYSCTRL_RSM_PMNI_APU_DEV_CFG  = {
     .component_node_id = SYSCTRL_RSM_PMNI_ID,
 };
 
+const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG  = {
+    .component_node_type = NI_TOWER_AMNI,
+    .component_node_id = SYSCTRL_RSE_SCP_AMNI_ID,
+};
+
 /* System Control NI-Tower device */
 const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,
