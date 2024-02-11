@@ -25,9 +25,9 @@
  *                             |     |-----------------| APU |---> rse_scp_axim
  *                             |     |                 +-----+
  *                             |     |
- * rse_main_axis ------------->|     |
- *                             |     |---------------------------> rse_mcp_axim
- *                             |     |
+ * rse_main_axis ------------->|     |                 +-----+
+ *                             |     |-----------------| APU |---> rse_mcp_axim
+ *                             |     |                 +-----+
  *                             |     |
  *                             |     |       +-----+
  *                             |     |------>|     |
@@ -443,6 +443,15 @@ static const struct ni_tower_apu_reg_cfg_info rse_scp_axim_apu[] = {
 };
 
 /*
+ * Completer side RSE-MCP AXIM APU to check access permission targeting the MCP
+ */
+static const struct ni_tower_apu_reg_cfg_info rse_mcp_axim_apu[] = {
+    INIT_APU_REGION(HOST_MCP_PHYS_BASE,
+                    HOST_MCP_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -517,6 +526,11 @@ static int32_t program_sysctrl_apu_aon(void)
             .dev_cfg = &SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rse_scp_axim_apu),
             .regions = rse_scp_axim_apu,
+        },
+        {
+            .dev_cfg = &SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(rse_mcp_axim_apu),
+            .regions = rse_mcp_axim_apu,
         },
     };
 
