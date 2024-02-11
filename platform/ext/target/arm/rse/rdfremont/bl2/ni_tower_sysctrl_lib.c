@@ -39,41 +39,56 @@
  *                                           |     |
  *                                           |     |
  *                                           |     |-------------> rsm_apbm
+ *                             +-----+       |     |
+ *                             |     |       |     |
+ *                             |     |------>|     |
+ *                             |     |       |     |-------------> app_axim
+ *                             |     |       |     |
+ *                             |     |       +-----+
+ *      mcp_axis ------------->|     |
+ *                             |     |
+ *                             |     |       +-----+
+ *                             |     |       |     |
+ *                             |     |------>|     |
+ *                             |     |       |     |
+ *                             +-----+       |     |
+ *                                           |     |
+ *                                           |     |-------------> app_scp_axim
  *                                           |     |
  *                                           |     |
  *                                           |     |
- *                                           |     |-------------> app_axim
+ *                                           |     |
  *                                           |     |
  *                                           +-----+
  *
  *
  * The following matrix shows the connections within System Control NI-Tower.
  *
- * +------------+---------------+----------+
- * |            | rse_main_axis | scp_axis |
- * +============+===============+==========+
- * |rse_scp_axim|       X       |          |
- * +------------+---------------+----------+
- * |rse_mcp_axim|       X       |          |
- * +------------+---------------+----------+
- * |  rsm_axim  |       X       |    X     |
- * +------------+---------------+----------+
- * |  rsm_apbm  |       X       |    X     |
- * +------------+---------------+----------+
- * |  cmn_apbm  |       X       |    X     |
- * +------------+---------------+----------+
- * |  tcu_apbm  |       X       |          |
- * +------------+---------------+----------+
- * |  lcp_axim  |               |          |
- * +------------+---------------+----------+
- * |  app_axim  |       X       |    X     |
- * +------------+---------------+----------+
- * |app_scp_axim|               |          |
- * +------------+---------------+----------+
- * |app_mcp_axim|               |          |
- * +------------+---------------+----------+
- * |lcp_scp_axim|               |          |
- * +------------+---------------+----------+
+ * +------------+---------------+----------+----------+
+ * |            | rse_main_axis | scp_axis | mcp_axis |
+ * +============+===============+==========+==========+
+ * |rse_scp_axim|       X       |          |          |
+ * +------------+---------------+----------+----------+
+ * |rse_mcp_axim|       X       |          |          |
+ * +------------+---------------+----------+----------+
+ * |  rsm_axim  |       X       |    X     |    X     |
+ * +------------+---------------+----------+----------+
+ * |  rsm_apbm  |       X       |    X     |    X     |
+ * +------------+---------------+----------+----------+
+ * |  cmn_apbm  |       X       |    X     |    X     |
+ * +------------+---------------+----------+----------+
+ * |  tcu_apbm  |       X       |          |          |
+ * +------------+---------------+----------+----------+
+ * |  lcp_axim  |               |          |          |
+ * +------------+---------------+----------+----------+
+ * |  app_axim  |       X       |    X     |    X     |
+ * +------------+---------------+----------+----------+
+ * |app_scp_axim|               |          |    X     |
+ * +------------+---------------+----------+----------+
+ * |app_mcp_axim|               |          |          |
+ * +------------+---------------+----------+----------+
+ * |lcp_scp_axim|               |          |          |
+ * +------------+---------------+----------+----------+
  *  NOTE: 'X' means there is a connection.
  */
 
@@ -298,6 +313,55 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_psam[] = {
 };
 
 /*
+ * Request originating from MCP ATU is mapped to targets based on following
+ * address map.
+ */
+static const struct ni_tower_psam_reg_cfg_info mcp_axis_psam[] = {
+    /* Shared SRAM */
+    {
+        HOST_AP_SHARED_SRAM_PHYS_BASE,
+        HOST_AP_SHARED_SRAM_PHYS_LIMIT,
+        SYSCTRL_APP_AMNI_ID
+    },
+    /* Generic refclk registers */
+    {
+        HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
+        HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* AP ECC error record */
+    {
+        HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+        HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+        SYSCTRL_APP_AMNI_ID
+    },
+    /* SCP/MCP RSM ECC error record */
+    {
+        HOST_SCP_S_RSM_RAM_ECC_REC_PHYS_BASE,
+        HOST_MCP_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
+        SYSCTRL_RSM_PMNI_ID
+    },
+    /* AP<->MCP MHUv3 registers + AP<->RSE MHUv3 registers */
+    {
+        HOST_AP_NS_MCP_MHUV3_SEND_BASE,
+        HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_AMNI_ID
+    },
+    /* MCP<->MCP MHU registers */
+    {
+        HOST_MCP_TO_MCP_MHU_PHYS_BASE,
+        HOST_MCP_TO_MCP_MHU_PHYS_LIMIT,
+        SYSCTRL_APP_AMNI_ID
+    },
+    /* Shared RSM SRAM */
+    {
+        HOST_RSM_SRAM_PHYS_BASE,
+        HOST_RSM_SRAM_PHYS_LIMIT,
+        SYSCTRL_RSM_AMNI_ID
+    },
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -317,6 +381,11 @@ static int32_t program_sysctrl_psam_aon(void)
             .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(scp_axis_psam),
             .regions = scp_axis_psam,
+        },
+        {
+            .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = ARRAY_SIZE(mcp_axis_psam),
+            .regions = mcp_axis_psam,
         },
     };
 
