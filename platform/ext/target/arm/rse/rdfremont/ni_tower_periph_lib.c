@@ -67,6 +67,58 @@ static const struct ni_tower_apu_reg_cfg_info secgenwdog_apbm_apu[] = {
                     NI_T_ROOT_RW | NI_T_SEC_RW),
 };
 
+/* Secure SRAM Error record block for the shared ARSM SRAM */
+static const struct ni_tower_apu_reg_cfg_info eccreg_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+    INIT_APU_REGION(HOST_SCP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_SCP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_SCP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_SCP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+    INIT_APU_REGION(HOST_MCP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_MCP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_MCP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_MCP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_MCP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_MCP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_MCP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_MCP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+    INIT_APU_REGION(HOST_RSE_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_RSE_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_RSE_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+};
+
 /*
  * Configure Access Protection Unit (APU) to setup access permission for each
  * memory region based on its target in Peripheral NI-Tower.
@@ -114,6 +166,11 @@ static int32_t program_periph_apu(void)
             .dev_cfg = &PERIPH_SECGENWDOG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(secgenwdog_apbm_apu),
             .regions = secgenwdog_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_ECCREG_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(eccreg_apbm_apu),
+            .regions = eccreg_apbm_apu,
         },
     };
 
