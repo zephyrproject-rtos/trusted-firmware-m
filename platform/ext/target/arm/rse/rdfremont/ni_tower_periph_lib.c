@@ -25,6 +25,27 @@ static const struct ni_tower_apu_reg_cfg_info ram_axim_apu[] = {
                     NI_T_ROOT_RW),
 };
 
+/* AP Non-secure UART */
+static const struct ni_tower_apu_reg_cfg_info nsuart0_apbm_apu[] = {
+    INIT_APU_REGION(HOST_NS_UART_PHYS_BASE,
+                    HOST_NS_UART_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/* AP Secure UART */
+static const struct ni_tower_apu_reg_cfg_info secuart_apbm_apu[] = {
+    INIT_APU_REGION(HOST_S_UART_PHYS_BASE,
+                    HOST_S_UART_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+};
+
+/* AP Non-secure UART for RMM debug */
+static const struct ni_tower_apu_reg_cfg_info nsuart1_apbm_apu[] = {
+    INIT_APU_REGION(HOST_RMM_NS_UART_PHYS_BASE,
+                    HOST_RMM_NS_UART_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+};
+
 /*
  * Configure Access Protection Unit (APU) to setup access permission for each
  * memory region based on its target in Peripheral NI-Tower.
@@ -42,6 +63,21 @@ static int32_t program_periph_apu(void)
             .dev_cfg = &PERIPH_RAM_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(ram_axim_apu),
             .regions = ram_axim_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_NSUART0_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(nsuart0_apbm_apu),
+            .regions = nsuart0_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_SECUART_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(secuart_apbm_apu),
+            .regions = secuart_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_NSUART1_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(nsuart1_apbm_apu),
+            .regions = nsuart1_apbm_apu,
         },
     };
 

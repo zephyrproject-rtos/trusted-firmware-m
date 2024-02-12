@@ -149,6 +149,21 @@ const struct ni_tower_apu_dev_cfg PERIPH_RAM_AMNI_APU_DEV_CFG  = {
     .component_node_id = PERIPH_RAM_AMNI_ID,
 };
 
+const struct ni_tower_apu_dev_cfg PERIPH_NSUART0_PMNI_APU_DEV_CFG  = {
+    .component_node_type = NI_TOWER_PMNI,
+    .component_node_id = PERIPH_NSUART0_PMNI_ID,
+};
+
+const struct ni_tower_apu_dev_cfg PERIPH_SECUART_PMNI_APU_DEV_CFG  = {
+    .component_node_type = NI_TOWER_PMNI,
+    .component_node_id = PERIPH_SECUART_PMNI_ID,
+};
+
+const struct ni_tower_apu_dev_cfg PERIPH_NSUART1_PMNI_APU_DEV_CFG  = {
+    .component_node_type = NI_TOWER_PMNI,
+    .component_node_id = PERIPH_NSUART1_PMNI_ID,
+};
+
 /* Peripheral NI-Tower device */
 const struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,

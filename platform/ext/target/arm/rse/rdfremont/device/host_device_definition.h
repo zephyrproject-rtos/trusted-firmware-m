@@ -77,6 +77,9 @@ extern const struct ni_tower_apu_dev_cfg SYSCTRL_LCP_ASNI_APU_DEV_CFG;
 extern const struct ni_tower_dev PERIPH_NI_TOWER_DEV;
 
 extern const struct ni_tower_apu_dev_cfg PERIPH_RAM_AMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_NSUART0_PMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_SECUART_PMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_NSUART1_PMNI_APU_DEV_CFG;
 #endif
 
 #ifdef HOST_SCP
