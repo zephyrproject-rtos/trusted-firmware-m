@@ -84,6 +84,11 @@ const struct ni_tower_psam_dev_cfg SYSCTRL_APP_ASNI_PSAM_DEV_CFG  = {
     .component_node_id = SYSCTRL_APP_ASNI_ID,
 };
 
+const struct ni_tower_psam_dev_cfg SYSCTRL_LCP_ASNI_PSAM_DEV_CFG  = {
+    .component_node_type = NI_TOWER_ASNI,
+    .component_node_id = SYSCTRL_LCP_ASNI_ID,
+};
+
 /* System Control NI-Tower APU device configurations */
 const struct ni_tower_apu_dev_cfg SYSCTRL_MCP_ASNI_APU_DEV_CFG  = {
     .component_node_type = NI_TOWER_ASNI,
