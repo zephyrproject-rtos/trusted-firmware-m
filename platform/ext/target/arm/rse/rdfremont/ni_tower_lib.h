@@ -132,9 +132,11 @@ enum periph_xMNI_ids {
 /**
  * \brief Programs System Control block NI-Tower PSAM and APU for AON domain
  *
+ * \param[in] chip_id  Current Chip ID
+ *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_sysctrl_ni_tower_aon(void);
+int32_t program_sysctrl_ni_tower_aon(uint32_t chip_id);
 
 /**
  * \brief Programs System Control block NI-Tower PSAM and APU for SYSTOP domain

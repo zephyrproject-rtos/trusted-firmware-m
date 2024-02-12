@@ -11,6 +11,17 @@
 
 #include <stddef.h>
 
+/* Chip ID enumerations */
+enum rse_supported_chip_ids {
+    RSE_CHIP_ID_0 = 0,
+    RSE_CHIP_ID_1,
+    RSE_CHIP_ID_2,
+    RSE_CHIP_ID_3,
+    RSE_MAX_SUPPORTED_CHIPS,
+};
+
+#define MHU_SEND_FRAME_SIZE     (RSE_MAX_SUPPORTED_CHIPS - 1)
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP/MCP and the CMN interconnect. Following block diagram depicts an
@@ -254,6 +265,97 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_1_psam[] = {
 };
 
 /*
+ * Multi-chip environment contains set of MHUs for RSE-RSE cross chip
+ * communications. Request coming from RSE ATU is mapped to targets based on
+ * following address map for RSE chip-to-chip MHU send frame between the
+ * current chip and other 3 chips.
+ */
+static const struct ni_tower_psam_reg_cfg_info
+        rse_main_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
+{
+    [RSE_CHIP_ID_0] = {
+        /* RSE Cross chip 0 to chip 1 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(0,1),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(0,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 0 to chip 2 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(0,2),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(0,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 0 to chip 3 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(0,3),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(0,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_1] =  {
+        /* RSE Cross chip 1 to chip 0 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(1,0),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(1,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 1 to chip 2 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(1,2),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(1,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 1 to chip 3 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(1,3),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(1,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_2] =  {
+        /* RSE Cross chip 2 to chip 0 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(2,0),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(2,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 2 to chip 1 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(2,1),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(2,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 2 to chip 3 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(2,3),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(2,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_3] = {
+        /* RSE Cross chip 3 to chip 0 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(3,0),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(3,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 3 to chip 1 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(3,1),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(3,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* RSE Cross chip 3 to chip 2 MHU send frame */
+        {
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_BASE(3,2),
+            HOST_RSE_N_TO_RSE_N_MHU_PHYS_LIMIT(3,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+};
+
+/*
  * Request originating from SCP ATU is mapped to targets based on following
  * address map.
  */
@@ -349,6 +451,97 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_1_psam[] = {
 };
 
 /*
+ * Multi-chip environment contains set of MHUs for SCP-SCP cross chip
+ * communications. Request coming from SCP ATU is mapped to targets based on
+ * following address map for SCP chip-to-chip MHU send frame between the
+ * current chip and other 3 chips.
+ */
+static const struct ni_tower_psam_reg_cfg_info
+            scp_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
+{
+    [RSE_CHIP_ID_0] = {
+        /* SCP Cross chip 0 to chip 1 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(0,1),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(0,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 0 to chip 2 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(0,2),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(0,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 0 to chip 3 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(0,3),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(0,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_1] =  {
+        /* SCP Cross chip 1 to chip 0 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(1,0),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(1,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 1 to chip 2 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(1,2),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(1,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 1 to chip 3 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(1,3),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(1,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_2] =  {
+        /* SCP Cross chip 2 to chip 0 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(2,0),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(2,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 2 to chip 1 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(2,1),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(2,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 2 to chip 3 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(2,3),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(2,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_3] = {
+        /* SCP Cross chip 3 to chip 0 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(3,0),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(3,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 3 to chip 1 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(3,1),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(3,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* SCP Cross chip 3 to chip 2 MHU send frame */
+        {
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_BASE(3,2),
+            HOST_SCP_N_TO_SCP_N_MHU_PHYS_LIMIT(3,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+};
+
+/*
  * Request originating from MCP ATU is mapped to targets based on following
  * address map.
  */
@@ -394,6 +587,97 @@ static const struct ni_tower_psam_reg_cfg_info mcp_axis_psam[] = {
         HOST_RSM_SRAM_PHYS_BASE,
         HOST_RSM_SRAM_PHYS_LIMIT,
         SYSCTRL_RSM_AMNI_ID
+    },
+};
+
+/*
+ * Multi-chip environment contains set of MHUs for MCP-MCP cross chip
+ * communications. Request coming from MCP ATU is mapped to targets based on
+ * following address map for MCP chip-to-chip MHU send frame between the
+ * current chip and other 3 chips.
+ */
+static const struct ni_tower_psam_reg_cfg_info
+            mcp_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
+{
+    [RSE_CHIP_ID_0] = {
+        /* MCP Cross chip 0 to chip 1 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(0,1),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(0,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 0 to chip 2 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(0,2),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(0,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 0 to chip 3 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(0,3),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(0,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_1] =  {
+        /* MCP Cross chip 1 to chip 0 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(1,0),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(1,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 1 to chip 2 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(1,2),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(1,2),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 1 to chip 3 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(1,3),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(1,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_2] =  {
+        /* MCP Cross chip 2 to chip 0 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(2,0),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(2,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 2 to chip 1 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(2,1),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(2,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 2 to chip 3 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(2,3),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(2,3),
+            SYSCTRL_APP_AMNI_ID
+        },
+    },
+    [RSE_CHIP_ID_3] = {
+        /* MCP Cross chip 3 to chip 0 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(3,0),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(3,0),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 3 to chip 1 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(3,1),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(3,1),
+            SYSCTRL_APP_AMNI_ID
+        },
+        /* MCP Cross chip 3 to chip 2 MHU send frame */
+        {
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_BASE(3,2),
+            HOST_MCP_N_TO_MCP_N_MHU_PHYS_LIMIT(3,2),
+            SYSCTRL_APP_AMNI_ID
+        },
     },
 };
 
@@ -710,7 +994,7 @@ static const struct ni_tower_apu_reg_cfg_info lcp_axis_apu[] = {
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
  */
-static int32_t program_sysctrl_psam_aon(void)
+static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
 {
     enum ni_tower_err err;
 
@@ -729,6 +1013,11 @@ static int32_t program_sysctrl_psam_aon(void)
             .add_chip_addr_offset = false,
         },
         {
+            .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = MHU_SEND_FRAME_SIZE,
+            .regions = rse_main_axis_psam_mhu_send_frame[chip_id],
+        },
+        {
             .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(scp_axis_0_psam),
             .regions = scp_axis_0_psam,
@@ -741,10 +1030,20 @@ static int32_t program_sysctrl_psam_aon(void)
             .add_chip_addr_offset = false,
         },
         {
+            .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = MHU_SEND_FRAME_SIZE,
+            .regions = scp_axis_psam_mhu_send_frame[chip_id],
+        },
+        {
             .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(mcp_axis_psam),
             .regions = mcp_axis_psam,
             .add_chip_addr_offset = true,
+        },
+        {
+            .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = MHU_SEND_FRAME_SIZE,
+            .regions = mcp_axis_psam_mhu_send_frame[chip_id],
         },
         {
             .dev_cfg = &SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG,
@@ -901,9 +1200,13 @@ static int32_t program_sysctrl_apu_systop(void)
     return 0;
 }
 
-int32_t program_sysctrl_ni_tower_aon(void)
+int32_t program_sysctrl_ni_tower_aon(uint32_t chip_id)
 {
-    if (program_sysctrl_psam_aon() != 0) {
+    if (chip_id >= RSE_MAX_SUPPORTED_CHIPS) {
+        return -1;
+    }
+
+    if (program_sysctrl_psam_aon(chip_id) != 0) {
         return -1;
     }
 

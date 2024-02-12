@@ -82,7 +82,7 @@ static int ni_tower_sysctrl_aon_init(void)
 
     SYSCTRL_NI_TOWER_DEV.chip_addr_offset =
             host_system_data.info.chip_ap_phys_base;
-    err = program_sysctrl_ni_tower_aon();
+    err = program_sysctrl_ni_tower_aon(host_system_data.info.chip_id);
     if (err != 0) {
         return err;
     }
