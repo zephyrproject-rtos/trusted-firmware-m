@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -37,11 +37,12 @@ Header:
   - Reserved: 0
   - STREAMINTCFG: 0
   - Reserved: 0
-  - LINKATTR: 0
+  - LINKATTR: 1
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000000
 GPOEN0: 0x0000001F
 GPOVAL0: 0x00000001
+LINKATTR: 0x00000044
 LINKADDR: "program1_cmd1_exec_addr"

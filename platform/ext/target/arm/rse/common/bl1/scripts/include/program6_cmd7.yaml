@@ -20,7 +20,7 @@ Header:
   - XSIZE: 1
   - XSIZEHI: 0
   - SRCTRANSCFG: 0
-  - DESTRANSCFG: 0
+  - DESTRANSCFG: 1
   - XADDRINC: 0
   - YADDRSTRIDE: 0
   - FILLVAL: 1
@@ -44,6 +44,7 @@ Header:
 CTRL: 0x10000602
 DESADDR: 'rse_system_control_registers_base_address + 0x25C'
 XSIZE: 0x00010000
-FILLVAL: 0x02AAAAAA
+DESTRANSCFG: 0x00000000
+FILLVAL: 0xAAAAAAAA
 GPOVAL0: 0x0000001F
 LINKADDR: "program6_cmd8_exec_addr"

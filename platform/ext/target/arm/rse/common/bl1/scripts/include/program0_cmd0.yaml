@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# This command sets the address of program1_cmd0 into the DMA350 Channel1
-# LINKADDR register.
+# This command sets DMA boot enable to 0.
 
 Header:
   - REGCLEAR: 0
@@ -37,15 +36,16 @@ Header:
   - Reserved: 0
   - STREAMINTCFG: 0
   - Reserved: 0
-  - LINKATTR: 0
+  - LINKATTR: 1
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'dma350_base_address + 0x1178'
+DESADDR: 'rse_system_control_registers_base_address + 0x254'
 XSIZE: 0x00010000
 DESTRANSCFG: 0x00000000
-FILLVAL: "program1_cmd0_exec_addr"
+FILLVAL: 0x00000000
 GPOEN0: 0x0000001F
 GPOVAL0: 0x00000001
+LINKATTR: 0x00000044
 LINKADDR: "program0_cmd1_exec_addr"

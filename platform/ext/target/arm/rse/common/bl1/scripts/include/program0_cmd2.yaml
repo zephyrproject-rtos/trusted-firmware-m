@@ -5,7 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command writes the TRAM enable register.
+# This command writes 0x1 into the DMA350 Channel1 CH_CMD register, this causes
+# it to start running.
 
 Header:
   - REGCLEAR: 0
@@ -19,7 +20,7 @@ Header:
   - XSIZE: 1
   - XSIZEHI: 0
   - SRCTRANSCFG: 0
-  - DESTRANSCFG: 1
+  - DESTRANSCFG: 0
   - XADDRINC: 0
   - YADDRSTRIDE: 0
   - FILLVAL: 1
@@ -41,9 +42,8 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'tram_base_address + 0x4'
+DESADDR: 'dma350_base_address + 0x1100'
 XSIZE: 0x00010000
-DESTRANSCFG: 0x00000000
 FILLVAL: 0x00000001
-GPOVAL0: 0x0000001E
-LINKADDR: "program6_cmd5_exec_addr"
+GPOVAL0: 0x00000001
+LINKADDR: "program2_cmd0_exec_addr"
