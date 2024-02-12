@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -106,6 +106,16 @@ struct ni_tower_apu_reg_cfg_info {
     enum ni_tower_apu_region_enable_type region_enable;
     /* Whether the region should be locked or not */
     enum ni_tower_apu_lock_type lock;
+};
+
+/**
+ * \brief NI-Tower APU device configuration structure
+ */
+struct ni_tower_apu_dev_cfg {
+    /* Component node type of APU's parent component */
+    const enum ni_tower_node_type_value component_node_type;
+    /* Component node id of APU's parent component */
+    const uint32_t component_node_id;
 };
 
 /**

@@ -19,10 +19,8 @@
  * \brief NI-Tower PSAM config structure
  */
 struct ni_tower_psam_cfgs {
-    /* Component node type of PSAM's parent component */
-    enum ni_tower_node_type_value component_node_type;
-    /* Component node id of PSAM's parent component */
-    uint32_t component_node_id;
+    /* Pointer to the PSAM device configuration */
+    struct ni_tower_psam_dev_cfg* dev_cfg;
     /* Number of non-hashed regions that needs to be configured */
     uint32_t nh_region_count;
     /* List of all region configuration information */
@@ -33,10 +31,8 @@ struct ni_tower_psam_cfgs {
  * \brief NI-Tower APU config structure
  */
 struct ni_tower_apu_cfgs {
-    /* Component node type of APU's parent component */
-    enum ni_tower_node_type_value component_node_type;
-    /* Component node id of APU's parent component */
-    uint32_t component_node_id;
+    /* Pointer to the APU device configuration */
+    struct ni_tower_apu_dev_cfg* dev_cfg;
     /* Number of address regions that needs to be configured */
     uint32_t region_count;
     /* List of all region configuration information */

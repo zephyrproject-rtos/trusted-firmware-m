@@ -32,6 +32,7 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
 {
     enum ni_tower_err err;
     struct ni_tower_psam_dev psam_dev;
+    struct ni_tower_psam_dev_cfg* psam_dev_cfg;
     struct ni_tower_psam_reg_cfg_info* r_info;
     uint32_t p_idx, r_idx, off_addr;
 
@@ -44,11 +45,15 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
     }
 
     for (p_idx = 0; p_idx < psam_table_count; ++p_idx) {
+        psam_dev_cfg = psam_table[p_idx].dev_cfg;
+        if (psam_dev_cfg == NULL) {
+            return NI_TOWER_ERR_INVALID_ARG;
+        }
+
         /* Discover offset address for the PSAM */
-        err = ni_tower_fetch_offset_address(
-                                    dev, psam_table[p_idx].component_node_type,
-                                    psam_table[p_idx].component_node_id,
-                                    NI_TOWER_PSAM, &off_addr);
+        err = ni_tower_fetch_offset_address(dev,
+                  psam_dev_cfg->component_node_type,
+                  psam_dev_cfg->component_node_id, NI_TOWER_PSAM, &off_addr);
         if (err != NI_TOWER_SUCCESS) {
             return err;
         }
@@ -82,6 +87,7 @@ enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
 {
     enum ni_tower_err err;
     struct ni_tower_apu_dev apu_dev;
+    struct ni_tower_apu_dev_cfg* apu_dev_cfg;
     struct ni_tower_apu_reg_cfg_info* r_info;
     uint32_t a_idx, r_idx, off_addr;
 
@@ -94,11 +100,15 @@ enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
     }
 
     for (a_idx = 0; a_idx < apu_table_count; ++a_idx) {
-        /* Discover offset address for the PSAM*/
-        err = ni_tower_fetch_offset_address(
-                                    dev, apu_table[a_idx].component_node_type,
-                                    apu_table[a_idx].component_node_id,
-                                    NI_TOWER_APU, &off_addr);
+        apu_dev_cfg = apu_table[a_idx].dev_cfg;
+        if (apu_dev_cfg == NULL) {
+            return NI_TOWER_ERR_INVALID_ARG;
+        }
+
+        /* Discover offset address for the APU */
+        err = ni_tower_fetch_offset_address(dev,
+                  apu_dev_cfg->component_node_type,
+                  apu_dev_cfg->component_node_id, NI_TOWER_APU, &off_addr);
         if (err != NI_TOWER_SUCCESS) {
             return err;
         }

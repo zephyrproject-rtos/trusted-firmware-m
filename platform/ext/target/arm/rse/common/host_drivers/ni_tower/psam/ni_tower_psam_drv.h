@@ -25,6 +25,16 @@ struct ni_tower_psam_reg_cfg_info {
 };
 
 /**
+ * \brief NI-Tower PSAM device configuration structure
+ */
+struct ni_tower_psam_dev_cfg {
+    /* Component node type of PSAM's parent component */
+    const enum ni_tower_node_type_value component_node_type;
+    /* Component node id of PSAM's parent component */
+    const uint32_t component_node_id;
+};
+
+/**
  * \brief NI-Tower PSAM device structure
  */
 struct ni_tower_psam_dev {
