@@ -52,7 +52,7 @@ extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
 
 #ifdef RD_SYSCTRL_NI_TOWER
 #include "ni_tower_lib.h"
-extern const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
+extern struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
 
 extern const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG;
 extern const struct ni_tower_psam_dev_cfg SYSCTRL_SCP_ASNI_PSAM_DEV_CFG;
@@ -74,7 +74,7 @@ extern const struct ni_tower_apu_dev_cfg SYSCTRL_LCP_ASNI_APU_DEV_CFG;
 
 #ifdef RD_PERIPH_NI_TOWER
 #include "ni_tower_lib.h"
-extern const struct ni_tower_dev PERIPH_NI_TOWER_DEV;
+extern struct ni_tower_dev PERIPH_NI_TOWER_DEV;
 
 extern const struct ni_tower_apu_dev_cfg PERIPH_RAM_AMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg PERIPH_NSUART0_PMNI_APU_DEV_CFG;

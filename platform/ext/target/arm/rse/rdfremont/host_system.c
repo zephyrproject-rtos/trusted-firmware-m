@@ -80,6 +80,8 @@ static int ni_tower_sysctrl_aon_init(void)
         return err;
     }
 
+    SYSCTRL_NI_TOWER_DEV.chip_addr_offset =
+            host_system_data.info.chip_ap_phys_base;
     err = program_sysctrl_ni_tower_aon();
     if (err != 0) {
         return err;
@@ -106,6 +108,8 @@ static int ni_tower_sysctrl_systop_init(void)
         return err;
     }
 
+    SYSCTRL_NI_TOWER_DEV.chip_addr_offset =
+            host_system_data.info.chip_ap_phys_base;
     err = program_sysctrl_ni_tower_systop();
     if (err != 0) {
         return err;
@@ -134,6 +138,8 @@ static int ni_tower_periph_init(void)
         return err;
     }
 
+    PERIPH_NI_TOWER_DEV.chip_addr_offset =
+        host_system_data.info.chip_ap_phys_base;
     err = program_periph_ni_tower();
     if (err != 0) {
         return err;

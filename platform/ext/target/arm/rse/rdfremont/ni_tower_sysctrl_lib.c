@@ -118,7 +118,7 @@
  * Request originating from RSE ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info rse_main_axis_psam[] = {
+static const struct ni_tower_psam_reg_cfg_info rse_main_axis_0_psam[] = {
     /* Shared SRAM + AP Memory Expansion 1 */
     {
         HOST_AP_SHARED_SRAM_PHYS_BASE,
@@ -223,6 +223,13 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_psam[] = {
         HOST_AP_MEM_EXP_2_PHYS_LIMIT,
         SYSCTRL_APP_AMNI_ID
     },
+};
+
+/*
+ * Request coming from RSE ATU is mapped to targets based on following
+ * address map.
+ */
+static const struct ni_tower_psam_reg_cfg_info rse_main_axis_1_psam[] = {
     /*
      * PCIe NCI Memory space 2 + PCIe NCI Memory space 3 + DRAM +
      * AP Memory Expansion 3
@@ -250,7 +257,7 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_psam[] = {
  * Request originating from SCP ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info scp_axis_psam[] = {
+static const struct ni_tower_psam_reg_cfg_info scp_axis_0_psam[] = {
     /* Shared SRAM + AP Memory Expansion 1 */
     {
         HOST_AP_SHARED_SRAM_PHYS_BASE,
@@ -323,6 +330,13 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_psam[] = {
         HOST_AP_MEM_EXP_2_PHYS_LIMIT,
         SYSCTRL_APP_AMNI_ID
     },
+};
+
+/*
+ * Request coming from SCP ATU is mapped to targets based on following
+ * address map.
+ */
+static const struct ni_tower_psam_reg_cfg_info scp_axis_1_psam[] = {
     /*
      * PCIe NCI Memory space 2 + PCIe NCI Memory space 3 + DRAM +
      * AP Memory Expansion 3
@@ -701,26 +715,42 @@ static int32_t program_sysctrl_psam_aon(void)
     enum ni_tower_err err;
 
     /* Populates all address maps into a table array to enable desired PSAMs */
-    struct ni_tower_psam_cfgs psam_table[] = {
+    const struct ni_tower_psam_cfgs psam_table[] = {
         {
             .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
-            .nh_region_count = ARRAY_SIZE(rse_main_axis_psam),
-            .regions = rse_main_axis_psam,
+            .nh_region_count = ARRAY_SIZE(rse_main_axis_0_psam),
+            .regions = rse_main_axis_0_psam,
+            .add_chip_addr_offset = true,
+        },
+        {
+            .dev_cfg = &SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = ARRAY_SIZE(rse_main_axis_1_psam),
+            .regions = rse_main_axis_1_psam,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
-            .nh_region_count = ARRAY_SIZE(scp_axis_psam),
-            .regions = scp_axis_psam,
+            .nh_region_count = ARRAY_SIZE(scp_axis_0_psam),
+            .regions = scp_axis_0_psam,
+            .add_chip_addr_offset = true,
+        },
+        {
+            .dev_cfg = &SYSCTRL_SCP_ASNI_PSAM_DEV_CFG,
+            .nh_region_count = ARRAY_SIZE(scp_axis_1_psam),
+            .regions = scp_axis_1_psam,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_MCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(mcp_axis_psam),
             .regions = mcp_axis_psam,
+            .add_chip_addr_offset = true,
         },
         {
             .dev_cfg = &SYSCTRL_RSE_SCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(rse_scp_axis_psam),
             .regions = rse_scp_axis_psam,
+            .add_chip_addr_offset = false,
         },
     };
 
@@ -746,31 +776,36 @@ static int32_t program_sysctrl_apu_aon(void)
      * Populates all APU entry into a table array to confgiure and enable
      * desired APUs
      */
-    struct ni_tower_apu_cfgs apu_table[] = {
+    const struct ni_tower_apu_cfgs apu_table[] = {
         {
             .dev_cfg = &SYSCTRL_MCP_ASNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(mcp_axis_apu),
             .regions = mcp_axis_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_RSM_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rsm_axim_apu),
             .regions = rsm_axim_apu,
+            .add_chip_addr_offset = true,
         },
         {
             .dev_cfg = &SYSCTRL_RSM_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rsm_apbm_apu),
             .regions = rsm_apbm_apu,
+            .add_chip_addr_offset = true,
         },
         {
             .dev_cfg = &SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rse_scp_axim_apu),
             .regions = rse_scp_axim_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rse_mcp_axim_apu),
             .regions = rse_mcp_axim_apu,
+            .add_chip_addr_offset = false,
         },
     };
 
@@ -793,16 +828,18 @@ static int32_t program_sysctrl_psam_systop(void)
     enum ni_tower_err err;
 
     /* Populates all address maps into a table array to enable desired PSAMs */
-    struct ni_tower_psam_cfgs psam_table[] = {
+    const struct ni_tower_psam_cfgs psam_table[] = {
         {
             .dev_cfg = &SYSCTRL_APP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(app_axis_psam),
             .regions = app_axis_psam,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_LCP_ASNI_PSAM_DEV_CFG,
             .nh_region_count = ARRAY_SIZE(lcp_axis_psam),
             .regions = lcp_axis_psam,
+            .add_chip_addr_offset = false,
         },
     };
 
@@ -828,26 +865,30 @@ static int32_t program_sysctrl_apu_systop(void)
      * Populates all APU entry into a table array to configure and enable
      * desired APUs
      */
-    struct ni_tower_apu_cfgs apu_table[] = {
+    const struct ni_tower_apu_cfgs apu_table[] = {
         {
             .dev_cfg = &SYSCTRL_APP_ASNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(app_axis_apu),
             .regions = app_axis_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_APP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(app_axim_apu),
             .regions = app_axim_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_LCP_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(lcp_axim_apu),
             .regions = lcp_axim_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &SYSCTRL_LCP_ASNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(lcp_axis_apu),
             .regions = lcp_axis_apu,
+            .add_chip_addr_offset = false,
         },
     };
 

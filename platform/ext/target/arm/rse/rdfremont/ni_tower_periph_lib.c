@@ -157,56 +157,67 @@ static int32_t program_periph_apu(void)
             .dev_cfg = &PERIPH_RAM_AMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(ram_axim_apu),
             .regions = ram_axim_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_NSUART0_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(nsuart0_apbm_apu),
             .regions = nsuart0_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_SECUART_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(secuart_apbm_apu),
             .regions = secuart_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_NSUART1_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(nsuart1_apbm_apu),
             .regions = nsuart1_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_NSGENWDOG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(nsgenwdog_apbm_apu),
             .regions = nsgenwdog_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_ROOTGENWDOG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(rootgenwdog_apbm_apu),
             .regions = rootgenwdog_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_SECGENWDOG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(secgenwdog_apbm_apu),
             .regions = secgenwdog_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_ECCREG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(eccreg_apbm_apu),
             .regions = eccreg_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_GTIMERCTRL_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(gtimerctrl_apbm_apu),
             .regions = gtimerctrl_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_SECGTIMER_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(secgtimer_apbm_apu),
             .regions = secgtimer_apbm_apu,
+            .add_chip_addr_offset = false,
         },
         {
             .dev_cfg = &PERIPH_NSGTIMER_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(nsgtimer_apbm_apu),
             .regions = nsgtimer_apbm_apu,
+            .add_chip_addr_offset = false,
         },
     };
 

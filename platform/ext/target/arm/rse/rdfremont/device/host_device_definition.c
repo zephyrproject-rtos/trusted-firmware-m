@@ -136,9 +136,10 @@ const struct ni_tower_apu_dev_cfg SYSCTRL_LCP_ASNI_APU_DEV_CFG  = {
 };
 
 /* System Control NI-Tower device */
-const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
+struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,
-    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES
+    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .chip_addr_offset = 0, /* Updated at boot time */
 };
 #endif
 
@@ -200,9 +201,10 @@ const struct ni_tower_apu_dev_cfg PERIPH_NSGTIMER_PMNI_APU_DEV_CFG  = {
 };
 
 /* Peripheral NI-Tower device */
-const struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
+struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
     .periphbase = HOST_NI_TOWER_BASE,
     .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .chip_addr_offset = 0, /* Updated at boot time */
 };
 #endif
 
