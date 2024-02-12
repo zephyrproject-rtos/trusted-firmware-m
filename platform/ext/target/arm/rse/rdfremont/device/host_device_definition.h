@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,13 @@ extern struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV;
 #ifdef MHU_V3_RSE_TO_SCP
 #include "mhu_v3_x.h"
 extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
+#endif
+
+#ifdef SYSCTRL_NI_TOWER
+#include "ni_tower_lib.h"
+extern const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
+
+extern const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG;
 #endif
 
 #ifdef __cplusplus

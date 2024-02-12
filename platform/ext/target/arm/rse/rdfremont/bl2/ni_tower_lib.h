@@ -8,7 +8,11 @@
 #ifndef __NI_TOWER_LIB_H__
 #define __NI_TOWER_LIB_H__
 
+#include "ni_tower_rse_drv.h"
+
 #include <stdint.h>
+
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
 /* Interface ID of xSNI components - completer interfaces */
 enum sysctrl_xSNI_ids {

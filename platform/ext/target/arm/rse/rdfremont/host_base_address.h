@@ -23,6 +23,7 @@
 #define __HOST_BASE_ADDRESS_H__
 
 #include "host_css_memory_map.h"
+#include "host_mscp_memory_map.h"
 #include "platform_base_address.h"
 #include "size_defs.h"
 

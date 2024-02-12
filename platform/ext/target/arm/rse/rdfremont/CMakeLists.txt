@@ -70,6 +70,7 @@ target_sources(platform_bl2
 
 target_include_directories(platform_bl2
     PUBLIC
+        bl2
         cmsis_drivers
         device
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
