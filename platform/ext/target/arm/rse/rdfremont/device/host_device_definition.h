@@ -84,6 +84,9 @@ extern const struct ni_tower_apu_dev_cfg PERIPH_NSGENWDOG_PMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg PERIPH_ROOTGENWDOG_PMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg PERIPH_SECGENWDOG_PMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg PERIPH_ECCREG_PMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_GTIMERCTRL_PMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_SECGTIMER_PMNI_APU_DEV_CFG;
+extern const struct ni_tower_apu_dev_cfg PERIPH_NSGTIMER_PMNI_APU_DEV_CFG;
 #endif
 
 #ifdef HOST_SCP

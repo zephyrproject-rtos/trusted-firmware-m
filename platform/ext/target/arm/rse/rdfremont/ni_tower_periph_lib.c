@@ -119,6 +119,27 @@ static const struct ni_tower_apu_reg_cfg_info eccreg_apbm_apu[] = {
                     NI_T_REALM_RW),
 };
 
+/* AP Generic Timer Control Frame */
+static const struct ni_tower_apu_reg_cfg_info gtimerctrl_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_REFCLK_CNTCTL_PHYS_BASE,
+                    HOST_AP_REFCLK_CNTCTL_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/* AP Secure Generic Timer Control Base Frame */
+static const struct ni_tower_apu_reg_cfg_info secgtimer_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_S_REFCLK_CNTBASE0_PHYS_BASE,
+                    HOST_AP_S_REFCLK_CNTBASE0_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+};
+
+/* AP Non-secure Generic Timer Control Base Frame */
+static const struct ni_tower_apu_reg_cfg_info nsgtimer_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_NS_REFCLK_CNTBASE1_PHYS_BASE,
+                    HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
 /*
  * Configure Access Protection Unit (APU) to setup access permission for each
  * memory region based on its target in Peripheral NI-Tower.
@@ -171,6 +192,21 @@ static int32_t program_periph_apu(void)
             .dev_cfg = &PERIPH_ECCREG_PMNI_APU_DEV_CFG,
             .region_count = ARRAY_SIZE(eccreg_apbm_apu),
             .regions = eccreg_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_GTIMERCTRL_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(gtimerctrl_apbm_apu),
+            .regions = gtimerctrl_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_SECGTIMER_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(secgtimer_apbm_apu),
+            .regions = secgtimer_apbm_apu,
+        },
+        {
+            .dev_cfg = &PERIPH_NSGTIMER_PMNI_APU_DEV_CFG,
+            .region_count = ARRAY_SIZE(nsgtimer_apbm_apu),
+            .regions = nsgtimer_apbm_apu,
         },
     };
 
