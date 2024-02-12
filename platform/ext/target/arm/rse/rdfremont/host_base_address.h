@@ -25,6 +25,7 @@
 #include "host_atu_base_address.h"
 #include "host_clus_util_lcp_memory_map.h"
 #include "host_css_memory_map.h"
+#include "host_fw_memory_map.h"
 #include "host_mscp_memory_map.h"
 #include "platform_base_address.h"
 #include "size_defs.h"

@@ -142,6 +142,20 @@ const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
 };
 #endif
 
+#ifdef RD_PERIPH_NI_TOWER
+/* Peripheral NI-Tower APU device configurations */
+const struct ni_tower_apu_dev_cfg PERIPH_RAM_AMNI_APU_DEV_CFG  = {
+    .component_node_type = NI_TOWER_AMNI,
+    .component_node_id = PERIPH_RAM_AMNI_ID,
+};
+
+/* Peripheral NI-Tower device */
+const struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
+    .periphbase = HOST_NI_TOWER_BASE,
+    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+};
+#endif
+
 #ifdef HOST_SCP
 struct mscp_dev_t HOST_SCP_DEV = {
     .init_ctrl_base = HOST_SCP_INIT_CTRL_BASE_S,
