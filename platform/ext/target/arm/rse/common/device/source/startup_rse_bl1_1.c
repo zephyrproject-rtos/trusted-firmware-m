@@ -273,11 +273,13 @@ void Reset_Handler(void)
 
 #ifdef RSE_ENABLE_TRAM
     /* Set MSP to be in VM0 to start with */
-    __set_MSP(VM0_BASE_S + 0x2000);
+    __set_MSP(CM_PROVISIONING_BUNDLE_START);
+    __set_MSPLIM(VM0_BASE_S);
 
     setup_tram_encryption();
 
     /* Now switch back to the right stack (which is in the TRAM) */
+    __set_MSPLIM(0);
     __set_MSP((uint32_t)(&__INITIAL_SP));
 #endif /* RSE_ENABLE_TRAM */
 
