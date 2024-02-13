@@ -16,6 +16,7 @@
 #include "ni_tower_lib.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
+#include "rse_expansion_regs.h"
 #include "size_defs.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
@@ -199,6 +200,7 @@ static int boot_platform_pre_load_scp(void)
 static int boot_platform_post_load_scp(void)
 {
     enum atu_error_t atu_err;
+    enum mscp_error_t mscp_err;
 
     BOOT_LOG_INF("BL2: SCP post load start");
 
@@ -207,6 +209,29 @@ static int boot_platform_post_load_scp(void)
      * part in the ITCM before releasing SCP out of reset.
      */
     memset(HOST_SCP_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Configure RSE ATU to access SCP INIT_CTRL region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    HOST_SCP_INIT_CTRL_ATU_ID,
+                                    HOST_SCP_INIT_CTRL_BASE_S,
+                                    HOST_SCP_INIT_CTRL_PHYS_BASE,
+                                    HOST_SCP_INIT_CTRL_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    mscp_err = mscp_driver_release_cpu(&HOST_SCP_DEV);
+    if (mscp_err != MSCP_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: SCP release failed");
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: SCP is released out of reset");
+
+    /* Close RSE ATU region configured to access SCP INIT_CTRL region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_SCP_INIT_CTRL_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
 
     /* Close RSE ATU region configured to access RSE header region for SCP */
     atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
@@ -272,6 +297,7 @@ static int boot_platform_pre_load_mcp(void)
 static int boot_platform_post_load_mcp(void)
 {
     enum atu_error_t atu_err;
+    enum mscp_error_t mscp_err;
 
     BOOT_LOG_INF("BL2: MCP post load start");
 
@@ -280,6 +306,29 @@ static int boot_platform_post_load_mcp(void)
      * part in the ITCM before releasing MCP out of reset.
      */
     memset(HOST_MCP_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Configure RSE ATU to access MCP INIT_CTRL region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    HOST_MCP_INIT_CTRL_ATU_ID,
+                                    HOST_MCP_INIT_CTRL_BASE_S,
+                                    HOST_MCP_INIT_CTRL_PHYS_BASE,
+                                    HOST_MCP_INIT_CTRL_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    mscp_err = mscp_driver_release_cpu(&HOST_MCP_DEV);
+    if (mscp_err != MSCP_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: MCP release failed");
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: MCP is released out of reset");
+
+    /* Close RSE ATU region configured to access MCP INIT_CTRL region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_MCP_INIT_CTRL_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
 
     /* Close RSE ATU region configured to access RSE header region for MCP */
     atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
