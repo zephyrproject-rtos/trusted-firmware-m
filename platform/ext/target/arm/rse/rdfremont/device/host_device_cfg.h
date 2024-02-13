@@ -29,4 +29,12 @@
 #define SYSCTRL_NI_TOWER
 #endif /* PLATFORM_HAS_NI_TOWER */
 
+/* MSCP */
+#ifdef PLATFORM_HOST_HAS_SCP
+#define HOST_SCP
+#endif /* PLATFORM_HOST_HAS_SCP */
+#ifdef PLATFORM_HOST_HAS_MCP
+#define HOST_MCP
+#endif /* PLATFORM_HOST_HAS_MCP */
+
 #endif /* __HOST_DEVICE_CFG_H__ */

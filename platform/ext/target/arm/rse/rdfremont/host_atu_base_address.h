@@ -181,8 +181,27 @@ enum rse_atu_ids {
 #define RSE_IMAGE_LOADING_END           (HOST_MCP_IMG_CODE_BASE_S +         \
                                          HOST_MCP_ATU_SIZE)
 
+/* SCP sysctrl region logical address start */
+#define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END
+/* SCP sysctrl region physical address start */
+#define HOST_SCP_INIT_CTRL_PHYS_BASE 0x1000050050000ULL
+/* SCP sysctrl region ATU size */
+#define HOST_SCP_INIT_CTRL_SIZE      ALIGN_UP(0x1000U, RSE_ATU_PAGE_SIZE)
+/* SCP sysctrl region ATU id */
+#define HOST_SCP_INIT_CTRL_ATU_ID    RSE_ATU_FW_INIT_ID
+
+/* MCP sysctrl region logical address start */
+#define HOST_MCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END
+/* MCP sysctrl region physical address start */
+#define HOST_MCP_INIT_CTRL_PHYS_BASE 0x2000050020000ULL
+/* MCP sysctrl region ATU size */
+#define HOST_MCP_INIT_CTRL_SIZE      ALIGN_UP(0x1000U, RSE_ATU_PAGE_SIZE)
+/* MCP sysctrl region ATU id */
+#define HOST_MCP_INIT_CTRL_ATU_ID    RSE_ATU_FW_INIT_ID
+
 /* ATU region mapping to access System Control NI-Tower */
-#define HOST_NI_TOWER_BASE      RSE_IMAGE_LOADING_END
+#define HOST_NI_TOWER_BASE      (HOST_MCP_INIT_CTRL_BASE_S +                \
+                                 HOST_MCP_INIT_CTRL_SIZE)
 #define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
 #define HOST_NI_TOWER_ATU_ID    RSE_ATU_NI_TOWER_ID
 

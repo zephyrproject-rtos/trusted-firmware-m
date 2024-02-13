@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -66,6 +66,7 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_USART.c
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
+        host_drivers/mscp_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
 )
 
@@ -74,10 +75,17 @@ target_include_directories(platform_bl2
         bl2
         cmsis_drivers
         device
+        host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
+)
+
+target_compile_definitions(platform_bl2
+    PRIVATE
+        PLATFORM_HOST_HAS_SCP
+        PLATFORM_HOST_HAS_MCP
 )
 
 #========================= Platform BL1_1 =====================================#

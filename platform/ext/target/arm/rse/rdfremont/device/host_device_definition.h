@@ -66,6 +66,16 @@ extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_SCP_AMNI_APU_DEV_CFG;
 extern const struct ni_tower_apu_dev_cfg SYSCTRL_RSE_MCP_AMNI_APU_DEV_CFG;
 #endif
 
+#ifdef HOST_SCP
+#include "mscp_drv.h"
+extern struct mscp_dev_t HOST_SCP_DEV;
+#endif
+
+#ifdef HOST_MCP
+#include "mscp_drv.h"
+extern struct mscp_dev_t HOST_MCP_DEV;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

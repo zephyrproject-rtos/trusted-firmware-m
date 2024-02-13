@@ -111,3 +111,15 @@ const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
     .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES
 };
 #endif
+
+#ifdef HOST_SCP
+struct mscp_dev_t HOST_SCP_DEV = {
+    .init_ctrl_base = HOST_SCP_INIT_CTRL_BASE_S,
+};
+#endif
+
+#ifdef HOST_MCP
+struct mscp_dev_t HOST_MCP_DEV = {
+    .init_ctrl_base = HOST_MCP_INIT_CTRL_BASE_S,
+};
+#endif
