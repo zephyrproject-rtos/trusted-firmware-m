@@ -47,7 +47,7 @@ int dpe_plat_share_context_with_ap(int ctx_handle)
         .finalize = true
     };
 
-    ret = sds_struct_add(&struct_desc);
+    ret = request_sds_struct_add(&struct_desc);
     if (ret != TFM_PLAT_ERR_SUCCESS) {
         return -1;
     }
