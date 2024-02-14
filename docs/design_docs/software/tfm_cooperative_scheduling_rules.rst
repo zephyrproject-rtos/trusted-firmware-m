@@ -10,7 +10,7 @@ TF-M Scheduler - Rules
 ======================
 
 On ArmV8-M CPUs, NSPE and SPE share the same physical processing element(PE). A
-TF-M enabled system need to be able to handle asynchronous events (interrupts)
+TF-M enabled systems need to be able to handle asynchronous events (interrupts)
 regardless of current security state of the PE, and that may lead to scheduling
 decisions. This introduces significant complexity into TF-M. To keep the
 integrity of (NSPE and SPE) schedulers and call paths between NSPE and SPE,
@@ -41,7 +41,7 @@ The switching between SPE and NSPE can be triggered in multiple ways.
 `Involuntary security state switch`; when the software has no control over the
 switch:
 
-- A NSPE interrupt take control into NSPE from SPE
+- A NSPE interrupt takes control into NSPE from SPE
 - A SPE interrupt takes control into SPE from NSPE
 
 `Voluntary security state switch`; when software programmatically makes the
@@ -207,4 +207,4 @@ Rules for ISR pre-emption
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2024, Arm Limited. All rights reserved.*

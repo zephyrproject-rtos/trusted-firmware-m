@@ -282,7 +282,7 @@ This API should not return.
 Isolation API
 =============
 The :term:`PSA-FF-M` defines three isolation levels and a memory access rule to
-provide diverse levels of securitiy. The isolation API provides the functions to
+provide diverse levels of security. The isolation API provides the functions to
 implement these requirements.
 
 The Isolation API operates on boundaries. A boundary represents a set of
@@ -480,7 +480,7 @@ The access permissions outside the boundary is platform-dependent.
 **Return Values**
 
 - ``TFM_HAL_SUCCESS`` - the isolation boundary has been set up.
-- ``TFM_HAL_ERROR_GENERIC`` - failed to set upthe isolation boundary.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to set up the isolation boundary.
 
 tfm_hal_memory_check()
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -916,6 +916,6 @@ compromise.
 
 --------------
 
-*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

@@ -202,9 +202,9 @@ services currently.
 Similar stateless services in a partition could be grouped, and assign one
 ``SID`` for the group. The ``type`` parameter in ``psa_call()`` could be
 extended to identify the service in group. In this case, it is recommended to
-use consecutive value for ``type``.
+use consecutive values for ``type``.
 
-It is recommended that each Seccure Partition declares one stateless service
+It is recommended that each Secure Partition declares one stateless service
 and uses the type parameter to distinguish different stateless services.
 Therefore, more stateless services can be supported.
 
@@ -227,4 +227,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited. All rights reserved.*

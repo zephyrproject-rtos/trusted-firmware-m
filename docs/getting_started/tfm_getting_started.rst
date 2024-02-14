@@ -422,7 +422,7 @@ To build the TF-M firmware the following tools are needed:
    - Git
    - gmake, aka GNU Make
    - Python v3.x
-   - a set of python modules listed in ``tools/requiremtns.txt``
+   - a set of python modules listed in ``tools/requirements.txt``
 
 ****************
 Dependency chain
@@ -477,6 +477,6 @@ Here are some next steps for exploring TF-M:
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
