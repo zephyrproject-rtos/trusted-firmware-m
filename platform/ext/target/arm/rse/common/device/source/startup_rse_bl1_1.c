@@ -242,33 +242,11 @@ static void setup_tram_encryption(void) {
 void Reset_Handler(void)
 {
 #ifdef RSE_USE_ROM_LIB_FROM_SRAM
-    /* At this point the GOT hasn't been set up, but we need it to set the stack
-     * pointers. Copy the GOT into RAM first (before the usual data section
-     * copy).
+    /*
+     * Use the GOT table from ROM at this point. This saves copying it into
+     * SRAM.
      */
-    __asm volatile(
-    "ldr    r1, =__etext \n"
-    "ldr    r2, =__got_start__ \n"
-    "ldr    r3, =__got_end__ \n"
-    "subs    r3, r2 \n"
-    "ble    .L_loop1_done \n"
-    ".L_loop1: \n"
-    "subs    r3, #4 \n"
-    "ldr    r0, [r1,r3] \n"
-    "str    r0, [r2,r3] \n"
-    "bgt    .L_loop1 \n"
-    ".L_loop1_done: \n"
-    : : : "r1", "r2", "r3"
-    );
-
-    /* Load the base address of the GOT into r9. */
-    __asm volatile(
-        "mov r9, %0 \n"
-        "mov r0, %1 \n"
-        "lsl r9, #16 \n"
-        "orr r9, r9, r0 \n"
-        : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r0"
-    );
+    __asm volatile("ldr    r9, =__etext \n");
 #endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
 #ifdef RSE_ENABLE_TRAM
