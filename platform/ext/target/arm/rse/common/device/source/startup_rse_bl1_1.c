@@ -282,6 +282,10 @@ void Reset_Handler(void)
     __asm volatile("ldr    r9, =__etext \n");
 #endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
+    /* Enable cacheing, particularly to avoid ECC errors in VM0/1 */
+    SCB_EnableICache();
+    SCB_EnableDCache();
+
 #ifdef RSE_ENABLE_TRAM
     /* Set MSP to be in VM0 to start with */
     __set_MSP(CM_PROVISIONING_BUNDLE_START);
