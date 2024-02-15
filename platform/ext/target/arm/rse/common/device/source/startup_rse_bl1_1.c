@@ -26,6 +26,7 @@
 #include "device_definition.h"
 #include "region_defs.h"
 #include "rse_kmu_slot_ids.h"
+#include "trng.h"
 
 /*----------------------------------------------------------------------------
   External References
@@ -195,7 +196,20 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #endif
 
 #ifdef RSE_ENABLE_TRAM
-static void setup_tram_encryption(void) {
+/*
+ * This can't be inlined, since the stack push to get space for the local
+ * variables is done at the start of the function, and the function which calls
+ * this includes an explict stack set which removes the space allocated for
+ * locals.
+ */
+static void __attribute__ ((noinline)) setup_tram_encryption(void) {
+    enum lcm_bool_t sp_enabled;
+    enum lcm_lcs_t lcs;
+    uint32_t random_word;
+    uint32_t idx;
+    uint8_t tram_key[32];
+    uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
+
     const struct kmu_key_export_config_t tram_key_export_config = {
         TRAM_BASE_S + 0x8, /* TRAM key register */
         0, /* No delay */
@@ -207,32 +221,51 @@ static void setup_tram_encryption(void) {
     };
 
     /* Redefine these, as at this point the constants haven't been loaded */
-    const struct kmu_dev_cfg_t kmu_dev_cfg_s = {
+    struct kmu_dev_cfg_t kmu_dev_cfg_s = {
         .base = KMU_BASE_S
     };
-    const struct kmu_dev_t kmu_dev_s = {
+    struct kmu_dev_t kmu_dev_s = {
         .cfg = &(kmu_dev_cfg_s)
     };
-    const struct tram_dev_cfg_t tram_dev_cfg_s = {
+    struct tram_dev_cfg_t tram_dev_cfg_s = {
     .base = TRAM_BASE_S
     };
     struct tram_dev_t tram_dev_s = {&tram_dev_cfg_s};
+    struct lcm_dev_cfg_t lcm_dev_cfg_s = {
+    .base = LCM_BASE_S
+    };
+    struct lcm_dev_t lcm_dev_s = {&lcm_dev_cfg_s};
 
+    lcm_get_sp_enabled(&lcm_dev_s, &sp_enabled);
+    lcm_get_lcs(&lcm_dev_s, &lcs);
 
-    /* Allow unaligned accesses */
-    SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
-    __DSB();
-    __ISB();
+    bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
+    kmu_init(&kmu_dev_s, prbg_seed);
 
-    /* Don't catch any errors from this, because we have no option to handle
-     * them.
+    /* The secure provisioning reset resets the KMU which wipes the keyslots,
+     * but it's still a warm reset so the DMA ICS doesn't run. Because of this,
+     * we need to generate a new TRAM key.
      */
+    if (sp_enabled == LCM_TRUE && (lcs == LCM_LCS_CM || lcs == LCM_LCS_DM)) {
+        bl1_trng_generate_random(tram_key, sizeof(tram_key));
+
+        kmu_set_key(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY, tram_key, sizeof(tram_key));
+    }
+
     kmu_set_key_export_config(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY, &tram_key_export_config);
     kmu_set_key_export_config_locked(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
     kmu_set_key_locked(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
     kmu_export_key(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
 
     tram_enable_encryption(&tram_dev_s);
+
+    if (sp_enabled == LCM_TRUE && (lcs == LCM_LCS_CM || lcs == LCM_LCS_DM)) {
+        bl1_trng_generate_random((uint8_t *)&random_word, sizeof(random_word));
+
+        for (idx = 0; idx < DTCM_SIZE / sizeof(uint32_t); idx++) {
+            ((uint32_t *)DTCM_BASE_S)[idx] = random_word;
+        }
+    }
 };
 #endif /* RSE_ENABLE_TRAM */
 
