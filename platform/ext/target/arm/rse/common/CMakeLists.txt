@@ -244,6 +244,7 @@ target_sources(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/util/ni_tower_util.c>
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rse_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3/smmu_v3_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c>
         native_drivers/atu_rse_drv.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c>
@@ -274,6 +275,7 @@ target_include_directories(platform_bl2
         device/include
         device/source/armclang
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower>
+        $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3>
         native_drivers
         partition
         services/src
@@ -301,6 +303,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>:BOOT_DMA_MIN_SIZE_REQ=${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:CMSIS_device_header="rse.h">
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:PLATFORM_HAS_NI_TOWER>
+        $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:PLATFORM_HAS_SMMU_V3>
 )
 
 target_compile_options(platform_bl2
