@@ -55,6 +55,9 @@
 /* Whether DMA remapping is enabled */
 #define CC3XX_CONFIG_DMA_REMAP_ENABLE
 
+/* Whether DMA supports working on cached memories */
+/* #define CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
+
 /* Whether CC will WFI instead of busy-wait looping while waiting for crypto
  * operations to complete.
  */
