@@ -16,6 +16,7 @@
 #include "kmu_drv.h"
 #include "device_definition.h"
 #include "tfm_plat_otp.h"
+#include "rse_kmu_slot_ids.h"
 
 #define NUMBER_OF_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
 #define TFM_NS_PARTITION_ID -1
@@ -37,7 +38,7 @@ static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
     *algorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
     *type = PSA_KEY_TYPE_DERIVE;
 
-    kmu_err = kmu_get_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 0, buf, 32);
+    kmu_err = kmu_get_key(&KMU_DEV_S, RSE_KMU_SLOT_VHUK, buf, 32);
     if (kmu_err != KMU_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -63,7 +64,7 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    kmu_err = kmu_get_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 1, buf, 32);
+    kmu_err = kmu_get_key(&KMU_DEV_S, RSE_KMU_SLOT_CPAK_SEED, buf, 32);
     if (kmu_err != KMU_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -167,7 +168,7 @@ static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
     *algorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
     *type = PSA_KEY_TYPE_DERIVE;
 
-    kmu_err = kmu_get_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 2, buf, 32);
+    kmu_err = kmu_get_key(&KMU_DEV_S, RSE_KMU_SLOT_DAK_SEED, buf, 32);
     if (kmu_err != KMU_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -194,8 +195,7 @@ static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
     *algorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
     *type = PSA_KEY_TYPE_DERIVE;
 
-    /* RSE_KMU_SLOT_ROT_CDI = KMU_USER_SLOT_MIN + 3 */
-    kmu_err = kmu_get_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 3, buf, 32);
+    kmu_err = kmu_get_key(&KMU_DEV_S, RSE_KMU_SLOT_ROT_CDI, buf, 32);
     if (kmu_err != KMU_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

@@ -36,6 +36,8 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
         RSE_AMOUNT=${RSE_AMOUNT}
         $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
 )
 
 #========================= Platform common defs ===============================#
@@ -195,8 +197,6 @@ target_compile_definitions(platform_s
         ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
         spm_memcpy=spm_dma_memcpy
     PRIVATE
-        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
-        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         CMSIS_device_header="rse.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
