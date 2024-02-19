@@ -33,53 +33,53 @@
 
 // <q> MPC (Memory Protection Controller) [Driver_SIC_MPC]
 // <i> Configuration settings for Driver_SIC_MPC in component ::Drivers:MPC
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define   RTE_SIC_MPC                 1
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN0]
-// <i> Configuration settings for Driver_PPC_RSS_MAIN0 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_MAIN0             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_MAIN0]
+// <i> Configuration settings for Driver_PPC_RSE_MAIN0 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_MAIN0             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN_EXP0]
-// <i> Configuration settings for Driver_PPC_RSS_MAIN_EXP0 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_MAIN_EXP0             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_MAIN_EXP0]
+// <i> Configuration settings for Driver_PPC_RSE_MAIN_EXP0 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_MAIN_EXP0             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN_EXP1]
-// <i> Configuration settings for Driver_PPC_RSS_MAIN_EXP1 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_MAIN_EXP1             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_MAIN_EXP1]
+// <i> Configuration settings for Driver_PPC_RSE_MAIN_EXP1 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_MAIN_EXP1             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN_EXP2]
-// <i> Configuration settings for Driver_PPC_RSS_MAIN_EXP2 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_MAIN_EXP2             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_MAIN_EXP2]
+// <i> Configuration settings for Driver_PPC_RSE_MAIN_EXP2 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_MAIN_EXP2             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN_EXP3]
-// <i> Configuration settings for Driver_PPC_RSS_MAIN_EXP3 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_MAIN_EXP3             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_MAIN_EXP3]
+// <i> Configuration settings for Driver_PPC_RSE_MAIN_EXP3 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_MAIN_EXP3             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH0]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH0 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH0             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH0]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH0 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH0             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH1]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH1 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH1             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH1]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH1 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH1             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH_EXP0]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH_EXP0 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH_EXP0             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH_EXP0]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH_EXP0 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH_EXP0             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH_EXP1]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH_EXP1 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH_EXP1             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH_EXP1]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH_EXP1 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH_EXP1             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH_EXP2]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH_EXP2 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH_EXP2             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH_EXP2]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH_EXP2 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH_EXP2             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_RSS_PERIPH_EXP3]
-// <i> Configuration settings for Driver_PPC_RSS_PERIPH_EXP3 in component ::Drivers:PPC
-#define   RTE_PPC_RSS_PERIPH_EXP3             1
+// <q> PPC (Peripheral Protection Controller) [PPC_RSE_PERIPH_EXP3]
+// <i> Configuration settings for Driver_PPC_RSE_PERIPH_EXP3 in component ::Drivers:PPC
+#define   RTE_PPC_RSE_PERIPH_EXP3             1
 
 // <q> Flash device emulated by SRAM [Driver_Flash0]
 // <i> Configuration settings for Driver_Flash0 in component ::Drivers:Flash

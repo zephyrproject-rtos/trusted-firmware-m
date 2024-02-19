@@ -17,18 +17,18 @@
 
 #include <string.h>
 
-#define RSS_ATU_S_IMAGE_XIP_REGION  0
-#define RSS_ATU_NS_IMAGE_XIP_REGION 1
+#define RSE_ATU_S_IMAGE_XIP_REGION  0
+#define RSE_ATU_NS_IMAGE_XIP_REGION 1
 
-#define RSS_SIC_S_IMAGE_DECRYPT_REGION  0
-#define RSS_SIC_NS_IMAGE_DECRYPT_REGION 1
+#define RSE_SIC_S_IMAGE_DECRYPT_REGION  0
+#define RSE_SIC_NS_IMAGE_DECRYPT_REGION 1
 
 #define FLASH_SIC_HTR_SIZE 0x800
 
 uint32_t s_image_offset;
 uint32_t ns_image_offset;
 
-struct rss_xip_htr_table {
+struct rse_xip_htr_table {
     uint32_t fw_revision;
     uint32_t nonce[2];
     size_t htr_size;
@@ -43,13 +43,13 @@ int sic_boot_init(void)
     /* The regions must be contiguous. This check is static, so will be compiled
      * out if it succeeds.
      */
-    if (RSS_RUNTIME_NS_XIP_BASE_S != RSS_RUNTIME_S_XIP_BASE_S + FLASH_S_PARTITION_SIZE) {
+    if (RSE_RUNTIME_NS_XIP_BASE_S != RSE_RUNTIME_S_XIP_BASE_S + FLASH_S_PARTITION_SIZE) {
         return 1;
     }
 
     sic_err = sic_auth_init(&SIC_DEV_S, SIC_DIGEST_SIZE_256,
                             SIC_DIGEST_COMPARE_FIRST_QWORD,
-                            RSS_RUNTIME_S_XIP_BASE_S,
+                            RSE_RUNTIME_S_XIP_BASE_S,
                             FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE);
     if (sic_err != SIC_ERROR_NONE) {
         return 1;
@@ -67,10 +67,10 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
 {
     enum sic_error_t sic_err;
     enum kmu_error_t kmu_err;
-    struct rss_xip_htr_table *table;
+    struct rse_xip_htr_table *table;
     enum tfm_plat_err_t plat_err;
     size_t sic_page_size;
-    enum rss_kmu_slot_id_t decrypt_key_slot;
+    enum rse_kmu_slot_id_t decrypt_key_slot;
     uint32_t decrypt_region;
     uint32_t xip_region_base_addr;
     uint32_t xip_host_base_addr;
@@ -93,8 +93,8 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
     }
 
     switch (image_id) {
-    case RSS_BL2_IMAGE_NS:
-        table = (struct rss_xip_htr_table*)(BL2_XIP_TABLES_START
+    case RSE_BL2_IMAGE_NS:
+        table = (struct rse_xip_htr_table*)(BL2_XIP_TABLES_START
                                             + FLASH_SIC_TABLE_SIZE
                                             + BL2_HEADER_SIZE);
 
@@ -116,18 +116,18 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
             return 1;
         }
 
-        decrypt_key_slot = RSS_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY;
-        atu_region = RSS_ATU_NS_IMAGE_XIP_REGION;
-        decrypt_region = RSS_SIC_NS_IMAGE_DECRYPT_REGION;
-        xip_region_base_addr = RSS_RUNTIME_NS_XIP_BASE_NS;
+        decrypt_key_slot = RSE_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY;
+        atu_region = RSE_ATU_NS_IMAGE_XIP_REGION;
+        decrypt_region = RSE_SIC_NS_IMAGE_DECRYPT_REGION;
+        xip_region_base_addr = RSE_RUNTIME_NS_XIP_BASE_NS;
         xip_host_base_addr = SIC_HOST_BASE_NS;
         max_region_size = NS_CODE_SIZE;
-        image_uuid = UUID_RSS_FIRMWARE_NS;
+        image_uuid = UUID_RSE_FIRMWARE_NS;
         image_offset = &ns_image_offset;
 
         break;
-    case RSS_BL2_IMAGE_S:
-        table = (struct rss_xip_htr_table*)(BL2_XIP_TABLES_START + BL2_HEADER_SIZE);
+    case RSE_BL2_IMAGE_S:
+        table = (struct rse_xip_htr_table*)(BL2_XIP_TABLES_START + BL2_HEADER_SIZE);
 
         if (image_load_offset >= FLASH_AREA_10_OFFSET
             && image_load_offset < FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE) {
@@ -139,19 +139,19 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
             return 1;
         }
 
-        decrypt_key_slot = RSS_KMU_SLOT_SECURE_ENCRYPTION_KEY;
-        atu_region = RSS_ATU_S_IMAGE_XIP_REGION;
-        decrypt_region = RSS_SIC_S_IMAGE_DECRYPT_REGION;
-        xip_region_base_addr = RSS_RUNTIME_S_XIP_BASE_S;
+        decrypt_key_slot = RSE_KMU_SLOT_SECURE_ENCRYPTION_KEY;
+        atu_region = RSE_ATU_S_IMAGE_XIP_REGION;
+        decrypt_region = RSE_SIC_S_IMAGE_DECRYPT_REGION;
+        xip_region_base_addr = RSE_RUNTIME_S_XIP_BASE_S;
         xip_host_base_addr = SIC_HOST_BASE_S;
         max_region_size = S_CODE_SIZE;
-        image_uuid = UUID_RSS_FIRMWARE_S;
+        image_uuid = UUID_RSE_FIRMWARE_S;
         image_offset = &s_image_offset;
 
         break;
 
-    case RSS_BL2_IMAGE_AP:
-    case RSS_BL2_IMAGE_SCP:
+    case RSE_BL2_IMAGE_AP:
+    case RSE_BL2_IMAGE_SCP:
         return 0;
     default:
         return 1;
@@ -167,7 +167,7 @@ int sic_boot_post_load(uint32_t image_id, uint32_t image_load_offset)
         return rc;
     }
 
-    /* RSS XIP images must be aligned to, at minimum, the SIC authentication
+    /* RSE XIP images must be aligned to, at minimum, the SIC authentication
      * page size and the SIC decrypt page size. Alignments that do not match
      * the ATU page size cause problems in jumping to NS code, and seem to
      * cause startup failure in some cases, so 8KiB alignment is required.
@@ -220,7 +220,7 @@ int sic_boot_pre_quit(struct boot_arm_vector_table **vt_cpy)
         return 1;
     }
 
-    *vt_cpy = (struct boot_arm_vector_table *)(RSS_RUNTIME_S_XIP_BASE_S + s_image_offset);
+    *vt_cpy = (struct boot_arm_vector_table *)(RSE_RUNTIME_S_XIP_BASE_S + s_image_offset);
 
     return 0;
 }

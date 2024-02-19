@@ -194,7 +194,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #pragma GCC diagnostic pop
 #endif
 
-#ifdef RSS_ENABLE_TRAM
+#ifdef RSE_ENABLE_TRAM
 static void setup_tram_encryption(void) {
     const struct kmu_key_export_config_t tram_key_export_config = {
         TRAM_BASE_S + 0x8, /* TRAM key register */
@@ -227,21 +227,21 @@ static void setup_tram_encryption(void) {
     /* Don't catch any errors from this, because we have no option to handle
      * them.
      */
-    kmu_set_key_export_config(&kmu_dev_s, RSS_KMU_SLOT_TRAM_KEY, &tram_key_export_config);
-    kmu_set_key_export_config_locked(&kmu_dev_s, RSS_KMU_SLOT_TRAM_KEY);
-    kmu_set_key_locked(&kmu_dev_s, RSS_KMU_SLOT_TRAM_KEY);
-    kmu_export_key(&kmu_dev_s, RSS_KMU_SLOT_TRAM_KEY);
+    kmu_set_key_export_config(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY, &tram_key_export_config);
+    kmu_set_key_export_config_locked(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
+    kmu_set_key_locked(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
+    kmu_export_key(&kmu_dev_s, RSE_KMU_SLOT_TRAM_KEY);
 
     tram_enable_encryption(&tram_dev_s);
 };
-#endif /* RSS_ENABLE_TRAM */
+#endif /* RSE_ENABLE_TRAM */
 
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
-#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+#ifdef RSE_USE_ROM_LIB_FROM_SRAM
     /* At this point the GOT hasn't been set up, but we need it to set the stack
      * pointers. Copy the GOT into RAM first (before the usual data section
      * copy).
@@ -269,9 +269,9 @@ void Reset_Handler(void)
         "orr r9, r9, r0 \n"
         : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r0"
     );
-#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
+#endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
-#ifdef RSS_ENABLE_TRAM
+#ifdef RSE_ENABLE_TRAM
     /* Set MSP to be in VM0 to start with */
     __set_MSP(VM0_BASE_S + 0x2000);
 
@@ -279,7 +279,7 @@ void Reset_Handler(void)
 
     /* Now switch back to the right stack (which is in the TRAM) */
     __set_MSP((uint32_t)(&__INITIAL_SP));
-#endif /* RSS_ENABLE_TRAM */
+#endif /* RSE_ENABLE_TRAM */
 
     __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
 

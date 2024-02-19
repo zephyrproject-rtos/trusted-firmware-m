@@ -21,7 +21,7 @@
 #include "platform_base_address.h"
 #include "size_defs.h"
 
-/* Flash layout on RSS:
+/* Flash layout on RSE:
  *
  * Offset    Image (Size)
  *       0x0 BL2 - MCUBoot primary slot (128 KB)
@@ -101,12 +101,12 @@
 #endif
 
 #define FLASH_AREA_IMAGE_PRIMARY(x) \
-        (((x) == RSS_FIRMWARE_SECURE_ID)     ? FLASH_AREA_2_ID : \
-         ((x) == RSS_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_3_ID : \
+        (((x) == RSE_FIRMWARE_SECURE_ID)     ? FLASH_AREA_2_ID : \
+         ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_3_ID : \
                                               255)
 #define FLASH_AREA_IMAGE_SECONDARY(x) \
-        (((x) == RSS_FIRMWARE_SECURE_ID)     ? FLASH_AREA_4_ID : \
-         ((x) == RSS_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_5_ID : \
+        (((x) == RSE_FIRMWARE_SECURE_ID)     ? FLASH_AREA_4_ID : \
+         ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_5_ID : \
                                               255)
 
 /* Scratch area is not used with RAM loading firmware upgrade */

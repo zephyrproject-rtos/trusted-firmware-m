@@ -25,41 +25,41 @@
 #include "cc3xx_rng.h"
 #include "log.h"
 
-enum rss_handshake_msg_type {
-    RSS_HANDSHAKE_SESSION_KEY_MSG,
-    RSS_HANDSHAKE_VHUK_MSG,
-    RSS_HANDSHAKE_MAX_MSG = UINT32_MAX,
+enum rse_handshake_msg_type {
+    RSE_HANDSHAKE_SESSION_KEY_MSG,
+    RSE_HANDSHAKE_VHUK_MSG,
+    RSE_HANDSHAKE_MAX_MSG = UINT32_MAX,
 };
 
-struct __attribute__((__packed__)) rss_handshake_header {
-    enum rss_handshake_msg_type type;
-    uint32_t rss_id;
+struct __attribute__((__packed__)) rse_handshake_header {
+    enum rse_handshake_msg_type type;
+    uint32_t rse_id;
     uint8_t ccm_iv[12];
 };
 
-struct  __attribute__((__packed__)) rss_handshake_trailer {
+struct  __attribute__((__packed__)) rse_handshake_trailer {
     uint8_t ccm_tag[16];
 };
 
-struct __attribute__((__packed__)) rss_handshake_msg {
-    struct rss_handshake_header header;
+struct __attribute__((__packed__)) rse_handshake_msg {
+    struct rse_handshake_header header;
     union __attribute__((__packed__)) {
         uint8_t vhuk_contribution[32];
         uint8_t session_key_iv[32];
     } body;
-    struct rss_handshake_trailer trailer;
+    struct rse_handshake_trailer trailer;
 };
 
-static int32_t rss_handshake_header_init(struct rss_handshake_msg *msg,
-                                         enum rss_handshake_msg_type type)
+static int32_t rse_handshake_header_init(struct rse_handshake_msg *msg,
+                                         enum rse_handshake_msg_type type)
 {
     int32_t err;
 
     msg->header.type = type;
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_RSS_ID,
-                            sizeof(msg->header.rss_id),
-                            (uint8_t*)&msg->header.rss_id);
+    err = tfm_plat_otp_read(PLAT_OTP_ID_RSE_ID,
+                            sizeof(msg->header.rse_id),
+                            (uint8_t*)&msg->header.rse_id);
     if (err != 0)
         return err;
 
@@ -72,11 +72,11 @@ static int32_t rss_handshake_header_init(struct rss_handshake_msg *msg,
     return 0;
 }
 
-static int32_t rss_handshake_session_init(struct rss_handshake_msg *msg)
+static int32_t rse_handshake_session_init(struct rse_handshake_msg *msg)
 {
     int32_t err;
 
-    err = rss_handshake_header_init(msg, RSS_HANDSHAKE_SESSION_KEY_MSG);
+    err = rse_handshake_header_init(msg, RSE_HANDSHAKE_SESSION_KEY_MSG);
     if (err) {
         return err;
     }
@@ -90,17 +90,17 @@ static int32_t rss_handshake_session_init(struct rss_handshake_msg *msg)
     return 0;
 }
 
-static int32_t rss_handshake_vhuk_init(struct rss_handshake_msg *msg)
+static int32_t rse_handshake_vhuk_init(struct rse_handshake_msg *msg)
 {
     int32_t err;
     size_t size;
 
-    err = rss_handshake_header_init(msg, RSS_HANDSHAKE_VHUK_MSG);
+    err = rse_handshake_header_init(msg, RSE_HANDSHAKE_VHUK_MSG);
     if (err) {
         return err;
     }
 
-    err = rss_derive_vhuk_seed((uint32_t*)msg->body.vhuk_contribution,
+    err = rse_derive_vhuk_seed((uint32_t*)msg->body.vhuk_contribution,
                                sizeof(msg->body.vhuk_contribution),
                                &size);
     if (err) {
@@ -110,12 +110,12 @@ static int32_t rss_handshake_vhuk_init(struct rss_handshake_msg *msg)
     return 0;
 }
 
-static int32_t rss_handshake_msg_crypt(cc3xx_aes_direction_t direction,
-                                       struct rss_handshake_msg *msg)
+static int32_t rse_handshake_msg_crypt(cc3xx_aes_direction_t direction,
+                                       struct rse_handshake_msg *msg)
 {
     int32_t err;
 
-    err = cc3xx_lowlevel_aes_init(direction, CC3XX_AES_MODE_CCM, RSS_KMU_SLOT_SESSION_KEY_0,
+    err = cc3xx_lowlevel_aes_init(direction, CC3XX_AES_MODE_CCM, RSE_KMU_SLOT_SESSION_KEY_0,
                                   NULL, CC3XX_AES_KEYSIZE_256,
                                   (uint32_t *)msg->header.ccm_iv, sizeof(msg->header.ccm_iv));
     if (err != 0) {
@@ -147,8 +147,8 @@ static int32_t rss_handshake_msg_crypt(cc3xx_aes_direction_t direction,
     return 0;
 }
 
-static int32_t rss_handshake_msg_send(void *mhu_sender_dev,
-                                      struct rss_handshake_msg *msg,
+static int32_t rse_handshake_msg_send(void *mhu_sender_dev,
+                                      struct rse_handshake_msg *msg,
                                       bool crypt)
 {
     int32_t err;
@@ -159,7 +159,7 @@ static int32_t rss_handshake_msg_send(void *mhu_sender_dev,
     }
 
     if (crypt) {
-        err = rss_handshake_msg_crypt(CC3XX_AES_DIRECTION_ENCRYPT, msg);
+        err = rse_handshake_msg_crypt(CC3XX_AES_DIRECTION_ENCRYPT, msg);
         if (err != 0) {
             return err;
         }
@@ -167,7 +167,7 @@ static int32_t rss_handshake_msg_send(void *mhu_sender_dev,
 
     err = mhu_send_data(mhu_sender_dev,
                         (uint8_t*)msg,
-                        sizeof(struct rss_handshake_msg));
+                        sizeof(struct rse_handshake_msg));
     if (err != 0) {
         return err;
     }
@@ -175,8 +175,8 @@ static int32_t rss_handshake_msg_send(void *mhu_sender_dev,
     return 0;
 }
 
-static int32_t rss_handshake_msg_receive(void *mhu_receiver_dev,
-                                         struct rss_handshake_msg *msg,
+static int32_t rse_handshake_msg_receive(void *mhu_receiver_dev,
+                                         struct rse_handshake_msg *msg,
                                          bool crypt)
 {
     int32_t err;
@@ -192,14 +192,14 @@ static int32_t rss_handshake_msg_receive(void *mhu_receiver_dev,
         return err;
     }
 
-    size = sizeof(struct rss_handshake_msg);
+    size = sizeof(struct rse_handshake_msg);
     err = mhu_receive_data(mhu_receiver_dev, (uint8_t*)msg, &size);
     if (err != 0) {
         return err;
     }
 
     if (crypt) {
-        err = rss_handshake_msg_crypt(CC3XX_AES_DIRECTION_DECRYPT, msg);
+        err = rse_handshake_msg_crypt(CC3XX_AES_DIRECTION_DECRYPT, msg);
         if (err != 0) {
             return err;
         }
@@ -208,40 +208,40 @@ static int32_t rss_handshake_msg_receive(void *mhu_receiver_dev,
     return 0;
 }
 
-int32_t rss_handshake(void)
+int32_t rse_handshake(void)
 {
     int err;
 
-    struct rss_handshake_msg session0;
-    struct rss_handshake_msg msg0;
+    struct rse_handshake_msg session0;
+    struct rse_handshake_msg msg0;
 
-    struct rss_handshake_msg session1;
-    struct rss_handshake_msg msg1;
+    struct rse_handshake_msg session1;
+    struct rse_handshake_msg msg1;
 
     uint8_t session_seed[64];
     uint8_t vhuk_seed[64];
 
-    err = rss_handshake_session_init(&session0);
+    err = rse_handshake_session_init(&session0);
     if (err != 0) {
         return err;
     }
 
-    err = rss_handshake_vhuk_init(&msg0);
+    err = rse_handshake_vhuk_init(&msg0);
     if (err != 0) {
         return err;
     }
 
-    if (msg0.header.rss_id == 0) {
+    if (msg0.header.rse_id == 0) {
         memcpy(session_seed, session0.body.session_key_iv,
                sizeof(session0.body.session_key_iv));
 
-        err = rss_handshake_msg_send(&MHU_RSS_TO_RSS_SENDER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_send(&MHU_RSE_TO_RSE_SENDER_DEVS[msg0.header.rse_id],
                                      &session0, false);
         if (err != 0) {
             return err;
         }
 
-        err = rss_handshake_msg_receive(&MHU_RSS_TO_RSS_RECEIVER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_receive(&MHU_RSE_TO_RSE_RECEIVER_DEVS[msg0.header.rse_id],
                                         &session1, false);
         if (err != 0) {
             return err;
@@ -250,9 +250,9 @@ int32_t rss_handshake(void)
         memcpy(session_seed + 32, session1.body.session_key_iv,
                sizeof(session1.body.session_key_iv));
 
-        err = rss_derive_session_key((uint8_t*)session_seed,
+        err = rse_derive_session_key((uint8_t*)session_seed,
                                      sizeof(session_seed),
-                                     RSS_KMU_SLOT_SESSION_KEY_0);
+                                     RSE_KMU_SLOT_SESSION_KEY_0);
         if (err) {
             return err;
         }
@@ -260,13 +260,13 @@ int32_t rss_handshake(void)
         memcpy(vhuk_seed, msg0.body.vhuk_contribution,
                sizeof(msg0.body.vhuk_contribution));
 
-        err = rss_handshake_msg_send(&MHU_RSS_TO_RSS_SENDER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_send(&MHU_RSE_TO_RSE_SENDER_DEVS[msg0.header.rse_id],
                                      &msg0, true);
         if (err != 0) {
             return err;
         }
 
-        err = rss_handshake_msg_receive(&MHU_RSS_TO_RSS_RECEIVER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_receive(&MHU_RSE_TO_RSE_RECEIVER_DEVS[msg0.header.rse_id],
                                         &msg1, true);
         if (err != 0) {
             return err;
@@ -275,17 +275,17 @@ int32_t rss_handshake(void)
         memcpy(vhuk_seed + 32, msg1.body.vhuk_contribution,
                sizeof(msg1.body.vhuk_contribution));
     }
-    else if (msg0.header.rss_id == 1) {
+    else if (msg0.header.rse_id == 1) {
         memcpy(session_seed + 32, session0.body.session_key_iv,
                sizeof(session0.body.session_key_iv));
 
-        err = rss_handshake_msg_receive(&MHU_RSS_TO_RSS_RECEIVER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_receive(&MHU_RSE_TO_RSE_RECEIVER_DEVS[msg0.header.rse_id],
                                         &session1, false);
         if (err != 0) {
             return err;
         }
 
-        err = rss_handshake_msg_send(&MHU_RSS_TO_RSS_SENDER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_send(&MHU_RSE_TO_RSE_SENDER_DEVS[msg0.header.rse_id],
                                      &session0, false);
         if (err != 0) {
             return err;
@@ -294,9 +294,9 @@ int32_t rss_handshake(void)
         memcpy(session_seed, session1.body.session_key_iv,
                sizeof(session1.body.session_key_iv));
 
-        err = rss_derive_session_key((uint8_t*)session_seed,
+        err = rse_derive_session_key((uint8_t*)session_seed,
                                      sizeof(session_seed),
-                                     RSS_KMU_SLOT_SESSION_KEY_0);
+                                     RSE_KMU_SLOT_SESSION_KEY_0);
         if (err) {
             return err;
         }
@@ -304,13 +304,13 @@ int32_t rss_handshake(void)
         memcpy(vhuk_seed + 32, msg0.body.vhuk_contribution,
                sizeof(msg0.body.vhuk_contribution));
 
-        err = rss_handshake_msg_receive(&MHU_RSS_TO_RSS_RECEIVER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_receive(&MHU_RSE_TO_RSE_RECEIVER_DEVS[msg0.header.rse_id],
                                         &msg1, true);
         if (err != 0) {
             return err;
         }
 
-        err = rss_handshake_msg_send(&MHU_RSS_TO_RSS_SENDER_DEVS[msg0.header.rss_id],
+        err = rse_handshake_msg_send(&MHU_RSE_TO_RSE_SENDER_DEVS[msg0.header.rse_id],
                                      &msg0, true);
         if (err != 0) {
             return err;
@@ -323,7 +323,7 @@ int32_t rss_handshake(void)
         return -1;
     }
 
-    err = rss_derive_vhuk((uint8_t *)vhuk_seed, sizeof(vhuk_seed), RSS_KMU_SLOT_VHUK);
+    err = rse_derive_vhuk((uint8_t *)vhuk_seed, sizeof(vhuk_seed), RSE_KMU_SLOT_VHUK);
     if (err) {
         return err;
     }

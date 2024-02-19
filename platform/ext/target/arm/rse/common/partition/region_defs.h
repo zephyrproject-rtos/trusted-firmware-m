@@ -22,7 +22,7 @@
 #include "flash_layout.h"
 #include "platform_base_address.h"
 
-/* RSS memory layout is as follows during BL1
+/* RSE memory layout is as follows during BL1
  *      |----------------------------------------|
  * DTCM | BOOT_SHARED | BL1_1_DATA | BL1_2_DATA  |
  *      |----------------------------------------|
@@ -41,7 +41,7 @@
  * If the size of VM0 and VM1 are larger than 64KiB, the size of BL1 code/data
  * and BL2 code can be increased to fill the extra space.
  *
- * RSS memory layout is as follows during BL2
+ * RSE memory layout is as follows during BL2
  *      |----------------------------------------|
  * DTCM | BOOT_SHARED |                          |
  *      |----------------------------------------|
@@ -57,7 +57,7 @@
  * increased to fill the extra space. Note that BL2 code is aligned to the start
  * of S_DATA, so under non-XIP mode it will not start at the beginning of VM0.
  *
- * RSS memory layout is as follows during Runtime with XIP mode enabled
+ * RSE memory layout is as follows during Runtime with XIP mode enabled
  *      |----------------------------------------|
  * DTCM | BOOT_SHARED |                          |
  *      |----------------------------------------|
@@ -69,7 +69,7 @@
  * VM1  | S_DATA                     | NS_DATA                   |
  *      |---------------------------------------------------------
  *
- * RSS memory layout is as follows during Runtime with XIP mode disabled. Note
+ * RSE memory layout is as follows during Runtime with XIP mode disabled. Note
  * that each SRAM must be at least 512KiB in this mode (64KiB data and 384KiB
  * code, for each of secure and non-secure).
  *      |----------------------------------------|
@@ -127,23 +127,23 @@
 
 /* Secure regions */
 /* Secure Code executes from VM0, or XIP from flash via the SIC */
-#ifdef RSS_XIP
-#define S_CODE_START    (RSS_RUNTIME_S_XIP_BASE_S)
+#ifdef RSE_XIP
+#define S_CODE_START    (RSE_RUNTIME_S_XIP_BASE_S)
 #define S_CODE_SIZE     (FLASH_S_PARTITION_SIZE)
 #else
 #define S_CODE_START    (S_IMAGE_LOAD_ADDRESS + BL2_HEADER_SIZE)
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 /* Secure Data stored in VM0. Size defined in flash layout */
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define S_DATA_START    (VM0_BASE_S)
 #define S_DATA_SIZE     (VM0_SIZE + (VM1_SIZE / 2))
 #else
 #define S_DATA_START    (VM0_BASE_S + FLASH_S_PARTITION_SIZE)
 #define S_DATA_SIZE     (VM0_SIZE - FLASH_S_PARTITION_SIZE)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* Size of vector table: 111 interrupt handlers + 4 bytes MSP initial value */
@@ -151,17 +151,17 @@
 
 /* Non-secure regions */
 /* Non-Secure Code executes from VM1, or XIP from flash via the SIC */
-#ifdef RSS_XIP
-#define NS_CODE_START   (RSS_RUNTIME_NS_XIP_BASE_NS)
+#ifdef RSE_XIP
+#define NS_CODE_START   (RSE_RUNTIME_NS_XIP_BASE_NS)
 #define NS_CODE_SIZE    (FLASH_NS_PARTITION_SIZE)
 #else
 #define NS_CODE_START   (NS_DATA_START + NS_DATA_SIZE + BL2_HEADER_SIZE)
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
 /* Non-Secure Data stored after secure data, or in VM1 if not in XIP mode. */
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define NS_DATA_START   (VM0_BASE_NS + S_DATA_SIZE)
 #define NS_DATA_SIZE    ((VM0_SIZE + VM1_SIZE) - S_DATA_SIZE)
 #else
@@ -171,11 +171,11 @@
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
-#ifdef RSS_XIP
-#define NS_PARTITION_START RSS_RUNTIME_NS_XIP_BASE_NS
+#ifdef RSE_XIP
+#define NS_PARTITION_START RSE_RUNTIME_NS_XIP_BASE_NS
 #else
 #define NS_PARTITION_START (NS_DATA_START + NS_DATA_SIZE)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 #define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE)
 
 #define SECONDARY_PARTITION_START (FWU_HOST_IMAGE_BASE_S)
@@ -203,7 +203,7 @@
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
 #if FLASH_BL2_PARTITION_SIZE + BL2_DATA_SIZE + XIP_TABLE_SIZE > VM0_SIZE + VM1_SIZE
-#error FLASH_BL2_PARTITION_SIZE + BL2_DATA_SIZE + 2 * FLASH_SIC_TABLE_SIZE is too large to fit in RSS SRAM
+#error FLASH_BL2_PARTITION_SIZE + BL2_DATA_SIZE + 2 * FLASH_SIC_TABLE_SIZE is too large to fit in RSE SRAM
 #endif
 
 /* BL1 data is in DTCM */

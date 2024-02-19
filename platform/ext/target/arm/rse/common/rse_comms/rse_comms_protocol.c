@@ -10,7 +10,7 @@
 #include "tfm_spm_log.h"
 #include <string.h>
 
-enum tfm_plat_err_t rss_protocol_deserialize_msg(
+enum tfm_plat_err_t rse_protocol_deserialize_msg(
         struct client_request_t *req, struct serialized_psa_msg_t *msg,
         size_t msg_len)
 {
@@ -23,24 +23,24 @@ enum tfm_plat_err_t rss_protocol_deserialize_msg(
     req->client_id = msg->header.client_id;
 
     switch (msg->header.protocol_ver) {
-#ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
-    case RSS_COMMS_PROTOCOL_EMBED:
+#ifdef RSE_COMMS_PROTOCOL_EMBED_ENABLED
+    case RSE_COMMS_PROTOCOL_EMBED:
         SPMLOG_DBGMSG("[COMMS] Deserializing as embed message\r\n");
-        return rss_protocol_embed_deserialize_msg(req, &msg->msg.embed,
-            msg_len - sizeof(struct serialized_rss_comms_header_t));
-#endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
-#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
-    case RSS_COMMS_PROTOCOL_POINTER_ACCESS:
+        return rse_protocol_embed_deserialize_msg(req, &msg->msg.embed,
+            msg_len - sizeof(struct serialized_rse_comms_header_t));
+#endif /* RSE_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSE_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+    case RSE_COMMS_PROTOCOL_POINTER_ACCESS:
         SPMLOG_DBGMSG("[COMMS] Deserializing as pointer_access message\r\n");
-        return rss_protocol_pointer_access_deserialize_msg(req, &msg->msg.pointer_access,
-                                               msg_len - sizeof(struct serialized_rss_comms_header_t));
+        return rse_protocol_pointer_access_deserialize_msg(req, &msg->msg.pointer_access,
+                                               msg_len - sizeof(struct serialized_rse_comms_header_t));
 #endif
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 }
 
-enum tfm_plat_err_t rss_protocol_serialize_reply(struct client_request_t *req,
+enum tfm_plat_err_t rse_protocol_serialize_reply(struct client_request_t *req,
         struct serialized_psa_reply_t *reply, size_t *reply_size)
 {
     enum tfm_plat_err_t err;
@@ -52,18 +52,18 @@ enum tfm_plat_err_t rss_protocol_serialize_reply(struct client_request_t *req,
     reply->header.client_id = req->client_id;
 
     switch (reply->header.protocol_ver) {
-#ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
-    case RSS_COMMS_PROTOCOL_EMBED:
-        err = rss_protocol_embed_serialize_reply(req, &reply->reply.embed,
+#ifdef RSE_COMMS_PROTOCOL_EMBED_ENABLED
+    case RSE_COMMS_PROTOCOL_EMBED:
+        err = rse_protocol_embed_serialize_reply(req, &reply->reply.embed,
                                                  reply_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
         break;
-#endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
-#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
-    case RSS_COMMS_PROTOCOL_POINTER_ACCESS:
-        err = rss_protocol_pointer_access_serialize_reply(req,
+#endif /* RSE_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSE_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+    case RSE_COMMS_PROTOCOL_POINTER_ACCESS:
+        err = rse_protocol_pointer_access_serialize_reply(req,
                 &reply->reply.pointer_access, reply_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
@@ -74,36 +74,36 @@ enum tfm_plat_err_t rss_protocol_serialize_reply(struct client_request_t *req,
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
-    *reply_size += sizeof(struct serialized_rss_comms_header_t);
+    *reply_size += sizeof(struct serialized_rse_comms_header_t);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t rss_protocol_serialize_error(
+enum tfm_plat_err_t rse_protocol_serialize_error(
         struct client_request_t *req,
-        struct serialized_rss_comms_header_t *header, psa_status_t error,
+        struct serialized_rse_comms_header_t *header, psa_status_t error,
         struct serialized_psa_reply_t *reply, size_t *reply_size)
 {
     enum tfm_plat_err_t err;
 
     memset(reply, 0, sizeof(struct serialized_psa_reply_t));
     memcpy(&reply->header, header,
-           sizeof(struct serialized_rss_comms_header_t));
+           sizeof(struct serialized_rse_comms_header_t));
 
     switch (reply->header.protocol_ver) {
-#ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
-    case RSS_COMMS_PROTOCOL_EMBED:
-        err = rss_protocol_embed_serialize_error(req, error,
+#ifdef RSE_COMMS_PROTOCOL_EMBED_ENABLED
+    case RSE_COMMS_PROTOCOL_EMBED:
+        err = rse_protocol_embed_serialize_error(req, error,
                                                  &reply->reply.embed,
                                                  reply_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
         break;
-#endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
-#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
-    case RSS_COMMS_PROTOCOL_POINTER_ACCESS:
-        err = rss_protocol_pointer_access_serialize_error(req, error,
+#endif /* RSE_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSE_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+    case RSE_COMMS_PROTOCOL_POINTER_ACCESS:
+        err = rse_protocol_pointer_access_serialize_error(req, error,
                 &reply->reply.pointer_access, reply_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
@@ -114,7 +114,7 @@ enum tfm_plat_err_t rss_protocol_serialize_error(
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
-    *reply_size += sizeof(struct serialized_rss_comms_header_t);
+    *reply_size += sizeof(struct serialized_rse_comms_header_t);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

@@ -18,7 +18,7 @@ void __Vectors(){}
 
 extern const struct cm_provisioning_data data;
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
@@ -56,7 +56,7 @@ static tfm_plat_err_t flash_write(uint8_t *buf, uint32_t size, uint32_t offset)
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) {
     enum tfm_plat_err_t err;
@@ -72,9 +72,9 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
-    err = tfm_plat_otp_write(PLAT_OTP_ID_RSS_ID,
-                             sizeof(data.rss_id),
-                             (const uint8_t *)&data.rss_id);
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RSE_ID,
+                             sizeof(data.rse_id),
+                             (const uint8_t *)&data.rse_id);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
@@ -91,7 +91,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
                              sizeof(data.bl1_2_image),
                              data.bl1_2_image);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
         if (err == TFM_PLAT_ERR_UNSUPPORTED) {
             err = flash_write((uint8_t *)data.bl1_2_image, bl1_2_len,
                               BL1_2_IMAGE_FLASH_OFFSET);
@@ -99,7 +99,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
                 return err;
             }
         }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
         return err;
     }
 

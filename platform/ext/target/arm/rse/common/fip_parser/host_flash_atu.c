@@ -17,11 +17,11 @@
 
 #include <string.h>
 
-#define RSS_ATU_REGION_TEMP_SLOT           2
-#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_0  3
-#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_1  4
-#define RSS_ATU_REGION_OUTPUT_IMAGE_SLOT   5
-#define RSS_ATU_REGION_OUTPUT_HEADER_SLOT  6
+#define RSE_ATU_REGION_TEMP_SLOT           2
+#define RSE_ATU_REGION_INPUT_IMAGE_SLOT_0  3
+#define RSE_ATU_REGION_INPUT_IMAGE_SLOT_1  4
+#define RSE_ATU_REGION_OUTPUT_IMAGE_SLOT   5
+#define RSE_ATU_REGION_OUTPUT_HEADER_SLOT  6
 
 static inline uint32_t round_down(uint32_t num, uint32_t boundary)
 {
@@ -90,7 +90,7 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
      * we just map 0x1000.
      */
     rc = setup_aligned_atu_slot(physical_address, 0x1000, page_size,
-                                RSS_ATU_REGION_TEMP_SLOT,
+                                RSE_ATU_REGION_TEMP_SLOT,
                                 HOST_FLASH0_TEMP_BASE_S, &alignment_offset,
                                 &atu_slot_size);
     if (rc) {
@@ -104,7 +104,7 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
         return rc;
     }
 
-    err = atu_uninitialize_region(&ATU_DEV_S, RSS_ATU_REGION_TEMP_SLOT);
+    err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_REGION_TEMP_SLOT);
     if (err != ATU_ERR_NONE) {
         return 1;
     }
@@ -129,7 +129,7 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
 
 int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
 {
-#ifdef RSS_GPT_SUPPORT
+#ifdef RSE_GPT_SUPPORT
     int rc;
     enum atu_error_t err;
     gpt_header_t header;
@@ -138,12 +138,12 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     uint64_t physical_address;
     uint32_t alignment_offset;
     size_t atu_slot_size;
-#endif /* RSS_GPT_SUPPORT */
+#endif /* RSE_GPT_SUPPORT */
 
-#ifdef RSS_GPT_SUPPORT
+#ifdef RSE_GPT_SUPPORT
     physical_address = HOST_FLASH0_BASE + FLASH_LBA_SIZE;
     rc = setup_aligned_atu_slot(physical_address, FLASH_LBA_SIZE,
-                                page_size, RSS_ATU_REGION_TEMP_SLOT,
+                                page_size, RSE_ATU_REGION_TEMP_SLOT,
                                 HOST_FLASH0_TEMP_BASE_S, &alignment_offset,
                                 &atu_slot_size);
     if (rc) {
@@ -157,7 +157,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     }
 
     err = atu_uninitialize_region(&ATU_DEV_S,
-                                  RSS_ATU_REGION_TEMP_SLOT);
+                                  RSE_ATU_REGION_TEMP_SLOT);
     if (err != ATU_ERR_NONE) {
         return 1;
     }
@@ -166,7 +166,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
                        + header.list_lba * FLASH_LBA_SIZE;
     rc = setup_aligned_atu_slot(physical_address,
                                 header.list_entry_size * header.list_num, page_size,
-                                RSS_ATU_REGION_TEMP_SLOT,
+                                RSE_ATU_REGION_TEMP_SLOT,
                                 HOST_FLASH0_TEMP_BASE_S, &alignment_offset,
                                 &atu_slot_size);
     if (rc) {
@@ -198,7 +198,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     }
 
     err = atu_uninitialize_region(&ATU_DEV_S,
-                                  RSS_ATU_REGION_TEMP_SLOT);
+                                  RSE_ATU_REGION_TEMP_SLOT);
     if (err != ATU_ERR_NONE) {
         return 1;
     }
@@ -207,7 +207,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     fip_offsets[0] = FLASH_FIP_A_OFFSET;
     fip_found[1] = true;
     fip_offsets[1] = FLASH_FIP_B_OFFSET;
-#endif /* RSS_GPT_SUPPORT */
+#endif /* RSE_GPT_SUPPORT */
 
     return 0;
 }
@@ -236,7 +236,7 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     }
 
     rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[0],
-                                          RSS_ATU_REGION_INPUT_IMAGE_SLOT_0,
+                                          RSE_ATU_REGION_INPUT_IMAGE_SLOT_0,
                                           HOST_FLASH0_IMAGE0_BASE_S, image_uuid,
                                           &offsets[0], NULL);
     if (rc == 0) {
@@ -244,7 +244,7 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     }
 
     rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[1],
-                                          RSS_ATU_REGION_INPUT_IMAGE_SLOT_1,
+                                          RSE_ATU_REGION_INPUT_IMAGE_SLOT_1,
                                           HOST_FLASH0_IMAGE1_BASE_S, image_uuid,
                                           &offsets[1], NULL);
     if (rc == 0) {
@@ -260,7 +260,7 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
      */
     if (fip_mapped[0] && !fip_mapped[1]) {
         rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[0],
-                                              RSS_ATU_REGION_INPUT_IMAGE_SLOT_1,
+                                              RSE_ATU_REGION_INPUT_IMAGE_SLOT_1,
                                               HOST_FLASH0_IMAGE1_BASE_S,
                                               image_uuid, &offsets[1], NULL);
         if (rc) {
@@ -268,7 +268,7 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
         }
     } else if (fip_mapped[1] && !fip_mapped[0]) {
         rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[1],
-                                              RSS_ATU_REGION_INPUT_IMAGE_SLOT_0,
+                                              RSE_ATU_REGION_INPUT_IMAGE_SLOT_0,
                                               HOST_FLASH0_IMAGE0_BASE_S,
                                               image_uuid, &offsets[0], NULL);
         if (rc) {
@@ -286,11 +286,11 @@ static int setup_image_output_slots(uuid_t image_uuid)
     uuid_t case_uuid;
     enum atu_error_t atu_err;
 
-    case_uuid = UUID_RSS_FIRMWARE_SCP_BL1;
+    case_uuid = UUID_RSE_FIRMWARE_SCP_BL1;
     if (memcmp(&image_uuid, &case_uuid, sizeof(uuid_t)) == 0) {
         /* Initialize SCP ATU header region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
-                                        RSS_ATU_REGION_OUTPUT_HEADER_SLOT,
+                                        RSE_ATU_REGION_OUTPUT_HEADER_SLOT,
                                         HOST_BOOT_IMAGE1_LOAD_BASE_S,
                                         SCP_BOOT_SRAM_BASE + SCP_BOOT_SRAM_SIZE
                                         - HOST_IMAGE_HEADER_SIZE,
@@ -301,7 +301,7 @@ static int setup_image_output_slots(uuid_t image_uuid)
 
         /* Initialize SCP ATU output region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
-                                        RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
+                                        RSE_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_IMAGE1_LOAD_BASE_S + HOST_IMAGE_HEADER_SIZE,
                                         SCP_BOOT_SRAM_BASE,
                                         SCP_BOOT_SRAM_SIZE - HOST_IMAGE_HEADER_SIZE);
@@ -312,11 +312,11 @@ static int setup_image_output_slots(uuid_t image_uuid)
         return 0;
     }
 
-    case_uuid = UUID_RSS_FIRMWARE_AP_BL1;
+    case_uuid = UUID_RSE_FIRMWARE_AP_BL1;
     if (memcmp(&image_uuid, &case_uuid, sizeof(uuid_t)) == 0) {
         /* Initialize AP ATU header region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
-                                        RSS_ATU_REGION_OUTPUT_HEADER_SLOT,
+                                        RSE_ATU_REGION_OUTPUT_HEADER_SLOT,
                                         HOST_BOOT_IMAGE0_LOAD_BASE_S,
                                         AP_BOOT_SRAM_BASE + AP_BOOT_SRAM_SIZE
                                         - HOST_IMAGE_HEADER_SIZE,
@@ -326,7 +326,7 @@ static int setup_image_output_slots(uuid_t image_uuid)
         }
         /* Initialize AP ATU region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
-                                        RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
+                                        RSE_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_IMAGE0_LOAD_BASE_S + HOST_IMAGE_HEADER_SIZE,
                                         AP_BOOT_SRAM_BASE,
                                         AP_BOOT_SRAM_SIZE - HOST_IMAGE_HEADER_SIZE);
@@ -362,25 +362,25 @@ int host_flash_atu_uninit_regions(void)
     enum atu_error_t atu_err;
 
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
-                                      RSS_ATU_REGION_INPUT_IMAGE_SLOT_0);
+                                      RSE_ATU_REGION_INPUT_IMAGE_SLOT_0);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
     }
 
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
-                                      RSS_ATU_REGION_INPUT_IMAGE_SLOT_1);
+                                      RSE_ATU_REGION_INPUT_IMAGE_SLOT_1);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
     }
 
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
-                                      RSS_ATU_REGION_OUTPUT_IMAGE_SLOT);
+                                      RSE_ATU_REGION_OUTPUT_IMAGE_SLOT);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
     }
 
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
-                                      RSS_ATU_REGION_OUTPUT_HEADER_SLOT);
+                                      RSE_ATU_REGION_OUTPUT_HEADER_SLOT);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
     }

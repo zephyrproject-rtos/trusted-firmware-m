@@ -61,7 +61,7 @@ parser.add_argument("--provisioning_values", help="the input provisioning values
 parser.add_argument("--magic", help="the magic constant to insert at the start and end", required=True)
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=False)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=False)
-parser.add_argument("--rss_id", help="the ID of the RSS", required=False)
+parser.add_argument("--rse_id", help="the ID of the RSE", required=False)
 parser.add_argument("--tp_mode", help="the test or production mode", required=True)
 parser.add_argument("--otp_dma_ics_input_file", help="OTP DMA ICS input file", required=False)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=False)
@@ -109,10 +109,10 @@ if args.otp_dma_ics_input_file:
 else:
     otp_dma_ics = bytes(0)
 
-if args.rss_id != None:
-    rss_id = int(args.rss_id, 0).to_bytes(4, 'little')
+if args.rse_id != None:
+    rse_id = int(args.rse_id, 0).to_bytes(4, 'little')
 else:
-    rss_id = bytes(0)
+    rse_id = bytes(0)
 
 if args.scp_data_input_file:
     with open(args.scp_data_input_file, "rb") as in_file:
@@ -125,7 +125,7 @@ patch_bundle = struct_pack([
     bl1_2,
     otp_dma_ics,
     scp_data,
-    rss_id,
+    rse_id,
 ])
 
 code = struct_pack([code], pad_to=0xB000)

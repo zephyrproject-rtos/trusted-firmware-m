@@ -73,22 +73,22 @@ static int boot_platform_post_load_non_secure(void)
  * Array of function pointers to call before each image is loaded indexed by
  * image id
  */
-static int (*boot_platform_pre_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
-    [RSS_FIRMWARE_SECURE_ID]        = boot_platform_pre_load_secure,
-#ifdef RSS_LOAD_NS_IMAGE
-    [RSS_FIRMWARE_NON_SECURE_ID]    = boot_platform_pre_load_non_secure,
-#endif /* RSS_LOAD_NS_IMAGE */
+static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
+    [RSE_FIRMWARE_SECURE_ID]        = boot_platform_pre_load_secure,
+#ifdef RSE_LOAD_NS_IMAGE
+    [RSE_FIRMWARE_NON_SECURE_ID]    = boot_platform_pre_load_non_secure,
+#endif /* RSE_LOAD_NS_IMAGE */
 };
 
 /*
  * Array of function pointers to call after each image is loaded indexed by
  * image id
  */
-static int (*boot_platform_post_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
-    [RSS_FIRMWARE_SECURE_ID]        = boot_platform_post_load_secure,
-#ifdef RSS_LOAD_NS_IMAGE
-    [RSS_FIRMWARE_NON_SECURE_ID]    = boot_platform_post_load_non_secure,
-#endif /* RSS_LOAD_NS_IMAGE */
+static int (*boot_platform_post_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
+    [RSE_FIRMWARE_SECURE_ID]        = boot_platform_post_load_secure,
+#ifdef RSE_LOAD_NS_IMAGE
+    [RSE_FIRMWARE_NON_SECURE_ID]    = boot_platform_post_load_non_secure,
+#endif /* RSE_LOAD_NS_IMAGE */
 };
 
 /*
@@ -97,7 +97,7 @@ static int (*boot_platform_post_load_vector[RSS_FIRMWARE_COUNT]) (void) = {
 
 int boot_platform_pre_load(uint32_t image_id)
 {
-    if (image_id >= RSS_FIRMWARE_COUNT) {
+    if (image_id >= RSE_FIRMWARE_COUNT) {
         BOOT_LOG_WRN("BL2: no pre load for image %d", image_id);
         return 0;
     }
@@ -107,7 +107,7 @@ int boot_platform_pre_load(uint32_t image_id)
 
 int boot_platform_post_load(uint32_t image_id)
 {
-    if (image_id >= RSS_FIRMWARE_COUNT) {
+    if (image_id >= RSE_FIRMWARE_COUNT) {
         BOOT_LOG_WRN("BL2: no post load for image %d", image_id);
         return 0;
     }
@@ -117,15 +117,15 @@ int boot_platform_post_load(uint32_t image_id)
 
 bool boot_platform_should_load_image(uint32_t image_id)
 {
-#ifndef RSS_LOAD_NS_IMAGE
-    if (image_id == RSS_FIRMWARE_NON_SECURE_ID) {
+#ifndef RSE_LOAD_NS_IMAGE
+    if (image_id == RSE_FIRMWARE_NON_SECURE_ID) {
         return false;
     }
-#endif /* RSS_LOAD_NS_IMAGE */
+#endif /* RSE_LOAD_NS_IMAGE */
 
-    if (image_id >= RSS_FIRMWARE_COUNT) {
+    if (image_id >= RSE_FIRMWARE_COUNT) {
         BOOT_LOG_WRN("BL2: Image %d beyond expected Firmware count: %d",
-                image_id, RSS_FIRMWARE_COUNT);
+                image_id, RSE_FIRMWARE_COUNT);
         return false;
     }
 

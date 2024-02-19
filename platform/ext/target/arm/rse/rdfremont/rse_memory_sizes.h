@@ -22,7 +22,7 @@
 
 #define BOOT_FLASH_SIZE    0x800000 /* 8MB */
 
-/* The total size of the OTP for the RSS */
+/* The total size of the OTP for the RSE */
 #define OTP_TOTAL_SIZE     0x4000 /* 16 KiB */
 /*
  * How much OTP is reserved for the portion of the DMA Initial Command Sequence

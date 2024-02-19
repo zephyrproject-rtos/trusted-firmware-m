@@ -19,7 +19,7 @@ extern "C" {
  * \brief                    Parse a FIP and retrieve the offset and size of one
  *                           of the firmware images (specified by UUID).
  *
- * \param[in]  fip_base      The RSS address mapped to the FIP base address in
+ * \param[in]  fip_base      The RSE address mapped to the FIP base address in
  *                           host flash.
  * \param[in]  atu_slot_size The size of the ATU region that was mapped for
  *                           access to this FIP. This is used to prevent reads

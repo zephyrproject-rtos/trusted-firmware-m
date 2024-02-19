@@ -216,7 +216,7 @@ uint32_t sic_page_count_get(struct sic_dev_t *dev);
  * \param[in]  digest_config The configuration value for the hash digest the SIC
  *                           should use, as a sic_digest_config_t.
  *
- * \param[in]  base          The RSS address which should be the start of the
+ * \param[in]  base          The RSE address which should be the start of the
  *                           authentication region.
  *
  * \param[in]  size          The size in bytes of the authentication region.
@@ -334,7 +334,7 @@ enum sic_error_t sic_decrypt_init(struct sic_dev_t *dev,
  *
  * \param[in]  region_idx  Which decryption region should be enabled.
  *
- * \param[in]  base        The RSS address of the start of the decryption
+ * \param[in]  base        The RSE address of the start of the decryption
  *                         region.
  * \param[in]  size        The size in bytes of the decryption region.
  * \param[in]  fw_revision The firmware revision of the image pointed to by the

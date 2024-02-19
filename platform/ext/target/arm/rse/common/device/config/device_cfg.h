@@ -25,50 +25,50 @@
  */
 
 #include "host_device_cfg.h"
-#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#ifdef RSE_HAS_EXPANSION_PERIPHERALS
 #include "rse_expansion_device_cfg.h"
-#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+#endif /* RSE_HAS_EXPANSION_PERIPHERALS */
 
-#ifdef RSS_DEBUG_UART
+#ifdef RSE_DEBUG_UART
 /* ARM UART CMSDK */
 #define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
 #define UART0_CMSDK_S
 #define UART0_CMSDK_NS
-#endif /* RSS_DEBUG_UART */
+#endif /* RSE_DEBUG_UART */
 
 /* ARM Memory Protection Controller (MPC) */
 #define MPC_VM0_S
 #define MPC_VM1_S
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define MPC_SIC_S
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 /* ARM Peripheral Protection Controllers (PPC) */
-#define PPC_RSS_MAIN0_S
-#define PPC_RSS_MAIN_EXP0_S
-#define PPC_RSS_MAIN_EXP1_S
-#define PPC_RSS_MAIN_EXP2_S
-#define PPC_RSS_MAIN_EXP3_S
-#define PPC_RSS_PERIPH0_S
-#define PPC_RSS_PERIPH1_S
-#define PPC_RSS_PERIPH_EXP0_S
-#define PPC_RSS_PERIPH_EXP1_S
-#define PPC_RSS_PERIPH_EXP2_S
-#define PPC_RSS_PERIPH_EXP3_S
+#define PPC_RSE_MAIN0_S
+#define PPC_RSE_MAIN_EXP0_S
+#define PPC_RSE_MAIN_EXP1_S
+#define PPC_RSE_MAIN_EXP2_S
+#define PPC_RSE_MAIN_EXP3_S
+#define PPC_RSE_PERIPH0_S
+#define PPC_RSE_PERIPH1_S
+#define PPC_RSE_PERIPH_EXP0_S
+#define PPC_RSE_PERIPH_EXP1_S
+#define PPC_RSE_PERIPH_EXP2_S
+#define PPC_RSE_PERIPH_EXP3_S
 
 /* ARM ATU */
 #define ATU_S
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 /* ARM SIC */
 #define SIC_S
 #endif
 
 /* ARM TRAM */
-#ifdef RSS_ENABLE_TRAM
+#ifdef RSE_ENABLE_TRAM
 #define TRAM_S
-#endif /* RSS_ENABLE_TRAM */
+#endif /* RSE_ENABLE_TRAM */
 
 /* ARM Integrity Checker */
 #define INTEGRITY_CHECKER_S

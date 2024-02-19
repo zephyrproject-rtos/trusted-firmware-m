@@ -49,34 +49,34 @@ extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH;
 #endif
 
 /* Message Handling Units (MHU) */
-#ifdef MHU_AP_MONITOR_TO_RSS
+#ifdef MHU_AP_MONITOR_TO_RSE
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_AP_MONITOR_TO_RSS_DEV;
+extern struct mhu_v2_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV;
 #endif
 
-#ifdef MHU_RSS_TO_AP_MONITOR
+#ifdef MHU_RSE_TO_AP_MONITOR
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_MONITOR_DEV;
+extern struct mhu_v2_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV;
 #endif
 
-#ifdef MHU_AP_NS_TO_RSS
+#ifdef MHU_AP_NS_TO_RSE
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_AP_NS_TO_RSS_DEV;
+extern struct mhu_v2_x_dev_t MHU_AP_NS_TO_RSE_DEV;
 #endif
 
-#ifdef MHU_RSS_TO_AP_NS
+#ifdef MHU_RSE_TO_AP_NS
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_NS_DEV;
+extern struct mhu_v2_x_dev_t MHU_RSE_TO_AP_NS_DEV;
 #endif
 
-#ifdef MHU_SCP_TO_RSS
+#ifdef MHU_SCP_TO_RSE
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV;
+extern struct mhu_v2_x_dev_t MHU_SCP_TO_RSE_DEV;
 #endif
 
-#ifdef MHU_RSS_TO_SCP
+#ifdef MHU_RSE_TO_SCP
 #include "mhu_v2_x.h"
-extern struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV;
+extern struct mhu_v2_x_dev_t MHU_RSE_TO_SCP_DEV;
 #endif
 
 #ifdef __cplusplus

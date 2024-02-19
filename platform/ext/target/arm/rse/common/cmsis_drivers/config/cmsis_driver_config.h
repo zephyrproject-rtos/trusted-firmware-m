@@ -21,31 +21,31 @@
 #include "device_definition.h"
 #include "RTE_Device.h"
 #include "host_cmsis_driver_config.h"
-#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#ifdef RSE_HAS_EXPANSION_PERIPHERALS
 #include "rse_expansion_cmsis_driver_config.h"
-#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+#endif /* RSE_HAS_EXPANSION_PERIPHERALS */
 
 
-#ifdef RSS_DEBUG_UART
+#ifdef RSE_DEBUG_UART
 #define UART0_DEV                    UART0_CMSDK_DEV_NS
-#endif /* RSS_DEBUG_UART */
+#endif /* RSE_DEBUG_UART */
 
 #define MPC_VM0_DEV                  MPC_VM0_DEV_S
 #define MPC_VM1_DEV                  MPC_VM1_DEV_S
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define MPC_SIC_DEV                  MPC_SIC_DEV_S
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
-#define PPC_RSS_MAIN0_DEV            PPC_RSS_MAIN0_DEV_S
-#define PPC_RSS_MAIN_EXP0_DEV        PPC_RSS_MAIN_EXP0_DEV_S
-#define PPC_RSS_MAIN_EXP1_DEV        PPC_RSS_MAIN_EXP1_DEV_S
-#define PPC_RSS_MAIN_EXP2_DEV        PPC_RSS_MAIN_EXP2_DEV_S
-#define PPC_RSS_MAIN_EXP3_DEV        PPC_RSS_MAIN_EXP3_DEV_S
-#define PPC_RSS_PERIPH0_DEV          PPC_RSS_PERIPH0_DEV_S
-#define PPC_RSS_PERIPH1_DEV          PPC_RSS_PERIPH1_DEV_S
-#define PPC_RSS_PERIPH_EXP0_DEV      PPC_RSS_PERIPH_EXP0_DEV_S
-#define PPC_RSS_PERIPH_EXP1_DEV      PPC_RSS_PERIPH_EXP1_DEV_S
-#define PPC_RSS_PERIPH_EXP2_DEV      PPC_RSS_PERIPH_EXP2_DEV_S
-#define PPC_RSS_PERIPH_EXP3_DEV      PPC_RSS_PERIPH_EXP3_DEV_S
+#define PPC_RSE_MAIN0_DEV            PPC_RSE_MAIN0_DEV_S
+#define PPC_RSE_MAIN_EXP0_DEV        PPC_RSE_MAIN_EXP0_DEV_S
+#define PPC_RSE_MAIN_EXP1_DEV        PPC_RSE_MAIN_EXP1_DEV_S
+#define PPC_RSE_MAIN_EXP2_DEV        PPC_RSE_MAIN_EXP2_DEV_S
+#define PPC_RSE_MAIN_EXP3_DEV        PPC_RSE_MAIN_EXP3_DEV_S
+#define PPC_RSE_PERIPH0_DEV          PPC_RSE_PERIPH0_DEV_S
+#define PPC_RSE_PERIPH1_DEV          PPC_RSE_PERIPH1_DEV_S
+#define PPC_RSE_PERIPH_EXP0_DEV      PPC_RSE_PERIPH_EXP0_DEV_S
+#define PPC_RSE_PERIPH_EXP1_DEV      PPC_RSE_PERIPH_EXP1_DEV_S
+#define PPC_RSE_PERIPH_EXP2_DEV      PPC_RSE_PERIPH_EXP2_DEV_S
+#define PPC_RSE_PERIPH_EXP3_DEV      PPC_RSE_PERIPH_EXP3_DEV_S
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

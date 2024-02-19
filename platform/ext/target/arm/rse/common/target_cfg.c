@@ -39,12 +39,12 @@ REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif
 
 const struct memory_region_limits memory_regions = {
-#ifdef RSS_XIP
-    .non_secure_code_start = RSS_RUNTIME_NS_XIP_BASE_NS,
+#ifdef RSE_XIP
+    .non_secure_code_start = RSE_RUNTIME_NS_XIP_BASE_NS,
 
-    .non_secure_partition_base = RSS_RUNTIME_NS_XIP_BASE_NS,
+    .non_secure_partition_base = RSE_RUNTIME_NS_XIP_BASE_NS,
 
-    .non_secure_partition_limit = RSS_RUNTIME_NS_XIP_BASE_NS +
+    .non_secure_partition_limit = RSE_RUNTIME_NS_XIP_BASE_NS +
                                   NS_PARTITION_SIZE - 1,
 #else
     .non_secure_code_start =
@@ -57,7 +57,7 @@ const struct memory_region_limits memory_regions = {
     .non_secure_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 #ifdef CONFIG_TFM_USE_TRUSTZONE
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
@@ -107,17 +107,17 @@ extern ARM_DRIVER_MPC Driver_VM1_MPC;
 extern ARM_DRIVER_MPC Driver_SIC_MPC;
 
 /* Import PPC drivers */
-extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN0;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN_EXP0;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN_EXP1;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN_EXP2;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN_EXP3;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH0;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH1;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH_EXP0;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH_EXP1;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH_EXP2;
-extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH_EXP3;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN0;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP0;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP1;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP2;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP3;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH0;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH1;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP0;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP1;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP2;
+extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP3;
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
@@ -144,18 +144,18 @@ extern DRIVER_PPC_RSS Driver_PPC_RSS_PERIPH_EXP3;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-static DRIVER_PPC_RSS *const ppc_bank_drivers[] = {
-    &Driver_PPC_RSS_MAIN0,
-    &Driver_PPC_RSS_MAIN_EXP0,
-    &Driver_PPC_RSS_MAIN_EXP1,
-    &Driver_PPC_RSS_MAIN_EXP2,
-    &Driver_PPC_RSS_MAIN_EXP3,
-    &Driver_PPC_RSS_PERIPH0,
-    &Driver_PPC_RSS_PERIPH1,
-    &Driver_PPC_RSS_PERIPH_EXP0,
-    &Driver_PPC_RSS_PERIPH_EXP1,
-    &Driver_PPC_RSS_PERIPH_EXP2,
-    &Driver_PPC_RSS_PERIPH_EXP3,
+static DRIVER_PPC_RSE *const ppc_bank_drivers[] = {
+    &Driver_PPC_RSE_MAIN0,
+    &Driver_PPC_RSE_MAIN_EXP0,
+    &Driver_PPC_RSE_MAIN_EXP1,
+    &Driver_PPC_RSE_MAIN_EXP2,
+    &Driver_PPC_RSE_MAIN_EXP3,
+    &Driver_PPC_RSE_PERIPH0,
+    &Driver_PPC_RSE_PERIPH1,
+    &Driver_PPC_RSE_PERIPH_EXP0,
+    &Driver_PPC_RSE_PERIPH_EXP1,
+    &Driver_PPC_RSE_PERIPH_EXP2,
+    &Driver_PPC_RSE_PERIPH_EXP3,
 };
 
 #define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
@@ -175,7 +175,7 @@ enum tfm_plat_err_t enable_fault_handlers(void)
 
 enum tfm_plat_err_t system_reset_cfg(void)
 {
-    struct rss_sysctrl_t *sysctrl = (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
+    struct rse_sysctrl_t *sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
     uint32_t reg_value = SCB->AIRCR;
 
     /* Enable system reset request for CPU 0, to be triggered via
@@ -285,7 +285,7 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
 enum tfm_plat_err_t init_debug(void)
 {
-    struct rss_sysctrl_t *sysctrl = (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
+    struct rse_sysctrl_t *sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
 
 #if defined(DAUTH_NONE)
     /* Set all the debug enable selector bits to 1 */
@@ -324,7 +324,7 @@ enum tfm_plat_err_t init_debug(void)
 /*------------------- SAU/IDAU configuration functions -----------------------*/
 void sau_and_idau_cfg(void)
 {
-    struct rss_sacfg_t *sacfg = (struct rss_sacfg_t *)RSS_SACFG_BASE_S;
+    struct rse_sacfg_t *sacfg = (struct rse_sacfg_t *)RSE_SACFG_BASE_S;
 
     /* Ensure all memory accesses are completed */
     __DMB();
@@ -388,12 +388,12 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     ret = Driver_SIC_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
     /* Configuring primary non-secure partition.
      * It is ensured in flash_layout.h that these memory regions are located in
@@ -406,7 +406,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     ret = Driver_SIC_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
@@ -414,7 +414,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     ret = Driver_VM1_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
-#endif /* !RSS_XIP */
+#endif /* !RSE_XIP */
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -429,12 +429,12 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     ret = Driver_SIC_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -449,29 +449,29 @@ void mpc_clear_irq(void)
 {
     Driver_VM0_MPC.ClearInterrupt();
     Driver_VM1_MPC.ClearInterrupt();
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     Driver_SIC_MPC.ClearInterrupt();
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 }
 
 /*------------------- PPC configuration functions -------------------------*/
 enum tfm_plat_err_t ppc_init_cfg(void)
 {
-    struct rss_sacfg_t *sacfg = (struct rss_sacfg_t *)RSS_SACFG_BASE_S;
+    struct rse_sacfg_t *sacfg = (struct rse_sacfg_t *)RSE_SACFG_BASE_S;
     int32_t err = ARM_DRIVER_OK;
 
     /* Initialize not used PPC drivers */
-    err |= Driver_PPC_RSS_MAIN0.Initialize();
-    err |= Driver_PPC_RSS_MAIN_EXP0.Initialize();
-    err |= Driver_PPC_RSS_MAIN_EXP1.Initialize();
-    err |= Driver_PPC_RSS_MAIN_EXP2.Initialize();
-    err |= Driver_PPC_RSS_MAIN_EXP3.Initialize();
-    err |= Driver_PPC_RSS_PERIPH0.Initialize();
-    err |= Driver_PPC_RSS_PERIPH1.Initialize();
-    err |= Driver_PPC_RSS_PERIPH_EXP0.Initialize();
-    err |= Driver_PPC_RSS_PERIPH_EXP1.Initialize();
-    err |= Driver_PPC_RSS_PERIPH_EXP2.Initialize();
-    err |= Driver_PPC_RSS_PERIPH_EXP3.Initialize();
+    err |= Driver_PPC_RSE_MAIN0.Initialize();
+    err |= Driver_PPC_RSE_MAIN_EXP0.Initialize();
+    err |= Driver_PPC_RSE_MAIN_EXP1.Initialize();
+    err |= Driver_PPC_RSE_MAIN_EXP2.Initialize();
+    err |= Driver_PPC_RSE_MAIN_EXP3.Initialize();
+    err |= Driver_PPC_RSE_PERIPH0.Initialize();
+    err |= Driver_PPC_RSE_PERIPH1.Initialize();
+    err |= Driver_PPC_RSE_PERIPH_EXP0.Initialize();
+    err |= Driver_PPC_RSE_PERIPH_EXP1.Initialize();
+    err |= Driver_PPC_RSE_PERIPH_EXP2.Initialize();
+    err |= Driver_PPC_RSE_PERIPH_EXP3.Initialize();
 
     /*
      * Configure the response to a security violation as a
@@ -488,7 +488,7 @@ enum tfm_plat_err_t ppc_init_cfg(void)
 
 void ppc_configure_to_secure(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSS *ppc_driver;
+    DRIVER_PPC_RSE *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -496,13 +496,13 @@ void ppc_configure_to_secure(ppc_bank_t bank, uint32_t pos)
 
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, PPC_RSS_SECURE_CONFIG);
+        ppc_driver->ConfigSecurity(pos, PPC_RSE_SECURE_CONFIG);
     }
 }
 
 void ppc_configure_to_non_secure(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSS *ppc_driver;
+    DRIVER_PPC_RSE *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -510,13 +510,13 @@ void ppc_configure_to_non_secure(ppc_bank_t bank, uint32_t pos)
 
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, PPC_RSS_NONSECURE_CONFIG);
+        ppc_driver->ConfigSecurity(pos, PPC_RSE_NONSECURE_CONFIG);
     }
 }
 
 void ppc_en_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSS *ppc_driver;
+    DRIVER_PPC_RSE *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -525,14 +525,14 @@ void ppc_en_secure_unpriv(ppc_bank_t bank, uint32_t pos)
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
         ppc_driver->ConfigPrivilege(pos,
-                                    PPC_RSS_SECURE_CONFIG,
-                                    PPC_RSS_PRIV_AND_NONPRIV_CONFIG);
+                                    PPC_RSE_SECURE_CONFIG,
+                                    PPC_RSE_PRIV_AND_NONPRIV_CONFIG);
     }
 }
 
 void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSS *ppc_driver;
+    DRIVER_PPC_RSE *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -541,8 +541,8 @@ void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos)
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
         ppc_driver->ConfigPrivilege(pos,
-                                    PPC_RSS_SECURE_CONFIG,
-                                    PPC_RSS_PRIV_CONFIG);
+                                    PPC_RSE_SECURE_CONFIG,
+                                    PPC_RSE_PRIV_CONFIG);
     }
 }
 

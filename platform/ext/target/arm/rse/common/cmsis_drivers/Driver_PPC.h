@@ -27,47 +27,47 @@ extern "C" {
 #define ARM_PPC_API_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,0)
 
 /* Security attribute used to configure the peripheral */
-typedef enum _PPC_RSS_SecAttr {
-    PPC_RSS_SECURE_CONFIG = 0,    /*!< Secure access */
-    PPC_RSS_NONSECURE_CONFIG,     /*!< Non-secure access */
-} PPC_RSS_SecAttr;
+typedef enum _PPC_RSE_SecAttr {
+    PPC_RSE_SECURE_CONFIG = 0,    /*!< Secure access */
+    PPC_RSE_NONSECURE_CONFIG,     /*!< Non-secure access */
+} PPC_RSE_SecAttr;
 
 /* Privilege attribute used to configure the peripheral */
-typedef enum _PPC_RSS_PrivAttr {
-    PPC_RSS_PRIV_AND_NONPRIV_CONFIG = 0, /*!< Privilege and non-privilege
+typedef enum _PPC_RSE_PrivAttr {
+    PPC_RSE_PRIV_AND_NONPRIV_CONFIG = 0, /*!< Privilege and non-privilege
                                              * access */
-    PPC_RSS_PRIV_CONFIG,                 /*!< Privilege only access */
-} PPC_RSS_PrivAttr;
+    PPC_RSE_PRIV_CONFIG,                 /*!< Privilege only access */
+} PPC_RSE_PrivAttr;
 
 /* Function descriptions */
 /**
   SACFG  - Secure Privilege Control Block
   NSACFG - Non-Secure Privilege Control Block
 
-  \fn          ARM_DRIVER_VERSION PPC_RSS_GetVersion(void)
+  \fn          ARM_DRIVER_VERSION PPC_RSE_GetVersion(void)
   \brief       Get driver version.
   \return      \ref ARM_DRIVER_VERSION
 
-  \fn          int32_t PPC_RSS_Initialize(void)
+  \fn          int32_t PPC_RSE_Initialize(void)
   \brief       Initializes PPC Interface.
-  \return      Returns RSS PPC error code.
+  \return      Returns RSE PPC error code.
 
-  \fn          int32_t PPC_RSS_Uninitialize(void)
+  \fn          int32_t PPC_RSE_Uninitialize(void)
   \brief       De-initializes PPC Interface.
-  \return      Returns RSS PPC error code.
+  \return      Returns RSE PPC error code.
 
-  \fn          int32_t PPC_RSS_ConfigPrivilege(uint32_t periph,
-                                                  PPC_RSS_SecAttr sec_attr,
-                                                  PPC_RSS_PrivAttr priv_attr)
+  \fn          int32_t PPC_RSE_ConfigPrivilege(uint32_t periph,
+                                                  PPC_RSE_SecAttr sec_attr,
+                                                  PPC_RSE_PrivAttr priv_attr)
   \brief       Configures privilege level with privileged and unprivileged
                access or privileged access only in the given security domain
                for a peripheral controlled by the given PPC.
   \param[in]   periph:     Peripheral mask for SACFG and NSACFG registers.
   \param[in]   sec_attr:   Specifies Secure or Non Secure domain.
   \param[in]   priv_attr:  Privilege attribute value to set.
-  \return      Returns RSS PPC error code.
+  \return      Returns RSE PPC error code.
 
-  \fn          bool PPC_RSS_IsPeriphPrivOnly (uint32_t periph)
+  \fn          bool PPC_RSE_IsPeriphPrivOnly (uint32_t periph)
   \brief       Checks if the peripheral is configured to be privilege only
                 - with non-secure caller in the non-secure domain
                 - with secure caller in the configured security domain
@@ -77,31 +77,31 @@ typedef enum _PPC_RSS_PrivAttr {
 
   Secure only functions:
 
-  \fn          int32_t PPC_RSS_ConfigSecurity(uint32_t periph,
-                                                 PPC_RSS_SecAttr sec_attr)
+  \fn          int32_t PPC_RSE_ConfigSecurity(uint32_t periph,
+                                                 PPC_RSE_SecAttr sec_attr)
   \brief       Configures security level for a peripheral controlled by the
                given PPC with secure or non-secure access only.
   \param[in]   periph:     Peripheral mask for SACFG and NSACFG registers.
   \param[in]   sec_attr:   Secure attribute value to set.
-  \return      Returns RSS PPC error code.
+  \return      Returns RSE PPC error code.
 
-  \fn          bool PPC_RSS_IsPeriphSecure (uint32_t periph)
+  \fn          bool PPC_RSE_IsPeriphSecure (uint32_t periph)
   \brief       Checks if the peripheral is configured to be secure.
   \param[in]   periph:      Peripheral mask for SACFG  and NSACFG registers.
   \return      Returns true if the peripheral is configured as secure,
                false for non-secure.
 
-  \fn          int32_t PPC_RSS_EnableInterrupt (void)
+  \fn          int32_t PPC_RSE_EnableInterrupt (void)
   \brief       Enables PPC interrupt.
-  \return      Returns RSS PPC error code.
+  \return      Returns RSE PPC error code.
 
-  \fn          void PPC_RSS_DisableInterrupt (void)
+  \fn          void PPC_RSE_DisableInterrupt (void)
   \brief       Disables PPC interrupt.
 
-  \fn          void PPC_RSS_ClearInterrupt (void)
+  \fn          void PPC_RSE_ClearInterrupt (void)
   \brief       Clears PPC interrupt.
 
-  \fn          bool PPC_RSS_InterruptState (void)
+  \fn          bool PPC_RSE_InterruptState (void)
   \brief       Gets PPC interrupt state.
   \return      Returns true if the interrupt is active, false otherwise.
 */
@@ -109,21 +109,21 @@ typedef enum _PPC_RSS_PrivAttr {
 /**
  * \brief Access structure of the PPC Driver.
  */
-typedef struct _DRIVER_PPC_RSS {
+typedef struct _DRIVER_PPC_RSE {
   ARM_DRIVER_VERSION  (*GetVersion)       (void);            ///< Pointer to \ref ARM_PPC_GetVersion   : Get driver version.
   int32_t             (*Initialize)       (void);            ///< Pointer to \ref ARM_PPC_Initialize   : Initialize the PPC Interface.
   int32_t             (*Uninitialize)     (void);            ///< Pointer to \ref ARM_PPC_Uninitialize : De-initialize the PPC Interface.
-  int32_t             (*ConfigPrivilege)  (uint32_t periph, PPC_RSS_SecAttr sec_attr, PPC_RSS_PrivAttr priv_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
+  int32_t             (*ConfigPrivilege)  (uint32_t periph, PPC_RSE_SecAttr sec_attr, PPC_RSE_PrivAttr priv_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
   bool                (*IsPeriphPrivOnly) (uint32_t periph);  ///< Pointer to \ref IsPeriphPrivOnly : Check if the peripheral is configured to be privilege only.
 #if (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U))
-  int32_t             (*ConfigSecurity)   (uint32_t periph, PPC_RSS_SecAttr sec_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
+  int32_t             (*ConfigSecurity)   (uint32_t periph, PPC_RSE_SecAttr sec_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
   bool                (*IsPeriphSecure)   (uint32_t periph);  ///< Pointer to \ref IsPeriphSecure :   Check if the peripheral is configured to be secure.
   int32_t             (*EnableInterrupt)  (void);            ///< Pointer to \ref ARM_PPC_EnableInterrupt  : Enable PPC interrupt.
   void                (*DisableInterrupt) (void);            ///< Pointer to \ref ARM_PPC_DisableInterrupt : Disable PPC interrupt.
   void                (*ClearInterrupt)   (void);            ///< Pointer to \ref ARM_PPC_ClearInterrupt   : Clear PPC interrupt.
   bool                (*InterruptState)   (void);            ///< Pointer to \ref ARM_PPC_InterruptState   : PPC interrupt State.
 #endif /* (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)) */
-} const DRIVER_PPC_RSS;
+} const DRIVER_PPC_RSE;
 
 #ifdef __cplusplus
 }

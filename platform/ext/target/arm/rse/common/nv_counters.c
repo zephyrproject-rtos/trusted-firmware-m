@@ -70,7 +70,7 @@ static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
 }
 #endif /* INTEGRITY_CHECKER_DEV_S */
 
-#ifdef RSS_BIT_PROGRAMMABLE_OTP
+#ifdef RSE_BIT_PROGRAMMABLE_OTP
 static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
                                             uint8_t *val)
 {
@@ -141,7 +141,7 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* RSS_BIT_PROGRAMMABLE_OTP */
+#endif /* RSE_BIT_PROGRAMMABLE_OTP */
 
 enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                              uint32_t size, uint8_t *val)
@@ -183,7 +183,7 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
 }
 
 
-#ifdef RSS_BIT_PROGRAMMABLE_OTP
+#ifdef RSE_BIT_PROGRAMMABLE_OTP
 static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
                                            uint32_t val)
 {
@@ -247,7 +247,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
 
     return err;
 }
-#endif /* RSS_BIT_PROGRAMMABLE_OTP */
+#endif /* RSE_BIT_PROGRAMMABLE_OTP */
 
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value)

@@ -15,11 +15,11 @@
 extern "C" {
 #endif
 
-uint32_t rss_bringup_helpers_hal_get_pins_offset(void);
+uint32_t rse_bringup_helpers_hal_get_pins_offset(void);
 
-void *rss_bringup_helpers_hal_get_vm0_exec_address(void);
-void *rss_bringup_helpers_hal_get_qpsi_exec_address(void);
-void *rss_bringup_helpers_hal_get_side_band_exec_address(void);
+void *rse_bringup_helpers_hal_get_vm0_exec_address(void);
+void *rse_bringup_helpers_hal_get_qpsi_exec_address(void);
+void *rse_bringup_helpers_hal_get_side_band_exec_address(void);
 
 #ifdef __cplusplus
 }

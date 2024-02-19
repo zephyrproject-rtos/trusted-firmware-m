@@ -10,9 +10,9 @@
 #include "tfm_psa_call_pack.h"
 #include "rse_comms_permissions_hal.h"
 
-enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
+enum tfm_plat_err_t rse_protocol_pointer_access_deserialize_msg(
         struct client_request_t *req,
-        struct rss_pointer_access_msg_t *msg, size_t msg_len)
+        struct rse_pointer_access_msg_t *msg, size_t msg_len)
 {
     enum tfm_plat_err_t err;
     uint32_t idx;
@@ -55,7 +55,7 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
             return err;
         }
 
-        err = comms_atu_get_rss_ptr_from_host_addr(atu_region,
+        err = comms_atu_get_rse_ptr_from_host_addr(atu_region,
                                                    msg->host_ptrs[idx],
                                                    &mapped_host_ptr);
         if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -88,7 +88,7 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
             return err;
         }
 
-        err = comms_atu_get_rss_ptr_from_host_addr(atu_region,
+        err = comms_atu_get_rse_ptr_from_host_addr(atu_region,
                 msg->host_ptrs[idx + req->in_len], &mapped_host_ptr);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
@@ -101,9 +101,9 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t rss_protocol_pointer_access_serialize_reply(
+enum tfm_plat_err_t rse_protocol_pointer_access_serialize_reply(
         struct client_request_t *req,
-        struct rss_pointer_access_reply_t *reply, size_t *reply_size)
+        struct rse_pointer_access_reply_t *reply, size_t *reply_size)
 {
     uint32_t idx;
 
@@ -120,9 +120,9 @@ enum tfm_plat_err_t rss_protocol_pointer_access_serialize_reply(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t rss_protocol_pointer_access_serialize_error(
+enum tfm_plat_err_t rse_protocol_pointer_access_serialize_error(
         struct client_request_t *req, psa_status_t err,
-        struct rss_pointer_access_reply_t *reply,
+        struct rse_pointer_access_reply_t *reply,
         size_t *reply_size)
 {
     reply->return_val = err;

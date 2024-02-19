@@ -16,7 +16,7 @@
 
 /**
  * \file host_base_address.h
- * \brief This file defines the host memory map addresses accessed by RSS.
+ * \brief This file defines the host memory map addresses accessed by RSE.
  */
 
 #ifndef __HOST_BASE_ADDRESS_H__

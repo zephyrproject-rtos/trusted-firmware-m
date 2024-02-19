@@ -33,7 +33,7 @@ locations:
         base_address: 0x34000000
     lcm:
         base_address: 0x500A0000
-    rss_system_control_registers:
+    rse_system_control_registers:
         base_address: 0x58021000
     trng:
         base_address: 0x500A5270

@@ -117,8 +117,8 @@ struct sds_region {
     bool      is_init;
 };
 
-static struct sds_region region_config = {.host_addr = PLAT_RSS_AP_SDS_BASE,
-                                          .size = PLAT_RSS_AP_SDS_SIZE,
+static struct sds_region region_config = {.host_addr = PLAT_RSE_AP_SDS_BASE,
+                                          .size = PLAT_RSE_AP_SDS_SIZE,
                                           .is_init = false};
 
 /*
@@ -225,7 +225,7 @@ static enum tfm_plat_err_t sds_region_map(uint8_t *atu_region)
     }
 
     /* TODO: might replace the comms_atu_* calls with native ATU driver calls */
-    err = comms_atu_get_rss_ptr_from_host_addr(*atu_region,
+    err = comms_atu_get_rse_ptr_from_host_addr(*atu_region,
                                                 region_config.host_addr,
                                                &region_config.mapped_addr);
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -248,7 +248,7 @@ static enum tfm_plat_err_t sds_region_unmap(uint8_t atu_region)
 
 static void sds_region_init(void)
 {
-    SPM_ASSERT(PLAT_RSS_AP_SDS_SIZE > MIN_REGION_SIZE);
+    SPM_ASSERT(PLAT_RSE_AP_SDS_SIZE > MIN_REGION_SIZE);
 
     struct region_descriptor *region_desc =
         (struct region_descriptor *)region_config.mapped_addr;

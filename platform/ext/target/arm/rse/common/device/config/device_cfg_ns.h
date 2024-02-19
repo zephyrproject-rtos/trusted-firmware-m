@@ -27,15 +27,15 @@
  */
 
 #include "host_device_cfg.h"
-#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#ifdef RSE_HAS_EXPANSION_PERIPHERALS
 #include "rse_expansion_device_cfg.h"
-#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+#endif /* RSE_HAS_EXPANSION_PERIPHERALS */
 
-#ifdef RSS_DEBUG_UART
+#ifdef RSE_DEBUG_UART
 /* ARM UART CMSDK */
 #define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
 #define UART0_CMSDK_NS
-#endif /* RSS_DEBUG_UART */
+#endif /* RSE_DEBUG_UART */
 
 #endif  /* __DEVICE_CFG_H__ */

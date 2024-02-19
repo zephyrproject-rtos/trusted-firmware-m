@@ -17,15 +17,15 @@
 #ifndef __RSE_MEMORY_SIZES_H__
 #define __RSE_MEMORY_SIZES_H__
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define VM0_SIZE                         0x00010000 /* 64 KiB */
 #define VM1_SIZE                         0x00010000 /* 64 KiB */
 #else
 #define VM0_SIZE                         0x00080000 /* 512 KiB */
 #define VM1_SIZE                         0x00080000 /* 512 KiB */
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
-/* The total size of the OTP for the RSS */
+/* The total size of the OTP for the RSE */
 #define OTP_TOTAL_SIZE     (0x4000)
 /* How much OTP is reserved for the portion of the DMA Initial Command Sequence
  * which is located in OTP. This is loaded by directly by the DMA hardware, so

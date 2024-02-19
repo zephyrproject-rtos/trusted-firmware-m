@@ -20,7 +20,7 @@ struct comms_atu_region_params_t {
 };
 
 /* ATU config */
-static struct comms_atu_region_params_t atu_regions[RSS_COMMS_ATU_REGION_AM] = {0};
+static struct comms_atu_region_params_t atu_regions[RSE_COMMS_ATU_REGION_AM] = {0};
 
 static inline uint64_t round_down(uint64_t num, uint64_t boundary)
 {
@@ -30,7 +30,7 @@ static inline uint64_t round_down(uint64_t num, uint64_t boundary)
 enum tfm_plat_err_t comms_atu_add_region_to_set(comms_atu_region_set_t *set,
                                                 uint8_t region)
 {
-    if (region >= RSS_COMMS_ATU_REGION_AM) {
+    if (region >= RSE_COMMS_ATU_REGION_AM) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
@@ -46,7 +46,7 @@ static enum tfm_plat_err_t get_region_idx_from_host_buf(uint64_t host_addr,
     uint32_t idx;
     struct comms_atu_region_params_t *region;
 
-    for (idx = 0; idx < RSS_COMMS_ATU_REGION_AM; idx++) {
+    for (idx = 0; idx < RSE_COMMS_ATU_REGION_AM; idx++) {
         region = &atu_regions[idx];
 
         if (atu_regions[idx].ref_count > 0 &&
@@ -60,19 +60,19 @@ static enum tfm_plat_err_t get_region_idx_from_host_buf(uint64_t host_addr,
     return TFM_PLAT_ERR_INVALID_INPUT;
 }
 
-enum tfm_plat_err_t comms_atu_get_rss_ptr_from_host_addr(uint8_t region,
+enum tfm_plat_err_t comms_atu_get_rse_ptr_from_host_addr(uint8_t region,
                                                          uint64_t host_addr,
-                                                         void **rss_ptr)
+                                                         void **rse_ptr)
 {
     struct comms_atu_region_params_t *region_params;
 
-    if (region >= RSS_COMMS_ATU_REGION_AM) {
+    if (region >= RSE_COMMS_ATU_REGION_AM) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
 
     region_params = &atu_regions[region];
-    *rss_ptr = (uint8_t *)((uint32_t)(host_addr - region_params->phys_addr)
+    *rse_ptr = (uint8_t *)((uint32_t)(host_addr - region_params->phys_addr)
                            + region_params->log_addr);
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -81,7 +81,7 @@ enum tfm_plat_err_t comms_atu_get_rss_ptr_from_host_addr(uint8_t region,
 static int get_free_region_idx(uint32_t *region_idx) {
     uint32_t idx;
 
-    for (idx = 0; idx <= RSS_COMMS_ATU_REGION_AM; idx++) {
+    for (idx = 0; idx <= RSE_COMMS_ATU_REGION_AM; idx++) {
         if (atu_regions[idx].ref_count == 0) {
             *region_idx = idx;
             return TFM_PLAT_ERR_SUCCESS;
@@ -104,13 +104,13 @@ static enum tfm_plat_err_t setup_region_for_host_buf(uint64_t host_addr,
     }
 
     region_params = &atu_regions[region_idx];
-    region_params->region = region_idx + RSS_COMMS_ATU_REGION_MIN;
+    region_params->region = region_idx + RSE_COMMS_ATU_REGION_MIN;
 
     region_params->log_addr = HOST_COMMS_MAPPABLE_BASE_S
-                              + (RSS_COMMS_ATU_REGION_SIZE * region_idx);
+                              + (RSE_COMMS_ATU_REGION_SIZE * region_idx);
 
-    region_params->phys_addr = round_down(host_addr, RSS_COMMS_ATU_PAGE_SIZE);
-    region_params->size = RSS_COMMS_ATU_REGION_SIZE;
+    region_params->phys_addr = round_down(host_addr, RSE_COMMS_ATU_PAGE_SIZE);
+    region_params->size = RSE_COMMS_ATU_REGION_SIZE;
 
     if (host_buf_end > region_params->phys_addr + region_params->size) {
         return TFM_PLAT_ERR_INVALID_INPUT;
@@ -162,7 +162,7 @@ enum tfm_plat_err_t comms_atu_free_region(uint8_t region)
     int32_t atu_err;
     struct comms_atu_region_params_t *region_params;
 
-    if (region >= RSS_COMMS_ATU_REGION_AM) {
+    if (region >= RSE_COMMS_ATU_REGION_AM) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
@@ -186,7 +186,7 @@ enum tfm_plat_err_t comms_atu_free_regions(comms_atu_region_set_t regions)
     int32_t atu_err;
     struct comms_atu_region_params_t *region_params;
 
-    for (region_idx = 0; region_idx < RSS_COMMS_ATU_REGION_AM; region_idx++) {
+    for (region_idx = 0; region_idx < RSE_COMMS_ATU_REGION_AM; region_idx++) {
         if ((regions.ref_counts[region_idx]) > 0) {
             atu_regions[region_idx].ref_count -= regions.ref_counts[region_idx];
             region_params = &atu_regions[region_idx];

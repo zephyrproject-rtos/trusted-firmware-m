@@ -13,10 +13,10 @@
  * Images are loaded by BL2 in reverse order of ID
  * Cannot use enum as this is included in linker files.
  */
-/* RSS firmware */
-#define RSS_FIRMWARE_SECURE_ID       0
-#define RSS_FIRMWARE_NON_SECURE_ID   1
+/* RSE firmware */
+#define RSE_FIRMWARE_SECURE_ID       0
+#define RSE_FIRMWARE_NON_SECURE_ID   1
 /* Number of firmware loaded by BL2 */
-#define RSS_FIRMWARE_COUNT           2
+#define RSE_FIRMWARE_COUNT           2
 
 #endif /* __BL2_IMAGE_ID_H__ */

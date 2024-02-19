@@ -16,7 +16,7 @@
 
 /**
  * \file ppc_rse_drv.h
- * \brief Generic driver for RSS Peripheral Protection Controllers (PPC).
+ * \brief Generic driver for RSE Peripheral Protection Controllers (PPC).
  */
 
 #ifndef __PPC_RSE_DRV_H__
@@ -29,31 +29,31 @@
 extern "C" {
 #endif
 
-/* RSS PPC names */
-enum ppc_rss_name_t {
-    PPC_RSS_MAIN0 = 0,        /*!< MAIN PPC 0 */
-    PPC_RSS_MAIN_EXP0,        /*!< Expansion 0 MAIN PPC */
-    PPC_RSS_MAIN_EXP1,        /*!< Expansion 1 MAIN PPC */
-    PPC_RSS_MAIN_EXP2,        /*!< Expansion 2 MAIN PPC */
-    PPC_RSS_MAIN_EXP3,        /*!< Expansion 3 MAIN PPC */
-    PPC_RSS_PERIPH0,          /*!< PERIPH PPC0 */
-    PPC_RSS_PERIPH1,          /*!< PERIPH PPC1 */
-    PPC_RSS_PERIPH_EXP0,      /*!< Expansion 0 PERIPH PPC */
-    PPC_RSS_PERIPH_EXP1,      /*!< Expansion 1 PERIPH PPC */
-    PPC_RSS_PERIPH_EXP2,      /*!< Expansion 2 PERIPH PPC */
-    PPC_RSS_PERIPH_EXP3,      /*!< Expansion 3 PERIPH PPC */
-    RSS_PPC_MAX_NUM
+/* RSE PPC names */
+enum ppc_rse_name_t {
+    PPC_RSE_MAIN0 = 0,        /*!< MAIN PPC 0 */
+    PPC_RSE_MAIN_EXP0,        /*!< Expansion 0 MAIN PPC */
+    PPC_RSE_MAIN_EXP1,        /*!< Expansion 1 MAIN PPC */
+    PPC_RSE_MAIN_EXP2,        /*!< Expansion 2 MAIN PPC */
+    PPC_RSE_MAIN_EXP3,        /*!< Expansion 3 MAIN PPC */
+    PPC_RSE_PERIPH0,          /*!< PERIPH PPC0 */
+    PPC_RSE_PERIPH1,          /*!< PERIPH PPC1 */
+    PPC_RSE_PERIPH_EXP0,      /*!< Expansion 0 PERIPH PPC */
+    PPC_RSE_PERIPH_EXP1,      /*!< Expansion 1 PERIPH PPC */
+    PPC_RSE_PERIPH_EXP2,      /*!< Expansion 2 PERIPH PPC */
+    PPC_RSE_PERIPH_EXP3,      /*!< Expansion 3 PERIPH PPC */
+    RSE_PPC_MAX_NUM
 };
 
-/* RSS PPC device configuration structure */
-struct ppc_rss_dev_cfg_t {
+/* RSE PPC device configuration structure */
+struct ppc_rse_dev_cfg_t {
     uint32_t const sacfg_base;  /*!< Secure Privilege Control Block base */
     uint32_t const nsacfg_base; /*!< Non-Secure Privilege Control Block base */
-    enum ppc_rss_name_t ppc_name;
+    enum ppc_rse_name_t ppc_name;
 };
 
-/* RSS PPC device data structure */
-struct ppc_rss_dev_data_t {
+/* RSE PPC device data structure */
+struct ppc_rse_dev_data_t {
     volatile uint32_t* sacfg_ns_ppc;   /*!< Pointer to non-secure register */
     volatile uint32_t* sacfg_sp_ppc;   /*!< Pointer to secure unprivileged
                                              register */
@@ -64,66 +64,66 @@ struct ppc_rss_dev_data_t {
                                              is initialized */
 };
 
-/* RSS PPC device structure */
-struct ppc_rss_dev_t {
-    const struct ppc_rss_dev_cfg_t* const cfg;  /*!< PPC configuration */
-    struct ppc_rss_dev_data_t* const data;      /*!< PPC data */
+/* RSE PPC device structure */
+struct ppc_rse_dev_t {
+    const struct ppc_rse_dev_cfg_t* const cfg;  /*!< PPC configuration */
+    struct ppc_rse_dev_data_t* const data;      /*!< PPC data */
 };
 
 /* Security attribute used to configure the peripherals */
-enum ppc_rss_sec_attr_t {
-    PPC_RSS_SECURE_ACCESS = 0,    /*! Secure access */
-    PPC_RSS_NONSECURE_ACCESS,     /*! Non-secure access */
+enum ppc_rse_sec_attr_t {
+    PPC_RSE_SECURE_ACCESS = 0,    /*! Secure access */
+    PPC_RSE_NONSECURE_ACCESS,     /*! Non-secure access */
 };
 
 /* Privilege attribute used to configure the peripherals */
-enum ppc_rss_priv_attr_t {
-    PPC_RSS_PRIV_AND_NONPRIV_ACCESS = 0, /*! Privilege and NonPrivilege
+enum ppc_rse_priv_attr_t {
+    PPC_RSE_PRIV_AND_NONPRIV_ACCESS = 0, /*! Privilege and NonPrivilege
                                                 access */
-    PPC_RSS_PRIV_ONLY_ACCESS,            /*! Privilege only access */
+    PPC_RSE_PRIV_ONLY_ACCESS,            /*! Privilege only access */
 };
 
 /* ARM PPC error codes */
-enum ppc_rss_error_t {
-    PPC_RSS_ERR_NONE = 0,      /*!< No error */
-    PPC_RSS_ERR_INVALID_PARAM, /*!< PPC invalid parameter error */
-    PPC_RSS_ERR_NOT_INIT,      /*!< PPC not initialized */
-    PPC_RSS_ERR_NOT_PERMITTED  /*!< PPC Operation not permitted */
+enum ppc_rse_error_t {
+    PPC_RSE_ERR_NONE = 0,      /*!< No error */
+    PPC_RSE_ERR_INVALID_PARAM, /*!< PPC invalid parameter error */
+    PPC_RSE_ERR_NOT_INIT,      /*!< PPC not initialized */
+    PPC_RSE_ERR_NOT_PERMITTED  /*!< PPC Operation not permitted */
 };
 
 /**
  * \brief Initialize the PPC device.
  *
- * \param[in] dev       PPC device \ref ppc_rss_dev_t
+ * \param[in] dev       PPC device \ref ppc_rse_dev_t
  *
- * \return Returns error code as specified in \ref ppc_rss_error_t
+ * \return Returns error code as specified in \ref ppc_rse_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum ppc_rss_error_t ppc_rss_init(struct ppc_rss_dev_t* dev);
+enum ppc_rse_error_t ppc_rse_init(struct ppc_rse_dev_t* dev);
 
 /**
  * \brief Configures privilege attribute through the PPC device.
  *
- * \param[in] dev        PPC device \ref ppc_rss_dev_t
+ * \param[in] dev        PPC device \ref ppc_rse_dev_t
  * \param[in] mask       Peripheral mask for the PPC.
  * \param[in] sec_attr   Secure attribute value.
  * \param[in] priv_attr  Privilege attribute value.
  *
- * \return Returns error code as specified in \ref ppc_rss_error_t
+ * \return Returns error code as specified in \ref ppc_rse_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum ppc_rss_error_t
-ppc_rss_config_privilege(struct ppc_rss_dev_t* dev, uint32_t mask,
-                            enum ppc_rss_sec_attr_t sec_attr,
-                            enum ppc_rss_priv_attr_t priv_attr);
+enum ppc_rse_error_t
+ppc_rse_config_privilege(struct ppc_rse_dev_t* dev, uint32_t mask,
+                            enum ppc_rse_sec_attr_t sec_attr,
+                            enum ppc_rse_priv_attr_t priv_attr);
 
 /**
  * \brief Checks if the peripheral is configured as Privilege only or
  *        Privilege and non-Privilege access mode.
  *
- * \param[in] dev     PPC device \ref ppc_rss_dev_t
+ * \param[in] dev     PPC device \ref ppc_rse_dev_t
  * \param[in] mask    Peripheral mask for the PPC.
  *
  * \return Returns true for Privilege only configuration and false otherwise
@@ -134,7 +134,7 @@ ppc_rss_config_privilege(struct ppc_rss_dev_t* dev, uint32_t mask,
  *
  * \note This function doesn't check if dev is NULL.
  */
-bool ppc_rss_is_periph_priv_only(struct ppc_rss_dev_t* dev,
+bool ppc_rse_is_periph_priv_only(struct ppc_rse_dev_t* dev,
                                     uint32_t mask);
 
 /* Secure only functions */
@@ -143,22 +143,22 @@ bool ppc_rss_is_periph_priv_only(struct ppc_rss_dev_t* dev,
 /**
  * \brief Configures security attribute through the PPC device.
  *
- * \param[in] dev        PPC device \ref ppc_rss_dev_t
+ * \param[in] dev        PPC device \ref ppc_rse_dev_t
  * \param[in] mask       Peripheral mask for the PPC.
  * \param[in] sec_attr   Secure attribute value.
  *
- * \return Returns error code as specified in \ref ppc_rss_error_t
+ * \return Returns error code as specified in \ref ppc_rse_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum ppc_rss_error_t
-ppc_rss_config_security(struct ppc_rss_dev_t* dev, uint32_t mask,
-                           enum ppc_rss_sec_attr_t sec_attr);
+enum ppc_rse_error_t
+ppc_rse_config_security(struct ppc_rse_dev_t* dev, uint32_t mask,
+                           enum ppc_rse_sec_attr_t sec_attr);
 
 /**
  * \brief Checks if the peripheral is configured as secure or non-secure.
  *
- * \param[in] dev     PPC device \ref ppc_rss_dev_t
+ * \param[in] dev     PPC device \ref ppc_rse_dev_t
  * \param[in] mask    Peripheral mask for the PPC.
  *
  * \return Returns true for secure and false for non-secure.
@@ -167,42 +167,42 @@ ppc_rss_config_security(struct ppc_rss_dev_t* dev, uint32_t mask,
  *
  * \note This function doesn't check if dev is NULL.
  */
-bool ppc_rss_is_periph_secure(struct ppc_rss_dev_t* dev,
+bool ppc_rse_is_periph_secure(struct ppc_rse_dev_t* dev,
                                  uint32_t mask);
 
 /**
  * \brief Enables PPC interrupt.
  *
- * \param[in] dev  PPC device \ref ppc_rss_dev_t
+ * \param[in] dev  PPC device \ref ppc_rse_dev_t
  *
- * \return Returns error code as specified in \ref ppc_rss_error_t
+ * \return Returns error code as specified in \ref ppc_rse_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum ppc_rss_error_t ppc_rss_irq_enable(struct ppc_rss_dev_t* dev);
+enum ppc_rse_error_t ppc_rse_irq_enable(struct ppc_rse_dev_t* dev);
 
 /**
  * \brief Disables PPC interrupt.
  *
- * \param[in] dev  PPC device \ref ppc_rss_dev_t
+ * \param[in] dev  PPC device \ref ppc_rse_dev_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-void ppc_rss_irq_disable(struct ppc_rss_dev_t* dev);
+void ppc_rse_irq_disable(struct ppc_rse_dev_t* dev);
 
 /**
  * \brief Clears PPC interrupt.
  *
- * \param[in] dev  PPC device \ref ppc_rss_dev_t
+ * \param[in] dev  PPC device \ref ppc_rse_dev_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-void ppc_rss_clear_irq(struct ppc_rss_dev_t* dev);
+void ppc_rse_clear_irq(struct ppc_rse_dev_t* dev);
 
 /**
  * \brief Returns the PPC interrupt state.
  *
- * \param[in] dev  PPC device \ref ppc_rss_dev_t
+ * \param[in] dev  PPC device \ref ppc_rse_dev_t
  *
  * \return Returns true if the interrupt is active and otherwise false.
  *         If the driver is not initalized the return value of this function is
@@ -210,7 +210,7 @@ void ppc_rss_clear_irq(struct ppc_rss_dev_t* dev);
  *
  * \note This function doesn't check if dev is NULL.
  */
-bool ppc_rss_irq_state(struct ppc_rss_dev_t* dev);
+bool ppc_rse_irq_state(struct ppc_rse_dev_t* dev);
 
 #endif /* (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)) */
 

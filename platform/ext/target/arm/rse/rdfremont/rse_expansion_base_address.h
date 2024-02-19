@@ -16,14 +16,14 @@
 
 /**
  * \file  platform_base_address.h
- * \brief This file defines all the peripheral base addresses for RSS platform.
+ * \brief This file defines all the peripheral base addresses for RSE platform.
  */
 
 #ifndef __RSE_EXPANSION_BASE_ADDRESS_H__
 #define __RSE_EXPANSION_BASE_ADDRESS_H__
 
-/* RSS Integration Layer register block */
-#define RSS_INTEG_LAYER_BASE_S  0x58100000
+/* RSE Integration Layer register block */
+#define RSE_INTEG_LAYER_BASE_S  0x58100000
 /* UART 0 Secure base address */
 #define UART0_BASE_S            0x58101000
 /* Boot flash */

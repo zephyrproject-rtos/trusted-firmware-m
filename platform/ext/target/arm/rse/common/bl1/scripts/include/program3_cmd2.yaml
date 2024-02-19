@@ -41,7 +41,7 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'rss_system_control_registers_base_address + 0x110'
+DESADDR: 'rse_system_control_registers_base_address + 0x110'
 XSIZE: 0x00010000
 DESTRANSCFG: 0x00000000
 FILLVAL: 0x22000001

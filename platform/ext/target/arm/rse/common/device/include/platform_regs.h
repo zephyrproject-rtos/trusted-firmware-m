@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 /* Secure Access Configuration Register Block */
-struct rss_sacfg_t {
+struct rse_sacfg_t {
     volatile uint32_t spcsecctrl;     /* 0x000 (R/W) Secure Privilege Controller
                                                      Secure Configuration Control
                                                      register */
@@ -184,7 +184,7 @@ struct rss_sacfg_t {
 #define MAIN_PPCEXP3_INT_POS_MASK    (1UL << 23)
 
 /* Non-secure Access Configuration Register Block */
-struct rss_nsacfg_t {
+struct rse_nsacfg_t {
     volatile uint32_t reserved0[36];
     volatile uint32_t mainnspppc0;     /* 0x090 (R/W) Non-secure Unprivileged
                                         *             Access Peripheral
@@ -331,7 +331,7 @@ struct cpu0_secctrl_t {
     volatile uint32_t cidr3;          /* 0xFFC (R/ ) Component ID 3 */
 };
 
-struct rss_sysinfo_t {
+struct rse_sysinfo_t {
     volatile uint32_t soc_identity;   /* 0x000 (R/ ) SoC Identity Register */
     volatile uint32_t sys_config0;    /* 0x004 (R/ ) System Hardware
                                        *             Configuration 0 */
@@ -355,7 +355,7 @@ struct rss_sysinfo_t {
     volatile uint32_t cidr3;          /* 0xFFC (R/ ) Component ID 3 */
 };
 
-struct rss_sysctrl_t {
+struct rse_sysctrl_t {
     volatile uint32_t secdbgstat;        /* 0x000 (R/ ) Secure Debug
                                           *             Configuration Status */
     volatile uint32_t secdbgset;         /* 0x004 (R/W) Secure Debug
@@ -417,7 +417,7 @@ struct rss_sysctrl_t {
     volatile uint32_t cidr3;             /* 0xFFC (R/ ) Component ID 3 */
 };
 
-struct rss_ewic_t {
+struct rse_ewic_t {
     volatile uint32_t ewic_cr;        /* 0x000 (R/W) EWIC Control */
     volatile uint32_t ewic_ascr;      /* 0x004 (R/W) Automatic Sequence
                                        *             Control */

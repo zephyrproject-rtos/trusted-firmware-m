@@ -46,8 +46,8 @@ static struct irq_t mbox_irq_info[2] = {0};
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
 {
-    (void)tfm_multi_core_hal_receive(&MHU_AP_MONITOR_TO_RSS_DEV,
-                                     &MHU_RSS_TO_AP_MONITOR_DEV,
+    (void)tfm_multi_core_hal_receive(&MHU_AP_MONITOR_TO_RSE_DEV,
+                                     &MHU_RSE_TO_AP_MONITOR_DEV,
                                      mbox_irq_info[0].p_ildi->source);
 
     /*
@@ -57,12 +57,12 @@ void CMU_MHU0_Receiver_Handler(void)
     spm_handle_interrupt(mbox_irq_info[0].p_pt, mbox_irq_info[0].p_ildi);
 }
 
-#ifdef MHU_AP_NS_TO_RSS
+#ifdef MHU_AP_NS_TO_RSE
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU1_Receiver_Handler(void)
 {
-    (void)tfm_multi_core_hal_receive(&MHU_AP_NS_TO_RSS_DEV,
-                                     &MHU_RSS_TO_AP_NS_DEV,
+    (void)tfm_multi_core_hal_receive(&MHU_AP_NS_TO_RSE_DEV,
+                                     &MHU_RSE_TO_AP_NS_DEV,
                                      mbox_irq_info[1].p_ildi->source);
 
     /*
@@ -71,7 +71,7 @@ void CMU_MHU1_Receiver_Handler(void)
      */
     spm_handle_interrupt(mbox_irq_info[1].p_pt, mbox_irq_info[1].p_ildi);
 }
-#endif /* MHU_AP_NS_TO_RSS */
+#endif /* MHU_AP_NS_TO_RSE */
 
 enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
                                        const struct irq_load_info_t *p_ildi)

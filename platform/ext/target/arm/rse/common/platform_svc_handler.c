@@ -10,9 +10,9 @@
 #include "platform_svc_numbers.h"
 #include "tfm_hal_platform.h"
 #include "tfm_platform_system.h"
-#ifdef RSS_USE_SDS_LIB
+#ifdef RSE_USE_SDS_LIB
 #include "sds.h"
-#endif /* RSS_USE_SDS_LIB */
+#endif /* RSE_USE_SDS_LIB */
 
 int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                                 uint32_t lr)
@@ -28,11 +28,11 @@ int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                     (void *)svc_args[2]);
             break;
 
-#ifdef RSS_USE_SDS_LIB
+#ifdef RSE_USE_SDS_LIB
         case TFM_SVC_PLATFORM_SDS_STRUCT_ADD:
             retval = (int32_t)sds_struct_add((void *)svc_args[0]);
             break;
-#endif /* RSS_USE_SDS_LIB */
+#endif /* RSE_USE_SDS_LIB */
 
         default:
             retval = PSA_ERROR_GENERIC_ERROR;

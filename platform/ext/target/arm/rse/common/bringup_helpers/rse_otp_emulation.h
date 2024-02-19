@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-bool rss_otp_emulation_is_enabled(void);
+bool rse_otp_emulation_is_enabled(void);
 
 #ifdef __cplusplus
 }

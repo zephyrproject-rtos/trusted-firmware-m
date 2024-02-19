@@ -62,7 +62,7 @@ int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid
             *offset = toc_entry.offset_address;
 
             /* We can't deal with partitions that are greater than UINT32_MAX,
-             * since they aren't wholly mappable into the RSS memory space. This
+             * since they aren't wholly mappable into the RSE memory space. This
              * is in reality bounded by the ATU mappable size, but that'll be
              * checked once the ATU region is set up, this just allows us to
              * perform safe type-conversion.

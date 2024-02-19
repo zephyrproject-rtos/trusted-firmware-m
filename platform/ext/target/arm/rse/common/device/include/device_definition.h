@@ -28,9 +28,9 @@
 
 #include "device_cfg.h"
 #include "host_device_definition.h"
-#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#ifdef RSE_HAS_EXPANSION_PERIPHERALS
 #include "rse_expansion_device_definition.h"
-#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+#endif /* RSE_HAS_EXPANSION_PERIPHERALS */
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,59 +66,59 @@ extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
 #endif
 
 /* ARM PPC driver structures */
-#ifdef PPC_RSS_MAIN0_S
+#ifdef PPC_RSE_MAIN0_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_MAIN0_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_MAIN0_DEV_S;
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP0_S
+#ifdef PPC_RSE_MAIN_EXP0_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_MAIN_EXP0_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_MAIN_EXP0_DEV_S;
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP1_S
+#ifdef PPC_RSE_MAIN_EXP1_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_MAIN_EXP1_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_MAIN_EXP1_DEV_S;
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP2_S
+#ifdef PPC_RSE_MAIN_EXP2_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_MAIN_EXP2_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_MAIN_EXP2_DEV_S;
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP3_S
+#ifdef PPC_RSE_MAIN_EXP3_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_MAIN_EXP3_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_MAIN_EXP3_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH0_S
+#ifdef PPC_RSE_PERIPH0_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH0_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH0_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH1_S
+#ifdef PPC_RSE_PERIPH1_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH1_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH1_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP0_S
+#ifdef PPC_RSE_PERIPH_EXP0_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP0_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP0_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP1_S
+#ifdef PPC_RSE_PERIPH_EXP1_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP1_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP1_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP2_S
+#ifdef PPC_RSE_PERIPH_EXP2_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP2_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP2_DEV_S;
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP3_S
+#ifdef PPC_RSE_PERIPH_EXP3_S
 #include "ppc_rse_drv.h"
-extern struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP3_DEV_S;
+extern struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP3_DEV_S;
 #endif
 
 /* System counters */

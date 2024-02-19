@@ -57,19 +57,19 @@ int32_t boot_platform_post_init(void)
     (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    status = mhu_v2_x_driver_init(&MHU_SCP_TO_RSS_DEV, MHU_REV_READ_FROM_HW);
+    status = mhu_v2_x_driver_init(&MHU_SCP_TO_RSE_DEV, MHU_REV_READ_FROM_HW);
     if (status != MHU_V_2_X_ERR_NONE) {
-        BOOT_LOG_ERR("SCP->RSS MHU driver initialization failed");
+        BOOT_LOG_ERR("SCP->RSE MHU driver initialization failed");
         return 1;
     }
-    BOOT_LOG_INF("SCP->RSS MHU driver initialized successfully");
+    BOOT_LOG_INF("SCP->RSE MHU driver initialized successfully");
 
-    status = mhu_v2_x_driver_init(&MHU_RSS_TO_SCP_DEV, MHU_REV_READ_FROM_HW);
+    status = mhu_v2_x_driver_init(&MHU_RSE_TO_SCP_DEV, MHU_REV_READ_FROM_HW);
     if (status != MHU_V_2_X_ERR_NONE) {
-        BOOT_LOG_ERR("RSS->SCP MHU driver initialization failed");
+        BOOT_LOG_ERR("RSE->SCP MHU driver initialization failed");
         return 1;
     }
-    BOOT_LOG_INF("RSS->SCP MHU driver initialized successfully");
+    BOOT_LOG_INF("RSE->SCP MHU driver initialized successfully");
 
 #ifdef PLATFORM_HAS_BOOT_DMA
     plat_err = boot_dma_init_cfg();
@@ -80,12 +80,12 @@ int32_t boot_platform_post_init(void)
     BOOT_LOG_INF("DMA350 driver initialized successfully.");
 #endif /* PLATFORM_HAS_BOOT_DMA */
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     result = sic_boot_init();
     if (result) {
         return result;
     }
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
     return 0;
 }
@@ -118,25 +118,25 @@ int boot_platform_pre_load(uint32_t image_id)
     }
 
     switch(image_id) {
-    case RSS_BL2_IMAGE_SCP:
-        uuid = UUID_RSS_FIRMWARE_SCP_BL1;
+    case RSE_BL2_IMAGE_SCP:
+        uuid = UUID_RSE_FIRMWARE_SCP_BL1;
         break;
-    case RSS_BL2_IMAGE_AP:
-        uuid = UUID_RSS_FIRMWARE_AP_BL1;
+    case RSE_BL2_IMAGE_AP:
+        uuid = UUID_RSE_FIRMWARE_AP_BL1;
         break;
-    case RSS_BL2_IMAGE_NS:
-#ifndef RSS_XIP
-        uuid = UUID_RSS_FIRMWARE_NS;
+    case RSE_BL2_IMAGE_NS:
+#ifndef RSE_XIP
+        uuid = UUID_RSE_FIRMWARE_NS;
 #else
-        uuid = UUID_RSS_SIC_TABLES_NS;
-#endif /* RSS_XIP */
+        uuid = UUID_RSE_SIC_TABLES_NS;
+#endif /* RSE_XIP */
         break;
-    case RSS_BL2_IMAGE_S:
-#ifndef RSS_XIP
-        uuid = UUID_RSS_FIRMWARE_S;
+    case RSE_BL2_IMAGE_S:
+#ifndef RSE_XIP
+        uuid = UUID_RSE_FIRMWARE_S;
 #else
-        uuid = UUID_RSS_SIC_TABLES_S;
-#endif /* RSS_XIP */
+        uuid = UUID_RSE_SIC_TABLES_S;
+#endif /* RSE_XIP */
         break;
     default:
         return 1;
@@ -157,18 +157,18 @@ int boot_platform_post_load(uint32_t image_id)
 {
     int err;
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     err = sic_boot_post_load(image_id, rsp.br_image_off);
     if (err) {
         return err;
     }
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
-    if (image_id == RSS_BL2_IMAGE_SCP) {
+    if (image_id == RSE_BL2_IMAGE_SCP) {
         memset((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
         uint32_t channel_stat = 0;
-        struct rss_sysctrl_t *sysctrl =
-                                     (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
+        struct rse_sysctrl_t *sysctrl =
+                                     (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
 
         /* Release SCP CPU from wait */
         sysctrl->gretreg = 0x1;
@@ -176,16 +176,16 @@ int boot_platform_post_load(uint32_t image_id)
         /* Wait for SCP to finish its startup */
         BOOT_LOG_INF("Waiting for SCP BL1 started event");
         while (channel_stat == 0) {
-            mhu_v2_x_channel_receive(&MHU_SCP_TO_RSS_DEV, 0, &channel_stat);
+            mhu_v2_x_channel_receive(&MHU_SCP_TO_RSE_DEV, 0, &channel_stat);
         }
         BOOT_LOG_INF("Got SCP BL1 started event");
 
-    } else if (image_id == RSS_BL2_IMAGE_AP) {
+    } else if (image_id == RSE_BL2_IMAGE_AP) {
         memset((void *)HOST_BOOT_IMAGE0_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
         BOOT_LOG_INF("Telling SCP to start AP cores");
-        mhu_v2_x_initiate_transfer(&MHU_RSS_TO_SCP_DEV);
+        mhu_v2_x_initiate_transfer(&MHU_RSE_TO_SCP_DEV);
         /* Slot 0 is used in the SCP protocol */
-        mhu_v2_x_channel_send(&MHU_RSS_TO_SCP_DEV, 0, 1);
+        mhu_v2_x_channel_send(&MHU_RSE_TO_SCP_DEV, 0, 1);
     }
 
     err = host_flash_atu_uninit_regions();
@@ -198,11 +198,11 @@ int boot_platform_post_load(uint32_t image_id)
 
 bool boot_platform_should_load_image(uint32_t image_id)
 {
-#ifndef RSS_LOAD_NS_IMAGE
-    if (image_id == RSS_BL2_IMAGE_NS) {
+#ifndef RSE_LOAD_NS_IMAGE
+    if (image_id == RSE_BL2_IMAGE_NS) {
         return false;
     }
-#endif /* RSS_LOAD_NS_IMAGE */
+#endif /* RSE_LOAD_NS_IMAGE */
 
     return true;
 }
@@ -219,12 +219,12 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 
     vt_cpy = vt;
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     result = sic_boot_pre_quit(&vt_cpy);
     if (result) {
         while(1){}
     }
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 #ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_finish();

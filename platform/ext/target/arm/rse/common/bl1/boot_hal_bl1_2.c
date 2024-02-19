@@ -24,7 +24,7 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
-#ifdef RSS_USE_HOST_FLASH
+#ifdef RSE_USE_HOST_FLASH
 #include "fip_parser.h"
 #include "host_flash_atu.h"
 #include "plat_def_fip_uuid.h"
@@ -35,7 +35,7 @@
 #include "mpu_armv8m_drv.h"
 #include "cmsis.h"
 #include "dpa_hardened_word_copy.h"
-#if RSS_AMOUNT > 1
+#if RSE_AMOUNT > 1
 #include "rse_handshake.h"
 #endif
 
@@ -57,14 +57,14 @@ uint32_t image_offsets[2];
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
-#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+#ifdef RSE_USE_ROM_LIB_FROM_SRAM
 extern uint32_t __got_start__;
 extern uint32_t __got_end__;
-#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
+#endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
-#ifdef RSS_USE_HOST_FLASH
+#ifdef RSE_USE_HOST_FLASH
 uint32_t bl1_image_get_flash_offset(uint32_t image_id)
 {
     switch (image_id) {
@@ -82,7 +82,7 @@ static int32_t init_atu_regions(void)
 {
     enum atu_error_t err;
 
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
     /* Initialize UART region */
     err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
@@ -91,12 +91,12 @@ static int32_t init_atu_regions(void)
     if (err != ATU_ERR_NONE) {
         return 1;
     }
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
     return 0;
 }
 
-static int setup_kmu_slot_from_otp(enum rss_kmu_slot_id_t slot,
+static int setup_kmu_slot_from_otp(enum rse_kmu_slot_id_t slot,
                                    enum tfm_otp_element_id_t otp_id,
                                    const struct kmu_key_export_config_t *export_config)
 {
@@ -149,7 +149,7 @@ out:
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
 static void read_debug_state_from_reset_syndrome(void)
 {
-    struct rss_sysctrl_t *sysctrl = (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
+    struct rse_sysctrl_t *sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
     uint32_t reg_value = sysctrl->reset_syndrome;
 
     /* Bits 24:31 (SWSYN) are allocated for software defined reset syndrome */
@@ -218,7 +218,7 @@ static int32_t boot_platform_init_debug(void)
 }
 #endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
-#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+#ifdef RSE_USE_ROM_LIB_FROM_SRAM
 static void setup_rom_library(void)
 {
     uint32_t got_entry;
@@ -246,7 +246,7 @@ static void setup_rom_library(void)
         : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r2"
     );
 }
-#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
+#endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
@@ -254,9 +254,9 @@ int32_t boot_platform_init(void)
     int32_t result;
     enum tfm_plat_err_t plat_err;
 
-#ifdef RSS_USE_ROM_LIB_FROM_SRAM
+#ifdef RSE_USE_ROM_LIB_FROM_SRAM
     setup_rom_library();
-#endif /* RSS_USE_ROM_LIB_FROM_SRAM */
+#endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
     /* Initialize stack limit register */
     uint32_t msp_stack_bottom =
@@ -283,8 +283,8 @@ int32_t boot_platform_init(void)
         return 1;
     }
 
-#ifdef RSS_USE_HOST_FLASH
-    result = host_flash_atu_init_regions_for_image(UUID_RSS_FIRMWARE_BL2, image_offsets);
+#ifdef RSE_USE_HOST_FLASH
+    result = host_flash_atu_init_regions_for_image(UUID_RSE_FIRMWARE_BL2, image_offsets);
     if (result) {
         return result;
     }
@@ -317,8 +317,8 @@ int32_t boot_platform_post_init(void)
         false, /* Don't disable the masking */
     };
 
-#if RSS_AMOUNT > 1
-    rc = rss_handshake();
+#if RSE_AMOUNT > 1
+    rc = rse_handshake();
     if (rc) {
         return rc;
     }
@@ -326,43 +326,43 @@ int32_t boot_platform_post_init(void)
     uint32_t vhuk_seed[8];
     size_t vhuk_seed_len;
 
-    rc = rss_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
+    rc = rse_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
     if (rc) {
         return rc;
     }
 
-    rc = rss_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSS_KMU_SLOT_VHUK);
+    rc = rse_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSE_KMU_SLOT_VHUK);
     if (rc) {
         return rc;
     }
 #endif
 
-    rc = rss_derive_cpak_seed(RSS_KMU_SLOT_CPAK_SEED);
+    rc = rse_derive_cpak_seed(RSE_KMU_SLOT_CPAK_SEED);
     if (rc) {
         return rc;
     }
 
-#ifdef RSS_BOOT_KEYS_CCA
-    rc = rss_derive_dak_seed(RSS_KMU_SLOT_DAK_SEED);
+#ifdef RSE_BOOT_KEYS_CCA
+    rc = rse_derive_dak_seed(RSE_KMU_SLOT_DAK_SEED);
     if (rc) {
         return rc;
     }
 #endif
-#ifdef RSS_BOOT_KEYS_DPE
-    rc = rss_derive_rot_cdi(RSS_KMU_SLOT_ROT_CDI);
+#ifdef RSE_BOOT_KEYS_DPE
+    rc = rse_derive_rot_cdi(RSE_KMU_SLOT_ROT_CDI);
     if (rc) {
         return rc;
     }
 #endif
 
-    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_SECURE_ENCRYPTION_KEY,
+    rc = setup_kmu_slot_from_otp(RSE_KMU_SLOT_SECURE_ENCRYPTION_KEY,
                                  PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
                                  &sic_dr0_export_config);
     if (rc) {
         return rc;
     }
 
-    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
+    rc = setup_kmu_slot_from_otp(RSE_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
                                  PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
                                  &sic_dr1_export_config);
     if (rc) {
@@ -430,7 +430,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
-#ifdef RSS_USE_HOST_FLASH
+#ifdef RSE_USE_HOST_FLASH
     result = host_flash_atu_uninit_regions();
     if (result) {
         while(1){}

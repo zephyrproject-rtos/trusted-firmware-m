@@ -5,5 +5,5 @@
  *
  */
 
-/* RSS does not have ITS */
+/* RSE does not have ITS */
 #undef MBEDTLS_PSA_CRYPTO_STORAGE_C

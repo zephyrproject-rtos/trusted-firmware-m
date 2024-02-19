@@ -9,10 +9,10 @@
 
 void tfm_hal_system_reset(void)
 {
-    struct rss_sysctrl_t *rss_sysctrl = (void *)RSS_SYSCTRL_BASE_S;
+    struct rse_sysctrl_t *rse_sysctrl = (void *)RSE_SYSCTRL_BASE_S;
 
     __DSB();
-    rss_sysctrl->swreset = 0x1u << 5;
+    rse_sysctrl->swreset = 0x1u << 5;
     __DSB();
 
     while(1) {

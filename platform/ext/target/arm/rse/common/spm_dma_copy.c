@@ -12,15 +12,15 @@
 #include "device_definition.h"
 #include "utilities.h"
 
-#ifndef RSS_DMA_MIN_SIZE
-#define RSS_DMA_MIN_SIZE 1024
-#endif /* RSS_DMA_MIN_SIZE */
+#ifndef RSE_DMA_MIN_SIZE
+#define RSE_DMA_MIN_SIZE 1024
+#endif /* RSE_DMA_MIN_SIZE */
 
 void *spm_dma_memcpy(void *dest, const void *src, size_t n)
 {
     enum dma350_lib_error_t err;
 
-    if (n < RSS_DMA_MIN_SIZE) {
+    if (n < RSE_DMA_MIN_SIZE) {
         return memcpy(dest, src, n);
     } else {
         err = dma350_memcpy(&DMA350_DMA0_CH0_DEV_S, (void *)src, dest, n,

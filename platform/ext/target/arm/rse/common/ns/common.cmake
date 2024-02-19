@@ -41,16 +41,16 @@ target_link_libraries(platform_ns
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<BOOL:${RSS_XIP}>:RSS_XIP>
-        $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
-        $<$<BOOL:${RSS_USE_HOST_UART}>:RSS_USE_HOST_UART>
-        $<$<BOOL:${RSS_USE_HOST_FLASH}>:RSS_USE_HOST_FLASH>
-        $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
-        $<$<BOOL:${RSS_HAS_EXPANSION_PERIPHERALS}>:RSS_HAS_EXPANSION_PERIPHERALS>
+        $<$<BOOL:${RSE_XIP}>:RSE_XIP>
+        $<$<BOOL:${RSE_DEBUG_UART}>:RSE_DEBUG_UART>
+        $<$<BOOL:${RSE_USE_HOST_UART}>:RSE_USE_HOST_UART>
+        $<$<BOOL:${RSE_USE_HOST_FLASH}>:RSE_USE_HOST_FLASH>
+        $<$<BOOL:${RSE_GPT_SUPPORT}>:RSE_GPT_SUPPORT>
+        $<$<BOOL:${RSE_HAS_EXPANSION_PERIPHERALS}>:RSE_HAS_EXPANSION_PERIPHERALS>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
-        $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
-        $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
+        $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
+        $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
+        $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
 )
 
 # Include region_defs.h and flash_layout.h
@@ -59,7 +59,7 @@ target_include_directories(platform_region_defs
         partition
 )
 
-if (RSS_XIP)
+if (RSE_XIP)
     find_package(Python3)
 
     add_custom_target(tfm_ns_sic_tables

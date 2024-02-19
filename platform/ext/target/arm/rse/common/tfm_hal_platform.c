@@ -16,7 +16,7 @@
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-#define RSS_ATU_REGION_PS_SLOT  16
+#define RSE_ATU_REGION_PS_SLOT  16
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 extern const struct memory_region_limits memory_regions;
@@ -68,7 +68,7 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
     /* Initialize PS region */
     err = atu_initialize_region(&ATU_DEV_S,
-                                RSS_ATU_REGION_PS_SLOT,
+                                RSE_ATU_REGION_PS_SLOT,
                                 HOST_ACCESS_PS_BASE_S,
                                 HOST_FLASH0_PS_BASE,
                                 HOST_FLASH0_PS_SIZE);
@@ -82,7 +82,7 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
 uint32_t tfm_hal_get_ns_VTOR(void)
 {
-#ifndef RSS_LOAD_NS_IMAGE
+#ifndef RSE_LOAD_NS_IMAGE
     /* If an NS image hasn't been set up, then just return 0 */
     return 0;
 #endif
@@ -92,7 +92,7 @@ uint32_t tfm_hal_get_ns_VTOR(void)
 
 uint32_t tfm_hal_get_ns_MSP(void)
 {
-#ifndef RSS_LOAD_NS_IMAGE
+#ifndef RSE_LOAD_NS_IMAGE
     /* If an NS image hasn't been set up, then just return 0 */
     return 0;
 #endif
@@ -102,7 +102,7 @@ uint32_t tfm_hal_get_ns_MSP(void)
 
 uint32_t tfm_hal_get_ns_entry_point(void)
 {
-#ifndef RSS_LOAD_NS_IMAGE
+#ifndef RSE_LOAD_NS_IMAGE
     /* If an NS image hasn't been set up, then just return 0 */
     return 0;
 #endif

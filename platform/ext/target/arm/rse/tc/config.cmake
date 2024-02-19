@@ -7,7 +7,7 @@
 
 # Once all options are set, set common options as fallback
 if (TFM_PARTITION_DPE)
-    set(RSS_USE_SDS_LIB         ON  CACHE BOOL  "Whether RSS should include SDS library or not")
+    set(RSE_USE_SDS_LIB         ON  CACHE BOOL  "Whether RSE should include SDS library or not")
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)

@@ -34,7 +34,7 @@ static psa_status_t message_dispatch(struct client_request_t *req)
         .p_outvecs = req->out_vec,
     };
 
-    SPMLOG_DBGMSG("[RSS-COMMS] Dispatching message\r\n");
+    SPMLOG_DBGMSG("[RSE-COMMS] Dispatching message\r\n");
     SPMLOG_DBGMSGVAL("handle=", req->handle);
     SPMLOG_DBGMSGVAL("type=", req->type);
     SPMLOG_DBGMSGVAL("in_len=", req->in_len);
@@ -69,14 +69,14 @@ static psa_status_t message_dispatch(struct client_request_t *req)
                                                req->in_len,
                                                req->type);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        SPMLOG_ERRMSG("[RSS-COMMS] Call not permitted\r\n");
+        SPMLOG_ERRMSG("[RSE-COMMS] Call not permitted\r\n");
         return PSA_ERROR_NOT_PERMITTED;
     }
 
     client_id = tfm_hal_client_id_translate(req->mhu_sender_dev,
                                             (int32_t)(req->client_id));
     if (client_id >= 0) {
-        SPMLOG_ERRMSGVAL("[RSS-COMMS] Invalid client_id: ",
+        SPMLOG_ERRMSGVAL("[RSE-COMMS] Invalid client_id: ",
                          (uint32_t)(req->client_id));
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -90,13 +90,13 @@ static psa_status_t message_dispatch(struct client_request_t *req)
                             NULL);
 }
 
-static void rss_comms_reply(const void *owner, int32_t ret)
+static void rse_comms_reply(const void *owner, int32_t ret)
 {
     struct client_request_t *req = (struct client_request_t *)owner;
 
     req->return_val = ret;
 
-    SPMLOG_DBGMSG("[RSS-COMMS] Sending reply\r\n");
+    SPMLOG_DBGMSG("[RSE-COMMS] Sending reply\r\n");
     SPMLOG_DBGMSGVAL("protocol_ver=", req->protocol_ver);
     SPMLOG_DBGMSGVAL("seq_num=", req->seq_num);
     SPMLOG_DBGMSGVAL("client_id=", req->client_id);
@@ -107,11 +107,11 @@ static void rss_comms_reply(const void *owner, int32_t ret)
     SPMLOG_DBGMSGVAL("out_vec[3].len=", req->out_vec[3].len);
 
     if (tfm_multi_core_hal_reply(req) != TFM_PLAT_ERR_SUCCESS) {
-        SPMLOG_DBGMSG("[RSS-COMMS] Sending reply failed!\r\n");
+        SPMLOG_DBGMSG("[RSE-COMMS] Sending reply failed!\r\n");
     }
 }
 
-static void rss_comms_handle_req(void)
+static void rse_comms_handle_req(void)
 {
     psa_status_t status;
     void *queue_entry;
@@ -132,17 +132,17 @@ static void rss_comms_handle_req(void)
          * Reply to the peer directly.
          */
         if (status != PSA_SUCCESS) {
-            SPMLOG_DBGMSGVAL("[RSS-COMMS] Message dispatch failed: ", status);
-            rss_comms_reply(req_to_process, status);
+            SPMLOG_DBGMSGVAL("[RSE-COMMS] Message dispatch failed: ", status);
+            rse_comms_reply(req_to_process, status);
         }
 #else
         /* In SFN model, the service call has been finished. Reply to the peer directly. */
-        rss_comms_reply(req_to_process, status);
+        rse_comms_reply(req_to_process, status);
 #endif
     }
 }
 
-static const void *rss_comms_get_caller_data(int32_t client_id)
+static const void *rse_comms_get_caller_data(int32_t client_id)
 {
     (void)client_id;
 
@@ -150,9 +150,9 @@ static const void *rss_comms_get_caller_data(int32_t client_id)
 }
 
 static struct tfm_rpc_ops_t rpc_ops = {
-    .handle_req = rss_comms_handle_req,
-    .reply = rss_comms_reply,
-    .get_caller_data = rss_comms_get_caller_data,
+    .handle_req = rse_comms_handle_req,
+    .reply = rse_comms_reply,
+    .get_caller_data = rse_comms_get_caller_data,
 };
 
 int32_t tfm_inter_core_comm_init(void)

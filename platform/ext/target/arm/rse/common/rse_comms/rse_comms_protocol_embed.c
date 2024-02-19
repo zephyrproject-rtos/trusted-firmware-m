@@ -11,8 +11,8 @@
 
 #include "tfm_psa_call_pack.h"
 
-enum tfm_plat_err_t rss_protocol_embed_deserialize_msg(
-        struct client_request_t *req, struct rss_embed_msg_t *msg,
+enum tfm_plat_err_t rse_protocol_embed_deserialize_msg(
+        struct client_request_t *req, struct rse_embed_msg_t *msg,
         size_t msg_len)
 {
     uint32_t payload_size = 0;
@@ -64,8 +64,8 @@ enum tfm_plat_err_t rss_protocol_embed_deserialize_msg(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t rss_protocol_embed_serialize_reply(
-        struct client_request_t *req, struct rss_embed_reply_t *reply,
+enum tfm_plat_err_t rse_protocol_embed_serialize_reply(
+        struct client_request_t *req, struct rse_embed_reply_t *reply,
         size_t *reply_size)
 {
     size_t payload_size = 0;
@@ -92,9 +92,9 @@ enum tfm_plat_err_t rss_protocol_embed_serialize_reply(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t rss_protocol_embed_serialize_error(
+enum tfm_plat_err_t rse_protocol_embed_serialize_error(
         struct client_request_t *req, psa_status_t err,
-        struct rss_embed_reply_t *reply, size_t *reply_size)
+        struct rse_embed_reply_t *reply, size_t *reply_size)
 {
     reply->return_val = err;
 

@@ -39,7 +39,7 @@ static struct kmu_key_export_config_t kmu_key1_export_config = {
 };
 
 
-static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
+static int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
                               size_t *state_size)
 {
     int rc;
@@ -101,9 +101,9 @@ static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
     return 0;
 }
 
-static int rss_derive_key(enum kmu_hardware_keyslot_t key_id, uint32_t *key_buf,
+static int rse_derive_key(enum kmu_hardware_keyslot_t key_id, uint32_t *key_buf,
                           const uint8_t *label, size_t label_len,
-                          enum rss_kmu_slot_id_t slot,
+                          enum rse_kmu_slot_id_t slot,
                           bool duplicate_into_next_slot)
 {
     int rc;
@@ -114,7 +114,7 @@ static int rss_derive_key(enum kmu_hardware_keyslot_t key_id, uint32_t *key_buf,
     volatile uint32_t *p_kmu_secondary_slot_buf;
     size_t kmu_slot_size;
 
-    rc = rss_get_boot_state(context, sizeof(context), &context_len);
+    rc = rse_get_boot_state(context, sizeof(context), &context_len);
     if (rc) {
         return rc;
     }
@@ -189,31 +189,31 @@ static int rss_derive_key(enum kmu_hardware_keyslot_t key_id, uint32_t *key_buf,
     return rc;
 }
 
-int rss_derive_cpak_seed(enum rss_kmu_slot_id_t slot)
+int rse_derive_cpak_seed(enum rse_kmu_slot_id_t slot)
 {
     uint8_t cpak_seed_label[] = "BL1_CPAK_SEED_DERIVATION";
 
-    return rss_derive_key(KMU_HW_SLOT_GUK, NULL, cpak_seed_label,
+    return rse_derive_key(KMU_HW_SLOT_GUK, NULL, cpak_seed_label,
                           sizeof(cpak_seed_label), slot, false);
 }
 
-int rss_derive_dak_seed(enum rss_kmu_slot_id_t slot)
+int rse_derive_dak_seed(enum rse_kmu_slot_id_t slot)
 {
     uint8_t dak_seed_label[]  = "BL1_DAK_SEED_DERIVATION";
 
-    return rss_derive_key(KMU_HW_SLOT_GUK, NULL, dak_seed_label,
+    return rse_derive_key(KMU_HW_SLOT_GUK, NULL, dak_seed_label,
                           sizeof(dak_seed_label), slot, false);
 }
 
-int rss_derive_rot_cdi(enum rss_kmu_slot_id_t slot)
+int rse_derive_rot_cdi(enum rse_kmu_slot_id_t slot)
 {
     uint8_t rot_cdi_label[] = "BL1_ROT_CDI_DERIVATION";
 
-    return rss_derive_key(KMU_HW_SLOT_HUK, NULL, rot_cdi_label,
+    return rse_derive_key(KMU_HW_SLOT_HUK, NULL, rot_cdi_label,
                           sizeof(rot_cdi_label), slot, false);
 }
 
-int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
+int rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
                          size_t *vhuk_seed_size)
 {
     uint8_t vhuk_seed_label[]  = "VHUK_SEED_DERIVATION";
@@ -235,25 +235,25 @@ int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
     return 0;
 }
 
-int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
-                    enum rss_kmu_slot_id_t slot)
+int rse_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
+                    enum rse_kmu_slot_id_t slot)
 {
-    return rss_derive_key(KMU_HW_SLOT_GUK, NULL, vhuk_seeds, vhuk_seeds_len,
+    return rse_derive_key(KMU_HW_SLOT_GUK, NULL, vhuk_seeds, vhuk_seeds_len,
                           slot, false);
 }
 
-int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
-                           enum rss_kmu_slot_id_t slot)
+int rse_derive_session_key(const uint8_t *ivs, size_t ivs_len,
+                           enum rse_kmu_slot_id_t slot)
 {
     int rc;
     enum kmu_error_t kmu_err;
 
-    rc = rss_derive_key(KMU_HW_SLOT_GUK, NULL, ivs, ivs_len, slot, true);
+    rc = rse_derive_key(KMU_HW_SLOT_GUK, NULL, ivs, ivs_len, slot, true);
     if (rc) {
         return rc;
     }
 
-    /* TODO: Should be removed once rss_derive_key properly locks KMU slots */
+    /* TODO: Should be removed once rse_derive_key properly locks KMU slots */
     kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot);
     if (kmu_err != KMU_ERROR_NONE) {
         return -1;
@@ -268,14 +268,14 @@ int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
 }
 
 int derive_using_krtl_or_zero_key(uint8_t *label, size_t label_len,
-                                  enum rss_kmu_slot_id_t output_slot)
+                                  enum rse_kmu_slot_id_t output_slot)
 {
     int rc;
     uint32_t zero_key[8] = {0};
     enum kmu_error_t kmu_err;
     enum lcm_tp_mode_t tp_mode;
     enum lcm_error_t lcm_err;
-    enum rss_kmu_slot_id_t input_slot;
+    enum rse_kmu_slot_id_t input_slot;
     uint32_t *key_buf;
 
     lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
@@ -285,18 +285,18 @@ int derive_using_krtl_or_zero_key(uint8_t *label, size_t label_len,
 
     switch(tp_mode) {
     case LCM_TP_MODE_PCI:
-        input_slot = (enum rss_kmu_slot_id_t)KMU_HW_SLOT_KRTL;
+        input_slot = (enum rse_kmu_slot_id_t)KMU_HW_SLOT_KRTL;
         key_buf = NULL;
         break;
     case LCM_TP_MODE_TCI:
-        input_slot = (enum rss_kmu_slot_id_t)0;
+        input_slot = (enum rse_kmu_slot_id_t)0;
         key_buf = zero_key;
         break;
     default:
         return -1;
     }
 
-    rc = rss_derive_key(input_slot, key_buf, label, label_len,
+    rc = rse_derive_key(input_slot, key_buf, label, label_len,
                         output_slot, true);
     if (rc) {
         return rc;
@@ -318,7 +318,7 @@ int derive_using_krtl_or_zero_key(uint8_t *label, size_t label_len,
     return 0;
 }
 
-int rss_derive_cm_provisioning_key(enum rss_kmu_slot_id_t slot)
+int rse_derive_cm_provisioning_key(enum rse_kmu_slot_id_t slot)
 {
     uint8_t cm_provisioning_label[] = "CM_PROVISIONING";
 
@@ -326,7 +326,7 @@ int rss_derive_cm_provisioning_key(enum rss_kmu_slot_id_t slot)
                                          sizeof(cm_provisioning_label), slot);
 }
 
-int rss_derive_dm_provisioning_key(enum rss_kmu_slot_id_t slot)
+int rse_derive_dm_provisioning_key(enum rse_kmu_slot_id_t slot)
 {
     uint8_t dm_provisioning_label[] = "DM_PROVISIONING";
 

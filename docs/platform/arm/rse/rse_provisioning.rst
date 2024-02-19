@@ -41,7 +41,7 @@ will provision the CM provisioning data into OTP. The RSE must be cold-reset,
 which will disable secure provisioning mode. If ``TFM_DUMMY_PROVISIONING`` is
 enabled the reset will happen automatically, else the external provisioning
 device should read the provisioning state from the GPIO/PSI (which is set via
-the ``rss_sysctrl`` register) and perform the reset.
+the ``rse_sysctrl`` register) and perform the reset.
 
 After the cold reset, the RSE will automatically transition to Device
 Manufacturer provisioning state "DM" as the LCM hardware state-machine reads the
@@ -105,9 +105,9 @@ RSE provisioning GPIO signalling
 The state of the RSE ROM boot/provisioning flow is signalled outside of the RSE
 subsystem via the GPIOs as part of the Persistent State Interface (PSI). The PSI
 signals the lifecycle state as a hardware signal, but additionally the software
-can signal over the PSI by setting the ``rss_sysctrl`` register.
+can signal over the PSI by setting the ``rse_sysctrl`` register.
 
-The boot state is encoded in the lowest 4 bits of the ``rss_sysctrl`` register,
+The boot state is encoded in the lowest 4 bits of the ``rse_sysctrl`` register,
 and has meaning as follows:
 
 +--------+------------------------------------------------------------------+

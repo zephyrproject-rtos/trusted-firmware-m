@@ -18,26 +18,26 @@ structs, which are serialized in byte-order over the MHU links.
 Messages encoding a psa_call() to RSE take the form::
 
     __PACKED_STRUCT serialized_psa_msg_t {
-        struct serialized_rss_comms_header_t header;
+        struct serialized_rse_comms_header_t header;
         __PACKED_UNION {
-            struct rss_embed_msg_t embed;
-            struct rss_pointer_access_msg_t pointer_access;
+            struct rse_embed_msg_t embed;
+            struct rse_pointer_access_msg_t pointer_access;
         } msg;
     };
 
 Replies from RSE take the form::
 
     __PACKED_STRUCT serialized_psa_reply_t {
-        struct serialized_rss_comms_header_t header;
+        struct serialized_rse_comms_header_t header;
         __PACKED_UNION {
-            struct rss_embed_reply_t embed;
-            struct rss_pointer_access_reply_t pointer_access;
+            struct rse_embed_reply_t embed;
+            struct rse_pointer_access_reply_t pointer_access;
         } reply;
     };
 
 All messages (calls and replies), in all protocols carry the following header::
 
-    __PACKED_STRUCT serialized_rss_comms_header_t {
+    __PACKED_STRUCT serialized_rse_comms_header_t {
         uint8_t protocol_ver;
         uint8_t seq_num;
         uint16_t client_id;
@@ -63,11 +63,11 @@ Embed protocol
 The embed protocol embeds the psa_call iovecs into the message sent over the
 MHU. It has the following format::
 
-    __PACKED_STRUCT rss_embed_msg_t {
+    __PACKED_STRUCT rse_embed_msg_t {
         psa_handle_t handle;
         uint32_t ctrl_param;
         uint16_t io_size[PSA_MAX_IOVEC];
-        uint8_t payload[RSS_COMMS_PAYLOAD_MAX_SIZE];
+        uint8_t payload[RSE_COMMS_PAYLOAD_MAX_SIZE];
     };
 
 The ``handle`` is the psa_call handle parameter and the ``ctrl_param`` packs the
@@ -79,15 +79,15 @@ iovecs, in order, with the invec sizes before the outvec sizes.
 The ``payload`` array then contains the invec data packed contiguously in order.
 The length of this parameter is variable, equal to the sum of the invec lengths
 in io_size. The caller does not need to pad the payload to the maximum size. The
-maximum payload size for this protocol, ``RSS_COMMS_PAYLOAD_MAX_SIZE``, is a
+maximum payload size for this protocol, ``RSE_COMMS_PAYLOAD_MAX_SIZE``, is a
 build-time option.
 
 Replies in the embed protocol take the form::
 
-    __PACKED_STRUCT rss_embed_reply_t {
+    __PACKED_STRUCT rse_embed_reply_t {
         int32_t return_val;
         uint16_t out_size[PSA_MAX_IOVEC];
-        uint8_t payload[RSS_COMMS_PAYLOAD_MAX_SIZE];
+        uint8_t payload[RSE_COMMS_PAYLOAD_MAX_SIZE];
     };
 
 The ``return_val`` is the return value of the psa_call() invocation, the
@@ -101,7 +101,7 @@ Pointer access protocol
 The pointer access protocol passes the psa_call iovecs as pointers to shared
 memory using the following MHU message format::
 
-    __PACKED_STRUCT rss_pointer_access_msg_t {
+    __PACKED_STRUCT rse_pointer_access_msg_t {
         psa_handle_t handle;
         uint32_t ctrl_param;
         uint32_t io_sizes[PSA_MAX_IOVEC];
@@ -118,7 +118,7 @@ pointed-to remains valid for the duration of the call.
 
 The reply message has the form::
 
-    __PACKED_STRUCT rss_pointer_access_reply_t {
+    __PACKED_STRUCT rse_pointer_access_reply_t {
         int32_t return_val;
         uint32_t out_size[PSA_MAX_IOVEC];
     };

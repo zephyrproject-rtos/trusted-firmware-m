@@ -21,9 +21,9 @@
 #include "device_definition.h"
 #include "RTE_Device.h"
 
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
 #define UART0_DEV                    UART0_PL011_DEV_NS
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
 #define FLASH0_DEV                   SPI_STRATAFLASHJ3_DEV
 

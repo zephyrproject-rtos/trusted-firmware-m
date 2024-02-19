@@ -25,7 +25,7 @@ extern "C" {
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
+int rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
                          size_t *vhuk_seed_size);
 
 /**
@@ -35,7 +35,7 @@ int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_cpak_seed(enum rss_kmu_slot_id_t slot);
+int rse_derive_cpak_seed(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the DAK seed, and lock in a KMU slot.
@@ -44,7 +44,7 @@ int rss_derive_cpak_seed(enum rss_kmu_slot_id_t slot);
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_dak_seed(enum rss_kmu_slot_id_t slot);
+int rse_derive_dak_seed(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the RoT CDI, and lock in a KMU slot.
@@ -53,20 +53,20 @@ int rss_derive_dak_seed(enum rss_kmu_slot_id_t slot);
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_rot_cdi(enum rss_kmu_slot_id_t slot);
+int rse_derive_rot_cdi(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the VHUK, and lock in a KMU slot.
  *
  * \param[in]  vhuk_seeds     A buffer containing the seed values.
  * \param[in]  vhuk_seeds_len The size of the vhuk_seeds buffer. This must be
- *                            RSS_AMOUNT * 32 in size.
+ *                            RSE_AMOUNT * 32 in size.
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
-                    enum rss_kmu_slot_id_t slot);
+int rse_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
+                    enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the session key, and lock into two KMU
@@ -79,13 +79,13 @@ int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
  *
  * \param[in]  ivs            A buffer containing the iv values.
  * \param[in]  ivs_len        The size of the ivs buffer. This must be
- *                            RSS_AMOUNT * 32 in size.
+ *                            RSE_AMOUNT * 32 in size.
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
-                           enum rss_kmu_slot_id_t slot);
+int rse_derive_session_key(const uint8_t *ivs, size_t ivs_len,
+                           enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the CM provisioning key, and lock into two
@@ -100,7 +100,7 @@ int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_cm_provisioning_key(enum rss_kmu_slot_id_t slot);
+int rse_derive_cm_provisioning_key(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the DM provisioning key, and lock into two
@@ -115,7 +115,7 @@ int rss_derive_cm_provisioning_key(enum rss_kmu_slot_id_t slot);
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_dm_provisioning_key(enum rss_kmu_slot_id_t slot);
+int rse_derive_dm_provisioning_key(enum rse_kmu_slot_id_t slot);
 
 #ifdef __cplusplus
 }

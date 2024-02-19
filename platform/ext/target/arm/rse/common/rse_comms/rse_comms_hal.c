@@ -41,52 +41,52 @@ static __ALIGNED(4) struct serialized_psa_reply_t reply;
 #define NS_CLIENT_ID_FLAG_OFFSET (31)
 #define NS_CLIENT_ID_FLAG_MASK (0x1UL << NS_CLIENT_ID_FLAG_OFFSET)
 
-/* MHU for RSS <> AP_MONITOR communication */
+/* MHU for RSE <> AP_MONITOR communication */
 #ifndef MHU0_CLIENT_ID_BASE
 #define MHU0_CLIENT_ID_BASE (0x0000UL << CLIENT_ID_MHU_BASE_OFFSET)
 #endif
 
-#ifdef MHU_RSS_TO_AP_NS
-/* MHU for RSS <> AP_NS communication */
+#ifdef MHU_RSE_TO_AP_NS
+/* MHU for RSE <> AP_NS communication */
 #ifndef MHU1_CLIENT_ID_BASE
 #define MHU1_CLIENT_ID_BASE (0x1000UL << CLIENT_ID_MHU_BASE_OFFSET)
 #endif
-#endif /* MHU_RSS_TO_AP_NS */
+#endif /* MHU_RSE_TO_AP_NS */
 
 TFM_POOL_DECLARE(req_pool, sizeof(struct client_request_t),
-                 RSS_COMMS_MAX_CONCURRENT_REQ);
+                 RSE_COMMS_MAX_CONCURRENT_REQ);
 
 static enum tfm_plat_err_t initialize_mhu(void)
 {
     enum mhu_error_t err;
 
-    err = mhu_init_sender(&MHU_RSS_TO_AP_MONITOR_DEV);
+    err = mhu_init_sender(&MHU_RSE_TO_AP_MONITOR_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] RSS to AP_MONITOR MHU driver init failed: ",
+        SPMLOG_ERRMSGVAL("[COMMS] RSE to AP_MONITOR MHU driver init failed: ",
                          err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = mhu_init_receiver(&MHU_AP_MONITOR_TO_RSS_DEV);
+    err = mhu_init_receiver(&MHU_AP_MONITOR_TO_RSE_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] AP_MONITOR to RSS MHU driver init failed: ",
+        SPMLOG_ERRMSGVAL("[COMMS] AP_MONITOR to RSE MHU driver init failed: ",
                          err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-#ifdef MHU_RSS_TO_AP_NS
-    err = mhu_init_sender(&MHU_RSS_TO_AP_NS_DEV);
+#ifdef MHU_RSE_TO_AP_NS
+    err = mhu_init_sender(&MHU_RSE_TO_AP_NS_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] RSS to AP_NS MHU driver init failed: ", err);
+        SPMLOG_ERRMSGVAL("[COMMS] RSE to AP_NS MHU driver init failed: ", err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = mhu_init_receiver(&MHU_AP_NS_TO_RSS_DEV);
+    err = mhu_init_receiver(&MHU_AP_NS_TO_RSE_DEV);
     if (err != MHU_ERR_NONE) {
-        SPMLOG_ERRMSGVAL("[COMMS] AP_NS to RSS MHU driver init failed: ", err);
+        SPMLOG_ERRMSGVAL("[COMMS] AP_NS to RSE MHU driver init failed: ", err);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-#endif /* MHU_RSS_TO_AP_NS */
+#endif /* MHU_RSE_TO_AP_NS */
 
     SPMLOG_DBGMSG("[COMMS] MHU driver initialized successfully.\r\n");
     return TFM_PLAT_ERR_SUCCESS;
@@ -134,7 +134,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
     /* Record the MHU sender device to be used for the reply */
     req->mhu_sender_dev = mhu_sender_dev;
 
-    err = rss_protocol_deserialize_msg(req, &msg, msg_len);
+    err = rse_protocol_deserialize_msg(req, &msg, msg_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         /* Deserialisation failed, drop message */
         SPMLOG_DBGMSGVAL("[COMMS] Deserialize message failed: ", err);
@@ -152,7 +152,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
 
 out_return_err:
     /* Attempt to respond with a failure message */
-    if (rss_protocol_serialize_error(req, &msg.header,
+    if (rse_protocol_serialize_error(req, &msg.header,
                                      PSA_ERROR_CONNECTION_BUSY,
                                      &reply, &reply_size)
         == TFM_PLAT_ERR_SUCCESS) {
@@ -183,7 +183,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_reply(struct client_request_t *req)
         goto out;
     }
 
-    err = rss_protocol_serialize_reply(req, &reply, &reply_size);
+    err = rse_protocol_serialize_reply(req, &reply, &reply_size);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         SPMLOG_DBGMSGVAL("[COMMS] Serialize reply failed: ", err);
         goto out_free_req;
@@ -211,7 +211,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void)
 
     spm_err = tfm_pool_init(req_pool, POOL_BUFFER_SIZE(req_pool),
                             sizeof(struct client_request_t),
-                            RSS_COMMS_MAX_CONCURRENT_REQ);
+                            RSE_COMMS_MAX_CONCURRENT_REQ);
     if (spm_err) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -221,12 +221,12 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void)
 
 int32_t tfm_hal_client_id_translate(void *owner, int32_t client_id_in)
 {
-    if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_MONITOR_DEV) {
+    if ((uintptr_t)owner == (uintptr_t)&MHU_RSE_TO_AP_MONITOR_DEV) {
         return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
                (MHU0_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
                (NS_CLIENT_ID_FLAG_MASK));
-#ifdef MHU_RSS_TO_AP_NS
-    } else if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_NS_DEV) {
+#ifdef MHU_RSE_TO_AP_NS
+    } else if ((uintptr_t)owner == (uintptr_t)&MHU_RSE_TO_AP_NS_DEV) {
         return ((client_id_in & CLIENT_ID_USER_INPUT_MASK) |
                (MHU1_CLIENT_ID_BASE & CLIENT_ID_MHU_BASE_MASK) |
                (NS_CLIENT_ID_FLAG_MASK));

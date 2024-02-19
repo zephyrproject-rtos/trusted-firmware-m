@@ -24,12 +24,12 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
-#ifdef RSS_ENABLE_BRINGUP_HELPERS
+#ifdef RSE_ENABLE_BRINGUP_HELPERS
 #include "rse_bringup_helpers.h"
-#endif /* RSS_ENABLE_BRINGUP_HELPERS */
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#endif /* RSE_ENABLE_BRINGUP_HELPERS */
+#ifdef RSE_BRINGUP_OTP_EMULATION
 #include "rse_otp_emulation.h"
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 #include "trng.h"
 
 /* Flash device name must be specified by target */
@@ -41,7 +41,7 @@ static int32_t init_atu_regions(void)
 {
     enum atu_error_t err;
 
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
     /* Initialize UART region */
     err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
@@ -50,7 +50,7 @@ static int32_t init_atu_regions(void)
     if (err != ATU_ERR_NONE) {
         return 1;
     }
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
     return 0;
 }
@@ -62,10 +62,10 @@ int32_t boot_platform_init(void)
     enum tfm_plat_err_t plat_err;
     uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
     uint32_t idx;
-#ifdef RSS_ENABLE_BRINGUP_HELPERS
+#ifdef RSE_ENABLE_BRINGUP_HELPERS
     enum lcm_error_t lcm_err;
     enum lcm_tp_mode_t tp_mode;
-#endif /* RSS_ENABLE_BRINGUP_HELPERS */
+#endif /* RSE_ENABLE_BRINGUP_HELPERS */
 
     /* Initialize stack limit register */
     uint32_t msp_stack_bottom =
@@ -73,34 +73,34 @@ int32_t boot_platform_init(void)
 
     __set_MSPLIM(msp_stack_bottom);
 
-    /* Enable system reset for the RSS */
-    struct rss_sysctrl_t *rss_sysctrl = (void *)RSS_SYSCTRL_BASE_S;
-    rss_sysctrl->reset_mask |= (1U << 8U);
+    /* Enable system reset for the RSE */
+    struct rse_sysctrl_t *rse_sysctrl = (void *)RSE_SYSCTRL_BASE_S;
+    rse_sysctrl->reset_mask |= (1U << 8U);
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return 1;
     }
 
-#ifdef RSS_ENABLE_BRINGUP_HELPERS
+#ifdef RSE_ENABLE_BRINGUP_HELPERS
     lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (lcm_err != LCM_ERROR_NONE) {
         return 2;
     }
 
     if (tp_mode == LCM_TP_MODE_VIRGIN || tp_mode == LCM_TP_MODE_TCI) {
-        rss_run_bringup_helpers_if_requested();
+        rse_run_bringup_helpers_if_requested();
     }
-#endif /* RSS_ENABLE_BRINGUP_HELPERS */
+#endif /* RSE_ENABLE_BRINGUP_HELPERS */
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
-    if (rss_otp_emulation_is_enabled()) {
+#ifdef RSE_BRINGUP_OTP_EMULATION
+    if (rse_otp_emulation_is_enabled()) {
         result = FLASH_DEV_NAME.Initialize(NULL);
         if (result != ARM_DRIVER_OK) {
             return 1;
         }
     }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     result = init_atu_regions();
@@ -171,14 +171,14 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
-    if (rss_otp_emulation_is_enabled()) {
+#ifdef RSE_BRINGUP_OTP_EMULATION
+    if (rse_otp_emulation_is_enabled()) {
         result = FLASH_DEV_NAME.Uninitialize();
         if (result != ARM_DRIVER_OK) {
             while (1){}
         }
     }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();

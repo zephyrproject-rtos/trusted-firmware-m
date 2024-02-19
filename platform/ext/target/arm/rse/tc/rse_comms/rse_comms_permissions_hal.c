@@ -62,7 +62,7 @@ enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
                                                    uint32_t size,
                                                    bool is_write)
 {
-    if ((uintptr_t)owner == (uintptr_t)&MHU_RSS_TO_AP_MONITOR_DEV) {
+    if ((uintptr_t)owner == (uintptr_t)&MHU_RSE_TO_AP_MONITOR_DEV) {
         /* Is fully within the Secure ROM and is a read */
         if (host_ptr >= 0x0 && host_ptr + size < 0x80000 && !is_write) {
             return TFM_PLAT_ERR_SUCCESS;

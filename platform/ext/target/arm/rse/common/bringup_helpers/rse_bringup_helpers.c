@@ -19,7 +19,7 @@
 
 static uint8_t check_gpio_pins(void)
 {
-    uint32_t pins_offset = rss_bringup_helpers_hal_get_pins_offset();
+    uint32_t pins_offset = rse_bringup_helpers_hal_get_pins_offset();
 
     return (*((uint32_t*)(GPIO0_CMSDK_BASE_S)) >> pins_offset) & 0b11;
 }
@@ -55,7 +55,7 @@ static void boot_address(struct boot_arm_vector_table *vt)
     boot_jump_to_next_image(vt_cpy->reset);
 }
 
-void rss_run_bringup_helpers_if_requested(void)
+void rse_run_bringup_helpers_if_requested(void)
 {
     uint8_t gpio_pins_value = check_gpio_pins();
     uint8_t gppc_val = get_gppc_val();
@@ -64,13 +64,13 @@ void rss_run_bringup_helpers_if_requested(void)
         case 0:
             break;
         case 1:
-            boot_address(rss_bringup_helpers_hal_get_vm0_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_vm0_exec_address());
             while(1){}
         case 2:
-            boot_address(rss_bringup_helpers_hal_get_qpsi_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_qpsi_exec_address());
             while(1){}
         case 3:
-            boot_address(rss_bringup_helpers_hal_get_side_band_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_side_band_exec_address());
             while(1){}
     }
 
@@ -78,13 +78,13 @@ void rss_run_bringup_helpers_if_requested(void)
         case 0:
             break;
         case 1:
-            boot_address(rss_bringup_helpers_hal_get_vm0_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_vm0_exec_address());
             while(1){}
         case 2:
-            boot_address(rss_bringup_helpers_hal_get_qpsi_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_qpsi_exec_address());
             while(1){}
         case 3:
-            boot_address(rss_bringup_helpers_hal_get_side_band_exec_address());
+            boot_address(rse_bringup_helpers_hal_get_side_band_exec_address());
             while(1){}
     }
 }

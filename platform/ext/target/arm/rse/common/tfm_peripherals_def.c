@@ -9,23 +9,23 @@
 #include "array.h"
 #include "cmsis.h"
 
-#ifdef RSS_DEBUG_UART
+#ifdef RSE_DEBUG_UART
 struct platform_data_t tfm_peripheral_std_uart = {
-        RSS_DEBUG_UART0_BASE_NS,
-        RSS_DEBUG_UART0_BASE_NS + 0xFFF,
+        RSE_DEBUG_UART0_BASE_NS,
+        RSE_DEBUG_UART0_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
-#endif /* RSS_DEBUG_UART */
+#endif /* RSE_DEBUG_UART */
 
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
 struct platform_data_t tfm_peripheral_std_uart = {
         HOST_UART0_BASE_NS,
         HOST_UART0_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
 struct platform_data_t tfm_peripheral_timer0 = {
         SYSTIMER0_ARMV8_M_BASE_S,
@@ -42,7 +42,7 @@ struct platform_data_t tfm_peripheral_dma0_ch0 = {
 };
 
 /* Allowed named MMIO of this platform.
- * Platform RSS only has named MMIO.
+ * Platform RSE only has named MMIO.
  */
 static const uintptr_t partition_named_mmio_list[] = {
     (uintptr_t)TFM_PERIPHERAL_STD_UART,

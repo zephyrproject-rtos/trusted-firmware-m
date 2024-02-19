@@ -20,20 +20,20 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<BOOL:${RSS_XIP}>:RSS_XIP>
-        $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
-        $<$<BOOL:${RSS_USE_HOST_UART}>:RSS_USE_HOST_UART>
-        $<$<BOOL:${RSS_USE_HOST_FLASH}>:RSS_USE_HOST_FLASH>
-        $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
-        $<$<BOOL:${RSS_HAS_EXPANSION_PERIPHERALS}>:RSS_HAS_EXPANSION_PERIPHERALS>
+        $<$<BOOL:${RSE_XIP}>:RSE_XIP>
+        $<$<BOOL:${RSE_DEBUG_UART}>:RSE_DEBUG_UART>
+        $<$<BOOL:${RSE_USE_HOST_UART}>:RSE_USE_HOST_UART>
+        $<$<BOOL:${RSE_USE_HOST_FLASH}>:RSE_USE_HOST_FLASH>
+        $<$<BOOL:${RSE_GPT_SUPPORT}>:RSE_GPT_SUPPORT>
+        $<$<BOOL:${RSE_HAS_EXPANSION_PERIPHERALS}>:RSE_HAS_EXPANSION_PERIPHERALS>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
-        $<$<BOOL:${RSS_OTP_TRNG}>:RSS_OTP_TRNG>
-        $<$<BOOL:${RSS_LOAD_NS_IMAGE}>:RSS_LOAD_NS_IMAGE>
-        $<$<BOOL:${RSS_ENABLE_TRAM}>:RSS_ENABLE_TRAM>
-        $<$<BOOL:${RSS_BIT_PROGRAMMABLE_OTP}>:RSS_BIT_PROGRAMMABLE_OTP>
-        $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:RSS_USE_ROM_LIB_FROM_SRAM>
-        $<$<BOOL:${RSS_BRINGUP_OTP_EMULATION}>:RSS_BRINGUP_OTP_EMULATION>
+        $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
+        $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
+        $<$<BOOL:${RSE_LOAD_NS_IMAGE}>:RSE_LOAD_NS_IMAGE>
+        $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
+        $<$<BOOL:${RSE_BIT_PROGRAMMABLE_OTP}>:RSE_BIT_PROGRAMMABLE_OTP>
+        $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:RSE_USE_ROM_LIB_FROM_SRAM>
+        $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
 )
 
 #========================= Platform common defs ===============================#
@@ -97,7 +97,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_comms rse_comms)
 endif()
 
-if (RSS_AMOUNT GREATER 1)
+if (RSE_AMOUNT GREATER 1)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_handshake rse_handshake)
 endif()
 
@@ -141,8 +141,8 @@ target_sources(platform_s
         device/source/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
         libraries/dma350_lib.c
-        $<$<BOOL:${RSS_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds.c>
-        $<$<BOOL:${RSS_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds_svc.c>
+        $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds.c>
+        $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds_svc.c>
         native_drivers/atu_rse_drv.c
         native_drivers/dma350_drv.c
         native_drivers/dma350_ch_drv.c
@@ -159,8 +159,8 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TFM_PARTITION_SLIH_TEST}>,$<BOOL:${TFM_PARTITION_FLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -193,12 +193,12 @@ target_compile_definitions(platform_s
         ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
         spm_memcpy=spm_dma_memcpy
     PRIVATE
-        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
-        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         CMSIS_device_header="rse.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
-        $<$<BOOL:${RSS_USE_SDS_LIB}>:RSS_USE_SDS_LIB>
+        $<$<BOOL:${RSE_USE_SDS_LIB}>:RSE_USE_SDS_LIB>
 )
 
 target_compile_options(platform_s
@@ -244,13 +244,13 @@ target_sources(platform_bl2
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         native_drivers/lcm_drv.c
         native_drivers/integrity_checker_drv.c
         otp_lcm.c
         nv_counters.c
-        $<$<BOOL:${RSS_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
+        $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
 )
 
 target_include_directories(platform_bl2
@@ -281,8 +281,8 @@ target_include_directories(platform_bl2
 
 target_compile_definitions(platform_bl2
     PRIVATE
-        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
-        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:PLATFORM_HAS_BOOT_DMA>
         $<$<BOOL:${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>:BOOT_DMA_MIN_SIZE_REQ=${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>
@@ -314,14 +314,14 @@ target_sources(platform_bl1_1
         ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./dpa_hardened_word_copy.c
         ./cc312/cc3xx_aes_external_key_loader.c
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
-        $<$<BOOL:${RSS_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
+        $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
+        $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./rse_key_derivation.c
-        $<$<BOOL:${RSS_USE_ROM_LIB_FROM_SRAM}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
+        $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -344,11 +344,11 @@ target_include_directories(platform_bl1_1_interface
 
 target_compile_definitions(platform_bl1_1_interface
     INTERFACE
-        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
-        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
-        RSS_AMOUNT=${RSS_AMOUNT}
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
+        RSE_AMOUNT=${RSE_AMOUNT}
         KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
-        $<$<BOOL:${RSS_ENCRYPTED_OTP_KEYS}>:RSS_ENCRYPTED_OTP_KEYS>
+        $<$<BOOL:${RSE_ENCRYPTED_OTP_KEYS}>:RSE_ENCRYPTED_OTP_KEYS>
 )
 
 target_link_libraries(platform_bl1_1
@@ -357,7 +357,7 @@ target_link_libraries(platform_bl1_1
         bl1_1_shared_lib_interface
 )
 
-if(RSS_USE_ROM_LIB_FROM_SRAM)
+if(RSE_USE_ROM_LIB_FROM_SRAM)
     target_compile_options(platform_bl1_1
         PUBLIC
             # Enable position independent code
@@ -405,8 +405,8 @@ endif()
 target_sources(bl1_1_shared_lib
     PRIVATE
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
-        $<$<AND:$<NOT:$<BOOL:${RSS_OTP_TRNG}>>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
-        $<$<AND:$<BOOL:${RSS_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+        $<$<AND:$<NOT:$<BOOL:${RSE_OTP_TRNG}>>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
+        $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
 )
 
 target_link_libraries(cc312_rom
@@ -434,17 +434,17 @@ target_include_directories(platform_bl1_2
 
 target_compile_definitions(platform_bl1_2
     PUBLIC
-        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
-        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
-        $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
+        $<$<BOOL:${RSE_AMOUNT}>:RSE_AMOUNT=${RSE_AMOUNT}>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
-if(RSS_USE_HOST_FLASH)
+if(RSE_USE_HOST_FLASH)
     add_subdirectory(./fip_parser)
 endif()
 
-if(RSS_USE_ROM_LIB_FROM_SRAM)
+if(RSE_USE_ROM_LIB_FROM_SRAM)
     target_compile_options(platform_bl1_2
         PUBLIC
             # Prevent BL1_2 from using r9
@@ -497,7 +497,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_genera
                              -DBL1_2_HASH_PATH=\\\"$<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin\\\"
                              -DGUK_PATH=\\\"${TFM_GUK_PATH}\\\"
                              -DCPAK_OUTPUT_PATH=\\\"${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin\\\"
-                             -DRSS_TP_MODE=${RSS_TP_MODE}
+                             -DRSE_TP_MODE=${RSE_TP_MODE}
     COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
 )
 
@@ -518,7 +518,7 @@ add_custom_target(cpak_public ALL
 
 ############################### IMAGE SIGNING ##################################
 
-if (RSS_XIP)
+if (RSE_XIP)
     find_package(Python3)
 
     add_custom_target(public_key ALL
@@ -700,8 +700,8 @@ install(FILES       device/source/device_definition.c
 )
 
 install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
-                    $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
-                    $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+                    $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+                    $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 

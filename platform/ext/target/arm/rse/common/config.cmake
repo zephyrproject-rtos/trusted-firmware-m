@@ -5,15 +5,15 @@
 #
 #-------------------------------------------------------------------------------
 
-if (RSS_XIP)
+if (RSE_XIP)
 set(PLATFORM_DEFAULT_IMAGE_SIGNING      OFF       CACHE BOOL    "Use default image signing implementation")
 
 set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      10        CACHE STRING  "ID of the flash area containing the primary Secure image")
 set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     11        CACHE STRING  "ID of the flash area containing the primary Non-Secure image")
 endif()
 
-set(RSS_USE_HOST_UART                   ON         CACHE BOOL     "Whether RSS should setup to use the UART from the host system")
-set(RSS_HAS_EXPANSION_PERIPHERALS       OFF        CACHE BOOL     "Whether RSS has sub-platform specific peripherals in the expansion layer")
+set(RSE_USE_HOST_UART                   ON         CACHE BOOL     "Whether RSE should setup to use the UART from the host system")
+set(RSE_HAS_EXPANSION_PERIPHERALS       OFF        CACHE BOOL     "Whether RSE has sub-platform specific peripherals in the expansion layer")
 
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
@@ -34,7 +34,7 @@ set(TFM_BL1_SOFTWARE_CRYPTO             OFF        CACHE BOOL     "Whether BL1_1
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON         CACHE BOOL     "Whether BL1 can directly access flash content")
 set(TFM_BL1_PQ_CRYPTO                   ON         CACHE BOOL     "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
 set(TFM_BL1_DUMMY_TRNG                  OFF        CACHE BOOL     "Whether BL1_1 will use dummy TRNG")
-if (RSS_BRINGUP_OTP_EMULATION)
+if (RSE_BRINGUP_OTP_EMULATION)
     set(TFM_BL1_2_IN_OTP                FALSE      CACHE BOOL      "Whether BL1_2 is stored in OTP")
 endif()
 
@@ -45,8 +45,8 @@ set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to us
 set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      2          CACHE STRING   "ID of the flash area containing the primary Secure image")
 set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     3          CACHE STRING   "ID of the flash area containing the primary Non-Secure image")
 set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS OFF CACHE BOOL     "Enable storing of encoded measurements in boot.")
-set(RSS_USE_HOST_FLASH                  ON         CACHE BOOL     "Enable RSS using the host flash.")
-set(RSS_LOAD_NS_IMAGE                   ON         CACHE BOOL     "Whether to load an RSS NSPE image")
+set(RSE_USE_HOST_FLASH                  ON         CACHE BOOL     "Enable RSE using the host flash.")
+set(RSE_LOAD_NS_IMAGE                   ON         CACHE BOOL     "Whether to load an RSE NSPE image")
 
 set(TFM_PARTITION_CRYPTO                ON         CACHE BOOL     "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL     "Enable Initial Attestation partition")
@@ -57,7 +57,7 @@ set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algor
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD" CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
-set(TFM_EXTRAS_REPO_VERSION             "805db7b"  CACHE STRING  "The version of tf-m-extras to use")
+set(TFM_EXTRAS_REPO_VERSION             "f0204f1"  CACHE STRING  "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
@@ -76,7 +76,7 @@ set(TFM_PXN_ENABLE                      ON         CACHE BOOL     "Use Privilege
 set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
 
 # Platform-specific configurations
-if (RSS_LOAD_NS_IMAGE)
+if (RSE_LOAD_NS_IMAGE)
     set(CONFIG_TFM_USE_TRUSTZONE            ON)
 else()
     set(CONFIG_TFM_USE_TRUSTZONE            OFF)
@@ -88,22 +88,22 @@ set(TFM_PARTITION_MEASURED_BOOT         ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
 
-set(RSS_AMOUNT                          1          CACHE STRING  "Amount of RSSes in the system")
+set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
-set(RSS_RTL_KEY_PATH                    ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
-set(RSS_SCP_DATA_PATH                   ${CMAKE_CURRENT_LIST_DIR}/provisioning/dummy_scp_data.bin CACHE FILEPATH "Path to SCP data to provision")
+set(RSE_RTL_KEY_PATH                    ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+set(RSE_SCP_DATA_PATH                   ${CMAKE_CURRENT_LIST_DIR}/provisioning/dummy_scp_data.bin CACHE FILEPATH "Path to SCP data to provision")
 
-set(RSS_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
-set(RSS_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
+set(RSE_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
+set(RSE_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
 
-set(RSS_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
+set(RSE_TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
 
-set(RSS_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSS OTP words can be programmed bit by bit, or whole words must be programmed at once")
+set(RSE_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSE OTP words can be programmed bit by bit, or whole words must be programmed at once")
 
-if (RSS_USE_ROM_LIB_FROM_SRAM)
+if (RSE_USE_ROM_LIB_FROM_SRAM)
     set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
     set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols_in_sram.axf" CACHE STRING "Suffix to use for code-sharing input files")
 endif()
 
-set(RSS_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
+set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")

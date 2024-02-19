@@ -23,7 +23,7 @@ const ARM_DRIVER_FLASH *flash_driver[] = {
 const int flash_driver_entry_num = ARRAY_SIZE(flash_driver);
 
 struct flash_area flash_map[] = {
-#ifdef RSS_XIP
+#ifdef RSE_XIP
     {
         .fa_id = FLASH_AREA_10_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -81,7 +81,7 @@ struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_5_OFFSET,
         .fa_size = FLASH_AREA_5_SIZE,
     },
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
     {
         .fa_id = FLASH_AREA_6_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -120,19 +120,19 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
 {
     int rc = -1;
 
-    if (image_id == RSS_BL2_IMAGE_S) {
+    if (image_id == RSE_BL2_IMAGE_S) {
         *exec_ram_start = S_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == RSS_BL2_IMAGE_NS) {
+    } else if (image_id == RSE_BL2_IMAGE_NS) {
         *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == RSS_BL2_IMAGE_AP) {
+    } else if (image_id == RSE_BL2_IMAGE_AP) {
         *exec_ram_start = HOST_BOOT_IMAGE0_LOAD_BASE_S;
         *exec_ram_size  = AP_BOOT_SRAM_SIZE;
         rc = 0;
-    } else if (image_id == RSS_BL2_IMAGE_SCP) {
+    } else if (image_id == RSE_BL2_IMAGE_SCP) {
         *exec_ram_start = HOST_BOOT_IMAGE1_LOAD_BASE_S;
         *exec_ram_size  = SCP_BOOT_SRAM_SIZE;
         rc = 0;

@@ -83,7 +83,7 @@ int gpt_get_list_entry_by_name(uint32_t list_base, uint32_t list_num_entries,
     uint64_t idx;
 
     /* List entry is using names larger than EFI_NAMELEN_MAX - this is either an
-     * RSS GPT config error or an out-of-spec GPT partition, either way we fail
+     * RSE GPT config error or an out-of-spec GPT partition, either way we fail
      * here.
      */
     if (list_entry_size > sizeof(gpt_entry_t)) {
@@ -114,4 +114,3 @@ int gpt_get_list_entry_by_name(uint32_t list_base, uint32_t list_num_entries,
 
     return 1;
 }
-

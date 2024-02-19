@@ -61,11 +61,11 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
 {
     int rc = -1;
 
-    if (image_id == RSS_FIRMWARE_SECURE_ID) {
+    if (image_id == RSE_FIRMWARE_SECURE_ID) {
         *exec_ram_start = S_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == RSS_FIRMWARE_NON_SECURE_ID) {
+    } else if (image_id == RSE_FIRMWARE_NON_SECURE_ID) {
         *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;

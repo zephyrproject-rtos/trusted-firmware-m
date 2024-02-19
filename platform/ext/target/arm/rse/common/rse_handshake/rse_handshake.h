@@ -19,6 +19,6 @@
 
 #include <stdint.h>
 
-int32_t rss_handshake(void);
+int32_t rse_handshake(void);
 
 #endif /* __RSE_HANDSHAKE_H__ */

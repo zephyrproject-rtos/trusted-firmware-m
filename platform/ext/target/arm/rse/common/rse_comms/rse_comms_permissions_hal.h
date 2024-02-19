@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 /**
- * \brief Check that RSS comms callers have permission to access a memory
+ * \brief Check that RSE comms callers have permission to access a memory
  *        buffer.
  *
  * \param[in]  owner               The owner of host memory against which the
@@ -38,7 +38,7 @@ enum tfm_plat_err_t comms_permissions_memory_check(void *owner,
                                                    bool is_write);
 
 /**
- * \brief Check that RSS comms callers have permission to access a service.
+ * \brief Check that RSE comms callers have permission to access a service.
  *
  * \note in_vec and in_len are passed in as the Crypto partition encodes which
  *       function is requested in the first in_vec.

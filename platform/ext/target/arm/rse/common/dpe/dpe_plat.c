@@ -19,7 +19,7 @@ int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_len)
 {
     enum kmu_error_t err;
 
-    err = kmu_get_key(&KMU_DEV_S, RSS_KMU_SLOT_ROT_CDI, buf, buf_len);
+    err = kmu_get_key(&KMU_DEV_S, RSE_KMU_SLOT_ROT_CDI, buf, buf_len);
     if (err != KMU_ERROR_NONE) {
         return -1;
     }

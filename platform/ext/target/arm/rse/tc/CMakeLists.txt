@@ -25,8 +25,8 @@ target_sources(platform_s
         device/host_device_definition.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
         rse_comms/rse_comms_permissions_hal.c
 )
 
@@ -37,7 +37,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
 #========================= Platform BL2 =======================================#
@@ -51,8 +51,8 @@ target_sources(platform_bl2
         device/host_device_definition.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
 )
 
 target_include_directories(platform_bl2
@@ -63,7 +63,7 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
 #========================= Platform BL1 =======================================#
@@ -73,11 +73,11 @@ target_sources(platform_bl1_1
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         device/host_device_definition.c
-        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/rse_bringup_helpers_hal.c>
+        $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/rse_bringup_helpers_hal.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -87,7 +87,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
 target_include_directories(platform_bl1_2
@@ -95,13 +95,13 @@ target_include_directories(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
+        $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
 #========================= Files for building NS side platform ================#
 
-install(FILES       $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
-                    $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h>
+install(FILES       $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
+                    $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h>
                     ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
                     ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c

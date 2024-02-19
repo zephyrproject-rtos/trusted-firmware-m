@@ -49,25 +49,25 @@
 
 #define HOST_IMAGE_HEADER_SIZE          (0x2000)
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 /* Each table contains a bit less that 12KiB of HTR and 2KiB of mcuboot headers.
  * The spare space in the 8KiB is used for decryption IVs.
  */
 #define FLASH_SIC_TABLE_SIZE            (0x3800) /* 10KiB */
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)    /* 512 KiB */
 /* Same as FLASH0_SIZE */
 #define FLASH_TOTAL_SIZE                (0xFC00000)  /* 252 MiB */
 
-#ifndef RSS_GPT_SUPPORT
+#ifndef RSE_GPT_SUPPORT
 #define FLASH_FIP_MAX_SIZE         0x800000 /* 8MiB */
 #define FLASH_FIP_A_OFFSET         0x0
 #define FLASH_FIP_B_OFFSET         (FLASH_FIP_A_OFFSET + FLASH_FIP_MAX_SIZE)
 #else
 #define FLASH_LBA_SIZE             0x200
-#endif /* !RSS_GPT_SUPPORT */
+#endif /* !RSE_GPT_SUPPORT */
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_PRIMARY and
@@ -85,9 +85,9 @@
 #error A partition is larger than HOST_IMAGE_MAX_SIZE, and so cannot be mapped
 #endif
 
-#ifndef RSS_XIP
+#ifndef RSE_XIP
 #define FLASH_SIC_TABLE_SIZE 0
-#endif /* !RSS_XIP */
+#endif /* !RSE_XIP */
 
 #define FLASH_MAX_PARTITION_SIZE SECURE_IMAGE_MAX_SIZE
 
@@ -134,7 +134,7 @@
 #define FLASH_AREA_9_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_9_SIZE          (FLASH_SCP_PARTITION_SIZE)
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 /* Secure image SIC tables primary slot */
 #define FLASH_AREA_10_ID            (FLASH_AREA_9_ID + 1)
 #define FLASH_AREA_10_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
@@ -151,13 +151,13 @@
 #define FLASH_AREA_13_ID            (FLASH_AREA_12_ID + 1)
 #define FLASH_AREA_13_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_13_SIZE          (FLASH_SIC_TABLE_SIZE)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_10_ID : \
                                          ((x) == 1) ? FLASH_AREA_11_ID : \
                                          ((x) == 2) ? FLASH_AREA_6_ID : \
@@ -180,7 +180,7 @@
                                          ((x) == 2) ? FLASH_AREA_8_ID : \
                                          ((x) == 3) ? FLASH_AREA_9_ID : \
                                                       255)
-#endif /* RSS_XIP */
+#endif /* RSE_XIP */
 
 /* Scratch area is not used with RAM loading firmware upgrade */
 #define FLASH_AREA_IMAGE_SCRATCH        255
@@ -189,22 +189,22 @@
 #define SECURE_IMAGE_OFFSET             (0x0)
 #define NON_SECURE_IMAGE_OFFSET         (SECURE_IMAGE_OFFSET + \
                                          SECURE_IMAGE_MAX_SIZE)
-#ifndef RSS_XIP
+#ifndef RSE_XIP
 #define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 #else
 #define SECURE_IMAGE_MAX_SIZE           FLASH_SIC_TABLE_SIZE
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_SIC_TABLE_SIZE
-#endif /* !RSS_XIP */
+#endif /* !RSE_XIP */
 
-#if !defined(RSS_XIP) && \
+#if !defined(RSE_XIP) && \
     FLASH_BL2_PARTITION_SIZE + FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE \
     > VM0_SIZE + VM1_SIZE
-#error Partition sizes are too large to load into RSS SRAM
+#error Partition sizes are too large to load into RSE SRAM
 #endif
 
 /* Image load addresses used by imgtool.py */
-#ifdef RSS_XIP
+#ifdef RSE_XIP
 #define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + FLASH_BL2_PARTITION_SIZE)
 #define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
                                          FLASH_SIC_TABLE_SIZE)

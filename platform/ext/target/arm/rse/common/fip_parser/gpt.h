@@ -51,7 +51,7 @@ typedef struct gpt_header {
 /**
  * \brief                    Read a GPT header from flash into a struct.
  *
- * \param[in]  table_base    The RSS address mapped to the GPT table base in
+ * \param[in]  table_base    The RSE address mapped to the GPT table base in
  *                           host flash.
  * \param[in]  atu_slot_size The size of the ATU region that was mapped for
  *                           access to this FIP. This is used to prevent reads
@@ -69,7 +69,7 @@ int gpt_get_header(uint32_t table_base, size_t atu_slot_size,
  *                              Which list entry should be read is determined
  *                              by matching the name of the partition.
  *
- * \param[in]  list_base        The RSS address mapped to the GPT entry list base
+ * \param[in]  list_base        The RSE address mapped to the GPT entry list base
  *                              in host flash.
  * \param[in]  list_num_entries The number of entries in the GPT entry list, as
  *                              read from the header.

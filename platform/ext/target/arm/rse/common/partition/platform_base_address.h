@@ -16,16 +16,16 @@
 
 /**
  * \file platform_base_address.h
- * \brief This file defines all the peripheral base addresses for RSS platform.
+ * \brief This file defines all the peripheral base addresses for RSE platform.
  */
 
 #ifndef __PLATFORM_BASE_ADDRESS_H__
 #define __PLATFORM_BASE_ADDRESS_H__
 
 #include "rse_memory_sizes.h"
-#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#ifdef RSE_HAS_EXPANSION_PERIPHERALS
 #include "rse_expansion_base_address.h"
-#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+#endif /* RSE_HAS_EXPANSION_PERIPHERALS */
 
 /* ======= Defines peripherals memory map addresses ======= */
 /* Non-secure memory map addresses */
@@ -41,7 +41,7 @@
 #define CPU0_IDENTITY_BASE_NS            0x4001F000 /* CPU 0 Identity Block Non-Secure base address */
 /* Non-Secure Peripheral region */
 #define DMA_350_BASE_NS                  0x40002000 /* DMA350 Non-Secure base address */
-#define RSS_NSACFG_BASE_NS               0x40080000 /* RSS Non-Secure Access Configuration Register Block Non-Secure base address */
+#define RSE_NSACFG_BASE_NS               0x40080000 /* RSE Non-Secure Access Configuration Register Block Non-Secure base address */
 #define GPIO0_CMSDK_BASE_NS              0x40100000 /* GPIO 0 Non-Secure base address */
 #define GPIO1_CMSDK_BASE_NS              0x40101000 /* GPIO 1 Non-Secure base address */
 #define MHU0_SENDER_BASE_NS              0x40160000 /* Combined MHU 0 Sender Non-Secure base address */
@@ -66,18 +66,18 @@
 #define SYSTIMER1_ARMV8_M_BASE_NS        0x48001000 /* System Timer 1 Non-Secure base address */
 #define SYSTIMER2_ARMV8_M_BASE_NS        0x48002000 /* System Timer 2 Non-Secure base address */
 #define SYSTIMER3_ARMV8_M_BASE_NS        0x48003000 /* System Timer 3 Non-Secure base address */
-#define RSS_SYSINFO_BASE_NS              0x48020000 /* RSS System info Block Non-Secure base address */
+#define RSE_SYSINFO_BASE_NS              0x48020000 /* RSE System info Block Non-Secure base address */
 #define SLOWCLK_TIMER_CMSDK_BASE_NS      0x4802F000 /* CMSDK based SLOWCLK Timer Non-Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_NS    0x48040000 /* Non-Secure Watchdog Timer control frame Non-Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_NS  0x48041000 /* Non-Secure Watchdog Timer refresh frame Non-Secure base address */
-#define RSS_DEBUG_UART0_BASE_NS          0xE0305000 /* Debug UART attached to RSS subsystem */
+#define RSE_DEBUG_UART0_BASE_NS          0xE0305000 /* Debug UART attached to RSE subsystem */
 /* Non-Secure Host region */
 #define HOST_ACCESS_BASE_NS              0x60000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_NS             (HOST_ACCESS_BASE_NS + HOST_ACCESS_SIZE - 1)
 /* ATU regions open in bootloader and runtime */
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
 #define HOST_UART0_BASE_NS               (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
@@ -94,7 +94,7 @@
 #define CPU0_IDENTITY_BASE_S             0x5001F000 /* CPU 0 Identity Block Secure base address */
 /* Secure Peripheral region */
 #define DMA_350_BASE_S                   0x50002000 /* DMA350 Secure base address */
-#define RSS_SACFG_BASE_S                 0x50080000 /* RSS Secure Access Configuration Register Secure base address */
+#define RSE_SACFG_BASE_S                 0x50080000 /* RSE Secure Access Configuration Register Secure base address */
 #define MPC_VM0_BASE_S                   0x50083000 /* VM0 Memory Protection Controller Secure base address */
 #define MPC_VM1_BASE_S                   0x50084000 /* VM1 Memory Protection Controller Secure base address */
 #define KMU_BASE_S                       0x5009E000 /* KMU Secure base address */
@@ -132,17 +132,17 @@
 #define SYSTIMER1_ARMV8_M_BASE_S         0x58001000 /* System Timer 1 Secure base address */
 #define SYSTIMER2_ARMV8_M_BASE_S         0x58002000 /* System Timer 2 Secure base address */
 #define SYSTIMER3_ARMV8_M_BASE_S         0x58003000 /* System Timer 3 Secure base address */
-#define RSS_SYSINFO_BASE_S               0x58020000 /* RSS System info Block Secure base address */
-#define RSS_SYSCTRL_BASE_S               0x58021000 /* RSS System control Block Secure base address */
-#define RSS_SYSPPU_BASE_S                0x58022000 /* RSS System Power Policy Unit Secure base address */
-#define RSS_CPU0PPU_BASE_S               0x58023000 /* RSS CPU 0 Power Policy Unit Secure base address */
-#define RSS_MGMTPPU_BASE_S               0x58028000 /* RSS Management Power Policy Unit Secure base address */
-#define RSS_DBGPPU_BASE_S                0x58029000 /* RSS Debug Power Policy Unit Secure base address */
+#define RSE_SYSINFO_BASE_S               0x58020000 /* RSE System info Block Secure base address */
+#define RSE_SYSCTRL_BASE_S               0x58021000 /* RSE System control Block Secure base address */
+#define RSE_SYSPPU_BASE_S                0x58022000 /* RSE System Power Policy Unit Secure base address */
+#define RSE_CPU0PPU_BASE_S               0x58023000 /* RSE CPU 0 Power Policy Unit Secure base address */
+#define RSE_MGMTPPU_BASE_S               0x58028000 /* RSE Management Power Policy Unit Secure base address */
+#define RSE_DBGPPU_BASE_S                0x58029000 /* RSE Debug Power Policy Unit Secure base address */
 #define SLOWCLK_WDOG_CMSDK_BASE_S        0x5802E000 /* CMSDK based SLOWCLK Watchdog Secure base address */
 #define SLOWCLK_TIMER_CMSDK_BASE_S       0x5802F000 /* CMSDK based SLOWCLK Timer Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_S     0x58040000 /* Secure Watchdog Timer control frame Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_S   0x58041000 /* Secure Watchdog Timer refresh frame Secure base address */
-#define RSS_DEBUG_UART0_BASE_S           0xF0305000 /* Debug UART attached to RSS subsystem */
+#define RSE_DEBUG_UART0_BASE_S           0xF0305000 /* Debug UART attached to RSE subsystem */
 
 /* Secure Host region */
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
@@ -151,9 +151,9 @@
 #define HOST_IMAGE_MAX_SIZE              0x1000000 /* 16 MiB */
 
 /* ATU regions open in bootloader and runtime */
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
 #define HOST_UART0_BASE_S                (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 /* ATU regions open in BL1 */
 #define HOST_FLASH0_TEMP_BASE_S          (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Temporary address for mapping host flash areas */
 #define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
@@ -165,7 +165,7 @@
 #define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
 #define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 4 * HOST_IMAGE_MAX_SIZE) /* Host flash image 1 input secure address */
 /* ATU regions open at runtime */
-#define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Region to allow writing new RSS FW images */
+#define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Region to allow writing new RSE FW images */
 #define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Region into which to map host comms pointers */
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #define HOST_ACCESS_PS_BASE_S            (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Region into which to map Protected Storage */
@@ -173,13 +173,13 @@
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 /* SIC regions open in BL2 and runtime. These must be contiguous */
-#define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */
-#define RSS_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + FLASH_S_PARTITION_SIZE) /* RSS runtime non-secure image XIP secure address */
+#define RSE_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSE runtime secure image XIP secure address */
+#define RSE_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + FLASH_S_PARTITION_SIZE) /* RSE runtime non-secure image XIP secure address */
 
-#define RSS_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + FLASH_S_PARTITION_SIZE) /* RSS runtime non-secure image XIP non-secure address */
+#define RSE_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + FLASH_S_PARTITION_SIZE) /* RSE runtime non-secure image XIP non-secure address */
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
-#define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller
+#define RSE_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller
                                                      * Access from Non-secure software is only allowed
                                                      * if AIRCR.BFHFNMINS is set to 1 */
 

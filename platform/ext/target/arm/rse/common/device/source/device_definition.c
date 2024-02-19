@@ -50,7 +50,7 @@ struct tram_dev_t TRAM_DEV_S = {&TRAM_DEV_CFG_S};
 /* UART CMSDK driver structures */
 #ifdef UART0_CMSDK_S
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
-    .base = RSS_DEBUG_UART0_BASE_S,
+    .base = RSE_DEBUG_UART0_BASE_S,
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_S = {
@@ -65,7 +65,7 @@ struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S = {
 #endif
 #ifdef UART0_CMSDK_NS
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_NS = {
-    .base = RSS_DEBUG_UART0_BASE_NS,
+    .base = RSE_DEBUG_UART0_BASE_NS,
     .default_baudrate = DEFAULT_UART_BAUDRATE
 };
 static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_NS = {
@@ -79,181 +79,181 @@ struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS = {
 };
 #endif
 
-/* RSS PPC driver structures */
-#ifdef PPC_RSS_MAIN0_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_MAIN0_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_MAIN0};
-static struct ppc_rss_dev_data_t PPC_RSS_MAIN0_DATA_S = {
+/* RSE PPC driver structures */
+#ifdef PPC_RSE_MAIN0_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_MAIN0_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_MAIN0};
+static struct ppc_rse_dev_data_t PPC_RSE_MAIN0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_MAIN0_DEV_S = {
-    &PPC_RSS_MAIN0_CFG_S,
-    &PPC_RSS_MAIN0_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_MAIN0_DEV_S = {
+    &PPC_RSE_MAIN0_CFG_S,
+    &PPC_RSE_MAIN0_DATA_S };
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP0_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_MAIN_EXP0_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_MAIN_EXP0};
-static struct ppc_rss_dev_data_t PPC_RSS_MAIN_EXP0_DATA_S = {
+#ifdef PPC_RSE_MAIN_EXP0_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_MAIN_EXP0_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_MAIN_EXP0};
+static struct ppc_rse_dev_data_t PPC_RSE_MAIN_EXP0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_MAIN_EXP0_DEV_S = {
-    &PPC_RSS_MAIN_EXP0_CFG_S,
-    &PPC_RSS_MAIN_EXP0_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_MAIN_EXP0_DEV_S = {
+    &PPC_RSE_MAIN_EXP0_CFG_S,
+    &PPC_RSE_MAIN_EXP0_DATA_S };
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP1_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_MAIN_EXP1_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_MAIN_EXP1};
-static struct ppc_rss_dev_data_t PPC_RSS_MAIN_EXP1_DATA_S = {
+#ifdef PPC_RSE_MAIN_EXP1_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_MAIN_EXP1_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_MAIN_EXP1};
+static struct ppc_rse_dev_data_t PPC_RSE_MAIN_EXP1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_MAIN_EXP1_DEV_S = {
-    &PPC_RSS_MAIN_EXP1_CFG_S,
-    &PPC_RSS_MAIN_EXP1_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_MAIN_EXP1_DEV_S = {
+    &PPC_RSE_MAIN_EXP1_CFG_S,
+    &PPC_RSE_MAIN_EXP1_DATA_S };
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP2_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_MAIN_EXP2_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_MAIN_EXP2};
-static struct ppc_rss_dev_data_t PPC_RSS_MAIN_EXP2_DATA_S = {
+#ifdef PPC_RSE_MAIN_EXP2_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_MAIN_EXP2_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_MAIN_EXP2};
+static struct ppc_rse_dev_data_t PPC_RSE_MAIN_EXP2_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_MAIN_EXP2_DEV_S = {
-    &PPC_RSS_MAIN_EXP2_CFG_S,
-    &PPC_RSS_MAIN_EXP2_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_MAIN_EXP2_DEV_S = {
+    &PPC_RSE_MAIN_EXP2_CFG_S,
+    &PPC_RSE_MAIN_EXP2_DATA_S };
 #endif
 
-#ifdef PPC_RSS_MAIN_EXP3_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_MAIN_EXP3_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_MAIN_EXP3};
-static struct ppc_rss_dev_data_t PPC_RSS_MAIN_EXP3_DATA_S = {
+#ifdef PPC_RSE_MAIN_EXP3_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_MAIN_EXP3_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_MAIN_EXP3};
+static struct ppc_rse_dev_data_t PPC_RSE_MAIN_EXP3_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_MAIN_EXP3_DEV_S = {
-    &PPC_RSS_MAIN_EXP3_CFG_S,
-    &PPC_RSS_MAIN_EXP3_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_MAIN_EXP3_DEV_S = {
+    &PPC_RSE_MAIN_EXP3_CFG_S,
+    &PPC_RSE_MAIN_EXP3_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH0_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH0_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH0};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH0_DATA_S = {
+#ifdef PPC_RSE_PERIPH0_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH0_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH0};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH0_DEV_S = {
-    &PPC_RSS_PERIPH0_CFG_S,
-    &PPC_RSS_PERIPH0_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH0_DEV_S = {
+    &PPC_RSE_PERIPH0_CFG_S,
+    &PPC_RSE_PERIPH0_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH1_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH1_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH1};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH1_DATA_S = {
+#ifdef PPC_RSE_PERIPH1_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH1_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH1};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH1_DEV_S = {
-    &PPC_RSS_PERIPH1_CFG_S,
-    &PPC_RSS_PERIPH1_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH1_DEV_S = {
+    &PPC_RSE_PERIPH1_CFG_S,
+    &PPC_RSE_PERIPH1_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP0_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH_EXP0_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH_EXP0};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH_EXP0_DATA_S = {
+#ifdef PPC_RSE_PERIPH_EXP0_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH_EXP0_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH_EXP0};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH_EXP0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP0_DEV_S = {
-    &PPC_RSS_PERIPH_EXP0_CFG_S,
-    &PPC_RSS_PERIPH_EXP0_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP0_DEV_S = {
+    &PPC_RSE_PERIPH_EXP0_CFG_S,
+    &PPC_RSE_PERIPH_EXP0_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP1_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH_EXP1_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH_EXP1};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH_EXP1_DATA_S = {
+#ifdef PPC_RSE_PERIPH_EXP1_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH_EXP1_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH_EXP1};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH_EXP1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP1_DEV_S = {
-    &PPC_RSS_PERIPH_EXP1_CFG_S,
-    &PPC_RSS_PERIPH_EXP1_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP1_DEV_S = {
+    &PPC_RSE_PERIPH_EXP1_CFG_S,
+    &PPC_RSE_PERIPH_EXP1_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP2_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH_EXP2_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH_EXP2};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH_EXP2_DATA_S = {
+#ifdef PPC_RSE_PERIPH_EXP2_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH_EXP2_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH_EXP2};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH_EXP2_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP2_DEV_S = {
-    &PPC_RSS_PERIPH_EXP2_CFG_S,
-    &PPC_RSS_PERIPH_EXP2_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP2_DEV_S = {
+    &PPC_RSE_PERIPH_EXP2_CFG_S,
+    &PPC_RSE_PERIPH_EXP2_DATA_S };
 #endif
 
-#ifdef PPC_RSS_PERIPH_EXP3_S
-static struct ppc_rss_dev_cfg_t PPC_RSS_PERIPH_EXP3_CFG_S = {
-    .sacfg_base  = RSS_SACFG_BASE_S,
-    .nsacfg_base = RSS_NSACFG_BASE_NS,
-    .ppc_name = PPC_RSS_PERIPH_EXP3};
-static struct ppc_rss_dev_data_t PPC_RSS_PERIPH_EXP3_DATA_S = {
+#ifdef PPC_RSE_PERIPH_EXP3_S
+static struct ppc_rse_dev_cfg_t PPC_RSE_PERIPH_EXP3_CFG_S = {
+    .sacfg_base  = RSE_SACFG_BASE_S,
+    .nsacfg_base = RSE_NSACFG_BASE_NS,
+    .ppc_name = PPC_RSE_PERIPH_EXP3};
+static struct ppc_rse_dev_data_t PPC_RSE_PERIPH_EXP3_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_rss_dev_t PPC_RSS_PERIPH_EXP3_DEV_S = {
-    &PPC_RSS_PERIPH_EXP3_CFG_S,
-    &PPC_RSS_PERIPH_EXP3_DATA_S };
+struct ppc_rse_dev_t PPC_RSE_PERIPH_EXP3_DEV_S = {
+    &PPC_RSE_PERIPH_EXP3_CFG_S,
+    &PPC_RSE_PERIPH_EXP3_DATA_S };
 #endif
 
 /* System counters */
@@ -454,7 +454,7 @@ struct syswdog_armv8_m_dev_t SYSWDOG_ARMV8_M_DEV_NS = {
 };
 #endif
 
-/* ARM MPC RSS driver structures */
+/* ARM MPC RSE driver structures */
 #ifdef MPC_VM0_S
 /* Ranges controlled by this VM0_MPC */
 static const struct mpc_sie_memory_range_t MPC_VM0_RANGE_S = {

@@ -43,7 +43,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2]);
  * \param[in] slot                    The ATU slot that should be setup as the
  *                                    image input slot.
  *
- * \param[in] logical_address         The address in RSS memory to which the ATU
+ * \param[in] logical_address         The address in RSE memory to which the ATU
  *                                    should map the image.
  *
  * \param[in] image_uuid              The UUID of the image that should be have

@@ -18,10 +18,10 @@
 #define __HOST_DEVICE_CFG_H__
 
 /* MHU */
-#define MHU_V3_RSS_TO_AP_MONITOR
-#define MHU_V3_AP_MONITOR_TO_RSS
+#define MHU_V3_RSE_TO_AP_MONITOR
+#define MHU_V3_AP_MONITOR_TO_RSE
 
-#define MHU_V3_RSS_TO_SCP
-#define MHU_V3_SCP_TO_RSS
+#define MHU_V3_RSE_TO_SCP
+#define MHU_V3_SCP_TO_RSE
 
 #endif /* __HOST_DEVICE_CFG_H__ */

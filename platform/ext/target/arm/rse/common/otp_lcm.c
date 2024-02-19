@@ -15,13 +15,13 @@
 #include "uart_stdout.h"
 #include "tfm_hal_platform.h"
 #include "rse_memory_sizes.h"
-#ifdef RSS_ENCRYPTED_OTP_KEYS
+#ifdef RSE_ENCRYPTED_OTP_KEYS
 #include "cc3xx_drv.h"
 #include "kmu_drv.h"
-#endif /* RSS_ENCRYPTED_OTP_KEYS */
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#endif /* RSE_ENCRYPTED_OTP_KEYS */
+#ifdef RSE_BRINGUP_OTP_EMULATION
 #include "rse_otp_emulation.h"
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #ifdef MCUBOOT_SIGN_EC384
 #define BL2_ROTPK_HASH_SIZE (12)
@@ -60,7 +60,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
              */
                 uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
                 uint32_t cca_system_properties;
-                uint32_t rss_id;
+                uint32_t rse_id;
 
                 uint32_t cm_config_flags;
             } cm_locked;
@@ -227,7 +227,7 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_OFFSET(cm_locked.cca_system_properties),
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
-    [PLAT_OTP_ID_RSS_ID] = USER_AREA_OFFSET(cm_locked.rss_id),
+    [PLAT_OTP_ID_RSE_ID] = USER_AREA_OFFSET(cm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
@@ -336,7 +336,7 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_SIZE(cm_locked.cca_system_properties),
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
-    [PLAT_OTP_ID_RSS_ID] = USER_AREA_SIZE(cm_locked.rss_id),
+    [PLAT_OTP_ID_RSE_ID] = USER_AREA_SIZE(cm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
@@ -349,7 +349,7 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_SIZE(dm_locked.dm_config_flags),
 };
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
 static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t len)
 {
     enum lcm_error_t lcm_err;
@@ -364,26 +364,26 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
      * then return UNSUPPORTED.
      */
     if (tp_mode != LCM_TP_MODE_PCI &&
-        rss_otp_emulation_is_enabled() &&
-        offset + len > RSS_BRINGUP_OTP_EMULATION_SIZE) {
+        rse_otp_emulation_is_enabled() &&
+        offset + len > RSE_BRINGUP_OTP_EMULATION_SIZE) {
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
                                     uint32_t buf_len, uint8_t *buf)
 {
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
     enum tfm_plat_err_t plat_err;
 
     plat_err = check_if_otp_is_emulated(offset, len);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
     if (buf_len < len) {
         len = buf_len;
@@ -400,7 +400,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
                                               uint32_t buf_len, uint8_t *buf,
                                               enum kmu_hardware_keyslot_t key)
 {
-#ifndef RSS_ENCRYPTED_OTP_KEYS
+#ifndef RSE_ENCRYPTED_OTP_KEYS
     return otp_read(offset, len, buf_len, buf);
 #else
     /* This is designed for keys, so 32 is a sane limit */
@@ -409,12 +409,12 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
     cc3xx_err_t cc_err;
     enum tfm_plat_err_t plat_err;
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
     plat_err = check_if_otp_is_emulated(offset, len);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
     if (len > sizeof(tmp_buf)) {
         return TFM_PLAT_ERR_INVALID_INPUT;
@@ -467,7 +467,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
                                      uint32_t buf_len, const uint8_t *buf,
                                      enum kmu_hardware_keyslot_t key)
 {
-#ifndef RSS_ENCRYPTED_OTP_KEYS
+#ifndef RSE_ENCRYPTED_OTP_KEYS
     return otp_write(offset, len, buf_len, buf);
 #else
     /* This is designed for keys, so 32 is a sane limit */
@@ -653,13 +653,13 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-#ifdef RSS_BRINGUP_OTP_EMULATION
+#ifdef RSE_BRINGUP_OTP_EMULATION
     /* Check that everything inside the main area can be emulated */
     if (USER_AREA_OFFSET(unlocked_area) + USER_AREA_SIZE(unlocked_area)
-        > RSS_BRINGUP_OTP_EMULATION_SIZE) {
+        > RSE_BRINGUP_OTP_EMULATION_SIZE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-#endif /* RSS_BRINGUP_OTP_EMULATION */
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
     err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (err != LCM_ERROR_NONE) {

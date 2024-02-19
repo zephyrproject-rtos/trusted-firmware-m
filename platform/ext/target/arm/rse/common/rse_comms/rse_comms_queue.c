@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define QUEUE_SIZE (RSS_COMMS_MAX_CONCURRENT_REQ + 1)
+#define QUEUE_SIZE (RSE_COMMS_MAX_CONCURRENT_REQ + 1)
 
 struct queue_t {
     void *buf[QUEUE_SIZE];

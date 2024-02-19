@@ -16,7 +16,7 @@
 
 /**
  * \file host_base_address.h
- * \brief This file defines the host memory map addresses accessed by RSS.
+ * \brief This file defines the host memory map addresses accessed by RSE.
  */
 
 #ifndef __HOST_BASE_ADDRESS_H__
@@ -40,9 +40,9 @@
 
 #define PLAT_SCP_AP_SDS_SIZE          0xDC0U  /* 3520 bytes */
 #define PLAT_SCP_SCMI_S_PAYLOAD_SIZE  0x100U  /*  256 bytes */
-#define PLAT_RSS_AP_SDS_BASE  (AP_SHARED_RAM_BASE \
+#define PLAT_RSE_AP_SDS_BASE  (AP_SHARED_RAM_BASE \
                                + PLAT_SCP_AP_SDS_SIZE \
                                + PLAT_SCP_SCMI_S_PAYLOAD_SIZE)
-#define PLAT_RSS_AP_SDS_SIZE  (64U)
+#define PLAT_RSE_AP_SDS_SIZE  (64U)
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */

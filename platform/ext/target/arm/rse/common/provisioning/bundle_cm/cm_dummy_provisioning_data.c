@@ -16,7 +16,7 @@ const struct cm_provisioning_data data = {
     {},
     /* SCP data */
     {},
-    /* RSS_ID */
+    /* RSE_ID */
     0,
     /* SAM config placeholder */
     {

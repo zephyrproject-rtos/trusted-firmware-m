@@ -8,11 +8,11 @@
 #ifndef __BL2_IMAGE_ID_H__
 #define __BL2_IMAGE_ID_H__
 
-enum rss_bl2_image_id_t {
-    RSS_BL2_IMAGE_S = 0,
-    RSS_BL2_IMAGE_NS,
-    RSS_BL2_IMAGE_AP,
-    RSS_BL2_IMAGE_SCP,
+enum rse_bl2_image_id_t {
+    RSE_BL2_IMAGE_S = 0,
+    RSE_BL2_IMAGE_NS,
+    RSE_BL2_IMAGE_AP,
+    RSE_BL2_IMAGE_SCP,
 };
 
 #endif /* __BL2_IMAGE_ID_H__ */

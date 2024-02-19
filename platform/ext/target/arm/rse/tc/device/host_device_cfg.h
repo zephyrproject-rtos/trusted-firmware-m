@@ -24,13 +24,13 @@
  * defined and configured via the secure and/or non-secure base address.
  */
 
-#ifdef RSS_USE_HOST_UART
+#ifdef RSE_USE_HOST_UART
 /* ARM UART PL011 */
 #define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
 #define UART0_PL011_S
 #define UART0_PL011_NS
-#endif /* RSS_USE_HOST_UART */
+#endif /* RSE_USE_HOST_UART */
 
 /*External Intel Strata Flash Device*/
 #define SPI_STRATAFLASHJ3_S
@@ -39,11 +39,11 @@
 #define CFI_S
 
 /* MHU */
-#define MHU_AP_MONITOR_TO_RSS
-#define MHU_RSS_TO_AP_MONITOR
-#define MHU_AP_NS_TO_RSS
-#define MHU_RSS_TO_AP_NS
-#define MHU_SCP_TO_RSS
-#define MHU_RSS_TO_SCP
+#define MHU_AP_MONITOR_TO_RSE
+#define MHU_RSE_TO_AP_MONITOR
+#define MHU_AP_NS_TO_RSE
+#define MHU_RSE_TO_AP_NS
+#define MHU_SCP_TO_RSE
+#define MHU_RSE_TO_SCP
 
 #endif  /* __HOST_DEVICE_CFG_H__ */

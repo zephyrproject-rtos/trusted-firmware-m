@@ -16,13 +16,13 @@ extern "C" {
  * \brief                        Check the status of various platform-specific
  *                               GPIO pins, and if the pins are high then run
  *                               an unauthenticated image from either SRAM, QSPI
- *                               or one received via an RSS-to-RSS link.
+ *                               or one received via an RSE-to-RSE link.
  *                               Intended to be used in early board bringup.
  *
  * \note                         This function must not be called if the LCM is
  *                               in PCI TP mode.
  */
-void rss_run_bringup_helpers_if_requested(void);
+void rse_run_bringup_helpers_if_requested(void);
 
 #ifdef __cplusplus
 }
