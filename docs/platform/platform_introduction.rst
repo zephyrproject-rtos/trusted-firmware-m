@@ -64,7 +64,7 @@ Supported Platforms
 
     - Runtime Security Engine (RSE):
 
-        - :doc:`RSE. </platform/arm/rss/readme>`
+        - :doc:`RSE. </platform/arm/rse/readme>`
 
 The document :doc:`Platform Deprecation and Removal </integration_guide/platform/platform_deprecation>`
 lists the deprecated platforms, removed from the upstream.
