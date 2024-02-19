@@ -400,6 +400,29 @@ The memory is accessible from :term:`NSPE`
 APIs
 ----
 
+tfm_hal_verify_static_boundaries()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  fih_int tfm_hal_verify_static_boundaries(void)
+
+**Description**
+
+This API verifies the static isolation boundaries.
+
+Refer to the :term:`PSA-FF-M` for the definitions of the isolation boundaries.
+
+**Parameter**
+
+- ``void`` - None
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - Verification has been successful.
+- ``TFM_HAL_ERROR_GENERIC`` - Verification failed.
+
 tfm_hal_set_up_static_boundaries()
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 **Prototype**
@@ -421,6 +444,10 @@ These boundaries include:
   Trust which is for isolation level 2 and 3 only.
 
 Refer to the :term:`PSA-FF-M` for the definitions of the isolation boundaries.
+
+**Parameter**
+
+- ``void`` - None
 
 **Return Values**
 
@@ -475,7 +502,7 @@ The access permissions outside the boundary is platform-dependent.
 
 - ``p_ldinf`` - The load information of the partition that is going to be run.
 - ``boundary`` - The boundary for the owner partition of ``p_ldinf``. This
-                 value is bound in function ``tfm_hal_bind_boundary``.
+  value is bound in function ``tfm_hal_bind_boundary``.
 
 **Return Values**
 
@@ -521,6 +548,29 @@ contains asset info.
 If the implementation chooses to encode a pointer as the boundary,
 a platform-specific pointer validation needs to be considered before
 referencing the content in this pointer.
+
+tfm_hal_boundary_need_switch()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                    uintptr_t boundary_to)
+
+**Description**
+
+This API let the platform decide if a boundary switch is needed.
+
+**Parameter**
+
+- ``boundary_from`` - Boundary to switch from.
+- ``boundary_to`` - Boundary to switch to.
+
+**Return Values**
+
+- ``true`` - A switching is needed
+- ``false`` - No need for a boundary switch
 
 Log API
 =======
@@ -620,7 +670,7 @@ This API enables an interrupt from the Interrupt Controller of the platform.
 **Return Values**
 
 - ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
-                                    supported number of external interrupts.
+  supported number of external interrupts.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to enable the interrupt.
 - ``TFM_HAL_SUCCESS`` - the interrupt is successfully enabled.
 
@@ -644,7 +694,7 @@ This API disables an interrupt from the Interrupt Controller of the platform.
 **Return Values**
 
 - ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
-                                    supported number of external interrupts.
+  supported number of external interrupts.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to disable the interrupt.
 - ``TFM_HAL_SUCCESS`` - the interrupt is successfully disabled.
 
@@ -668,7 +718,7 @@ This API clears an active and pending interrupt.
 **Return Values**
 
 - ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
-                                    supported number of external interrupts.
+  supported number of external interrupts.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to clear the pending interrupt.
 - ``TFM_HAL_SUCCESS`` - the pending interrupt has been cleared.
 
