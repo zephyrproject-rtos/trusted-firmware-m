@@ -42,7 +42,7 @@ Header:
   - LINKADDRHI: 0
 CTRL: 0x10000202
 SRCADDR: 'vm0_base_address'
-DESADDR: 'kmu_base_address + 0x230'
+DESADDR: 'kmu_base_address + 0x210'
 XSIZE: 0x00080008
 SRCTRANSCFG: 0x000F0044
 DESTRANSCFG: 0x00000000

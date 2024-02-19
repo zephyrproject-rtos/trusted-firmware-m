@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,8 +202,7 @@ enum kmu_hardware_keyslot_t {
     KMU_HW_SLOT_KCE_CM,
     KMU_HW_SLOT_KP_DM,
     KMU_HW_SLOT_KCE_DM,
-    KMU_HW_SLOT_RESERVED,
-    KMU_USER_SLOT_MIN = (8u),
+    KMU_USER_SLOT_MIN = (7u),
     KMU_USER_SLOT_MAX = (31u),
 };
 
