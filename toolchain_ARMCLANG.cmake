@@ -399,27 +399,7 @@ macro(target_link_shared_code target)
         endif()
 
         add_dependencies(${target} ${symbol_provider})
-        # Some cmake functions don't allow generator expressions, so get the
-        # property as a backup. If the symbol provider hasn't been created yet,
-        # then use the output dir of the target.
-        if (TARGET ${symbol_provider})
-            get_target_property(SYMBOL_PROVIDER_OUTPUT_DIR ${symbol_provider} RUNTIME_OUTPUT_DIRECTORY)
-        else()
-            get_target_property(SYMBOL_PROVIDER_OUTPUT_DIR ${target} RUNTIME_OUTPUT_DIRECTORY)
-        endif()
-        # Set these properties so that cmake will allow us to use a source file
-        # that doesn't exist at cmake-time, but we guarantee will exist at
-        # compile-time.
-        set_source_files_properties(${SYMBOL_PROVIDER_OUTPUT_DIR}/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX}
-            DIRECTORY ${TARGET_SOURCE_DIR}
-            PROPERTIES
-                EXTERNAL_OBJECT true
-                GENERATED true
-        )
-        target_sources(${target}
-            PRIVATE
-            $<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX}
-        )
+        target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
 
