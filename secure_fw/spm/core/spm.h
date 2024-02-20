@@ -190,24 +190,31 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 /************************ Message functions **********************************/
 
 /**
- * \brief                   Convert the given user handle to SPM recognised
- *                          connection and verify it.
+ * \brief                   Convert the given user handle to an SPM recognised
+ *                          connection and verify that it is a valid idle
+ *                          connection that the caller is authorised to access.
  *
- * \param[in] p_connection  The address of connection pointer to be converted
+ * \param[out] p_connection The address of connection pointer to be converted
  *                          from the given user handle.
  *
- * \param[in] handle        A handle to an established connection that is
- *                          returned by a prior psa_connect call.
+ * \param[in] handle        Either a static handle or a handle to an established
+ *                          connection that was returned by a prior psa_connect
+ *                          call.
+ *
+ * \param[in] client_id     The client ID of the caller.
  *
  * \retval PSA_SUCCESS      Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
  *                          connection.
  * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
  *                          connection at the moment.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The handle is invalid, the caller is not
+ *                          authorised to use it or the connection is already
+ *                          handling a request.
  */
-psa_status_t spm_get_connection(struct connection_t **p_connection,
-                                psa_handle_t handle,
-                                int32_t client_id);
+psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
+                                     psa_handle_t handle,
+                                     int32_t client_id);
 
 /**
  * \brief                   Convert the given message handle to SPM recognised
@@ -223,16 +230,17 @@ psa_status_t spm_get_connection(struct connection_t **p_connection,
 struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
 
 /**
- * \brief                   Initialize connection and fill in with the input information.
+ * \brief                   Initialize connection, fill in with the input
+ *                          information and set to idle.
  *
  * \param[in] p_connection  The 'p_connection' to initialize and fill information in.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \param[in] client_id     Partition ID of the sender of the message
  */
-void spm_init_connection(struct connection_t *p_connection,
-                         struct service_t *service,
-                         int32_t client_id);
+void spm_init_idle_connection(struct connection_t *p_connection,
+                              struct service_t *service,
+                              int32_t client_id);
 
 /*
  * Update connection content with information extracted from control param,

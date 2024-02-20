@@ -36,7 +36,7 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    status = spm_get_connection(&p_connection, handle, params->ns_client_id_stateless);
+    status = spm_get_idle_connection(&p_connection, handle, params->ns_client_id_stateless);
     if (status != PSA_SUCCESS) {
         return status;
     }

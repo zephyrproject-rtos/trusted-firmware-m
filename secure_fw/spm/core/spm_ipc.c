@@ -177,9 +177,9 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 }
 
 /* Message functions */
-psa_status_t spm_get_connection(struct connection_t **p_connection,
-                                psa_handle_t handle,
-                                int32_t client_id)
+psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
+                                     psa_handle_t handle,
+                                     int32_t client_id)
 {
     struct connection_t *connection;
     struct service_t *service;
@@ -226,7 +226,7 @@ psa_status_t spm_get_connection(struct connection_t **p_connection,
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
-        spm_init_connection(connection, service, client_id);
+        spm_init_idle_connection(connection, service, client_id);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         connection = handle_to_connection(handle);
@@ -292,9 +292,9 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
     return p_conn_handle;
 }
 
-void spm_init_connection(struct connection_t *p_connection,
-                         struct service_t *service,
-                         int32_t client_id)
+void spm_init_idle_connection(struct connection_t *p_connection,
+                              struct service_t *service,
+                              int32_t client_id)
 {
     SPM_ASSERT(p_connection);
     SPM_ASSERT(service);

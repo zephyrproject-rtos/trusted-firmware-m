@@ -83,7 +83,7 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    spm_init_connection(connection, service, client_id);
+    spm_init_idle_connection(connection, service, client_id);
     connection->msg.type = PSA_IPC_CONNECT;
 
     *p_connection = connection;
@@ -116,17 +116,9 @@ psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t cli
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    status = spm_get_connection(&p_connection, handle, client_id);
+    status = spm_get_idle_connection(&p_connection, handle, client_id);
     if (status != PSA_SUCCESS) {
         return status;
-    }
-
-    /*
-     * It is a PROGRAMMER ERROR if the connection is currently handling a
-     * request.
-     */
-    if (p_connection->status == TFM_HANDLE_STATUS_ACTIVE) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     p_connection->msg.type = PSA_IPC_DISCONNECT;
