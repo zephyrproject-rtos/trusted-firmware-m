@@ -1120,12 +1120,13 @@ static enum fwu_agent_error_t update_nv_counters(
 
     FWU_LOG_MSG("%s: enter\n\r", __func__);
 
-    for (int i = 0; i <= FWU_MAX_NV_COUNTER_INDEX; i++) {
+    /* The FWU_BL2_NV_COUNTER (0) is not mirrored in the private metadata. It is
+     * directly updated in the bl1_2_validate_image_at_addr() function, in
+     * tfm/bl1/bl1_2/main.c.
+     * Because of this, the index starts from FWU_TFM_NV_COUNTER (1). */
+    for (int i = FWU_TFM_NV_COUNTER; i <= FWU_MAX_NV_COUNTER_INDEX; i++) {
 
         switch (i) {
-            case FWU_BL2_NV_COUNTER:
-                tfm_nv_counter_i = PLAT_NV_COUNTER_BL1_0;
-                break;
             case FWU_TFM_NV_COUNTER:
                 tfm_nv_counter_i = PLAT_NV_COUNTER_BL2_0;
                 break;
@@ -1140,18 +1141,21 @@ static enum fwu_agent_error_t update_nv_counters(
         err = tfm_plat_read_nv_counter(tfm_nv_counter_i,
                         sizeof(security_cnt), (uint8_t *)&security_cnt);
         if (err != TFM_PLAT_ERR_SUCCESS) {
+            FWU_LOG_MSG("%s: couldn't read NV counter\n\r", __func__);
             return FWU_AGENT_ERROR;
         }
 
         if (priv_metadata->nv_counter[i] < security_cnt) {
+            FWU_LOG_MSG("%s: staged NV counter is smaller than current value\n\r", __func__);
             return FWU_AGENT_ERROR;
         } else if (priv_metadata->nv_counter[i] > security_cnt) {
-            FWU_LOG_MSG("%s: updaing index = %u nv counter = %u->%u\n\r",
+            FWU_LOG_MSG("%s: updating index = %u nv counter = %u->%u\n\r",
                         __func__, i, security_cnt,
-                        priv_metadata->nv_counter[FWU_BL2_NV_COUNTER]);
+                        priv_metadata->nv_counter[i]);
             err = tfm_plat_set_nv_counter(tfm_nv_counter_i,
-                                    priv_metadata->nv_counter[FWU_BL2_NV_COUNTER]);
+                                    priv_metadata->nv_counter[i]);
             if (err != TFM_PLAT_ERR_SUCCESS) {
+                FWU_LOG_MSG("%s: couldn't write NV counter\n\r", __func__);
                 return FWU_AGENT_ERROR;
             }
         }
