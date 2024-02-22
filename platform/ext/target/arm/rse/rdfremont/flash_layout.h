@@ -57,6 +57,7 @@
 /* Flash layout info for BL2 bootloader */
 /* Same as FLASH0_BASE_S */
 #define FLASH_BASE_ADDRESS              (BOOT_FLASH_BASE_S)
+#define FLASH_BL1_BASE_ADDRESS          (FLASH_BASE_ADDRESS)
 
 /*
  * Offset and size definitions of the flash partitions that are handled by the
@@ -130,7 +131,9 @@
  * Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
-#define FLASH_DEV_NAME Driver_FLASH0
+#define FLASH_DEV_NAME          Driver_FLASH0
+#define FLASH_DEV_NAME_BL1      FLASH_DEV_NAME
+
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
 
