@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,6 +28,8 @@
 #include "load/partition_defs.h"
 #include "psa/client.h"
 
+#define INVALID_PSP_VALUE 0xFFFFFFFFU
+
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_number,
                                      uint32_t *ctx, uint32_t lr);
@@ -43,7 +45,7 @@ extern uintptr_t spm_boundary;
  * they will be changed when preparing to Thread mode to run the PSA API functions.
  * Later they will be restored when returning from the functions.
  */
-static uint32_t saved_psp;
+static uint32_t saved_psp = INVALID_PSP_VALUE;
 static uint32_t saved_psp_limit;
 static uint32_t saved_exc_return;
 
@@ -98,6 +100,9 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 
     tfm_arch_set_psplim(saved_psp_limit);
     __set_PSP(saved_psp);
+
+    /* Invalidate saved_psp */
+    saved_psp = INVALID_PSP_VALUE;
 
     return saved_exc_return;
 }
@@ -176,6 +181,11 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
     ctx[0] = PSA_SUCCESS;
 
     return EXC_RETURN_THREAD_PSP;
+}
+
+bool tfm_svc_thread_mode_spm_active(void)
+{
+    return saved_psp != INVALID_PSP_VALUE;
 }
 #endif
 

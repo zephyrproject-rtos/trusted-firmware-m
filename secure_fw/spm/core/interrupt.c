@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -103,6 +103,14 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
                                      p_prev_sp->boundary)) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_prev_sp->p_ldinf, p_prev_sp->boundary);
+    }
+
+    /*
+     * If the interrupted Thread mode context was running SPM code, then
+     * Privileged thread mode needs to be restored.
+     */
+    if (tfm_svc_thread_mode_spm_active()) {
+        __set_CONTROL_nPRIV(0);
     }
 
     /* Restore current component */
