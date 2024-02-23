@@ -12,7 +12,8 @@ tfm_invalid_config(${CMAKE_C_COMPILER_ID} STREQUAL IAR)
 tfm_invalid_config(${CMAKE_C_COMPILER_ID} STREQUAL ARMClang AND ${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.14")
 
 # Only GCC is supported for using ROM library from SRAM
-tfm_invalid_config(RSE_USE_ROM_LIB_FROM_SRAM AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+tfm_invalid_config(RSE_SUPPORT_ROM_LIB_RELOCATION AND NOT ${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+tfm_invalid_config(RSE_USE_ROM_LIB_FROM_SRAM AND NOT RSE_SUPPORT_ROM_LIB_RELOCATION)
 
 # RSE requires BL1 and BL2
 tfm_invalid_config(NOT BL1)

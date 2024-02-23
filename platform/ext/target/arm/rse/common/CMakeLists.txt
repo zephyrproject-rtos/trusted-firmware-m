@@ -33,6 +33,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
         $<$<BOOL:${RSE_BIT_PROGRAMMABLE_OTP}>:RSE_BIT_PROGRAMMABLE_OTP>
         $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:RSE_USE_ROM_LIB_FROM_SRAM>
+        $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:RSE_SUPPORT_ROM_LIB_RELOCATION>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
         RSE_AMOUNT=${RSE_AMOUNT}
         $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
@@ -323,7 +324,7 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./rse_key_derivation.c
-        $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
+        $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -358,7 +359,7 @@ target_link_libraries(platform_bl1_1
         bl1_1_shared_lib_interface
 )
 
-if(RSE_USE_ROM_LIB_FROM_SRAM)
+if(RSE_SUPPORT_ROM_LIB_RELOCATION)
     target_compile_options(platform_bl1_1
         PUBLIC
             # Enable position independent code
@@ -384,7 +385,9 @@ if(RSE_USE_ROM_LIB_FROM_SRAM)
             # valid.
             -finstrument-functions-exclude-function-list=boot_platform_quit,boot_jump_to_next_image
     )
+endif()
 
+if (RSE_USE_ROM_LIB_FROM_SRAM)
     add_custom_target(bl1_1_shared_symbols_in_sram
         DEPENDS bl1_1
         SOURCES ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
@@ -394,7 +397,7 @@ if(RSE_USE_ROM_LIB_FROM_SRAM)
         OUTPUT ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
         DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
         COMMAND ${CMAKE_OBJCOPY} ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
-                --change-section-address .text.\*+0x20010000
+                --change-section-address .text\*+0x20010000
                 ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
     )
 
@@ -444,7 +447,7 @@ if(RSE_USE_HOST_FLASH)
     add_subdirectory(./fip_parser)
 endif()
 
-if(RSE_USE_ROM_LIB_FROM_SRAM)
+if(RSE_SUPPORT_ROM_LIB_RELOCATION)
     target_compile_options(platform_bl1_2
         PUBLIC
             # Prevent BL1_2 from using r9

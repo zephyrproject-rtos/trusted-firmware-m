@@ -274,13 +274,13 @@ static void __attribute__ ((noinline)) setup_tram_encryption(void) {
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
-#ifdef RSE_USE_ROM_LIB_FROM_SRAM
+#ifdef RSE_SUPPORT_ROM_LIB_RELOCATION
     /*
      * Use the GOT table from ROM at this point. This saves copying it into
      * SRAM.
      */
     __asm volatile("ldr    r9, =__etext \n");
-#endif /* RSE_USE_ROM_LIB_FROM_SRAM */
+#endif /* RSE_SUPPORT_ROM_LIB_RELOCATION */
 
     /* Enable cacheing, particularly to avoid ECC errors in VM0/1 */
     SCB_EnableICache();

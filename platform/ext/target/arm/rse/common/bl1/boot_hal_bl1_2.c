@@ -218,8 +218,21 @@ static int32_t boot_platform_init_debug(void)
 }
 #endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
+#ifdef RSE_SUPPORT_ROM_LIB_RELOCATION
+static void setup_got_register(void)
+{
+    __asm volatile(
+        "mov r9, %0 \n"
+        "mov r2, %1 \n"
+        "lsl r9, #16 \n"
+        "orr r9, r9, r2 \n"
+        : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r2"
+    );
+}
+#endif /* RSE_SUPPORT_ROM_LIB_RELOCATION */
+
 #ifdef RSE_USE_ROM_LIB_FROM_SRAM
-static void setup_rom_library(void)
+static void copy_rom_library_into_sram(void)
 {
     uint32_t got_entry;
 
@@ -237,14 +250,6 @@ static void setup_rom_library(void)
             got_entry += VM1_BASE_S;
         }
     }
-
-    __asm volatile(
-        "mov r9, %0 \n"
-        "mov r2, %1 \n"
-        "lsl r9, #16 \n"
-        "orr r9, r9, r2 \n"
-        : : "I" (BL1_1_DATA_START >> 16), "I" (BL1_1_DATA_START & 0xFFFF) : "r2"
-    );
 }
 #endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
@@ -254,8 +259,11 @@ int32_t boot_platform_init(void)
     int32_t result;
     enum tfm_plat_err_t plat_err;
 
+#ifdef RSE_SUPPORT_ROM_LIB_RELOCATION
+    setup_got_register();
+#endif /* RSE_SUPPORT_ROM_LIB_RELOCATION */
 #ifdef RSE_USE_ROM_LIB_FROM_SRAM
-    setup_rom_library();
+    copy_rom_library_into_sram();
 #endif /* RSE_USE_ROM_LIB_FROM_SRAM */
 
     /* Initialize stack limit register */
