@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -64,8 +64,7 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
     } else {
         /* Hardware keys are locked to aes_key_0 */
-        if (is_tun1 && key_id < KMU_USER_SLOT_MIN) {
-            while(1){}
+        if (is_tun1 && key_id < (cc3xx_aes_key_id_t)KMU_USER_SLOT_MIN) {
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
 
@@ -79,18 +78,15 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         /* It's an error to use an unlocked slot */
         kmu_err = kmu_get_key_export_config_locked(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_SLOT_LOCKED) {
-            while(1){}
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
         kmu_err = kmu_get_key_locked(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_SLOT_LOCKED) {
-            while(1){}
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
 
         kmu_err = kmu_export_key(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_NONE) {
-            while(1){}
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
     }
