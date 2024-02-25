@@ -110,4 +110,11 @@ enum sysctrl_apu_filter_ids {
  */
 int32_t program_sysctrl_ni_tower_aon(void);
 
+/**
+ * \brief Programs System Control block NI-Tower PSAM and APU for SYSTOP domain
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_sysctrl_ni_tower_systop(void);
+
 #endif /* __NI_TOWER_LIB_H__ */

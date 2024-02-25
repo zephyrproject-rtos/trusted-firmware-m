@@ -104,6 +104,36 @@ static int32_t ni_tower_sysctrl_aon_init(void)
     return 0;
 }
 
+/*
+ * Programs the System control NI-Tower for nodes under SYSTOP domain.
+ */
+static int32_t ni_tower_sysctrl_systop_init(void)
+{
+    int32_t err;
+
+    err = ni_tower_pre_init(HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_sysctrl_ni_tower_systop();
+    if (err != 0) {
+        BOOT_LOG_ERR("BL2: Unable to configure System Control NI-Tower for "
+                        "nodes under SYSTOP domain");
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    BOOT_LOG_INF("BL2: System Control NI-Tower configured for node under "
+                    "SYSTOP domain");
+
+    return 0;
+}
+
 int32_t boot_platform_post_init(void)
 {
     int32_t result;
@@ -203,6 +233,7 @@ static int boot_platform_post_load_scp(void)
     struct rse_integ_t *integ_layer =
             (struct rse_integ_t *)RSE_INTEG_LAYER_BASE_S;
     enum mscp_error_t mscp_err;
+    int32_t err;
 
     BOOT_LOG_INF("BL2: SCP post load start");
 
@@ -247,6 +278,12 @@ static int boot_platform_post_load_scp(void)
     /* Close RSE ATU region configured to access SCP ITCM region */
     atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
     if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
+    err = ni_tower_sysctrl_systop_init();
+    if (err != 0) {
         return 1;
     }
 
