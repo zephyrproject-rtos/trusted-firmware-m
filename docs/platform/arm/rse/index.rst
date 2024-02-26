@@ -14,9 +14,10 @@ Previously known as Runtime Security Subsystem (RSS).
 
 RSE also includes the following extra partitions:
 
-- `Measured boot partition <https://git.trustedfirmware.org/TF-M/tf-m-extras.git/tree/partitions/measured_boot/measured_boot_integration_guide.rst>`_
-- `Delegated attestation partition <https://git.trustedfirmware.org/TF-M/tf-m-extras.git/tree/partitions/delegated_attestation/delegated_attest_integration_guide.rst>`_
+- :doc:`Measured boot partition <TF-M-Extras:partitions/measured_boot_integration_guide>`
+- :doc:`Delegated attestation partition<TF-M-Extras:partitions/delegated_attestation/delegated_attest_integration_guide>`
+- :doc:`DICE Protection Environment partition <TF-M-Extras:partitions/dice_protection_environment>`
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited. All rights reserved.*
