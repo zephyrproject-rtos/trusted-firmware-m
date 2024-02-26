@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -87,7 +87,7 @@ target_add_scatter_file(bl1_2
 
 #========================= Platform Secure ====================================#
 
-add_subdirectory(openamp)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_comms rse_comms)
 
 # Set which PLATFORM depedency must be used by the CC3XX driver
 set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
@@ -126,6 +126,7 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
+        Native_Driver/mhu_wrapper_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -139,6 +140,7 @@ target_sources(platform_s
         partition/partition.c
         partition/gpt.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
+        rse_comms_permissions_hal.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -378,6 +380,7 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
 
 target_sources(tfm_spm
     PRIVATE
+        tfm_interrupts.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
         $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
