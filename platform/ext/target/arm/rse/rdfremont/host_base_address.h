@@ -22,6 +22,7 @@
 #ifndef __HOST_BASE_ADDRESS_H__
 #define __HOST_BASE_ADDRESS_H__
 
+#include "host_clus_util_lcp_memory_map.h"
 #include "host_css_memory_map.h"
 #include "host_mscp_memory_map.h"
 #include "platform_base_address.h"
