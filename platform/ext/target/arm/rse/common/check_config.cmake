@@ -17,3 +17,8 @@ tfm_invalid_config(RSE_USE_ROM_LIB_FROM_SRAM AND NOT ${CMAKE_C_COMPILER_ID} STRE
 # RSE requires BL1 and BL2
 tfm_invalid_config(NOT BL1)
 tfm_invalid_config(NOT BL2)
+
+########################## Attestation #########################################
+
+get_property(TFM_ATTESTATION_SCHEME_LIST CACHE TFM_ATTESTATION_SCHEME PROPERTY STRINGS)
+tfm_invalid_config(NOT TFM_ATTESTATION_SCHEME IN_LIST TFM_ATTESTATION_SCHEME_LIST)

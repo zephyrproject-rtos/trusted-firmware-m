@@ -9,6 +9,8 @@
 # variables always take the last.
 
 set(TFM_BL1_MEMORY_MAPPED_FLASH         OFF      CACHE BOOL    "Whether BL1 can directly access flash content")
+set(TFM_ATTESTATION_SCHEME              "CCA"    CACHE STRING  "Attestation scheme to use [OFF, PSA, CCA, DPE]")
+
 set(PLATFORM_HAS_BOOT_DMA               OFF      CACHE BOOL    "Enable dma support for memory transactions for bootloader")
 set(PLAT_MHU_VERSION                    3        CACHE STRING  "Supported MHU version by platform")
 set(MCUBOOT_IMAGE_NUMBER                2        CACHE STRING  "Number of images supported by MCUBoot")

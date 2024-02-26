@@ -1,12 +1,10 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PARTITION_MEASURED_BOOT               OFF  CACHE BOOL   "Disable Measured boot partition")
-set(TFM_PARTITION_DELEGATED_ATTESTATION       OFF  CACHE BOOL   "Disable Delegated Attestation partition")
 set(TFM_PARTITION_PROTECTED_STORAGE            ON  CACHE BOOL   "Enable Protected Storage partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE    OFF  CACHE BOOL   "Disable Internal Trusted Storage partition")
 
@@ -14,8 +12,6 @@ set(TFM_EXTRAS_REPO_PATH                       ""  CACHE PATH   "Path to tf-m-ex
 set(TFM_EXTRAS_REPO_VERSION                    ""  CACHE STRING "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS           ""  CACHE STRING "List of extra secure partition directory name(s)")
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST        ""  CACHE STRING "List of extra secure partition manifests")
-
-set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS ON  CACHE BOOL   "Enable storing of encoded measurements in boot.")
 
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH  ""  CACHE PATH   "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 

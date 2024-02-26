@@ -44,25 +44,23 @@ set(MCUBOOT_IMAGE_NUMBER                4          CACHE STRING   "Number of ima
 set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to use the default flash map defined by TF-M project")
 set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      2          CACHE STRING   "ID of the flash area containing the primary Secure image")
 set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     3          CACHE STRING   "ID of the flash area containing the primary Non-Secure image")
-set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS OFF CACHE BOOL     "Enable storing of encoded measurements in boot.")
 set(RSE_USE_HOST_FLASH                  ON         CACHE BOOL     "Enable RSE using the host flash.")
 set(RSE_LOAD_NS_IMAGE                   ON         CACHE BOOL     "Whether to load an RSE NSPE image")
 
 set(TFM_PARTITION_CRYPTO                ON         CACHE BOOL     "Enable Crypto partition")
-set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL     "Enable Initial Attestation partition")
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF        CACHE BOOL     "Enable Protected Storage partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF     CACHE BOOL     "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_PLATFORM              ON         CACHE BOOL     "Enable Platform partition")
 set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algorithm used by Measured boot services")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
+set(TFM_ATTESTATION_SCHEME              "PSA"      CACHE STRING   "Attestation scheme to use [OFF, PSA, CCA]")
+
 set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD" CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
 set(TFM_EXTRAS_REPO_VERSION             "f0204f1"  CACHE STRING  "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
-
-set(TFM_PARTITION_DELEGATED_ATTESTATION ON         CACHE BOOL     "Enable Delegated Attestation partition")
 
 set(ATTEST_KEY_BITS                     384        CACHE STRING   "The size of the initial attestation key in bits")
 set(PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   0x800      CACHE STRING    "The maximum possible size of a token")
@@ -82,9 +80,29 @@ else()
     set(CONFIG_TFM_USE_TRUSTZONE            OFF)
 endif()
 
+if (TFM_ATTESTATION_SCHEME      STREQUAL "PSA")
+    set(TFM_PARTITION_INITIAL_ATTESTATION   ON      CACHE BOOL  "Enable Initial Attestation partition")
+    set(TFM_PARTITION_DELEGATED_ATTESTATION OFF     CACHE BOOL  "Enable Delegated Attestation partition")
+    set(TFM_PARTITION_MEASURED_BOOT         OFF)
+elseif (TFM_ATTESTATION_SCHEME  STREQUAL "CCA")
+    set(TFM_PARTITION_INITIAL_ATTESTATION   ON      CACHE BOOL  "Enable Initial Attestation partition")
+    set(TFM_PARTITION_DELEGATED_ATTESTATION ON      CACHE BOOL  "Enable Delegated Attestation partition")
+    set(TFM_PARTITION_MEASURED_BOOT         ON)
+else()
+    # Disable attestation
+    set(TFM_PARTITION_INITIAL_ATTESTATION   OFF     CACHE BOOL  "Enable Initial Attestation partition")
+    set(TFM_PARTITION_DELEGATED_ATTESTATION OFF     CACHE BOOL  "Enable Delegated Attestation partition")
+    set(TFM_PARTITION_MEASURED_BOOT         OFF)
+    set(CONFIG_TFM_BOOT_STORE_MEASUREMENTS  OFF     CACHE BOOL  "Store measurement values from all the boot stages. Used for initial attestation token.")
+    set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS  OFF CACHE BOOL  "Enable storing of encoded measurements in boot.")
+endif()
+
+if (TFM_PARTITION_MEASURED_BOOT)
+    set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS  OFF CACHE BOOL  "Enable storing of encoded measurements in boot.")
+    set(MCUBOOT_DATA_SHARING                        ON)
+endif()
+
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
-set(MCUBOOT_DATA_SHARING                ON)
-set(TFM_PARTITION_MEASURED_BOOT         ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
 
@@ -114,3 +132,12 @@ endif()
 set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
 
 set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
+
+################################################################################
+
+# Specifying the accepted values for certain configuration options to facilitate
+# their later validation.
+
+########################## Attestation #########################################
+
+set_property(CACHE TFM_ATTESTATION_SCHEME PROPERTY STRINGS "OFF;PSA;CCA")
