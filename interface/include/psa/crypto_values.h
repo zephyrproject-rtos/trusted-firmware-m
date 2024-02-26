@@ -2396,7 +2396,7 @@
  * \return The constructed lifetime value.
  */
 #define PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(persistence, location) \
-    ((location) << 8 | (persistence))
+    (((location) << 8) | (persistence))
 
 /** The local storage area for persistent keys.
  *

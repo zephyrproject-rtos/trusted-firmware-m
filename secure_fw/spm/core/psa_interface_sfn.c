@@ -163,7 +163,7 @@ void psa_close(psa_handle_t handle)
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {

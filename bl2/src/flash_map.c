@@ -170,8 +170,8 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
         }
 
         /* Record how many target data have been read. */
-        read_length = off - aligned_off + len >= data_width ?
-                                        data_width - (off - aligned_off) : len;
+        read_length = ((off - aligned_off + len) >= data_width) ?
+                                        (data_width - (off - aligned_off)) : len;
 
         /* Copy the read data from off. */
         for (i = 0; i < read_length; i++) {
@@ -197,14 +197,14 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     }
     if (remaining_len) {
         ret = DRV_FLASH_AREA(area)->ReadData(
-                            area->fa_off + off + i + item_number * data_width,
+                            area->fa_off + off + i + (item_number * data_width),
                             temp_buffer,
                             1);
         if (ret < 0) {
             return ret;
         }
         for (j = 0; j < remaining_len; j++) {
-            ((uint8_t *)dst)[i + item_number * data_width + j] = temp_buffer[j];
+            ((uint8_t *)dst)[i + (item_number * data_width) + j] = temp_buffer[j];
         }
     }
 
@@ -292,7 +292,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     if (add_padding_size) {
         /* Fill the first program unit bytes with data from src. */
         for (i = add_padding_size, src_written_idx = 0;
-             i < FLASH_PROGRAM_UNIT && src_written_idx < len;
+             (i < FLASH_PROGRAM_UNIT) && (src_written_idx < len);
              i++, src_written_idx++) {
             add_padding[i] = ((uint8_t *)src)[src_written_idx];
         }
@@ -300,7 +300,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
             /* aligned_len equals to FLASH_PROGRAM_UNIT in this case.
              * Fill the len_padding_size datas into add_padding.
              */
-            for (k = 0; i < FLASH_PROGRAM_UNIT && k < len_padding_size;
+            for (k = 0; (i < FLASH_PROGRAM_UNIT) && (k < len_padding_size);
                  i++, k++) {
                 add_padding[i] = len_padding[k];
             }
@@ -346,7 +346,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
         /* Program the last program unit data into flash. */
         if (len_padding_size) {
             /* Copy the last unaligned bytes in src to add_padding. */
-            for (i = 0; i < FLASH_PROGRAM_UNIT && src_written_idx < len;
+            for (i = 0; (i < FLASH_PROGRAM_UNIT) && (src_written_idx < len);
                  i++, src_written_idx++) {
                 add_padding[i] = ((uint8_t *)src)[src_written_idx];
             }
@@ -355,14 +355,14 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
                 return -1;
             }
             /* Copy the len_padding_size bytes in len_padding to add_padding. */
-            for (k = 0; i < FLASH_PROGRAM_UNIT && k < len_padding_size;
+            for (k = 0; (i < FLASH_PROGRAM_UNIT) && (k < len_padding_size);
                  i++, k++) {
                 add_padding[i] = len_padding[k];
             }
             write_size = add_padding_size + last_unit_start_off +
                          FLASH_PROGRAM_UNIT;
-            if (i != FLASH_PROGRAM_UNIT || k != len_padding_size ||
-                aligned_len != write_size) {
+            if ((i != FLASH_PROGRAM_UNIT) || (k != len_padding_size) ||
+                (aligned_len != write_size)) {
                 return -1;
             }
             if (DRV_FLASH_AREA(area)->ProgramData(

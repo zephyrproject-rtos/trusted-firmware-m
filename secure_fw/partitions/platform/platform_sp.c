@@ -98,9 +98,9 @@ static psa_status_t platform_sp_nv_read_psa_api(const psa_msg_t *msg)
         out_len--;
     }
 
-    if (msg->in_size[0] != NV_COUNTER_ID_SIZE ||
-        msg->out_size[0] > NV_COUNTER_SIZE ||
-        in_len != 1 || out_len != 1) {
+    if ((msg->in_size[0] != NV_COUNTER_ID_SIZE) ||
+        (msg->out_size[0] > NV_COUNTER_SIZE) ||
+        (in_len != 1) || (out_len != 1)) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 
@@ -147,8 +147,8 @@ static psa_status_t platform_sp_nv_increment_psa_api(const psa_msg_t *msg)
         out_len--;
     }
 
-    if (msg->in_size[0] != NV_COUNTER_ID_SIZE ||
-        in_len != 1 || out_len != 0) {
+    if ((msg->in_size[0] != NV_COUNTER_ID_SIZE) ||
+        (in_len != 1) || (out_len != 0)) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 

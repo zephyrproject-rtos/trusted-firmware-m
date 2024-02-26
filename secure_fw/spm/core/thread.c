@@ -67,7 +67,7 @@ struct thread_t *thrd_next(void)
 
 static void insert_by_prior(struct thread_t **head, struct thread_t *node)
 {
-    if (*head == NULL || (node->priority <= (*head)->priority)) {
+    if ((*head == NULL) || (node->priority <= (*head)->priority)) {
         node->next = *head;
         *head = node;
     } else {

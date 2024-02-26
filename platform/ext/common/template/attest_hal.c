@@ -61,7 +61,7 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
     }
 
     /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
+    copy_size = (*size < otp_size) ? *size : otp_size;
     /* String content */
     *size = tfm_strnlen((char*)buf, copy_size);
 
@@ -86,7 +86,7 @@ tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf)
     }
 
     /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
+    copy_size = (*size < otp_size) ? *size : otp_size;
     /* String content */
     *size = tfm_strnlen((char*)buf, copy_size);
 
@@ -123,7 +123,7 @@ enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
     }
 
     /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
+    copy_size = (*size < otp_size) ? *size : otp_size;
     /* Binary data */
     *size = copy_size;
 
@@ -147,7 +147,7 @@ enum tfm_plat_err_t tfm_plat_get_cert_ref(uint32_t *size, uint8_t *buf)
     }
 
     /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
+    copy_size = (*size < otp_size) ? *size : otp_size;
     /* String content */
     *size = tfm_strnlen((char*)buf, copy_size);
 
@@ -178,7 +178,7 @@ enum tfm_plat_err_t tfm_attest_hal_get_platform_hash_algo(uint32_t *size,
     const char hash_algo[] = "not-hash-extended";
 #endif
 
-    if (*size < sizeof(hash_algo) - 1) {
+    if (*size < (sizeof(hash_algo) - 1)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 

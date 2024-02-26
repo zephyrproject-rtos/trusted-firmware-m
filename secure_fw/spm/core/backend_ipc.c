@@ -458,8 +458,8 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     sched_attempted = arch_release_sched_lock();
 
     /* Interrupt is masked, PendSV will not happen immediately. */
-    if (result == STATUS_NEED_SCHEDULE ||
-        sched_attempted == SCHEDULER_ATTEMPTED) {
+    if ((result == STATUS_NEED_SCHEDULE) ||
+        (sched_attempted == SCHEDULER_ATTEMPTED)) {
         arch_attempt_schedule();
     }
 
@@ -510,7 +510,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
     p_part_curr = GET_CURRENT_COMPONENT();
     p_part_next = GET_THRD_OWNER(pth_next);
 
-    if (pth_next != NULL && p_part_curr != p_part_next) {
+    if ((pth_next != NULL) && (p_part_curr != p_part_next)) {
         /* Check if there is enough room on stack to save more context */
         if ((p_curr_ctx->sp_limit +
                 sizeof(struct tfm_additional_context_t)) > __get_PSP()) {

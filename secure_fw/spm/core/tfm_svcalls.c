@@ -155,7 +155,7 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
         tfm_core_panic();
     }
 
-    if (svc_idx >= sizeof(psa_api_svc_func_table)/sizeof(psa_api_svc_func_t)) {
+    if (svc_idx >= (sizeof(psa_api_svc_func_table)/sizeof(psa_api_svc_func_t))) {
         SPMLOG_ERRMSGVAL("Invalid PSA API SVC requested: ", svc_number);
         ctx[0] = PSA_ERROR_GENERIC_ERROR;
         return exc_return;

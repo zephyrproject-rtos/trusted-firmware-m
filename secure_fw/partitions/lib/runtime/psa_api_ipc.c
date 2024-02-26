@@ -102,7 +102,7 @@ void psa_clear(void)
 }
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 void psa_irq_enable(psa_signal_t irq_signal)
 {
     PART_METADATA()->psa_fns->psa_irq_enable(irq_signal);

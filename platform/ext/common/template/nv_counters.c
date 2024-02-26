@@ -65,7 +65,7 @@ static enum tfm_plat_err_t read_nv_counter_otp(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    counter_size = counter_size > OTP_COUNTER_MAX_SIZE ? OTP_COUNTER_MAX_SIZE : counter_size;
+    counter_size = (counter_size > OTP_COUNTER_MAX_SIZE) ? OTP_COUNTER_MAX_SIZE : counter_size;
 
     err = tfm_plat_otp_read(id, counter_size, counter_value);
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -172,7 +172,7 @@ static enum tfm_plat_err_t set_nv_counter_otp(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    counter_size = counter_size > OTP_COUNTER_MAX_SIZE ? OTP_COUNTER_MAX_SIZE : counter_size;
+    counter_size = (counter_size > OTP_COUNTER_MAX_SIZE) ? OTP_COUNTER_MAX_SIZE : counter_size;
 
     if (value > (8 * counter_size)) {
         return TFM_PLAT_ERR_MAX_VALUE;

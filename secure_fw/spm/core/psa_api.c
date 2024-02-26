@@ -32,8 +32,8 @@
 
 void spm_handle_programmer_errors(psa_status_t status)
 {
-    if (status == PSA_ERROR_PROGRAMMER_ERROR ||
-        status == PSA_ERROR_CONNECTION_REFUSED) {
+    if ((status == PSA_ERROR_PROGRAMMER_ERROR) ||
+        (status == PSA_ERROR_CONNECTION_REFUSED)) {
         if (!tfm_spm_is_ns_caller()) {
             tfm_core_panic();
         }
@@ -67,8 +67,8 @@ uint32_t tfm_spm_get_lifecycle_state(void)
 
 /* PSA Partition API function body */
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
-    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_SPM_BACKEND_IPC == 1) \
+    || (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)
 {
@@ -91,7 +91,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
      * signals.
      */
     if ((partition->signals_allowed) &&
-        (partition->signals_allowed & signal_mask) == 0) {
+        ((partition->signals_allowed & signal_mask) == 0)) {
         tfm_core_panic();
     }
 
@@ -242,7 +242,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
              * Any output vectors that are still mapped will report that
              * zero bytes have been written.
              */
-            for (int i = OUTVEC_IDX_BASE; i < PSA_MAX_IOVEC * 2; i++) {
+            for (int i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
                 if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
                     handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
                 }

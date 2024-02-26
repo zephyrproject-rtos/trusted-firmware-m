@@ -49,7 +49,7 @@ struct psa_api_tbl_t {
     void             (*psa_notify)(int32_t partition_id);
     void             (*psa_clear)(void);
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
     void             (*psa_irq_enable)(psa_signal_t irq_signal);
     psa_irq_status_t (*psa_irq_disable)(psa_signal_t irq_signal);
 #if CONFIG_TFM_FLIH_API == 1

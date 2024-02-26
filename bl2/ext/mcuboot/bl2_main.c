@@ -90,7 +90,7 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
     stdio_uninit();
 #endif
 
@@ -112,7 +112,7 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
     stdio_init();
 #endif
 

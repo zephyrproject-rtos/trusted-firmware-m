@@ -144,7 +144,7 @@ void psa_set_rhandle_thread_fn_call(psa_handle_t msg_handle, void *rhandle)
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 __naked
 void psa_irq_enable_thread_fn_call(psa_signal_t irq_signal)
 {
@@ -253,7 +253,7 @@ const struct psa_api_tbl_t psa_api_thread_fn_call = {
                                 psa_notify_thread_fn_call,
                                 psa_clear_thread_fn_call,
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
                                 psa_irq_enable_thread_fn_call,
                                 psa_irq_disable_thread_fn_call,
 #if CONFIG_TFM_FLIH_API == 1

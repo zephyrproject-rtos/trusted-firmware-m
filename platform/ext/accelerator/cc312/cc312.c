@@ -148,7 +148,7 @@ int crypto_hw_apply_debug_permissions(uint8_t *permissions_mask, uint32_t len)
                         DX_BASE_HOST_RGF + DX_HOST_DCU_EN2_REG_OFFSET,
                         DX_BASE_HOST_RGF + DX_HOST_DCU_EN3_REG_OFFSET};
 
-    if (len != 16 || permissions_mask == NULL) {
+    if ((len != 16) || (permissions_mask == NULL)) {
         return ret_val;
     }
 

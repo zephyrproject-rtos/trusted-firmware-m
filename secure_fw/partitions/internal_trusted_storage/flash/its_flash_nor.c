@@ -80,7 +80,7 @@ static psa_status_t flash_read_unaligned(
         }
 
         /* Record how many target data have been read. */
-        read_length = ((addr - aligned_addr + size >= data_width) ?
+        read_length = (((addr - aligned_addr + size) >= data_width) ?
          (data_width - (addr - aligned_addr)) : size);
 
         /* Copy the read data. */

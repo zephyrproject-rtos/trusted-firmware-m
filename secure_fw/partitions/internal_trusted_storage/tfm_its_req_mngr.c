@@ -32,8 +32,8 @@ static psa_status_t tfm_its_set_req(const psa_msg_t *msg)
     size_t num;
     size_t data_length;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->in_size[2] != sizeof(create_flags)) {
+    if ((msg->in_size[0] != sizeof(uid)) ||
+        (msg->in_size[2] != sizeof(create_flags))) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
@@ -69,8 +69,8 @@ static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
     size_t data_offset;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->in_size[1] != sizeof(data_offset)) {
+    if ((msg->in_size[0] != sizeof(uid)) ||
+        (msg->in_size[1] != sizeof(data_offset))) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
@@ -110,8 +110,8 @@ static psa_status_t tfm_its_get_info_req(const psa_msg_t *msg)
     struct psa_storage_info_t info;
     size_t num;
 
-    if (msg->in_size[0] != sizeof(uid) ||
-        msg->out_size[0] != sizeof(info)) {
+    if ((msg->in_size[0] != sizeof(uid)) ||
+        (msg->out_size[0] != sizeof(info))) {
         /* The size of one of the arguments is incorrect */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }

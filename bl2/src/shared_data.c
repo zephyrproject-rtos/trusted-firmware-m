@@ -203,14 +203,14 @@ int boot_save_shared_data(const struct image_header *hdr,
     (void)active_slot;
     (void)max_app_size;
 
-    if (hdr == NULL || fap == NULL) {
+    if ((hdr == NULL) || (fap == NULL)) {
         return -1;
     }
 
     /* Look for the given flash area to determine the image ID. */
     for (i = 0; i < MCUBOOT_IMAGE_NUMBER; i++) {
-        if (flash_area_open(FLASH_AREA_IMAGE_PRIMARY(i), &temp_fap) == 0 &&
-            fap == temp_fap) {
+        if ((flash_area_open(FLASH_AREA_IMAGE_PRIMARY(i), &temp_fap) == 0) &&
+            (fap == temp_fap)) {
             mcuboot_image_id = i;
             break;
         }

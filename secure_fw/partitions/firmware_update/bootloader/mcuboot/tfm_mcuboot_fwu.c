@@ -139,7 +139,7 @@ psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
 {
     const struct flash_area *fap;
 
-    if (block == NULL || component >= FWU_COMPONENT_NUMBER) {
+    if ((block == NULL) || (component >= FWU_COMPONENT_NUMBER)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -302,7 +302,7 @@ psa_status_t fwu_bootloader_install_image(const psa_fwu_component_t *candidates,
                     /* Check the version of the dependency image in the secondary slot
                      * only if the image header is good.
                      */
-                    if (hdr_secondary.ih_magic == IMAGE_MAGIC &&
+                    if ((hdr_secondary.ih_magic == IMAGE_MAGIC) &&
                         (is_version_greater_or_equal(&hdr_secondary.ih_ver,
                                                      &dep.image_min_version))) {
                         /* The dependency image in the secondary slot meet the

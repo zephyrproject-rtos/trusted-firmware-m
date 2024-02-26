@@ -141,7 +141,7 @@ void tfm_arch_init_context(struct context_ctrl_t *p_ctx_ctrl,
             (struct full_context_t *)arch_seal_thread_stack(sp);
 
     /* Check if enough space on stack */
-    if ((uintptr_t)p_tctx - sizeof(struct full_context_t) < sp_limit) {
+    if (((uintptr_t)p_tctx - sizeof(struct full_context_t)) < sp_limit) {
         tfm_core_panic();
     }
 

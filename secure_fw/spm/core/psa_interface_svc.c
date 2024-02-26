@@ -125,7 +125,7 @@ __naked void psa_set_rhandle_svc(psa_handle_t msg_handle, void *rhandle)
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 
 __naked void psa_irq_enable_svc(psa_signal_t irq_signal)
 {
@@ -208,7 +208,7 @@ const struct psa_api_tbl_t psa_api_svc = {
                                 psa_notify_svc,
                                 psa_clear_svc,
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
                                 psa_irq_enable_svc,
                                 psa_irq_disable_svc,
 #if CONFIG_TFM_FLIH_API == 1

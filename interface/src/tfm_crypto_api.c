@@ -1005,7 +1005,7 @@ TFM_CRYPTO_API(psa_status_t, psa_aead_finish)(psa_aead_operation_t *operation,
 
     size_t out_len = IOVEC_LEN(out_vec);
 
-    if (ciphertext == NULL || ciphertext_size == 0) {
+    if ((ciphertext == NULL) || (ciphertext_size == 0)) {
         out_len--;
     }
     if ((out_len == 3) && (ciphertext_length == NULL)) {
@@ -1056,7 +1056,7 @@ TFM_CRYPTO_API(psa_status_t, psa_aead_verify)(psa_aead_operation_t *operation,
 
     size_t out_len = IOVEC_LEN(out_vec);
 
-    if (plaintext == NULL || plaintext_size == 0) {
+    if ((plaintext == NULL) || (plaintext_size == 0)) {
         out_len--;
     }
     if ((out_len == 2) && (plaintext_length == NULL)) {

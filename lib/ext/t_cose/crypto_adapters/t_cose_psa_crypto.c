@@ -96,11 +96,11 @@ static psa_algorithm_t cose_alg_id_to_psa_alg_id(int32_t cose_alg_id)
 static enum t_cose_err_t psa_status_to_t_cose_error_signing(psa_status_t err)
 {
     /* Intentionally keeping to fewer mapped errors to save object code */
-    return err == PSA_SUCCESS                   ? T_COSE_SUCCESS :
-           err == PSA_ERROR_INVALID_SIGNATURE   ? T_COSE_ERR_SIG_VERIFY :
-           err == PSA_ERROR_NOT_SUPPORTED       ? T_COSE_ERR_UNSUPPORTED_SIGNING_ALG:
-           err == PSA_ERROR_INSUFFICIENT_MEMORY ? T_COSE_ERR_INSUFFICIENT_MEMORY :
-           err == PSA_ERROR_CORRUPTION_DETECTED ? T_COSE_ERR_TAMPERING_DETECTED :
+    return (err == PSA_SUCCESS  )                 ? T_COSE_SUCCESS :
+           (err == PSA_ERROR_INVALID_SIGNATURE)   ? T_COSE_ERR_SIG_VERIFY :
+           (err == PSA_ERROR_NOT_SUPPORTED)       ? T_COSE_ERR_UNSUPPORTED_SIGNING_ALG:
+           (err == PSA_ERROR_INSUFFICIENT_MEMORY) ? T_COSE_ERR_INSUFFICIENT_MEMORY :
+           (err == PSA_ERROR_CORRUPTION_DETECTED) ? T_COSE_ERR_TAMPERING_DETECTED :
                                                   T_COSE_ERR_SIG_FAIL;
 }
 
@@ -332,9 +332,9 @@ psa_status_to_t_cose_error_hash(psa_status_t status)
     /* Intentionally limited to just this minimum set of errors to
      * save object code as hashes don't really fail much
      */
-    return status == PSA_SUCCESS                ? T_COSE_SUCCESS :
-           status == PSA_ERROR_NOT_SUPPORTED    ? T_COSE_ERR_UNSUPPORTED_HASH :
-           status == PSA_ERROR_BUFFER_TOO_SMALL ? T_COSE_ERR_HASH_BUFFER_SIZE :
+    return (status == PSA_SUCCESS)                ? T_COSE_SUCCESS :
+           (status == PSA_ERROR_NOT_SUPPORTED)    ? T_COSE_ERR_UNSUPPORTED_HASH :
+           (status == PSA_ERROR_BUFFER_TOO_SMALL) ? T_COSE_ERR_HASH_BUFFER_SIZE :
                                                   T_COSE_ERR_HASH_GENERAL_FAIL;
 }
 
@@ -449,12 +449,12 @@ psa_status_to_t_cose_error_hmac(psa_status_t status)
     /* Intentionally limited to just this minimum set of errors to
      * save object code as hashes don't really fail much
      */
-    return status == PSA_SUCCESS                   ? T_COSE_SUCCESS :
-           status == PSA_ERROR_NOT_SUPPORTED       ? T_COSE_ERR_UNSUPPORTED_HASH :
-           status == PSA_ERROR_INVALID_ARGUMENT    ? T_COSE_ERR_INVALID_ARGUMENT :
-           status == PSA_ERROR_INSUFFICIENT_MEMORY ? T_COSE_ERR_INSUFFICIENT_MEMORY :
-           status == PSA_ERROR_BUFFER_TOO_SMALL    ? T_COSE_ERR_TOO_SMALL :
-           status == PSA_ERROR_INVALID_SIGNATURE   ? T_COSE_ERR_SIG_VERIFY :
+    return (status == PSA_SUCCESS)                   ? T_COSE_SUCCESS :
+           (status == PSA_ERROR_NOT_SUPPORTED)       ? T_COSE_ERR_UNSUPPORTED_HASH :
+           (status == PSA_ERROR_INVALID_ARGUMENT)    ? T_COSE_ERR_INVALID_ARGUMENT :
+           (status == PSA_ERROR_INSUFFICIENT_MEMORY) ? T_COSE_ERR_INSUFFICIENT_MEMORY :
+           (status == PSA_ERROR_BUFFER_TOO_SMALL)    ? T_COSE_ERR_TOO_SMALL :
+           (status == PSA_ERROR_INVALID_SIGNATURE)   ? T_COSE_ERR_SIG_VERIFY :
                                                      T_COSE_ERR_FAIL;
 }
 
