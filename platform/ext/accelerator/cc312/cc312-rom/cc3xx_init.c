@@ -65,10 +65,13 @@ static void check_features(void)
 
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
-    uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
 #ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
+    const uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
     uint32_t lock_dfa_enabled = dfa_is_supported;
 #else
+    /* If the DFA countermeasures are not enabled, the setup just locks them to false
+     * regardless of the HW being capable of DFA support or not
+     */
     uint32_t lock_dfa_enabled = false;
 #endif
 
@@ -116,9 +119,8 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
 
 cc3xx_err_t cc3xx_lowlevel_init(void)
 {
-#if defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) || defined(CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE)
     cc3xx_err_t err;
-#endif
+
     /* If on a debug build, check that the CC3XX has all the features that have
      * been chosen by config */
     check_features();
