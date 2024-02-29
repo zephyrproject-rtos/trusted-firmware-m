@@ -120,14 +120,18 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
     __PACKED_STRUCT {
-        uint32_t data[(OTP_MANUFACTURING_DATA_MAX_SIZE - 2 * sizeof(uint32_t)) / sizeof(uint32_t)];
+        uint32_t data[(OTP_MANUFACTURING_DATA_MAX_SIZE - 4 * sizeof(uint32_t)) / sizeof(uint32_t)];
         /* Things before this point are not touched by BL1_1, and hence are
          * modifiable by new provisioning code. Things after this point have
          * fixed addresses which are used by BL1_1 and cannot be changed by
          * new provisioning code.
          */
-        uint32_t size;
-        uint32_t zero_count;
+        __PACKED_STRUCT {
+            uint32_t _pad0;
+            uint32_t size;
+            uint32_t _pad1;
+            uint32_t zero_count;
+        } header;
     } manufacturing_data;
 #endif /* RSE_HAS_MANUFACTURING_DATA */
 
@@ -238,7 +242,7 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
-    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_OFFSET(manufacturing_data.size),
+    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_OFFSET(manufacturing_data.header.size),
 #endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
@@ -354,7 +358,7 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
-    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_SIZE(manufacturing_data.size),
+    [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_SIZE(manufacturing_data.header.size),
 #endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
@@ -558,16 +562,16 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
     uint64_t dm_size;
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
-    err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
-                   USER_AREA_SIZE(manufacturing_data.size),
+    err = otp_read(USER_AREA_OFFSET(manufacturing_data.header.size),
+                   USER_AREA_SIZE(manufacturing_data.header.size),
                    sizeof(manufacturing_size), (uint8_t*)&manufacturing_size);
     if (err == TFM_PLAT_ERR_SUCCESS) {
         ic_err = integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
                                                INTEGRITY_CHECKER_MODE_ZERO_COUNT,
-                                               (uint32_t *)(USER_AREA_ADDRESS(manufacturing_data.size) - manufacturing_size),
-                                               manufacturing_size + sizeof(uint32_t),
-                                               (uint32_t *)USER_AREA_ADDRESS(manufacturing_data.zero_count),
-                                               USER_AREA_SIZE(manufacturing_data.zero_count));
+                                               (uint32_t *)(USER_AREA_ADDRESS(manufacturing_data.header) - manufacturing_size),
+                                               manufacturing_size + 2 * sizeof(uint32_t),
+                                               (uint32_t *)USER_AREA_ADDRESS(manufacturing_data.header.zero_count),
+                                               USER_AREA_SIZE(manufacturing_data.header.zero_count));
         if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
@@ -769,13 +773,13 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         }
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
-        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
-                       USER_AREA_SIZE(manufacturing_data.size),
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.header.size),
+                       USER_AREA_SIZE(manufacturing_data.header.size),
                        sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
-        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size - bl1_2_size;
+        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.header) - manufacturing_data_size - bl1_2_size;
 #else
         bl1_2_offset = USER_AREA_OFFSET(dma_initial_command_sequence) - bl1_2_size;
 #endif
@@ -786,14 +790,14 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
 
     case PLAT_OTP_ID_MANUFACTURING_DATA:
 #ifdef RSE_HAS_MANUFACTURING_DATA
-        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
-                       USER_AREA_SIZE(manufacturing_data.size),
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.header.size),
+                       USER_AREA_SIZE(manufacturing_data.header.size),
                        sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
 
-        return otp_read(USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size,
+        return otp_read(USER_AREA_OFFSET(manufacturing_data.header) - manufacturing_data_size,
                         manufacturing_data_size,
                         out_len, out);
 #else
@@ -961,14 +965,14 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                                    OTP_ROM_ENCRYPTION_KEY);
     case PLAT_OTP_ID_BL1_2_IMAGE:
 #ifdef RSE_HAS_MANUFACTURING_DATA
-        err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
-                       USER_AREA_SIZE(manufacturing_data.size),
+        err = otp_read(USER_AREA_OFFSET(manufacturing_data.header.size),
+                       USER_AREA_SIZE(manufacturing_data.header.size),
                        sizeof(manufacturing_data_size), (uint8_t *)&manufacturing_data_size);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
 
-        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.size) - manufacturing_data_size - in_len;
+        bl1_2_offset = USER_AREA_OFFSET(manufacturing_data.header) - manufacturing_data_size - in_len;
 #else
         bl1_2_offset = USER_AREA_OFFSET(dma_initial_command_sequence) - in_len;
 #endif
