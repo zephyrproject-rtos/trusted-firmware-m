@@ -144,14 +144,14 @@
 #define BL1_2_CODE_LIMIT  (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
 
 #define BL1_1_DATA_START  (BOOT_TFM_SHARED_DATA_BASE + BOOT_TFM_SHARED_DATA_SIZE)
-#define BL1_1_DATA_SIZE   (0x5200)
+#define BL1_1_DATA_SIZE   (0x20000)
 #define BL1_1_DATA_LIMIT  (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
 
 /* The BL1_1 and BL1_2 data region cannot overlap because the
  * used shared symbols that are located at BL1_1's data region.
  */
 #define BL1_2_DATA_START  (BL1_1_DATA_START + BL1_1_DATA_SIZE)
-#define BL1_2_DATA_SIZE   (0x4800)
+#define BL1_2_DATA_SIZE   (0x20000)
 #define BL1_2_DATA_LIMIT  (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 #endif
 
