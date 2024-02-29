@@ -87,9 +87,11 @@
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
+#define S_DATA_OVERALL_SIZE         (0x20000)
+
 /* Secure Data stored in ISRAM0 */
 #define S_DATA_START    (ISRAM0_BASE_S)
-#define S_DATA_SIZE     (ISRAM0_SIZE - S_RAM_CODE_SIZE)
+#define S_DATA_SIZE     (S_DATA_OVERALL_SIZE - S_RAM_CODE_SIZE)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 #ifdef CORSTONE310_FVP
@@ -108,9 +110,9 @@
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored in ISRAM1 */
-#define NS_DATA_START   (ISRAM1_BASE_NS)
-#define NS_DATA_SIZE    (ISRAM1_SIZE)
+/* Non-Secure Data stored in ISRAM0+ISRAM1 */
+#define NS_DATA_START   (ISRAM0_BASE_NS + S_DATA_OVERALL_SIZE)
+#define NS_DATA_SIZE    ((ISRAM0_SIZE - S_DATA_OVERALL_SIZE) + ISRAM1_SIZE)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
