@@ -125,7 +125,7 @@
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Code SRAM area */
-#define S_RAM_CODE_SIZE          (0x00001800) /* 6 KB (3x TGU block size)*/
+#define S_RAM_CODE_SIZE          (0x00004000) /* 16 KB (SRAM MPC block size)*/
 #define S_RAM_CODE_START         (S_DATA_START + S_DATA_SIZE)
 
 #ifdef BL2
