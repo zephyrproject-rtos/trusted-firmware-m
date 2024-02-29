@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,13 +353,13 @@ void sau_and_idau_cfg(void)
 0x11200000+-------+       |  +-------+-------+-------+ +------------+ (for AN547)
           |               |  |                       | |            |
 0x20000000+-------+-------+  +-------+-------+-------+ +------------+
-          | DTCM  |       |  | DTCM  |    S          | |     S      |
+          | DTCM  |       |  | DTCM  |   NS  | RNR 2 | |     NS     |
 0x20008000+-------+       |  +-------+-------+-------+ +------------+
           |               |  |                       | |            |
-0x21000000+--------+      |  +--------+--------------+ +------------+
-          | ISRAM0 |      |  | ISRAM0 |      |       | |            |
-          +--------+      |  +--------+  NS  | RNR 2 + +     NS     +
-          | ISRAM1 |      |  | ISRAM1 |      |       | |            |
+0x21000000+--------+      |  +--------+  S           | |     S      |
+          | ISRAM0 |      |  | ISRAM0 |              | |            |
+          +--------+      |  +--------+------+-------+ +------------+
+          | ISRAM1 |      |  | ISRAM1 |  NS  | RNR 3 | |     NS     |
 0x21200000+--------+      |  +--------+------+-------+ +------------+
 0x21400000+--------+      |  +--------+------+-------+ +------------+ (for AN547)
           |               |  |                       | |            |
@@ -374,7 +374,7 @@ void sau_and_idau_cfg(void)
           | eer   |       |  | eer   |               | |            |
           +-------+       |  +-------+-------+-------+ +------------+
           | ns-   |       |  | ns-   |       |       | |            |
-          | part  |       |  | part  |   NS  | RNR 3 | |     NS     |
+          | part  |       |  | part  |   NS  | RNR 4 | |     NS     |
           | ion   |       |  | ion   |       |       | |            |
 0x28800000+-------+       |  +-------+-------+-------+ +------------+
           |               |  |                       | |            |
@@ -394,7 +394,7 @@ void sau_and_idau_cfg(void)
           | part  |       |  | part  |               | |            |
           | ion   |       |  | ion   |               | |            |
           +-------+       |  +-------+-------+-------+ +------------+
-          | ven-  |       |  | ven-  |  NSC  | RNR 4 | |     NSC    |
+          | ven-  |       |  | ven-  |  NSC  | RNR 5 | |     NSC    |
           | eer   |       |  | eer   |       |       | |            |
           +-------+       |  +-------+-------+-------+ +------------+
           | ns-   |       |  | ns-   |               | |            |
@@ -403,7 +403,7 @@ void sau_and_idau_cfg(void)
 0x38800000+-------+       |  +-------+               | |            |
           |               |  |                       | |            |
 0x40000000+--------+------+  +--------+------+-------+ +------------+
-          | Periph |  NS  |  | Periph |  NS  | RNR 5 | |     NS     |
+          | Periph |  NS  |  | Periph |  NS  | RNR 6 | |     NS     |
 0x50000000+--------+------+  +--------+------+-------+ +------------+
           | Periph |   S  |  | Periph |  S           | |     S      |
 0x60000000+--------+------+  +--------+------+-------+ +------------+
@@ -414,7 +414,7 @@ void sau_and_idau_cfg(void)
           | DDR4 2 |  NS  |  | DDR4 2 |      |       | |     NS     |
 0x90000000+--------+------+  +--------+      |       | +------------+
           | DDR4 3 |   S  |  | DDR4 3 |      |       | |     S      |
-0xA0000000+--------+------+  +--------+  NS  | RNR 6 | +------------+
+0xA0000000+--------+------+  +--------+  NS  | RNR 7 | +------------+
           | DDR4 4 |  NS  |  | DDR4 4 |      |       | |     NS     |
 0xB0000000+--------+------+  +--------+      |       | +------------+
           | DDR4 5 |   S  |  | DDR4 5 |      |       | |     S      |
@@ -444,29 +444,34 @@ void sau_and_idau_cfg(void)
                 | SAU_RLAR_ENABLE_Msk;
 #endif
 
-    /* Configure ISRAM0: non-secure, ISRAM1: non-secure */
+    /* Configure DTCM */
     SAU->RNR = 2;
-    SAU->RBAR = (ISRAM0_BASE_NS & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = ((ISRAM0_BASE_NS + ISRAM0_SIZE + ISRAM1_SIZE - 1)
+    SAU->RBAR = (DTCM0_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1)
+                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+    /* Configure ISRAM0: secure, ISRAM1: non-secure */
+    SAU->RNR = 3;
+    SAU->RBAR = (ISRAM1_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((ISRAM1_BASE_NS + ISRAM1_SIZE - 1)
                  & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
     /* Configure QSPI */
-    SAU->RNR = 3;
+    SAU->RNR = 4;
     SAU->RBAR = (memory_regions.non_secure_partition_base
                  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.non_secure_partition_limit
                   & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
     /* Configures veneers region to be non-secure callable */
-    SAU->RNR  = 4;
+    SAU->RNR  = 5;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                  | SAU_RLAR_ENABLE_Msk | SAU_RLAR_NSC_Msk;
     /* Configure the peripherals space */
-    SAU->RNR  = 5;
+    SAU->RNR  = 6;
     SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
     /* Configure DDR4 with the last available region */
-    SAU->RNR  = 6;
+    SAU->RNR  = 7;
     SAU->RBAR = (DDR4_BLK0_BASE_NS & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = ((DDR4_BLK0_BASE_NS + ((uint32_t)DDR4_BLK_NUM * DDR4_BLK_SIZE) - 1)
                  & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
@@ -504,6 +509,13 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         ERROR_MSG("Failed to Initialize TGU for DTCM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
+    ret = Driver_DTCM_TGU_ARMV8_M.ConfigRegion(DTCM0_BASE_NS,
+                          (DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1),
+                          ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure TGU for DTCM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     ret = Driver_SRAM_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
@@ -521,13 +533,6 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     ret = Driver_ISRAM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    ret = Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_NS,
-                                         MPC_ISRAM0_RANGE_LIMIT_NS,
-                                         ARM_MPC_ATTR_NONSECURE);
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -623,13 +628,13 @@ void mpc_revert_non_secure_to_secure_cfg(void)
                             (DTCM0_BASE_S + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1),
                             ARM_MPC_ATTR_SECURE);
 
-    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
-                                 MPC_SRAM_RANGE_LIMIT_S,
-                                 ARM_MPC_ATTR_SECURE);
-
     Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
                                    MPC_ISRAM0_RANGE_LIMIT_S,
                                    ARM_MPC_ATTR_SECURE);
+
+    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
+                                 MPC_SRAM_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
 
     Driver_ISRAM1_MPC.ConfigRegion(MPC_ISRAM1_RANGE_BASE_S,
                                    MPC_ISRAM1_RANGE_LIMIT_S,
@@ -652,7 +657,6 @@ void mpc_clear_irq(void)
     Driver_ISRAM1_MPC.ClearInterrupt();
     Driver_SRAM_MPC.ClearInterrupt();
     Driver_QSPI_MPC.ClearInterrupt();
-    Driver_DDR4_MPC.ClearInterrupt();
 }
 
 /*------------------- PPC configuration functions -------------------------*/
