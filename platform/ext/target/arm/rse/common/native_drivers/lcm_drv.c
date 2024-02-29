@@ -26,6 +26,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <assert.h>
 
 #ifdef INTEGRITY_CHECKER_S
  __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
@@ -656,17 +657,20 @@ static const struct lcm_hw_slot_zero_count_mapping {
     uint32_t size;
     uint32_t zero_count_offset;
     uint32_t shift;
+    uint32_t bit_size;
 } zero_count_mappings[] = {
     {
         offsetof(struct lcm_otp_layout_t, huk),
         sizeof(((struct lcm_otp_layout_t*)0)->huk),
         offsetof(struct lcm_otp_layout_t, cm_config_1),
         0,
+        8,
     },
     {
         offsetof(struct lcm_otp_layout_t, guk),
         sizeof(((struct lcm_otp_layout_t*)0)->guk),
         offsetof(struct lcm_otp_layout_t, cm_config_1),
+        8,
         8,
     },
     {
@@ -674,12 +678,14 @@ static const struct lcm_hw_slot_zero_count_mapping {
         sizeof(((struct lcm_otp_layout_t*)0)->kp_cm),
         offsetof(struct lcm_otp_layout_t, cm_config_1),
         16,
+        8,
     },
     {
         offsetof(struct lcm_otp_layout_t, kce_cm),
         sizeof(((struct lcm_otp_layout_t*)0)->kce_cm),
         offsetof(struct lcm_otp_layout_t, cm_config_1),
         24,
+        8,
     },
 
     {
@@ -687,6 +693,7 @@ static const struct lcm_hw_slot_zero_count_mapping {
         sizeof(((struct lcm_otp_layout_t*)0)->rotpk),
         offsetof(struct lcm_otp_layout_t, cm_config_2),
         0,
+        8,
     },
 
     {
@@ -694,11 +701,13 @@ static const struct lcm_hw_slot_zero_count_mapping {
         sizeof(((struct lcm_otp_layout_t*)0)->kp_dm),
         offsetof(struct lcm_otp_layout_t, dm_config),
         0,
+        8,
     },
     {
         offsetof(struct lcm_otp_layout_t, kce_dm),
         sizeof(((struct lcm_otp_layout_t*)0)->kce_dm),
         offsetof(struct lcm_otp_layout_t, dm_config),
+        8,
         8,
     },
 };
@@ -733,6 +742,13 @@ static enum lcm_error_t write_zero_count_if_needed(struct lcm_dev_t *dev,
     err = count_zero_bits((uint32_t *)buf, len, &zero_bits);
     if (err != LCM_ERROR_NONE) {
         return err;
+    }
+
+    /* sanity check that we don't overflow */
+    assert((zero_bits & ~((1 << mapping->bit_size) - 1)) == 0);
+
+    if (zero_bits & ~((1 << mapping->bit_size) - 1)) {
+        return LCM_ERR_INVALID_ZERO_COUNT;
     }
 
     err = lcm_otp_read(dev, mapping->zero_count_offset, sizeof(otp_word),
