@@ -13,6 +13,9 @@ import os
 sys.path.append(os.path.join(sys.path[0],'..'))
 from provisioning_common_utils import *
 
+def count_zero_bits(x):
+    return (bin(int.from_bytes(x, 'big')).count('0')).to_bytes(4, 'little')
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--provisioning_code", help="the input provisioning code", required=True)
 parser.add_argument("--provisioning_data", help="the input provisioning data", required=True)
@@ -63,9 +66,9 @@ with open(args.krtl_file, "rb") as in_file:
 
 with open(args.otp_dma_ics_input_file, "rb") as in_file:
     otp_dma_ics = in_file.read()
-otp_dma_ics = struct_pack([ otp_dma_ics], pad_to=0x400 - 4)
-otp_ics_crc = binascii.crc32(otp_dma_ics).to_bytes(4, byteorder='little')
-otp_dma_ics = struct_pack([otp_ics_crc, otp_dma_ics])
+otp_dma_ics = struct_pack([ otp_dma_ics], pad_to=0x400 - 8)
+otp_ics_zero_count = count_zero_bits(otp_dma_ics)
+otp_dma_ics = struct_pack([otp_ics_zero_count, bytes(4), otp_dma_ics])
 
 # These are always required
 patch_bundle = struct_pack([

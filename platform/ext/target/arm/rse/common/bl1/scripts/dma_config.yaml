@@ -17,7 +17,7 @@ locations:
         # layout changes
         base_address: 0x500A4C00
         size: 0x400
-        reserved: 0x4
+        reserved: 0x8
     integrity_checker:
         base_address: 0x5015C000
     otp_sam_config:

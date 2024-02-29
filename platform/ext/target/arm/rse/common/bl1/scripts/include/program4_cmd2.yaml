@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -51,5 +51,5 @@ GPOVAL0: 0x00000003
 LINKADDR: "program4_cmd3_exec_addr"
 execute_link: false
 ICDA: 'vm0_base_address + 0x4' # The program to be measured starts after the integrity value word
-ICDL: 'otp_size - 0x1' # This is measured in words
-ICEVA: 'vm0_base_address' # The first word in VM0 is the integrity value
+ICDL: 'otp_size / 2 - 0x1' # This is measured in 8-byte IC words, so divide the size (which is in 4-byte words) by 2
+ICEVA: 'vm0_base_address' # The first (8-byte) word in VM0 is the integrity value

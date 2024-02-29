@@ -46,10 +46,10 @@ def calculate_header_word(header):
     return final_val
 
 
-def resolve_store_reference(command, key, reference_string):
+def parse_store(command, key, reference_string):
     return command_storage_locations[reference_string]
 
-def resolve_exec_reference(command, key, reference_string):
+def parse_exec(command, key, reference_string):
     command_location = command_execution_locations[reference_string]
     # Need to set bit 0 if the link should be executed
     if key != 'SRCADDR' and key != 'DESADDR':
@@ -61,7 +61,7 @@ def resolve_exec_reference(command, key, reference_string):
             command_location += 1
     return command_location
 
-def resolve_size_reference(command, key, reference_string):
+def parse_size(command, key, reference_string):
     size = sizes[reference_string]
     if key == 'XSIZE':
         size = size // 4
@@ -72,35 +72,37 @@ def resolve_size_reference(command, key, reference_string):
         size = size // 4
     return size
 
-def resolve_base_address_reference(command, key, reference_string):
+def parse_base_address(command, key, reference_string):
     return location_base_addresses[reference_string]
 
-def resolve_program_reference(command, key, reference_string):
+def parse(command, key, reference_string):
+    if "/" in reference_string:
+        split = reference_string.split(" / ", maxsplit=1)
+        return parse(command, key, split[0].lstrip()) // parse(command, key, split[1])
+
+    if "*" in reference_string:
+        split = reference_string.split(" * ", maxsplit=1)
+        return parse(command, key, split[0].lstrip()) * parse(command, key, split[1])
+
     if "-" in reference_string:
         split = reference_string.split(" - ", maxsplit=1)
-        reference_string = split[0].lstrip()
-        sub_value = resolve_program_reference(command, key, split[1])
-    else:
-        sub_value = 0
+        return parse(command, key, split[0].lstrip()) - parse(command, key, split[1])
 
     if "+" in reference_string:
         split = reference_string.split(" + ", maxsplit=1)
-        reference_string = split[0].lstrip()
-        add_value = resolve_program_reference(command, key, split[1])
-    else:
-        add_value = 0
+        return parse(command, key, split[0].lstrip()) + parse(command, key, split[1])
 
     if "_store_addr" in reference_string:
-        value = resolve_store_reference(command, key, reference_string.replace("_store_addr", ""))
+        value = parse_store(command, key, reference_string.replace("_store_addr", ""))
     elif "_exec_addr" in reference_string:
-        value = resolve_exec_reference(command, key, reference_string.replace("_exec_addr", ""))
+        value = parse_exec(command, key, reference_string.replace("_exec_addr", ""))
     elif "_size" in reference_string:
-        value = resolve_size_reference(command, key, reference_string.replace("_size", ""))
+        value = parse_size(command, key, reference_string.replace("_size", ""))
     elif "_base_address" in reference_string:
-        value = resolve_base_address_reference(command, key, reference_string.replace("_base_address", ""))
+        value = parse_base_address(command, key, reference_string.replace("_base_address", ""))
     else:
         value = int(reference_string, 0)
-    value = value + add_value - sub_value
+
     logging.debug('resolving reference {} as {}'.format(reference_string, hex(value)))
     return value
 
@@ -181,7 +183,7 @@ for program in data['program']:
             try:
                 command_array.append(int(command[key]))
             except ValueError:
-                command_array.append(int(resolve_program_reference(command, key, command[key])))
+                command_array.append(int(parse(command, key, command[key])))
         location_word_arrays[program['storage_location']] += command_array
 
 for location in output_locations:
