@@ -68,7 +68,7 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
                                     size_t *key_buffer_length)
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
-    psa_key_type_t key_bits = psa_get_key_bits(attributes);
+    psa_key_bits_t key_bits = psa_get_key_bits(attributes);
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t rc;
@@ -145,7 +145,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
 {
     CCError_t cc_err = CC_FAIL;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_key_type_t key_bits = psa_get_key_bits(attributes);
+    psa_key_bits_t key_bits = psa_get_key_bits(attributes);
     uint32_t pubExpSizeBits, mask;
     CCRndContext_t rndContext;
     CCRsaPubKey_t *pCcPubKey = NULL;
@@ -371,7 +371,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
                                      size_t data_size, size_t *data_length)
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
-    psa_key_type_t key_bits = psa_get_key_bits(attributes);
+    psa_key_bits_t key_bits = psa_get_key_bits(attributes);
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
     CCEcpkiUserPrivKey_t pUserPrivKey;
     CCEcpkiUserPublKey_t pUserPublKey;
