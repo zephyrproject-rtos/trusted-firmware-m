@@ -5,6 +5,7 @@
  *
  */
 
+#include "discovery/ni_tower_discovery_drv.h"
 #include "ni_tower_apu_drv.h"
 #include "ni_tower_apu_reg.h"
 #include "util/ni_tower_util.h"
@@ -314,6 +315,44 @@ enum ni_tower_err ni_tower_apu_sync_err_enable(
     reg->apu_ctlr &= ~NI_TOWER_APU_CTLR_SYNC_ERROR_EN_MSK;
     /* Set sync_err_en */
     reg->apu_ctlr |= NI_TOWER_APU_CTLR_SYNC_ERROR_EN;
+
+    return NI_TOWER_SUCCESS;
+}
+
+enum ni_tower_err ni_tower_apu_dev_init(
+    const struct ni_tower_dev *ni_tower_dev,
+    const struct ni_tower_apu_dev_cfg *cfg,
+    const uint64_t region_mapping_offset,
+    struct ni_tower_apu_dev *dev)
+{
+    enum ni_tower_err err;
+    uint32_t off_addr;
+    struct ni_tower_discovery_node root = {
+        .node_type = NI_TOWER_CFGNI,
+        .node_id = 0,
+        .node_off_addr = 0x0
+    };
+
+    if (ni_tower_dev == NULL || ni_tower_dev->periphbase == (uintptr_t)NULL) {
+        return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    if (cfg == NULL || dev == NULL) {
+        return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    /* Discover offset address for the APU */
+    err = ni_tower_discover_offset(
+            ni_tower_dev, &root,
+            cfg->component_node_type,
+            cfg->component_node_id,
+            NI_TOWER_APU, &off_addr);
+    if (err != NI_TOWER_SUCCESS) {
+        return err;
+    }
+
+    dev->base = ni_tower_dev->periphbase + off_addr;
+    dev->region_mapping_offset = region_mapping_offset;
 
     return NI_TOWER_SUCCESS;
 }

@@ -8,34 +8,14 @@
 
 #include <stddef.h>
 
-static enum ni_tower_err ni_tower_fetch_offset_address(
-    const struct ni_tower_dev *dev,
-    const enum ni_tower_node_type_value component_node_type,
-    const uint32_t component_node_id,
-    const enum ni_tower_subfeature_type_value subfeature_node_type,
-    uint32_t *off_addr)
-{
-    struct ni_tower_discovery_node root = {
-        .node_type = NI_TOWER_CFGNI,
-        .node_id = 0,
-        .node_off_addr = 0x0
-    };
-
-    return ni_tower_discover_offset(dev, &root, component_node_type,
-                                    component_node_id, subfeature_node_type,
-                                    off_addr);
-}
-
 enum ni_tower_err ni_tower_program_psam_table(
     const struct ni_tower_dev *dev,
     const struct ni_tower_psam_cfgs psam_table[],
     const uint32_t psam_table_count)
 {
     enum ni_tower_err err;
-    struct ni_tower_psam_dev psam_dev;
-    const struct ni_tower_psam_dev_cfg* psam_dev_cfg;
-    const struct ni_tower_psam_reg_cfg_info* r_info;
-    uint32_t p_idx, r_idx, off_addr;
+    struct ni_tower_psam_dev psam_dev = {0};
+    uint32_t p_idx, r_idx;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
@@ -46,30 +26,18 @@ enum ni_tower_err ni_tower_program_psam_table(
     }
 
     for (p_idx = 0; p_idx < psam_table_count; ++p_idx) {
-        psam_dev_cfg = psam_table[p_idx].dev_cfg;
-        if (psam_dev_cfg == NULL) {
-            return NI_TOWER_ERR_INVALID_ARG;
-        }
-
-        /* Discover offset address for the PSAM */
-        err = ni_tower_fetch_offset_address(dev,
-                  psam_dev_cfg->component_node_type,
-                  psam_dev_cfg->component_node_id, NI_TOWER_PSAM, &off_addr);
+        err = ni_tower_psam_dev_init(
+            dev, psam_table[p_idx].dev_cfg,
+            psam_table[p_idx].add_chip_addr_offset ? dev->chip_addr_offset : 0,
+            &psam_dev);
         if (err != NI_TOWER_SUCCESS) {
             return err;
         }
 
-        psam_dev = (struct ni_tower_psam_dev) {
-            .base = dev->periphbase + off_addr,
-            .region_mapping_offset = psam_table[p_idx].add_chip_addr_offset ?
-                                        dev->chip_addr_offset : 0,
-        };
-
         /* Set region fields */
         for (r_idx = 0; r_idx < psam_table[p_idx].nh_region_count; ++r_idx) {
-            r_info = &psam_table[p_idx].regions[r_idx];
-            err = ni_tower_psam_configure_next_available_nhregion(&psam_dev,
-                    r_info);
+            err = ni_tower_psam_configure_next_available_nhregion(
+                &psam_dev, &psam_table[p_idx].regions[r_idx]);
             if (err != NI_TOWER_SUCCESS) {
                 return err;
             }
@@ -91,10 +59,8 @@ enum ni_tower_err ni_tower_program_apu_table(
     const uint32_t apu_table_count)
 {
     enum ni_tower_err err;
-    struct ni_tower_apu_dev apu_dev;
-    const struct ni_tower_apu_dev_cfg* apu_dev_cfg;
-    const struct ni_tower_apu_reg_cfg_info* r_info;
-    uint32_t a_idx, r_idx, off_addr;
+    struct ni_tower_apu_dev apu_dev = {0};
+    uint32_t a_idx, r_idx;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {
         return NI_TOWER_ERR_INVALID_ARG;
@@ -105,30 +71,18 @@ enum ni_tower_err ni_tower_program_apu_table(
     }
 
     for (a_idx = 0; a_idx < apu_table_count; ++a_idx) {
-        apu_dev_cfg = apu_table[a_idx].dev_cfg;
-        if (apu_dev_cfg == NULL) {
-            return NI_TOWER_ERR_INVALID_ARG;
-        }
-
-        /* Discover offset address for the APU */
-        err = ni_tower_fetch_offset_address(dev,
-                  apu_dev_cfg->component_node_type,
-                  apu_dev_cfg->component_node_id, NI_TOWER_APU, &off_addr);
+        err = ni_tower_apu_dev_init(
+            dev, apu_table[a_idx].dev_cfg,
+            apu_table[a_idx].add_chip_addr_offset ? dev->chip_addr_offset : 0,
+            &apu_dev);
         if (err != NI_TOWER_SUCCESS) {
             return err;
         }
 
-        apu_dev = (struct ni_tower_apu_dev) {
-            .base = dev->periphbase + off_addr,
-            .region_mapping_offset = apu_table[a_idx].add_chip_addr_offset ?
-                                        dev->chip_addr_offset : 0,
-        };
-
         /* Set region fields */
         for (r_idx = 0; r_idx < apu_table[a_idx].region_count; ++r_idx) {
-            r_info = &apu_table[a_idx].regions[r_idx];
-            err = ni_tower_apu_configure_next_available_region(&apu_dev,
-                    r_info);
+            err = ni_tower_apu_configure_next_available_region(
+                &apu_dev, &apu_table[a_idx].regions[r_idx]);
             if (err != NI_TOWER_SUCCESS) {
                 return err;
             }

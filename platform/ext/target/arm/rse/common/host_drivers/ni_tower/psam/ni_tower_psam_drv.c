@@ -5,6 +5,7 @@
  *
  */
 
+#include "discovery/ni_tower_discovery_drv.h"
 #include "ni_tower_psam_drv.h"
 #include "ni_tower_psam_reg.h"
 #include "util/ni_tower_util.h"
@@ -22,6 +23,44 @@
 #define NI_TOWER_PSAM_GET64_END_ADDRESS(addr, high, low)    \
     addr = (((uint64_t)(high) << 32) | (low)) |             \
             (NI_TOWER_PSAM_ADDRESS_GRAN - 1)
+
+enum ni_tower_err ni_tower_psam_dev_init(
+    const struct ni_tower_dev *ni_tower_dev,
+    const struct ni_tower_psam_dev_cfg *cfg,
+    const uint64_t region_mapping_offset,
+    struct ni_tower_psam_dev *dev)
+{
+    enum ni_tower_err err;
+    uint32_t off_addr;
+    struct ni_tower_discovery_node root = {
+        .node_type = NI_TOWER_CFGNI,
+        .node_id = 0,
+        .node_off_addr = 0x0
+    };
+
+    if (ni_tower_dev == NULL || ni_tower_dev->periphbase == (uintptr_t)NULL) {
+        return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    if (cfg == NULL || dev == NULL) {
+        return NI_TOWER_ERR_INVALID_ARG;
+    }
+
+    /* Discover offset address for the PSAM */
+    err = ni_tower_discover_offset(
+            ni_tower_dev, &root,
+            cfg->component_node_type,
+            cfg->component_node_id,
+            NI_TOWER_PSAM, &off_addr);
+    if (err != NI_TOWER_SUCCESS) {
+        return err;
+    }
+
+    dev->base = ni_tower_dev->periphbase + off_addr;
+    dev->region_mapping_offset = region_mapping_offset;
+
+    return NI_TOWER_SUCCESS;
+}
 
 enum ni_tower_err ni_tower_psam_configure_nhregion(
     const struct ni_tower_psam_dev *dev,

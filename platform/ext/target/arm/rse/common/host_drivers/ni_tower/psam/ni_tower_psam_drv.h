@@ -44,6 +44,25 @@ struct ni_tower_psam_dev {
 };
 
 /**
+ * \brief Initialize and return PSAM device
+ *
+ * \param[in]  ni_tower_dev          NI-Tower device struct \ref ni_tower_dev.
+ * \param[in]  cfg                   NI-Tower PSAM device configuration struct
+ *                                   \ref ni_tower_psam_dev_cfg.
+ * \param[in]  region_mapping_offset Offset which will added to the memory map
+ *                                   base and end addresses.
+ * \param[out] dev                   NI-Tower PSAM device struct \ref
+ *                                   ni_tower_psam_dev
+ *
+ * \return Returns error code as specified in \ref ni_tower_err
+ */
+enum ni_tower_err ni_tower_psam_dev_init(
+    const struct ni_tower_dev *ni_tower_dev,
+    const struct ni_tower_psam_dev_cfg *cfg,
+    const uint64_t region_mapping_offset,
+    struct ni_tower_psam_dev *dev);
+
+/**
  * \brief Configure non-striped (non-hashed) region.
  *
  * \param[in] dev         NI-Tower PSAM device struct \ref ni_tower_psam_dev.
