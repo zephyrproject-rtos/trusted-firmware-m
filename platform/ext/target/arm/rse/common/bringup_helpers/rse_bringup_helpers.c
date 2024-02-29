@@ -60,31 +60,31 @@ void rse_run_bringup_helpers_if_requested(void)
     uint8_t gpio_pins_value = check_gpio_pins();
     uint8_t gppc_val = get_gppc_val();
 
-    switch (gpio_pins_value) {
-        case 0:
-            break;
-        case 1:
-            boot_address(rse_bringup_helpers_hal_get_vm0_exec_address());
-            while(1){}
-        case 2:
-            boot_address(rse_bringup_helpers_hal_get_qpsi_exec_address());
-            while(1){}
-        case 3:
-            boot_address(rse_bringup_helpers_hal_get_side_band_exec_address());
-            while(1){}
-    }
-
     switch (gppc_val & 0b11) {
         case 0:
             break;
         case 1:
             boot_address(rse_bringup_helpers_hal_get_vm0_exec_address());
-            while(1){}
+            break;
         case 2:
             boot_address(rse_bringup_helpers_hal_get_qpsi_exec_address());
-            while(1){}
+            break;
         case 3:
             boot_address(rse_bringup_helpers_hal_get_side_band_exec_address());
-            while(1){}
+            break;
+    }
+
+    switch (gpio_pins_value) {
+        case 0:
+            break;
+        case 1:
+            boot_address(rse_bringup_helpers_hal_get_vm0_exec_address());
+            break;
+        case 2:
+            boot_address(rse_bringup_helpers_hal_get_qpsi_exec_address());
+            break;
+        case 3:
+            boot_address(rse_bringup_helpers_hal_get_side_band_exec_address());
+            break;
     }
 }
