@@ -103,10 +103,16 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 static bool valid_mcu_select(uint32_t mcu)
 {
 	switch (mcu) {
+#if defined(NRF54L15_XXAA)
+	case NRF_GPIO_PIN_SEL_GPIO:
+	case NRF_GPIO_PIN_SEL_VPR:
+	case NRF_GPIO_PIN_SEL_GRTC:
+#else
 	case NRF_GPIO_PIN_SEL_APP:
 	case NRF_GPIO_PIN_SEL_NETWORK:
 	case NRF_GPIO_PIN_SEL_PERIPHERAL:
 	case NRF_GPIO_PIN_SEL_TND:
+#endif
 		return true;
 	default:
 		return false;

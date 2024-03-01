@@ -9,6 +9,8 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
+
 if (NOT NRF_BOARD_SELECTED)
     if (${TFM_PLATFORM} STREQUAL "nordic_nrf/nrf5340")
         set(hint nordic_nrf/nrf5340dk_nrf5340_cpuapp)
@@ -22,12 +24,14 @@ endif()
 # At the time of writing there is no systematic way to identify which
 # NVM technology is used by the SoC from the Kconfig, so we just
 # hardcode this information here instead.
-if((NRF_SOC_VARIANT STREQUAL nrf54l15) OR (target STREQUAL nrf54l15))
+if((NRF_SOC_VARIANT STREQUAL nrf54l15) OR (TFM_PLATFORM STREQUAL "nordic_nrf/nrf54l15dk_nrf54l15_cpuapp") OR (PSA_API_TEST_TARGET STREQUAL nrf54l15))
   # Maybe we only need to check one of these options but these
   # variables keep changing so we check both to be future proof
   set(HAS_RRAMC 1)
+  set(HAS_CRACEN 1)
 else()
   set(HAS_NVMC 1)
+  set(HAS_CRACEN 0)
 endif()
 
 #========================= Platform dependencies ===============================#
@@ -75,7 +79,7 @@ target_include_directories(platform_s
 )
 
 set(nvm_sources
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c
+  $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
 )
 
 if(HAS_RRAMC)
@@ -99,7 +103,8 @@ target_sources(platform_s
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:${CMAKE_CURRENT_SOURCE_DIR}/nrf_exception_info.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
-        $<$<BOOL:${ITS_ENCRYPTION}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_its_encryption.c>
+        $<$<AND:$<BOOL:${ITS_ENCRYPTION}>,$<NOT:${HAS_CRACEN}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_its_encryption.c>
+        $<$<AND:$<BOOL:${ITS_ENCRYPTION}>,$<BOOL:${HAS_CRACEN}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_its_encryption_cracen.c>
 )
 
 if (NRF_HW_INIT_RESET_ON_BOOT)
@@ -128,6 +133,11 @@ if(TFM_SPM_LOG_RAW_ENABLED)
         PRIVATE
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
+    )
+
+    target_compile_definitions(platform_s
+        PUBLIC
+            NRF_SECURE_UART_INSTANCE=${NRF_SECURE_UART_INSTANCE}
     )
 endif()
 
