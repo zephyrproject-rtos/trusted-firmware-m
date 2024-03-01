@@ -9,6 +9,22 @@ find_package(Python3)
 
 add_executable(dm_provisioning_bundle)
 
+if(${TFM_DUMMY_PROVISIONING})
+    include(${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_dm/dm_provisioning_config.cmake)
+else()
+    include("${DM_PROVISIONING_KEYS_CONFIG}" OPTIONAL RESULT_VARIABLE DM_PROVISIONING_KEYS_CONFIG_PATH)
+    if(NOT DM_PROVISIONING_KEYS_CONFIG_PATH)
+        message(WARNING "The DM_PROVISIONING_KEYS_CONFIG is not set. If the keys are not passed via the command line then \
+                        random numbers will be used for keys and seeds or default values will be used (for attestation). \
+                        To create and use a DM_PROVISIONING_KEYS_CONFIG file, \
+                        see the example in: \
+                        tf-m/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_dm/dm_provisioning_config.cmake")
+    endif()
+    if(TFM_BL2_ENCRYPTION_KEY_PATH STREQUAL ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl2_dummy_encryption_key.bin)
+        message(WARNING "TFM_DUMMY_PROVISIONING is OFF but TFM_BL2_ENCRYPTION_KEY_PATH is set to the dummy encryption key.")
+    endif()
+endif()
+
 set_target_properties(dm_provisioning_bundle
     PROPERTIES
         SUFFIX ".axf"
@@ -33,8 +49,8 @@ target_link_options(dm_provisioning_bundle
 
 target_sources(dm_provisioning_bundle
     PRIVATE
-        ./dm_provisioning_code.c
-        $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:./dm_dummy_provisioning_data.c>
+        dm_provisioning_code.c
+        dm_provisioning_data.c
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
@@ -57,6 +73,33 @@ target_link_shared_code(dm_provisioning_bundle
 add_custom_target(dm_provisioning_bundle_bin
     ALL
     SOURCES dm_provisioning_bundle.bin
+)
+
+add_custom_target(dm_provisioning_data
+    SOURCES
+        dm_provisioning_data.c
+)
+
+add_custom_command(OUTPUT dm_provisioning_data.c
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,${MCUBOOT_KEY_S}>
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,${MCUBOOT_KEY_NS}>
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/dm_provisioning_data_template.jinja2
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/dm_create_provisioning_data.py
+    WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/dm_create_provisioning_data.py
+        ${CMAKE_CURRENT_BINARY_DIR}/dm_provisioning_data.c
+        --template_path=${CMAKE_CURRENT_SOURCE_DIR}
+        --bl1_rotpk_0=${BL1_ROTPK_0}
+        --bl2_encryption_key_path=${TFM_BL2_ENCRYPTION_KEY_PATH}
+        --bl2_rot_priv_key_0=${MCUBOOT_KEY_S}
+        --bl2_rot_priv_key_1=${MCUBOOT_KEY_NS}
+        --implementation_id=${IMPLEMENTATION_ID}
+        --verification_service_url=${VERIFICATION_SERVICE_URL}
+        --attestation_profile_definition=${ATTESTATION_PROFILE_DEFINITION}
+        --secure_debug_pk=${SECURE_DEBUG_PK}
+        --boot_seed=${BOOT_SEED}
+        --certification_reference=${CERTIFICATION_REFERENCE}
+        --entropy_seed=${ENTROPY_SEED}
 )
 
 add_custom_command(OUTPUT dm_provisioning_bundle.bin

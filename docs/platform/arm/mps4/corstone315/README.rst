@@ -35,6 +35,43 @@ Build instructions with platform name: arm/mps4/corstone315
    The built binaries can be run on the Corstone-315 Ethos-U65 Ecosystem FVP
    (FVP_Corstone_SSE-315).
 
+.. note::
+
+   If ``-DTFM_DUMMY_PROVISIONING=ON`` then the keys in the
+   ``tf-M/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_cm/cm_provisioning_config.cmake``,
+   ``tf-M/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_dm/dm_provisioning_config.cmake`` and
+   default MCUBoot signing and encryption keys will be used for provisioning.
+
+   If ``-DTFM_DUMMY_PROVISIONING=OFF`` is set then unique values can be used for provisioning. The keys
+   and seeds can be changed by passing the new values to the build command, or by setting the
+   ``-DDM_PROVISIONING_KEYS_CONFIG`` and  ``-DCM_PROVISIONING_KEYS_CONFIG` flag to the .cmake files
+   which contain the keys. An example config cmake file can be seen at
+   ``tf-m/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_cm/cm_provisioning_config.cmake``
+   and ``tf-m/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_dm/dm_provisioning_config.cmake``.
+   Otherwise new random values are going to be generated and used (or default values in some cases). For the image signing
+   the ${MCUBOOT_KEY_S} and ${MCUBOOT_KEY_NS} will be used. These variables should point to
+   .pem files that contain the code signing private keys. The public keys are going to be generated
+   from these private keys and will be used for provisioning. The hash of the public key is going to
+   be written into the ``provisioning_data.c`` automatically. For the BL2 image encryption the
+   ``TFM_BL2_ENCRYPTION_KEY_PATH`` has to be set to a .bin file which contains the encryption key.
+   (For an example, see ``tf-m/bl1/bl1_2/bl2_dummy_encryption_key.bin``)
+
+   If ``-DMCUBOOT_GENERATE_SIGNING_KEYPAIR=ON`` is set then a new MCUBoot signing public and private
+   keypair is going to be generated and it's going to be used to sign the S and NS binaries.
+
+
+   The new generated keypair can be found in the ``<build dir>/bin`` folder or in the
+   ``<install directory>/image_signing/keys`` after installation.
+   The generated provisioning_data.c file can be found at
+   ``<build directory>/platform/target/provisioning/provisioning_data.c``
+
+.. note::
+
+   The provisioning bundle generation depends on pyelftools that's have to be installed::
+
+    pip3 install pyelftools
+
+
 To run the example code on Corstone-315 Ethos-U65 Ecosystem FVP
 ---------------------------------------------------------------
 FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__

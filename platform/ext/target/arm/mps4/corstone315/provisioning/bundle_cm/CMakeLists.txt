@@ -9,6 +9,19 @@ find_package(Python3)
 
 add_executable(cm_provisioning_bundle)
 
+if(${TFM_DUMMY_PROVISIONING})
+    include(${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_cm/cm_provisioning_config.cmake)
+else()
+    include("${CM_PROVISIONING_KEYS_CONFIG}" OPTIONAL RESULT_VARIABLE CM_PROVISIONING_KEYS_CONFIG_PATH)
+    if(NOT CM_PROVISIONING_KEYS_CONFIG_PATH)
+        message(WARNING "The CM_PROVISIONING_KEYS_CONFIG is not set. If the keys are not passed via the command line then \
+                        random numbers will be used for provisioning data. \
+                        To create and use a CM_PROVISIONING_KEYS_CONFIG file, \
+                        see the example in: \
+                        tf-m/platform/ext/target/arm/mps4/corstone315/provisioning/bundle_cm/cm_provisioning_config.cmake")
+    endif()
+endif()
+
 set_target_properties(cm_provisioning_bundle
     PROPERTIES
         SUFFIX ".axf"
@@ -33,8 +46,8 @@ target_link_options(cm_provisioning_bundle
 
 target_sources(cm_provisioning_bundle
     PRIVATE
-        ./cm_provisioning_code.c
-        $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:./cm_dummy_provisioning_data.c>
+        cm_provisioning_code.c
+        cm_provisioning_data.c
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
@@ -56,6 +69,22 @@ target_link_shared_code(cm_provisioning_bundle
 add_custom_target(cm_provisioning_bundle_bin
     ALL
     SOURCES cm_provisioning_bundle.bin
+)
+
+add_custom_target(cm_provisioning_data
+    SOURCES
+        cm_provisioning_data.c
+)
+
+add_custom_command(OUTPUT cm_provisioning_data.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cm_provisioning_data_template.jinja2
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cm_create_provisioning_data.py
+    WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cm_create_provisioning_data.py
+        ${CMAKE_CURRENT_BINARY_DIR}/cm_provisioning_data.c
+        --template_path=${CMAKE_CURRENT_SOURCE_DIR}
+        --guk=${GUK}
+        --sam_config=${SAM_CONFIG}
 )
 
 add_custom_command(OUTPUT cm_provisioning_bundle.bin

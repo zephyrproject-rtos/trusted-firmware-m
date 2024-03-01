@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include "config_tfm.h"
+#include "corstone315_provisioning_bundle.h"
+
+const struct dm_provisioning_data data = {
+    /* BL1 ROTPK 0 */
+    {
+        {{bl1_rotpk_0 | indent(12)}}
+    },
+    /* BL2 Encryption key */
+    {
+        {{bl2_encryption_key | indent(12)}}
+    },
+    /* BL2 ROTPKs */
+    {
+        {
+        {{bl2_rotpk_0 | indent(12)}}
+        },
+        {
+        {{bl2_rotpk_1 | indent(12)}}
+        },
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+        {
+        {{bl2_rotpk_2 | indent(12)}}
+        },
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+        {
+        {{bl2_rotpk_3 | indent(12)}}
+        },
+#endif
+    },
+    /* Implementation ID */
+    {
+    {{implementation_id | indent(12)}}
+    },
+    /* Verification Service URL */
+    "{{verification_service_url | indent(8)}}",
+    /* Attestation Profile Definition */
+    "{{attestation_profile_definition | indent(8)}}",
+    /* Secure debug public key */
+    {
+        {{secure_debug_pk | indent(12)}}
+    },
+    /* boot seed */
+    {
+        {{boot_seed | indent(12)}}
+    },
+    /* Certification Reference */
+    "{{certification_reference | indent(8)}}",
+    /* Entropy seed */
+    {
+        {{entropy_seed | indent(12)}}
+    },
+};
