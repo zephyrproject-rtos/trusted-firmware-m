@@ -35,21 +35,34 @@
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
 
-// TODO: NCSDK-25009: Support configuring which UART is used by TF-M on nrf54L
-
 #if NRF_SECURE_UART_INSTANCE == 0
 #define TFM_DRIVER_STDIO    Driver_USART0
 #elif NRF_SECURE_UART_INSTANCE == 1
 #define TFM_DRIVER_STDIO    Driver_USART1
+#elif NRF_SECURE_UART_INSTANCE == 00
+#define TFM_DRIVER_STDIO    Driver_USART00
+#elif NRF_SECURE_UART_INSTANCE == 20
+#define TFM_DRIVER_STDIO    Driver_USART20
+#elif NRF_SECURE_UART_INSTANCE == 21
+#define TFM_DRIVER_STDIO    Driver_USART21
 #elif NRF_SECURE_UART_INSTANCE == 22
 #define TFM_DRIVER_STDIO    Driver_USART22
+#elif NRF_SECURE_UART_INSTANCE == 30
+#define TFM_DRIVER_STDIO    Driver_USART30
 #endif
 
-#ifdef NRF54L15_ENGA_XXAA
+/* Only UART20 and UART30 are supported for TF-M tests, which are the
+ * Non-secure applications build via the TF-M build system
+ */
+#ifdef NRF54L15_XXAA
+#if NRF_SECURE_UART_INSTANCE == 20
+#define NS_DRIVER_STDIO     Driver_USART30
+#else
 #define NS_DRIVER_STDIO     Driver_USART20
+#endif
 #else
 #define NS_DRIVER_STDIO     Driver_USART0
-#endif
+#endif /* NRF54L15_XXAA */
 
 /**
  * \brief Store the addresses of memory regions
@@ -99,11 +112,6 @@ enum tfm_plat_err_t spu_init_cfg(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t spu_periph_init_cfg(void);
-
-/**
- * \brief Clears SPU interrupt.
- */
-void spu_clear_irq(void);
 
 /**
  * \brief Configures memory permissions via the MPC.

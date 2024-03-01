@@ -15,29 +15,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "target_cfg.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "tfm_peripherals_config.h"
 #include "tfm_plat_provisioning.h"
+#include "utilities.h"
 #include "region.h"
 #include "array.h"
 
+#ifdef __NRF_TFM__
+#include <zephyr/autoconf.h>
+#endif
+
 #include <spu.h>
 #include <nrfx.h>
-#include <nrfx_nvmc.h>
-#include <hal/nrf_nvmc.h>
+
 #include <hal/nrf_gpio.h>
 #include <hal/nrf_spu.h>
 
-#define PIN_XL1 0
-#define PIN_XL2 1
+#ifdef RRAMC_PRESENT
+#include <nrfx_rramc.h>
+#include <hal/nrf_rramc.h>
 
-#if !(defined(NRF91_SERIES) || defined(NRF53_SERIES))
-#error "Invalid configuration"
+#if CONFIG_NRF_RRAM_WRITE_BUFFER_SIZE > 0
+#define WRITE_BUFFER_SIZE CONFIG_NRF_RRAM_WRITE_BUFFER_SIZE
+#else
+#define WRITE_BUFFER_SIZE 0
 #endif
 
+#endif
+
+#define SPU_ADDRESS_REGION    (0x50000000)
+#define GET_SPU_SLAVE_INDEX(periph) ((periph.periph_start & 0x0003F000) >> 12)
+#define GET_SPU_INSTANCE(periph) ((NRF_SPU_Type*)(SPU_ADDRESS_REGION | (periph.periph_start & 0x00FC0000)))
+
+
+#ifdef CACHE_PRESENT
+#include <hal/nrf_cache.h>
+#endif
+
+#ifdef NVMC_PRESENT
+#include <nrfx_nvmc.h>
+#include <hal/nrf_nvmc.h>
+#endif
+
+#ifdef MPC_PRESENT
+#include <hal/nrf_mpc.h>
+#endif
+
+#ifdef NRF53_SERIES
+#define PIN_XL1 0
+#define PIN_XL2 1
+#endif
+
+#ifdef NRF54L15_XXAA
+/* On nRF54L15 XL1 and XL2 are(P1.00) and XL2(P1.01) */
+#define PIN_XL1 32
+#define PIN_XL2 33
+
+/* During TF-M system initialization we invoke a function that comes
+ * from Zephyr. This function does not have a header file so we
+ * declare its prototype here.
+ */
+int nordicsemi_nrf54l_init(void);
+#endif
 
 #if TFM_PERIPHERAL_DCNF_SECURE
 struct platform_data_t tfm_peripheral_dcnf = {
@@ -92,6 +134,48 @@ struct platform_data_t tfm_peripheral_reset = {
 struct platform_data_t tfm_peripheral_spim0 = {
     NRF_SPIM0_S_BASE,
     NRF_SPIM0_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM00_SECURE
+struct platform_data_t tfm_peripheral_spim00 = {
+    NRF_SPIM00_S_BASE,
+    NRF_SPIM00_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM20_SECURE
+struct platform_data_t tfm_peripheral_spim20 = {
+    NRF_SPIM20_S_BASE,
+    NRF_SPIM20_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM22_SECURE
+struct platform_data_t tfm_peripheral_spim21 = {
+    NRF_SPIM21_S_BASE,
+    NRF_SPIM21_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM22_SECURE
+struct platform_data_t tfm_peripheral_spim22 = {
+    NRF_SPIM22_S_BASE,
+    NRF_SPIM22_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM23_SECURE
+struct platform_data_t tfm_peripheral_spim23 = {
+    NRF_SPIM23_S_BASE,
+    NRF_SPIM23_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_SPIM30_SECURE
+struct platform_data_t tfm_peripheral_spim30 = {
+    NRF_SPIM30_S_BASE,
+    NRF_SPIM30_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
 };
 #endif
 
@@ -235,6 +319,41 @@ struct platform_data_t tfm_peripheral_uarte3 = {
 };
 #endif
 
+#if TFM_PERIPHERAL_UARTE00_SECURE
+struct platform_data_t tfm_peripheral_uarte00 = {
+    NRF_UARTE00_S_BASE,
+    NRF_UARTE00_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_UARTE20_SECURE
+struct platform_data_t tfm_peripheral_uarte20 = {
+    NRF_UARTE20_S_BASE,
+    NRF_UARTE20_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_UARTE21_SECURE
+struct platform_data_t tfm_peripheral_uarte21 = {
+    NRF_UARTE21_S_BASE,
+    NRF_UARTE21_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_UARTE22_SECURE
+struct platform_data_t tfm_peripheral_uarte22 = {
+    NRF_UARTE22_S_BASE,
+    NRF_UARTE22_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_UARTE30_SECURE
+struct platform_data_t tfm_peripheral_uarte30 = {
+    NRF_UARTE30_S_BASE,
+    NRF_UARTE30_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+#endif
+
 #if TFM_PERIPHERAL_SAADC_SECURE
 struct platform_data_t tfm_peripheral_saadc = {
     NRF_SAADC_S_BASE,
@@ -246,6 +365,55 @@ struct platform_data_t tfm_peripheral_saadc = {
 struct platform_data_t tfm_peripheral_timer0 = {
     NRF_TIMER0_S_BASE,
     NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER00_SECURE
+struct platform_data_t tfm_peripheral_timer00 = {
+    NRF_TIMER00_S_BASE,
+    NRF_TIMER00_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER10_SECURE
+struct platform_data_t tfm_peripheral_timer10 = {
+    NRF_TIMER10_S_BASE,
+    NRF_TIMER10_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER20_SECURE
+struct platform_data_t tfm_peripheral_timer20 = {
+    NRF_TIMER20_S_BASE,
+    NRF_TIMER20_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER21_SECURE
+struct platform_data_t tfm_peripheral_timer21 = {
+    NRF_TIMER21_S_BASE,
+    NRF_TIMER21_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER22_SECURE
+struct platform_data_t tfm_peripheral_timer22 = {
+    NRF_TIMER22_S_BASE,
+    NRF_TIMER22_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER23_SECURE
+struct platform_data_t tfm_peripheral_timer23 = {
+    NRF_TIMER23_S_BASE,
+    NRF_TIMER23_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_TIMER24_SECURE
+struct platform_data_t tfm_peripheral_timer24 = {
+    NRF_TIMER24_S_BASE,
+    NRF_TIMER24_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
 };
 #endif
 
@@ -361,6 +529,20 @@ struct platform_data_t tfm_peripheral_egu5 = {
 };
 #endif
 
+#if TFM_PERIPHERAL_EGU10_SECURE
+struct platform_data_t tfm_peripheral_egu10 = {
+    NRF_EGU10_S_BASE,
+    NRF_EGU10_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_EGU20_SECURE
+struct platform_data_t tfm_peripheral_egu20 = {
+    NRF_EGU20_S_BASE,
+    NRF_EGU20_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+#endif
+
 #if TFM_PERIPHERAL_PWM0_SECURE
 struct platform_data_t tfm_peripheral_pwm0 = {
     NRF_PWM0_S_BASE,
@@ -386,6 +568,27 @@ struct platform_data_t tfm_peripheral_pwm2 = {
 struct platform_data_t tfm_peripheral_pwm3 = {
     NRF_PWM3_S_BASE,
     NRF_PWM3_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_PWM20_SECURE
+struct platform_data_t tfm_peripheral_pwm20 = {
+    NRF_PWM20_S_BASE,
+    NRF_PWM20_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_PWM21_SECURE
+struct platform_data_t tfm_peripheral_pwm21 = {
+    NRF_PWM21_S_BASE,
+    NRF_PWM21_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+#endif
+
+#if TFM_PERIPHERAL_PWM22_SECURE
+struct platform_data_t tfm_peripheral_pwm22 = {
+    NRF_PWM22_S_BASE,
+    NRF_PWM22_S_BASE + (sizeof(NRF_PWM_Type) - 1),
 };
 #endif
 
@@ -613,7 +816,7 @@ enum tfm_plat_err_t init_debug(void)
 #error "Debug access controlled by NRF_APPROTECT and NRF_SECURE_APPROTECT."
 #endif
 
-#if defined(NRF_APPROTECT)
+#if defined(NRF_APPROTECT) && !defined(NRF54L15_XXAA)
     /* For nRF53 and nRF91x1 already active. For nRF9160, active in the next boot.*/
     if (nrfx_nvmc_word_writable_check((uint32_t)&NRF_UICR_S->APPROTECT,
                                     UICR_APPROTECT_PALL_Protected)) {
@@ -622,7 +825,7 @@ enum tfm_plat_err_t init_debug(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif
-#if defined(NRF_SECURE_APPROTECT)
+#if defined(NRF_SECURE_APPROTECT) && !defined(NRF54L15_XXAA)
     /* For nRF53 and nRF91x1 already active. For nRF9160, active in the next boot. */
     if (nrfx_nvmc_word_writable_check((uint32_t)&NRF_UICR_S->SECUREAPPROTECT,
                                     UICR_SECUREAPPROTECT_PALL_Protected)) {
@@ -633,7 +836,7 @@ enum tfm_plat_err_t init_debug(void)
     }
 #endif
 
-#elif defined(NRF91_SERIES)
+#elif defined(NRF91_SERIES) || defined(NRF54L15_XXAA)
 
 #if !defined(DAUTH_CHIP_DEFAULT)
 #error "Debug access on this platform can only be configured by programming the corresponding registers in UICR."
@@ -664,10 +867,16 @@ enum tfm_plat_err_t init_debug(void)
     NRF_CTRLAP->SECUREAPPROTECT.LOCK = CTRLAPPERI_SECUREAPPROTECT_LOCK_LOCK_Locked <<
         CTRLAPPERI_SECUREAPPROTECT_LOCK_LOCK_Msk;
 
+#else
+#error "Unrecognized platform"
+
 #endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
+
+#define NRF_UARTE_INSTANCE(id) NRF_UARTE ## id
+#define NRF_UARTE_INSTANCE_GET(id) NRF_UARTE_INSTANCE(id)
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/
 enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
@@ -677,12 +886,21 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
         NVIC->ITNS[i] = 0xFFFFFFFF;
     }
 
-    /* Make sure that the SPU is targeted to S state */
-    NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_SPU));
+    /* Make sure that the SPU instance(s) are targeted to S state */
+	for(int i = 0; i < ARRAY_SIZE(spu_instances); i++) {
+		NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(spu_instances[i]));
+	}
+
+#ifdef NRF_CRACEN
+	NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_CRACEN));
+#endif
+#ifdef NRF_MPC00
+	NVIC_ClearTargetState(MPC00_IRQn);
+#endif
 
 #ifdef SECURE_UART1
-    /* UARTE1 is a secure peripheral, so its IRQ has to target S state */
-    NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_UARTE1));
+    /* IRQ for the selected secure UART has to target S state */
+    NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_UARTE_INSTANCE_GET(NRF_SECURE_UART_INSTANCE)));
 #endif
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -694,8 +912,23 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     /* SPU interrupt enabling */
     spu_enable_interrupts();
 
-    NVIC_ClearPendingIRQ(NRFX_IRQ_NUMBER_GET(NRF_SPU));
-    NVIC_EnableIRQ(NRFX_IRQ_NUMBER_GET(NRF_SPU));
+	for(int i = 0; i < ARRAY_SIZE(spu_instances); i++) {
+		NVIC_ClearPendingIRQ(NRFX_IRQ_NUMBER_GET(spu_instances[i]));
+		NVIC_EnableIRQ(NRFX_IRQ_NUMBER_GET(spu_instances[i]));
+	}
+
+#ifdef MPC_PRESENT
+    mpc_clear_events();
+    /* MPC interrupt enabling */
+    mpc_enable_interrupts();
+
+    NVIC_ClearPendingIRQ(NRFX_IRQ_NUMBER_GET(NRF_MPC00));
+    NVIC_EnableIRQ(NRFX_IRQ_NUMBER_GET(NRF_MPC00));
+#endif
+
+	/* The CRACEN driver configures the NVIC for CRACEN and is
+	 * therefore omitted here.
+	 */
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -704,13 +937,61 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
 void sau_and_idau_cfg(void)
 {
+	/*
+	 * SAU and IDAU configuration is very different between old
+	 * (53/91) and new (54++) platforms. New platforms have a proper SAU
+	 * and IDAU, whereas old platforms do not.
+	 */
+#ifdef NRF54L15_XXAA
+	/*
+	 * This SAU configuration aligns with ARM's RSS implementation of
+	 * sau_and_idau_cfg when possible.
+	 */
+
+	/* Enables SAU */
+    TZ_SAU_Enable();
+
+    /* Configures SAU regions to be non-secure */
+
+	/* Note that this SAU configuration assumes that there is only one
+	 * secure NVM partition and one non-secure NVM partition. Meaning,
+	 * memory_regions.non_secure_partition_limit is at the end of
+	 * NVM.
+	 */
+
+	/* Configure the end of NVM, and the FICR, to be non-secure using
+	   a single region. Note that the FICR is placed after the
+	   non-secure NVM and before the UICR.*/
+    SAU->RNR  = 0;
+    SAU->RBAR = (memory_regions.non_secure_partition_base
+                 & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (NRF_UICR_S_BASE & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+	/* Leave SAU region 1 disabled until we find a use for it */
+
+    /* Configures veneers region to be non-secure callable */
+    SAU->RNR  = 2;
+    SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
+                 | SAU_RLAR_ENABLE_Msk | SAU_RLAR_NSC_Msk;
+
+	/* Configures SAU region 3 to cover both the end of SRAM and
+	 * regions above it as shown in the "Example memory map" in the
+	 * "Product Specification" */
+    SAU->RNR  = 3;
+    SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (0xFFFFFFFFul & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+#else
     /* IDAU (SPU) is always enabled. SAU is non-existent.
      * Allow SPU to have precedence over (non-existing) ARMv8-M SAU.
      */
     TZ_SAU_Disable();
     SAU->CTRL |= SAU_CTRL_ALLNS_Msk;
+#endif
 }
 
+#if NRF_SPU_HAS_MEMORY
 enum tfm_plat_err_t spu_init_cfg(void)
 {
     /*
@@ -801,28 +1082,262 @@ enum tfm_plat_err_t spu_init_cfg(void)
 
     return TFM_PLAT_ERR_SUCCESS;
 }
+#endif /* NRF_SPU_HAS_MEMORY */
+
+
+#ifdef MPC_PRESENT
+struct mpc_region_override {
+	nrf_mpc_override_config_t config;
+	nrf_owner_t owner_id;
+	uintptr_t start_address;
+	size_t endaddr;
+	uint32_t perm;
+	uint32_t permmask;
+	size_t index;
+};
+
+static void mpc_configure_override(NRF_MPC_Type *mpc, struct mpc_region_override *override)
+{
+	nrf_mpc_override_startaddr_set(mpc, override->index, override->start_address);
+	nrf_mpc_override_endaddr_set(mpc, override->index, override->endaddr);
+	nrf_mpc_override_perm_set(mpc, override->index, override->perm);
+	nrf_mpc_override_permmask_set(mpc, override->index, override->permmask);
+	nrf_mpc_override_ownerid_set(mpc, override->index, override->owner_id);
+	nrf_mpc_override_config_set(mpc, override->index, &override->config);
+}
+
+/*
+ * Configure the override struct with reasonable defaults. This includes:
+ *
+ * Use a slave number of 0 to avoid redirecting bus transactions from
+ * one slave to another.
+ *
+ * Lock the override to prevent the code that follows from tampering
+ * with the configuration.
+ *
+ * Enable the override so it takes effect.
+ *
+ * Indicate that secdom is not enabled as this driver is not used on
+ * platforms with secdom.
+ */
+static void init_mpc_region_override(struct mpc_region_override * override)
+{
+	*override = (struct mpc_region_override){
+		.config =
+		(nrf_mpc_override_config_t){
+			.slave_number = 0,
+			.lock = true,
+			.enable = true,
+			.secdom_enable = false,
+			.secure_mask = true,
+		},
+		.perm = 0, /* 0 for non-secure */
+		.owner_id = 0,
+	};
+
+	override->permmask = MPC_OVERRIDE_PERM_SECATTR_Msk;
+}
+
+enum tfm_plat_err_t nrf_mpc_init_cfg(void)
+{
+	/* On 54l the NRF_MPC00->REGION[]'s are fixed in HW and the
+	 * OVERRIDE indexes (that are useful to us) start at 0 and end
+	 * (inclusive) at 4.
+	 *
+	 * Note that the MPC regions configure all volatile and non-volatile memory as secure, so we only
+	 * need to explicitly OVERRIDE the non-secure addresses to permit non-secure access.
+	 *
+	 * Explicitly configuring memory as secure is not necessary.
+	 *
+	 * The last OVERRIDE in 54L is fixed in HW and exists to prevent
+	 * other bus masters than the KMU from accessing CRACEN protected RAM.
+	 *
+	 * Note that we must take care not to configure an OVERRIDE that
+	 * affects an active bus transaction.
+	 *
+	 * Note that we don't configure the NSC region to be NS because
+	 * from the MPC's perspective it is secure. NSC is only configurable from the SAU.
+	 *
+	 * Note that OVERRIDE[n].MASTERPORT has a reasonable reset value
+	 * so it is left unconfigured.
+	 *
+	 * Note that there are two owners in 54L. KMU with owner ID 1, and everything else with owner ID 0.
+	 */
+
+	uint32_t index = 0;
+	/*
+	 * Configure the non-secure partition of the non-volatile
+	 * memory. This MPC region is intended to cover both the
+	 * non-secure partition in the NVM and also the FICR. The FICR
+	 * starts after the NVM and ends just before the UICR.
+	 */
+	{
+		struct mpc_region_override override;
+
+		init_mpc_region_override(&override);
+
+		override.start_address = memory_regions.non_secure_partition_base;
+		override.endaddr = NRF_UICR_S_BASE;
+		override.index = index++;
+
+		mpc_configure_override(NRF_MPC00, &override);
+	}
+
+	/* Configure the non-secure partition of the volatile memory */
+	{
+		struct mpc_region_override override;
+
+		init_mpc_region_override(&override);
+
+		override.start_address = NS_DATA_START;
+		override.endaddr = 1 + NS_DATA_LIMIT;
+		override.index = index++;
+
+		mpc_configure_override(NRF_MPC00, &override);
+	}
+
+	if(index > 4) {
+		/* Used more overrides than are available */
+		tfm_core_panic();
+	}
+
+	/* Lock and disable any unused MPC overrides to prevent malicious configuration */
+	while(index <= 4) {
+		struct mpc_region_override override;
+
+		init_mpc_region_override(&override);
+
+		override.config.enable = false;
+
+		override.index = index++;
+
+		mpc_configure_override(NRF_MPC00, &override);
+	}
+
+	return TFM_PLAT_ERR_SUCCESS;
+}
+
+#endif /* MPC_PRESENT */
+
+static void dppi_channel_configuration(void)
+{
+	/* The SPU HW and corresponding NRFX HAL API have two different
+	 * API's for DPPI security configuration. The defines
+	 * NRF_SPU_HAS_OWNERSHIP and NRF_SPU_HAS_MEMORY identify which of the two API's
+	 * are present.
+	 *
+	 * TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE is configurable, but
+	 * usually defaults to 0, which results in all DPPI channels being
+	 * non-secure.
+	 */
+#if NRF_SPU_HAS_MEMORY
+    /* There is only one dppi_id */
+    uint8_t dppi_id = 0;
+    nrf_spu_dppi_config_set(NRF_SPU, dppi_id, TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE,
+			    SPU_LOCK_CONF_LOCKED);
+#else
+	/* TODO_NRF54L15: Use the nrf_spu_feature API to configure DPPI
+	   channels according to a user-controllable config similar to
+	   TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE. */
+#endif
+}
 
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
+#ifdef NRF54L15_XXAA
+	/* Configure features to be non-secure */
+
+	/*
+	 * Due to MLT-7600, many SPU HW reset values are wrong. The docs
+	 * generally features being non-secure when coming out of HW
+	 * reset, but the HW has a good mix of both.
+	 *
+	 * When configuring NRF_SPU 0 will indicate non-secure and 1 will
+	 * indicate secure.
+	 *
+	 * Most of the chip should be non-secure so to simplify and be
+	 * consistent, we memset the entire memory map of each SPU
+	 * peripheral to 0.
+	 *
+	 * Just after memsetting to 0 we explicitly configure the
+	 * peripherals that should be secure back to secure again.
+	 */
+	// TODO: NCSDK-22597: Evaluate if it is safe to memset everything
+	// in NRF_SPU to 0.
+	memset(NRF_SPU00, 0, sizeof(NRF_SPU_Type));
+	memset(NRF_SPU10, 0, sizeof(NRF_SPU_Type));
+	memset(NRF_SPU20, 0, sizeof(NRF_SPU_Type));
+	memset(NRF_SPU30, 0, sizeof(NRF_SPU_Type));
+
+#if SECURE_UART1
+	/* Configure TF-M's UART peripheral to be secure */
+#if NRF_SECURE_UART_INSTANCE == 00
+    uint32_t uart_periph_start = tfm_peripheral_uarte00.periph_start;
+#elif NRF_SECURE_UART_INSTANCE == 20
+    uint32_t uart_periph_start = tfm_peripheral_uarte20.periph_start;
+#elif NRF_SECURE_UART_INSTANCE == 21
+    uint32_t uart_periph_start = tfm_peripheral_uarte21.periph_start;
+#elif NRF_SECURE_UART_INSTANCE == 22
+    uint32_t uart_periph_start = tfm_peripheral_uarte22.periph_start;
+#elif NRF_SECURE_UART_INSTANCE == 30
+    uint32_t uart_periph_start = tfm_peripheral_uarte30.periph_start;
+#endif
+	spu_peripheral_config_secure(uart_periph_start, SPU_LOCK_CONF_LOCKED);
+#endif /* SECURE_UART1 */
+
+	/* Configure the CTRL-AP mailbox interface to be secure as it is used by the secure ADAC service */
+	spu_peripheral_config_secure(NRF_CTRLAP_S_BASE, SPU_LOCK_CONF_LOCKED);
+
+	/* Configure NRF_MEMCONF to be secure as it could otherwise be used to corrupt secure RAM. */
+	spu_peripheral_config_secure(NRF_MEMCONF_S_BASE, SPU_LOCK_CONF_LOCKED);
+
+	/* Configure trace to be secure, as the security implications of non-secure trace are not understood */
+	spu_peripheral_config_secure(NRF_TAD_S_BASE, SPU_LOCK_CONF_LOCKED);
+
+	/* Configure these HW features, which are not in the MDK, to be
+	 * secure, as the security implications of them being non-secure
+	 * are not understood
+	 */
+	uint32_t base_addresses[4] = {
+		0x50056000,
+		0x5008C000,
+		0x500E6000,
+		0x5010F000
+	};
+	for(int i = 0; i < 4; i++) {
+		spu_peripheral_config_secure(base_addresses[i], SPU_LOCK_CONF_LOCKED);
+	}
+
+	/* Configure NRF_REGULATORS, and NRF_OSCILLATORS to be secure as NRF_REGULATORS.POFCON is needed
+	 * to prevent glitches when the power supply is attacked.
+	 *
+	 * NB: Note that NRF_OSCILLATORS and NRF_REGULATORS have the same base address and must therefore
+	 * have the same security configuration.
+	 */
+	spu_peripheral_config_secure(NRF_REGULATORS_S_BASE, SPU_LOCK_CONF_LOCKED);
+#else /* NRF54L15_XXAA */
 static const uint32_t target_peripherals[] = {
     /* The following peripherals share ID:
      * - FPU (FPU cannot be configured in NRF91 series, it's always NS)
      * - DCNF (On 53, but not 91)
      */
 #ifndef NRF91_SERIES
+    //NRFX_PERIPHERAL_ID_GET(NRF_FPU),
     NRF_FPU_S_BASE,
 #endif
     /* The following peripherals share ID:
      * - REGULATORS
      * - OSCILLATORS
      */
+    //NRFX_PERIPHERAL_ID_GET(NRF_REGULATORS),
     NRF_REGULATORS_S_BASE,
     /* The following peripherals share ID:
      * - CLOCK
      * - POWER
      * - RESET (On 53, but not 91)
      */
+    //NRFX_PERIPHERAL_ID_GET(NRF_CLOCK),
     NRF_CLOCK_S_BASE,
     /* The following peripherals share ID: (referred to as Serial-Box)
      * - SPIMx
@@ -831,16 +1346,34 @@ static const uint32_t target_peripherals[] = {
      * - TWISx
      * - UARTEx
      */
+
+    /* When UART0 is a secure peripheral we need to leave Serial-Box 0 as Secure.
+     * The UART Driver will configure it as non-secure when it uninitializes.
+     */
+#if !(defined(SECURE_UART1) && NRF_SECURE_UART_INSTANCE == 0)
+    //NRFX_PERIPHERAL_ID_GET(NRF_SPIM0),
     NRF_SPIM0_S_BASE,
-#ifndef SECURE_UART1
+#endif
+#if !(defined(SECURE_UART1) && NRF_SECURE_UART_INSTANCE == 1)
     /* UART1 is a secure peripheral, so we need to leave Serial-Box 1 as Secure */
+    //NRFX_PERIPHERAL_ID_GET(NRF_SPIM1),
     NRF_SPIM1_S_BASE,
 #endif
+    //NRFX_PERIPHERAL_ID_GET(NRF_SPIM2),
+    //NRFX_PERIPHERAL_ID_GET(NRF_SPIM3),
     NRF_SPIM2_S_BASE,
     NRF_SPIM3_S_BASE,
 #ifdef NRF_SPIM4
+    //NRFX_PERIPHERAL_ID_GET(NRF_SPIM4),
     NRF_SPIM4_S_BASE,
 #endif
+    //NRFX_PERIPHERAL_ID_GET(NRF_SAADC),
+    //NRFX_PERIPHERAL_ID_GET(NRF_TIMER0),
+    //NRFX_PERIPHERAL_ID_GET(NRF_TIMER1),
+    //NRFX_PERIPHERAL_ID_GET(NRF_TIMER2),
+    //NRFX_PERIPHERAL_ID_GET(NRF_RTC0),
+    //NRFX_PERIPHERAL_ID_GET(NRF_RTC1),
+    //NRFX_PERIPHERAL_ID_GET(NRF_DPPIC),
     NRF_SAADC_S_BASE,
     NRF_TIMER0_S_BASE,
     NRF_TIMER1_S_BASE,
@@ -851,13 +1384,16 @@ static const uint32_t target_peripherals[] = {
 #ifndef PSA_API_TEST_IPC
 #ifdef NRF_WDT0
     /* WDT0 is used as a secure peripheral in PSA FF tests */
+    //NRFX_PERIPHERAL_ID_GET(NRF_WDT0),
     NRF_WDT0_S_BASE,
 #endif
 #ifdef NRF_WDT
+    //NRFX_PERIPHERAL_ID_GET(NRF_WDT),
     NRF_WDT_S_BASE,
 #endif
 #endif /* PSA_API_TEST_IPC */
 #ifdef NRF_WDT1
+    //NRFX_PERIPHERAL_ID_GET(NRF_WDT1),
     NRF_WDT1_S_BASE,
 #endif
     /* The following peripherals share ID:
@@ -865,8 +1401,14 @@ static const uint32_t target_peripherals[] = {
      * - LPCOMP
      */
 #ifdef NRF_COMP
+    //NRFX_PERIPHERAL_ID_GET(NRF_COMP),
     NRF_COMP_S_BASE,
 #endif
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU0),
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU1),
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU2),
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU3),
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU4),
     NRF_EGU0_S_BASE,
     NRF_EGU1_S_BASE,
     NRF_EGU2_S_BASE,
@@ -874,52 +1416,76 @@ static const uint32_t target_peripherals[] = {
     NRF_EGU4_S_BASE,
 #ifndef PSA_API_TEST_IPC
     /* EGU5 is used as a secure peripheral in PSA FF tests */
+    //NRFX_PERIPHERAL_ID_GET(NRF_EGU5),
     NRF_EGU5_S_BASE,
 #endif
+    //NRFX_PERIPHERAL_ID_GET(NRF_PWM0),
+    //NRFX_PERIPHERAL_ID_GET(NRF_PWM1),
+    //NRFX_PERIPHERAL_ID_GET(NRF_PWM2),
+    //NRFX_PERIPHERAL_ID_GET(NRF_PWM3),
     NRF_PWM0_S_BASE,
     NRF_PWM1_S_BASE,
     NRF_PWM2_S_BASE,
     NRF_PWM3_S_BASE,
 #ifdef NRF_PDM
+    //NRFX_PERIPHERAL_ID_GET(NRF_PDM),
     NRF_PDM_S_BASE,
 #endif
 #ifdef NRF_PDM0
+    //NRFX_PERIPHERAL_ID_GET(NRF_PDM0),
     NRF_PDM0_S_BASE,
 #endif
 #ifdef NRF_I2S
+    //NRFX_PERIPHERAL_ID_GET(NRF_I2S),
     NRF_I2S_S_BASE,
 #endif
 #ifdef NRF_I2S0
+    //NRFX_PERIPHERAL_ID_GET(NRF_I2S0),
     NRF_I2S0_S_BASE,
 #endif
+    //NRFX_PERIPHERAL_ID_GET(NRF_IPC),
     NRF_IPC_S_BASE,
 #ifndef SECURE_QSPI
 #ifdef NRF_QSPI
+    //NRFX_PERIPHERAL_ID_GET(NRF_QSPI),
     NRF_QSPI_S_BASE,
 #endif
 #endif
 #ifdef NRF_NFCT
+    //NRFX_PERIPHERAL_ID_GET(NRF_NFCT),
     NRF_NFCT_S_BASE,
 #endif
 #ifdef NRF_MUTEX
+    //NRFX_PERIPHERAL_ID_GET(NRF_MUTEX),
     NRF_MUTEX_S_BASE,
 #endif
 #ifdef NRF_QDEC0
+    //NRFX_PERIPHERAL_ID_GET(NRF_QDEC0),
     NRF_QDEC0_S_BASE,
 #endif
 #ifdef NRF_QDEC1
+    //NRFX_PERIPHERAL_ID_GET(NRF_QDEC1),
     NRF_QDEC1_S_BASE,
 #endif
 #ifdef NRF_USBD
+    //NRFX_PERIPHERAL_ID_GET(NRF_USBD),
     NRF_USBD_S_BASE,
 #endif
 #ifdef NRF_USBREGULATOR
+    //NRFX_PERIPHERAL_ID_GET(NRF_USBREGULATOR),
     NRF_USBREGULATOR_S_BASE,
-#endif
+#endif /* NRF_USBREGULATOR */
+    //NRFX_PERIPHERAL_ID_GET(NRF_NVMC),
+    //NRFX_PERIPHERAL_ID_GET(NRF_P0),
     NRF_NVMC_S_BASE,
     NRF_P0_S_BASE,
 #ifdef NRF_P1
+    //NRFX_PERIPHERAL_ID_GET(NRF_P1),
     NRF_P1_S_BASE,
+#endif /*NRF_P1 */
+#if defined(NRF91_SERIES) || defined(NRF53_SERIES)
+    //NRFX_PERIPHERAL_ID_GET(NRF_VMC),
+    NRF_VMC_S_BASE
 #endif
 };
 
@@ -927,23 +1493,69 @@ static const uint32_t target_peripherals[] = {
         spu_peripheral_config_non_secure(target_peripherals[i], SPU_LOCK_CONF_UNLOCKED);
     }
 
+#endif /* NRF54L15_XXAA */
+
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
+	dppi_channel_configuration();
 
     /* GPIO pin configuration */
-    spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
+	uint32_t secure_pins[] = {
+		TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE,
 #ifdef TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE
-    spu_gpio_config_non_secure(1, TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
+		TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE,
+#endif
+#ifdef TFM_PERIPHERAL_GPIO2_PIN_MASK_SECURE
+		TFM_PERIPHERAL_GPIO2_PIN_MASK_SECURE,
+#endif
+	};
+
+	/* Note that there are two different API's for SPU configuration */
+#if NRF_SPU_HAS_MEMORY
+
+	for(int port = 0; port < ARRAY_SIZE(secure_pins); port++){
+		nrf_spu_gpio_config_set(NRF_SPU, port, secure_pins[port], SPU_LOCK_CONF_LOCKED);
+	}
+
+#elif NRF_SPU_HAS_PERIPHERAL_ACCESS
+
+	for(int port = 0; port < ARRAY_SIZE(secure_pins); port++) {
+		for (int pin = 0; pin < 32; pin++) {
+			if (secure_pins[port] & (1 << pin)) {
+				bool enable = true; // secure
+
+				/*
+				 * Unfortunately, NRF_P0 is not configured by NRF_SPU00, etc.
+				 * so it is a bit convoluted to find the SPU instance for port x.
+				 */
+				uint32_t gpio_port_addr[2] = {
+					NRF_P0_S_BASE,
+					NRF_P1_S_BASE,
+				};
+
+				NRF_SPU_Type * spu_instance = spu_instance_from_peripheral_addr(gpio_port_addr[port]);
+
+				nrf_spu_feature_secattr_set(spu_instance, NRF_SPU_FEATURE_GPIO_PIN, port, pin, enable);
+				nrf_spu_feature_lock_enable(spu_instance, NRF_SPU_FEATURE_GPIO_PIN, port, pin);
+			}
+		}
+	}
+#else
+#error "Expected either NRF_SPU_HAS_MEMORY or NRF_SPU_HAS_PERIPHERAL_ACCESS to be true"
 #endif
 
-#ifdef NRF53_SERIES
     /* Configure properly the XL1 and XL2 pins so that the low-frequency crystal
      * oscillator (LFXO) can be used.
      * This configuration can be done only from secure code, as otherwise those
      * register fields are not accessible. That's why it is placed here.
      */
+#ifdef NRF53_SERIES
     nrf_gpio_pin_control_select(PIN_XL1, NRF_GPIO_PIN_SEL_PERIPHERAL);
     nrf_gpio_pin_control_select(PIN_XL2, NRF_GPIO_PIN_SEL_PERIPHERAL);
+#endif /* NRF53_SERIES */
+#ifdef NRF54L15_XXAA
+    /* NRF54L has a different define */
+    nrf_gpio_pin_control_select(PIN_XL1, NRF_GPIO_PIN_SEL_GPIO);
+    nrf_gpio_pin_control_select(PIN_XL2, NRF_GPIO_PIN_SEL_GPIO);
 #endif
 
 	/*
@@ -959,9 +1571,52 @@ static const uint32_t target_peripherals[] = {
 #if defined(NVMC_FEATURE_CACHE_PRESENT) // From MDK
 	nrfx_nvmc_icache_enable();
 #elif defined(CACHE_PRESENT) // From MDK
-	NRF_CACHE->ENABLE = CACHE_ENABLE_ENABLE_Enabled;
+
+#ifdef NRF_CACHE
+	nrf_cache_enable(NRF_CACHE);
+#endif
+#ifdef NRF_ICACHE
+	nrf_cache_enable(NRF_ICACHE);
+#endif
+#ifdef NRF_DCACHE
+	nrf_cache_enable(NRF_DCACHE);
 #endif
 
+#endif
+
+#ifdef RRAMC_PRESENT
+	nrfx_rramc_config_t config = NRFX_RRAMC_DEFAULT_CONFIG(WRITE_BUFFER_SIZE);
+
+	config.mode_write = true;
+
+#if CONFIG_NRF_RRAM_READYNEXT_TIMEOUT_VALUE > 0
+	config.preload_timeout_enable = true;
+	config.preload_timeout = CONFIG_NRF_RRAM_READYNEXT_TIMEOUT_VALUE;
+#else
+	config.preload_timeout_enable = false;
+	config.preload_timeout = 0;
+#endif
+
+	/* Don't use an event handler until it's understood whether we
+	 * want it or not
+	 */
+	nrfx_rramc_evt_handler_t handler = NULL;
+
+	nrfx_err_t err = nrfx_rramc_init(&config, handler);
+	if(err != NRFX_SUCCESS && err != NRFX_ERROR_ALREADY) {
+		return err;
+	}
+#endif /* RRAMC_PRESENT */
+
+#ifdef NRF54L15_XXAA
+	/* SOC configuration from Zephyr's soc.c. */
+	int soc_err = nordicsemi_nrf54l_init();
+	if (soc_err) {
+		return soc_err;
+	}
+#endif
+
+#if NRF_SPU_HAS_MEMORY
     /* Enforce that the nRF5340 Network MCU is in the Non-Secure
      * domain. Non-secure is the HW reset value for the network core
      * so configuring this should not be necessary, but we want to
@@ -970,6 +1625,7 @@ static const uint32_t target_peripherals[] = {
      * it doesn't get changed by accident.
      */
     nrf_spu_extdomain_set(NRF_SPU, 0, false, true);
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }

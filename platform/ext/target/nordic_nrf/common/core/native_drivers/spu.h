@@ -20,13 +20,35 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <nrfx.h>
 
 #include <hal/nrf_spu.h>
+#ifdef MPC_PRESENT
+#include <hal/nrf_mpc.h>
+#endif
 
 #define SPU_LOCK_CONF_LOCKED true
 #define SPU_LOCK_CONF_UNLOCKED false
 #define SPU_SECURE_ATTR_SECURE true
 #define SPU_SECURE_ATTR_NONSECURE false
+
+__attribute__((unused)) static NRF_SPU_Type * spu_instances[] = {
+#ifdef NRF_SPU
+	NRF_SPU,
+#endif
+#ifdef NRF_SPU00
+	NRF_SPU00,
+#endif
+#ifdef NRF_SPU10
+	NRF_SPU10,
+#endif
+#ifdef NRF_SPU20
+	NRF_SPU20,
+#endif
+#ifdef NRF_SPU30
+	NRF_SPU30,
+#endif
+};
 
 /**
  * \brief SPU interrupt enabling
@@ -40,6 +62,7 @@ enum spu_events {
        SPU_EVENT_RAMACCERR = 1 << 0,
        SPU_EVENT_FLASHACCERR = 1 << 1,
        SPU_EVENT_PERIPHACCERR= 1 << 2,
+	   MPC_EVENT_MEMACCERR = 1 << 3
 };
 
 /**
@@ -122,45 +145,10 @@ void spu_peripheral_config_secure(const uint32_t periph_base_address, bool perip
 void spu_peripheral_config_non_secure(const uint32_t periph_base_address, bool periph_lock);
 
 /**
- * Configure DPPI channels to be accessible from Non-Secure domain.
+ * /brief Retrieve the address of the transaction that triggered PERIPHACCERR.
  *
- * \param channels_mask Bitmask with channels configuration.
- * \param lock_conf Variable indicating whether to lock DPPI channel security
- *
- * \note all channels are configured as Non-Secure
  */
-static inline void spu_dppi_config_non_secure(uint32_t channels_mask, bool lock_conf)
-{
-    nrf_spu_dppi_config_set(NRF_SPU, 0, channels_mask, lock_conf);
-}
-
-/**
- * Configure GPIO pins to be accessible from Non-Secure domain.
- *
- * \param port_number GPIO Port number
- * \param gpio_mask Bitmask with gpio configuration.
- * \param lock_conf Variable indicating whether to lock GPIO port security
- *
- * \note all pins are configured as Non-Secure
- */
-static inline void spu_gpio_config_non_secure(uint8_t port_number, uint32_t gpio_mask,
-    bool lock_conf)
-{
-    nrf_spu_gpio_config_set(NRF_SPU, port_number, gpio_mask, lock_conf);
-}
-
-/**
- * Return the SPU instance that can be used to configure the
- * peripheral at the given base address.
- */
-static inline NRF_SPU_Type * spu_instance_from_peripheral_addr(uint32_t peripheral_addr)
-{
-	/* See the SPU chapter in the IPS for how this is calculated */
-
-	uint32_t apb_bus_number = peripheral_addr & 0x00FC0000;
-
-	return (NRF_SPU_Type *)(0x50000000 | apb_bus_number);
-}
+uint32_t spu_get_peri_addr(void);
 
 /**
  * \brief Return base address of a Flash SPU regions
@@ -247,5 +235,38 @@ uint32_t spu_regions_sram_get_last_id(void);
  * \return the size of SRAM SPU regions
  */
 uint32_t spu_regions_sram_get_region_size(void);
+
+/**
+ * \brief MPC interrupt enabling
+ *
+ * Enable security violations outside the Cortex-M33
+ * to trigger SPU interrupts.
+ */
+void mpc_enable_interrupts(void);
+
+/**
+ * \brief Retrieve bitmask of MPC events.
+ */
+uint32_t mpc_events_get(void);
+
+/**
+ * \brief MPC event clearing
+ *
+ * Clear MPC event registers
+ */
+void mpc_clear_events(void);
+
+/**
+ * Return the SPU instance that can be used to configure the
+ * peripheral at the given base address.
+ */
+static inline NRF_SPU_Type * spu_instance_from_peripheral_addr(uint32_t peripheral_addr)
+{
+	/* See the SPU chapter in the IPS for how this is calculated */
+
+	uint32_t apb_bus_number = peripheral_addr & 0x00FC0000;
+
+	return (NRF_SPU_Type *)(0x50000000 | apb_bus_number);
+}
 
 #endif
