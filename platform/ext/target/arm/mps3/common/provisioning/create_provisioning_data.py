@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # -----------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -54,9 +54,9 @@ def get_key_hash_c_array(key_file):
 @click.option('--verification_service_url', metavar='url', default="",
               required=False)
 @click.option('--entropy_seed', metavar='seed', required=False)
-@click.command(help='''Create a signed or unsigned image\n
-               INFILE and OUTFILE are parsed as Intel HEX if the params have
-               .hex extension, otherwise binary format is used''')
+@click.command(help='''Creates a .c file with the given keys, using the\n
+               provisioning_data_template.jinja2 template which is located in
+               "template_path" and outputs it to "outfile"''')
 def generate_provisioning_data_c(outfile, bl2_rot_priv_key_0,
                                  bl2_rot_priv_key_1,
                                  template_path, bl2_rot_priv_key_2,
@@ -70,7 +70,6 @@ def generate_provisioning_data_c(outfile, bl2_rot_priv_key_0,
     environment = Environment(loader=FileSystemLoader(template_path))
     template = environment.get_template("provisioning_data_template.jinja2")
 
-    # getpubhash cannot be called directly because of its click decorators
     bl2_rot_pub_key_0_hash = ""
     if bool(bl2_rot_priv_key_0) is True:
         bl2_rot_pub_key_0_hash = get_key_hash_c_array(bl2_rot_priv_key_0)
