@@ -82,6 +82,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:ext/common/provisioning.c>
         $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
         $<$<BOOL:${TFM_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+        ./ext/common/tfm_fatal_error.c
 )
 
 # If this is not added to the tfm_s it will not correctly override the weak
@@ -125,6 +126,8 @@ target_compile_definitions(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
+        $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},"TFM_SPM_LOG_LEVEL_SILENCE">>>:LOG_FATAL_ERRORS>
+        $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},"TFM_SPM_LOG_LEVEL_SILENCE">>>:LOG_NONFATAL_ERRORS>
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
@@ -194,6 +197,7 @@ if(BL2)
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
             $<$<BOOL:${BL2_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+            ./ext/common/tfm_fatal_error.c
     )
 
     target_link_libraries(platform_bl2
@@ -222,6 +226,8 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${MCUBOOT_LOG_LEVEL}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${MCUBOOT_LOG_LEVEL}>>:LOG_NONFATAL_ERRORS>
     )
 
     target_compile_options(platform_bl2
@@ -261,6 +267,8 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
             $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_NONFATAL_ERRORS>
     )
 
     target_compile_options(platform_bl1_1
@@ -275,6 +283,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
             $<$<OR:$<BOOL:${BL1_1_SANITIZE}>,$<BOOL:${TFM_BL1_2_SANITIZE}>>:ext/common/tfm_sanitize_handlers.c>
+            ./ext/common/tfm_fatal_error.c
     )
 
     target_link_libraries(platform_bl1_1
@@ -318,6 +327,8 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
             $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_NONFATAL_ERRORS>
     )
 
     target_sources(platform_bl1_2
@@ -367,6 +378,8 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:ENABLE_HEAP>
         PLATFORM_NS_NV_COUNTERS=${TFM_NS_NV_COUNTER_AMOUNT}
+        $<$<BOOL:${TFM_HALT_ON_FATAL_ERRORS}>:HALT_ON_FATAL_ERROR>
+        $<$<BOOL:${TFM_LOG_ERR_FILE_AND_LINE}>:FATAL_ERR_LOG_FILE_AND_LINE>
 )
 
 target_include_directories(platform_region_defs

@@ -18,3 +18,5 @@ tfm_plat_otp_read
 tfm_plat_read_nv_counter
 tfm_plat_set_nv_counter
 __ubsan_*
+log_error
+log_error_permissions_check

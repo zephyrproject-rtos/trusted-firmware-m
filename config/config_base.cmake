@@ -79,6 +79,10 @@ set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS  ON  CACHE BOOL      "Enable stor
 set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
 
 set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal errors in the secure firmware, capture info about the exception. Print the info if the SPM log level is sufficient.")
+set(TFM_LOG_FATAL_ERRORS                OFF         CACHE BOOL      "Log fatal errors when they occur to aid debugging")
+set(TFM_LOG_NONFATAL_ERRORS             OFF         CACHE BOOL      "Log non-fatal errors when they occur to aid debugging")
+set(TFM_HALT_ON_FATAL_ERRORS            OFF         CACHE BOOL      "On fatal errors in the secure firmware, halt immediately to allow debugging")
+set(TFM_LOG_ERR_FILE_AND_LINE           OFF         CACHE BOOL      "Log file name and line numbers of fatal and non-fatal errors")
 
 set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal errors in the secure firmware, halt instead of rebooting.")
 

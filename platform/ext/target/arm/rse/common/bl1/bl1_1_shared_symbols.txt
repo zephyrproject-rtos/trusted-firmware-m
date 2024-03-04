@@ -63,3 +63,5 @@ cc3xx_lowlevel_aes_finish
 __got_start__
 __got_end__
 __ubsan_*
+log_error
+log_error_permissions_check
