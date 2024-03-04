@@ -271,8 +271,8 @@ out:
 cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
                                       const uint32_t *private_key, size_t private_key_len,
                                       const uint32_t *hash, size_t hash_len,
-                                      uint32_t *sig_r, size_t sig_r_len, uint32_t *sig_r_size,
-                                      uint32_t *sig_s, size_t sig_s_len, uint32_t *sig_s_size)
+                                      uint32_t *sig_r, size_t sig_r_len, size_t *sig_r_size,
+                                      uint32_t *sig_s, size_t sig_s_len, size_t *sig_s_size)
 {
     cc3xx_ec_curve_t curve;
     cc3xx_ec_point_affine temp_point;
