@@ -22,6 +22,7 @@
 #include "integrity_checker_drv.h"
 
 #include "tfm_hal_device_header.h"
+#include "fatal_error.h"
 
 #include <stdbool.h>
 
@@ -112,12 +113,14 @@ static enum integrity_checker_error_t check_mode_is_supported(
     uint32_t bitmask = (1 << (mode + 3 * (is_compute)));
 
     if (mode > INTEGRITY_CHECKER_MODE_SHA256) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_UNSUPPORTED_MODE);
         return INTEGRITY_CHECKER_ERROR_UNSUPPORTED_MODE;
     }
 
     if (p_integrity_checker->icbc & bitmask) {
         return INTEGRITY_CHECKER_ERROR_NONE;
     } else {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_UNSUPPORTED_MODE);
         return INTEGRITY_CHECKER_ERROR_UNSUPPORTED_MODE;
     }
 }
@@ -168,14 +171,17 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
     }
 
     if (value_size != mode_sizes[mode]) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_OUTPUT_BUFFER_TOO_SMALL);
         return INTEGRITY_CHECKER_ERROR_OUTPUT_BUFFER_TOO_SMALL;
     }
 
     if (((uintptr_t)data % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT);
         return INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT;
     }
 
     if ((size % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_INVALID_LENGTH);
         return INTEGRITY_CHECKER_ERROR_INVALID_LENGTH;
     }
 
@@ -208,6 +214,7 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
 
     /* Check for any unusual error interrupts */
     if (p_integrity_checker->icis & (~0b11)) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_OPERATION_FAILED);
         return INTEGRITY_CHECKER_ERROR_OPERATION_FAILED;
     }
 
@@ -243,14 +250,17 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
     }
 
     if (value_size != mode_sizes[mode]) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_VALUE_BUFFER_TOO_SMALL);
         return INTEGRITY_CHECKER_ERROR_VALUE_BUFFER_TOO_SMALL;
     }
 
     if (((uintptr_t)data % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT);
         return INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT;
     }
 
     if ((size % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_INVALID_LENGTH);
         return INTEGRITY_CHECKER_ERROR_INVALID_LENGTH;
     }
 
@@ -284,9 +294,11 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
 
     /* Check for any unusual error interrupts */
     if (p_integrity_checker->icis & (~0b11)) {
+        FATAL_ERR(INTEGRITY_CHECKER_ERROR_OPERATION_FAILED);
         return INTEGRITY_CHECKER_ERROR_OPERATION_FAILED;
     } else if (p_integrity_checker->icis & (0b10)) {
         /* Check for comparison failure */
+        NONFATAL_ERR(INTEGRITY_CHECKER_ERROR_COMPARISON_FAILED);
         return INTEGRITY_CHECKER_ERROR_COMPARISON_FAILED;
     }
 
