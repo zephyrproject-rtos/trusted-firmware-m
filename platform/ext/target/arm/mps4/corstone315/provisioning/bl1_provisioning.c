@@ -123,13 +123,7 @@ static enum tfm_plat_err_t set_tp_mode(void)
     volatile enum lcm_tp_mode_t tp_mode = LCM_TP_MODE_VIRGIN;
     enum lcm_error_t lcm_err;
 
-#ifdef TFM_DUMMY_PROVISIONING
     tp_mode = LCM_TP_MODE_TCI;
-#endif /* TFM_DUMMY_PROVISIONING */
-    /* Loop until someone sets this with a debugger. DUMMY_PROVISIONING will
-     * have set this to TCI.
-     */
-    while(tp_mode != LCM_TP_MODE_PCI && tp_mode != LCM_TP_MODE_TCI) {}
 
     lcm_err = lcm_set_tp_mode(&LCM_DEV_S, tp_mode);
     if (lcm_err != LCM_ERROR_NONE) {
@@ -180,10 +174,6 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
-
-#ifndef TFM_DUMMY_PROVISIONING
-        __WFI();
-#endif /* TFM_DUMMY_PROVISIONING */
     }
 
     lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
@@ -201,10 +191,6 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
-
-#ifndef TFM_DUMMY_PROVISIONING
-        __WFI();
-#endif /* TFM_DUMMY_PROVISIONING */
     }
 
     return TFM_PLAT_ERR_SUCCESS;
