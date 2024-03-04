@@ -48,7 +48,7 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
     $ ./FVP_Corstone_SSE-315 --data "bl1_1.bin"@0x11000000
                    --data "cm_provisioning_bundle.bin"@0x12024000
                    --data "dm_provisioning_bundle.bin"@0x1202aa00
-                   --data "bl2_signed.bin"@0x12002000
+                   --data "bl2_signed.bin"@0x12031400
                    --data "tfm_s_ns_signed.bin"@0x38000000
 
 

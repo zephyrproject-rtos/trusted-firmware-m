@@ -189,11 +189,21 @@
 
 #define CM_PROVISIONING_BUNDLE_START (PROVISIONING_BUNDLE_CODE_START + \
                                       PROVISIONING_BUNDLE_CODE_SIZE)
-#define DM_PROVISIONING_BUNDLE_START (CM_PROVISIONING_BUNDLE_START + \
-                                      PROVISIONING_BUNDLE_CODE_SIZE + \
-                                      PROVISIONING_BUNDLE_VALUES_SIZE + \
-                                      PROVISIONING_BUNDLE_DATA_SIZE + \
-                                      0x200) // Add 0x200 because the CM_PROVISIONING_BUNDLE has some overhead
+#define CM_PROVISIONING_BUNDLE_SIZE (PROVISIONING_BUNDLE_CODE_SIZE + \
+                                     PROVISIONING_BUNDLE_VALUES_SIZE + \
+                                     PROVISIONING_BUNDLE_DATA_SIZE + \
+                                     0x200) // Add 0x200 because the CM_PROVISIONING_BUNDLE has some overhead
+
+#define DM_PROVISIONING_BUNDLE_START (CM_PROVISIONING_BUNDLE_START + CM_PROVISIONING_BUNDLE_SIZE)
+#define DM_PROVISIONING_BUNDLE_SIZE (PROVISIONING_BUNDLE_CODE_SIZE + \
+                                     PROVISIONING_BUNDLE_VALUES_SIZE + \
+                                     PROVISIONING_BUNDLE_DATA_SIZE + \
+                                     0x200) // Add 0x200 because the DM_PROVISIONING_BUNDLE has some overhead
+
+
+#ifdef BL2
+#define BL2_ENCRYPTED_IMAGE_START (DM_PROVISIONING_BUNDLE_START + DM_PROVISIONING_BUNDLE_SIZE)
+#endif /* BL2 */
 
 #define OTP_SAM_CONFIGURATION_SIZE_BYTES 0x60
 
