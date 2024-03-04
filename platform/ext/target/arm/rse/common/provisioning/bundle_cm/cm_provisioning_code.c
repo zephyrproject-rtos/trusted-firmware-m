@@ -15,6 +15,7 @@
 #include "device_definition.h"
 
 #include "trng.h"
+#include "log.h"
 
 /* This is a stub to make the linker happy */
 void __Vectors(){}
@@ -69,6 +70,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     int32_t int_err;
     enum integrity_checker_error_t ic_err;
 
+    BL1_LOG("[INF] Provisioning BL1_2 image hash\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
                              sizeof(data.bl1_2_image_hash),
                              data.bl1_2_image_hash);
@@ -76,6 +78,8 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+
+    BL1_LOG("[INF] Provisioning GUK\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
                              sizeof(data.guk),
                              data.guk);
@@ -83,6 +87,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    BL1_LOG("[INF] Provisioning BL1_2 image\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE,
                              sizeof(data.bl1_2_image),
                              data.bl1_2_image);
@@ -99,6 +104,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    BL1_LOG("[INF] Provisioning BL1_2 image length\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_LEN,
                              sizeof(bl1_2_len),
                              (uint8_t *)&bl1_2_len);
@@ -106,6 +112,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    BL1_LOG("[INF] Provisioning CCA system properties\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES,
                              sizeof(data.cca_system_properties),
                              (uint8_t*)&data.cca_system_properties);
@@ -113,6 +120,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
+    BL1_LOG("[INF] Provisioning DMA ICS\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_DMA_ICS,
                              sizeof(data.dma_otp_ics),
                              (uint8_t*)&data.dma_otp_ics);
@@ -126,24 +134,28 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
+    BL1_LOG("[INF] Provisioning HUK\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_HUK,
                              sizeof(generated_key_buf), generated_key_buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
+    BL1_LOG("[INF] Generating ROM OTP encryption key\r\n");
     int_err = bl1_trng_generate_random(generated_key_buf,
                                        sizeof(generated_key_buf));
     if (int_err != 0) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
+    BL1_LOG("[INF] Provisioning ROM OTP encryption key\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY,
                              sizeof(generated_key_buf), generated_key_buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
+    BL1_LOG("[INF] Transitioning to DM LCS\r\n");
     new_lcs = PLAT_OTP_LCS_PSA_ROT_PROVISIONING;
     err = tfm_plat_otp_write(PLAT_OTP_ID_LCS, sizeof(new_lcs),
                              (uint8_t*)&new_lcs);
