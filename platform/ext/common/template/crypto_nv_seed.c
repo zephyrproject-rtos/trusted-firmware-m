@@ -8,12 +8,18 @@
 #include "tfm_plat_crypto_nv_seed.h"
 #include "tfm_plat_otp.h"
 #include "psa/internal_trusted_storage.h"
+#include "config_tfm.h"
+
+#define NV_SEED_SIZE 64
+#if NV_SEED_SIZE > ITS_MAX_ASSET_SIZE
+#error "ITS_MAX_ASSET_SIZE is too small to store the entropy seed"
+#endif
 
 int tfm_plat_crypto_provision_entropy_seed(void)
 {
     enum tfm_plat_err_t plat_err;
     int err;
-    uint8_t buf[64];
+    uint8_t buf[NV_SEED_SIZE];
 
     /* If the seed is already provisioned, then return successfully */
     err = tfm_plat_crypto_nv_seed_read(buf, sizeof(buf));
