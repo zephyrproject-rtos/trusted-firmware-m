@@ -72,6 +72,13 @@ struct _integrity_checker_reg_map_t {
                 /*!< Offset: 0xFFC (R/ ) Component ID 3 */
 };
 
+enum ic_aprot {
+    IC_APROT_SECURE_UNPRIVILEGED     = 0x0,
+    IC_APROT_SECURE_PRIVILEGED       = 0x1,
+    IC_APROT_NON_SECURE_UNPRIVILEGED = 0x2,
+    IC_APROT_NON_SECURE_PRIVILEGED   = 0x3,
+};
+
 static uintptr_t remap_addr(struct integrity_checker_dev_t *dev, uintptr_t addr)
 {
     uint32_t idx;
@@ -128,6 +135,9 @@ static void init_integrity_checker(struct integrity_checker_dev_t *dev,
      * compute mode.
      */
     *iccval |= 1 << 6;
+
+    *iccval |= (IC_APROT_SECURE_PRIVILEGED & 0b11) << 7;
+    *iccval |= (IC_APROT_SECURE_PRIVILEGED & 0b11) << 9;
 
     /* Disable all alarms */
     p_integrity_checker->icae = 0;
