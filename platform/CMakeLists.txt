@@ -81,6 +81,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
         $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:ext/common/provisioning.c>
         $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
+        $<$<BOOL:${TFM_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
 )
 
 # If this is not added to the tfm_s it will not correctly override the weak
@@ -133,6 +134,7 @@ target_compile_definitions(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CP_FLAG}
+        $<$<BOOL:${TFM_SANITIZE}>:-fsanitize=${TFM_SANITIZE}>
 )
 
 #========================= Platform Crypto Keys ===============================#
@@ -191,6 +193,7 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+            $<$<BOOL:${BL2_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
     )
 
     target_link_libraries(platform_bl2
@@ -224,6 +227,7 @@ if(BL2)
     target_compile_options(platform_bl2
         PUBLIC
             ${BL2_COMPILER_CP_FLAG}
+            $<$<BOOL:${BL2_SANITIZE}>:-fsanitize=${BL2_SANITIZE}>
     )
 endif()
 
@@ -259,12 +263,18 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
     )
 
+    target_compile_options(platform_bl1_1
+        PUBLIC
+            $<$<BOOL:${BL1_1_SANITIZE}>:-fsanitize=${BL1_1_SANITIZE}>
+    )
+
     target_sources(platform_bl1_1
         PRIVATE
             ext/common/boot_hal_bl1_1.c
             ext/common/uart_stdout.c
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+            $<$<OR:$<BOOL:${BL1_1_SANITIZE}>,$<BOOL:${TFM_BL1_2_SANITIZE}>>:ext/common/tfm_sanitize_handlers.c>
     )
 
     target_link_libraries(platform_bl1_1
@@ -327,6 +337,11 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             tfm_boot_status
             platform_region_defs
             bl1_1_shared_lib_interface
+    )
+
+    target_compile_options(platform_bl1_2
+        PUBLIC
+            $<$<BOOL:${BL1_2_SANITIZE}>:-fsanitize=${BL1_2_SANITIZE}>
     )
 endif()
 

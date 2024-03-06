@@ -164,6 +164,13 @@ else()
     set(MCUBOOT_MEASURED_BOOT OFF)
 endif()
 
+########################## TF-M Runtime Sanitization ###########################
+
+set(BL1_1_SANITIZE                      OFF         CACHE STRING    "Enable a runtime sanitizer for BL1_1")
+set(BL1_2_SANITIZE                      OFF         CACHE STRING    "Enable a runtime sanitizer for BL1_2")
+set(BL2_SANITIZE                        OFF         CACHE STRING    "Enable a runtime sanitizer for BL2")
+set(TFM_SANITIZE                        OFF         CACHE STRING    "Enable a runtime sanitizer for the TF-M runtime")
+
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate
@@ -172,3 +179,12 @@ endif()
 ########################## FIH #################################################
 
 set_property(CACHE TFM_FIH_PROFILE PROPERTY STRINGS "OFF;LOW;MEDIUM;HIGH")
+
+########################## TF-M Runtime Sanitization ###########################
+
+set(SANITIZE_OPTIONS "undefined;shift;shift-exponent;shift-base; integer-divide-by-zero;unreachable;vla-bound; null;return;signed-integer-overflow;bounds; bounds-strict;alignment;object-size; float-divide-by-zero;float-cast-overflow; nonnull-attribute;returns-nonnull-attribute; bool;enum;vptr;pointer-overflow;builtin")
+
+set_property(CACHE BL1_1_SANITIZE PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE BL1_2_SANITIZE PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE BL2_SANITIZE   PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE TFM_SANITIZE   PROPERTY STRINGS ${SANITIZE_OPTIONS})
