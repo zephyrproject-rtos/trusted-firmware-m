@@ -14,11 +14,13 @@ target_link_libraries(flash_drivers_s
     PRIVATE
         flash_drivers
         cmsis_includes_s
+        device_definition
 )
 target_link_libraries(flash_drivers_bl2
     PRIVATE
         flash_drivers
         cmsis_includes_bl2
+        device_definition
 )
 
 target_compile_options(flash_drivers_s

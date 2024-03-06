@@ -68,13 +68,15 @@ target_include_directories(cmsis_includes
         device/include
         cmsis_drivers
         partition
+        ${PLATFORM_DIR}/ext/cmsis/Include
+        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
 )
 
 add_library(cmsis_includes_ns INTERFACE)
-target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes cmsis)
+target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
 target_include_directories(cmsis_includes_ns
     INTERFACE
         cmsis_drivers/config/non_secure

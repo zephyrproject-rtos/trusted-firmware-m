@@ -55,11 +55,11 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/include
         ${ETHOS_DRIVER_PATH}/src
         ${ETHOS_DRIVER_PATH}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/platform/include
 )
 
 add_library(device_definition_s STATIC)
@@ -71,6 +71,12 @@ target_sources(device_definition_s
 target_compile_options(device_definition_s
     PRIVATE
         ${COMPILER_CMSE_FLAG}
+)
+
+add_library(device_definition_bl2 STATIC)
+target_sources(device_definition_bl2
+    PUBLIC
+        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
 )
 
 #========================= CMSIS lib ===============================#
@@ -122,14 +128,17 @@ target_link_options(cmsis_includes_s
 #========================= Linking ===============================#
 
 target_link_libraries(device_definition_s PUBLIC device_definition)
+target_link_libraries(device_definition_bl2 PUBLIC device_definition)
+
 target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
+target_link_libraries(device_definition_bl2 PRIVATE cmsis_includes_bl2)
 
 target_link_libraries(platform_bl2
     PUBLIC
         cmsis_includes
         cmsis
     PRIVATE
-        device_definition_s
+        device_definition_bl2
         cmsis_includes_bl2
 )
 
