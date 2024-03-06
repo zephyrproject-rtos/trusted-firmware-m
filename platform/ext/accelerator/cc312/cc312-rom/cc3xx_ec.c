@@ -190,6 +190,7 @@ cc3xx_ec_curve_data_t *curve_data_map[_CURVE_ID_MAX] = {
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
 };
 
+#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
 static bool validate_reg_is_equal_to_buf(cc3xx_pka_reg_id_t reg, uint32_t *buf,
                                          size_t len)
 {
@@ -224,6 +225,7 @@ static bool validate_curve(cc3xx_ec_curve_t *curve)
 
     return result;
 }
+#endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
 cc3xx_err_t cc3xx_lowlevel_ec_init(cc3xx_ec_curve_id_t id,
                           cc3xx_ec_curve_t *curve)
@@ -394,6 +396,7 @@ static bool pad_scalar(cc3xx_ec_curve_t *curve, cc3xx_pka_reg_id_t scalar,
     return negate_at_end;
 }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static bool split_scalar(cc3xx_ec_curve_t *curve, cc3xx_pka_reg_id_t scalar,
                          cc3xx_pka_reg_id_t random, cc3xx_pka_reg_id_t quotient,
                          cc3xx_pka_reg_id_t remainder)
@@ -409,6 +412,7 @@ static bool split_scalar(cc3xx_ec_curve_t *curve, cc3xx_pka_reg_id_t scalar,
 
     return err;
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
 cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
                                                       cc3xx_ec_point_affine *p,
@@ -518,7 +522,9 @@ cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
     }
 #endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 out:
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
     if (err != CC3XX_ERR_SUCCESS) {
         /* If an error has occurred, then scrub the result */
         cc3xx_lowlevel_pka_set_to_random(res->x, curve->modulus_size * 8);
