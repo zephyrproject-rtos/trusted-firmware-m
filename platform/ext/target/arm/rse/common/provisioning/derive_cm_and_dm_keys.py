@@ -21,6 +21,13 @@ def derive_encryption_key(input_key, provisioning_lcs, tp_mode, krtl_derivation_
     hash.update(boot_state)
     context = hash.digest()
 
+    state = struct_pack([krtl_derivation_label.encode('ascii') + bytes(1),
+                         bytes(1), context,
+                         (32).to_bytes(4, byteorder='little')])
+    c = cmac.CMAC(algorithms.AES(input_key))
+    c.update(state)
+    k0 = c.finalize()
+
     output_key = bytes(0);
     # The KDF outputs 16 bytes per iteration, so we need 2 for an AES-256 key
     for i in range(2):
@@ -29,7 +36,8 @@ def derive_encryption_key(input_key, provisioning_lcs, tp_mode, krtl_derivation_
                              # it back manually.
                              krtl_derivation_label.encode('ascii') + bytes(1),
                              bytes(1), context,
-                             (32).to_bytes(4, byteorder='little')])
+                             (32).to_bytes(4, byteorder='little'),
+                             k0])
         c = cmac.CMAC(algorithms.AES(input_key))
         c.update(state)
         output_key += c.finalize()

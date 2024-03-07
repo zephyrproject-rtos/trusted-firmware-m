@@ -49,6 +49,13 @@ def derive_encryption_key_cmac(security_counter):
     with open(args.encrypt_key_file, "rb") as encrypt_key_file:
         encrypt_key = encrypt_key_file.read()
 
+    state = struct_pack(["BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
+                         bytes(1), security_counter,
+                         (32).to_bytes(4, byteorder='little')])
+    c = cmac.CMAC(algorithms.AES(encrypt_key))
+    c.update(state)
+    k0 = c.finalize()
+
     output_key = bytes(0);
     # The KDF outputs 16 bytes per iteration, so we need 2 for an AES-256 key
     for i in range(2):
@@ -57,7 +64,8 @@ def derive_encryption_key_cmac(security_counter):
                              # it back manually.
                              "BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
                              bytes(1), security_counter,
-                             (32).to_bytes(4, byteorder='little')])
+                             (32).to_bytes(4, byteorder='little'),
+                             k0])
         c = cmac.CMAC(algorithms.AES(encrypt_key))
         c.update(state)
         output_key += c.finalize()
