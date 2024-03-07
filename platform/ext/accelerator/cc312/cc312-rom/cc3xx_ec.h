@@ -201,7 +201,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
  * \return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_lowlevel_ec_multiply_points_by_scalars_and_add(
+cc3xx_err_t cc3xx_lowlevel_ec_shamir_multiply_points_by_scalars_and_add(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p1,
                                              cc3xx_pka_reg_id_t    scalar1,

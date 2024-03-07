@@ -241,7 +241,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
     cc3xx_lowlevel_pka_mod_mul(v_reg, sig_r_reg, v_reg);
 
     /* R1 = [u]G + [v]Q */
-    err = cc3xx_lowlevel_ec_multiply_points_by_scalars_and_add(&curve,
+    err = cc3xx_lowlevel_ec_shamir_multiply_points_by_scalars_and_add(&curve,
                                                       &curve.generator, u_reg,
                                                       &public_key_point, v_reg,
                                                       &calculated_r_point);
