@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,7 @@
 
 #include <assert.h>
 
+#include "fatal_error.h"
 #ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
 #include "cmsis.h"
 #endif
@@ -161,6 +162,7 @@ cc3xx_err_t cc3xx_lowlevel_dma_buffered_input_data(const void* buf, size_t lengt
 
     if (write_output) {
         if (length > dma_state.output_size) {
+            FATAL_ERR(CC3XX_ERR_DMA_OUTPUT_BUFFER_TOO_SMALL);
             return CC3XX_ERR_DMA_OUTPUT_BUFFER_TOO_SMALL;
         }
         dma_state.output_size -= length;

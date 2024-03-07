@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,8 @@
 #include "cc3xx_engine_state.h"
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_stdlib.h"
+
+#include "fatal_error.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -113,6 +115,7 @@ cc3xx_err_t cc3xx_lowlevel_hash_init(cc3xx_hash_alg_t alg)
 #endif /* CC3XX_CONFIG_HASH_SHA1_ENABLE */
     default:
         cc3xx_lowlevel_hash_uninit();
+        FATAL_ERR(CC3XX_ERR_NOT_IMPLEMENTED);
         return CC3XX_ERR_NOT_IMPLEMENTED;
     }
 

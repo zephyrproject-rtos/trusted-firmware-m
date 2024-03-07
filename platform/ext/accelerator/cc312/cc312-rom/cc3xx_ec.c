@@ -21,6 +21,7 @@
 #include "cc3xx_ec_weierstrass.h"
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
 
+#include "fatal_error.h"
 #include "cmsis.h"
 
 #include <string.h>
@@ -237,12 +238,14 @@ cc3xx_err_t cc3xx_lowlevel_ec_init(cc3xx_ec_curve_id_t id,
     cc3xx_pka_reg_id_t barrett_tag;
 
     if (id >= _CURVE_ID_MAX) {
+        FATAL_ERR(CC3XX_ERR_EC_CURVE_NOT_SUPPORTED);
         return CC3XX_ERR_EC_CURVE_NOT_SUPPORTED;
     }
 
     cc3xx_ec_curve_data_t *curve_data = curve_data_map[id];
 
     if (curve_data == NULL) {
+        FATAL_ERR(CC3XX_ERR_EC_CURVE_NOT_SUPPORTED);
         return CC3XX_ERR_EC_CURVE_NOT_SUPPORTED;
     }
 
@@ -293,6 +296,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_init(cc3xx_ec_curve_id_t id,
 #ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
     if (!validate_curve(curve)) {
         cc3xx_lowlevel_pka_uninit();
+        FATAL_ERR(CC3XX_ERR_FAULT_DETECTED);
         return CC3XX_ERR_FAULT_DETECTED;
     }
 #endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */

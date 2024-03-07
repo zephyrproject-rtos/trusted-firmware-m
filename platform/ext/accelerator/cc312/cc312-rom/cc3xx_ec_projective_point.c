@@ -12,6 +12,8 @@
 #include "cc3xx_pka.h"
 #include "cc3xx_ec.h"
 
+#include "fatal_error.h"
+
 cc3xx_ec_point_projective cc3xx_lowlevel_ec_allocate_projective_point(void)
 {
     cc3xx_ec_point_projective res;
@@ -90,6 +92,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_jacobian_to_affine(cc3xx_ec_curve_t *curve,
                                                  cc3xx_ec_point_affine *res)
 {
     if (cc3xx_lowlevel_ec_projective_point_is_infinity(p)) {
+        FATAL_ERR(CC3XX_ERR_EC_POINT_IS_INFINITY);
         return CC3XX_ERR_EC_POINT_IS_INFINITY;
     }
 

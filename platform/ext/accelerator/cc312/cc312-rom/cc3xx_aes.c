@@ -19,6 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "fatal_error.h"
+
 #ifdef CC3XX_CONFIG_AES_EXTERNAL_KEY_LOADER
 #include "cc3xx_aes_external_key_loader.h"
 #endif /* CC3XX_CONFIG_AES_EXTERNAL_KEY_LOADER */
@@ -51,26 +53,31 @@ static cc3xx_err_t check_key_lock(cc3xx_aes_key_id_t key_id)
         }
         /* The RTL key is only valid in certain states */
         if (! (lcs == (cc3xx_lcs_cm | cc3xx_lcs_dm))) {
+            FATAL_ERR(CC3XX_ERR_INVALID_LCS);
             return CC3XX_ERR_INVALID_LCS;
         }
         break;
     case CC3XX_AES_KEY_ID_KCP:
         if (P_CC3XX->ao.host_ao_lock_bits & (0x1U << 3)) {
+            FATAL_ERR(CC3XX_ERR_INVALID_STATE);
             return CC3XX_ERR_INVALID_STATE;
         }
         break;
     case CC3XX_AES_KEY_ID_KCE:
         if (P_CC3XX->ao.host_ao_lock_bits & (0x1U << 4)) {
+            FATAL_ERR(CC3XX_ERR_INVALID_STATE);
             return CC3XX_ERR_INVALID_STATE;
         }
         break;
     case CC3XX_AES_KEY_ID_KPICV:
         if (P_CC3XX->ao.host_ao_lock_bits & (0x1U << 1)) {
+            FATAL_ERR(CC3XX_ERR_INVALID_STATE);
             return CC3XX_ERR_INVALID_STATE;
         }
         break;
     case CC3XX_AES_KEY_ID_KCEICV:
         if (P_CC3XX->ao.host_ao_lock_bits & (0x1U << 2)) {
+            FATAL_ERR(CC3XX_ERR_INVALID_STATE);
             return CC3XX_ERR_INVALID_STATE;
         }
         break;
@@ -92,6 +99,7 @@ static cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
 #if !defined(CC3XX_CONFIG_AES_CCM_ENABLE) || !defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE)
     if (is_tun1) {
         assert(0); /* Wrong programming for this driver configuration */
+        FATAL_ERR(CC3XX_ERR_INVALID_STATE);
         return CC3XX_ERR_INVALID_STATE;
     }
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
@@ -115,6 +123,7 @@ static cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
     if (key_id != CC3XX_AES_KEY_ID_USER_KEY) {
         /* Check if the HOST_FATAL_ERROR mode is enabled */
         if (P_CC3XX->ao.host_ao_lock_bits & 0x1U) {
+            FATAL_ERR(CC3XX_ERR_INVALID_STATE);
             return CC3XX_ERR_INVALID_STATE;
         }
 
@@ -446,6 +455,7 @@ cc3xx_err_t cc3xx_lowlevel_aes_init(
      */
     if (P_CC3XX->aes.aes_hw_flags & (0x1 << 12)
         && P_CC3XX->aes.aes_dfa_err_status) {
+            FATAL_ERR(CC3XX_ERR_DFA_VIOLATION);
             return CC3XX_ERR_DFA_VIOLATION;
     }
 #endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
@@ -508,6 +518,7 @@ cc3xx_err_t cc3xx_lowlevel_aes_init(
         break;
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
     default:
+        FATAL_ERR(CC3XX_ERR_NOT_IMPLEMENTED);
         return CC3XX_ERR_NOT_IMPLEMENTED;
     }
 
@@ -931,6 +942,7 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
     }
 
     if (are_different) {
+        FATAL_ERR(CC3XX_ERR_INVALID_TAG);
         return CC3XX_ERR_INVALID_TAG;
     } else {
         return CC3XX_ERR_SUCCESS;

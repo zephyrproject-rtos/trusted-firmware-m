@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+
+#include "fatal_error.h"
 
 #ifdef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 #include "cc3xx_rng_external_trng.h"
@@ -95,6 +97,7 @@ static cc3xx_err_t fill_entropy_buf(uint32_t *buf) {
 
     if (attempt_count == CC3XX_CONFIG_RNG_MAX_ATTEMPTS) {
         rng_finish();
+        FATAL_ERR(CC3XX_ERR_RNG_TOO_MANY_ATTEMPTS);
         return CC3XX_ERR_RNG_TOO_MANY_ATTEMPTS;
     }
 
@@ -191,6 +194,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint)
 
         attempts += 1;
         if (attempts >= CC3XX_CONFIG_RNG_MAX_ATTEMPTS) {
+            FATAL_ERR(CC3XX_ERR_RNG_TOO_MANY_ATTEMPTS);
             return CC3XX_ERR_RNG_TOO_MANY_ATTEMPTS;
         }
     } while (value >= bound);
