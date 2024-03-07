@@ -55,7 +55,7 @@ target_add_scatter_file(tfm_s
 
 target_sources(bl2
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rse.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rse_bl.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_dma.c>
 )
 
@@ -85,7 +85,7 @@ target_add_scatter_file(bl1_1
 
 target_sources(bl1_2
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rse.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rse_bl.c
 )
 target_add_scatter_file(bl1_2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rse_bl1_2.sct>
