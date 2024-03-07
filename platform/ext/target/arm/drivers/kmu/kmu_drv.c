@@ -21,6 +21,7 @@
 
 #include "kmu_drv.h"
 
+#include "fatal_error.h"
 #ifdef KMU_CONFIG_EXTERNAL_DPA_HARDENED_WORD_COPY
 #include "dpa_hardened_word_copy.h"
 #endif /* KMU_CONFIG_EXTERNAL_DPA_HARDENED_WORD_COPY */
@@ -82,6 +83,7 @@ enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed)
     uint32_t idx;
 
     if ((uint32_t)p_prgb_seed_word & (sizeof(uint32_t) - 1)) {
+        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
         return KMU_ERROR_INVALID_ALIGNMENT;
     }
 
@@ -104,6 +106,7 @@ enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -137,6 +140,7 @@ enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
     enum kmu_error_t err;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -185,6 +189,7 @@ enum kmu_error_t kmu_set_key_locked(struct kmu_dev_t *dev, uint32_t slot)
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -198,10 +203,12 @@ enum kmu_error_t kmu_get_key_locked(struct kmu_dev_t *dev, uint32_t slot)
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
     if (p_kmu->kmuksc[slot] & KMU_KMUKSC_LKSKR_MASK) {
+        NONFATAL_ERR(KMU_ERROR_SLOT_LOCKED);
         return KMU_ERROR_SLOT_LOCKED;
     } else {
         return KMU_ERROR_NONE;
@@ -214,6 +221,7 @@ enum kmu_error_t kmu_set_key_export_config_locked(struct kmu_dev_t *dev,
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -228,10 +236,12 @@ enum kmu_error_t kmu_get_key_export_config_locked(struct kmu_dev_t *dev,
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
     if (p_kmu->kmuksc[slot] & KMU_KMUKSC_LKS_MASK) {
+        NONFATAL_ERR(KMU_ERROR_SLOT_LOCKED);
         return KMU_ERROR_SLOT_LOCKED;
     } else {
         return KMU_ERROR_NONE;
@@ -244,6 +254,7 @@ enum kmu_error_t kmu_set_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
     enum kmu_error_t err;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -264,10 +275,12 @@ enum kmu_error_t kmu_get_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
     if (p_kmu->kmuksc[slot] | KMU_KMUKSC_KSIP_MASK){
+        NONFATAL_ERR(KMU_ERROR_SLOT_INVALIDATED);
         return KMU_ERROR_SLOT_INVALIDATED;
     } else {
         return KMU_ERROR_NONE;
@@ -283,19 +296,23 @@ enum kmu_error_t kmu_set_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *key,
     size_t idx;
 
     if ((uint32_t)key & (sizeof(uint32_t) - 1)) {
+        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
         return KMU_ERROR_INVALID_ALIGNMENT;
     }
 
     if (key_len & (sizeof(uint32_t) - 1) || key_len > 32) {
+        FATAL_ERR(KMU_ERROR_INVALID_LENGTH);
         return KMU_ERROR_INVALID_LENGTH;
     }
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
     err = kmu_get_key_locked(dev, slot);
     if (err != KMU_ERROR_NONE) {
+        FATAL_ERR(err);
         return err;
     }
 
@@ -310,6 +327,7 @@ enum kmu_error_t kmu_set_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *key,
 
     if (p_kmu->kmuis & KMU_KMISR_MWKSW_MASK) {
         p_kmu->kmuis &= ~KMU_KMISR_MWKSW_MASK;
+        FATAL_ERR(KMU_ERROR_SLOT_ALREADY_WRITTEN);
         return KMU_ERROR_SLOT_ALREADY_WRITTEN;
     }
 
@@ -325,19 +343,23 @@ enum kmu_error_t kmu_get_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *buf,
     size_t idx;
 
     if ((uint32_t)buf & (sizeof(uint32_t) - 1)) {
+        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
         return KMU_ERROR_INVALID_ALIGNMENT;
     }
 
     if ((buf_len & (sizeof(uint32_t) - 1)) || buf_len > 32) {
+        FATAL_ERR(KMU_ERROR_INVALID_LENGTH);
         return KMU_ERROR_INVALID_LENGTH;
     }
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
     err = kmu_get_key_locked(dev, slot);
     if (err != KMU_ERROR_NONE) {
+        FATAL_ERR(err);
         return err;
     }
 
@@ -362,6 +384,7 @@ enum kmu_error_t kmu_get_key_buffer_ptr(struct kmu_dev_t *dev, uint32_t slot,
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -383,6 +406,7 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
     if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
         return KMU_ERROR_INVALID_SLOT;
     }
 
@@ -450,6 +474,7 @@ enum kmu_error_t kmu_random_delay(struct kmu_dev_t *dev,
         foo = p_kmu->kmurd_32;
         break;
     default:
+        FATAL_ERR(KMU_ERROR_INVALID_DELAY_LENGTH);
         return KMU_ERROR_INVALID_DELAY_LENGTH;
     }
 
