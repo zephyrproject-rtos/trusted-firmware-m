@@ -69,6 +69,7 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
         bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_cm_provisioning_bundle.py
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/../cm_provisioning_key.bin
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf cm_provisioning_bundle_${RSE_ID}.axf
         COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSE_ID}.axf
                         --dump-section CODE=cm_provisioning_code.bin
@@ -83,8 +84,7 @@ foreach(RSE_ID RANGE ${RSE_AMOUNT_LOOP_RANGE})
                         --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                         --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
                         --otp_dma_ics_input_file=$<TARGET_FILE_DIR:bl1_2>/otp_dma_ics.bin
-                        --tp_mode=${RSE_TP_MODE}
-                        --krtl_file=${RSE_RTL_KEY_PATH}
+                        --cm_provisioning_key_file=${CMAKE_CURRENT_BINARY_DIR}/../cm_provisioning_key.bin
                         --bundle_output_file encrypted_cm_provisioning_bundle_${RSE_ID}.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_cm_provisioning_bundle_${RSE_ID}.bin ${CMAKE_BINARY_DIR}/bin/encrypted_cm_provisioning_bundle_${RSE_ID}.bin
     )

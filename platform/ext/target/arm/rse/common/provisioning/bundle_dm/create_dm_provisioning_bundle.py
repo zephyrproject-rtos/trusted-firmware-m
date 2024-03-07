@@ -76,8 +76,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--provisioning_code", help="the input provisioning code", required=True)
 parser.add_argument("--provisioning_data", help="the input provisioning data", required=True)
 parser.add_argument("--provisioning_values", help="the input provisioning values", required=True)
-parser.add_argument("--tp_mode", help="the test or production mode", required=True)
-parser.add_argument("--krtl_file", help="the AES-CCM key file", required=True)
+parser.add_argument("--dm_provisioning_key_file", help="the AES-CCM key file", required=True)
 parser.add_argument("--rse_id", help="the ID of the RSE", required=False)
 parser.add_argument("--rse_amount", help="the amount of RSEes in the system", required=False)
 parser.add_argument("--multi_rse_topology_graph_file", help="The topology graph of a multi-rse system", required=False)
@@ -98,7 +97,7 @@ except FileNotFoundError:
 with open(args.provisioning_values, "rb") as in_file:
     values = in_file.read()
 
-with open(args.krtl_file, "rb") as in_file:
+with open(args.dm_provisioning_key_file, "rb") as in_file:
     input_key = in_file.read()
 
 if args.rse_id:
@@ -124,14 +123,7 @@ else:
     send_table = bytes(4)
     receive_table = bytes(4)
 
-assert(args.tp_mode == "TCI" or args.tp_mode == "PCI")
-if args.tp_mode == "TCI":
-    tp_mode = 0x111155AA
-elif args.tp_mode == "PCI":
-    tp_mode = 0x2222AA55
-
-
-with open(args.krtl_file, "rb") as in_file:
+with open(args.dm_provisioning_key_file, "rb") as in_file:
     input_key = in_file.read()
 
 # These are always required
@@ -144,7 +136,7 @@ patch_bundle = struct_pack([
 values = patch_binary(values, patch_bundle, 0)
 
 bundle = encrypt_bundle(code, 0xB000, values, 0x3800, data, 0x3D00, 0xAAAABEEFFEEDAAAA,
-                        input_key, 1, tp_mode, "DM_PROVISIONING")
+                        input_key)
 
 with open(args.bundle_output_file, "wb") as out_file:
     out_file.write(bundle)

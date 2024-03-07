@@ -20,8 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--provisioning_code", help="the input provisioning code", required=True)
 parser.add_argument("--provisioning_data", help="the input provisioning data", required=True)
 parser.add_argument("--provisioning_values", help="the input provisioning values", required=True)
-parser.add_argument("--tp_mode", help="the test or production mode", required=True)
-parser.add_argument("--krtl_file", help="the RTL key file", required=True)
+parser.add_argument("--cm_provisioning_key_file", help="the RTL key file", required=True)
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=True)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=True)
 parser.add_argument("--otp_dma_ics_input_file", help="OTP DMA ICS input file", required=True)
@@ -54,14 +53,7 @@ if args.bl1_2_input_file:
 else:
     bl1_2 = bytes(0)
 
-assert(args.tp_mode == "TCI" or args.tp_mode == "PCI")
-if args.tp_mode == "TCI":
-    tp_mode = 0x111155AA
-elif args.tp_mode == "PCI":
-    tp_mode = 0x2222AA55
-
-
-with open(args.krtl_file, "rb") as in_file:
+with open(args.cm_provisioning_key_file, "rb") as in_file:
     input_key = in_file.read()
 
 with open(args.otp_dma_ics_input_file, "rb") as in_file:
@@ -80,7 +72,7 @@ patch_bundle = struct_pack([
 values = patch_binary(values, patch_bundle, 0)
 
 bundle = encrypt_bundle(code, 0xB000, values, 0x3800, data, 0x3D00, 0xAAAAC0DEFEEDAAAA,
-                        input_key, 0, tp_mode, "CM_PROVISIONING")
+                        input_key)
 
 with open(args.bundle_output_file, "wb") as out_file:
     out_file.write(bundle)
