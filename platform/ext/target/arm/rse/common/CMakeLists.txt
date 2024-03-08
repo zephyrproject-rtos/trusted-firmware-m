@@ -39,6 +39,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
+        LCM_VERSION=0
 )
 
 #========================= Platform common defs ===============================#

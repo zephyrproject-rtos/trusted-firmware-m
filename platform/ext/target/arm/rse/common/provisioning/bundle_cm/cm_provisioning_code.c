@@ -70,15 +70,6 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     int32_t int_err;
     enum integrity_checker_error_t ic_err;
 
-    BL1_LOG("[INF] Provisioning BL1_2 image hash\r\n");
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
-                             sizeof(data.bl1_2_image_hash),
-                             data.bl1_2_image_hash);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-
     BL1_LOG("[INF] Provisioning GUK\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
                              sizeof(data.guk),
@@ -108,6 +99,14 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_LEN,
                              sizeof(bl1_2_len),
                              (uint8_t *)&bl1_2_len);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    BL1_LOG("[INF] Provisioning BL1_2 image hash\r\n");
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
+                             sizeof(data.bl1_2_image_hash),
+                             data.bl1_2_image_hash);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

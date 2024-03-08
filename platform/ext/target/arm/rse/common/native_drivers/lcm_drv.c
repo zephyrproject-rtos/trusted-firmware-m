@@ -480,6 +480,10 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
 
     config_val |= (zero_bits & 0xFF) << 0;
     config_val |= ((uint32_t)gppc_val) << 8;
+#if LCM_VERSION == 0
+    /* The upper bit has been used to trigger the DM->CM transition already */
+    config_val |= 0x800;
+#endif /* LCM_VERSION == 0 */
 
     err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, cm_config_2),
                         sizeof(uint32_t), (uint8_t *)&config_val);
@@ -659,6 +663,7 @@ static const struct lcm_hw_slot_zero_count_mapping {
     uint32_t shift;
     uint32_t bit_size;
 } zero_count_mappings[] = {
+#if (LCM_VERSION == 1)
     {
         offsetof(struct lcm_otp_layout_t, huk),
         sizeof(((struct lcm_otp_layout_t*)0)->huk),
@@ -687,6 +692,7 @@ static const struct lcm_hw_slot_zero_count_mapping {
         24,
         8,
     },
+#endif /* (LCM_VERSION == 1) */
 
     {
         offsetof(struct lcm_otp_layout_t, rotpk),
@@ -696,6 +702,7 @@ static const struct lcm_hw_slot_zero_count_mapping {
         8,
     },
 
+#if (LCM_VERSION == 1)
     {
         offsetof(struct lcm_otp_layout_t, kp_dm),
         sizeof(((struct lcm_otp_layout_t*)0)->kp_dm),
@@ -710,6 +717,7 @@ static const struct lcm_hw_slot_zero_count_mapping {
         8,
         8,
     },
+#endif /* (LCM_VERSION == 1) */
 };
 
 static enum lcm_error_t write_zero_count_if_needed(struct lcm_dev_t *dev,

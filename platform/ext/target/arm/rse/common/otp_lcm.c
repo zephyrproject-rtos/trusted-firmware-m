@@ -66,7 +66,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t cca_system_properties;
 
                 uint32_t cm_config_flags;
-                uint32_t _pad0
+                uint32_t _pad0;
             } cm_locked;
 
             __PACKED_STRUCT {
@@ -99,6 +99,9 @@ __PACKED_STRUCT plat_user_area_layout_t {
                     uint32_t bl2_encryption_key[8];
                     uint32_t s_image_encryption_key[8];
                     uint32_t ns_image_encryption_key[8];
+#if LCM_VERSION == 0
+                    uint32_t runtime_otp_encryption_key[8];
+#endif /* LCM_VERSION == 0 */
                 } dm_encrypted;
             } dm_locked;
 
@@ -246,7 +249,11 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 #endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
+#if LCM_VERSION == 0
+    [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = USER_AREA_OFFSET(dm_locked.dm_encrypted.runtime_otp_encryption_key),
+#else
     [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = OTP_OFFSET(kce_dm),
+#endif
 
     [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_OFFSET(cm_locked.cm_config_flags),
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_OFFSET(dm_locked.dm_config_flags),
@@ -362,7 +369,11 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 #endif /* RSE_HAS_MANUFACTURING_DATA */
 
     [PLAT_OTP_ID_ROM_OTP_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
+#if LCM_VERSION == 0
+    [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = USER_AREA_SIZE(dm_locked.dm_encrypted.runtime_otp_encryption_key),
+#else
     [PLAT_OTP_ID_RUNTIME_OTP_ENCRYPTION_KEY] = OTP_SIZE(kce_dm),
+#endif
 
     [PLAT_OTP_ID_CM_CONFIG_FLAGS] = USER_AREA_SIZE(cm_locked.cm_config_flags),
     [PLAT_OTP_ID_DM_CONFIG_FLAGS] = USER_AREA_SIZE(dm_locked.dm_config_flags),
@@ -928,10 +939,6 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-#ifdef TFM_DUMMY_PROVISIONING
-    tfm_hal_system_reset();
-#endif /* TFM_DUMMY_PROVISIONING */
-
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -1000,5 +1007,93 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 
     *size = otp_sizes[id];
 
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
+{
+    enum lcm_bool_t sp_enabled;
+    enum lcm_error_t lcm_err;
+#if LCM_VERSION == 0
+    static uint8_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) dummy_key_value[32] = {
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04,
+                                                       0x01, 0x02, 0x03, 0x04};
+    uint32_t gppc_val = 0x0800;
+    uint32_t dm_config_2 = 0xFFFFFFFFu;
+    enum lcm_lcs_t lcs;
+#endif /* LCM_VERSION == 0 */
+
+    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    if (sp_enabled != LCM_TRUE) {
+        lcm_set_sp_enabled(&LCM_DEV_S);
+    } else {
+#if LCM_VERSION == 0
+        /* Now we're in SP mode, if we have the R0 LCM, we should make sure the
+         * transition will occur.
+         */
+        lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
+        if (lcm_err != LCM_ERROR_NONE) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
+        switch(lcs) {
+        case LCM_LCS_CM:
+            /* Trigger CM->DM by setting the uppermost bit of GPPC */
+            lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(cm_config_2), sizeof(gppc_val),
+                                    (uint8_t *)&gppc_val);
+            if (lcm_err != LCM_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
+            break;
+        case LCM_LCS_DM:
+            /* Triggering DM->SE is trickier. Both KP_DM and KCE_DM must be set
+             * with dummy data.
+             */
+            lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(kp_dm),
+                                    sizeof(dummy_key_value), dummy_key_value);
+            if (lcm_err != LCM_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
+
+            lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(kce_dm),
+                                    sizeof(dummy_key_value), dummy_key_value);
+            if (lcm_err != LCM_ERROR_NONE) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
+
+            /* Finally, write dm_config to trigger the zero-count checking. It
+             * doesn't matter what is written on the R0 LCM.
+             */
+            lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(dm_config),
+                                    sizeof(dm_config_2), (uint8_t *)&dm_config_2);
+            if (lcm_err != LCM_ERROR_NONE && lcm_err != LCM_ERROR_WRITE_VERIFY_FAIL) {
+                return TFM_PLAT_ERR_SYSTEM_ERR;
+            }
+            break;
+        default:
+            break;
+        }
+
+#endif /* LCM_VERSION == 0 */
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_finish(void)
+{
+    tfm_hal_system_reset();
+
+    /* We'll never get here */
     return TFM_PLAT_ERR_SUCCESS;
 }
