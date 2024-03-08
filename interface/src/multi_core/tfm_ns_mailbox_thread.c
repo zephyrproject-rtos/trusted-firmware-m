@@ -245,8 +245,7 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
     }
 
     tfm_ns_mailbox_hal_enter_critical_isr();
-    replied_status = mailbox_queue_ptr->replied_slots;
-    clear_queue_slot_all_replied(mailbox_queue_ptr, replied_status);
+    replied_status = clear_queue_slot_all_replied(mailbox_queue_ptr);
     tfm_ns_mailbox_hal_exit_critical_isr();
 
     if (!replied_status) {

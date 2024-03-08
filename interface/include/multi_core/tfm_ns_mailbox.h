@@ -303,11 +303,13 @@ static inline void set_queue_slot_pend(struct ns_mailbox_queue_t *queue_ptr,
     }
 }
 
-static inline void clear_queue_slot_all_replied(
-                                           struct ns_mailbox_queue_t *queue_ptr,
-                                           mailbox_queue_status_t status)
+static inline mailbox_queue_status_t clear_queue_slot_all_replied(
+                                           struct ns_mailbox_queue_t *queue_ptr)
 {
-    queue_ptr->replied_slots &= ~status;
+    mailbox_queue_status_t status = queue_ptr->replied_slots;
+
+    queue_ptr->replied_slots = 0;
+    return status;
 }
 
 #ifdef __cplusplus
