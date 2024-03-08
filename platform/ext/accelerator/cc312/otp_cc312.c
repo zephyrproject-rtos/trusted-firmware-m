@@ -1150,3 +1150,13 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 
     return TFM_PLAT_ERR_SUCCESS;
 }
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
+{
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_finish(void)
+{
+    return TFM_PLAT_ERR_SUCCESS;
+}
