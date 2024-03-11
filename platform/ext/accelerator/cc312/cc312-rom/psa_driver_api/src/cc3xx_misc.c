@@ -16,7 +16,8 @@
 
 #if defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) || \
     defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) || \
-    defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE)
+    defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) || \
+    defined(CC3XX_CONFIG_ECDH_ENABLE)
 
 cc3xx_ec_curve_id_t cc3xx_to_curve_id(psa_ecc_family_t psa_ecc_family, psa_key_bits_t key_bits)
 {
@@ -86,7 +87,7 @@ cc3xx_ec_curve_id_t cc3xx_to_curve_id(psa_ecc_family_t psa_ecc_family, psa_key_b
         return _CURVE_ID_MAX; /* Use the Maximum value as invalid */
     }
 }
-#endif /* CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE || CC3XX_CONFIG_ECDSA_VERIFY_ENABLE || CC3XX_CONFIG_ECDSA_SIGN_ENABLE */
+#endif /* ECDSA_KEYGEN_ENABLE || ECDSA_VERIFY_ENABLE || ECDSA_SIGN_ENABLE || ECDH_ENABLE */
 
 psa_status_t cc3xx_to_psa_err(enum cc3xx_error err)
 {
