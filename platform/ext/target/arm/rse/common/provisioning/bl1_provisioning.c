@@ -220,7 +220,7 @@ static enum tfm_plat_err_t set_tp_mode(void)
     enum lcm_error_t lcm_err;
 
 #ifdef TFM_DUMMY_PROVISIONING
-    tp_mode = LCM_TP_MODE_TCI;
+    tp_mode = RSE_TP_MODE;
 #endif /* TFM_DUMMY_PROVISIONING */
     /* Loop until someone sets this with a debugger. DUMMY_PROVISIONING will
      * have set this to TCI.

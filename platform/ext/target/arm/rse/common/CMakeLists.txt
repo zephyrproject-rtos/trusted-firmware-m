@@ -40,6 +40,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         LCM_VERSION=0
+        RSE_TP_MODE=LCM_TP_MODE_${RSE_TP_MODE}
 )
 
 #========================= Platform common defs ===============================#
