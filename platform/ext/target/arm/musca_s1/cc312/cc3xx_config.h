@@ -173,6 +173,9 @@
 #define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE
 #define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE
 
+/* Whether ECDH feature is enabled */
+#define CC3XX_CONFIG_ECDH_ENABLE
+
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 /* #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 

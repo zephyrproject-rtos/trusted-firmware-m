@@ -38,6 +38,7 @@ target_sources(${CC3XX_TARGET_NAME}
         ./cc3xx_ec_curve_data.c
         ./cc3xx_ec_weierstrass.c
         ./cc3xx_ec_projective_point.c
+        ./cc3xx_ecdh.c
 )
 
 # This file is the performance-limit for ECDSA, so should be compiled with the

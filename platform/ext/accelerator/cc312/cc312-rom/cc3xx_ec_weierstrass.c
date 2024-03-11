@@ -481,7 +481,8 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
      * using the Shamir trick exponentiation with a zero as the second scalar
      */
 #if defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE) && defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) \
-    && !defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) && !defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE)
+    && !defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) && !defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) \
+    && !defined(CC3XX_CONFIG_ECDH_ENABLE) /* If ECDH is enabled we treat secret data in the multiplication */
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
     cc3xx_pka_reg_id_t zero_reg = cc3xx_lowlevel_pka_allocate_reg();
 
