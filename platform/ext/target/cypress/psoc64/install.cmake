@@ -52,7 +52,7 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/Device/Config
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/partition
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(DIRECTORY   ${CMAKE_BINARY_DIR}/lib/ext/cmsis-src/CMSIS/Core/Include
+install(DIRECTORY   $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/cmsis)
 
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/Native_Driver/generated_source
