@@ -208,7 +208,7 @@ agent forwarding NS requests.
 
   psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                  int32_t ns_client_id, const void *client_data);
-  void agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
+  psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 One extra parameter ``ns_client_id`` added to tell SPM which NS client the
 agent is representing when API gets called. It is recorded in the handle
@@ -317,7 +317,7 @@ Code Example
                   status = agent_psa_connect(SID(ns_msg), VER(ns_msg),
                                              NSID(ns_msg), &ns_msg);
               } else if (ns_msg.type == PSA_IPC_CLOSE) {
-                  agent_psa_close(ns_msg.handle, NSID(ns_msg));
+                  status = agent_psa_close(ns_msg.handle, NSID(ns_msg));
               } else {
                   /* Other types as call type and let API check errors. */
                   client_param.ns_client_id_stateless = NSID(ns_msg);
@@ -431,6 +431,6 @@ The solution is:
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

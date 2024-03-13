@@ -287,8 +287,11 @@ void deliver_msg_to_tfm_spe(void *private)
             }
             break;
         case OPENAMP_PSA_CLOSE:
-            tfm_rpc_psa_close(s_map_entry->msg.params.psa_close_params.handle,
-                              s_map_entry->msg.client_id);
+            psa_ret = tfm_rpc_psa_close(s_map_entry->msg.params.psa_close_params.handle,
+                                        s_map_entry->msg.client_id);
+            if (psa_ret != PSA_SUCCESS) {
+                send_service_reply_to_non_secure(psa_ret, s_map_entry);
+            }
             break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
         default:

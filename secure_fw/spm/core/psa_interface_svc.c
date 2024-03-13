@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -178,7 +178,7 @@ __naked psa_handle_t agent_psa_connect_svc(uint32_t sid, uint32_t version,
                    "bx      lr                                 \n");
 }
 
-__naked void agent_psa_close_svc(psa_handle_t handle, int32_t ns_client_id)
+__naked psa_status_t agent_psa_close_svc(psa_handle_t handle, int32_t ns_client_id)
 {
     __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CLOSE)"     \n"
                    "bx      lr                                 \n");

@@ -115,13 +115,15 @@ psa_status_t tfm_rpc_psa_call(psa_handle_t handle, uint32_t control,
  * \param[in] handle            A handle to an established connection, or the null handle.
  * \param[in] ns_client_id      NS client's identifier.
  *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
+ * \retval PSA_SUCCESS          Success.
+ * \retval "PROGRAMMER ERROR"   The call is a PROGRAMMER ERROR if one or more
+ *                              of the following are true:
  * \arg                           An invalid handle was provided that is not
- *                                the null handle..
+ *                                the null handle.
+ * \arg                           The connection is currently handling a
+ *                                request.
  */
-void tfm_rpc_psa_close(psa_handle_t handle, int32_t ns_client_id);
+psa_status_t tfm_rpc_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 /**
  * \brief Register underlying mailbox communication operations.

@@ -628,7 +628,7 @@ TF-M RPC ``psa_close()`` handler
 
 .. code-block:: c
 
-  void tfm_rpc_psa_close(psa_handle_t handle);
+  psa_status_t tfm_rpc_psa_close(psa_handle_t handle);
 
 **Parameters**
 
@@ -638,11 +638,11 @@ TF-M RPC ``psa_close()`` handler
 
 **Return**
 
-+---------------------+---------------------------------------------+
-| ``void``            | Success.                                    |
-+---------------------+---------------------------------------------+
-| ``Does not return`` | The call is invalid, or invalid parameters. |
-+---------------------+---------------------------------------------+
++----------------------+---------------------------------------------+
+| ``PSA_SUCCESS``      | Success.                                    |
++----------------------+---------------------------------------------+
+| ``PROGRAMMER ERROR`` | The call is invalid, or invalid parameters. |
++----------------------+---------------------------------------------+
 
 **Usage**
 

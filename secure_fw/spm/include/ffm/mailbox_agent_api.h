@@ -77,7 +77,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
  *                              null handle.
  * \param[in] ns_client_id      NS client's identifier.
  *
- * \retval void                 Success.
+ * \retval PSA_SUCCESS          Success.
  * \retval "PROGRAMMER ERROR"   The call is a PROGRAMMER ERROR if one or more
  *                              of the following are true:
  * \arg                           An invalid handle was provided that is not
@@ -85,7 +85,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
  * \arg                           The connection is currently handling a
  *                                request.
  */
-void agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
+psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #define agent_psa_connect    NULL

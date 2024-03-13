@@ -271,7 +271,10 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         if (client_id >= 0) {
             sync = true;
         }
-        tfm_rpc_psa_close(params->psa_close_params.handle, client_id);
+        psa_ret = tfm_rpc_psa_close(params->psa_close_params.handle, client_id);
+        if (psa_ret != PSA_SUCCESS) {
+            sync = true;
+        }
         break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 

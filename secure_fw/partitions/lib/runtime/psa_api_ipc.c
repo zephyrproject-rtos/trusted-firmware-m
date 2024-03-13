@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -169,9 +169,9 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                                        client_data);
 }
 
-void agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
+psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
 {
-    PART_METADATA()->psa_fns->agent_psa_close(handle, ns_client_id);
+    return PART_METADATA()->psa_fns->agent_psa_close(handle, ns_client_id);
 }
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
