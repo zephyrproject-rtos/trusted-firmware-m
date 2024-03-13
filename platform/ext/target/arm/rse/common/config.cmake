@@ -5,11 +5,13 @@
 #
 #-------------------------------------------------------------------------------
 
-if (RSE_XIP)
-set(PLATFORM_DEFAULT_IMAGE_SIGNING      OFF       CACHE BOOL    "Use default image signing implementation")
+set(RSE_XIP                             OFF        CACHE BOOL     "Whether to run runtime firmware XIP via the SIC")
 
-set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      10        CACHE STRING  "ID of the flash area containing the primary Secure image")
-set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     11        CACHE STRING  "ID of the flash area containing the primary Non-Secure image")
+if (RSE_XIP)
+    set(PLATFORM_DEFAULT_IMAGE_SIGNING      OFF        CACHE BOOL     "Use default image signing implementation")
+
+    set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      10         CACHE STRING   "ID of the flash area containing the primary Secure image")
+    set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     11         CACHE STRING   "ID of the flash area containing the primary Non-Secure image")
 endif()
 
 set(RSE_USE_HOST_UART                   ON         CACHE BOOL     "Whether RSE should setup to use the UART from the host system")
