@@ -65,6 +65,10 @@ extern "C" {
 #define CC3XX_EC_MAX_BARRETT_TAG_SIZE 0
 #endif
 
+/**
+ * @brief Structure describing Elliptic Curve parameters
+ *
+ */
 typedef struct {
     cc3xx_ec_curve_type_t type;
 

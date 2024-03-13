@@ -19,31 +19,31 @@ extern "C" {
 #endif
 
 /**
- * \brief                        Validate an affine point.
+ * @brief                        Validate an affine point.
  *
- * \param[in]  curve             A pointer to an initialized weierstrass curve
+ * @param[in]  curve             A pointer to an initialized weierstrass curve
  *                               object
- * \param[in]  p                 A pointer to the affine point to validate.
+ * @param[in]  p                 A pointer to the affine point to validate.
  *
- * \return                       true if the affine point a valid point on
+ * @return                       true if the affine point a valid point on
  *                               the curve, false if it isn't.
  */
 bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
                                                   cc3xx_ec_point_affine *p);
 
 /**
- * \brief                        Add two affine points
+ * @brief                        Add two affine points
  *
- * \param[in]  curve             A pointer to an initialized weierstrass curve
+ * @param[in]  curve             A pointer to an initialized weierstrass curve
  *                               object
- * \param[in]  p                 A pointer to the first affine point object to
+ * @param[in]  p                 A pointer to the first affine point object to
  *                               add.
- * \param[in]  q                 A pointer to the secnd affine point object to
+ * @param[in]  q                 A pointer to the secnd affine point object to
  *                               add.
- * \param[out] res               A pointer to the affine point object which the
+ * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_add_points(cc3xx_ec_curve_t *curve,
@@ -52,15 +52,15 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_add_points(cc3xx_ec_curve_t *curve,
                                                      cc3xx_ec_point_affine *res);
 
 /**
- * \brief                        Double an affine point
+ * @brief                        Double an affine point
  *
- * \param[in]  curve             A pointer to an initialized weierstrass curve
+ * @param[in]  curve             A pointer to an initialized weierstrass curve
  *                               object.
- * \param[in]  p                 A pointer to the affine point object to double.
- * \param[out] res               A pointer to the affine point object which the
+ * @param[in]  p                 A pointer to the affine point object to double.
+ * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_double_point(cc3xx_ec_curve_t *curve,
@@ -68,32 +68,32 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_double_point(cc3xx_ec_curve_t *curve,
                                                        cc3xx_ec_point_affine *res);
 
 /**
- * \brief                        Negate an affine point
+ * @brief                        Negate an affine point
  *
- * \param[in]  p                 A pointer to the affine point object to negate.
- * \param[out] res               A pointer to the affine point object which the
+ * @param[in]  p                 A pointer to the affine point object to negate.
+ * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.
  */
 void cc3xx_lowlevel_ec_weierstrass_negate_point(cc3xx_ec_point_affine *p,
                                                 cc3xx_ec_point_affine *res);
 
 /**
- * \brief                        Multiply an affine point by a scalar value
+ * @brief                        Multiply an affine point by a scalar value
  *
- * \note                         This function is side-channel protected and
+ * @note                         This function is side-channel protected and
  *                               may be used on secret values. By default it is
  *                               protected against timing attacks, further
  *                               mitigations can be enabled by config.
  *
- * \param[in]  curve             A pointer to an initialized weierstrass curve
+ * @param[in]  curve             A pointer to an initialized weierstrass curve
  *                               object.
- * \param[in]  p                 A pointer to the affine point object to
+ * @param[in]  p                 A pointer to the affine point object to
  *                               multiply.
- * \param[in]  scalar            The scalar value to multiply the point by.
- * \param[out] res               A pointer to the affine point object which the
+ * @param[in]  scalar            The scalar value to multiply the point by.
+ * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
@@ -103,29 +103,29 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
                                              cc3xx_ec_point_affine *res);
 
 /**
- * \brief                        Multiply two scalar by two separate affine
+ * @brief                        Multiply two scalar by two separate affine
  *                               values, and then add the points. This function
  *                               may use the Shamir trick, if it is enabled by
  *                               config.
  *
- * \note                         This function must _not_ be used on secret
+ * @note                         This function must _not_ be used on secret
  *                               values, in case the Shamir trick is used which
  *                               is not side-channel protected.
  *
- * \param[in]  curve             A pointer to an initialized weierstrass curve
+ * @param[in]  curve             A pointer to an initialized weierstrass curve
  *                               object
- * \param[in]  p1                A pointer to the first affine point object to
+ * @param[in]  p1                A pointer to the first affine point object to
  *                               multiply.
- * \param[in]  scalar1           The scalar value to multiply the first point
+ * @param[in]  scalar1           The scalar value to multiply the first point
  *                               by.
- * \param[in]  p2                A pointer to the second affine point object to
+ * @param[in]  p2                A pointer to the second affine point object to
  *                               multiply.
- * \param[in]  scalar2           The scalar value to multiply the second point
+ * @param[in]  scalar2           The scalar value to multiply the second point
  *                               by.
- * \param[out] res               A pointer to the affine point object which the
+ * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_shamir_multiply_points_by_scalars_and_add(
