@@ -143,7 +143,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     FIH_RET(fih_rc);
 }
 
-static fih_int validate_image_at_addr(struct bl1_2_image_t *image)
+fih_int validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
@@ -171,7 +171,7 @@ static fih_int validate_image_at_addr(struct bl1_2_image_t *image)
     FIH_RET(FIH_SUCCESS);
 }
 
-static fih_int copy_and_decrypt_image(uint32_t image_id)
+fih_int copy_and_decrypt_image(uint32_t image_id)
 {
     int rc;
     struct bl1_2_image_t *image_to_decrypt;

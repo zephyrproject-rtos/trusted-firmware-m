@@ -57,7 +57,7 @@ static void collect_boot_measurement(void)
 }
 #endif /* TFM_MEASURED_BOOT_API */
 
-static fih_int validate_image_at_addr(uint8_t *image)
+fih_int validate_image_at_addr(const uint8_t *image)
 {
     enum tfm_plat_err_t plat_err;
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
