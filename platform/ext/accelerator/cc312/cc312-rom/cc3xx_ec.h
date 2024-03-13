@@ -209,7 +209,23 @@ cc3xx_err_t cc3xx_lowlevel_ec_shamir_multiply_points_by_scalars_and_add(
                                              cc3xx_pka_reg_id_t    scalar2,
                                              cc3xx_ec_point_affine *res);
 
-void cc3xx_ec_uninit(void);
+/**
+ * \brief Getter method to return the associated \a modulus_size from a curve.
+ *        Note that usually the implementation deals with 4-byte aligned sizes
+ *        so for, e.g. 521 bit curves this will be slightly greater than what
+ *        would be strictly required
+ *
+ * \param curve_id An ID of the curve to retrieve the modulus size
+ *
+ * \return size_t Size in bytes of the modulus
+ */
+size_t cc3xx_lowlevel_ec_get_modulus_size_from_curve(cc3xx_ec_curve_id_t curve_id);
+
+/**
+ * \brief De-initializes the Elliptic Curve operation
+ *
+ */
+void cc3xx_lowlevel_ec_uninit(void);
 
 #ifdef __cplusplus
 }

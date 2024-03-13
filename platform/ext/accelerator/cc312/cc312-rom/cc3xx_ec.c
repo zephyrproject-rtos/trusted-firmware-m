@@ -119,7 +119,7 @@ void cc3xx_lowlevel_ec_free_point(cc3xx_ec_point_affine *p)
     cc3xx_lowlevel_pka_free_reg(p->x);
 }
 
-cc3xx_ec_curve_data_t *curve_data_map[_CURVE_ID_MAX] = {
+static cc3xx_ec_curve_data_t *curve_data_map[_CURVE_ID_MAX] = {
 #ifdef CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE
     [CC3XX_EC_CURVE_SECP_192_R1] = &secp_192_r1,
@@ -189,6 +189,10 @@ cc3xx_ec_curve_data_t *curve_data_map[_CURVE_ID_MAX] = {
 #endif
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
 };
+
+size_t cc3xx_lowlevel_ec_get_modulus_size_from_curve(cc3xx_ec_curve_id_t curve_id) {
+    return (curve_data_map[curve_id])->modulus_size;
+}
 
 #ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
 static bool validate_reg_is_equal_to_buf(cc3xx_pka_reg_id_t reg, uint32_t *buf,

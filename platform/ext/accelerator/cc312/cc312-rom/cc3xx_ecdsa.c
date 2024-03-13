@@ -51,7 +51,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_genkey(cc3xx_ec_curve_id_t curve_id,
 
     *private_key_size = curve.modulus_size;
 out:
-    cc3xx_lowlevel_pka_uninit();
+    cc3xx_lowlevel_ec_uninit();
 
     return err;
 }
@@ -104,7 +104,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
     *public_key_y_size = curve.modulus_size;
 
 out:
-    cc3xx_lowlevel_pka_uninit();
+    cc3xx_lowlevel_ec_uninit();
 
     return err;
 }
@@ -260,8 +260,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
     }
 
 out:
-    /* This frees all the registers */
-    cc3xx_lowlevel_pka_uninit();
+    /* This frees all the PKA registers as it will deinit the PKA engine */
+    cc3xx_lowlevel_ec_uninit();
 
     return err;
 }
@@ -380,8 +380,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
 
     err = CC3XX_ERR_SUCCESS;
 out:
-    /* This frees all the registers */
-    cc3xx_lowlevel_pka_uninit();
+    /* This frees all the PKA registers as it will deinit the PKA engine */
+    cc3xx_lowlevel_ec_uninit();
 
     return err;
 }
