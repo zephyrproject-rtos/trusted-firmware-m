@@ -93,7 +93,6 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
-    int rc;
     fih_ret fih_rc = FIH_FAILURE;
     fih_ret recovery_succeeded = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
