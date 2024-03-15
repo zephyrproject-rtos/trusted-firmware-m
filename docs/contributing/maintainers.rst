@@ -15,18 +15,21 @@ Anton Komlev
     :email: `Anton.Komlev@arm.com <Anton.Komlev@arm.com>`__
     :github: `Anton-TF <https://github.com/Anton-TF>`__
 
+Antonio de Angelis
+    :email: `Antonio.deAngelis@arm.com <Antonio.deAngelis@arm.com>`__
+    :github: `adeaarm <https://github.com/adeaarm>`__
+
 Chris Brand
     :email: `Chris.Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
-
-Ken Liu
-    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
-    :github: `KenLSoft <https://github.com/KenLSoft>`__
 
 David Hu
     :email: `David.Hu@arm.com <David.Hu@arm.com>`__
     :github: `davidhuziji <https://github.com/davidhuziji>`__
 
+Ken Liu
+    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
+    :github: `KenLSoft <https://github.com/KenLSoft>`__
 
 Code owners
 ===========
