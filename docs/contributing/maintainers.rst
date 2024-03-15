@@ -191,6 +191,14 @@ WS Chang
     :email: `MS20 WSChang0@nuvoton.com <wschang0@nuvoton.com>`__
     :github: `wschang0 <https://github.com/wschang0>`__
 
+
+ArmChina Platform:
+~~~~~~~~~~~~~~~~~~
+
+Jidong Mei
+    :email: `Jidong.Mei@armchina.com <Jidong.Mei@armchina.com>`__
+    :github: `JidongMei <https://github.com/JidongMei>`__
+
 =============
 
 *Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
