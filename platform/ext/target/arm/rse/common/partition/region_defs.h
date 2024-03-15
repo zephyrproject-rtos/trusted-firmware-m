@@ -21,6 +21,7 @@
 
 #include "flash_layout.h"
 #include "platform_base_address.h"
+#include "rse_memory_sizes.h"
 
 /* RSE memory layout is as follows during BL1
  *      |----------------------------------------|
@@ -139,7 +140,7 @@
 /* Secure Data stored in VM0. Size defined in flash layout */
 #ifdef RSE_XIP
 #define S_DATA_START    (VM0_BASE_S)
-#define S_DATA_SIZE     (VM0_SIZE + (VM1_SIZE / 2))
+#define S_DATA_SIZE     (VM0_SIZE + VM1_SIZE - NS_DATA_SIZE)
 #else
 #define S_DATA_START    (VM0_BASE_S + FLASH_S_PARTITION_SIZE)
 #define S_DATA_SIZE     (VM0_SIZE - FLASH_S_PARTITION_SIZE)
@@ -163,9 +164,13 @@
 /* Non-Secure Data stored after secure data, or in VM1 if not in XIP mode. */
 #ifdef RSE_XIP
 #define NS_DATA_START   (VM0_BASE_NS + S_DATA_SIZE)
-#define NS_DATA_SIZE    ((VM0_SIZE + VM1_SIZE) - S_DATA_SIZE)
 #else
 #define NS_DATA_START   (VM1_BASE_NS)
+/* In the case of non-XIP configs, the NS data section size is controlled by the
+ * size of the NS image (with the NS image plus data section taking up the whole
+ * of VM1) so platforms should instead alter the size of the NS image.
+ */
+#undef  NS_DATA_SIZE
 #define NS_DATA_SIZE    (VM1_SIZE - FLASH_NS_PARTITION_SIZE)
 #endif
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)

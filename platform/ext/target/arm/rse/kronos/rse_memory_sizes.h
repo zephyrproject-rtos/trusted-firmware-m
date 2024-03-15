@@ -25,6 +25,13 @@
 #define VM1_SIZE                         0x00080000 /* 512 KiB */
 #endif /* RSE_XIP */
 
+/*
+ * The size of the SRAM which is allocated to NS. This may be increased
+ * depending on the layout.
+ */
+#define NS_DATA_SIZE (0x5000)
+
+
 /* The total size of the OTP for the RSE */
 #define OTP_TOTAL_SIZE     (0x4000)
 /* How much OTP is reserved for the portion of the DMA Initial Command Sequence

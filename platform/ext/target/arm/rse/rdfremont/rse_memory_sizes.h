@@ -22,6 +22,12 @@
 
 #define BOOT_FLASH_SIZE    0x800000 /* 8MB */
 
+/*
+ * The size of the SRAM which is allocated to NS. This may be increased
+ * depending on the layout.
+ */
+#define NS_DATA_SIZE (0x5000)
+
 /* The total size of the OTP for the RSE */
 #define OTP_TOTAL_SIZE     0x4000 /* 16 KiB */
 /*
