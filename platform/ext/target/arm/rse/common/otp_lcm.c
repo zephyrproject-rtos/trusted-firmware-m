@@ -49,11 +49,11 @@
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
         __PACKED_STRUCT {
-            uint32_t cm_locked_size;
+            uint64_t cm_locked_size;
             uint32_t cm_locked_size_zero_count;
             uint32_t cm_zero_count;
 
-            uint32_t dm_locked_size;
+            uint64_t dm_locked_size;
             uint32_t dm_locked_size_zero_count;
             uint32_t dm_zero_count;
 
@@ -66,6 +66,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t cca_system_properties;
 
                 uint32_t cm_config_flags;
+                uint32_t _pad0
             } cm_locked;
 
             __PACKED_STRUCT {
@@ -553,8 +554,8 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
 #ifdef RSE_HAS_MANUFACTURING_DATA
     uint32_t manufacturing_size;
 #endif /* RSE_HAS_MANUFACTURING_DATA */
-    uint32_t cm_size;
-    uint32_t dm_size;
+    uint64_t cm_size;
+    uint64_t dm_size;
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
     err = otp_read(USER_AREA_OFFSET(manufacturing_data.size),
@@ -811,7 +812,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
     enum lcm_error_t lcm_err;
     uint16_t gppc_val = 0;
     uint32_t zero_bit_count;
-    uint32_t region_size;
+    uint64_t region_size;
     enum integrity_checker_error_t ic_err;
 
     if (in_len != sizeof(lcs)) {

@@ -143,7 +143,7 @@ patch_bundle = struct_pack([
 
 values = patch_binary(values, patch_bundle, 0)
 
-bundle = encrypt_bundle(code, 0xB000, values, 0x3800, data, 0x3D00, 0xBEEFFEED,
+bundle = encrypt_bundle(code, 0xB000, values, 0x3800, data, 0x3D00, 0xAAAABEEFFEEDAAAA,
                         input_key, 1, tp_mode, "DM_PROVISIONING")
 
 with open(args.bundle_output_file, "wb") as out_file:

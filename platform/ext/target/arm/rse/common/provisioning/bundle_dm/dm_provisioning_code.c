@@ -8,6 +8,8 @@
 #include "tfm_plat_otp.h"
 #include "rse_provisioning_bundle.h"
 
+#include "tfm_hal_device_header.h"
+
 #include "trng.h"
 
 /* This is a stub to make the linker happy */
@@ -18,7 +20,7 @@ extern const struct dm_provisioning_data data;
 enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) {
     enum tfm_plat_err_t err;
     uint32_t new_lcs;
-    uint8_t generated_key_buf[32];
+    uint8_t __ALIGNED(8) generated_key_buf[32];
     int32_t int_err;
 
     int_err = bl1_trng_generate_random(generated_key_buf,

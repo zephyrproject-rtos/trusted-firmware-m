@@ -21,12 +21,12 @@ extern "C" {
 #define BL2_ROTPK_HASH_SIZE     (32)
 #endif
 
-#define CM_BUNDLE_MAGIC 0xC0DEFEED
-#define DM_BUNDLE_MAGIC 0xBEEFFEED
+#define CM_BUNDLE_MAGIC 0xAAAAC0DEFEEDAAAA
+#define DM_BUNDLE_MAGIC 0xAAAABEEFFEEDAAAA
 
 struct __attribute__((__packed__)) cm_provisioning_bundle {
     /* This section is authenticated */
-    uint32_t magic;
+    uint64_t magic;
     /* This section is encrypted */
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
@@ -43,12 +43,12 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
     /* This section is metadata */
     uint32_t iv[3];
     uint32_t tag[4];
-    uint32_t magic2;
+    uint64_t magic2;
 };
 
 struct __attribute__((__packed__)) dm_provisioning_bundle {
     /* This section is authenticated */
-    uint32_t magic;
+    uint64_t magic;
     /* This section is encrypted */
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
@@ -77,7 +77,7 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
     /* This section is metadata */
     uint32_t iv[3];
     uint32_t tag[4];
-    uint32_t magic2;
+    uint64_t magic2;
 };
 
 #ifdef __cplusplus

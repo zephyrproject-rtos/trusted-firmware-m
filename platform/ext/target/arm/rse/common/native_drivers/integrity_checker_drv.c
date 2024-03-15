@@ -143,6 +143,9 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
                                                                uint32_t *value, size_t value_size,
                                                                size_t *value_len)
 {
+    uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+        temp_val[INTEGRITY_CHECKER_OUTPUT_SIZE_SHA256 / sizeof(uint32_t)] = {0};
+    uint32_t *value_ptr = value;
     struct _integrity_checker_reg_map_t* p_integrity_checker =
         (struct _integrity_checker_reg_map_t*)dev->cfg->base;
     enum integrity_checker_error_t err;
@@ -154,18 +157,21 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
         return err;
     }
 
-    if (value_size > mode_sizes[mode]) {
+    if (value_size != mode_sizes[mode]) {
         return INTEGRITY_CHECKER_ERROR_OUTPUT_BUFFER_TOO_SMALL;
     }
 
-    if (((uintptr_t)data % sizeof(uint32_t)) != 0) {
+    if (((uintptr_t)data % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
         return INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT;
     }
 
-    if ((size % sizeof(uint32_t)) != 0) {
+    if ((size % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
         return INTEGRITY_CHECKER_ERROR_INVALID_LENGTH;
     }
 
+    if (((uintptr_t)value % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        value_ptr = temp_val;
+    }
 
     init_integrity_checker(dev, &iccval);
 
@@ -177,10 +183,10 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
 
     /* Configure input data. Size is in words */
     p_integrity_checker->icda = remap_addr(dev, (uint32_t)data);
-    p_integrity_checker->icdl = size / sizeof(uint32_t);
+    p_integrity_checker->icdl = size / INTEGRITY_CHECKER_REQUIRED_ALIGNMENT;
 
     /* Set output address */
-    p_integrity_checker->iccva = remap_addr(dev, (uint32_t)value);
+    p_integrity_checker->iccva = remap_addr(dev, (uint32_t)value_ptr);
 
     /* Start integrity checker */
     iccval |= 1;
@@ -195,6 +201,12 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
         return INTEGRITY_CHECKER_ERROR_OPERATION_FAILED;
     }
 
+    if (value_ptr != value) {
+        for (int idx = 0; idx < mode_sizes[mode] / sizeof(uint32_t); idx++) {
+            value[idx] = value_ptr[idx];
+        }
+    }
+
     if (value_len != NULL) {
         *value_len = mode_sizes[mode];
     }
@@ -207,6 +219,9 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
                                                              const uint32_t *data, size_t size,
                                                              const uint32_t *value, size_t value_size)
 {
+    uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+        temp_val[INTEGRITY_CHECKER_OUTPUT_SIZE_SHA256 / sizeof(uint32_t)] = {0};
+    uint32_t *value_ptr = (uint32_t *)value;
     struct _integrity_checker_reg_map_t* p_integrity_checker =
         (struct _integrity_checker_reg_map_t*)dev->cfg->base;
     enum integrity_checker_error_t err;
@@ -217,16 +232,24 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
         return err;
     }
 
-    if (value_size > mode_sizes[mode]) {
+    if (value_size != mode_sizes[mode]) {
         return INTEGRITY_CHECKER_ERROR_VALUE_BUFFER_TOO_SMALL;
     }
 
-    if (((uintptr_t)data % sizeof(uint32_t)) != 0) {
+    if (((uintptr_t)data % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
         return INTEGRITY_CHECKER_ERROR_INVALID_ALIGNMENT;
     }
 
-    if ((size % sizeof(uint32_t)) != 0) {
+    if ((size % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
         return INTEGRITY_CHECKER_ERROR_INVALID_LENGTH;
+    }
+
+    if (((uintptr_t)value % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0
+           || (value_size % INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) != 0) {
+        for (int idx = 0; idx < value_size / sizeof(uint32_t); idx++) {
+            temp_val[idx] = value[idx];
+        }
+        value_ptr = temp_val;
     }
 
     init_integrity_checker(dev, &iccval);
@@ -236,10 +259,10 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
 
     /* Configure input data. Size is in words */
     p_integrity_checker->icda = remap_addr(dev, (uint32_t)data);
-    p_integrity_checker->icdl = size / sizeof(uint32_t);
+    p_integrity_checker->icdl = size / INTEGRITY_CHECKER_REQUIRED_ALIGNMENT;
 
     /* Set compare address */
-    p_integrity_checker->iceva = remap_addr(dev, (uint32_t)value);
+    p_integrity_checker->iceva = remap_addr(dev, (uint32_t)value_ptr);
 
     /* Start integrity checker */
     iccval |= 1;

@@ -64,7 +64,7 @@ def encrypt_bundle(code, code_pad, values, values_pad, data,
     ccm_iv = secrets.token_bytes(12)
 
     to_auth = struct_pack([
-        magic.to_bytes(4, 'little'),
+        magic.to_bytes(8, 'little'),
     ])
 
     to_encrypt = struct_pack([
@@ -83,7 +83,7 @@ def encrypt_bundle(code, code_pad, values, values_pad, data,
         encrypted_data,
         ccm_iv,
         tag,
-        magic.to_bytes(4, 'little'),
+        magic.to_bytes(8, 'little'),
     ])
 
     return bundle

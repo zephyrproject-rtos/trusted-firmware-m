@@ -27,6 +27,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef INTEGRITY_CHECKER_S
+ __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+#endif
 static uint8_t dummy_key_value[32] = {0x01, 0x02, 0x03, 0x04,
                                       0x01, 0x02, 0x03, 0x04,
                                       0x01, 0x02, 0x03, 0x04,
@@ -394,6 +397,9 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
 {
     enum lcm_error_t err;
     uint32_t config_val;
+#ifdef INTEGRITY_CHECKER_S
+ __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+#endif
     uint32_t zero_bits;
 
     config_val = LCM_TRUE;
@@ -487,6 +493,9 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
 {
     enum lcm_error_t err;
     uint32_t config_val;
+#ifdef INTEGRITY_CHECKER_S
+ __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+#endif
     uint32_t zero_bits;
 
     err = count_otp_zero_bits(dev, offsetof(struct lcm_otp_layout_t, kp_dm), 32,
