@@ -10,7 +10,7 @@
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c)
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common.h  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.h)
 
-file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common_arm.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c)
+#FIXME: Revert after MCUx SDK upadte to CMSISv6  file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common_arm.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c)
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common_arm.h  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.h)
 
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/ctimer/fsl_ctimer.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c)
