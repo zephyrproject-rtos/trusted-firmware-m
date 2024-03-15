@@ -112,26 +112,9 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
-    /* Sanity-check that the SAM config integrity value is correct */
-    ic_err = integrity_checker_check_value(
-        &INTEGRITY_CHECKER_DEV_S, INTEGRITY_CHECKER_MODE_ZERO_COUNT, data.sam_config,
-        sizeof(data.sam_config) - sizeof(uint32_t),
-        data.sam_config + ((sizeof(data.sam_config) - sizeof(uint32_t)) / sizeof(uint32_t)),
-        sizeof(uint32_t));
-    if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
     err = tfm_plat_otp_write(PLAT_OTP_ID_DMA_ICS,
                              sizeof(data.dma_otp_ics),
                              (uint8_t*)&data.dma_otp_ics);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = tfm_plat_otp_write(PLAT_OTP_ID_SAM_CONFIG,
-                             sizeof(data.sam_config),
-                             (uint8_t*)&data.sam_config);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

@@ -63,7 +63,6 @@ __PACKED_STRUCT plat_user_area_layout_t {
             /* Things after this point are not touched by BL1_1, and hence are
              * modifiable by new provisioning code.
              */
-                uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE / sizeof(uint32_t)];
                 uint32_t cca_system_properties;
 
                 uint32_t cm_config_flags;
@@ -236,7 +235,6 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_RSE_ID] = USER_AREA_OFFSET(dm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
-    [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
     [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_OFFSET(manufacturing_data.size),
@@ -353,7 +351,6 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_RSE_ID] = USER_AREA_SIZE(dm_locked.rse_id),
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
-    [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
 
 #ifdef RSE_HAS_MANUFACTURING_DATA
     [PLAT_OTP_ID_MANUFACTURING_DATA_LEN] = USER_AREA_SIZE(manufacturing_data.size),
