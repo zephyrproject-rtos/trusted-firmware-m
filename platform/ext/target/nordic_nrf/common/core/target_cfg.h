@@ -35,8 +35,21 @@
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
 
+// TODO: NCSDK-25009: Support configuring which UART is used by TF-M on nrf54L
+
+#if NRF_SECURE_UART_INSTANCE == 0
+#define TFM_DRIVER_STDIO    Driver_USART0
+#elif NRF_SECURE_UART_INSTANCE == 1
 #define TFM_DRIVER_STDIO    Driver_USART1
+#elif NRF_SECURE_UART_INSTANCE == 22
+#define TFM_DRIVER_STDIO    Driver_USART22
+#endif
+
+#ifdef NRF54L15_ENGA_XXAA
+#define NS_DRIVER_STDIO     Driver_USART20
+#else
 #define NS_DRIVER_STDIO     Driver_USART0
+#endif
 
 /**
  * \brief Store the addresses of memory regions
@@ -91,6 +104,13 @@ enum tfm_plat_err_t spu_periph_init_cfg(void);
  * \brief Clears SPU interrupt.
  */
 void spu_clear_irq(void);
+
+/**
+ * \brief Configures memory permissions via the MPC.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t nrf_mpc_init_cfg(void);
 
 /**
  * \brief Configures SAU and IDAU.
