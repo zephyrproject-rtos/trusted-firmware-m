@@ -19,6 +19,17 @@ if (NOT NRF_BOARD_SELECTED)
         "Instead of '${TFM_PLATFORM}', choose e.g. '${hint}'.")
 endif()
 
+# At the time of writing there is no systematic way to identify which
+# NVM technology is used by the SoC from the Kconfig, so we just
+# hardcode this information here instead.
+if((NRF_SOC_VARIANT STREQUAL nrf54l15) OR (target STREQUAL nrf54l15))
+  # Maybe we only need to check one of these options but these
+  # variables keep changing so we check both to be future proof
+  set(HAS_RRAMC 1)
+else()
+  set(HAS_NVMC 1)
+endif()
+
 #========================= Platform dependencies ===============================#
 
 include(hal_nordic.cmake)
@@ -26,13 +37,6 @@ include(hal_nordic.cmake)
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
-set(nvm_sources)
-if(HAS_NVMC)
-    set(nvm_sources
-      cmsis_drivers/Driver_Flash.c
-      ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
-    )
-endif()
 
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
@@ -70,9 +74,25 @@ target_include_directories(platform_s
         services/include
 )
 
+set(nvm_sources
+  $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
+)
+
+if(HAS_RRAMC)
+  list(APPEND nvm_sources
+    ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_rramc.c
+  )
+elseif(HAS_NVMC)
+  list(APPEND nvm_sources
+    ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+  )
+else()
+  message(FATAL_ERROR "Unexpected device")
+endif()
+
 target_sources(platform_s
-    PRIVATE
-        ${nvm_sources}
+  PRIVATE
+       ${nvm_sources}
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
