@@ -70,3 +70,14 @@ target_compile_definitions(platform_ns
         NRF_TRUSTZONE_NONSECURE
         DOMAIN_NS=1
 )
+
+target_compile_definitions(platform_ns
+  PUBLIC
+  # We don't need to trim the device in the non-secure image because it
+  # is the secure image's responsiblity to do this.
+  NRF_DISABLE_FICR_TRIMCNF
+  # The glitch detector can only be configured from a secure image so
+  # we need to skip this configuration.
+  NRF_SKIP_GLITCHDETECTOR_DISABLE
+)
+
