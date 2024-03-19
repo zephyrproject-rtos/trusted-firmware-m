@@ -203,125 +203,9 @@ int boot_store_measurement(uint8_t index,
                              lock_measurement);
 }
 
-/*
- * Initializes the ATU region before configuring the NI-Tower. This function
- * maps the physical base address of the NI-Tower instance received as the
- * parameter to a logical address HOST_NI_TOWER_BASE.
- */
-static int32_t ni_tower_pre_init(uint64_t ni_tower_phys_address)
-{
-    enum atu_error_t atu_err;
-    enum atu_roba_t roba_value;
-
-    atu_err = atu_initialize_region(
-                &ATU_DEV_S,
-                HOST_NI_TOWER_ATU_ID,
-                HOST_NI_TOWER_BASE,
-                ni_tower_phys_address,
-                HOST_NI_TOWER_SIZE);
-    if (atu_err != ATU_ERR_NONE) {
-        return -1;
-    }
-
-    roba_value = ATU_ROBA_SET_1;
-    atu_err = set_axnsc(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
-    if (atu_err != ATU_ERR_NONE) {
-        BOOT_LOG_ERR("BL2: Unable to modify AxNSE");
-        return -1;
-    }
-
-    roba_value = ATU_ROBA_SET_0;
-    atu_err = set_axprot1(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
-    if (atu_err != ATU_ERR_NONE) {
-        BOOT_LOG_ERR("BL2: Unable to modify AxPROT1");
-        return -1;
-    }
-
-    return 0;
-}
-
-/* Un-initializes the ATU region after configuring the NI-Tower */
-static int32_t ni_tower_post_init(void)
-{
-    enum atu_error_t atu_err;
-
-    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_NI_TOWER_ATU_ID);
-    if (atu_err != ATU_ERR_NONE) {
-        return -1;
-    }
-
-    return 0;
-}
-
-/*
- * Programs the System control NI-Tower for nodes under Always-On (AON) domain.
- */
-static int32_t ni_tower_sysctrl_aon_init(void)
-{
-    int32_t err;
-
-    err = ni_tower_pre_init(HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
-    if (err != 0) {
-        return err;
-    }
-
-    err = program_sysctrl_ni_tower_aon();
-    if (err != 0) {
-        BOOT_LOG_ERR("BL2: Unable to configure System Control NI-Tower for "
-                        "nodes under AON domain");
-        return err;
-    }
-
-    err = ni_tower_post_init();
-    if (err != 0) {
-        return err;
-    }
-
-    BOOT_LOG_INF("BL2: System Control NI-Tower configured for node under AON "
-                    "domain");
-
-    return 0;
-}
-
-/*
- * Programs the System control NI-Tower for nodes under SYSTOP domain.
- */
-static int32_t ni_tower_sysctrl_systop_init(void)
-{
-    int32_t err;
-
-    err = ni_tower_pre_init(HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
-    if (err != 0) {
-        return err;
-    }
-
-    err = program_sysctrl_ni_tower_systop();
-    if (err != 0) {
-        BOOT_LOG_ERR("BL2: Unable to configure System Control NI-Tower for "
-                        "nodes under SYSTOP domain");
-        return err;
-    }
-
-    err = ni_tower_post_init();
-    if (err != 0) {
-        return err;
-    }
-
-    BOOT_LOG_INF("BL2: System Control NI-Tower configured for node under "
-                    "SYSTOP domain");
-
-    return 0;
-}
-
 int32_t boot_platform_post_init(void)
 {
     int32_t result;
-
-    result = ni_tower_sysctrl_aon_init();
-    if (result != 0) {
-        return result;
-    }
-
     result = interrupts_bl2_init();
     if (result != 0) {
         return result;
@@ -474,6 +358,14 @@ static int boot_platform_pre_load_scp(void)
 
     BOOT_LOG_INF("BL2: SCP pre load start");
 
+    /*
+     * Setup everything needed for access to the MSCP subsystem.
+     */
+    if (host_system_prepare_mscp_access() != 0) {
+        BOOT_LOG_ERR("BL2: Could not setup access to MSCP systems.");
+        return 1;
+    }
+
     /* Configure ATUs for loading to areas not directly addressable by RSE. */
 
     /*
@@ -519,7 +411,6 @@ static int boot_platform_post_load_scp(void)
     struct rse_integ_t *integ_layer =
             (struct rse_integ_t *)RSE_INTEG_LAYER_BASE_S;
     enum mscp_error_t mscp_err;
-    int32_t err;
 
     BOOT_LOG_INF("BL2: SCP post load start");
 
@@ -564,12 +455,6 @@ static int boot_platform_post_load_scp(void)
     /* Close RSE ATU region configured to access SCP ITCM region */
     atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
     if (atu_err != ATU_ERR_NONE) {
-        return 1;
-    }
-
-    /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
-    err = ni_tower_sysctrl_systop_init();
-    if (err != 0) {
         return 1;
     }
 

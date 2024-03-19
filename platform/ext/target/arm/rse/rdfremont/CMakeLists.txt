@@ -61,7 +61,6 @@ target_sources(platform_bl2
         bl2/boot_hal_bl2.c
         bl2/flash_map_bl2.c
         bl2/interrupts_bl2.c
-        bl2/ni_tower_sysctrl_lib.c
         host_system.c
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
@@ -71,6 +70,7 @@ target_sources(platform_bl2
         device/rse_expansion_device_definition.c
         host_drivers/mscp_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+        ni_tower_sysctrl_lib.c
 )
 
 target_compile_definitions(platform_bl2

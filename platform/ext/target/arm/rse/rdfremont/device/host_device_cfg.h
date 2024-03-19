@@ -26,7 +26,7 @@
 
 /* NI-Tower */
 #ifdef PLATFORM_HAS_NI_TOWER
-#define SYSCTRL_NI_TOWER
+#define RD_SYSCTRL_NI_TOWER
 #endif /* PLATFORM_HAS_NI_TOWER */
 
 /* MSCP */

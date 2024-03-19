@@ -14,6 +14,9 @@ extern "C" {
 
 int host_system_prepare_ap_access(void);
 
+/* Prepares MSCP access for host system */
+int host_system_prepare_mscp_access(void);
+
 void host_system_scp_signal_ap_ready(void);
 
 #ifdef __cplusplus

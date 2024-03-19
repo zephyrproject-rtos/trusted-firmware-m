@@ -50,7 +50,7 @@ extern struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV;
 extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
 #endif
 
-#ifdef SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NI_TOWER
 #include "ni_tower_lib.h"
 extern const struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
 

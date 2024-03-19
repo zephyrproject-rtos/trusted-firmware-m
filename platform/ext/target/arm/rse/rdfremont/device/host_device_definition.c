@@ -57,7 +57,7 @@ struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV = {
 };
 #endif
 
-#ifdef SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NI_TOWER
 /* System Control NI-Tower PSAM device configurations */
 const struct ni_tower_psam_dev_cfg SYSCTRL_RSE_MAIN_ASNI_PSAM_DEV_CFG  = {
     .component_node_type = NI_TOWER_ASNI,
