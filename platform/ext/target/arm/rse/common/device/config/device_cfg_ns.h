@@ -38,4 +38,8 @@
 #define UART0_CMSDK_NS
 #endif /* RSE_DEBUG_UART */
 
+/* Arm GPIO */
+#define GPIO0_NS
+#define GPIO1_NS
+
 #endif  /* __DEVICE_CFG_H__ */

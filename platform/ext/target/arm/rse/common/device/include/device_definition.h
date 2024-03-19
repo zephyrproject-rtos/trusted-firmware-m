@@ -237,6 +237,26 @@ extern struct dma350_ch_dev_t DMA350_DMA0_CH2_DEV_S;
 extern struct dma350_ch_dev_t DMA350_DMA0_CH3_DEV_S;
 #endif
 
+#ifdef GPIO0_S
+#include "gpio_pl061_drv.h"
+extern pl061_regblk_t *const GPIO0_DEV_S;
+#endif
+
+#ifdef GPIO1_S
+#include "gpio_pl061_drv.h"
+extern pl061_regblk_t *const GPIO1_DEV_S;
+#endif
+
+#ifdef GPIO0_NS
+#include "gpio_pl061_drv.h"
+extern pl061_regblk_t *const GPIO0_DEV_NS;
+#endif
+
+#ifdef GPIO1_NS
+#include "gpio_pl061_drv.h"
+extern pl061_regblk_t *const GPIO1_DEV_NS;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

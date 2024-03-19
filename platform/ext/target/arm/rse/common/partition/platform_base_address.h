@@ -42,8 +42,8 @@
 /* Non-Secure Peripheral region */
 #define DMA_350_BASE_NS                  0x40002000 /* DMA350 Non-Secure base address */
 #define RSE_NSACFG_BASE_NS               0x40080000 /* RSE Non-Secure Access Configuration Register Block Non-Secure base address */
-#define GPIO0_CMSDK_BASE_NS              0x40100000 /* GPIO 0 Non-Secure base address */
-#define GPIO1_CMSDK_BASE_NS              0x40101000 /* GPIO 1 Non-Secure base address */
+#define GPIO0_BASE_NS                    0x40100000 /* Primecell GPIO0 Non-Secure base address */
+#define GPIO1_BASE_NS                    0x40101000 /* Primecell GPIO1 Non-Secure base address */
 #define MHU0_SENDER_BASE_NS              0x40160000 /* Combined MHU 0 Sender Non-Secure base address */
 #define MHU0_RECEIVER_BASE_NS            0x40170000 /* Combined MHU 0 Receiver Non-Secure base address */
 #define MHU1_SENDER_BASE_NS              0x40180000 /* Combined MHU 1 Sender Non-Secure base address */
@@ -100,8 +100,8 @@
 #define KMU_BASE_S                       0x5009E000 /* KMU Secure base address */
 #define SAM_BASE_S                       0x5009F000 /* SAM Secure base address */
 #define LCM_BASE_S                       0x500A0000 /* LCM Secure base address */
-#define GPIO0_CMSDK_BASE_S               0x50100000 /* GPIO 0 Secure base address */
-#define GPIO1_CMSDK_BASE_S               0x50101000 /* GPIO 1 Secure base address */
+#define GPIO0_BASE_S                     0x50100000 /* Primecell GPIO0 Secure base address */
+#define GPIO1_BASE_S                     0x50101000 /* Primecell GPIO1 Secure base address */
 #define SIC_BASE_S                       0x50140000 /* SIC Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
 #define MPC_SIC_BASE_S                   0x50151000 /* SIC Memory Protection Controller Secure base address */

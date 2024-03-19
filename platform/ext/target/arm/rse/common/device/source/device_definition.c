@@ -671,3 +671,19 @@ struct dma350_ch_dev_t DMA350_DMA0_CH3_DEV_S = {
     .data = {0}
 };
 #endif
+
+#ifdef GPIO0_S
+pl061_regblk_t *const GPIO0_DEV_S = (pl061_regblk_t *) GPIO0_BASE_S;
+#endif
+
+#ifdef GPIO1_S
+pl061_regblk_t *const GPIO1_DEV_S = (pl061_regblk_t *) GPIO1_BASE_S;
+#endif
+
+#ifdef GPIO0_NS
+pl061_regblk_t *const GPIO0_DEV_NS = (pl061_regblk_t *) GPIO0_BASE_NS;
+#endif
+
+#ifdef GPIO1_NS
+pl061_regblk_t *const GPIO1_DEV_NS = (pl061_regblk_t *) GPIO1_BASE_NS;
+#endif

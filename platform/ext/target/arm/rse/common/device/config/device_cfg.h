@@ -85,6 +85,9 @@
 #define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_INT           1u
 #define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_FRACT         0u
 
+/* Arm GPIO */
+#define GPIO0_S
+#define GPIO1_S
 
 /* System Timer Armv8-M */
 #define SYSTIMER0_ARMV8_M_S
