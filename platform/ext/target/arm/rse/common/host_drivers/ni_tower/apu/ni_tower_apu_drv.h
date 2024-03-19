@@ -123,6 +123,8 @@ struct ni_tower_apu_dev_cfg {
  */
 struct ni_tower_apu_dev {
     uintptr_t base;
+    /* Offset to be added to the memory map base and end addresses */
+    uint64_t region_mapping_offset;
 };
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,7 @@
 #ifndef __NI_TOWER_RSE_DRV_H__
 #define __NI_TOWER_RSE_DRV_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "ni_tower_drv.h"
@@ -25,6 +26,8 @@ struct ni_tower_psam_cfgs {
     uint32_t nh_region_count;
     /* List of all region configuration information */
     struct ni_tower_psam_reg_cfg_info* regions;
+    /* Whether to add chip address offset to the memory map regions */
+    bool add_chip_addr_offset;
 };
 
 /**
@@ -37,6 +40,8 @@ struct ni_tower_apu_cfgs {
     uint32_t region_count;
     /* List of all region configuration information */
     struct ni_tower_apu_reg_cfg_info* regions;
+    /* Whether to add chip address offset to the memory map regions */
+    bool add_chip_addr_offset;
 };
 
 /**

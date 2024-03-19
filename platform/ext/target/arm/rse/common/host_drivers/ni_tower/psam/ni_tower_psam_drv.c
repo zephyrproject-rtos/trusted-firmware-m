@@ -29,6 +29,7 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
                             uint32_t region)
 {
     struct ni_tower_psam_reg_map* reg;
+    uint64_t base_addr, end_addr;
     uint64_t temp_base_addr, temp_end_addr;
     uint32_t r_idx;
 
@@ -42,9 +43,12 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
         return NI_TOWER_ERR_INVALID_ARG;
     }
 
+    base_addr = cfg_info->base_addr + dev->region_mapping_offset;
+    end_addr = cfg_info->end_addr + dev->region_mapping_offset;
+
     /* Checking alignment of base and end addresses */
-    if (((cfg_info->base_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0) ||
-        ((~cfg_info->end_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0)) {
+    if (((base_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0) ||
+        ((~end_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0)) {
         return NI_TOWER_ERR_INVALID_ARG;
     }
 
@@ -62,8 +66,8 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
                                             reg->nh_region[r_idx].cfg3,
                                             reg->nh_region[r_idx].cfg2);
 
-            if (ni_tower_check_region_overlaps(cfg_info->base_addr,
-                    cfg_info->end_addr, temp_base_addr, temp_end_addr) !=
+            if (ni_tower_check_region_overlaps(base_addr, end_addr,
+                    temp_base_addr, temp_end_addr) !=
                 NI_TOWER_SUCCESS) {
                 return NI_TOWER_ERR_REGION_OVERLAPS;
             }
@@ -71,11 +75,11 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
     }
 
     /* Set base address */
-    reg->nh_region[region].cfg0 = NI_TOWER_PSAM_ADDRESS_L(cfg_info->base_addr);
-    reg->nh_region[region].cfg1 = NI_TOWER_PSAM_ADDRESS_H(cfg_info->base_addr);
+    reg->nh_region[region].cfg0 = NI_TOWER_PSAM_ADDRESS_L(base_addr);
+    reg->nh_region[region].cfg1 = NI_TOWER_PSAM_ADDRESS_H(base_addr);
     /* Set end address */
-    reg->nh_region[region].cfg2 = NI_TOWER_PSAM_ADDRESS_L(cfg_info->end_addr);
-    reg->nh_region[region].cfg3 = NI_TOWER_PSAM_ADDRESS_H(cfg_info->end_addr);
+    reg->nh_region[region].cfg2 = NI_TOWER_PSAM_ADDRESS_L(end_addr);
+    reg->nh_region[region].cfg3 = NI_TOWER_PSAM_ADDRESS_H(end_addr);
     /* Set ID for the Target interface. */
     reg->nh_region[region].cfg2 |= (cfg_info->target_id &
                                     NI_TOWER_NH_REGION_TGT_ID_MSK);

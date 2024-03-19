@@ -71,6 +71,14 @@ struct ni_tower_dev {
      * nodes.
      */
     const enum ni_tower_granularity config_node_granularity;
+    /*
+     * Address space offset for the current chip. This is typically updated
+     * during the boot time by reading the current chip id (in case of RSE
+     * present in a multichip platform). The offset will be added to the region
+     * base and end address if the component enables \ref add_chip_addr_offset
+     * flag.
+     */
+    uint64_t chip_addr_offset;
 };
 
 #endif /* __NI_TOWER_DRV_H__ */

@@ -34,6 +34,9 @@ static enum ni_tower_err ni_tower_apu_set_addr_range(
 
     reg = (struct ni_tower_apu_reg_map*)dev->base;
 
+    base_addr += dev->region_mapping_offset;
+    end_addr += dev->region_mapping_offset;
+
     /* Check alignment of base and end addresses */
     if (((base_addr & (NI_TOWER_APU_ADDRESS_GRAN - 1)) != 0) ||
         ((~end_addr & (NI_TOWER_APU_ADDRESS_GRAN - 1)) != 0)) {

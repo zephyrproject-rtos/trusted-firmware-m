@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -39,6 +39,8 @@ struct ni_tower_psam_dev_cfg {
  */
 struct ni_tower_psam_dev {
     uintptr_t base;
+    /* Offset to be added to the memory map base and end addresses */
+    uint64_t region_mapping_offset;
 };
 
 /**

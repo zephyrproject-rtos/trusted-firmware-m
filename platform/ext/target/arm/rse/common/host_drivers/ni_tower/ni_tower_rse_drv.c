@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,7 +59,9 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
         }
 
         psam_dev = (struct ni_tower_psam_dev) {
-            .base = dev->periphbase + off_addr
+            .base = dev->periphbase + off_addr,
+            .region_mapping_offset = psam_table[p_idx].add_chip_addr_offset ?
+                                        dev->chip_addr_offset : 0,
         };
 
         /* Set region fields */
@@ -115,7 +117,9 @@ enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
         }
 
         apu_dev = (struct ni_tower_apu_dev) {
-            .base = dev->periphbase + off_addr
+            .base = dev->periphbase + off_addr,
+            .region_mapping_offset = apu_table[a_idx].add_chip_addr_offset ?
+                                        dev->chip_addr_offset : 0,
         };
 
         /* Set region fields */
