@@ -187,6 +187,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
         spm_dma_copy.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
+        ./platform_fatal_error.c
 )
 
 target_link_libraries(platform_s
@@ -265,6 +266,7 @@ target_sources(platform_bl2
         nv_counters.c
         $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
+        ./platform_fatal_error.c
 )
 
 target_include_directories(platform_bl2
@@ -343,6 +345,7 @@ target_sources(platform_bl1_1
         ./rse_key_derivation.c
         $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
+        ./platform_fatal_error.c
 )
 
 target_include_directories(platform_bl1_1_interface
