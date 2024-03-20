@@ -259,13 +259,13 @@ as an example:
         .. code-block:: bash
 
             cd </tf-m-tests/tests_reg>
-            cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir> \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake \
+            cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir absolute path> \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<TF-M source dir absolute path>/toolchain_GNUARM.cmake \
                   -DTEST_S=ON -DTEST_NS=ON \
             cmake --build build_spe -- install
 
-            cmake -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_ns_GNUARM.cmake
+            cmake -S . -B build_test -DCONFIG_SPE_PATH=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns/cmake/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
     .. group-tab:: Windows
@@ -285,13 +285,13 @@ as an example:
         .. code-block:: bash
 
             cd </tf-m-tests/tests_reg>
-            cmake -G"Unix Makefiles" -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir> \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake \
+            cmake -G"Unix Makefiles" -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir absolute path> \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<TF-M source dir absolute path>/toolchain_GNUARM.cmake \
                   -DTEST_S=ON -DTEST_NS=ON \
             cmake --build build_spe -- install
 
-            cmake -G"Unix Makefiles" -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_ns_GNUARM.cmake
+            cmake -G"Unix Makefiles" -S . -B build_test -DCONFIG_SPE_PATH=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns/cmake/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
         .. note::
