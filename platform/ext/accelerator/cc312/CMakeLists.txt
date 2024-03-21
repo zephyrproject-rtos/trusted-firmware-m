@@ -233,6 +233,7 @@ if (TFM_PARTITION_CRYPTO)
     endif()
 
     if (NOT ${CC312_LEGACY_DRIVER_API_ENABLED} AND ${CC3XX_RUNTIME_ENABLED})
+        set(CC3XX_TARGET_PREFIX crypto_service_)
         set(CC3XX_PLATFORM_INTERFACE platform_s)
         add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc3xx)
     endif()

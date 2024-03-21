@@ -26,7 +26,7 @@
 #define CC3XX_CONFIG_AES_CTR_ENABLE
 
 /* Whether the AES ECB support is enabled */
-#define CC3XX_CONFIG_AES_ECB_ENABLE
+/* #define CC3XX_CONFIG_AES_ECB_ENABLE */
 
 /* Whether the AES CBC support is enabled */
 /* #define CC3XX_CONFIG_AES_CBC_ENABLE */
@@ -77,11 +77,11 @@
 #define CC3XX_CONFIG_RNG_ENABLE
 
 /* Whether the CTR_DRBG is enabled through the generic interface */
-#define CC3XX_CONFIG_DRBG_CTR_ENABLE
+/* #define CC3XX_CONFIG_DRBG_CTR_ENABLE */
 /* Whether the HMAC_DRBG is enabled through the generic interface */
-#define CC3XX_CONFIG_DRBG_HMAC_ENABLE
+/* #define CC3XX_CONFIG_DRBG_HMAC_ENABLE */
 /* Whether the HASH_DRBG is enabled through the generic interface */
-#define CC3XX_CONFIG_DRBG_HASH_ENABLE
+/* #define CC3XX_CONFIG_DRBG_HASH_ENABLE */
 
 /* Whether an external TRNG should be used in place of the standard CC3XX TRNG */
 #ifdef RSE_OTP_TRNG
@@ -120,39 +120,39 @@
  * barrett tags are required for modular reduction. If disabled, this may
  * decrease code size.
  */
-#define CC3XX_CONFIG_PKA_CALC_NP_ENABLE
+/* #define CC3XX_CONFIG_PKA_CALC_NP_ENABLE */
 
 /* Whether PKA operations will be inlined to increase performance at the cost of
  * code size
  */
-#define CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE
+/* #define CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE */
 
 /* Whether PKA variables will be aligned to word-size to increase performance at
  * the cost of code size
  */
-#define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE
+/* #define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE */
 
 /* Whether various EC curve types are enabled */
-#define CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
+/* #define CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_TYPE_MONTGOMERY_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
 
 /* Whether various EC curves are enabled */
-#define CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_224_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_192_K1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_224_K1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_SECP_256_K1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_192_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_224_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_256_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_320_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_384_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_512_R1_ENABLE
-#define CC3XX_CONFIG_EC_CURVE_FRP_256_V1_ENABLE
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_224_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_192_K1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_224_K1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_SECP_256_K1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_192_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_224_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_256_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_320_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_384_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_512_R1_ENABLE */
+/* #define CC3XX_CONFIG_EC_CURVE_FRP_256_V1_ENABLE */
 
 /* #define CC3XX_CONFIG_EC_CURVE_25519_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_448_ENABLE */
@@ -168,12 +168,15 @@
 /* Whether the Shamir trick will be used to improve performance of point-scalar
  * multiplication on non-secret data. Has a code-size penalty.
  */
-#define CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE
+/* #define CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE */
 
 /* Whether various ECDSA features are enabled */
-#define CC3XX_CONFIG_ECDSA_SIGN_ENABLE
-#define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE
-#define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE
+/* #define CC3XX_CONFIG_ECDSA_SIGN_ENABLE */
+/* #define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE */
+/* #define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE */
+
+/* Whether ECDH feature is enabled */
+/* #define CC3XX_CONFIG_ECDH_ENABLE */
 
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
@@ -184,7 +187,7 @@
 /* Whether an external secure word copying function (for copying keys etc) will
  * be provided by the platform
  */
-#define CC3XX_CONFIG_STDLIB_EXTERNAL_SECURE_WORD_COPY
+/* #define CC3XX_CONFIG_STDLIB_EXTERNAL_SECURE_WORD_COPY */
 
 #ifndef CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS
 #define CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS 128

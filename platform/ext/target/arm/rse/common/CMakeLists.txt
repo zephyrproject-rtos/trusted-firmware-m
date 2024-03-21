@@ -15,7 +15,6 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(platform_region_defs
     INTERFACE
         partition
-        cc312
 )
 
 target_compile_definitions(platform_region_defs
@@ -156,6 +155,10 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
+        ./cc3xx
+        ./runtime/cc3xx
+        ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include
+        ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
 )
 
 target_sources(platform_s
@@ -203,6 +206,7 @@ target_sources(platform_s
         spm_dma_copy.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
+        ./cc3xx/cc3xx_aes_external_key_loader.c
 )
 
 target_link_libraries(platform_s
@@ -313,6 +317,8 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
+        ./cc3xx
+        bl2/cc3xx
     PRIVATE
         ${PLATFORM_DIR}/..
 )
@@ -358,7 +364,7 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./dpa_hardened_word_copy.c
-        ./cc312/cc3xx_aes_external_key_loader.c
+        ./cc3xx/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./bl1/rse_kmu_keys.c
@@ -366,8 +372,8 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
-        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
         $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
 )
 
@@ -392,6 +398,8 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
+        ./cc3xx
+        ./bl1/cc3xx
 )
 
 target_compile_definitions(platform_bl1_1_interface
@@ -454,6 +462,13 @@ if (RSE_USE_ROM_LIB_FROM_SRAM)
         bl1_1_shared_symbols_in_sram
     )
 endif()
+
+target_sources(bl1_1_shared_lib
+    PRIVATE
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
+        $<$<AND:$<NOT:$<BOOL:${RSE_OTP_TRNG}>>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
+        $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+)
 
 #========================= Platform BL1_2 =====================================#
 
