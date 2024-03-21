@@ -41,6 +41,14 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
 #include "uart_pl011_drv.h"
 extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
 #endif
+#ifdef UART0_LOCAL_PL011_S
+#include "uart_pl011_drv.h"
+extern struct uart_pl011_dev_t UART0_LOCAL_PL011_DEV_S;
+#endif
+#ifdef UART0_LOCAL_PL011_NS
+#include "uart_pl011_drv.h"
+extern struct uart_pl011_dev_t UART0_LOCAL_PL011_DEV_NS;
+#endif
 
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
 #include "spi_strataflashj3_flash_lib.h"

@@ -23,7 +23,10 @@
 
 #ifdef RSE_USE_HOST_UART
 #define UART0_DEV                    UART0_PL011_DEV_NS
+#elif defined(RSE_USE_LOCAL_UART)
+#define UART0_DEV                    UART0_LOCAL_PL011_DEV_NS
 #endif /* RSE_USE_HOST_UART */
+
 
 #define FLASH0_DEV                   SPI_STRATAFLASHJ3_DEV
 

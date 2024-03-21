@@ -23,6 +23,7 @@ target_sources(platform_s
     PRIVATE
         ${TC_COMMON_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c
         ${TC_COMMON_SOURCE_DIR}/device/host_device_definition.c
+        ${TC_COMMON_SOURCE_DIR}/tfm_peripherals_def.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${TC_COMMON_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>

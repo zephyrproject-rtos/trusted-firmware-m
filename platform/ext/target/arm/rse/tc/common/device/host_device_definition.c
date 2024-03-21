@@ -26,6 +26,7 @@
 #include "host_device_definition.h"
 #include "platform_base_address.h"
 #include "host_base_address.h"
+#include "rse_platform_defs.h"
 
 /* Arm UART PL011 driver structures */
 #ifdef UART0_PL011_S
@@ -56,6 +57,35 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
 struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
                                               &(UART0_PL011_DEV_DATA_NS)};
 #endif
+#ifdef UART0_LOCAL_PL011_S
+static const struct uart_pl011_dev_cfg_t UART0_LOCAL_PL011_DEV_CFG_S = {
+    .base = LOCAL_UART_BASE_S,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART0_LOCAL_PL011_DEV_DATA_S = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART0_LOCAL_PL011_DEV_S = {&(UART0_LOCAL_PL011_DEV_CFG_S),
+                                                   &(UART0_LOCAL_PL011_DEV_DATA_S)};
+#endif
+#ifdef UART0_LOCAL_PL011_NS
+static const struct uart_pl011_dev_cfg_t UART0_LOCAL_PL011_DEV_CFG_NS = {
+    .base = LOCAL_UART_BASE_NS,
+    .def_baudrate = DEFAULT_UART_BAUDRATE,
+    .def_wlen = UART_PL011_WLEN_8,
+    .def_parity = UART_PL011_PARITY_DISABLED,
+    .def_stopbit = UART_PL011_STOPBIT_1};
+static struct uart_pl011_dev_data_t UART0_LOCAL_PL011_DEV_DATA_NS = {
+    .state = 0,
+    .uart_clk = 0,
+    .baudrate = 0};
+struct uart_pl011_dev_t UART0_LOCAL_PL011_DEV_NS = {&(UART0_LOCAL_PL011_DEV_CFG_NS),
+                                                    &(UART0_LOCAL_PL011_DEV_DATA_NS)};
+#endif
+
 
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {

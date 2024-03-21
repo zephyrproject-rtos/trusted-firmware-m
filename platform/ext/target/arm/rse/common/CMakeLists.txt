@@ -23,6 +23,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_XIP}>:RSE_XIP>
         $<$<BOOL:${RSE_DEBUG_UART}>:RSE_DEBUG_UART>
         $<$<BOOL:${RSE_USE_HOST_UART}>:RSE_USE_HOST_UART>
+        $<$<BOOL:${RSE_USE_LOCAL_UART}>:RSE_USE_LOCAL_UART>
         $<$<BOOL:${RSE_USE_HOST_FLASH}>:RSE_USE_HOST_FLASH>
         $<$<BOOL:${RSE_GPT_SUPPORT}>:RSE_GPT_SUPPORT>
         $<$<BOOL:${RSE_HAS_EXPANSION_PERIPHERALS}>:RSE_HAS_EXPANSION_PERIPHERALS>

@@ -24,13 +24,20 @@
  * defined and configured via the secure and/or non-secure base address.
  */
 
-#ifdef RSE_USE_HOST_UART
-/* ARM UART PL011 */
 #define DEFAULT_UART_CONTROL 0
 #define DEFAULT_UART_BAUDRATE  115200
+
+#ifdef RSE_USE_HOST_UART
+/* ARM UART PL011 */
 #define UART0_PL011_S
 #define UART0_PL011_NS
 #endif /* RSE_USE_HOST_UART */
+
+#ifdef RSE_USE_LOCAL_UART
+/* ARM UART PL011 */
+#define UART0_LOCAL_PL011_S
+#define UART0_LOCAL_PL011_NS
+#endif
 
 /*External Intel Strata Flash Device*/
 #define SPI_STRATAFLASHJ3_S
