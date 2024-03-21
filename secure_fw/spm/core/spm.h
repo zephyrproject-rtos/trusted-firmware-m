@@ -303,7 +303,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  * PendSV specified function.
  *
  * Parameters :
- *  p_actx        -    Architecture context storage pointer
+ *  exc_return    -    EXC_RETURN value for the PendSV handler
  *
  * Return:
  *  Pointers to context control (sp, splimit, dummy, lr) of the current and
@@ -311,7 +311,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  *  Each takes 32 bits. The context control is used by PendSV_Handler to do
  *  context switch.
  */
-uint64_t ipc_schedule(void);
+uint64_t ipc_schedule(uint32_t exc_return);
 
 /**
  * \brief                      SPM initialization implementation

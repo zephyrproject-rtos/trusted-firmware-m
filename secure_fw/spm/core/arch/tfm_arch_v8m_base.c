@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -106,6 +106,9 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
 #endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   mov     r0, lr                              \n" /* Pass the EXC_RETURN value as
+                                                             * parameter
+                                                             */
         "   bl      ipc_schedule                        \n"
         "   pop     {r2, r3}                            \n"
         "   mov     lr, r3                              \n"

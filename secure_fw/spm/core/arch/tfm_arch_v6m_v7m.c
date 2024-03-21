@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -88,6 +88,7 @@ __attribute__((naked)) void PendSV_Handler(void)
     __ASM volatile(
         SYNTAX_UNIFIED
         "   push    {r0, lr}                \n"
+        "   mov     r0, lr                  \n" /* pass the EXC_RETURN value as parameter */
         "   bl      ipc_schedule            \n"
         "   pop     {r2, r3}                \n"
         "   mov     lr, r3                  \n"

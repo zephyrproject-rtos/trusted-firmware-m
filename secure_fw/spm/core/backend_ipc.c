@@ -446,7 +446,7 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     return result;
 }
 
-uint64_t ipc_schedule(void)
+uint64_t ipc_schedule(uint32_t exc_return)
 {
     fih_int fih_rc = FIH_FAILURE;
     AAPCS_DUAL_U32_T ctx_ctrls;
@@ -471,8 +471,17 @@ uint64_t ipc_schedule(void)
     }
 #endif
 
-    pth_next = thrd_next();
     p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
+
+    /*
+     * Update SP for current thread, in case tfm_arch_set_context_ret_code have to update R0
+     * in the current thread's saved context.
+     */
+    p_curr_ctx->sp = __get_PSP() -
+        (is_default_stacking_rules_apply(exc_return) ?
+            sizeof(struct tfm_additional_context_t) : 0);
+
+    pth_next = thrd_next();
 
     AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
 
