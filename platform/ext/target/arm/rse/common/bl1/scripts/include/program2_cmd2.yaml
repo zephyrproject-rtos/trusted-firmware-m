@@ -5,8 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command writes 0x1 into the DMA350 Channel1 CH_CMD register, this causes
-# it to start running.
+# This command sets the address of program3_cmd0 into the DMA350 Channel1
+# LINKADDR register.
 
 Header:
   - REGCLEAR: 0
@@ -42,8 +42,8 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'dma350_base_address + 0x1100'
+DESADDR: 'dma350_base_address + 0x1178'
 XSIZE: 0x00010000
-FILLVAL: 0x00000001
+FILLVAL: "program3_cmd0_exec_addr"
 GPOVAL0: 0x00000002
-LINKADDR: "program4_cmd0_exec_addr"
+LINKADDR: "program2_cmd3_exec_addr"

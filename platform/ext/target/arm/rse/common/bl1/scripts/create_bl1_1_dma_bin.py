@@ -76,14 +76,6 @@ def parse_base_address(command, key, reference_string):
     return location_base_addresses[reference_string]
 
 def parse(command, key, reference_string):
-    if "/" in reference_string:
-        split = reference_string.split(" / ", maxsplit=1)
-        return parse(command, key, split[0].lstrip()) // parse(command, key, split[1])
-
-    if "*" in reference_string:
-        split = reference_string.split(" * ", maxsplit=1)
-        return parse(command, key, split[0].lstrip()) * parse(command, key, split[1])
-
     if "-" in reference_string:
         split = reference_string.split(" - ", maxsplit=1)
         return parse(command, key, split[0].lstrip()) - parse(command, key, split[1])
@@ -91,6 +83,14 @@ def parse(command, key, reference_string):
     if "+" in reference_string:
         split = reference_string.split(" + ", maxsplit=1)
         return parse(command, key, split[0].lstrip()) + parse(command, key, split[1])
+
+    if "/" in reference_string:
+        split = reference_string.split(" / ", maxsplit=1)
+        return parse(command, key, split[0].lstrip()) // parse(command, key, split[1])
+
+    if "*" in reference_string:
+        split = reference_string.split(" * ", maxsplit=1)
+        return parse(command, key, split[0].lstrip()) * parse(command, key, split[1])
 
     if "_store_addr" in reference_string:
         value = parse_store(command, key, reference_string.replace("_store_addr", ""))

@@ -21,7 +21,7 @@ Header:
   - XSIZEHI: 0
   - SRCTRANSCFG: 1
   - DESTRANSCFG: 1
-  - XADDRINC: 0
+  - XADDRINC: 1
   - YADDRSTRIDE: 0
   - FILLVAL: 0
   - YSIZE: 0
@@ -46,10 +46,10 @@ SRCADDR: 'program4_cmd2_store_addr + program4_cmd2_size - 0xC'
 DESADDR: 'integrity_checker_base_address + 0x18'
 XSIZE: 0x00030003
 SRCTRANSCFG: 0x000F0044
-DESTRIGINCFG: 0x00000000
+DESTRANSCFG: 0x00000000
+XADDRINC: 0x00010001
 GPOVAL0: 0x00000003
 LINKADDR: "program4_cmd3_exec_addr"
-execute_link: false
-ICDA: 'vm0_base_address + 0x4' # The program to be measured starts after the integrity value word
+ICDA: 'vm0_base_address + 0x8' # The program to be measured starts after the integrity value word
 ICDL: 'otp_size / 2 - 0x1' # This is measured in 8-byte IC words, so divide the size (which is in 4-byte words) by 2
 ICEVA: 'vm0_base_address' # The first (8-byte) word in VM0 is the integrity value

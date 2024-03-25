@@ -5,8 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command sets the address of program3_cmd0 into the DMA350 Channel1
-# LINKADDR register.
+# Disable the wait for trigger on channel 1, since otherwise later programs in
+# channel 1 will inherit the trigger wait.
 
 Header:
   - REGCLEAR: 0
@@ -42,8 +42,8 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 'dma350_base_address + 0x1178'
+DESADDR: 'dma350_base_address + 0x110C'
 XSIZE: 0x00010000
-FILLVAL: "program3_cmd0_exec_addr"
-GPOVAL0: 0x00000003
+FILLVAL: 0x00000000
+GPOVAL0: 0x00000002
 LINKADDR: "program2_cmd2_exec_addr"

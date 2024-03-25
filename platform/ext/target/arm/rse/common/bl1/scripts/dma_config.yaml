@@ -11,7 +11,7 @@ locations:
     vm0:
         base_address: 0x31000000
         size: 0x10000
-        reserved: 0x4
+        reserved: 0x8
     otp:
         # This has to be manually calculated, and must be updated if the OTP
         # layout changes
@@ -20,11 +20,6 @@ locations:
         reserved: 0x8
     integrity_checker:
         base_address: 0x5015C000
-    otp_sam_config:
-        # This has to be manually calculated, and must be updated if the OTP
-        # layout changes
-        base_address: 0x500A1114
-        size: 0x60
     sam:
         base_address: 0x5009F000
     dma350:
@@ -71,6 +66,7 @@ program:
       - !include include/program2_cmd0.yaml         # Program 2 - Command 0
       - !include include/program2_cmd1.yaml         # Program 2 - Command 1
       - !include include/program2_cmd2.yaml         # Program 2 - Command 2
+      - !include include/program2_cmd3.yaml         # Program 2 - Command 3
 
   - storage_location: "rom"
     execution_location: "rom"

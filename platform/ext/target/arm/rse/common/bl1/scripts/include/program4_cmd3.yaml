@@ -46,7 +46,7 @@ SRCADDR: 'program4_cmd3_store_addr + program4_cmd3_size - 0x4'
 DESADDR: 'integrity_checker_base_address + 0x4'
 XSIZE: 0x00010001
 SRCTRANSCFG: 0x000F0044
-DESTRIGINCFG: 0x00000000
+DESTRANSCFG: 0x00000000
 GPOVAL0: 0x00000003
 LINKADDR: "program4_cmd4_exec_addr"
 ICC: 0x00000081
