@@ -35,18 +35,18 @@ extern uint32_t __STACK_LIMIT;
 extern uint64_t __STACK_SEAL;
 #endif
 
-extern void __PROGRAM_START(void) __NO_RETURN;
+extern __NO_RETURN void __PROGRAM_START(void);
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Reset_Handler  (void) __NO_RETURN;
+__NO_RETURN void Reset_Handler (void);
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void __WEAK handler_name(void) __NO_RETURN; \
+__NO_RETURN void __WEAK handler_name(void); \
 void handler_name(void) { \
     while(1); \
 }

@@ -49,7 +49,7 @@ void boot_clear_ram_area(void);
  * \param[in] reset_handler_addr Address of next image's Reset_Handler() in
                                  the boot chain (TF-M SPE, etc.)
  */
-void boot_jump_to_next_image(uint32_t reset_handler_addr) __NO_RETURN;
+__NO_RETURN void boot_jump_to_next_image(uint32_t reset_handler_addr);
 
 /**
  * \brief Platform peripherals and devices initialization.
@@ -74,7 +74,7 @@ int32_t boot_platform_post_init(void);
  *
  * \param[in] vt  pointer to secure application vector table descriptor
  */
-void boot_platform_quit(struct boot_arm_vector_table *vt) __NO_RETURN;
+__NO_RETURN void boot_platform_quit(struct boot_arm_vector_table *vt);
 
 /**
  * \brief Platform operation to perform steps required before image load.

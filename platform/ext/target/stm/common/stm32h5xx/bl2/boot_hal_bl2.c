@@ -122,7 +122,7 @@ volatile uint32_t uFlowStage = FLOW_STAGE_CFG;
   * @{
   */
 #ifdef MCUBOOT_EXT_LOADER
-void execute_loader(void) __NO_RETURN;
+__NO_RETURN void execute_loader(void);
 #endif /* MCUBOOT_EXT_LOADER */
 void boot_clean_ns_ram_area(void);
 __attribute__((naked)) void boot_jump_to_ns_image(uint32_t reset_handler_addr);

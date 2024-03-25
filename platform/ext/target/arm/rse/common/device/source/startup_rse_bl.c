@@ -29,12 +29,12 @@
 extern uint32_t __INITIAL_SP;
 extern uint32_t __STACK_LIMIT;
 
-extern void __PROGRAM_START(void) __NO_RETURN;
+extern __NO_RETURN void __PROGRAM_START(void);
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Reset_Handler(void) __NO_RETURN;
+__NO_RETURN void Reset_Handler(void);
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler
