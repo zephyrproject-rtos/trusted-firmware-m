@@ -28,6 +28,14 @@
 #include <stdint.h>
 #include <assert.h>
 
+#ifdef LCM_DCU_PARITY
+#define DCU_ENABLED_MASK  0x55555555
+#define DCU_DISABLED_MASK 0xAAAAAAAA
+#else
+#define DCU_ENABLED_MASK  0xFFFFFFFF
+#define DCU_DISABLED_MASK 0x00000000
+#endif
+
 #ifdef INTEGRITY_CHECKER_S
  __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
 #endif
@@ -235,12 +243,33 @@ enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enab
     return LCM_ERROR_NONE;
 }
 
+static inline enum lcm_error_t mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
+{
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+    size_t idx;
+    uint32_t mask_enabled;
+    uint32_t mask_disabled;
+
+    for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
+        mask_enabled = p_lcm->dcu_sp_disable_mask[idx] & DCU_ENABLED_MASK;
+        mask_disabled = p_lcm->dcu_sp_disable_mask[idx] & DCU_DISABLED_MASK;
+
+        p_lcm->dcu_en[idx] = mask_enabled & p_lcm->dcu_en[idx];
+
+        p_lcm->dcu_en[idx] |= ((~p_lcm->dcu_en[idx] & DCU_ENABLED_MASK) << 1) & mask_disabled;
+    }
+
+    return LCM_ERROR_NONE;
+}
+
 enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
     enum lcm_error_t err;
     uint32_t idx;
+
+    mask_dcus_for_sp_enable(dev);
 
     /* High hamming-weight magic constant used to trigger secure provisioning
      * mode
@@ -909,14 +938,34 @@ enum lcm_error_t lcm_dcu_get_enabled(struct lcm_dev_t *dev, uint8_t *val)
     return LCM_ERROR_NONE;
 }
 
+static enum lcm_error_t check_dcu_mask(struct lcm_dev_t *dev, uint32_t *val)
+{
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+    size_t idx;
+
+    for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
+        if (val[idx] & ~p_lcm->dcu_disable_mask[idx]) {
+            return LCM_ERR_DCU_MASK_MISMATCH;
+        }
+    }
+
+    return LCM_ERROR_NONE;
+}
+
 enum lcm_error_t lcm_dcu_set_enabled(struct lcm_dev_t *dev, uint8_t *val)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     uint32_t *p_val_word = (uint32_t *)val;
+    enum lcm_error_t err;
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
         return LCM_ERROR_INVALID_ALIGNMENT;
+    }
+
+    err = check_dcu_mask(dev, p_val_word);
+    if (err != LCM_ERROR_NONE) {
+        return err;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
