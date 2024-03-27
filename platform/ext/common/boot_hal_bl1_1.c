@@ -36,11 +36,6 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
 
-REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
-REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
-REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
-REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
-
 /*!
  * \brief Chain-loading the next image in the boot sequence.
  *
@@ -53,9 +48,6 @@ REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
  *  - There are secrets in the memory: KDF parameter, symmetric key,
  *    manufacturer sensitive code/data, etc.
  */
-#if defined(__ICCARM__)
-#pragma required = boot_clear_ram_area
-#endif
 
 __WEAK __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
 {

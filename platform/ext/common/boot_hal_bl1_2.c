@@ -35,11 +35,17 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
 
+#if defined(__ICCARM__)
+REGION_DECLARE(Image$$, BL1_1_ER_DATA, $$Base)[];
+REGION_DECLARE(Image$$, BL1_1_ER_DATA, $$Limit)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA, $$Base)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA, $$Limit)[];
+#else
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
 REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
 REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
-
+#endif
 /* Erase both BL1 data sections at the end of BL1_2
  * At the point this function is called, the SP has been set to the next image's
  * initial SP and this function itself will wipe the executing image's data
@@ -54,8 +60,13 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
 #endif
         /* Clear the entire BL1_1 data section */
         "movs    r0, #0                                \n"
+#if defined(__ICCARM__)
+        "ldr     r1, =BL1_1_ER_DATA$$Base \n"
+        "ldr     r2, =BL1_1_ER_DATA$$Limit \n"
+#else
         "ldr     r1, =Image$$BL1_1_ER_DATA_START$$Base \n"
         "ldr     r2, =Image$$BL1_1_ER_DATA_LIMIT$$Base \n"
+#endif
         "subs    r2, r2, r1                            \n"
         "Loop_1:                                       \n"
         "subs    r2, #4                                \n"
@@ -65,8 +76,13 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
         "Clear_done_1:                                 \n"
         /* Clear the entire BL1_2 data section */
         "movs    r0, #0                                \n"
+#if defined(__ICCARM__)
+        "ldr     r1, =BL1_2_ER_DATA$$Base \n"
+        "ldr     r2, =BL1_2_ER_DATA$$Limit \n"
+#else
         "ldr     r1, =Image$$BL1_2_ER_DATA_START$$Base \n"
         "ldr     r2, =Image$$BL1_2_ER_DATA_LIMIT$$Base \n"
+#endif
         "subs    r2, r2, r1                            \n"
         "Loop_2:                                       \n"
         "subs    r2, #4                                \n"

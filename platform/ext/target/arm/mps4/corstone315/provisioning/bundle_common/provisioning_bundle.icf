@@ -1,0 +1,41 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include "region_defs.h"
+
+do not initialize { section .noinit };
+do not initialize { readwrite };
+
+define block VALUES with fixed order, maximum size = PROVISIONING_BUNDLE_VALUES_SIZE {
+       ro object *provisioning_data.o
+};
+"VALUES": place at address PROVISIONING_BUNDLE_VALUES_START { block VALUES };
+
+define ram region DATA = [from PROVISIONING_BUNDLE_DATA_START size PROVISIONING_BUNDLE_DATA_SIZE];
+
+define block RW_DATA {
+    rw data
+};
+"RW_DATA": place at start of DATA { block RW_DATA };
+
+define block RO_DATA {
+    ro data
+} except  {
+    ro object *provisioning_data.o
+};
+"RO_DATA": place in DATA { block RO_DATA };
+
+define block BSS_DATA {
+    zi section .bss
+};
+"BSS_DATA": place in DATA { block BSS_DATA };
+
+define block CODE with fixed order, alignment = 4, maximum size = PROVISIONING_BUNDLE_CODE_SIZE {
+    ro section DO_PROVISION,
+    ro code,
+};
+"CODE": place at address PROVISIONING_BUNDLE_CODE_START { block CODE };

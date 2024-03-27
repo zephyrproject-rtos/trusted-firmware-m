@@ -339,13 +339,13 @@ include(libflash_drivers.cmake)
 target_add_scatter_file(bl1_1
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone315_bl1_1.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone315_bl1_1.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/corstone315_bl1_1.icf>
 )
 
 target_sources(platform_bl1_1
     PRIVATE
         nv_counters.c
         otp_lcm.c
-        bl1/boot_hal_bl1_1.c
         cmsis_drivers/Driver_USART.c
         device/source/system_core_init.c
         device/source/startup_corstone315.c
@@ -365,20 +365,34 @@ target_link_libraries(platform_bl1_1
         cmsis_includes_bl1
 )
 
+# If this is not added to the bl1_1 it will not correctly override the weak
+# functions and will instead be discarded as they are not in use.
+target_sources(bl1_1
+    PUBLIC
+        bl1/boot_hal_bl1_1.c
+)
+
 #========================= Platform BL1_2 =====================================#
 
 target_add_scatter_file(bl1_2
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone315_bl1_2.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone315_bl1_2.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/corstone315_bl1_2.icf>
 )
 
 target_sources(platform_bl1_2
     PUBLIC
         device/source/startup_corstone315.c
     PRIVATE
-        bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
 
+)
+
+# If this is not added to the bl1_2 it will not correctly override the weak
+# functions and will instead be discarded as they are not in use.
+target_sources(bl1_2
+    PRIVATE
+        bl1/boot_hal_bl1_2.c
 )
 
 target_compile_definitions(platform_bl1_2

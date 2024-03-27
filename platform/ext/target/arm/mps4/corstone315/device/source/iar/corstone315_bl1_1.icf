@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+/* Linker script to configure memory regions. */
+/* This file will be run trough the pre-processor. */
+
+#include "region_defs.h"
+
+do not initialize  { section .noinit };
+initialize by copy { readwrite };
+
+define block ER_CODE            with fixed order, alignment = 8, size = BL1_1_CODE_SIZE {
+       section .intvec,
+       readonly
+};
+define block LR_CODE with fixed order {block ER_CODE};
+place at address BL1_1_CODE_START {block LR_CODE};
+
+define block TFM_SHARED_DATA        with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
+define block ER_DATA                with alignment = 32 {readwrite};
+define block CSTACK                 with alignment = 32, size = BL1_1_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK          with alignment = 32, size = BL1_1_MSP_STACK_SIZE { };
+define block HEAP                   with alignment = 8, size = BL1_1_HEAP_SIZE { };
+define block ARM_LIB_HEAP           with alignment = 8, size = BL1_1_HEAP_SIZE { };
+define block SRAM_WATERMARK         with size = 0 { };
+define overlay HEAP_OVL             {block HEAP};
+define overlay HEAP_OVL             {block ARM_LIB_HEAP};
+define overlay STACK_OVL            {block CSTACK};
+define overlay STACK_OVL            {block ARM_LIB_STACK};
+keep {block TFM_SHARED_DATA,
+      block CSTACK,
+      block ARM_LIB_STACK,
+      block HEAP,
+      block ARM_LIB_HEAP,
+      block SRAM_WATERMARK,
+};
+
+if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
+{
+  // Required in a multi-threaded application
+  initialize by copy with packing = none { section __DLIB_PERTHREAD };
+}
+
+define block BL1_1_ER_DATA with fixed order, maximum size = BL1_1_DATA_SIZE  {
+        block TFM_SHARED_DATA,
+        block ER_DATA,
+        overlay STACK_OVL,
+        overlay HEAP_OVL,
+        block SRAM_WATERMARK,
+};
+place at address BL1_1_DATA_START {block BL1_1_ER_DATA};
+
+define block BL1_2_ER_DATA with fixed order, size = BL1_2_DATA_SIZE  {
+};
+place at address BL1_2_DATA_START {block BL1_2_ER_DATA};
+keep {block BL1_2_ER_DATA,
+};

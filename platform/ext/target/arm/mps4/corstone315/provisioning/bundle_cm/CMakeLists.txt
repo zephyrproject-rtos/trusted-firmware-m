@@ -30,6 +30,7 @@ set_target_properties(cm_provisioning_bundle
 target_add_scatter_file(cm_provisioning_bundle
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.icf>
 )
 
 target_link_options(cm_provisioning_bundle
@@ -95,13 +96,8 @@ add_custom_command(OUTPUT cm_provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../create_provisioning_bundle.py
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf cm_provisioning_bundle.axf
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-                    --dump-section CODE=cm_provisioning_code.bin
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-                    --dump-section VALUES=cm_provisioning_values.bin
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../create_provisioning_bundle.py
-                    --provisioning_code cm_provisioning_code.bin
-                    --provisioning_values cm_provisioning_values.bin
+                    --provisioning_bundle_axf $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
                     --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                     --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
                     --bl2_signed_hash_input_file $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
