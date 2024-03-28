@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -24,29 +24,30 @@
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
     Cy_PDL_Init(CY_DEVICE_CFG);
 
     if (smpu_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
     if (ppu_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
     if (bus_masters_cfg() != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
     *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
-enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
+                                           uintptr_t boundary,
                                            uintptr_t base,
                                            size_t size,
                                            uint32_t access_type)
@@ -59,7 +60,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
     } else if (access_type & TFM_HAL_ACCESS_READABLE) {
         flags |= MEM_CHECK_MPU_READ;
     } else {
-        return TFM_HAL_ERROR_INVALID_INPUT;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_INVALID_INPUT));
     }
 
     if (access_type & TFM_HAL_ACCESS_NS) {
@@ -76,10 +77,10 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
 
     status = tfm_has_access_to_region((const void *)base, size, flags);
     if (status != SPM_SUCCESS) {
-         return TFM_HAL_ERROR_MEM_FAULT;
+         FIH_RET(fih_int_encode(TFM_HAL_ERROR_MEM_FAULT));
     }
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
 /*
@@ -92,7 +93,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
  * SPM passes the handle to platform to do platform settings and update
  * isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
@@ -102,7 +103,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     const struct asset_desc_t *p_asset;
 
     if (!p_ldinf || !p_boundary) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
 #if TFM_ISOLATION_LEVEL == 1
@@ -130,17 +131,17 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
         }
 
         if (j == ARRAY_SIZE(partition_named_mmio_list)) {
-            return TFM_HAL_ERROR_GENERIC;
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
         }
     }
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                         HANDLE_ATTR_PRIV_MASK;
     *p_boundary = (uintptr_t)partition_attrs;
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
-enum tfm_hal_status_t tfm_hal_activate_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
                              uintptr_t boundary)
 {
@@ -152,7 +153,7 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     ctrl.b.nPRIV = privileged ? 0 : 1;
     __set_CONTROL(ctrl.w);
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
 bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,

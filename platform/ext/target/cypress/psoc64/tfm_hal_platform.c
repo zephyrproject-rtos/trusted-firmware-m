@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,7 +50,7 @@ void mock_tfm_shared_data(void)
     memcpy(boot_data, mock_data, sizeof(mock_data));
 }
 
-enum tfm_hal_status_t tfm_hal_platform_init(void)
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 
@@ -67,15 +69,15 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
     plat_err = nvic_interrupt_target_state_cfg();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
     plat_err = nvic_interrupt_enable();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
 uint32_t tfm_hal_get_ns_VTOR(void)
