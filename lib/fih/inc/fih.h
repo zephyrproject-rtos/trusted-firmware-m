@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -197,18 +200,20 @@ void fih_delay(void)
 
 #ifdef FIH_ENABLE_DOUBLE_VARS
 __attribute__((always_inline)) inline
-void fih_int_validate(fih_int x)
+int fih_int_validate(fih_int x)
 {
     if (x.val != (x.msk ^ _FIH_MASK_VALUE)) {
         FIH_PANIC;
     }
+
+    return 1;
 }
 
 /* Convert a fih_int to an int. Validate for tampering. */
 __attribute__((always_inline)) inline
 int32_t fih_int_decode(fih_int x)
 {
-    fih_int_validate(x);
+    (void)fih_int_validate(x);
     return x.val;
 }
 
@@ -227,8 +232,8 @@ int32_t fih_eq(fih_int x, fih_int y)
     volatile int32_t rc1 = FIH_FALSE;
     volatile int32_t rc2 = FIH_FALSE;
 
-    fih_int_validate(x);
-    fih_int_validate(y);
+    (void)fih_int_validate(x);
+    (void)fih_int_validate(y);
 
     if (x.val == y.val) {
         rc1 = FIH_TRUE;
@@ -255,8 +260,8 @@ int32_t fih_not_eq(fih_int x, fih_int y)
     volatile int32_t rc1 = FIH_FALSE;
     volatile int32_t rc2 = FIH_FALSE;
 
-    fih_int_validate(x);
-    fih_int_validate(y);
+    (void)fih_int_validate(x);
+    (void)fih_int_validate(y);
 
     if (x.val != y.val) {
         rc1 = FIH_TRUE;
@@ -278,7 +283,7 @@ int32_t fih_not_eq(fih_int x, fih_int y)
 }
 #else /* FIH_ENABLE_DOUBLE_VARS */
 /* NOOP */
-#define fih_int_validate(x)
+#define fih_int_validate(x)        1
 
 /* NOOP */
 #define fih_int_decode(x)          (x)
@@ -424,7 +429,7 @@ void fih_cfi_decrement(void);
 #define FIH_CFI_STEP_ERR_RESET() \
         do { \
             _fih_cfi_ctr = _fih_cfi_step_saved_value; \
-            fih_int_validate(_fih_cfi_ctr); \
+            (void)fih_int_validate(_fih_cfi_ctr); \
         } while(0)
 
 #else /* FIH_ENABLE_CFI */
@@ -468,7 +473,7 @@ void fih_cfi_decrement(void);
         fih_delay(); \
         ret = f(__VA_ARGS__); \
         FIH_CFI_POSTCALL_BLOCK; \
-        fih_int_validate(ret); \
+        (void)fih_int_validate(ret); \
         FIH_LABEL("FIH_CALL_END"); \
     } while (0)
 
@@ -498,7 +503,7 @@ typedef int32_t fih_int;
 #define FIH_SUCCESS           0
 #define FIH_FAILURE           -1
 
-#define fih_int_validate(x)
+#define fih_int_validate(x)   1
 
 #define fih_int_decode(x)     (x)
 
