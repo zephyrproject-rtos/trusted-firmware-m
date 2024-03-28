@@ -40,7 +40,6 @@ target_include_directories(device_definition
         device/include
         native_drivers
         partition
-        libraries
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
@@ -50,6 +49,7 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/watchdog
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/include
         ${ETHOS_DRIVER_PATH}/src
         ${ETHOS_DRIVER_PATH}/include
@@ -200,11 +200,11 @@ target_sources(platform_s
         $<$<OR:$<BOOL:${TFM_PARTITION_SLIH_TEST}>,$<BOOL:${TFM_PARTITION_FLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 
         # DMA350 files
-        native_drivers/dma350_ch_drv.c
-        native_drivers/dma350_drv.c
-        libraries/dma350_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
-        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_checker_layer.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_address_remap.c>
 )
@@ -426,7 +426,6 @@ install(DIRECTORY   device
                     native_drivers
                     cmsis_drivers
                     partition
-                    libraries
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/arm/drivers

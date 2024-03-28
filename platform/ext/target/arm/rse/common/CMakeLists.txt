@@ -138,6 +138,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ./bringup_helpers
 )
 
@@ -148,12 +149,12 @@ target_sources(platform_s
         device/source/device_definition.c
         device/source/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
-        libraries/dma350_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c
         $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds.c>
         $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds_svc.c>
         native_drivers/atu_rse_drv.c
-        native_drivers/dma350_drv.c
-        native_drivers/dma350_ch_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c
         native_drivers/kmu_drv.c
         native_drivers/sic_drv.c
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
@@ -179,7 +180,7 @@ target_sources(platform_s
         sam_interrupts.c
         tfm_hal_platform_reset.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
-        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_checker_layer.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
         spm_dma_copy.c
 )
@@ -241,10 +242,10 @@ target_sources(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/util/ni_tower_util.c>
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rse_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_lib.c>
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c>
         native_drivers/atu_rse_drv.c
-        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_ch_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c>
         native_drivers/kmu_drv.c
         native_drivers/sic_drv.c
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
@@ -281,6 +282,7 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ./bringup_helpers
     PRIVATE
         ${PLATFORM_DIR}/..
@@ -345,6 +347,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
         ./bringup_helpers
 )
@@ -438,6 +441,7 @@ target_include_directories(platform_bl1_2
     PRIVATE
         .
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
 )
 
 target_compile_definitions(platform_bl1_2

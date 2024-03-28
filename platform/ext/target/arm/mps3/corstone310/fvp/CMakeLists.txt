@@ -15,10 +15,10 @@ add_library(flash_drivers_bl2 STATIC)
 
 target_sources(platform_fvp
     PRIVATE
-    native_drivers/dma350_ch_drv.c
-    native_drivers/dma350_drv.c
-    libraries/dma350_lib.c
-    $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
+    ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c
+    ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c
+    ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c
+    $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_checker_layer.c>
     $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
     $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_address_remap.c>
 )
@@ -33,8 +33,6 @@ target_compile_definitions(platform_fvp
 target_include_directories(platform_fvp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        libraries
-        native_drivers
     PRIVATE
         ${CMAKE_SOURCE_DIR}
         device/config
@@ -46,6 +44,7 @@ target_include_directories(platform_fvp
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
 )
 
 target_compile_options(platform_fvp
@@ -71,8 +70,7 @@ target_link_libraries(platform_s
 
 target_include_directories(device_definition
     INTERFACE
-        libraries
-        native_drivers
+        ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
 )
 
 add_library(flash_drivers INTERFACE)
@@ -111,12 +109,6 @@ target_sources(tfm_spm
 #========================= Files for building NS side platform ================#
 
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/device
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(DIRECTORY   ${TARGET_PLATFORM_PATH}/native_drivers
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(DIRECTORY   ${TARGET_PLATFORM_PATH}/libraries
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
