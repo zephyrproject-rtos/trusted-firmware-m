@@ -24,9 +24,9 @@
             (NI_TOWER_PSAM_ADDRESS_GRAN - 1)
 
 enum ni_tower_err ni_tower_psam_configure_nhregion(
-                            struct ni_tower_psam_dev *dev,
-                            const struct ni_tower_psam_reg_cfg_info *cfg_info,
-                            uint32_t region)
+    const struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_reg_cfg_info *cfg_info,
+    const uint32_t region)
 {
     struct ni_tower_psam_reg_map* reg;
     uint64_t base_addr, end_addr;
@@ -90,7 +90,7 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
 }
 
 static enum ni_tower_err get_next_available_region(
-    struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_dev *dev,
     uint32_t *region)
 {
     struct ni_tower_psam_reg_map* reg;
@@ -113,7 +113,7 @@ static enum ni_tower_err get_next_available_region(
 }
 
 enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
-    struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_dev *dev,
     const struct ni_tower_psam_reg_cfg_info *cfg_info)
 {
     enum ni_tower_err err;
@@ -128,7 +128,7 @@ enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
             next_available_region);
 }
 
-enum ni_tower_err ni_tower_psam_enable(struct ni_tower_psam_dev *dev)
+enum ni_tower_err ni_tower_psam_enable(const struct ni_tower_psam_dev *dev)
 {
     struct ni_tower_psam_reg_map* reg;
 
@@ -143,7 +143,7 @@ enum ni_tower_err ni_tower_psam_enable(struct ni_tower_psam_dev *dev)
     return NI_TOWER_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_psam_disable(struct ni_tower_psam_dev *dev)
+enum ni_tower_err ni_tower_psam_disable(const struct ni_tower_psam_dev *dev)
 {
     struct ni_tower_psam_reg_map* reg;
 

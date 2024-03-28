@@ -9,11 +9,11 @@
 #include <stddef.h>
 
 static enum ni_tower_err ni_tower_fetch_offset_address(
-                    struct ni_tower_dev *dev,
-                    enum ni_tower_node_type_value component_node_type,
-                    uint32_t component_node_id,
-                    enum ni_tower_subfeature_type_value subfeature_node_type,
-                    uint32_t *off_addr)
+    const struct ni_tower_dev *dev,
+    const enum ni_tower_node_type_value component_node_type,
+    const uint32_t component_node_id,
+    const enum ni_tower_subfeature_type_value subfeature_node_type,
+    uint32_t *off_addr)
 {
     struct ni_tower_discovery_node root = {
         .node_type = NI_TOWER_CFGNI,
@@ -26,14 +26,15 @@ static enum ni_tower_err ni_tower_fetch_offset_address(
                                     off_addr);
 }
 
-enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
-                            struct ni_tower_psam_cfgs psam_table[],
-                            uint32_t psam_table_count)
+enum ni_tower_err ni_tower_program_psam_table(
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_psam_cfgs psam_table[],
+    const uint32_t psam_table_count)
 {
     enum ni_tower_err err;
     struct ni_tower_psam_dev psam_dev;
-    struct ni_tower_psam_dev_cfg* psam_dev_cfg;
-    struct ni_tower_psam_reg_cfg_info* r_info;
+    const struct ni_tower_psam_dev_cfg* psam_dev_cfg;
+    const struct ni_tower_psam_reg_cfg_info* r_info;
     uint32_t p_idx, r_idx, off_addr;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {
@@ -84,14 +85,15 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
     return NI_TOWER_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
-                           struct ni_tower_apu_cfgs apu_table[],
-                           uint32_t apu_table_count)
+enum ni_tower_err ni_tower_program_apu_table(
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_apu_cfgs apu_table[],
+    const uint32_t apu_table_count)
 {
     enum ni_tower_err err;
     struct ni_tower_apu_dev apu_dev;
-    struct ni_tower_apu_dev_cfg* apu_dev_cfg;
-    struct ni_tower_apu_reg_cfg_info* r_info;
+    const struct ni_tower_apu_dev_cfg* apu_dev_cfg;
+    const struct ni_tower_apu_reg_cfg_info* r_info;
     uint32_t a_idx, r_idx, off_addr;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {

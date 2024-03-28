@@ -21,13 +21,13 @@
  */
 struct ni_tower_psam_cfgs {
     /* Pointer to the PSAM device configuration */
-    struct ni_tower_psam_dev_cfg* dev_cfg;
+    const struct ni_tower_psam_dev_cfg* dev_cfg;
     /* Number of non-hashed regions that needs to be configured */
-    uint32_t nh_region_count;
+    const uint32_t nh_region_count;
     /* List of all region configuration information */
-    struct ni_tower_psam_reg_cfg_info* regions;
+    const struct ni_tower_psam_reg_cfg_info* regions;
     /* Whether to add chip address offset to the memory map regions */
-    bool add_chip_addr_offset;
+    const bool add_chip_addr_offset;
 };
 
 /**
@@ -35,13 +35,13 @@ struct ni_tower_psam_cfgs {
  */
 struct ni_tower_apu_cfgs {
     /* Pointer to the APU device configuration */
-    struct ni_tower_apu_dev_cfg* dev_cfg;
+    const struct ni_tower_apu_dev_cfg* dev_cfg;
     /* Number of address regions that needs to be configured */
-    uint32_t region_count;
+    const uint32_t region_count;
     /* List of all region configuration information */
-    struct ni_tower_apu_reg_cfg_info* regions;
+    const struct ni_tower_apu_reg_cfg_info* regions;
     /* Whether to add chip address offset to the memory map regions */
-    bool add_chip_addr_offset;
+    const bool add_chip_addr_offset;
 };
 
 /**
@@ -54,9 +54,10 @@ struct ni_tower_apu_cfgs {
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
-                            struct ni_tower_psam_cfgs psam_table[],
-                            uint32_t psam_table_count);
+enum ni_tower_err ni_tower_program_psam_table(
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_psam_cfgs psam_table[],
+    const uint32_t psam_table_count);
 
 /**
  * \brief Program NI-Tower APU from APU configs
@@ -68,8 +69,9 @@ enum ni_tower_err ni_tower_program_psam_table(struct ni_tower_dev *dev,
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_program_apu_table(struct ni_tower_dev *dev,
-                           struct ni_tower_apu_cfgs apu_table[],
-                           uint32_t apu_table_count);
+enum ni_tower_err ni_tower_program_apu_table(
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_apu_cfgs apu_table[],
+    const uint32_t apu_table_count);
 
 #endif /* __NI_TOWER_RSE_DRV_H__ */

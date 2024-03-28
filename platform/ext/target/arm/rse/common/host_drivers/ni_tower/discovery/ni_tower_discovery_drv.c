@@ -13,29 +13,30 @@
 #define FMU_CHECK(node_base) \
                 (*(uint32_t *)((node_base) + FMU_CHECK_OFFSET_ADDRESS))
 
-static inline bool ni_tower_type_is_domain(enum ni_tower_node_type_value type)
+static inline bool ni_tower_type_is_domain(
+    const enum ni_tower_node_type_value type)
 {
     return ((type) == NI_TOWER_CFGNI) || ((type) == NI_TOWER_VD) ||
            ((type) == NI_TOWER_PD) || ((type) == NI_TOWER_CD);
 }
 
-static inline bool
-ni_tower_type_is_component(enum ni_tower_node_type_value type)
+static inline bool ni_tower_type_is_component(
+    const enum ni_tower_node_type_value type)
 {
     return ((type) == NI_TOWER_ASNI) || ((type) == NI_TOWER_AMNI) ||
            ((type) == NI_TOWER_PMU) || ((type) == NI_TOWER_HSNI) ||
            ((type) == NI_TOWER_HMNI) || ((type) == NI_TOWER_PMNI);
 }
 
-static inline bool
-ni_tower_type_is_subfeature(enum ni_tower_subfeature_type_value type)
+static inline bool ni_tower_type_is_subfeature(
+    const enum ni_tower_subfeature_type_value type)
 {
     return ((type) == NI_TOWER_APU) || ((type) == NI_TOWER_PSAM) ||
            ((type) == NI_TOWER_FCU) || ((type) == NI_TOWER_IDM);
 }
 
-static enum ni_tower_err
-ni_tower_check_interconnect_part_number(struct ni_tower_dev *dev)
+static enum ni_tower_err ni_tower_check_interconnect_part_number(
+    const struct ni_tower_dev *dev)
 {
     struct ni_tower_global_reg_map* reg;
     if (dev != NULL && dev->periphbase == (uintptr_t)NULL) {
@@ -54,11 +55,11 @@ ni_tower_check_interconnect_part_number(struct ni_tower_dev *dev)
     return NI_TOWER_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_discover_subfeature_offset(
-                    struct ni_tower_dev *dev,
-                    uint32_t component_offset_address,
-                    enum ni_tower_subfeature_type_value subfeature_node_type,
-                    uint32_t *ret_off_addr)
+static enum ni_tower_err ni_tower_discover_subfeature_offset(
+    const struct ni_tower_dev *dev,
+    const uint32_t component_offset_address,
+    const enum ni_tower_subfeature_type_value subfeature_node_type,
+    uint32_t *ret_off_addr)
 {
     uint32_t s_idx;
     struct ni_tower_component_cfg_hdr *component_hdr;
@@ -85,12 +86,12 @@ enum ni_tower_err ni_tower_discover_subfeature_offset(
 }
 
 enum ni_tower_err ni_tower_discover_offset(
-                    struct ni_tower_dev *dev,
-                    const struct ni_tower_discovery_node *cfg_node,
-                    enum ni_tower_node_type_value component_node_type,
-                    uint32_t component_node_id,
-                    enum ni_tower_subfeature_type_value subfeature_node_type,
-                    uint32_t *ret_off_addr)
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_discovery_node *cfg_node,
+    const enum ni_tower_node_type_value component_node_type,
+    const uint32_t component_node_id,
+    const enum ni_tower_subfeature_type_value subfeature_node_type,
+    uint32_t *ret_off_addr)
 {
     enum ni_tower_err err;
     struct ni_tower_discovery_node node;

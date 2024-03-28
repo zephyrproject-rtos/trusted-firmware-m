@@ -41,11 +41,11 @@ struct ni_tower_discovery_node {
  * \return Returns error code as specified in enum \ref ni_tower_err.
  */
 enum ni_tower_err ni_tower_discover_offset(
-                    struct ni_tower_dev *dev,
-                    const struct ni_tower_discovery_node *cfg_node,
-                    enum ni_tower_node_type_value component_node_type,
-                    uint32_t component_node_id,
-                    enum ni_tower_subfeature_type_value subfeature_node_type,
-                    uint32_t *ret_off_addr);
+    const struct ni_tower_dev *dev,
+    const struct ni_tower_discovery_node *cfg_node,
+    const enum ni_tower_node_type_value component_node_type,
+    const uint32_t component_node_id,
+    const enum ni_tower_subfeature_type_value subfeature_node_type,
+    uint32_t *ret_off_addr);
 
 #endif /* __NI_TOWER_DISCOVERY_DRV_H__ */

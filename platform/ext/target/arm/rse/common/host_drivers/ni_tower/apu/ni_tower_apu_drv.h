@@ -138,9 +138,9 @@ struct ni_tower_apu_dev {
  * \return Returns error code as specified in \ref ni_tower_err
  */
 enum ni_tower_err ni_tower_apu_configure_region(
-                            struct ni_tower_apu_dev *dev,
-                            const struct ni_tower_apu_reg_cfg_info *cfg_info,
-                            uint32_t region);
+    const struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_reg_cfg_info *cfg_info,
+    const uint32_t region);
 
 /**
  * \brief Get the next available region number and configure NI-Tower APU
@@ -153,7 +153,7 @@ enum ni_tower_err ni_tower_apu_configure_region(
  * \return Returns error code as specified in \ref ni_tower_err
  */
 enum ni_tower_err ni_tower_apu_configure_next_available_region(
-    struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_dev *dev,
     const struct ni_tower_apu_reg_cfg_info *cfg_info);
 
 /**
@@ -163,7 +163,7 @@ enum ni_tower_err ni_tower_apu_configure_next_available_region(
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_apu_enable(struct ni_tower_apu_dev *dev);
+enum ni_tower_err ni_tower_apu_enable(const struct ni_tower_apu_dev *dev);
 
 /**
  * \brief Enables NI-Tower APU SLVERR response.
@@ -172,6 +172,7 @@ enum ni_tower_err ni_tower_apu_enable(struct ni_tower_apu_dev *dev);
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_apu_sync_err_enable(struct ni_tower_apu_dev *dev);
+enum ni_tower_err ni_tower_apu_sync_err_enable(
+    const struct ni_tower_apu_dev *dev);
 
 #endif /* __NI_TOWER_APU_DRV_H__ */

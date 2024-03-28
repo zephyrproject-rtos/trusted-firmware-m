@@ -54,9 +54,9 @@ struct ni_tower_psam_dev {
  * \return Returns error code as specified in \ref ni_tower_err
  */
 enum ni_tower_err ni_tower_psam_configure_nhregion(
-                            struct ni_tower_psam_dev *dev,
-                            const struct ni_tower_psam_reg_cfg_info *cfg_info,
-                            uint32_t region);
+    const struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_reg_cfg_info *cfg_info,
+    const uint32_t region);
 
 /**
  * \brief Get the next available region number and configure the non-striped
@@ -69,7 +69,7 @@ enum ni_tower_err ni_tower_psam_configure_nhregion(
  * \return Returns error code as specified in \ref ni_tower_err
  */
 enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
-    struct ni_tower_psam_dev *dev,
+    const struct ni_tower_psam_dev *dev,
     const struct ni_tower_psam_reg_cfg_info *cfg_info);
 
 /**
@@ -79,7 +79,7 @@ enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_psam_enable(struct ni_tower_psam_dev *dev);
+enum ni_tower_err ni_tower_psam_enable(const struct ni_tower_psam_dev *dev);
 
 /**
  * \brief Disables the PSAM device
@@ -88,6 +88,6 @@ enum ni_tower_err ni_tower_psam_enable(struct ni_tower_psam_dev *dev);
  *
  * \return Returns error code as specified in \ref ni_tower_err
  */
-enum ni_tower_err ni_tower_psam_disable(struct ni_tower_psam_dev *dev);
+enum ni_tower_err ni_tower_psam_disable(const struct ni_tower_psam_dev *dev);
 
 #endif /* __NI_TOWER_PSAM_DRV_H__ */

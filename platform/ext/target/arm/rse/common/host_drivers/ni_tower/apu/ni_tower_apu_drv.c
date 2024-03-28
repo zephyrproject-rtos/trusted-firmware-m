@@ -23,8 +23,10 @@
     addr = (((uint64_t)(high) << 32) | (low)) | (NI_TOWER_APU_ADDRESS_GRAN - 1)
 
 static enum ni_tower_err ni_tower_apu_set_addr_range(
-                        struct ni_tower_apu_dev *dev, uint32_t region,
-                        uint64_t base_addr, uint64_t end_addr)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region,
+    uint64_t base_addr,
+    uint64_t end_addr)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -54,9 +56,9 @@ static enum ni_tower_err ni_tower_apu_set_addr_range(
 }
 
 static enum ni_tower_err ni_tower_apu_set_access_perms(
-                            struct ni_tower_apu_dev *dev, uint32_t region,
-                            enum ni_tower_apu_access_perm_type permission,
-                            enum ni_tower_apu_entity_type id_select)
+    const struct ni_tower_apu_dev *dev, uint32_t region,
+    const enum ni_tower_apu_access_perm_type permission,
+    const enum ni_tower_apu_entity_type id_select)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -103,9 +105,10 @@ static enum ni_tower_err ni_tower_apu_set_access_perms(
 }
 
 static enum ni_tower_err ni_tower_apu_set_entity_id(
-                                struct ni_tower_apu_dev *dev,
-                                uint32_t region, uint32_t id_value,
-                                enum ni_tower_apu_entity_type id_select)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region,
+    const uint32_t id_value,
+    const enum ni_tower_apu_entity_type id_select)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -152,9 +155,9 @@ static enum ni_tower_err ni_tower_apu_set_entity_id(
 }
 
 static enum ni_tower_err ni_tower_apu_set_lock(
-                                            struct ni_tower_apu_dev *dev,
-                                            uint32_t region,
-                                            enum ni_tower_apu_lock_type lock)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region,
+    const enum ni_tower_apu_lock_type lock)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -172,9 +175,9 @@ static enum ni_tower_err ni_tower_apu_set_lock(
 }
 
 static enum ni_tower_err ni_tower_apu_set_br(
-                                        struct ni_tower_apu_dev *dev,
-                                        uint32_t region,
-                                        enum ni_tower_apu_br_type background)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region,
+    const enum ni_tower_apu_br_type background)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -194,7 +197,8 @@ static enum ni_tower_err ni_tower_apu_set_br(
 }
 
 static enum ni_tower_err ni_tower_apu_set_region_enable(
-                            struct ni_tower_apu_dev *dev, uint32_t region)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region)
 {
     enum ni_tower_apu_br_type temp_br_type, curr_br_type;
     struct ni_tower_apu_reg_map* reg;
@@ -255,9 +259,9 @@ static enum ni_tower_err ni_tower_apu_set_region_enable(
 }
 
 static enum ni_tower_err ni_tower_apu_set_id_valid(
-                                    struct ni_tower_apu_dev *dev,
-                                    uint32_t region,
-                                    enum ni_tower_apu_entity_valid_type valid)
+    const struct ni_tower_apu_dev *dev,
+    const uint32_t region,
+    const enum ni_tower_apu_entity_valid_type valid)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -276,7 +280,7 @@ static enum ni_tower_err ni_tower_apu_set_id_valid(
     return NI_TOWER_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_apu_enable(struct ni_tower_apu_dev *dev)
+enum ni_tower_err ni_tower_apu_enable(const struct ni_tower_apu_dev *dev)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -295,7 +299,8 @@ enum ni_tower_err ni_tower_apu_enable(struct ni_tower_apu_dev *dev)
     return NI_TOWER_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_apu_sync_err_enable(struct ni_tower_apu_dev *dev)
+enum ni_tower_err ni_tower_apu_sync_err_enable(
+    const struct ni_tower_apu_dev *dev)
 {
     struct ni_tower_apu_reg_map* reg;
 
@@ -314,9 +319,9 @@ enum ni_tower_err ni_tower_apu_sync_err_enable(struct ni_tower_apu_dev *dev)
 }
 
 enum ni_tower_err ni_tower_apu_configure_region(
-                            struct ni_tower_apu_dev *dev,
-                            const struct ni_tower_apu_reg_cfg_info *cfg_info,
-                            uint32_t region)
+    const struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_reg_cfg_info *cfg_info,
+    const uint32_t region)
 {
     struct ni_tower_apu_reg_map *reg;
     enum ni_tower_err err;
@@ -384,7 +389,7 @@ enum ni_tower_err ni_tower_apu_configure_region(
 }
 
 static enum ni_tower_err get_next_available_region(
-    struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_dev *dev,
     uint32_t *region)
 {
     struct ni_tower_apu_reg_map* reg;
@@ -407,7 +412,7 @@ static enum ni_tower_err get_next_available_region(
 }
 
 enum ni_tower_err ni_tower_apu_configure_next_available_region(
-    struct ni_tower_apu_dev *dev,
+    const struct ni_tower_apu_dev *dev,
     const struct ni_tower_apu_reg_cfg_info *cfg_info)
 {
     enum ni_tower_err err;
