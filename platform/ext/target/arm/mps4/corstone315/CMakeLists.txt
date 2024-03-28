@@ -50,6 +50,8 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/watchdog
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/include
         ${ETHOS_DRIVER_PATH}/src
         ${ETHOS_DRIVER_PATH}/include
@@ -188,8 +190,8 @@ target_sources(platform_s
         device/source/system_core_init.c
         native_drivers/ppc_corstone315_drv.c
         native_drivers/tgu_armv8_m_drv.c
-        native_drivers/kmu_drv.c
-        native_drivers/lcm_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
@@ -254,7 +256,8 @@ if(BL2)
         PRIVATE
             nv_counters.c
             otp_lcm.c
-            native_drivers/lcm_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
             cmsis_drivers/Driver_USART.c
             device/source/system_core_init.c
             ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
@@ -345,8 +348,8 @@ target_sources(platform_bl1_1
         cmsis_drivers/Driver_USART.c
         device/source/system_core_init.c
         device/source/startup_corstone315.c
-        native_drivers/kmu_drv.c
-        native_drivers/lcm_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/watchdog/arm_watchdog_drv.c

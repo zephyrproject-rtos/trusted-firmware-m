@@ -36,4 +36,13 @@
 
 #define SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ    (25000000ul)
 
+/* Arm KMU */
+#define KMU_S
+
+/* Arm SAM */
+#define SAM_S
+
+/* Arm LCM */
+#define LCM_S
+
 #endif  /* __DEVICE_CFG_H__ */

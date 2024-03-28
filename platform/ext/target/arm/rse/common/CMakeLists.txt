@@ -139,6 +139,8 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ./bringup_helpers
 )
 
@@ -155,7 +157,7 @@ target_sources(platform_s
         native_drivers/atu_rse_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c
-        native_drivers/kmu_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
         native_drivers/sic_drv.c
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
@@ -173,7 +175,7 @@ target_sources(platform_s
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TFM_PARTITION_SLIH_TEST}>,$<BOOL:${TFM_PARTITION_FLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
-        native_drivers/lcm_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         otp_lcm.c
         nv_counters.c
         attest_hal.c
@@ -246,7 +248,7 @@ target_sources(platform_bl2
         native_drivers/atu_rse_drv.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c>
-        native_drivers/kmu_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
         native_drivers/sic_drv.c
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
@@ -254,7 +256,7 @@ target_sources(platform_bl2
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSE_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
-        native_drivers/lcm_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         native_drivers/integrity_checker_drv.c
         otp_lcm.c
         nv_counters.c
@@ -283,6 +285,8 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ./bringup_helpers
     PRIVATE
         ${PLATFORM_DIR}/..
@@ -312,8 +316,8 @@ target_sources(platform_bl1_1
         ./device/source/device_definition.c
         ./device/source/system_core_init.c
         ./native_drivers/atu_rse_drv.c
-        ./native_drivers/kmu_drv.c
-        ./native_drivers/lcm_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
@@ -348,6 +352,8 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
         ./bringup_helpers
 )
@@ -432,7 +438,7 @@ target_sources(platform_bl1_2
         device/source/system_core_init.c
         ./bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
-        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/lcm_drv.c>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/device_definition.c>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_dcu.c>
 )
@@ -442,6 +448,8 @@ target_include_directories(platform_bl1_2
         .
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
+        ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
 )
 
 target_compile_definitions(platform_bl1_2
