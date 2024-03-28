@@ -10,7 +10,7 @@
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 #if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
 #include "test_interrupt.h"
 #endif

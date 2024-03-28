@@ -52,6 +52,7 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
+        ${PLATFORM_DIR}/ext/target/arm/drivers/tgu
         ${PLATFORM_DIR}/include
         ${ETHOS_DRIVER_PATH}/src
         ${ETHOS_DRIVER_PATH}/include
@@ -189,7 +190,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_USART.c
         device/source/system_core_init.c
         native_drivers/ppc_corstone315_drv.c
-        native_drivers/tgu_armv8_m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/tgu/tgu_armv8_m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c

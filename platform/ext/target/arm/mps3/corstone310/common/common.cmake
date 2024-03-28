@@ -55,6 +55,7 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/tgu
         ${PLATFORM_DIR}/include
         ${ETHOS_DRIVER_PATH}/src
         ${ETHOS_DRIVER_PATH}/include
@@ -172,7 +173,7 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
-        ${CORSTONE310_COMMON_DIR}/native_drivers/tgu_armv8_m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/tgu/tgu_armv8_m_drv.c
         ${CORSTONE310_COMMON_DIR}/tfm_peripherals_def.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
