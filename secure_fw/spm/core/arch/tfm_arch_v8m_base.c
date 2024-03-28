@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -277,7 +277,7 @@ FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }
-    fih_delay();
+    (void)fih_delay();
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }
