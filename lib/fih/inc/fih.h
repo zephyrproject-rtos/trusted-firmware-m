@@ -228,61 +228,31 @@ fih_int fih_int_encode(int32_t x)
 }
 
 /* Standard equality. If A == B then 1, else 0 */
-__attribute__((always_inline)) inline
-int32_t fih_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc1 = FIH_FALSE;
-    volatile int32_t rc2 = FIH_FALSE;
+/* Note that this is designed to be difficult to glitch so as to make it
+ * return 1 when it should return 0. It may not be as resistant the other
+ * way.
+ */
+#define fih_eq(x, y)          \
+    ( fih_int_validate(x) &&  \
+      fih_int_validate(y) &&  \
+      ((x).val == (y).val) && \
+      fih_delay() &&          \
+      ((x).msk == (y).msk) && \
+      fih_delay() &&          \
+      ((x).val == (_FIH_MASK_VALUE ^ (y).msk)) )
 
-    (void)fih_int_validate(x);
-    (void)fih_int_validate(y);
-
-    if (x.val == y.val) {
-        rc1 = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (x.msk == y.msk) {
-        rc2 = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (rc1 != rc2) {
-        FIH_PANIC;
-    }
-
-    return rc1;
-}
-
-__attribute__((always_inline)) inline
-int32_t fih_not_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc1 = FIH_FALSE;
-    volatile int32_t rc2 = FIH_FALSE;
-
-    (void)fih_int_validate(x);
-    (void)fih_int_validate(y);
-
-    if (x.val != y.val) {
-        rc1 = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (x.msk != y.msk) {
-        rc2 = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (rc1 != rc2) {
-        FIH_PANIC;
-    }
-
-    return rc1;
-}
+/* Note that this is designed to be difficult to glitch so as to make it
+ * return 0 when it should return 1. It may not be as resistant the other
+ * way.
+ */
+#define fih_not_eq(x, y)      \
+    ( !fih_int_validate(x) || \
+      !fih_int_validate(y) || \
+      ((x).val != (y).val) || \
+      !fih_delay() ||         \
+      ((x).msk != (y).msk) || \
+      !fih_delay() ||         \
+      ((x).val != (_FIH_MASK_VALUE ^ (y).msk)) )
 #else /* FIH_ENABLE_DOUBLE_VARS */
 /* NOOP */
 #define fih_int_validate(x)        1
@@ -293,41 +263,15 @@ int32_t fih_not_eq(fih_int x, fih_int y)
 /* NOOP */
 #define fih_int_encode(x)          (x)
 
-__attribute__((always_inline)) inline
-int32_t fih_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc = FIH_FALSE;
+#define fih_eq(x, y) \
+    ( (x == y) &&    \
+      fih_delay() && \
+      !(x != y) )
 
-    if (x == y) {
-        rc = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (x != y) {
-        rc = FIH_FALSE;
-    }
-
-    return rc;
-}
-
-__attribute__((always_inline)) inline
-int32_t fih_not_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc = FIH_FALSE;
-
-    if (x != y) {
-        rc = FIH_TRUE;
-    }
-
-    (void)fih_delay();
-
-    if (x == y) {
-        rc = FIH_FALSE;
-    }
-
-    return rc;
-}
+#define fih_not_eq(x, y) \
+    ( (x != y) ||        \
+      !fih_delay() ||    \
+      !(x == y) )
 #endif /* FIH_ENABLE_DOUBLE_VARS */
 
 /*
