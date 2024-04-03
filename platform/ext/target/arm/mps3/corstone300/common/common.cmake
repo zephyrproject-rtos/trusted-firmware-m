@@ -266,7 +266,8 @@ endif()
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
     INTERFACE
-FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        S_DATA_OVERALL_SIZE=${S_DATA_OVERALL_SIZE}
+        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
         FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
@@ -276,6 +277,7 @@ FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
 #========================= Files for building NS side platform ================#
 target_compile_definitions(tfm_config
     INTERFACE
+        S_DATA_OVERALL_SIZE=${S_DATA_OVERALL_SIZE}
         FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
         FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}

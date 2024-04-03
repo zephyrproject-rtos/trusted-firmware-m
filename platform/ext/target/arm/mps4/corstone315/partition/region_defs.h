@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,9 @@
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
-#define S_DATA_OVERALL_SIZE         (0x20000)
+#if (S_DATA_OVERALL_SIZE > ISRAM0_SIZE)
+#error "Secure data must fit in ISRAM0!"
+#endif
 
 /* Secure Data stored in ISRAM0 */
 #define S_DATA_START    (ISRAM0_BASE_S)
