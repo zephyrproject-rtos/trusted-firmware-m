@@ -192,6 +192,11 @@ bool tfm_svc_thread_mode_spm_active(void)
 static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return,
                                         uint32_t *svc_args, uint32_t *msp)
 {
+#if TFM_SP_LOG_RAW_ENABLED
+    struct partition_t *curr_partition;
+    fih_int fih_rc = FIH_FAILURE;
+#endif
+
     switch (svc_number) {
     case TFM_SVC_SPM_INIT:
         exc_return = tfm_spm_init();
@@ -213,7 +218,17 @@ static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return
 #endif
 #if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0], svc_args[1]);
+        /* Protect PRoT data from unauthorised access from ARoT partition.
+         * This fixes the TFMV-7 vulnerability
+         */
+        curr_partition = GET_CURRENT_COMPONENT();
+        FIH_CALL(tfm_hal_memory_check, fih_rc, curr_partition->boundary, (uintptr_t)svc_args[0],
+                svc_args[1], TFM_HAL_ACCESS_READABLE);
+        if (fih_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+            svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0], svc_args[1]);
+        } else {
+            tfm_core_panic();
+        }
         break;
 #endif
 #if TFM_ISOLATION_LEVEL > 1
