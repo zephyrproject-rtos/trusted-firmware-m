@@ -35,7 +35,7 @@ REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
 REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 
 #define HOST_ADDRESS_SPACE_BASE         0x00000000
-#define HOST_SHARED_RAM_BASE            0x02000000
+#define HOST_TRUSTED_RAM_BASE           0x02000000
 #define HOST_XNVM_BASE                  0x08000000
 #define HOST_BASE_SYSTEM_CONTROL_BASE   0x1A010000
 #define HOST_FIREWALL_BASE              0x1A800000
@@ -347,7 +347,7 @@ static void setup_host_firewall(void)
 
     fc_pe_enable();
 
-    /* CVM - Shared RAM */
+    /* CVM - Secure RAM */
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, COMP_CVM);
     fc_disable_bypass();
     fc_pe_disable();
@@ -355,15 +355,12 @@ static void setup_host_firewall(void)
     fc_select_region(1);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_4MB, HOST_SHARED_RAM_BASE);
+    fc_prog_rgn(RGN_SIZE_4MB, HOST_TRUSTED_RAM_BASE);
     fc_init_mpl(RGN_MPE0);
 
     mpl_rights = (RGN_MPL_ANY_MST_MASK | RGN_MPL_SECURE_READ_MASK |
                                          RGN_MPL_SECURE_WRITE_MASK |
-                                         RGN_MPL_SECURE_EXECUTE_MASK |
-                                         RGN_MPL_NONSECURE_READ_MASK |
-                                         RGN_MPL_NONSECURE_WRITE_MASK |
-                                         RGN_MPL_NONSECURE_EXECUTE_MASK);
+                                         RGN_MPL_SECURE_EXECUTE_MASK);
 
     fc_enable_mpl(RGN_MPE0, mpl_rights);
     fc_disable_mpl(RGN_MPE0, ~mpl_rights);
@@ -398,7 +395,9 @@ static void setup_host_firewall(void)
 
     fc_pe_enable();
 
-    /* Host Expansion Master 0 */
+#if !(PLATFORM_IS_FVP)
+    /* Host Expansion Master 0 (Due to the difference in the models only
+     * programming this for MPS3) */
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, COMP_EXPMST0);
     fc_disable_bypass();
     fc_pe_disable();
@@ -433,7 +432,6 @@ static void setup_host_firewall(void)
     fc_enable_regions();
     fc_rgn_lock();
 
-#if !(PLATFORM_IS_FVP)
     fc_select_region(3);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
@@ -461,16 +459,14 @@ static void setup_host_firewall(void)
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
     fc_rgn_lock();
-#endif
 
     fc_pe_enable();
 
-    /* Host Expansion Master 0 */
+    /* Host Expansion Master 1*/
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, COMP_EXPMST1);
     fc_disable_bypass();
     fc_pe_disable();
 
-#if !(PLATFORM_IS_FVP)
     fc_select_region(1);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
@@ -484,22 +480,6 @@ static void setup_host_firewall(void)
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
     fc_rgn_lock();
-#else
-    fc_select_region(1);
-    fc_disable_regions();
-    fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_8MB, HOST_SE_SECURE_FLASH_BASE_FVP);
-    fc_init_mpl(RGN_MPE0);
-
-    mpl_rights = (RGN_MPL_ANY_MST_MASK | RGN_MPL_SECURE_READ_MASK |
-                                         RGN_MPL_SECURE_WRITE_MASK);
-
-    fc_enable_mpl(RGN_MPE0, mpl_rights);
-    fc_enable_mpe(RGN_MPE0);
-    fc_enable_regions();
-    fc_rgn_lock();
-#endif
-
     fc_pe_enable();
 
     /* Always ON Host Peripherals */
@@ -527,7 +507,6 @@ static void setup_host_firewall(void)
     }
 
     fc_pe_enable();
-
     /* Host System Peripherals */
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, COMP_SYSPERIPH);
     fc_disable_bypass();
@@ -553,6 +532,7 @@ static void setup_host_firewall(void)
     }
 
     fc_pe_enable();
+#endif
 
     /* Host System Peripherals */
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, COMP_DBGPERIPH);
@@ -590,13 +570,9 @@ int32_t boot_platform_init(void)
     if (result != ARM_DRIVER_OK) {
 	return 1;
      }
-#if !(PLATFORM_IS_FVP)
         setup_mpu();
-#endif
         setup_se_firewall();
-#if !(PLATFORM_IS_FVP)
         setup_host_firewall();
-#endif
 
 #if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -70,7 +70,7 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
         rc = 0;
     }
     else if (image_id == 1 || image_id == 2) {
-        (*exec_ram_start) = CORSTONE1000_HOST_SHARED_RAM_BASE;
+        (*exec_ram_start) = CORSTONE1000_HOST_TRUSTED_RAM_BASE;
         (*exec_ram_size) = 0x20000000U;
         rc = 0;
     }

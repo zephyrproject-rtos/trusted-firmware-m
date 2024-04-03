@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@
  * required by the SE are defined here */
 #define CORSTONE1000_HOST_ADDRESS_SPACE_BASE       (0x60000000U) /* Host Address Space                */
 #define CORSTONE1000_HOST_BIR_BASE                 (0x60000000U) /* Boot Instruction Register         */
-#define CORSTONE1000_HOST_SHARED_RAM_BASE          (0x62000000U) /* Shared RAM                        */
+#define CORSTONE1000_HOST_TRUSTED_RAM_BASE         (0x62000000U) /* Secure RAM                        */
 #define CORSTONE1000_HOST_XNVM_BASE                (0x68000000U) /* XNVM                              */
 #define CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE (0x7A010000U) /* Host SCB                          */
 #define CORSTONE1000_EXT_SYS_RESET_REG             (0x7A010310U) /* external system (cortex-M3)       */
