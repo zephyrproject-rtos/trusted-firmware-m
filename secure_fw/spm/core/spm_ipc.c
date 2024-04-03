@@ -427,6 +427,17 @@ uint32_t tfm_spm_init(void)
         backend_init_comp_assuredly(partition, service_setting);
     }
 
+#if CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1
+    /*
+     * Platform can use CONFIG_TFM_POST_PARTITION_INIT_HOOK option to add extra initialization
+     * steps after static initialization of partitions' isolation has been completed.
+     */
+    FIH_CALL(tfm_hal_post_partition_init_hook, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+        tfm_core_panic();
+    }
+#endif /* CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1 */
+
     return backend_system_run();
 }
 

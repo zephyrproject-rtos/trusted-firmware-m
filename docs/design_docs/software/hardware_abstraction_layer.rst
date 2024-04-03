@@ -572,6 +572,29 @@ This API let the platform decide if a boundary switch is needed.
 - ``true`` - A switching is needed
 - ``false`` - No need for a boundary switch
 
+tfm_hal_post_partition_init_hook()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_post_partition_init_hook(void)
+
+**Description**
+
+This API let the platform to finish static isolation after all partitions have been bound.
+It's called by SPM right before starting scheduler. Use CONFIG_TFM_POST_PARTITION_INIT_HOOK
+to enable it.
+
+**Parameter**
+
+- ``void`` - None
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - Booting has been successful.
+- ``TFM_HAL_ERROR_GENERIC`` - Error occurred.
+
 Log API
 =======
 The log API is used by the :term:`TF-M` :doc:`log system </design_docs/tfm_log_system_design_document>`.

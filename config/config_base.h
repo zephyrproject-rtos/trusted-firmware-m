@@ -270,6 +270,14 @@
 #define CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT 0
 #endif
 
+/*
+ * tfm_hal_post_partition_init_hook is called if this option is enabled.
+ * It's called by SPM right before starting scheduler.
+ */
+#ifndef CONFIG_TFM_POST_PARTITION_INIT_HOOK
+#define CONFIG_TFM_POST_PARTITION_INIT_HOOK     0
+#endif
+
 /* Enable OTP/NV_COUNTERS emulation in RAM */
 #ifndef OTP_NV_COUNTERS_RAM_EMULATION
 #define OTP_NV_COUNTERS_RAM_EMULATION           0
