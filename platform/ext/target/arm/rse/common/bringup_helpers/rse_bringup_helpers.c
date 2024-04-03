@@ -13,6 +13,7 @@
 #include "boot_hal.h"
 #include "flash_layout.h"
 #include "device_definition.h"
+#include "gpio_pl061_drv.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -21,7 +22,7 @@ static uint8_t check_gpio_pins(void)
 {
     uint32_t pins_offset = rse_bringup_helpers_hal_get_pins_offset();
 
-    return (*((uint32_t*)(GPIO0_CMSDK_BASE_S)) >> pins_offset) & 0b11;
+    return (pl061_get_gpio(GPIO0_DEV_S, UINT8_MAX) >> pins_offset) & 0b11;
 }
 
 static uint16_t get_gppc_val(void)

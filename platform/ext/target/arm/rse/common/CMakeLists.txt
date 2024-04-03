@@ -141,6 +141,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
 )
 
@@ -185,6 +186,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_checker_layer.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
         spm_dma_copy.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
 )
 
 target_link_libraries(platform_s
@@ -262,6 +264,7 @@ target_sources(platform_bl2
         otp_lcm.c
         nv_counters.c
         $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
 )
 
 target_include_directories(platform_bl2
@@ -289,6 +292,7 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
     PRIVATE
         ${PLATFORM_DIR}/..
@@ -338,6 +342,7 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./rse_key_derivation.c
         $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -358,6 +363,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
+        ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
 )
 
@@ -736,9 +742,11 @@ install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscou
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
                     ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/native_drivers
 )
 
