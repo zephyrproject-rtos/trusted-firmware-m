@@ -8,6 +8,7 @@
 
 ################################## Dependencies ################################
 set(TFM_PLATFORM_NXP_HAL_FILE_PATH      "DOWNLOAD"      CACHE STRING    "Path to the NXP SDK hal (or DOWNLOAD to fetch automatically)")
+set(NXP_SDK_GIT_REP                     "https://raw.githubusercontent.com/nxp-mcuxpresso/mcux-sdk" CACHE STRING    "The repository address of the NXP MCUXpresso SDK")
 set(NXP_SDK_GIT_TAG                     "MCUX_2.15.000" CACHE STRING    "The version of the NXP MCUXpresso SDK")
 
 ############################ Platform ##########################################

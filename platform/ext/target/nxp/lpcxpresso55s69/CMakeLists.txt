@@ -14,7 +14,7 @@ set(NXP_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 # Pull drivers from NXP git
 if (TFM_PLATFORM_NXP_HAL_FILE_PATH STREQUAL "DOWNLOAD")
     set(NXP_HAL_FILE_PATH ${PLATFORM_DIR}/ext/target/nxp)
-    Message("-- Pulling MCUxpresso NXP SDK drivers from https://github.com/NXPmicro/mcux-sdk")
+    Message("-- Pulling MCUxpresso NXP SDK drivers from "${NXP_SDK_GIT_REP}/${NXP_SDK_GIT_TAG})
     include(pull_drivers.cmake)
 # Use specified path to NXP hal folder provided by user
 else()
