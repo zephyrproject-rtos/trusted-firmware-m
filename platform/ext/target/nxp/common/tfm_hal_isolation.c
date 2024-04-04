@@ -103,7 +103,6 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
-    fih_int fih_rc = FIH_FAILURE;
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
 
@@ -117,6 +116,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
 
     /* Set up static isolation boundaries inside SPE */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+    fih_int fih_rc = FIH_FAILURE;
     struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
     mpu_armv8m_clean(&dev_mpu_s);
