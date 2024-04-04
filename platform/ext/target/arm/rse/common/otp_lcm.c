@@ -24,10 +24,20 @@
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #ifdef MCUBOOT_SIGN_EC384
+/* The sizes are in 4 byte words */
 #define BL2_ROTPK_HASH_SIZE (12)
+#define BL2_ROTPK_SIZE      (30)
 #else
 #define BL2_ROTPK_HASH_SIZE (8)
-#endif
+#define BL2_ROTPK_SIZE      (23)
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_SIZE
+#else
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
+
 
 #define OTP_OFFSET(x)        (offsetof(struct lcm_otp_layout_t, x))
 #define OTP_SIZE(x)          (sizeof(((struct lcm_otp_layout_t *)0)->x))
@@ -72,7 +82,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
             __PACKED_STRUCT {
                 uint32_t bl1_rotpk_0[14];
 
-                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][BL2_ROTPK_HASH_SIZE];
+                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][PROV_ROTPK_DATA_SIZE];
 
                 uint32_t iak_len;
                 uint32_t iak_type;
