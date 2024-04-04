@@ -152,6 +152,7 @@ if(BL2)
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
             nrfx_glue.c
+            $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>
     )
     target_sources(bl2
         PRIVATE
@@ -168,6 +169,12 @@ if(BL2)
         PRIVATE
             ${PLATFORM_DIR}/..
     )
+
+    target_compile_definitions(platform_bl2
+         PUBLIC
+         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL} # Required by nvm_sources
+    )
+
 endif()
 
 if (TFM_PARTITION_PLATFORM)
