@@ -249,14 +249,21 @@ static inline enum lcm_error_t mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
     size_t idx;
     uint32_t mask_enabled;
     uint32_t mask_disabled;
+    uint32_t dcu_val;
+    uint32_t mask_val;
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
-        mask_enabled = p_lcm->dcu_sp_disable_mask[idx] & DCU_ENABLED_MASK;
-        mask_disabled = p_lcm->dcu_sp_disable_mask[idx] & DCU_DISABLED_MASK;
+        mask_val = p_lcm->dcu_sp_disable_mask[idx];
 
-        p_lcm->dcu_en[idx] = mask_enabled & p_lcm->dcu_en[idx];
+        mask_enabled = mask_val & DCU_ENABLED_MASK;
+        mask_disabled = mask_val & DCU_DISABLED_MASK;
 
-        p_lcm->dcu_en[idx] |= ((~p_lcm->dcu_en[idx] & DCU_ENABLED_MASK) << 1) & mask_disabled;
+        dcu_val = p_lcm->dcu_en[idx];
+
+        dcu_val &= mask_enabled;
+        dcu_val |= ((~dcu_val & DCU_ENABLED_MASK) << 1) & mask_disabled;
+
+        p_lcm->dcu_en[idx] = dcu_val;
     }
 
     return LCM_ERROR_NONE;
