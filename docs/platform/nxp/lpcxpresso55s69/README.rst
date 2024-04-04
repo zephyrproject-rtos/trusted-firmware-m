@@ -58,16 +58,16 @@ After generating the binaries, there are three options to flash them using:
 ===============================
 
 For command line flashing it is recommended to use external Segger J-Link flasher or to
-update the LPC-Link 2 debugger on the development board with the firmware provided by Segger, 
+update the LPC-Link 2 debugger on the development board with the firmware provided by Segger,
 which makes the device behave as if there is an on-board J-Link debugger.
 
-For onboard J-Link debugger option please follow this step: 
+For onboard J-Link debugger option please follow this step:
 
 2.1.1 Update the LPC-Link 2 to Segger J-Link
 --------------------------------------------
 
 -  Install a recent version of the `J-Link Software and Documentation
-   Pack <https://www.segger.com/downloads/jlink#J-LinkSoftwareAndDocumentationPack>`__.
+   Pack <https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack>`__.
    Version **6.98b** was used with this guide.
 
 -  Update the on-board LPC-Link 2 to use the latest J-Link firmware,
@@ -160,13 +160,13 @@ If you built TF-M with the BL2 secondary bootloader, use following commands:
 
 2.2 Flashing with PyOCD
 =======================
-PyOCD is an open source Python package for programming and debugging Arm Cortex-M microcontrollers using multiple supported types of USB debug probes. 
+PyOCD is an open source Python package for programming and debugging Arm Cortex-M microcontrollers using multiple supported types of USB debug probes.
 See: `PyOCD <https://pypi.org/project/pyocd/>`__
 
 To flash TF-M images with PyOCD you can use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
     - ``flash_PyOCD.py`` - for uploading image without BL2
     - ``flash_bl2_PyOCD.py`` - for uploading image with BL2
-    
+
 You should get the following output (flashing without BL2):
 ::
 

@@ -185,7 +185,7 @@ versions are:
           This defect has been fixed since Arm compiler v6.18.
           See [SDCOMP-59788] in Armclang v6.18 `release note`__ for details.
 
-          .. __: https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/Arm%20Compiler%20for%20Embedded/6-18/Release%20notes%20for%20Arm%20Compiler%20for%20Embedded%206.pdf
+          .. __: https://developer.arm.com/documentation/107814/6-18
 
     - GNU Arm compiler v7.3.1+
 
@@ -221,7 +221,7 @@ versions are:
 
           .. group-tab:: Linux
 
-              - Download IAR build tools from `here <https://www.iar.com/iar-embedded-workbench/build-tools-for-linux/>`__.
+              - Download IAR build tools from `here <https://www.iar.com/products/architectures/arm/iar-embedded-workbench-for-arm>`__.
               - Add IAR Arm compiler into environment:
 
                 .. code-block:: bash
@@ -230,7 +230,7 @@ versions are:
 
           .. group-tab:: Windows
 
-              - Download IAR build tools from `here <https://www.iar.com/iar-embedded-workbench/#!?architecture=Arm>`__.
+              - Download IAR build tools from `here <https://www.iar.com/products/architectures/arm/iar-embedded-workbench-for-arm>`__.
               - Add IAR Arm compiler into environment:
 
                 .. code-block:: bash

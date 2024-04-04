@@ -260,7 +260,7 @@ References
 **********
 
 .. [1] PSA cryptoprocessor driver interface: \ https://github.com/Mbed-TLS/mbedtls/blob/development/docs/proposed/psa-driver-interface.md
-.. [2] Definition of psa_key_location_t type in the PSA spec: \ https://armmbed.github.io/mbed-crypto/html/api/keys/lifetimes.html#c.psa_key_location_t
+.. [2] Definition of psa_key_location_t type in the PSA spec: \ https://arm-software.github.io/psa-api/crypto/1.1/api/keys/lifetimes.html#c.psa_key_location_t
 .. [3] Interface for platform keys: \ https://github.com/ARM-software/psa-crypto-api/issues/550
 
 --------------

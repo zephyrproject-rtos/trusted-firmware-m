@@ -4,9 +4,7 @@ Technical ownership of most parts of the codebase falls on the code owners
 listed below. An acknowledgement from these code owners is required before
 the maintainers merge a contribution.
 
-More details may be found in the `Project Maintenance Process
-<https://developer.trustedfirmware.org/w/collaboration/project-maintenance-process/>`_
-document.
+More details may be found in the `Project Maintenance Process`_ document.
 
 Maintainers
 ===========
@@ -200,5 +198,7 @@ Jidong Mei
     :github: `JidongMei <https://github.com/JidongMei>`__
 
 =============
+
+.. _Project Maintenance Process: https://trusted-firmware-docs.readthedocs.io/en/latest/generic_processes/project_maintenance_process.html
 
 *Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
