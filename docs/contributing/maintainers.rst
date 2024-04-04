@@ -152,7 +152,7 @@ NXP Platforms
 
 Andrej Butok
     :email: `Andrey.Butok@nxp.com <andrey.butok@nxp.com>`__
-    :github: `AndreyButokNXP <https://github.com/AndreyButokNXP>`__
+    :github: `butok <https://github.com/butok>`__
 
 STM Platforms: DISCO_L562QE, NUCLEO_L552ZE_Q
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
