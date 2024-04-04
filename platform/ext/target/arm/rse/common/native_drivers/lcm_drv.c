@@ -844,14 +844,6 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
         return LCM_ERROR_INVALID_OFFSET;
     }
 
-    /* Reject the write if we'd have to unset a bit. */
-    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
-        if (p_buf_word[idx] !=
-           (p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] | p_buf_word[idx])) {
-            return LCM_ERROR_INVALID_WRITE;
-        }
-    }
-
     /* Write the zero count if needed */
     err = write_zero_count_if_needed(dev, offset, len, buf);
     if (err != LCM_ERROR_NONE) {
