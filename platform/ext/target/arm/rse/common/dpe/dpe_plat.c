@@ -17,17 +17,9 @@
 #define SDS_DPE_CTX_HANDLE_STRUCT_ID    (0x0000000A)
 
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_DPE", "APP-ROT")
-int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_size)
+psa_key_id_t dpe_plat_get_rot_cdi_key_id(void)
 {
-    psa_status_t status;
-    size_t key_len;
-
-    status = psa_export_key(TFM_BUILTIN_KEY_ID_ROT_CDI, buf, buf_size,  &key_len);
-    if (status != PSA_SUCCESS) {
-        return -1;
-    }
-
-    return 0;
+    return TFM_BUILTIN_KEY_ID_ROT_CDI;
 }
 
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_DPE", "APP-ROT")

@@ -18,14 +18,11 @@ extern "C" {
 #endif
 
 /**
- * \brief Get the RoT CDI value generated at boot time.
+ * \brief Get the RoT CDI key ID.
  *
- * \param[out] buf      Pointer to buffer to be written
- * \param[in]  buf_len  Length of data requested
- *
- * \return Returns 0 on success or a negative integer on failure.
+ * \return Returns key ID.
  */
-int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_len);
+psa_key_id_t dpe_plat_get_rot_cdi_key_id(void);
 
 /**
  * \brief Get the key ID of the root attestation key.
