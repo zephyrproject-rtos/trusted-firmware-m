@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -548,16 +551,16 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(uintptr_t boundary, uin
     }
 }
 
-bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
-                                  uintptr_t boundary_to)
+FIH_RET_TYPE(bool) tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                                uintptr_t boundary_to)
 {
     if (boundary_from == boundary_to) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
 
     if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
         ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
-    return true;
+    FIH_RET(fih_int_encode(true));
 }

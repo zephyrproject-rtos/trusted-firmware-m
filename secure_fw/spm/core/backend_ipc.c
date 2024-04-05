@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -15,6 +15,7 @@
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "ffm/psa_api.h"
+#include "fih.h"
 #include "runtime_defs.h"
 #include "stack_watermark.h"
 #include "spm.h"
@@ -125,6 +126,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     struct runtime_metadata_t *p_rt_meta;
     service_fn_t *p_sfn_table;
     uint32_t allocate_size;
+    FIH_RET_TYPE(bool) fih_rc;
 
     p_pt_ldi = p_pt->p_ldinf;
     p_srv_ldi = LOAD_INFO_SERVICE(p_pt_ldi);
@@ -145,7 +147,8 @@ static void prv_process_metadata(struct partition_t *p_pt)
 #if TFM_ISOLATION_LEVEL == 1
     p_rt_meta->psa_fns = &psa_api_thread_fn_call;
 #else
-    if (tfm_hal_boundary_need_switch(spm_boundary, p_pt->boundary)) {
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_rc, spm_boundary, p_pt->boundary);
+    if (fih_not_eq(fih_rc, fih_int_encode(false))) {
         p_rt_meta->psa_fns = &psa_api_svc;
     } else {
         p_rt_meta->psa_fns = &psa_api_thread_fn_call;
@@ -449,6 +452,7 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
 uint64_t ipc_schedule(uint32_t exc_return)
 {
     fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
     AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
@@ -499,8 +503,9 @@ uint64_t ipc_schedule(uint32_t exc_return)
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
          */
-        if (tfm_hal_boundary_need_switch(p_part_curr->boundary,
-                                         p_part_next->boundary)) {
+        FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
+                 p_part_curr->boundary, p_part_next->boundary);
+        if (fih_not_eq(fih_bool, fih_int_encode(false))) {
             FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                      p_part_next->p_ldinf, p_part_next->boundary);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {

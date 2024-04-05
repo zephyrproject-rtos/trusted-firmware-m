@@ -83,10 +83,12 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
 static uint32_t thread_mode_spm_return(uint32_t result)
 {
     fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
     struct partition_t *p_part_next = GET_CURRENT_COMPONENT();
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
 
-    if (tfm_hal_boundary_need_switch(spm_boundary, p_part_next->boundary)) {
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_bool, spm_boundary, p_part_next->boundary);
+    if (fih_not_eq(fih_bool, fih_int_encode(false))) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_part_next->p_ldinf, p_part_next->boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
@@ -143,6 +145,7 @@ static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uint32_t exc_return)
 {
     fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
     struct partition_t *p_curr_sp;
     psa_api_svc_func_t svc_func = NULL;
     uint8_t svc_idx = svc_number & TFM_SVC_NUM_INDEX_MSK;
@@ -168,7 +171,8 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
     saved_exc_return = exc_return;
 
     p_curr_sp = GET_CURRENT_COMPONENT();
-    if (tfm_hal_boundary_need_switch(p_curr_sp->boundary, spm_boundary)) {
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_bool, p_curr_sp->boundary, spm_boundary);
+    if (fih_not_eq(fih_bool, fih_int_encode(false))) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc, NULL, spm_boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
             tfm_core_panic();

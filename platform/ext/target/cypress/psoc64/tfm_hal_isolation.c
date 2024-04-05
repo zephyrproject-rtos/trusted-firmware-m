@@ -156,16 +156,16 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
-bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
-                                  uintptr_t boundary_to)
+FIH_RET_TYPE(bool) tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                                uintptr_t boundary_to)
 {
     if (boundary_from == boundary_to) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
 
     if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
         ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
-    return true;
+    FIH_RET(fih_int_encode(true));
 }
