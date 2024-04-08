@@ -1086,7 +1086,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
              */
             lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(dm_config),
                                     sizeof(dm_config_2), (uint8_t *)&dm_config_2);
-            if (lcm_err != LCM_ERROR_NONE && lcm_err != LCM_ERROR_WRITE_VERIFY_FAIL) {
+            if (lcm_err != LCM_ERROR_NONE && lcm_err != LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL) {
                 return TFM_PLAT_ERR_SYSTEM_ERR;
             }
             break;
