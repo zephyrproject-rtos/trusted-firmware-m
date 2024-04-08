@@ -24,19 +24,29 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef TFM_UNIQUE_ERROR_CODES
+#include "error_codes_mapping.h"
+#else
+#define ATU_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
+
 /**
  * \brief Arm ATU error enumeration types
  */
 enum atu_error_t {
-    ATU_ERR_NONE,
-    ATU_ERR_INVALID_REGION,
-    ATU_ERR_INVALID_ADDRESS,
-    ATU_ERR_INVALID_ARG,
+    ATU_ERR_NONE = 0x0u,
+    ATU_ERR_INVALID_REGION = ATU_ERROR_BASE,
+    ATU_ERR_INVALID_LOGICAL_ADDRESS,
+    ATU_ERR_INIT_REGION_INVALID_ADDRESS,
+    ATU_ERR_INIT_REGION_INVALID_ARG,
+    ATU_ERR_UNINIT_REGION_INVALID_ARG,
+    ATU_ERR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**
