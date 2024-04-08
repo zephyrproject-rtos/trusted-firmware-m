@@ -24,10 +24,17 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef TFM_UNIQUE_ERROR_CODES
+#include "error_codes_mapping.h"
+#else
+#define MHU_V_3_X_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
 
 /* MHU Architecture Major Revision 3 */
 #define MHU_MAJOR_REV_V3 (0x2u)
@@ -54,17 +61,39 @@ extern "C" {
  */
 enum mhu_v3_x_error_t {
     /* No error */
-    MHU_V_3_X_ERR_NONE,
-    /* MHU driver not initialized */
-    MHU_V_3_X_ERR_NOT_INIT,
+    MHU_V_3_X_ERR_NONE = 0x0u,
+    /* Invalid input param in init function */
+    MHU_V_3_X_ERR_INIT_INVALID_PARAM = MHU_V_3_X_ERROR_BASE,
     /* MHU Revision not supported error */
-    MHU_V_3_X_ERR_UNSUPPORTED_VERSION,
-    /* Operation not supported */
-    MHU_V_3_X_ERR_UNSUPPORTED,
-    /* Invalid parameter */
-    MHU_V_3_X_ERR_INVALID_PARAM,
-    /* General MHU driver error */
-    MHU_V_3_X_ERR_GENERAL,
+    MHU_V_3_X_ERR_INIT_UNSUPPORTED_VERSION,
+    /* Invalid input param in get_num_channel function */
+    MHU_V_3_X_ERR_GET_NUM_CHANNEL_INVALID_PARAM,
+    /* Operation not supported in get_num_channel function */
+    MHU_V_3_X_ERR_GET_NUM_CHANNEL_UNSUPPORTED,
+    /* Invalid input param in doorbell_clear function */
+    MHU_V_3_X_ERR_DOORBELL_CLEAR_INVALID_PARAM,
+    /* Invalid input param in doorbell_write function */
+    MHU_V_3_X_ERR_DOORBELL_WRITE_INVALID_PARAM,
+    /* Invalid input param in doorbell_read function */
+    MHU_V_3_X_ERR_DOORBELL_READ_INVALID_PARAM,
+    /* Invalid input param in doorbell_mask_set function */
+    MHU_V_3_X_ERR_DOORBELL_MASK_SET_INVALID_PARAM,
+    /* Invalid input param in doorbell_mask_clear function */
+    MHU_V_3_X_ERR_DOORBELL_MASK_CLEAR_INVALID_PARAM,
+    /* Invalid input param in doorbell_mask_get function */
+    MHU_V_3_X_ERR_DOORBELL_MASK_GET_INVALID_PARAM,
+    /* Invalid input param in channel_interrupt_enable function */
+    MHU_V_3_X_ERR_INTERRUPT_ENABLE_INVALID_PARAM,
+    /* Operation not supported in channel_interrupt_enable function */
+    MHU_V_3_X_ERR_INTERRUPT_ENABLE_UNSUPPORTED,
+    /* Operation not supported in channel_interrupt_disable function */
+    MHU_V_3_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED,
+    /* Invalid input param in channel_interrupt_clear function */
+    MHU_V_3_X_ERR_INTERRUPT_CLEAR_INVALID_PARAM,
+    /* Operation not supported in channel_interrupt_clear function */
+    MHU_V_3_X_ERR_INTERRUPT_CLEAR_UNSUPPORTED,
+    /* Following entry is to ensure the error code size */
+    MHU_V_3_X_ERR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**
