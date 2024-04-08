@@ -39,6 +39,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
+        TFM_UNIQUE_ERROR_CODES=ON
         LCM_VERSION=0
         RSE_TP_MODE=LCM_TP_MODE_${RSE_TP_MODE}
         LCM_DCU_PARITY
@@ -775,6 +776,7 @@ install(DIRECTORY   partition
 
 install(FILES       target_cfg.h
                     tfm_peripherals_def.h
+                    error_codes_mapping.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/common/uart_stdout.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
