@@ -76,6 +76,18 @@ struct _kmu_reg_map_t {
                 /*!< Offset: 0xFFC (R/ ) Component ID 3 */
 };
 
+static inline enum kmu_error_t kmu_check_supported_slot(struct kmu_dev_t *dev, uint32_t slot)
+{
+    struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+
+    if (slot >= KMU_GET_NKS(p_kmu)) {
+        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
+        return KMU_ERROR_INVALID_SLOT;
+    }
+
+    return KMU_ERROR_NONE;
+}
+
 enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed)
 {
     uint32_t *p_prgb_seed_word = (uint32_t *)prbg_seed;
@@ -83,8 +95,8 @@ enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed)
     uint32_t idx;
 
     if ((uint32_t)p_prgb_seed_word & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
-        return KMU_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(KMU_ERROR_INIT_INVALID_ALIGNMENT);
+        return KMU_ERROR_INIT_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < KMU_PRBG_SEED_LEN / sizeof(uint32_t); idx++) {
@@ -104,10 +116,11 @@ enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     config->export_address = p_kmu->kmudkpa[slot];
@@ -139,9 +152,9 @@ enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
     enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     err = kmu_get_key_export_config_locked(dev, slot);
@@ -187,10 +200,11 @@ enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
 enum kmu_error_t kmu_set_key_locked(struct kmu_dev_t *dev, uint32_t slot)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_LKSKR_MASK;
@@ -201,10 +215,11 @@ enum kmu_error_t kmu_set_key_locked(struct kmu_dev_t *dev, uint32_t slot)
 enum kmu_error_t kmu_get_key_locked(struct kmu_dev_t *dev, uint32_t slot)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     if (p_kmu->kmuksc[slot] & KMU_KMUKSC_LKSKR_MASK) {
@@ -219,10 +234,11 @@ enum kmu_error_t kmu_set_key_export_config_locked(struct kmu_dev_t *dev,
                                                   uint32_t slot)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_LKS_MASK;
@@ -234,10 +250,11 @@ enum kmu_error_t kmu_get_key_export_config_locked(struct kmu_dev_t *dev,
                                                   uint32_t slot)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     if (p_kmu->kmuksc[slot] & KMU_KMUKSC_LKS_MASK) {
@@ -253,15 +270,15 @@ enum kmu_error_t kmu_set_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
     enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_IKS_MASK;
 
     if (p_kmu->kmuis & KMU_KMISR_AIKSWE_MASK) {
-        err = KMU_ERROR_INTERNAL_ERROR;
+        err = KMU_ERROR_SLOT_INTERNAL_ERROR;
     } else {
         err = KMU_ERROR_NONE;
     }
@@ -273,10 +290,11 @@ enum kmu_error_t kmu_set_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
 enum kmu_error_t kmu_get_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    enum kmu_error_t err;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     if (p_kmu->kmuksc[slot] | KMU_KMUKSC_KSIP_MASK){
@@ -296,18 +314,18 @@ enum kmu_error_t kmu_set_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *key,
     size_t idx;
 
     if ((uint32_t)key & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
-        return KMU_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(KMU_ERROR_SET_KEY_INVALID_ALIGNMENT);
+        return KMU_ERROR_SET_KEY_INVALID_ALIGNMENT;
     }
 
     if (key_len & (sizeof(uint32_t) - 1) || key_len > 32) {
-        FATAL_ERR(KMU_ERROR_INVALID_LENGTH);
-        return KMU_ERROR_INVALID_LENGTH;
+        FATAL_ERR(KMU_ERROR_SET_KEY_INVALID_LENGTH);
+        return KMU_ERROR_SET_KEY_INVALID_LENGTH;
     }
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     err = kmu_get_key_locked(dev, slot);
@@ -327,8 +345,8 @@ enum kmu_error_t kmu_set_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *key,
 
     if (p_kmu->kmuis & KMU_KMISR_MWKSW_MASK) {
         p_kmu->kmuis &= ~KMU_KMISR_MWKSW_MASK;
-        FATAL_ERR(KMU_ERROR_SLOT_ALREADY_WRITTEN);
-        return KMU_ERROR_SLOT_ALREADY_WRITTEN;
+        FATAL_ERR(KMU_ERROR_SET_KEY_SLOT_ALREADY_WRITTEN);
+        return KMU_ERROR_SET_KEY_SLOT_ALREADY_WRITTEN;
     }
 
     return KMU_ERROR_NONE;
@@ -343,18 +361,18 @@ enum kmu_error_t kmu_get_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *buf,
     size_t idx;
 
     if ((uint32_t)buf & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(KMU_ERROR_INVALID_ALIGNMENT);
-        return KMU_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(KMU_ERROR_GET_KEY_INVALID_ALIGNMENT);
+        return KMU_ERROR_GET_KEY_INVALID_ALIGNMENT;
     }
 
     if ((buf_len & (sizeof(uint32_t) - 1)) || buf_len > 32) {
-        FATAL_ERR(KMU_ERROR_INVALID_LENGTH);
-        return KMU_ERROR_INVALID_LENGTH;
+        FATAL_ERR(KMU_ERROR_GET_KEY_INVALID_LENGTH);
+        return KMU_ERROR_GET_KEY_INVALID_LENGTH;
     }
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     err = kmu_get_key_locked(dev, slot);
@@ -383,9 +401,9 @@ enum kmu_error_t kmu_get_key_buffer_ptr(struct kmu_dev_t *dev, uint32_t slot,
     enum kmu_error_t err;
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
 
     err = kmu_get_key_locked(dev, slot);
@@ -405,11 +423,10 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
     enum kmu_error_t err;
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
 
-    if (slot >= KMU_GET_NKS(p_kmu)) {
-        FATAL_ERR(KMU_ERROR_INVALID_SLOT);
-        return KMU_ERROR_INVALID_SLOT;
+    err = kmu_check_supported_slot(dev, slot);
+    if (err != KMU_ERROR_NONE) {
+        return err;
     }
-
     /* Trigger the key ready operation */
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_VKS_MASK;
 
@@ -419,18 +436,18 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
     /* Check that key readying succeeded, if not return the right error */
     if (!(p_kmu->kmuksc[slot] & KMU_KMUKSC_KSR_MASK)) {
         if (p_kmu->kmuis & KMU_KMISR_KSNL_MASK) {
-            err = KMU_ERROR_SLOT_NOT_LOCKED;
+            err = KMU_ERROR_EXPORT_KEY_SLOT_NOT_LOCKED;
             goto out;
         } else if (p_kmu->kmuis & KMU_KMISR_KSKRSM_MASK) {
-            err = KMU_ERROR_INVALID_LENGTH;
+            err = KMU_ERROR_EXPORT_KEY_INVALID_LENGTH;
             goto out;
         } else if (p_kmu->kmuis & KMU_KMISR_KSDPANS_MASK) {
-            err = KMU_ERROR_INVALID_EXPORT_ADDR;
+            err = KMU_ERROR_EXPORT_KEY_INVALID_ADDR;
             goto out;
         }
 
         /* Shouldn't ever happen, all errors should be one of the three above */
-        err = KMU_ERROR_INTERNAL_ERROR;
+        err = KMU_ERROR_EXPORT_KEY_INTERNAL_ERROR;
         goto out;
     }
 
@@ -441,13 +458,13 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
     while (!(p_kmu->kmuis & KMU_KMISR_KEC_MASK)) {}
 
     if (p_kmu->kmuis & KMU_KMISR_WTE_MASK) {
-        err = KMU_ERROR_INTERNAL_ERROR;
+        err = KMU_ERROR_EXPORT_KEY_INTERNAL_ERROR;
         goto out;
     } else if (p_kmu->kmuis & KMU_KMISR_INPPE_MASK) {
-        err = KMU_ERROR_INTERNAL_ERROR;
+        err = KMU_ERROR_EXPORT_KEY_INTERNAL_ERROR;
         goto out;
     } else if (p_kmu->kmuis & KMU_KMISR_AWBE_MASK) {
-        err = KMU_ERROR_INTERNAL_ERROR;
+        err = KMU_ERROR_EXPORT_KEY_INTERNAL_ERROR;
         goto out;
     }
 
