@@ -97,6 +97,7 @@ target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         device/rse_expansion_device_definition.c
+        rse_comms/rse_comms_permissions_hal.c
         rse_expansion_peripherals_def.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c

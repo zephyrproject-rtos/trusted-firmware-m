@@ -19,9 +19,6 @@ set(RSE_USE_HOST_UART                   OFF      CACHE BOOL    "Whether RSE shou
 set(RSE_USE_LOCAL_UART                  ON       CACHE BOOL    "Whether RSE should use the local UART dedicated to RSE")
 set(TFM_ATTESTATION_SCHEME              OFF      CACHE STRING  "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 set(TFM_BL1_MEMORY_MAPPED_FLASH         OFF      CACHE BOOL    "Whether BL1 can directly access flash content")
-set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   OFF      CACHE BOOL    "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")
 
 # Once all cache options are set, set common options as fallback
 include(${CMAKE_CURRENT_LIST_DIR}/../../common/config.cmake)
-
-set(TFM_MULTI_CORE_TOPOLOGY             OFF)

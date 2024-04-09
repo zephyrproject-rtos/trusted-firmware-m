@@ -15,15 +15,17 @@
  */
 
 /**
- * \file host_base_address.h
- * \brief This file defines the host memory map addresses accessed by RSE.
+ * \file host_ap_memory_map.h
+ * \brief This file contains addresses that are defined in the Application
+ *        processor (AP) memory map.
  */
 
-#ifndef __HOST_BASE_ADDRESS_H__
-#define __HOST_BASE_ADDRESS_H__
+#ifndef __HOST_AP_MEMORY_MAP_H__
+#define __HOST_AP_MEMORY_MAP_H__
 
-#include "host_ap_memory_map.h"
-#include "image_size_defs.h"
-#include "platform_base_address.h"
+/* AP Shared (ARSM) SRAM base address */
+#define HOST_AP_SHARED_SRAM_PHYS_BASE               0x000000000ULL
+/* AP Shared (ARSM) SRAM end address */
+#define HOST_AP_SHARED_SRAM_PHYS_LIMIT              0x0000FFFFFULL
 
-#endif  /* __HOST_BASE_ADDRESS_H__ */
+#endif /* __HOST_AP_MEMORY_MAP_H__ */
