@@ -27,6 +27,11 @@ const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
     .id = SYSCTRL_RSE_SCP_ASNI_ID,
 };
 
+const struct ni_tower_component_node sysctrl_rsm_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_RSM_AMNI_ID,
+};
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP, Safety Island and the CMN interconnect. Following block diagram
@@ -49,9 +54,9 @@ const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
  *                             |     |------>|     |
  *                             |     |       |     |-------------> cmn_apbm
  *                             +-----+       |     |
- *                                           |     |
- *                                           |     |-------------> rsm_axim
- *      scp_axis --------------------------->|     |
+ *                                           |     |   +-----+
+ *                                           |     |---| APU |---> rsm_axim
+ *      scp_axis --------------------------->|     |   +-----+
  *                                           |     |
  *                                           |     |
  *                                           |     |-------------> rsm_apbm
@@ -328,6 +333,16 @@ static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
 };
 
 /*
+ * Completer side RSM AXIM APU to check access permission targeting Shared RAM
+ * between RSE and SCP
+ */
+static const struct ni_tower_apu_reg_cfg_info rsm_axim_apu[] = {
+    INIT_APU_REGION(HOST_RSM_SRAM_PHYS_BASE,
+                    HOST_RSM_SRAM_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -360,6 +375,37 @@ static int32_t program_sysctrl_psam_aon(void)
 
     err = ni_tower_program_psam_table(&SYSCTRL_NI_TOWER_DEV, psam_table,
             ARRAY_SIZE(psam_table));
+    if (err != NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Configure Access Protection Unit (APU) to setup access permission for each
+ * memory region based on its target in System Control NI-Tower for nodes
+ * under AON domain.
+ */
+static int32_t program_sysctrl_apu_aon(void)
+{
+    enum ni_tower_err err;
+
+    /*
+     * Populates all APU entry into a table array to confgiure and enable
+     * desired APUs
+     */
+    struct ni_tower_apu_cfgs apu_table[] = {
+        {
+            .component = &sysctrl_rsm_amni,
+            .region_count = ARRAY_SIZE(rsm_axim_apu),
+            .regions = rsm_axim_apu,
+            .add_chip_addr_offset = false,
+        },
+    };
+
+    err = ni_tower_program_apu_table(&SYSCTRL_NI_TOWER_DEV, apu_table,
+            ARRAY_SIZE(apu_table));
     if (err != NI_TOWER_SUCCESS) {
         return -1;
     }

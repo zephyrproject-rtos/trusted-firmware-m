@@ -13,6 +13,23 @@
 #include "array.h"
 #include <stdint.h>
 
+/*
+ * Platform specific apu region initialization macro wrapper. This macros
+ * returns 'struct ni_tower_apu_reg_cfg_info' definition by providing
+ * the base and end address of APU region and the associated access permission.
+ */
+#define INIT_APU_REGION(base, end, perm)        \
+    {                                           \
+        .base_addr = base,                      \
+        .end_addr = end,                        \
+        .background = NI_T_FOREGROUND,          \
+        .permissions = { perm, 0, 0, 0 },       \
+        .entity_ids = { 0, 0, 0, 0 },           \
+        .id_valid = NI_T_ID_VALID_NONE,         \
+        .region_enable = NI_T_REGION_ENABLE,    \
+        .lock = NI_T_LOCK                       \
+    }
+
 /* Interface ID of xSNI components - completer interfaces */
 enum sysctrl_xSNI_ids {
     /* Request from AP */
