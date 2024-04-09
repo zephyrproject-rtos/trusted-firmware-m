@@ -32,6 +32,11 @@ const struct ni_tower_component_node sysctrl_rsm_amni  = {
     .id = SYSCTRL_RSM_AMNI_ID,
 };
 
+const struct ni_tower_component_node sysctrl_rsm_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = SYSCTRL_RSM_PMNI_ID,
+};
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP, Safety Island and the CMN interconnect. Following block diagram
@@ -58,9 +63,9 @@ const struct ni_tower_component_node sysctrl_rsm_amni  = {
  *                                           |     |---| APU |---> rsm_axim
  *      scp_axis --------------------------->|     |   +-----+
  *                                           |     |
- *                                           |     |
- *                                           |     |-------------> rsm_apbm
- *                                           |     |
+ *                                           |     |   +-----+
+ *                                           |     |---| APU |---> rsm_apbm
+ *                                           |     |   +-----+
  *                                           |     |
  *                                           |     |
  *                                           |     |-------------> app_axim
@@ -343,6 +348,25 @@ static const struct ni_tower_apu_reg_cfg_info rsm_axim_apu[] = {
 };
 
 /*
+ * RSM APBM APU to check the ECC Error record register block for Shared RAM
+ * between RSE and SCP
+ */
+static const struct ni_tower_apu_reg_cfg_info rsm_apbm_apu[] = {
+    INIT_APU_REGION(HOST_RSE_S_RSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_S_RSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_RSE_NS_RSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_RSE_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    INIT_APU_REGION(HOST_SCP_S_RSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_S_RSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    INIT_APU_REGION(HOST_SCP_NS_RSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -400,6 +424,12 @@ static int32_t program_sysctrl_apu_aon(void)
             .component = &sysctrl_rsm_amni,
             .region_count = ARRAY_SIZE(rsm_axim_apu),
             .regions = rsm_axim_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_rsm_pmni,
+            .region_count = ARRAY_SIZE(rsm_apbm_apu),
+            .regions = rsm_apbm_apu,
             .add_chip_addr_offset = false,
         },
     };
