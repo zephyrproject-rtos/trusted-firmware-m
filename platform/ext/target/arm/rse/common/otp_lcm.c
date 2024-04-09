@@ -402,7 +402,7 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
 
     lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return lcm_err;
     }
 
     /* If the OTP is outside the emulated region, and the emulation is enabled,
@@ -411,7 +411,7 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
     if (tp_mode != LCM_TP_MODE_PCI &&
         rse_otp_emulation_is_enabled() &&
         offset + len > RSE_BRINGUP_OTP_EMULATION_SIZE) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_OTP_EMULATION_UNSUPPORTED;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -421,17 +421,20 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
 static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
                                     uint32_t buf_len, uint8_t *buf)
 {
+    enum lcm_error_t lcm_err;
+#ifdef RSE_BRINGUP_OTP_EMULATION
+    enum tfm_plat_err_t plat_err;
+#endif /* RSE_BRINGUP_OTP_EMULATION */
+
     if (len == 0) {
         return TFM_PLAT_ERR_SUCCESS;
     }
 
     if (offset == 0) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_OTP_READ_UNSUPPORTED;
     }
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
-    enum tfm_plat_err_t plat_err;
-
     plat_err = check_if_otp_is_emulated(offset, len);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
@@ -442,8 +445,9 @@ static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
         len = buf_len;
     }
 
-    if (lcm_otp_read(&LCM_DEV_S, offset, len, buf) != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    lcm_err = lcm_otp_read(&LCM_DEV_S, offset, len, buf);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return lcm_err;
     } else {
         return TFM_PLAT_ERR_SUCCESS;
     }
@@ -458,7 +462,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
     }
 
     if (offset == 0) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_OTP_READ_ENCRYPTED_UNSUPPORTED;
     }
 
 #ifndef RSE_ENCRYPTED_OTP_KEYS
@@ -478,7 +482,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
     if (len > sizeof(tmp_buf)) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_OTP_READ_ENCRYPTED_INVALID_INPUT;
     }
 
     plat_err = otp_read(offset, len, sizeof(tmp_buf), (uint8_t *)tmp_buf);
@@ -490,7 +494,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
                                      KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
                                      iv, sizeof(iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return cc_err;
     }
 
     cc3xx_lowlevel_aes_set_output_buffer(buf, buf_len);
@@ -498,7 +502,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
     cc_err = cc3xx_lowlevel_aes_update((uint8_t *)tmp_buf, len);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         cc3xx_lowlevel_aes_uninit();
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return cc_err;
     }
 
     cc3xx_lowlevel_aes_finish(NULL, NULL);
@@ -513,12 +517,12 @@ static enum tfm_plat_err_t otp_write(uint32_t offset, uint32_t len,
     enum lcm_error_t err;
 
     if (buf_len > len) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_OTP_WRITE_INVALID_INPUT;
     }
 
     err = lcm_otp_write(&LCM_DEV_S, offset, buf_len, buf);
     if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return err;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -538,14 +542,14 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
     enum tfm_plat_err_t plat_err;
 
     if (len > sizeof(tmp_buf)) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_OTP_WRITE_ENCRYPTED_INVALID_INPUT;
     }
 
     cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CTR,
                             key, NULL, CC3XX_AES_KEYSIZE_256,
                             iv, sizeof(iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return cc_err;
     }
 
     cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)tmp_buf, sizeof(tmp_buf));
@@ -553,7 +557,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
     cc_err = cc3xx_lowlevel_aes_update(buf, len);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         cc3xx_lowlevel_aes_uninit();
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return cc_err;
     }
 
     cc3xx_lowlevel_aes_finish(NULL, NULL);
@@ -565,7 +569,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
 
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return cc_err;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -594,9 +598,9 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
                                                (uint32_t *)USER_AREA_ADDRESS(manufacturing_data.header.zero_count),
                                                USER_AREA_SIZE(manufacturing_data.header.zero_count));
         if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
+            return ic_err;
         }
-    } else if (err != TFM_PLAT_ERR_UNSUPPORTED) {
+    } else if (err != TFM_PLAT_ERR_OTP_EMULATION_UNSUPPORTED) {
         return err;
     }
 #endif /* RSE_HAS_MANUFACTURING_DATA */
@@ -609,7 +613,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
                                                    (uint32_t *)USER_AREA_ADDRESS(cm_locked_size_zero_count),
                                                    USER_AREA_SIZE(cm_locked_size_zero_count));
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
 
             err = otp_read(USER_AREA_OFFSET(cm_locked_size),
@@ -626,7 +630,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
                                                    (uint32_t *)USER_AREA_ADDRESS(cm_zero_count),
                                                    USER_AREA_SIZE(cm_zero_count));
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
     }
 
@@ -638,7 +642,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
                                                    (uint32_t *)USER_AREA_ADDRESS(dm_locked_size_zero_count),
                                                    USER_AREA_SIZE(dm_locked_size_zero_count));
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
 
             err = otp_read(USER_AREA_OFFSET(dm_locked_size),
@@ -655,7 +659,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(enum lcm_lcs_t lcs)
                                                    (uint32_t *)USER_AREA_ADDRESS(dm_zero_count),
                                                    USER_AREA_SIZE(dm_zero_count));
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
     }
 
@@ -696,15 +700,17 @@ static enum plat_otp_lcs_t map_lcm_lcs_to_otp_lcs(enum lcm_lcs_t lcs)
 
 static enum tfm_plat_err_t otp_read_lcs(size_t out_len, uint8_t *out)
 {
+    enum lcm_error_t lcm_err;
     enum lcm_lcs_t lcm_lcs;
     enum plat_otp_lcs_t *lcs = (enum plat_otp_lcs_t*) out;
 
-    if (lcm_get_lcs(&LCM_DEV_S, &lcm_lcs)) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcm_lcs);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return lcm_err;
     }
 
     if (out_len != sizeof(uint32_t)) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_OTP_READ_LCS_INVALID_INPUT;
     }
 
     *lcs = map_lcm_lcs_to_otp_lcs(lcm_lcs);
@@ -720,33 +726,29 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
 
     err = lcm_init(&LCM_DEV_S);
     if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return err;
     }
 
     err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return err;
     }
-    if (otp_size < OTP_OFFSET(user_data) +
-                   sizeof(struct plat_user_area_layout_t)) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    if (OTP_TOTAL_SIZE < OTP_OFFSET(user_data) +
-                   sizeof(struct plat_user_area_layout_t)) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    if ((otp_size < OTP_OFFSET(user_data) + sizeof(struct plat_user_area_layout_t)) ||
+        (OTP_TOTAL_SIZE < OTP_OFFSET(user_data) + sizeof(struct plat_user_area_layout_t))) {
+        return TFM_PLAT_ERR_OTP_INIT_SYSTEM_ERR;
     }
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
     /* Check that everything inside the main area can be emulated */
     if (USER_AREA_OFFSET(unlocked_area) + USER_AREA_SIZE(unlocked_area)
         > RSE_BRINGUP_OTP_EMULATION_SIZE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return TFM_PLAT_ERR_OTP_INIT_SYSTEM_ERR;
     }
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
     err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return err;
     }
 
     return check_keys_for_tampering(lcs);
@@ -767,14 +769,12 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     uint32_t bl1_2_offset;
 
     if (id >= PLAT_OTP_ID_MAX) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_PLAT_OTP_READ_INVALID_INPUT;
     }
 
-    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
-    }
-    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+    if ((id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) ||
+        (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8)) {
+        return TFM_PLAT_ERR_PLAT_OTP_READ_UNSUPPORTED;
     }
 
     switch(id) {
@@ -822,7 +822,7 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
                         manufacturing_data_size,
                         out_len, out);
 #else
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_PLAT_OTP_READ_MFG_DATA_UNSUPPORTED;
 #endif
     default:
         return otp_read(otp_offsets[id], otp_sizes[id], out_len, out);
@@ -841,7 +841,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
     enum integrity_checker_error_t ic_err;
 
     if (in_len != sizeof(lcs)) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_OTP_WRITE_LCS_INVALID_INPUT;
     }
 
     switch(new_lcs) {
@@ -864,7 +864,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
                                                      sizeof(zero_bit_count),
                                                      NULL);
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
             err = otp_write(USER_AREA_OFFSET(cm_locked_size_zero_count),
                             USER_AREA_SIZE(cm_locked_size_zero_count),
@@ -882,7 +882,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
                                                      sizeof(zero_bit_count),
                                                      NULL);
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
             err = otp_write(USER_AREA_OFFSET(cm_zero_count),
                             USER_AREA_SIZE(cm_zero_count), sizeof(zero_bit_count),
@@ -910,7 +910,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
                                                      sizeof(zero_bit_count),
                                                      NULL);
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
             err = otp_write(USER_AREA_OFFSET(dm_locked_size_zero_count),
                             USER_AREA_SIZE(dm_locked_size_zero_count),
@@ -928,7 +928,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
                                                      sizeof(zero_bit_count),
                                                      NULL);
             if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return ic_err;
             }
             err = otp_write(USER_AREA_OFFSET(dm_zero_count),
                             USER_AREA_SIZE(dm_zero_count), sizeof(zero_bit_count),
@@ -941,12 +941,12 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             break;
         case LCM_LCS_CM:
         case LCM_LCS_INVALID:
-            return TFM_PLAT_ERR_SYSTEM_ERR;
+            return TFM_PLAT_ERR_OTP_WRITE_LCS_SYSTEM_ERR;
     }
 
     lcm_err = lcm_set_lcs(&LCM_DEV_S, new_lcs, gppc_val);
     if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return lcm_err;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -962,14 +962,12 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     uint32_t bl1_2_offset;
 
     if (id >= PLAT_OTP_ID_MAX) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_PLAT_OTP_WRITE_INVALID_INPUT;
     }
 
-    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
-    }
-    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+    if ((id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) ||
+        (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8)) {
+        return TFM_PLAT_ERR_PLAT_OTP_WRITE_UNSUPPORTED;
     }
 
     switch (id) {
@@ -1005,14 +1003,12 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
                                           size_t *size)
 {
     if (id >= PLAT_OTP_ID_MAX) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        return TFM_PLAT_ERR_PLAT_OTP_GET_SIZE_INVALID_INPUT;
     }
 
-    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
-    }
-    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
-        return TFM_PLAT_ERR_UNSUPPORTED;
+    if ((id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) ||
+        (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8)) {
+        return TFM_PLAT_ERR_PLAT_OTP_GET_SIZE_UNSUPPORTED;
     }
 
     *size = otp_sizes[id];
@@ -1041,7 +1037,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
 
     lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
     if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return lcm_err;
     }
 
     if (sp_enabled != LCM_TRUE) {
@@ -1053,7 +1049,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
          */
         lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
         if (lcm_err != LCM_ERROR_NONE) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
+            return lcm_err;
         }
 
         switch(lcs) {
@@ -1062,7 +1058,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
             lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(cm_config_2), sizeof(gppc_val),
                                     (uint8_t *)&gppc_val);
             if (lcm_err != LCM_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return lcm_err;
             }
             break;
         case LCM_LCS_DM:
@@ -1072,13 +1068,13 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
             lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(kp_dm),
                                     sizeof(dummy_key_value), dummy_key_value);
             if (lcm_err != LCM_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return lcm_err;
             }
 
             lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(kce_dm),
                                     sizeof(dummy_key_value), dummy_key_value);
             if (lcm_err != LCM_ERROR_NONE) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return lcm_err;
             }
 
             /* Finally, write dm_config to trigger the zero-count checking. It
@@ -1087,7 +1083,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
             lcm_err = lcm_otp_write(&LCM_DEV_S, OTP_OFFSET(dm_config),
                                     sizeof(dm_config_2), (uint8_t *)&dm_config_2);
             if (lcm_err != LCM_ERROR_NONE && lcm_err != LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL) {
-                return TFM_PLAT_ERR_SYSTEM_ERR;
+                return lcm_err;
             }
             break;
         default:

@@ -31,7 +31,7 @@ fih_int bl1_read_bl1_2_image(uint8_t *image)
     }
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_2_IMAGE, bl1_2_len, image);
-    if (plat_err == TFM_PLAT_ERR_UNSUPPORTED) {
+    if (plat_err == TFM_PLAT_ERR_OTP_EMULATION_UNSUPPORTED) {
         /* If this returns unsupported, then the OTP emulation isn't large
          * enough to contain the BL1_2 image.
          */

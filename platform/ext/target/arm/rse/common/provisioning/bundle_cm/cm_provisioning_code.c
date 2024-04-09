@@ -84,7 +84,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
                              data.bl1_2_image);
     if (err != TFM_PLAT_ERR_SUCCESS) {
 #ifdef RSE_BRINGUP_OTP_EMULATION
-        if (err == TFM_PLAT_ERR_UNSUPPORTED) {
+        if (err == TFM_PLAT_ERR_OTP_EMULATION_UNSUPPORTED) {
             err = flash_write((uint8_t *)data.bl1_2_image, bl1_2_len,
                               BL1_2_IMAGE_FLASH_OFFSET);
             if (err != TFM_PLAT_ERR_SUCCESS) {
