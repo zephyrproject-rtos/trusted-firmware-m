@@ -37,6 +37,11 @@ const struct ni_tower_component_node sysctrl_rsm_pmni  = {
     .id = SYSCTRL_RSM_PMNI_ID,
 };
 
+const struct ni_tower_component_node sysctrl_rse_scp_amni  = {
+    .type = NI_TOWER_AMNI,
+    .id = SYSCTRL_RSE_SCP_AMNI_ID,
+};
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP, Safety Island and the CMN interconnect. Following block diagram
@@ -47,9 +52,9 @@ const struct ni_tower_component_node sysctrl_rsm_pmni  = {
  *                             |     |---------------------------> tcu_apbm
  *                             |     |
  *                             |     |
- *                             |     |
- *                             |     |---------------------------> rse_scp_axim
- *                             |     |
+ *                             |     |                 +-----+
+ *                             |     |-----------------| APU |---> rse_scp_axim
+ *                             |     |                 +-----+
  *                             |     |
  * rse_main_axis ------------->|     |
  *                             |     |---------------------------> rse_si_axim
@@ -367,6 +372,15 @@ static const struct ni_tower_apu_reg_cfg_info rsm_apbm_apu[] = {
 };
 
 /*
+ * Completer side RSE-SCP AXIM APU to check access permission targeting the SCP
+ */
+static const struct ni_tower_apu_reg_cfg_info rse_scp_axim_apu[] = {
+    INIT_APU_REGION(HOST_SCP_PHYS_BASE,
+                    HOST_SCP_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -430,6 +444,12 @@ static int32_t program_sysctrl_apu_aon(void)
             .component = &sysctrl_rsm_pmni,
             .region_count = ARRAY_SIZE(rsm_apbm_apu),
             .regions = rsm_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_rse_scp_amni,
+            .region_count = ARRAY_SIZE(rse_scp_axim_apu),
+            .regions = rse_scp_axim_apu,
             .add_chip_addr_offset = false,
         },
     };
