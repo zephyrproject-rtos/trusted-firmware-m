@@ -20,10 +20,21 @@
  * definitions from device_cfg.h.
  */
 
-#include "host_device_definition.h"
+#include <stddef.h>
 
+#include "host_device_definition.h"
 #include "host_base_address.h"
 #include "platform_base_address.h"
+
+#ifdef PLATFORM_HAS_NI_TOWER
+/* System Control NI-Tower device */
+struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
+    .periphbase = HOST_NI_TOWER_BASE,
+    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .skip_discovery_list = NULL,
+    .chip_addr_offset = 0,
+};
+#endif /* PLATFORM_HAS_NI_TOWER */
 
 #ifdef PLATFORM_HOST_HAS_SCP
 struct mscp_dev_t HOST_SCP_DEV = {

@@ -25,6 +25,7 @@
 #include "host_ap_memory_map.h"
 #include "host_atu_base_address.h"
 #include "host_scp_memory_map.h"
+#include "host_si_memory_map.h"
 #include "image_size_defs.h"
 #include "platform_base_address.h"
 
