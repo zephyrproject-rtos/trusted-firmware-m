@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -55,7 +55,7 @@ struct partition_head_t {
 /* Runtime service struct list head node type */
 struct service_head_t {
     uint32_t reserved;                  /* Reserved             */
-    struct service_t *next;             /* Next partition node  */
+    struct service_t *next;             /* Next service node    */
 };
 
 /*

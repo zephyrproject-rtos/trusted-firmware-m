@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -37,7 +37,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
                                                   uint32_t sid, uint32_t version, int32_t client_id)
 {
-    struct service_t *service;
+    const struct service_t *service;
     struct connection_t *connection;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = (client_id < 0) ? true : false;

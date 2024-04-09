@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -15,8 +15,6 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_psa_call_pack.h"
 #include "utilities.h"
-
-extern struct service_t *stateless_services_ref_tbl[];
 
 psa_status_t spm_associate_call_params(struct connection_t *p_connection,
                                        uint32_t            ctrl_param,

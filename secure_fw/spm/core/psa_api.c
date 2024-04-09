@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -200,7 +200,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {
-    struct service_t *service;
+    const struct service_t *service;
     struct connection_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;

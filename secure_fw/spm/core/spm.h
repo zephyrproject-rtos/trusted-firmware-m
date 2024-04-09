@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -78,7 +78,7 @@ struct connection_t {
                                               * TFM_HANDLE_STATUS_TO_FREE
                                               */
     struct partition_t *p_client;            /* Caller partition               */
-    struct service_t *service;               /* RoT service pointer            */
+    const struct service_t *service;         /* RoT service pointer            */
     psa_msg_t msg;                           /* PSA message body               */
     const void *invec_base[PSA_MAX_IOVEC];   /* Base addresses of invec from client */
     size_t invec_accessed[PSA_MAX_IOVEC];    /* Size of data accessed by psa_read/skip */
@@ -185,7 +185,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
  * \retval "Not NULL"       Target service context pointer,
  *                          \ref service_t structures
  */
-struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
+const struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /************************ Message functions **********************************/
 
@@ -239,7 +239,7 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
  * \param[in] client_id     Partition ID of the sender of the message
  */
 void spm_init_idle_connection(struct connection_t *p_connection,
-                              struct service_t *service,
+                              const struct service_t *service,
                               int32_t client_id);
 
 /*
@@ -263,7 +263,7 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
  * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval SPM_ERROR_VERSION Check failed
  */
-int32_t tfm_spm_check_client_version(struct service_t *service,
+int32_t tfm_spm_check_client_version(const struct service_t *service,
                                      uint32_t version);
 
 /**
@@ -278,7 +278,7 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
  * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
-                                    struct service_t *service,
+                                    const struct service_t *service,
                                     bool ns_caller);
 
 /**
