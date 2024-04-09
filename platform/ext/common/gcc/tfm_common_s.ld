@@ -69,6 +69,9 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+    /* Start address of the code. */
+    Image$$PT_RO_START$$Base = ADDR(.TFM_VECTORS);
+
     .TFM_VECTORS : ALIGN(4)
     {
         __vectors_start__ = .;
@@ -258,6 +261,10 @@ SECTIONS
 #if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
     VENEERS()
 #endif
+
+    /* Position tag */
+    . = ALIGN(TFM_LINKER_PT_RO_ALIGNMENT);
+    Image$$PT_RO_END$$Base = .;
 
     /**** Base address of secure data area */
     .tfm_secure_data_start :

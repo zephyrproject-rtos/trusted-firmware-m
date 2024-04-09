@@ -26,6 +26,10 @@
  * default values if needed. */
 #include "tfm_s_linker_alignments.h"
 
+/* position tag block : code + RO-data */
+define block PT_RO_START with alignment = TFM_LINKER_PT_RO_ALIGNMENT, size = 0 { };
+define block PT_RO_END with alignment = TFM_LINKER_PT_RO_ALIGNMENT, size = 0 { };
+
 define block ER_VECTORS with size = S_CODE_VECTOR_TABLE_SIZE {
        readonly section .intvec
 };
@@ -254,6 +258,7 @@ define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
        block ER_VENEER,
        block VENEER_ALIGN,
 #endif
+       block PT_RO_START,
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE_START,
        block TFM_UNPRIV_CODE_END,
@@ -280,6 +285,7 @@ define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
      * of APP RoT code.
      */
        block TFM_APP_CODE_END,
+       block PT_RO_END,
        };
 
 do not initialize  {
