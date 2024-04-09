@@ -20,6 +20,11 @@
 #include <string.h>
 #include "sam_reg_map.h"
 #include "trng.h"
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "fih.h"
+#include "cc3xx_drv.h"
+#endif /* CRYPTO_HW_ACCELERATOR */
+
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
@@ -62,6 +67,15 @@ int32_t boot_platform_init(void)
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return 1;
     }
+
+#ifdef CRYPTO_HW_ACCELERATOR
+    result = cc3xx_lowlevel_init();
+    if (result != CC3XX_ERR_SUCCESS) {
+        return 1;
+    }
+    (void)fih_delay_init();
+#endif /* CRYPTO_HW_ACCELERATOR */
+
 
     /* Init KMU */
     result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
