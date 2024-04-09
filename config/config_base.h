@@ -275,4 +275,11 @@
 #define OTP_NV_COUNTERS_RAM_EMULATION           0
 #endif
 
+/* Error Codes Configs */
+
+/* Enable unique error codes */
+#ifndef TFM_UNIQUE_ERROR_CODES
+#define TFM_UNIQUE_ERROR_CODES 0
+#endif
+
 #endif /* __CONFIG_BASE_H__ */
