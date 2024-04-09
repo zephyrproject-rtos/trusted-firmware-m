@@ -482,3 +482,16 @@ static int32_t program_sysctrl_apu_aon(void)
 
     return 0;
 }
+
+int32_t program_sysctrl_ni_tower_aon(void)
+{
+    if (program_sysctrl_psam_aon() != 0) {
+        return -1;
+    }
+
+    if (program_sysctrl_apu_aon() != 0) {
+        return -1;
+    }
+
+    return 0;
+}

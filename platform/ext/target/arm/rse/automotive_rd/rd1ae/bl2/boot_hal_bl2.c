@@ -14,6 +14,7 @@
 #include "host_base_address.h"
 #include "interrupts_bl2.h"
 #include "mhu_v3_x.h"
+#include "ni_tower_lib.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "rse_expansion_regs.h"
@@ -163,6 +164,14 @@ static int boot_platform_pre_load_scp(void)
     int mhu_err;
 
     BOOT_LOG_INF("BL2: SCP pre load start");
+
+    /*
+     * Setup everything needed for access to the SCP subsystem.
+     */
+    if (host_system_prepare_scp_access() != 0) {
+        BOOT_LOG_ERR("BL2: Could not setup access to SCP systems.");
+        return 1;
+    }
 
     /* Configure ATUs for loading to areas not directly addressable by RSE. */
 

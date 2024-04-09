@@ -41,6 +41,9 @@ enum rse_atu_ids {
     RSE_ATU_IMG_CODE_LOAD_ID,
     /* ID to use for region initializing firmware */
     RSE_ATU_FW_INIT_ID,
+
+    /* ATU region ID for programming NI-Tower */
+    RSE_ATU_NI_TOWER_ID,
 };
 
 /*
@@ -193,5 +196,7 @@ enum rse_atu_ids {
 /* ATU region mapping to access System Control NI-Tower */
 #define HOST_NI_TOWER_BASE      (HOST_SCP_INIT_CTRL_BASE_S +                \
                                  HOST_SCP_INIT_CTRL_SIZE)
+#define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
+#define HOST_NI_TOWER_ATU_ID    RSE_ATU_NI_TOWER_ID
 
 #endif  /* __HOST_ATU_BASE_ADDRESS_H__ */
