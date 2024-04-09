@@ -26,10 +26,10 @@
 #ifdef MCUBOOT_SIGN_EC384
 /* The sizes are in 4 byte words */
 #define BL2_ROTPK_HASH_SIZE (12)
-#define BL2_ROTPK_SIZE      (30)
+#define BL2_ROTPK_SIZE      (25)
 #else
 #define BL2_ROTPK_HASH_SIZE (8)
-#define BL2_ROTPK_SIZE      (23)
+#define BL2_ROTPK_SIZE      (17)
 #endif /* MCUBOOT_SIGN_EC384 */
 
 #ifdef MCUBOOT_BUILTIN_KEY

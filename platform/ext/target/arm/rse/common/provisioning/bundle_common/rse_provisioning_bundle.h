@@ -17,10 +17,10 @@ extern "C" {
 
 #ifdef MCUBOOT_SIGN_EC384
 #define BL2_ROTPK_HASH_SIZE     (48)
-#define BL2_ROTPK_KEY_SIZE      (120)
+#define BL2_ROTPK_KEY_SIZE      (100) /* Size must be aligned to 4 Bytes */
 #else
 #define BL2_ROTPK_HASH_SIZE     (32)
-#define BL2_ROTPK_KEY_SIZE      (92) /* Size must be aligned to 4 Bytes */
+#define BL2_ROTPK_KEY_SIZE      (68)  /* Size must be aligned to 4 Bytes */
 #endif /* MCUBOOT_SIGN_EC384 */
 
 #ifdef MCUBOOT_BUILTIN_KEY
