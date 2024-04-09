@@ -195,7 +195,6 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #pragma GCC diagnostic pop
 #endif
 
-#ifdef RSE_ENABLE_TRAM
 extern uint32_t stdio_is_initialized;
 
 /*
@@ -273,7 +272,6 @@ static void __attribute__ ((noinline)) setup_tram_encryption(void) {
 
     stdio_is_initialized = 0;
 };
-#endif /* RSE_ENABLE_TRAM */
 
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
@@ -292,7 +290,6 @@ void Reset_Handler(void)
     SCB_EnableICache();
     SCB_EnableDCache();
 
-#ifdef RSE_ENABLE_TRAM
     /* Set MSP to be in VM0 to start with */
     __set_MSP(CM_PROVISIONING_BUNDLE_START);
     __set_MSPLIM(VM0_BASE_S);
@@ -302,7 +299,6 @@ void Reset_Handler(void)
     /* Now switch back to the right stack (which is in the TRAM) */
     __set_MSPLIM(0);
     __set_MSP((uint32_t)(&__INITIAL_SP));
-#endif /* RSE_ENABLE_TRAM */
 
     __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
 
