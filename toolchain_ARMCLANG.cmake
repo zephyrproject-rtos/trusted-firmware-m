@@ -361,7 +361,7 @@ macro(target_share_symbols target)
         message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
     endif()
 
-    foreach(symbol_list ${ARGN})
+    foreach(symbol_file ${ARGN})
         FILE(STRINGS ${symbol_file} SYMBOLS
             LENGTH_MINIMUM 1
         )
