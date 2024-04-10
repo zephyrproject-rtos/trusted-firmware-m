@@ -208,7 +208,8 @@ target_compile_definitions(platform_bl1_1
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
-
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -229,6 +230,7 @@ target_include_directories(platform_bl1_1_interface
         ${CMAKE_SOURCE_DIR}/bl1/bl1_1/shared_lib/interface/
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/platform/ext/accelerator/interface>
+        ${PLATFORM_DIR}/ext/accelerator/cc312/
 )
 
 target_link_libraries(platform_bl1_1
@@ -247,6 +249,8 @@ target_compile_definitions(platform_bl1_2
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
 target_include_directories(platform_bl1_2
@@ -266,6 +270,7 @@ target_include_directories(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/
+        ${PLATFORM_DIR}/ext/accelerator/cc312/
 )
 
 #========================= Platform BL2 =======================================#
