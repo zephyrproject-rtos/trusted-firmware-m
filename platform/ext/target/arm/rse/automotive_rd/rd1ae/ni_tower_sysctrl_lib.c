@@ -27,6 +27,11 @@ const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
     .id = SYSCTRL_RSE_SCP_ASNI_ID,
 };
 
+const struct ni_tower_component_node sysctrl_app_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_APP_ASNI_ID,
+};
+
 const struct ni_tower_component_node sysctrl_rsm_amni  = {
     .type = NI_TOWER_AMNI,
     .id = SYSCTRL_RSM_AMNI_ID,
@@ -85,6 +90,14 @@ const struct ni_tower_component_node sysctrl_rse_si_amni  = {
  *                             +-----+
  *                             |     |
  *                             |     |
+ *      app_axis ------------->|     |--------------------------> app_si_axim
+ *                             |     |
+ *                             |     |
+ *                             +-----+
+ *
+ *                             +-----+
+ *                             |     |
+ *                             |     |
  *  rse_scp_axis ------------->|     |--------------------------> clus_util_axim
  *                             |     |
  *                             |     |
@@ -92,27 +105,27 @@ const struct ni_tower_component_node sysctrl_rse_si_amni  = {
  *
  * The following matrix shows the connections within System Control NI-Tower.
  *
- * +------------+---------------+----------+--------------+
- * |            | rse_main_axis | scp_axis | rse_scp_axis |
- * +============+===============+==========+==============+
- * |rse_scp_axim|       X       |          |              |
- * +------------+---------------+----------+--------------+
- * |rse_si_axim |       X       |          |              |
- * +------------+---------------+----------+--------------+
- * |  rsm_axim  |       X       |    X     |              |
- * +------------+---------------+----------+--------------+
- * |  rsm_apbm  |       X       |    X     |              |
- * +------------+---------------+----------+--------------+
- * |  cmn_apbm  |       X       |    X     |              |
- * +------------+---------------+----------+--------------+
- * |  tcu_apbm  |       X       |          |              |
- * +------------+---------------+----------+--------------+
- * |  app_axim  |       X       |    X     |              |
- * +------------+---------------+----------+--------------+
- * |app_scp_axim|               |          |              |
- * +------------+---------------+----------+--------------+
- * |app_si_axim |               |          |              |
- * +------------+---------------+----------+--------------+
+ * +------------+---------------+----------+--------------+----------+
+ * |            | rse_main_axis | scp_axis | rse_scp_axis | app_axis |
+ * +============+===============+==========+==============+==========+
+ * |rse_scp_axim|       X       |          |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |rse_si_axim |       X       |          |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |  rsm_axim  |       X       |    X     |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |  rsm_apbm  |       X       |    X     |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |  cmn_apbm  |       X       |    X     |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |  tcu_apbm  |       X       |          |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |  app_axim  |       X       |    X     |              |          |
+ * +------------+---------------+----------+--------------+----------+
+ * |app_scp_axim|               |          |              |    X     |
+ * +------------+---------------+----------+--------------+----------+
+ * |app_si_axim |               |          |              |    X     |
+ * +------------+---------------+----------+--------------+----------+
  *  NOTE: 'X' means there is a connection.
  */
 
@@ -348,6 +361,40 @@ static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
 };
 
 /*
+ * Request originating from AP is mapped to targets based on following
+ * address map.
+ */
+static const struct ni_tower_psam_reg_cfg_info app_axis_psam[] = {
+    /*
+     * Generic refclk + AP Watchdog peripherals + SID + ECC error record
+     * registers
+     */
+    {
+        HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
+        HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* Refclk registers */
+    {
+        HOST_GENERIC_REFCLK_CNTREAD_PHYS_BASE,
+        HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* AP<->SCP MHUv3 registers */
+    {
+        HOST_AP_NS_SCP_MHUV3_PHYS_BASE,
+        HOST_AP_RT_SCP_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* AP<->RSE MHUv3 registers */
+    {
+        HOST_AP_NS_RSE_MHUV3_PHYS_BASE,
+        HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+};
+
+/*
  * Completer side RSM AXIM APU to check access permission targeting Shared RAM
  * between RSE and SCP
  */
@@ -476,6 +523,34 @@ static int32_t program_sysctrl_apu_aon(void)
 
     err = ni_tower_program_apu_table(&SYSCTRL_NI_TOWER_DEV, apu_table,
             ARRAY_SIZE(apu_table));
+    if (err != NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Configure Programmable System Address Map (PSAM) to setup the memory map and
+ * its target ID for each requester in the System Control NI-Tower for nodes
+ * under SYSTOP domain.
+ */
+static int32_t program_sysctrl_psam_systop(void)
+{
+    enum ni_tower_err err;
+
+    /* Populates all address maps into a table array to enable desired PSAMs */
+    struct ni_tower_psam_cfgs psam_table[] = {
+        {
+            .component = &sysctrl_app_asni,
+            .nh_region_count = ARRAY_SIZE(app_axis_psam),
+            .regions = app_axis_psam,
+            .add_chip_addr_offset = false,
+        },
+    };
+
+    err = ni_tower_program_psam_table(&SYSCTRL_NI_TOWER_DEV, psam_table,
+                                                    ARRAY_SIZE(psam_table));
     if (err != NI_TOWER_SUCCESS) {
         return -1;
     }
