@@ -75,7 +75,7 @@ target_include_directories(platform_s
 )
 
 set(nvm_sources
-  $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c
 )
 
 if(HAS_RRAMC)
