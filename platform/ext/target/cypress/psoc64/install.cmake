@@ -79,3 +79,7 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/libs
 
 install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
