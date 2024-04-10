@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,30 @@
 extern "C" {
 #endif
 #define OTP_NV_COUNTERS_INITIALIZED 0xC0DE8112U
+
+#ifdef BL2
+#if defined(MCUBOOT_SIGN_EC384)
+#define BL2_ROTPK_HASH_SIZE     (48)
+#define BL2_ROTPK_KEY_SIZE      (100) /* Aligned to 4 bytes */
+#else
+#define BL2_ROTPK_HASH_SIZE     (32)
+#endif /* MCUBOOT_SIGN_EC384 */
+#if defined(MCUBOOT_SIGN_EC256)
+#define BL2_ROTPK_KEY_SIZE      (68)  /* Aligned to 4 bytes */
+#endif /* MCUBOOT_SIGN_EC256 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define BL2_ROTPK_SIZE    BL2_ROTPK_KEY_SIZE
+#else
+#define BL2_ROTPK_SIZE    BL2_ROTPK_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
+#endif /* BL2 */
+
+#if (defined(BL2_ROTPK_SIZE) && (BL2_ROTPK_SIZE > 64))
+#define OTP_ELEMENT_SIZE_MAX    BL2_ROTPK_SIZE
+#else
+#define OTP_ELEMENT_SIZE_MAX    (64)
+#endif
 
 __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be the first item */
@@ -37,16 +61,16 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
         uint8_t profile_definition[32];
 
 #ifdef BL2
-        uint8_t bl2_rotpk_0[32];
-        uint8_t bl2_rotpk_1[32];
+        uint8_t bl2_rotpk_0[BL2_ROTPK_SIZE];
+        uint8_t bl2_rotpk_1[BL2_ROTPK_SIZE];
 
         uint8_t bl2_nv_counter_0[64];
         uint8_t bl2_nv_counter_1[64];
         uint8_t bl2_nv_counter_2[64];
         uint8_t bl2_nv_counter_3[64];
 
-        uint8_t bl2_rotpk_2[32];
-        uint8_t bl2_rotpk_3[32];
+        uint8_t bl2_rotpk_2[BL2_ROTPK_SIZE];
+        uint8_t bl2_rotpk_3[BL2_ROTPK_SIZE];
 #endif /* BL2 */
 
 #ifdef BL1
