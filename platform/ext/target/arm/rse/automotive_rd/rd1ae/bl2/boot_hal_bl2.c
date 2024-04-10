@@ -376,6 +376,14 @@ static int boot_platform_post_load_ap_bl2(void)
     BOOT_LOG_INF("BL2: AP BL2 post load start");
 
     /*
+     * Executes final preparations before starting the AP core.
+     */
+    if (host_system_finish() != 0) {
+        BOOT_LOG_ERR("BL2: Could not finish host system preparations");
+        return 1;
+    }
+
+    /*
      * Since the measurement are taken at this point, clear the image
      * header part in the Shared SRAM before releasing AP BL2 out of reset.
      */

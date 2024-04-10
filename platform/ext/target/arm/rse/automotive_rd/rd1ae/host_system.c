@@ -178,6 +178,31 @@ static int ni_tower_periph_init(void)
     return 0;
 }
 
+/*
+ * Programs the Peripheral NI-Tower for ram_axim AP_BL2_RO region.
+ */
+static int32_t ni_tower_periph_init_ap_bl2_post_load(void)
+{
+    int32_t err;
+
+    err = ni_tower_pre_init(HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_periph_ni_tower_post_ap_bl2_load();
+    if (err != 0) {
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+
 int host_system_prepare_scp_access(void)
 {
     int res;
@@ -221,4 +246,19 @@ int host_system_prepare_ap_access(void)
 void host_system_scp_signal_ap_ready(void)
 {
     scp_setup_signal_received = true;
+}
+
+int host_system_finish(void)
+{
+    int res;
+
+    (void)res;
+
+    /* Limit AP BL2 load region to read-only and lock the APU region */
+    res = ni_tower_periph_init_ap_bl2_post_load();
+    if (res != 0) {
+        return 1;
+    }
+
+    return 0;
 }
