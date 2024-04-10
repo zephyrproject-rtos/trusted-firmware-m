@@ -12,6 +12,8 @@ set(TFM_BL1_MEMORY_MAPPED_FLASH         OFF      CACHE BOOL    "Whether BL1 can 
 set(TFM_ATTESTATION_SCHEME              "CCA"    CACHE STRING  "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 
 set(PLATFORM_HAS_BOOT_DMA               OFF      CACHE BOOL    "Enable dma support for memory transactions for bootloader")
+set(PLATFORM_HOST_HAS_SCP               ON       CACHE BOOL    "Enable SCP support")
+set(PLATFORM_HOST_HAS_MCP               ON       CACHE BOOL    "Enable MCP support")
 set(PLATFORM_HAS_NI_TOWER               ON       CACHE BOOL    "Enable NI-Tower support")
 set(PLATFORM_HAS_SMMU_V3                ON       CACHE BOOL    "Enable SMMU V3 support")
 
