@@ -8,6 +8,7 @@
 #include "interrupts_bl2.h"
 
 #include "device_definition.h"
+#include "host_system.h"
 #include "mhu_v3_x.h"
 #include "tfm_hal_device_header.h"
 
@@ -15,14 +16,32 @@
 
 /* Enum for id of each doorbell channel of the scp to rse MHU */
 enum mhu_scp_rse_doorbell_channel {
+    MHU_SCP_RSE_RESERVED_CHANNEL_ID = 0,
+    MHU_SCP_RSE_SYSTOP_ON_CHANNEL_ID = 1,
     MHU_SCP_RSE_CHANNEL_COUNT,
 };
+
+#define MHU_SCP_SYSTOP_FLAG 0x1
+
+static int mhu_scp_rse_systop_on_doorbell_handler(uint32_t value)
+{
+    /* Only flag 0 is used to indicate SYSTOP ON */
+    if ((value & MHU_SCP_SYSTOP_FLAG) != MHU_SCP_SYSTOP_FLAG) {
+        return 1;
+    }
+
+    host_system_scp_signal_ap_ready();
+
+    return 0;
+}
 
 /* Function prototype to use for mhu channel vector pointers */
 typedef int (*mhu_vector_t) (uint32_t);
 
 /* Array of function pointers to call if a message is received on a channel */
-static mhu_vector_t mhu_scp_rse_doorbell_vector[MHU_SCP_RSE_CHANNEL_COUNT] = {};
+static mhu_vector_t mhu_scp_rse_doorbell_vector[MHU_SCP_RSE_CHANNEL_COUNT] = {
+    [MHU_SCP_RSE_SYSTOP_ON_CHANNEL_ID] = mhu_scp_rse_systop_on_doorbell_handler,
+};
 
 /* Function to handle the SCP to RSE MHUv3 combined MBX interrupt */
 void CMU_MHU4_Receiver_Handler(void)

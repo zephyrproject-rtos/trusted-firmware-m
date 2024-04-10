@@ -273,6 +273,19 @@ static int boot_platform_pre_load_ap_bl2(void)
 
     BOOT_LOG_INF("BL2: AP BL2 pre load start");
 
+    BOOT_LOG_INF("BL2: Wait for doorbell from SCP before loading AP BL2...");
+
+    /*
+     * Ensure SCP has notified it is ready and setup anything needed for access
+     * to the application processor subsystem.
+     */
+    if (host_system_prepare_ap_access() != 0) {
+        BOOT_LOG_ERR("BL2: Could not setup access to AP systems.");
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: Doorbell received from SCP!");
+
     /* Configure RSE ATU to access RSE header region for AP BL2 */
     atu_err = atu_initialize_region(&ATU_DEV_S,
                                     RSE_ATU_IMG_HDR_LOAD_ID,
