@@ -42,11 +42,11 @@ static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
                                              addr, len, zero_bits, sizeof(uint32_t),
                                              NULL);
 
-    if (ic_err == INTEGRITY_CHECKER_ERROR_NONE) {
-        return TFM_PLAT_ERR_SUCCESS;
-    } else {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+        return ic_err;
     }
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 #else
 static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
@@ -133,7 +133,7 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
         } else if (counter_value[idx] == 0) {
             break;
         } else {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
+            return TFM_PLAT_ERR_READ_OTP_COUNTER_SYSTEM_ERR;
         }
     }
 
@@ -147,7 +147,7 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                              uint32_t size, uint8_t *val)
 {
     if (size != NV_COUNTER_SIZE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+        return TFM_PLAT_ERR_READ_NV_COUNTER_INVALID_COUNTER_SIZE;
     }
 
     /* Assumes Platform nv counters are contiguous*/
@@ -178,7 +178,7 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
         return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, val);
 
     default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_READ_NV_COUNTER_UNSUPPORTED;
     }
 }
 
@@ -201,7 +201,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
                                                        : counter_size;
 
     if (val > counter_size * 8) {
-        return TFM_PLAT_ERR_MAX_VALUE;
+        return TFM_PLAT_ERR_SET_OTP_COUNTER_MAX_VALUE;
     }
 
     for (idx = 0; idx < val / 32; idx++) {
@@ -235,7 +235,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
                                                        : counter_size;
 
     if (val > counter_size) {
-        return TFM_PLAT_ERR_MAX_VALUE;
+        return TFM_PLAT_ERR_SET_OTP_COUNTER_MAX_VALUE;
     }
 
     for (idx = 0; idx < val; idx++) {
@@ -281,7 +281,7 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
         return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, value);
 
     default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return TFM_PLAT_ERR_SET_NV_COUNTER_UNSUPPORTED;
     }
 }
 
@@ -299,7 +299,7 @@ enum tfm_plat_err_t tfm_plat_increment_nv_counter(
     }
 
     if (security_cnt == UINT32_MAX) {
-        return TFM_PLAT_ERR_MAX_VALUE;
+        return TFM_PLAT_ERR_ICREMENT_NV_COUNTER_MAX_VALUE;
     }
 
     return tfm_plat_set_nv_counter(counter_id, security_cnt + 1u);
