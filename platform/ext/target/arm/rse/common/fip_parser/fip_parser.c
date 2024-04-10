@@ -6,6 +6,7 @@
  */
 
 #include "fip_parser.h"
+#include "tfm_plat_defs.h"
 
 #include "flash_layout.h"
 #include "Driver_Flash.h"
@@ -14,8 +15,8 @@
 
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
-int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid,
-                          uint64_t *offset, size_t *size)
+enum tfm_plat_err_t fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size,
+                                          uuid_t uuid, uint64_t *offset, size_t *size)
 {
     ARM_FLASH_CAPABILITIES DriverCapabilities = FLASH_DEV_NAME.GetCapabilities();
     /* Valid entries for data item width */
@@ -37,11 +38,11 @@ int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid
     rc = FLASH_DEV_NAME.ReadData(fip_base - FLASH_BASE_ADDRESS, &toc_header,
                                  sizeof(toc_header) / data_width);
     if (rc != sizeof(toc_header) / data_width) {
-        return rc;
+        return TFM_PLAT_ERR_FIP_TOC_HEADER_INVALID_READ;
     }
 
     if (toc_header.name != TOC_HEADER_NAME) {
-        return 2;
+        return TFM_PLAT_ERR_FIP_TOC_HEADER_INVALID_NAME;
     }
 
     idx += sizeof(toc_header);
@@ -49,13 +50,13 @@ int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid
     do {
         /* Prevent reading out of bounds */
         if (idx + sizeof(toc_entry) > atu_slot_size) {
-            return 3;
+            return TFM_PLAT_ERR_FIP_TOC_ENTRY_OVERFLOW;
         }
 
         rc = FLASH_DEV_NAME.ReadData(fip_base + idx - FLASH_BASE_ADDRESS,
                                      &toc_entry, sizeof(toc_entry) / data_width);
         if (rc != sizeof(toc_entry) / data_width) {
-            return rc;
+            return TFM_PLAT_ERR_FIP_TOC_ENTRY_INVALID_READ;
         }
 
         if (!memcmp(&uuid, &toc_entry.uuid, sizeof(uuid))) {
@@ -68,12 +69,12 @@ int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid
              * perform safe type-conversion.
              */
             if (toc_entry.size > UINT32_MAX) {
-                return 1;
+                return TFM_PLAT_ERR_FIP_TOC_ENTRY_INVALID_SIZE;
             }
 
             *size = (uint32_t)toc_entry.size;
 
-            return 0;
+            return TFM_PLAT_ERR_SUCCESS;
         }
 
         idx += sizeof(toc_entry);
@@ -82,5 +83,5 @@ int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid
     } while (memcmp(&null_uuid, &toc_entry.uuid, sizeof(uuid_t)));
 
     /* UUID not found, return error. */
-    return 3;
+    return TFM_PLAT_ERR_GPT_TOC_ENTRY_NOT_FOUND;
 }

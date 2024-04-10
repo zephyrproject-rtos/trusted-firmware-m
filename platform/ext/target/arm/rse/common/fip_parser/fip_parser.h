@@ -30,11 +30,11 @@ extern "C" {
  * \param[out] offset        The offset in host flash of the firmware image.
  * \param[out] size          The size of the firmware image.
  *
- * \return                   0 if operation completed successfully, another
- *                           value on error.
+ * \return                   TFM_PLAT_ERR_SUCCESS if operation completed
+ *                           successfully, another value on error.
  */
-int fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size, uuid_t uuid,
-                          uint64_t *offset, size_t *size);
+enum tfm_plat_err_t fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size,
+                                          uuid_t uuid, uint64_t *offset, size_t *size);
 
 #ifdef __cplusplus
 }
