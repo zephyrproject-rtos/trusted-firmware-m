@@ -17,6 +17,21 @@ const struct ni_tower_component_node periph_ram_amni  = {
     .id = PERIPH_RAM_AMNI_ID,
 };
 
+const struct ni_tower_component_node periph_nsuart0_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSUART0_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_secuart_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_SECUART_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_nsuart1_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSUART1_PMNI_ID,
+};
+
 /*
  * Software implementation defined region for SRAM and is accessible by AP,
  * RSE and SCP. First region (AP BL2 code region) will be changed to Read
@@ -29,6 +44,27 @@ static const struct ni_tower_apu_reg_cfg_info ram_axim_apu[] = {
     INIT_APU_REGION(HOST_AP_BL2_RW_SRAM_PHYS_BASE,
                     HOST_AP_BL2_RW_SRAM_PHYS_LIMIT,
                     NI_T_ROOT_RW | NI_T_SEC_RW),
+};
+
+/* AP Non-secure UART */
+static const struct ni_tower_apu_reg_cfg_info nsuart0_apbm_apu[] = {
+    INIT_APU_REGION(HOST_NS_UART_PHYS_BASE,
+                    HOST_NS_UART_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/* AP Secure UART */
+static const struct ni_tower_apu_reg_cfg_info secuart_apbm_apu[] = {
+    INIT_APU_REGION(HOST_S_UART_PHYS_BASE,
+                    HOST_S_UART_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
+};
+
+/* AP Non-secure UART for RMM debug */
+static const struct ni_tower_apu_reg_cfg_info nsuart1_apbm_apu[] = {
+    INIT_APU_REGION(HOST_RMM_NS_UART_PHYS_BASE,
+                    HOST_RMM_NS_UART_PHYS_LIMIT,
+                    NI_T_REALM_RW),
 };
 
 /*
@@ -48,6 +84,24 @@ static int32_t program_periph_apu(void)
             .component = &periph_ram_amni,
             .region_count = ARRAY_SIZE(ram_axim_apu),
             .regions = ram_axim_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_nsuart0_pmni,
+            .region_count = ARRAY_SIZE(nsuart0_apbm_apu),
+            .regions = nsuart0_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_secuart_pmni,
+            .region_count = ARRAY_SIZE(secuart_apbm_apu),
+            .regions = secuart_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_nsuart1_pmni,
+            .region_count = ARRAY_SIZE(nsuart1_apbm_apu),
+            .regions = nsuart1_apbm_apu,
             .add_chip_addr_offset = false,
         },
     };
