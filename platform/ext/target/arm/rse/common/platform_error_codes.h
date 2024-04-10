@@ -38,6 +38,9 @@ enum tfm_plat_err_t {
     TFM_PLAT_ERR_PLAT_OTP_GET_SIZE_UNSUPPORTED,
     /* RSE BL1 provisioning error codes */
     TFM_PLAT_ERR_BL1_PROVISIONING_INVALID_TP_MODE,
+    /* RSE key derivation error codes */
+    TFM_PLAT_ERR_KEY_DERIVATION_BOOT_STATE_BUFFER_TOO_SMALL,
+    TFM_PLAT_ERR_KEY_DERIVATION_INVALID_TP_MODE,
     /* Generic errors */
     TFM_PLAT_ERR_SYSTEM_ERR,
     TFM_PLAT_ERR_MAX_VALUE,

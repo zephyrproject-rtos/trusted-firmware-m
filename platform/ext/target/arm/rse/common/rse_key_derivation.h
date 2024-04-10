@@ -23,37 +23,37 @@ extern "C" {
  * \param[in]  vhuk_seed_buf_len The size of the seed buffer.
  * \param[out] vhuk_seed_size    The size of the seed.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                       TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
-                         size_t *vhuk_seed_size);
+enum tfm_plat_err_t rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
+                                         size_t *vhuk_seed_size);
 
 /**
  * \brief                     Derive the CPAK seed, and lock in a KMU slot.
  *
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_cpak_seed(enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_cpak_seed(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the DAK seed, and lock in a KMU slot.
  *
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_dak_seed(enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_dak_seed(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the RoT CDI, and lock in a KMU slot.
  *
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_rot_cdi(enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_rot_cdi(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the VHUK, and lock in a KMU slot.
@@ -63,10 +63,10 @@ int rse_derive_rot_cdi(enum rse_kmu_slot_id_t slot);
  *                            RSE_AMOUNT * 32 in size.
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
-                    enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
+                                    enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the session key, and lock into two KMU
@@ -82,10 +82,10 @@ int rse_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
  *                            RSE_AMOUNT * 32 in size.
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_session_key(const uint8_t *ivs, size_t ivs_len,
-                           enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_session_key(const uint8_t *ivs, size_t ivs_len,
+                                           enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the CM provisioning key, and lock into two
@@ -98,9 +98,9 @@ int rse_derive_session_key(const uint8_t *ivs, size_t ivs_len,
  *
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_cm_provisioning_key(enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_cm_provisioning_key(enum rse_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the DM provisioning key, and lock into two
@@ -113,9 +113,9 @@ int rse_derive_cm_provisioning_key(enum rse_kmu_slot_id_t slot);
  *
  * \param[in]  slot           The KMU slot to derive and lock the seed into.
  *
- * \return                    0 on success, non-zero on error.
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-int rse_derive_dm_provisioning_key(enum rse_kmu_slot_id_t slot);
+enum tfm_plat_err_t rse_derive_dm_provisioning_key(enum rse_kmu_slot_id_t slot);
 
 #ifdef __cplusplus
 }
