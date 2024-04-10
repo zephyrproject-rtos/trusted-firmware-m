@@ -158,4 +158,13 @@ enum rse_atu_ids {
 #define RSE_IMAGE_LOADING_END           (HOST_SCP_IMG_CODE_BASE_S +         \
                                          HOST_SCP_ATU_SIZE)
 
+/* SCP sysctrl region logical address start */
+#define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END
+/* SCP sysctrl region physical address start */
+#define HOST_SCP_INIT_CTRL_PHYS_BASE 0x1000050050000ULL
+/* SCP sysctrl region ATU size */
+#define HOST_SCP_INIT_CTRL_SIZE      ALIGN_UP(0x1000U, RSE_ATU_PAGE_SIZE)
+/* SCP sysctrl region ATU id */
+#define HOST_SCP_INIT_CTRL_ATU_ID    RSE_ATU_FW_INIT_ID
+
 #endif  /* __HOST_ATU_BASE_ADDRESS_H__ */

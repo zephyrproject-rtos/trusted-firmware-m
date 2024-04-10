@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited
+ * Copyright (c) 2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  */
 
 /**
- * \file  platform_base_address.h
- * \brief This file defines all the peripheral base addresses for RSE platform.
+ * \file host_device_definition.c
+ * \brief This file defines exports the structures based on the peripheral
+ * definitions from device_cfg.h.
  */
 
-#ifndef __RSE_EXPANSION_BASE_ADDRESS_H__
-#define __RSE_EXPANSION_BASE_ADDRESS_H__
+#include "host_device_definition.h"
 
-/* Boot flash */
-#define BOOT_FLASH_BASE_S       0xB0000000
-/* UART 0 Secure base address */
-#define LOCAL_UART0_BASE_S      0x58101000
-/* RSE Integration Layer register block */
-#define RSE_INTEG_LAYER_BASE_S  0x58100000
+#include "host_base_address.h"
+#include "platform_base_address.h"
 
-#endif  /* __RSE_EXPANSION_BASE_ADDRESS_H__ */
+#ifdef PLATFORM_HOST_HAS_SCP
+struct mscp_dev_t HOST_SCP_DEV = {
+    .init_ctrl_base = HOST_SCP_INIT_CTRL_BASE_S,
+};
+#endif /* PLATFORM_HOST_HAS_SCP */

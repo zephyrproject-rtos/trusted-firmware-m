@@ -29,6 +29,11 @@
 extern "C" {
 #endif
 
+#ifdef PLATFORM_HOST_HAS_SCP
+#include "mscp_drv.h"
+extern struct mscp_dev_t HOST_SCP_DEV;
+#endif /* PLATFORM_HOST_HAS_SCP */
+
 #ifdef __cplusplus
 }
 #endif

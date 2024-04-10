@@ -63,6 +63,7 @@ target_sources(platform_bl2
         bl2/boot_hal_bl2.c
         bl2/flash_map_bl2.c
         cmsis_drivers/Driver_Flash.c
+        device/host_device_definition.c
         device/rse_expansion_device_definition.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
@@ -96,6 +97,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
+        device/host_device_definition.c
         device/rse_expansion_device_definition.c
         rse_comms/rse_comms_permissions_hal.c
         rse_expansion_peripherals_def.c
