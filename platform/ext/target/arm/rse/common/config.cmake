@@ -71,6 +71,7 @@ set(TFM_NS_NV_COUNTER_AMOUNT            3          CACHE STRING   "How many NS N
 
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")
 
+set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
 set(TFM_PXN_ENABLE                      ON         CACHE BOOL     "Use Privileged execute never (PXN)")
 
 set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
