@@ -93,6 +93,32 @@ enum sysctrl_apu_filter_ids {
     SYSCTRL_DAP_APU_ID = 0x3F,
 };
 
+/* Interface ID of Peripheral xMNI components */
+enum periph_xMNI_ids {
+    /* Targets ARSM SRAM */
+    PERIPH_RAM_AMNI_ID = 0x0,
+    /* Targets Secure SRAM Error record block for the shared ARSM SRAM */
+    PERIPH_ECCREG_PMNI_ID,
+    /* Targets AP Generic Timer Control Frame */
+    PERIPH_GTIMERCTRL_PMNI_ID,
+    /* Targets AP Non-secure WatchDog */
+    PERIPH_NSGENWDOG_PMNI_ID,
+    /* Targets AP Non-secure Generic Timer Control Base Frame */
+    PERIPH_NSGTIMER_PMNI_ID,
+    /* Targets AP Non-secure UART */
+    PERIPH_NSUART0_PMNI_ID,
+    /* Targets AP Non-secure UART for RMM debug */
+    PERIPH_NSUART1_PMNI_ID,
+    /* Targets AP root WatchDog */
+    PERIPH_ROOTGENWDOG_PMNI_ID,
+    /* Targets AP Secure WatchDog */
+    PERIPH_SECGENWDOG_PMNI_ID,
+    /* Targets AP Secure Generic Timer Control Base Frame */
+    PERIPH_SECGTIMER_PMNI_ID,
+    /* Targets AP Secure UART */
+    PERIPH_SECUART_PMNI_ID
+};
+
 /**
  * \brief Programs System Control block NI-Tower PSAM and APU for AON domain
  *
