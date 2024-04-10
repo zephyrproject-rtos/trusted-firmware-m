@@ -26,4 +26,7 @@
 /* Non-Secure Firmware */
 #define SIZE_DEF_NS_IMAGE           (0x60000) /* 384 KB */
 
+/* Host Firmware */
+#define SIZE_DEF_SCP_IMAGE          (0x80000) /* 512 KB */
+
 #endif /* __IMAGE_SIZE_DEFS_H__ */
