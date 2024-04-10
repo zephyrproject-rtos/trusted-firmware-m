@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024, Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,9 +30,14 @@
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}} 1024
 #endif
 
-/* SPM re-uses Trustzone NS agent stack. */
-#define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}     \
-            {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}
+#if !defined CONFIG_TFM_USE_TRUSTZONE
+/* SPM has to have its own stack if Trustzone isn't present. */
+#if defined(TFM_FIH_PROFILE_ON)
+#define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}  1536
+#else
+#define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}  1024
+#endif
+#endif
 
 #elif CONFIG_TFM_SPM_BACKEND_SFN == 1
     {% set total_stk = namespace(size="0") %}
