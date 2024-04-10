@@ -32,6 +32,7 @@ extern "C" {
 #ifdef PLATFORM_HAS_NI_TOWER
 #include "ni_tower_lib.h"
 extern struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
+extern const struct ni_tower_dev PERIPH_NI_TOWER_DEV;
 #endif /* PLATFORM_HAS_NI_TOWER */
 
 #ifdef PLATFORM_HOST_HAS_SCP

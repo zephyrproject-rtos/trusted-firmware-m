@@ -34,6 +34,15 @@ struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
     .skip_discovery_list = NULL,
     .chip_addr_offset = 0,
 };
+
+/* Peripheral NI-Tower device */
+const struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
+    .periphbase = HOST_NI_TOWER_BASE,
+    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+    .skip_discovery_list = NULL,
+    .chip_addr_offset = 0,
+};
+
 #endif /* PLATFORM_HAS_NI_TOWER */
 
 #ifdef PLATFORM_HOST_HAS_SCP

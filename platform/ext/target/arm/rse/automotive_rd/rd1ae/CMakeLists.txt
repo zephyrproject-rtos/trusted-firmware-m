@@ -67,6 +67,7 @@ target_sources(platform_bl2
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
         host_system.c
+        ni_tower_periph_lib.c
         ni_tower_sysctrl_lib.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
