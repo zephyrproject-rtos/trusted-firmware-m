@@ -87,6 +87,31 @@ static int ni_tower_sysctrl_aon_init(void)
     return 0;
 }
 
+/*
+ * Programs the System control NI-Tower for nodes under SYSTOP domain.
+ */
+static int ni_tower_sysctrl_systop_init(void)
+{
+    int err;
+
+    err = ni_tower_pre_init(HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_sysctrl_ni_tower_systop();
+    if (err != 0) {
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+
 int host_system_prepare_scp_access(void)
 {
     int res;
@@ -102,12 +127,20 @@ int host_system_prepare_scp_access(void)
 
 int host_system_prepare_ap_access(void)
 {
+    int res;
+
     /*
      * AP cannot be accessed until SCP setup is complete so wait for signal
      * from SCP.
      */
     while (scp_setup_signal_received == false) {
         __WFE();
+    }
+
+    /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
+    res = ni_tower_sysctrl_systop_init();
+    if (res != 0) {
+        return 1;
     }
 
     return 0;
