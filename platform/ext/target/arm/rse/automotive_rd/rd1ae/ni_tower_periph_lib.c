@@ -32,6 +32,21 @@ const struct ni_tower_component_node periph_nsuart1_pmni  = {
     .id = PERIPH_NSUART1_PMNI_ID,
 };
 
+const struct ni_tower_component_node periph_nsgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_NSGENWDOG_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_rootgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_ROOTGENWDOG_PMNI_ID,
+};
+
+const struct ni_tower_component_node periph_secgenwdog_pmni  = {
+    .type = NI_TOWER_PMNI,
+    .id = PERIPH_SECGENWDOG_PMNI_ID,
+};
+
 /*
  * Software implementation defined region for SRAM and is accessible by AP,
  * RSE and SCP. First region (AP BL2 code region) will be changed to Read
@@ -65,6 +80,27 @@ static const struct ni_tower_apu_reg_cfg_info nsuart1_apbm_apu[] = {
     INIT_APU_REGION(HOST_RMM_NS_UART_PHYS_BASE,
                     HOST_RMM_NS_UART_PHYS_LIMIT,
                     NI_T_REALM_RW),
+};
+
+/* AP Non-secure WatchDog */
+static const struct ni_tower_apu_reg_cfg_info nsgenwdog_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_NS_WDOG_PHYS_BASE,
+                    HOST_AP_NS_WDOG_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+};
+
+/* AP root WatchDog */
+static const struct ni_tower_apu_reg_cfg_info rootgenwdog_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_RT_WDOG_PHYS_BASE,
+                    HOST_AP_RT_WDOG_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+};
+
+/* AP Secure WatchDog */
+static const struct ni_tower_apu_reg_cfg_info secgenwdog_apbm_apu[] = {
+    INIT_APU_REGION(HOST_AP_S_WDOG_PHYS_BASE,
+                    HOST_AP_S_WDOG_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_SEC_RW),
 };
 
 /*
@@ -102,6 +138,24 @@ static int32_t program_periph_apu(void)
             .component = &periph_nsuart1_pmni,
             .region_count = ARRAY_SIZE(nsuart1_apbm_apu),
             .regions = nsuart1_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_nsgenwdog_pmni,
+            .region_count = ARRAY_SIZE(nsgenwdog_apbm_apu),
+            .regions = nsgenwdog_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_rootgenwdog_pmni,
+            .region_count = ARRAY_SIZE(rootgenwdog_apbm_apu),
+            .regions = rootgenwdog_apbm_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &periph_secgenwdog_pmni,
+            .region_count = ARRAY_SIZE(secgenwdog_apbm_apu),
+            .regions = secgenwdog_apbm_apu,
             .add_chip_addr_offset = false,
         },
     };
