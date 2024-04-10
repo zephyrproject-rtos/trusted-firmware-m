@@ -193,7 +193,10 @@ enum rse_atu_ids {
 /* SCP sysctrl region ATU id */
 #define HOST_SCP_INIT_CTRL_ATU_ID    RSE_ATU_FW_INIT_ID
 
-/* ATU region mapping to access System Control NI-Tower */
+/*
+ * ATU region mapping to access System Control NI-Tower and Peripheral
+ * NI-Tower
+ */
 #define HOST_NI_TOWER_BASE      (HOST_SCP_INIT_CTRL_BASE_S +                \
                                  HOST_SCP_INIT_CTRL_SIZE)
 #define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)

@@ -112,6 +112,31 @@ static int ni_tower_sysctrl_systop_init(void)
     return 0;
 }
 
+/*
+ * Programs the Peripheral NI-Tower.
+ */
+static int ni_tower_periph_init(void)
+{
+    int err;
+
+    err = ni_tower_pre_init(HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_periph_ni_tower();
+    if (err != 0) {
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+
 int host_system_prepare_scp_access(void)
 {
     int res;
@@ -139,6 +164,12 @@ int host_system_prepare_ap_access(void)
 
     /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
     res = ni_tower_sysctrl_systop_init();
+    if (res != 0) {
+        return 1;
+    }
+
+    /* Configure Peripheral NI-Tower */
+    res = ni_tower_periph_init();
     if (res != 0) {
         return 1;
     }

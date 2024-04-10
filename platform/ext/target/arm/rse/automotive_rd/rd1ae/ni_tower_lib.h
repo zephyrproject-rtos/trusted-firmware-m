@@ -133,4 +133,11 @@ int32_t program_sysctrl_ni_tower_aon(void);
  */
 int32_t program_sysctrl_ni_tower_systop(void);
 
+/**
+ * \brief Program NI-Tower peripheral block APU
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_periph_ni_tower(void);
+
 #endif /* __NI_TOWER_LIB_H__ */
