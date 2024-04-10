@@ -12,6 +12,8 @@
 #include "fih.h"
 #include "flash_map/flash_map.h"
 #include "host_base_address.h"
+#include "interrupts_bl2.h"
+#include "mhu_v3_x.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "rse_expansion_regs.h"
@@ -26,6 +28,11 @@ int32_t boot_platform_post_init(void)
 {
     int32_t result;
 
+    result = interrupts_bl2_init();
+    if (result != 0) {
+        return result;
+    }
+
     result = crypto_hw_accelerator_init();
     if (result) {
         return 1;
@@ -33,6 +40,20 @@ int32_t boot_platform_post_init(void)
 
     (void)fih_delay_init();
 
+    return 0;
+}
+
+/*
+ * Last function called before jumping to runtime. Used for final setup and
+ * cleanup.
+ */
+static int boot_platform_finish(void)
+{
+    /*
+     * Disable SCP to RSE MHUv3 Interrupt to ensure interrupt doesn't trigger
+     * while switching to runtime.
+     */
+    NVIC_DisableIRQ(CMU_MHU4_Receiver_IRQn);
     return 0;
 }
 
@@ -47,17 +68,99 @@ static int boot_platform_pre_load_secure(void)
 
 static int boot_platform_post_load_secure(void)
 {
-    return 0;
+    return boot_platform_finish();
 }
 
 /*
  * ============================ SCP LOAD FUNCTIONS =============================
  */
 
+static int initialize_rse_scp_mhu(void)
+{
+    enum mhu_v3_x_error_t mhuv3_err;
+    uint8_t ch;
+    uint8_t num_ch;
+
+    /* Setup RSE to SCP MHU Sender */
+
+    /* Initialize the RSE to SCP Sender MHU */
+    mhuv3_err = mhu_v3_x_driver_init(&MHU_V3_RSE_TO_SCP_DEV);
+    if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP MHU driver init failed: %d", mhuv3_err);
+        return 1;
+    }
+
+    /* Get number of channels for sender */
+    mhuv3_err = mhu_v3_x_get_num_channel_implemented(
+                &MHU_V3_RSE_TO_SCP_DEV, MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
+    if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP MHU get channels failed: %d", mhuv3_err);
+        return 1;
+    }
+
+    /* Disable interrupts for sender */
+    for (ch = 0; ch < num_ch; ++ch) {
+        mhuv3_err = mhu_v3_x_channel_interrupt_disable(
+                    &MHU_V3_RSE_TO_SCP_DEV, ch, MHU_V3_X_CHANNEL_TYPE_DBCH);
+        if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+            BOOT_LOG_ERR("BL2: RSE to SCP MHU interrupt disable failed: %d",
+                         mhuv3_err);
+            return 1;
+        }
+    }
+
+    /* Setup SCP to RSE MHU Receiver */
+
+    /* Initialize the SCP to RSE Receiver MHU */
+    mhuv3_err = mhu_v3_x_driver_init(&MHU_V3_SCP_TO_RSE_DEV);
+    if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: SCP to RSE MHU driver init failed: %d", mhuv3_err);
+        return 1;
+    }
+
+    /* Get number of channels of receiver */
+    mhuv3_err = mhu_v3_x_get_num_channel_implemented(&MHU_V3_SCP_TO_RSE_DEV,
+            MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
+    if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: SCP to RSE MHU get channels failed: %d", mhuv3_err);
+        return 1;
+    }
+
+    /*
+     * Clear receiver interrupt mask on all channels and enable interrupts for
+     * all channels so interrupts are triggered when data is received on any
+     * channel.
+     */
+    for (ch = 0; ch < num_ch; ch++) {
+        mhuv3_err = mhu_v3_x_channel_interrupt_enable(&MHU_V3_SCP_TO_RSE_DEV, ch,
+                                                MHU_V3_X_CHANNEL_TYPE_DBCH);
+        if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+            BOOT_LOG_ERR("BL2: RSE to SCP MHU interrupt enable failed: %d",
+                         mhuv3_err);
+            return 1;
+        }
+        mhuv3_err = mhu_v3_x_doorbell_mask_clear(&MHU_V3_SCP_TO_RSE_DEV, ch,
+                                                 UINT32_MAX);
+        if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
+            BOOT_LOG_ERR("BL2: RSE to SCP MHU mask clear failed: %d",
+                         mhuv3_err);
+            return 1;
+        }
+    }
+
+    /* Enable SCP to RSE MHUv3 Interrupt */
+    NVIC_ClearPendingIRQ(CMU_MHU4_Receiver_IRQn);
+    NVIC_EnableIRQ(CMU_MHU4_Receiver_IRQn);
+
+    BOOT_LOG_INF("BL2: RSE to SCP and SCP to RSE MHUs initialized");
+    return 0;
+}
+
 /* Function called before SCP firmware is loaded. */
 static int boot_platform_pre_load_scp(void)
 {
     enum atu_error_t atu_err;
+    int mhu_err;
 
     BOOT_LOG_INF("BL2: SCP pre load start");
 
@@ -86,6 +189,12 @@ static int boot_platform_pre_load_scp(void)
                                     HOST_SCP_ATU_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
+    }
+
+    /* Initialize RSE to SCP and SCP to RSE MHUs */
+    mhu_err = initialize_rse_scp_mhu();
+    if (mhu_err) {
+        return mhu_err;
     }
 
     BOOT_LOG_INF("BL2: SCP pre load complete");

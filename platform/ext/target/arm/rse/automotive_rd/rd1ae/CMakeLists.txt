@@ -62,6 +62,7 @@ target_sources(platform_bl2
     PRIVATE
         bl2/boot_hal_bl2.c
         bl2/flash_map_bl2.c
+        bl2/interrupts_bl2.c
         cmsis_drivers/Driver_Flash.c
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
