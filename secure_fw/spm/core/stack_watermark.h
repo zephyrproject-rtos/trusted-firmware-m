@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2022-2024, Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +13,7 @@
 #include "spm.h"
 
 #ifdef CONFIG_TFM_STACK_WATERMARKS
-void watermark_stack(struct partition_t *p_pt);
+void watermark_stack(const struct partition_t *p_pt);
 void dump_used_stacks(void);
 #else
 #define watermark_stack(p_pt)

@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2022-2024, Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,7 +23,7 @@
 
 #define STACK_WATERMARK_VAL 0xdeadbeef
 
-void watermark_stack(struct partition_t *p_pt)
+void watermark_stack(const struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
@@ -31,7 +33,7 @@ void watermark_stack(struct partition_t *p_pt)
 }
 
 /* Returns the number of bytes of stack that have been used by the specified partition */
-static uint32_t used_stack(struct partition_t *p_pt)
+static uint32_t used_stack(const struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     uint32_t unused_words = 0;
@@ -50,7 +52,7 @@ static uint32_t used_stack(struct partition_t *p_pt)
 
 void dump_used_stacks(void)
 {
-    struct partition_t *p_pt;
+    const struct partition_t *p_pt;
 
     SPMLOG("Used stack sizes report\r\n");
     UNI_LIST_FOREACH(p_pt, PARTITION_LIST_ADDR, next) {
