@@ -64,6 +64,20 @@ const struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_7_OFFSET,
         .fa_size = FLASH_AREA_7_SIZE,
     },
+    {
+        .fa_id = FLASH_AREA_8_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_8_OFFSET,
+        .fa_size = FLASH_AREA_8_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_9_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_9_OFFSET,
+        .fa_size = FLASH_AREA_9_SIZE,
+    },
 };
 
 const int flash_map_entry_num = ARRAY_SIZE(flash_map);
@@ -92,6 +106,9 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
     } else if (image_id == RSE_FIRMWARE_SCP_ID) {
         *exec_ram_start = HOST_SCP_IMG_HDR_BASE_S;
         *exec_ram_size  = HOST_SCP_ATU_SIZE;
+    } else if (image_id == RSE_FIRMWARE_AP_BL2_ID) {
+        *exec_ram_start = HOST_AP_BL2_IMG_HDR_BASE_S;
+        *exec_ram_size  = HOST_AP_BL2_ATU_SIZE;
     } else {
         rc = -1;
     }

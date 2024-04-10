@@ -154,9 +154,32 @@ enum rse_atu_ids {
                                          HOST_SCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
+/* AP BL2 */
+
+/* AP BL2 ATU HEADER logical address start */
+#define HOST_AP_BL2_HDR_ATU_WINDOW_BASE_S (HOST_SCP_IMG_CODE_BASE_S +          \
+                                           HOST_SCP_ATU_SIZE)
+/* AP BL2 Image address start, offset so end of HEADER at end of ATU HEADER */
+#define HOST_AP_BL2_IMG_HDR_BASE_S        (HOST_AP_BL2_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE -       \
+                                           BL2_HEADER_SIZE)
+/* AP BL2 Code region and SCP ATU CODE logical address start */
+#define HOST_AP_BL2_IMG_CODE_BASE_S       (HOST_AP_BL2_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* AP BL2 Shared SRAM physical address start */
+#define HOST_AP_BL2_PHYS_BASE             (HOST_AP_SHARED_SRAM_PHYS_BASE +     \
+                                           0x42000UL)
+/* AP BL2 ATU CODE size (aligned size of SCP image) */
+#define HOST_AP_BL2_ATU_SIZE              ALIGN_UP(SIZE_DEF_AP_BL2_IMAGE,      \
+                                                   RSE_ATU_PAGE_SIZE)
+/* AP BL2 HEADER physical address start (mapped to end of AP ITCM) */
+#define HOST_AP_BL2_HDR_PHYS_BASE         (HOST_AP_BL2_PHYS_BASE +             \
+                                           HOST_AP_BL2_ATU_SIZE -              \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
 /* Last RSE logical address used for loading images */
-#define RSE_IMAGE_LOADING_END           (HOST_SCP_IMG_CODE_BASE_S +         \
-                                         HOST_SCP_ATU_SIZE)
+#define RSE_IMAGE_LOADING_END             (HOST_AP_BL2_IMG_CODE_BASE_S +       \
+                                           HOST_AP_BL2_ATU_SIZE)
 
 /* SCP sysctrl region logical address start */
 #define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END

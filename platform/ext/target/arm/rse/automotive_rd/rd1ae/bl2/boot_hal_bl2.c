@@ -261,6 +261,100 @@ static int boot_platform_post_load_scp(void)
     return 0;
 }
 
+/*
+ * =========================== AP BL2 LOAD FUNCTIONS ===========================
+ */
+
+/* Function called before AP BL2 firmware is loaded. */
+static int boot_platform_pre_load_ap_bl2(void)
+{
+    enum atu_error_t atu_err;
+    enum atu_roba_t roba_value;
+
+    BOOT_LOG_INF("BL2: AP BL2 pre load start");
+
+    /* Configure RSE ATU to access RSE header region for AP BL2 */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_HDR_LOAD_ID,
+                                    HOST_AP_BL2_HDR_ATU_WINDOW_BASE_S,
+                                    HOST_AP_BL2_HDR_PHYS_BASE,
+                                    RSE_IMG_HDR_ATU_WINDOW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    roba_value = ATU_ROBA_SET_1;
+    atu_err = set_axnsc(&ATU_DEV_S, roba_value, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_INF("BL2: Unable to modify AxNSE");
+        return 1;
+    }
+
+    roba_value = ATU_ROBA_SET_0;
+    atu_err = set_axprot1(&ATU_DEV_S, roba_value, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_INF("BL2: Unable to modify AxPROT1");
+        return 1;
+    }
+
+    /* Configure RSE ATU to access AP BL2 Shared SRAM region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_CODE_LOAD_ID,
+                                    HOST_AP_BL2_IMG_CODE_BASE_S,
+                                    HOST_AP_BL2_PHYS_BASE,
+                                    HOST_AP_BL2_ATU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    roba_value = ATU_ROBA_SET_1;
+    atu_err = set_axnsc(&ATU_DEV_S, roba_value, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_INF("BL2: Unable to modify AxNSE");
+        return 1;
+    }
+
+    roba_value = ATU_ROBA_SET_0;
+    atu_err = set_axprot1(&ATU_DEV_S, roba_value, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_INF("BL2: Unable to modify AxPROT1");
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: AP BL2 pre load complete");
+
+    return 0;
+}
+
+/* Function called after AP BL2 firmware is loaded. */
+static int boot_platform_post_load_ap_bl2(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: AP BL2 post load start");
+
+    /*
+     * Since the measurement are taken at this point, clear the image
+     * header part in the Shared SRAM before releasing AP BL2 out of reset.
+     */
+    memset(HOST_AP_BL2_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU region configured to access RSE header region for AP BL2 */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Close RSE ATU region configured to access AP BL2 Shared SRAM region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: AP BL2 post load complete");
+
+    return 0;
+}
 
 /*
  * ================================= VECTORS ==================================
@@ -273,6 +367,7 @@ static int boot_platform_post_load_scp(void)
 static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
     [RSE_FIRMWARE_SECURE_ID]        = boot_platform_pre_load_secure,
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_pre_load_scp,
+    [RSE_FIRMWARE_AP_BL2_ID]        = boot_platform_pre_load_ap_bl2,
 };
 
 /*
@@ -282,6 +377,7 @@ static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
 static int (*boot_platform_post_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
     [RSE_FIRMWARE_SECURE_ID]        = boot_platform_post_load_secure,
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_post_load_scp,
+    [RSE_FIRMWARE_AP_BL2_ID]        = boot_platform_post_load_ap_bl2,
 };
 
 /*
