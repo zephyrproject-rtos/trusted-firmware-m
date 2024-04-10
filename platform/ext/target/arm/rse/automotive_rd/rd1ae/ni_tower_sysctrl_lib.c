@@ -89,9 +89,9 @@ const struct ni_tower_component_node sysctrl_rse_si_amni  = {
  *
  *                             +-----+
  *                             |     |
- *                             |     |
- *      app_axis ------------->|     |--------------------------> app_si_axim
- *                             |     |
+ *                  +-----+    |     |
+ *      app_axis ---| APU |--->|     |--------------------------> app_si_axim
+ *                  +-----+    |     |
  *                             |     |
  *                             +-----+
  *
@@ -442,6 +442,94 @@ static const struct ni_tower_apu_reg_cfg_info rse_si_axim_apu[] = {
 };
 
 /*
+ * Requester side APP AXIS APU to check access permission targeting the
+ * peripherals in SCP and RSE
+ */
+static const struct ni_tower_apu_reg_cfg_info app_axis_apu[] = {
+    /* Secure & Root read-write permission : Generic refclk registers */
+    INIT_APU_REGION(HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
+                    HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    /* Full permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_NS_WDOG_PHYS_BASE,
+                    HOST_AP_NS_WDOG_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Root read-write permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_RT_WDOG_PHYS_BASE,
+                    HOST_AP_RT_WDOG_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    /* Secure read-write permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_S_WDOG_PHYS_BASE,
+                    HOST_AP_S_WDOG_PHYS_LIMIT,
+                    NI_T_SEC_RW),
+    /* Full permission : SID */
+    INIT_APU_REGION(HOST_SID_PHYS_BASE,
+                    HOST_SID_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Secure read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_SEC_RW),
+    /* Full permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Root read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    /* Realm read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_REALM_RW),
+    /*
+     * Secure & Root read-write permission : SCP/RSE ECC error record +
+     * SCP/RSE RSM ECC error record
+     */
+    INIT_APU_REGION(HOST_SCP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_SEC_RW),
+    INIT_APU_REGION(HOST_RSE_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_SCP_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NI_T_SEC_RW),
+    /*
+     * Secure & Root read-write permission : Generic refclk registers +
+     * AP refclk registers
+     */
+    INIT_APU_REGION(HOST_GENERIC_REFCLK_CNTREAD_PHYS_BASE,
+                    HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    /* Full permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_NS_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_NS_SCP_MHUV3_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Secure & Root read-write permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_S_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_S_SCP_MHUV3_PHYS_LIMIT,
+                    NI_T_SEC_RW | NI_T_ROOT_RW),
+    /* Root read-write permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RT_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_RT_SCP_MHUV3_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    /* Full permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_NS_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_NS_RSE_MHUV3_PHYS_LIMIT,
+                    NI_T_ALL_PERM),
+    /* Secure read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_S_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_S_RSE_MHUV3_PHYS_LIMIT,
+                    NI_T_SEC_RW),
+    /* Root read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RT_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_RT_RSE_MHUV3_PHYS_LIMIT,
+                    NI_T_ROOT_RW),
+    /* Root & Realm read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RL_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
+                    NI_T_ROOT_RW | NI_T_REALM_RW),
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -551,6 +639,37 @@ static int32_t program_sysctrl_psam_systop(void)
 
     err = ni_tower_program_psam_table(&SYSCTRL_NI_TOWER_DEV, psam_table,
                                                     ARRAY_SIZE(psam_table));
+    if (err != NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Configure Access Protection Unit (APU) to setup access permission for each
+ * memory region based on its target in System Control NI-Tower for nodes
+ * under SYSTOP domain.
+ */
+static int32_t program_sysctrl_apu_systop(void)
+{
+    enum ni_tower_err err;
+
+    /*
+     * Populates all APU entry into a table array to configure and enable
+     * desired APUs
+     */
+    struct ni_tower_apu_cfgs apu_table[] = {
+        {
+            .component = &sysctrl_app_asni,
+            .region_count = ARRAY_SIZE(app_axis_apu),
+            .regions = app_axis_apu,
+            .add_chip_addr_offset = false,
+        },
+    };
+
+    err = ni_tower_program_apu_table(&SYSCTRL_NI_TOWER_DEV, apu_table,
+                                                        ARRAY_SIZE(apu_table));
     if (err != NI_TOWER_SUCCESS) {
         return -1;
     }
