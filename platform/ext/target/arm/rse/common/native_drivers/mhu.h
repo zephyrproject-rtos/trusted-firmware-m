@@ -19,23 +19,35 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef TFM_UNIQUE_ERROR_CODES
+#include "error_codes_mapping.h"
+#else
+#define MHU_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
+
 /**
  * Generic MHU error enumeration types.
  */
 enum mhu_error_t {
-    MHU_ERR_NONE                =  0,
-    MHU_ERR_NOT_INIT            = -1,
-    MHU_ERR_ALREADY_INIT        = -2,
-    MHU_ERR_UNSUPPORTED_VERSION = -3,
-    MHU_ERR_UNSUPPORTED         = -4,
-    MHU_ERR_INVALID_ARG         = -5,
-    MHU_ERR_BUFFER_TOO_SMALL    = -6,
-    MHU_ERR_GENERAL             = -7,
+    MHU_ERR_NONE =  0,
+    MHU_ERR_SIGNAL_WAIT_CLEAR_INVALID_ARG = MHU_ERROR_BASE,
+    MHU_ERR_WAIT_SIGNAL_CLEAR_INVALID_ARG,
+    MHU_ERR_CLEAR_WAIT_SIGNAL_INVALID_ARG,
+    MHU_ERR_VALIDATE_BUFFER_PARAMS_INVALID_ARG,
+    MHU_ERR_INIT_SENDER_INVALID_ARG,
+    MHU_ERR_INIT_SENDER_UNSUPPORTED,
+    MHU_ERR_INIT_RECEIVER_INVALID_ARG,
+    MHU_ERR_INIT_RECEIVER_UNSUPPORTED,
+    MHU_ERR_SEND_DATA_INVALID_ARG,
+    MHU_ERR_RECEIVE_DATA_INVALID_ARG,
+    MHU_ERR_RECEIVE_DATA_BUFFER_TOO_SMALL,
+    MHU_ERR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**

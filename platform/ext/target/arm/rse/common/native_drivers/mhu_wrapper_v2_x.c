@@ -23,27 +23,6 @@
 
 #define MHU_NOTIFY_VALUE    (1234u)
 
-static enum mhu_error_t
-error_mapping_to_mhu_error_t(enum mhu_v2_x_error_t err)
-{
-    switch (err) {
-    case MHU_V_2_X_ERR_NONE:
-        return MHU_ERR_NONE;
-    case MHU_V_2_X_ERR_NOT_INIT:
-        return MHU_ERR_NOT_INIT;
-    case MHU_V_2_X_ERR_ALREADY_INIT:
-        return MHU_ERR_ALREADY_INIT;
-    case MHU_V_2_X_ERR_UNSUPPORTED_VERSION:
-        return MHU_ERR_UNSUPPORTED_VERSION;
-    case MHU_V_2_X_ERR_INVALID_ARG:
-        return MHU_ERR_INVALID_ARG;
-    case MHU_V_2_X_ERR_GENERAL:
-        return MHU_ERR_GENERAL;
-    default:
-        return MHU_ERR_GENERAL;
-    }
-}
-
 enum mhu_error_t
 signal_and_wait_for_clear(void *mhu_sender_dev, uint32_t value)
 {
@@ -53,7 +32,7 @@ signal_and_wait_for_clear(void *mhu_sender_dev, uint32_t value)
     uint32_t wait_val;
 
     if (mhu_sender_dev == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_SIGNAL_WAIT_CLEAR_INVALID_ARG;
     }
 
     dev = (struct mhu_v2_x_dev_t *)mhu_sender_dev;
@@ -64,7 +43,7 @@ signal_and_wait_for_clear(void *mhu_sender_dev, uint32_t value)
     /* FIXME: Avoid wasting a whole channel for notifying */
     err = mhu_v2_x_channel_send(dev, channel_notify, value);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     do {
@@ -74,7 +53,7 @@ signal_and_wait_for_clear(void *mhu_sender_dev, uint32_t value)
         }
     } while (wait_val != 0);
 
-    return error_mapping_to_mhu_error_t(err);
+    return err;
 }
 
 enum mhu_error_t
@@ -86,7 +65,7 @@ wait_for_signal_and_clear(void *mhu_receiver_dev, uint32_t value)
     uint32_t wait_val;
 
     if (mhu_receiver_dev == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_WAIT_SIGNAL_CLEAR_INVALID_ARG;
     }
 
     dev = (struct mhu_v2_x_dev_t *)mhu_receiver_dev;
@@ -98,14 +77,14 @@ wait_for_signal_and_clear(void *mhu_receiver_dev, uint32_t value)
         /* Using the last channel for notifications */
         err = mhu_v2_x_channel_receive(dev, channel_notify, &wait_val);
         if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     } while (wait_val != value);
 
     /* Clear the last channel */
     err = mhu_v2_x_channel_clear(dev, channel_notify);
 
-    return error_mapping_to_mhu_error_t(err);
+    return err;
 }
 
 static enum mhu_v2_x_error_t
@@ -140,17 +119,17 @@ enum mhu_error_t mhu_init_sender(void *mhu_sender_dev)
     struct mhu_v2_x_dev_t *dev = mhu_sender_dev;
 
     if (dev == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_INIT_SENDER_INVALID_ARG;
     }
 
     err = mhu_v2_x_driver_init(dev, MHU_REV_READ_FROM_HW);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* This wrapper requires at least two channels to be implemented */
     if (mhu_v2_x_get_num_channel_implemented(dev) < 2) {
-        return MHU_ERR_UNSUPPORTED;
+        return MHU_ERR_INIT_SENDER_UNSUPPORTED;
     }
 
     return MHU_ERR_NONE;
@@ -163,38 +142,38 @@ enum mhu_error_t mhu_init_receiver(void *mhu_receiver_dev)
     uint32_t num_channels, i;
 
     if (dev == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_INIT_RECEIVER_INVALID_ARG;
     }
 
     err = mhu_v2_x_driver_init(dev, MHU_REV_READ_FROM_HW);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     num_channels = mhu_v2_x_get_num_channel_implemented(dev);
 
     /* This wrapper requires at least two channels to be implemented */
     if (num_channels < 2) {
-        return MHU_ERR_UNSUPPORTED;
+        return MHU_ERR_INIT_RECEIVER_UNSUPPORTED;
     }
 
     /* Mask all channels except the notifying channel */
     for (i = 0; i < (num_channels - 1); ++i) {
         err = mhu_v2_x_channel_mask_set(dev, i, UINT32_MAX);
         if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     }
 
     /* The last channel is used for notifications */
     err = mhu_v2_x_channel_mask_clear(dev, (num_channels - 1), UINT32_MAX);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     err = mhu_v2_x_interrupt_enable(dev, MHU_2_1_INTR_CHCOMB_MASK);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     return MHU_ERR_NONE;
@@ -213,25 +192,25 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
     uint32_t *p;
 
     if (dev == NULL || send_buffer == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_SEND_DATA_INVALID_ARG;
     } else if (size == 0) {
         return MHU_ERR_NONE;
     }
 
     /* For simplicity, require the send_buffer to be 4-byte aligned. */
     if ((uintptr_t)send_buffer & 0x3u) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_SEND_DATA_INVALID_ARG;
     }
 
     err = mhu_v2_x_initiate_transfer(dev);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* First send over the size of the actual message. */
     err = mhu_v2_x_channel_send(dev, chan, (uint32_t)size);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
     chan++;
 
@@ -239,7 +218,7 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
     for (i = 0; i < size; i += 4) {
         err = mhu_v2_x_channel_send(dev, chan, *p++);
         if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
         if (++chan == (num_channels - 1)) {
             mhu_err = signal_and_wait_for_clear(dev, MHU_NOTIFY_VALUE);
@@ -263,7 +242,7 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev,
     }
 
     err = mhu_v2_x_close_transfer(dev);
-    return error_mapping_to_mhu_error_t(err);
+    return err;
 }
 
 enum mhu_error_t mhu_wait_data(void *mhu_receiver_dev)
@@ -281,7 +260,7 @@ enum mhu_error_t mhu_wait_data(void *mhu_receiver_dev)
         }
     } while (val != MHU_NOTIFY_VALUE);
 
-    return error_mapping_to_mhu_error_t(err);
+    return err;
 }
 
 enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
@@ -297,7 +276,7 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
     uint32_t *p;
 
     if (dev == NULL || receive_buffer == NULL) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_RECEIVE_DATA_INVALID_ARG;
     }
 
     /* For simplicity, require:
@@ -305,27 +284,27 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
      * - the buffer size to be a multiple of 4.
      */
     if (((uintptr_t)receive_buffer & 0x3u) || (*size & 0x3u)) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_RECEIVE_DATA_INVALID_ARG;
     }
 
     /* The first word is the length of the actual message. */
     err = mhu_v2_x_channel_receive(dev, chan, &message_len);
     if (err != MHU_V_2_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
     chan++;
 
     if (message_len > *size) {
         /* Message buffer too small */
         *size = message_len;
-        return MHU_ERR_BUFFER_TOO_SMALL;
+        return MHU_ERR_RECEIVE_DATA_BUFFER_TOO_SMALL;
     }
 
     p = (uint32_t *)receive_buffer;
     for (i = 0; i < message_len; i += 4) {
         err = mhu_v2_x_channel_receive(dev, chan, p++);
         if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
 
         /* Only wait for next transfer if there is still missing data. */
@@ -333,7 +312,7 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
             /* Busy wait for next transfer */
             err = clear_and_wait_for_signal(dev);
             if (err != MHU_V_2_X_ERR_NONE) {
-                return error_mapping_to_mhu_error_t(err);
+                return err;
             }
             chan = 0;
         }
@@ -343,7 +322,7 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
     for (i = 0; i < num_channels; ++i) {
         err = mhu_v2_x_channel_clear(dev, i);
         if (err != MHU_V_2_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     }
 

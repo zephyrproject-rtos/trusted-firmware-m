@@ -210,7 +210,7 @@ static int32_t rse_handshake_msg_send(void *mhu_sender_dev,
     int32_t err;
 
     err = mhu_init_sender(mhu_sender_dev);
-    if (err != MHU_ERR_NONE && err != MHU_ERR_ALREADY_INIT) {
+    if (err != MHU_ERR_NONE) {
         return err;
     }
 
@@ -239,7 +239,7 @@ static int32_t rse_handshake_msg_receive(void *mhu_receiver_dev,
     size_t size;
 
     err = mhu_init_receiver(mhu_receiver_dev);
-    if (err != MHU_ERR_NONE && err != MHU_ERR_ALREADY_INIT) {
+    if (err != MHU_ERR_NONE) {
         return err;
     }
 
