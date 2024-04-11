@@ -40,7 +40,7 @@ extern const struct memory_region_limits memory_regions;
      ((1U << HANDLE_ATTR_SPM_POS) & HANDLE_ATTR_SPM_MASK))
 #else
 #define PROT_BOUNDARY_VAL \
-    (((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
 #endif
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
