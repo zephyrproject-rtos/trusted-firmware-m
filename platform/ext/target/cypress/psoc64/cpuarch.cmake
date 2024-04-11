@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-# preload.cmake is used to set things that related to the platform that are both
+# cpuarch.cmake is used to set things that related to the platform that are both
 # immutable and global, which is to say they should apply to any kind of project
 # that uses this platform. In practise this is normally compiler definitions and
 # variables related to hardware.
