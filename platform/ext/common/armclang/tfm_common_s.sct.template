@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,6 +93,21 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *tfm_psa_rot_partition* (+RO-CODE, +RO-DATA)
         *libplatform_s* (TFM_*_PSA-ROT_ATTR_FN)
         *.o (TFM_*_PSA-ROT_ATTR_FN)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}} (+RO-CODE, +RO-DATA)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}} (+RO-CODE, +RO-DATA)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
+    {% endif %}
+{% endfor %}
     }
 
     /*
@@ -114,6 +129,21 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *tfm_app_rot_partition* (+RO-CODE, +RO-DATA)
         *libplatform_s* (TFM_*_APP-ROT_ATTR_FN)
         *.o (TFM_*_APP-ROT_ATTR_FN)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}} (+RO-CODE, +RO-DATA)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}} (+RO-CODE, +RO-DATA)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
+    {% endif %}
+{% endfor %}
     }
 
     /*
@@ -210,6 +240,22 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *tfm_app_rot_partition* (+RW +ZI)
         *.o(TFM_*_APP-ROT_ATTR_RW)
         *.o(TFM_*_APP-ROT_ATTR_ZI)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}} (+RW +ZI)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}} (+RW +ZI)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
+    {% endif %}
+{% endfor %}
     }
 
     /*
@@ -273,6 +319,22 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *tfm_psa_rot_partition* (+RW +ZI)
         *.o(TFM_*_PSA-ROT_ATTR_RW)
         *.o(TFM_*_PSA-ROT_ATTR_ZI)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}} (+RW +ZI)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}} (+RW +ZI)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
+    {% endif %}
+{% endfor %}
     }
 
     /*

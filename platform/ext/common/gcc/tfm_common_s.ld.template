@@ -1,6 +1,6 @@
 ;/*
 ; * Copyright (c) 2009-2024 Arm Limited
-; * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
+; * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
 ; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -114,6 +114,23 @@ SECTIONS
     {
         *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.text*))
         *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.rodata*))
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
+    {% endif %}
+{% endfor %}
         *(TFM_*_PSA-ROT_ATTR_FN)
         . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
@@ -133,6 +150,23 @@ SECTIONS
     {
         *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.text*))
         *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.rodata*))
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
+    {% endif %}
+{% endfor %}
         *(TFM_*_APP-ROT_ATTR_FN)
         . = ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
@@ -373,6 +407,21 @@ SECTIONS
     .TFM_APP_ROT_LINKER_DATA ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT) :
     {
         *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.data*))
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.data*))
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}(SORT_BY_ALIGNMENT(.data*))
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
+    {% endif %}
+{% endfor %}
         *(TFM_*_APP-ROT_ATTR_RW)
         . = ALIGN(4);
     } > RAM AT> FLASH
@@ -384,6 +433,23 @@ SECTIONS
         start_of_TFM_APP_ROT_LINKER = .;
         *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.bss*))
         *tfm_app_rot_partition*:*(COMMON)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.bss*))
+        {{pattern}}:*(COMMON)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}(.bss*)
+        {{pattern}}(COMMON)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
+    {% endif %}
+{% endfor %}
         *(TFM_*_APP-ROT_ATTR_ZI)
         . += (. - start_of_TFM_APP_ROT_LINKER) ? 0 : 4;
         . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
@@ -434,6 +500,21 @@ SECTIONS
     .TFM_PSA_ROT_LINKER_DATA ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT) :
     {
         *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.data*))
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.data*))
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}(SORT_BY_ALIGNMENT(.data*))
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
+    {% endif %}
+{% endfor %}
         *(TFM_*_PSA-ROT_ATTR_RW)
         . = ALIGN(4);
     } > RAM AT> FLASH
@@ -445,6 +526,23 @@ SECTIONS
         start_of_TFM_PSA_ROT_LINKER = .;
         *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.bss*))
         *tfm_psa_rot_partition*:*(COMMON)
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+        {{pattern}}:(SORT_BY_ALIGNMENT(.bss*))
+        {{pattern}}:*(COMMON)
+        {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+        {{pattern}}(.bss*)
+        {{pattern}}(COMMON)
+        {% endfor %}
+    {% endif %}
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
+    {% endif %}
+{% endfor %}
         *(TFM_*_PSA-ROT_ATTR_ZI)
         . += (. - start_of_TFM_PSA_ROT_LINKER) ? 0 : 4;
         . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT);

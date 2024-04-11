@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  * Copyright (c) 2020-2021 IAR Systems AB
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,6 +85,22 @@ define block TFM_PSA_ROT_LINKER with alignment = TFM_LINKER_PSA_ROT_LINKER_CODE_
        ro object *tfm_psa_rot_partition*,
        section TFM_*_PSA-ROT_ATTR_FN object *libplatform_s*,
        section TFM_*_PSA-ROT_ATTR_FN object *.o,
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+       {% for pattern in partition.attr.linker_pattern.library_list %}
+       ro section .text object {{pattern}},
+       ro section .rodata object {{pattern}},
+       {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+       {% for pattern in partition.attr.linker_pattern.object_list %}
+       ro object {{pattern}},
+       {% endfor %}
+    {% endif %}
+       section {{partition.manifest.name}}_PSA-ROT_ATTR_FN,
+    {% endif %}
+{% endfor %}
     };
 
     /*
@@ -102,6 +118,22 @@ define block TFM_APP_CODE_START with alignment = TFM_LINKER_APP_ROT_LINKER_CODE_
 
     define block TFM_APP_ROT_LINKER with alignment = TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT {
         ro object *tfm_app_rot_partition*,
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+       {% for pattern in partition.attr.linker_pattern.library_list %}
+       ro section .text object {{pattern}},
+       ro section .rodata object {{pattern}},
+       {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+       {% for pattern in partition.attr.linker_pattern.object_list %}
+       ro object {{pattern}},
+       {% endfor %}
+    {% endif %}
+       section {{partition.manifest.name}}_APP-ROT_ATTR_FN,
+    {% endif %}
+{% endfor %}
     };
 
     /*
@@ -162,6 +194,23 @@ define block TFM_APP_ROT_LINKER_DATA with alignment = TFM_LINKER_APP_ROT_LINKER_
        rw object *tfm_app_rot_partition*,
        section TFM_*_APP-ROT_ATTR_RW object *.o,
        section TFM_*_APP-ROT_ATTR_ZI object *.o,
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+       {% for pattern in partition.attr.linker_pattern.library_list %}
+       rw section .data object {{pattern}},
+       rw section .bss  object {{pattern}},
+       {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+       {% for pattern in partition.attr.linker_pattern.object_list %}
+       rw object {{pattern}},
+       {% endfor %}
+    {% endif %}
+       section {{partition.manifest.name}}_APP-ROT_ATTR_RW,
+       section {{partition.manifest.name}}_APP-ROT_ATTR_ZI,
+    {% endif %}
+{% endfor %}
     };
 
 
@@ -234,6 +283,23 @@ define block TFM_PSA_ROT_LINKER_DATA with alignment = TFM_LINKER_PSA_ROT_LINKER_
        rw object *tfm_psa_rot_partition*,
        section TFM_*_PSA-ROT_ATTR_RW object *.o,
        section TFM_*_PSA-ROT_ATTR_ZI object *.o,
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.linker_pattern.library_list %}
+       {% for pattern in partition.attr.linker_pattern.library_list %}
+       rw section .data object {{pattern}},
+       rw section .bss  object {{pattern}},
+       {% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+       {% for pattern in partition.attr.linker_pattern.object_list %}
+       rw object {{pattern}},
+       {% endfor %}
+    {% endif %}
+       section {{partition.manifest.name}}_PSA-ROT_ATTR_RW,
+       section {{partition.manifest.name}}_PSA-ROT_ATTR_ZI,
+    {% endif %}
+{% endfor %}
 };
 
 
