@@ -343,6 +343,12 @@ target_add_scatter_file(bl1_1
     $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/corstone315_bl1_1.icf>
 )
 
+target_compile_definitions(bl1_1
+    PRIVATE
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
+)
+
 target_sources(platform_bl1_1
     PRIVATE
         nv_counters.c
@@ -379,6 +385,12 @@ target_add_scatter_file(bl1_2
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone315_bl1_2.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone315_bl1_2.ld>
     $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/corstone315_bl1_2.icf>
+)
+
+target_compile_definitions(bl1_2
+    PRIVATE
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
 target_sources(platform_bl1_2
