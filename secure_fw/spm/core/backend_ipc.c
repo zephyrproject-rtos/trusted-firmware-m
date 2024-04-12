@@ -52,7 +52,7 @@ struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 /* Indicator point to the partition meta */
 uintptr_t *partition_meta_indicator_pos;
 
-#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
 bool basepri_set_by_ipc_schedule;
 #endif
 
@@ -458,7 +458,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
     /* Protect concurrent access to current thread/component and thread status */
     CRITICAL_SECTION_ENTER(cs);
 
-#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
     if (__get_BASEPRI() == 0) {
         /*
          * If BASEPRI is not set, that means an interrupt was taken when
@@ -509,7 +509,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
         }
         ARCH_FLUSH_FP_CONTEXT();
 
-#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
         if (IS_NS_AGENT_TZ(p_part_next->p_ldinf)) {
             /*
              * The Non-Secure Agent for TrustZone is going to be scheduled.
