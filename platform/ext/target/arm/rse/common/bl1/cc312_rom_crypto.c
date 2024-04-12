@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "region_defs.h"
+#include "tfm_plat_defs.h"
 #include "device_definition.h"
 #include "otp.h"
 #include "fih.h"
@@ -21,11 +22,11 @@
 
 fih_int bl1_sha256_init(void)
 {
-    fih_int fih_rc = FIH_FAILURE;
+    fih_int fih_rc;
 
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     return FIH_SUCCESS;
@@ -44,12 +45,12 @@ fih_int bl1_sha256_finish(uint8_t *hash)
 
 fih_int bl1_sha256_update(uint8_t *data, size_t data_length)
 {
-    fih_int fih_rc = FIH_FAILURE;
+    fih_int fih_rc;
 
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data,
                                                                      data_length));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     return FIH_SUCCESS;
@@ -60,21 +61,21 @@ fih_int bl1_sha256_compute(const uint8_t *data,
                            uint8_t *hash)
 {
     uint32_t tmp_buf[32 / sizeof(uint32_t)];
-    fih_int fih_rc = FIH_FAILURE;
+    fih_int fih_rc;
 
     if (data == NULL || hash == NULL) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(TFM_PLAT_ERR_ROM_CRYPTO_SHA256_COMPUTE_INVALID_INPUT);
     }
 
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data,
                                                                      data_length));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
     cc3xx_lowlevel_hash_finish(tmp_buf, 32);
 
@@ -83,11 +84,11 @@ fih_int bl1_sha256_compute(const uint8_t *data,
     FIH_RET(FIH_SUCCESS);
 }
 
-static int32_t bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
-                                    enum kmu_hardware_keyslot_t *cc3xx_key_type,
-                                    uint8_t **key_buf, size_t key_buf_size)
+static fih_int bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
+                                  enum kmu_hardware_keyslot_t *cc3xx_key_type,
+                                  uint8_t **key_buf, size_t key_buf_size)
 {
-    int32_t rc;
+    fih_int fih_rc;
 
     switch(key_id) {
     case TFM_BL1_KEY_HUK:
@@ -99,15 +100,15 @@ static int32_t bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
         *key_buf = NULL;
         break;
     default:
-        rc = bl1_otp_read_key(key_id, *key_buf);
-        if (rc) {
+        FIH_CALL(bl1_otp_read_key, fih_rc, key_id, *key_buf);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             memset(*key_buf, 0, key_buf_size);
-            return rc;
+            FIH_RET(fih_rc);
         }
         break;
     }
 
-    return 0;
+    FIH_RET(FIH_SUCCESS);
 }
 
 int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
@@ -119,44 +120,44 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
 {
     enum kmu_hardware_keyslot_t kmu_key_slot;
     uint32_t key_buf[32 / sizeof(uint32_t)];
-    int32_t rc = 0;
     uint8_t *input_key = (uint8_t *)key_buf;
-    cc3xx_err_t err;
+    fih_int fih_rc;
+    cc3xx_err_t cc_err;
 
     if (ciphertext_length == 0) {
-        return 0;
+        return TFM_PLAT_ERR_SUCCESS;
     }
 
     if (counter == NULL || ciphertext == NULL || plaintext == NULL) {
-        return -1;
+        return TFM_PLAT_ERR_ROM_CRYPTO_AES256_CTR_DECRYPT_INVALID_INPUT;
     }
 
     if ((uintptr_t)counter & 0x3) {
-        return -1;
+        return TFM_PLAT_ERR_ROM_CRYPTO_AES256_CTR_DECRYPT_INVALID_ALIGNMENT;
     }
 
     if (key_material == NULL) {
-        rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key,
-                                sizeof(key_buf));
-        if (rc) {
-            return rc;
+        fih_rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key,
+                                    sizeof(key_buf));
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            return fih_int_decode(fih_rc);
         }
     } else {
         input_key = (uint8_t *)key_material;
     }
 
-    err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
-                                  kmu_key_slot, (uint32_t *)input_key,
-                                  CC3XX_AES_KEYSIZE_256, (uint32_t *)counter, 16);
-    if (err != CC3XX_ERR_SUCCESS) {
-        return 1;
+    cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
+                                     kmu_key_slot, (uint32_t *)input_key,
+                                     CC3XX_AES_KEYSIZE_256, (uint32_t *)counter, 16);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return cc_err;
     }
 
     cc3xx_lowlevel_aes_set_output_buffer(plaintext, ciphertext_length);
     cc3xx_lowlevel_aes_update(ciphertext, ciphertext_length);
     cc3xx_lowlevel_aes_finish(NULL, NULL);
 
-    return 0;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
@@ -167,20 +168,20 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
     enum kmu_hardware_keyslot_t kmu_key_slot;
     uint32_t key_buf[32 / sizeof(uint32_t)];
     uint8_t *input_key = (uint8_t *)key_buf;
-    int32_t rc = 0;
-    cc3xx_err_t err;
+    fih_int fih_rc;
+    cc3xx_err_t cc_err;
 
-    rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key, sizeof(key_buf));
-    if (rc) {
-        return rc;
+    fih_rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key, sizeof(key_buf));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return fih_int_decode(fih_rc);
     }
 
-    err = cc3xx_lowlevel_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
-                                  CC3XX_AES_KEYSIZE_256, label, label_length, context,
-                                  context_length, (uint32_t *)output_key, output_length);
-    if (err != CC3XX_ERR_SUCCESS) {
-        return 1;
+    cc_err = cc3xx_lowlevel_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
+                                     CC3XX_AES_KEYSIZE_256, label, label_length, context,
+                                     context_length, (uint32_t *)output_key, output_length);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return cc_err;
     }
 
-    return 0;
+    return TFM_PLAT_ERR_SUCCESS;
 }
