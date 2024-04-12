@@ -11,6 +11,7 @@
 #include "device_definition.h"
 #include "fih.h"
 #include "flash_map/flash_map.h"
+#include "gic_720ae_lib.h"
 #include "host_base_address.h"
 #include "interrupts_bl2.h"
 #include "mhu_v3_x.h"
@@ -26,6 +27,41 @@
 #define MHU_SCP_SI_CL1_READY_SIGNAL_CHANNEL 4
 #define MHU_SCP_SI_CL2_READY_SIGNAL_CHANNEL 5
 #define MHU_SCP_READY_SIGNAL_PAYLOAD 0x1
+
+static int32_t gic_multiple_view_init(void)
+{
+    enum atu_error_t atu_err;
+    uint32_t err;
+
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_GIC_ID,
+                                    HOST_SI_GIC_VIEW_0_BASE_S,
+                                    HOST_SI_GIC_VIEW_0_PHYS_BASE,
+                                    HOST_SI_GIC_VIEW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    err = gic_multiple_view_probe(HOST_SI_GIC_VIEW_0_BASE_S);
+    if (err != 0) {
+        BOOT_LOG_ERR("BL2: Error probing GIC Multiple Views device");
+        goto free_atu;
+    }
+
+    err = gic_multiple_view_programming();
+    if (err != 0) {
+        BOOT_LOG_ERR("BL2: Error programming GIC Multiple Views");
+        goto free_atu;
+    }
+
+free_atu:
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_GIC_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    return err;
+}
 
 /*
  * ============================ INIT FUNCTIONS =================================
@@ -454,8 +490,14 @@ static int boot_platform_post_load_ap_bl2(void)
 static int boot_platform_pre_load_si_cl0(void)
 {
     enum atu_error_t atu_err;
+    int32_t result;
 
     BOOT_LOG_INF("BL2: SI CL0 pre load start");
+
+    result = gic_multiple_view_init();
+    if (result != 0) {
+        return result;
+    }
 
     /* Configure RSE ATU to access RSE header region for SI CL0 */
     atu_err = atu_initialize_region(&ATU_DEV_S,

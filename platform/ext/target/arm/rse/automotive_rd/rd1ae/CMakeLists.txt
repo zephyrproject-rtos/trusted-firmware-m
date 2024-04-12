@@ -66,6 +66,7 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_Flash.c
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
+        gic_720ae_lib.c
         host_drivers/gic_720ae_drv.c
         host_system.c
         ni_tower_periph_lib.c
