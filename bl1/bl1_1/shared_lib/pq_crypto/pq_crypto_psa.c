@@ -65,7 +65,7 @@ fih_int pq_crypto_verify(enum tfm_bl1_key_id_t key,
 
     FIH_CALL(bl1_otp_read_key, fih_rc, key, key_buf);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     mbedtls_lms_public_init(&ctx);
@@ -73,7 +73,6 @@ fih_int pq_crypto_verify(enum tfm_bl1_key_id_t key,
     rc = mbedtls_lms_import_public_key(&ctx, key_buf, MBEDTLS_LMS_PUBLIC_KEY_LEN(MBEDTLS_LMS_SHA256_M32_H10));
     fih_rc = fih_int_encode_zero_equality(rc);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        fih_rc = FIH_FAILURE;
         goto out;
     }
 
@@ -99,14 +98,15 @@ int pq_crypto_get_pub_key_hash(enum tfm_bl1_key_id_t key,
 
     fih_rc = bl1_otp_read_key(key, key_buf);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        return -1;
+        return fih_int_decode(fih_rc);
     }
 
     fih_rc = bl1_sha256_compute(key_buf, sizeof(key_buf), hash);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        return -1;
+        return fih_int_decode(fih_rc);
     }
 
     *hash_length = 32;
+
     return 0;
 }

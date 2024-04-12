@@ -66,20 +66,20 @@ fih_int validate_image_at_addr(const uint8_t *image)
     FIH_CALL(bl1_sha256_compute, fih_rc, image, BL1_2_CODE_SIZE,
                                          computed_bl1_2_hash);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_2_IMAGE_HASH, BL1_2_HASH_SIZE,
                                  stored_bl1_2_hash);
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_CALL(bl_fih_memeql, fih_rc, computed_bl1_2_hash,
                                     stored_bl1_2_hash, BL1_2_HASH_SIZE);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_RET(FIH_SUCCESS);
@@ -87,7 +87,6 @@ fih_int validate_image_at_addr(const uint8_t *image)
 
 int main(void)
 {
-    int rc;
     fih_int fih_rc = FIH_FAILURE;
     fih_int recovery_succeeded = FIH_FAILURE;
 
