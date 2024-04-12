@@ -27,7 +27,26 @@ Features
 Known errata
 ============
 
-- None!
+- The build instructions for this release initially contained an incorrect
+  address for the DMA ICS concatenation with the ROM code. The build
+  instructions in this document have been updated and are now correct. The
+  correct address is 0x1F000, instead of 0x1E000. Some distributed ROM binaries
+  have also been impacted, and hence will not boot.
+
+  If a ROM binary does not boot, it can be checked for this error using the
+  command:
+
+  .. code-block:: bash
+
+    xxd -s 0x1F000 rom.bin
+
+  If there is no output, or the output is all zero-words, then the ROM binary is
+  affected by the issue. It is possible to fix a ROM binary affected by the
+  issue by running the following command:
+
+  .. code-block:: bash
+
+    dd if=rom.bin bs=1k skip=120 seek=124 count=4 of=rom.bin
 
 TF-M version
 ============
@@ -107,7 +126,7 @@ The RSE ROM image should be generated with the following build commands:
     cmake --build build -- install
 
     srec_cat build/bin/bl1_1.bin  -Binary -offset 0x0 \
-        build/bin/rom_dma_ics.bin -Binary -offset 0x1E000 \
+        build/bin/rom_dma_ics.bin -Binary -offset 0x1F000 \
         -o rse_rom_2024-04-08.bin -Binary
 
     truncate --size 131072 rse_rom_2024-04-08.bin
