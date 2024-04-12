@@ -15,6 +15,7 @@ set(RSE_USE_HOST_FLASH                      @RSE_USE_HOST_FLASH@ CACHE BOOL "Whe
 set(RSE_GPT_SUPPORT                         @RSE_GPT_SUPPORT@ CACHE BOOL "Whether to read a GPT header to find images")
 set(RSE_HAS_EXPANSION_PERIPHERALS           @RSE_HAS_EXPANSION_PERIPHERALS@ CACHE BOOL "Whether there are extra peripherals on the RSE subsystem")
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS         @PLATFORM_HAS_PS_NV_OTP_COUNTERS@ CACHE BOOL "Whether OTP counters will be used for PS")
+set(PLATFORM_ERROR_CODES                    @PLATFORM_ERROR_CODES@ CACHE BOOL "Whether to use platform-specific error codes.")
 set(RSE_ENABLE_BRINGUP_HELPERS              @RSE_ENABLE_BRINGUP_HELPERS@ CACHE BOOL "Whether RSE bringup helpers are enabled")
 set(RSE_OTP_TRNG                            @RSE_OTP_TRNG@ CACHE BOOL "Whether to use the TRNG from the OTP")
 set(RSE_TP_MODE                             @RSE_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")

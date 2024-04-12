@@ -15,6 +15,9 @@
 #include <stdint.h>
 #include <limits.h>
 
+#ifdef PLATFORM_ERROR_CODES
+#include "platform_error_codes.h"
+#else
 enum tfm_plat_err_t {
     TFM_PLAT_ERR_SUCCESS = 0,
     TFM_PLAT_ERR_SYSTEM_ERR = 0x3A5C,
@@ -25,6 +28,7 @@ enum tfm_plat_err_t {
     /* Following entry is only to ensure the error code of int size */
     TFM_PLAT_ERR_FORCE_INT_SIZE = INT_MAX
 };
+#endif /* PLATFORM_ERROR_CODES */
 
 #if defined(TFM_ISOLATION_LEVEL) && (TFM_ISOLATION_LEVEL != 1)
 

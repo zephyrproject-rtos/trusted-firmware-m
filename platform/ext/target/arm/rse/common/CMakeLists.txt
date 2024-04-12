@@ -27,6 +27,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_GPT_SUPPORT}>:RSE_GPT_SUPPORT>
         $<$<BOOL:${RSE_HAS_EXPANSION_PERIPHERALS}>:RSE_HAS_EXPANSION_PERIPHERALS>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
+        $<$<BOOL:${PLATFORM_ERROR_CODES}>:PLATFORM_ERROR_CODES>
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
         $<$<BOOL:${RSE_LOAD_NS_IMAGE}>:RSE_LOAD_NS_IMAGE>
@@ -777,6 +778,7 @@ install(DIRECTORY   partition
 install(FILES       target_cfg.h
                     tfm_peripherals_def.h
                     error_codes_mapping.h
+                    platform_error_codes.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/common/uart_stdout.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
