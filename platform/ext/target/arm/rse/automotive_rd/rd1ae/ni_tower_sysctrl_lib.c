@@ -22,6 +22,11 @@ const struct ni_tower_component_node sysctrl_scp_asni  = {
     .id = SYSCTRL_SCP_ASNI_ID,
 };
 
+const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
+    .type = NI_TOWER_ASNI,
+    .id = SYSCTRL_RSE_SCP_ASNI_ID,
+};
+
 /*
  * System Control NI-Tower is the interconnect between the AXI interfaces of
  * RSE, SCP, Safety Island and the CMN interconnect. Following block diagram
@@ -57,30 +62,37 @@ const struct ni_tower_component_node sysctrl_scp_asni  = {
  *                                           |     |
  *                                           +-----+
  *
+ *                             +-----+
+ *                             |     |
+ *                             |     |
+ *  rse_scp_axis ------------->|     |--------------------------> clus_util_axim
+ *                             |     |
+ *                             |     |
+ *                             +-----+
  *
  * The following matrix shows the connections within System Control NI-Tower.
  *
- * +------------+---------------+----------+
- * |            | rse_main_axis | scp_axis |
- * +============+===============+==========+
- * |rse_scp_axim|       X       |          |
- * +------------+---------------+----------+
- * |rse_si_axim |       X       |          |
- * +------------+---------------+----------+
- * |  rsm_axim  |       X       |    X     |
- * +------------+---------------+----------+
- * |  rsm_apbm  |       X       |    X     |
- * +------------+---------------+----------+
- * |  cmn_apbm  |       X       |    X     |
- * +------------+---------------+----------+
- * |  tcu_apbm  |       X       |          |
- * +------------+---------------+----------+
- * |  app_axim  |       X       |    X     |
- * +------------+---------------+----------+
- * |app_scp_axim|               |          |
- * +------------+---------------+----------+
- * |app_si_axim |               |          |
- * +------------+---------------+----------+
+ * +------------+---------------+----------+--------------+
+ * |            | rse_main_axis | scp_axis | rse_scp_axis |
+ * +============+===============+==========+==============+
+ * |rse_scp_axim|       X       |          |              |
+ * +------------+---------------+----------+--------------+
+ * |rse_si_axim |       X       |          |              |
+ * +------------+---------------+----------+--------------+
+ * |  rsm_axim  |       X       |    X     |              |
+ * +------------+---------------+----------+--------------+
+ * |  rsm_apbm  |       X       |    X     |              |
+ * +------------+---------------+----------+--------------+
+ * |  cmn_apbm  |       X       |    X     |              |
+ * +------------+---------------+----------+--------------+
+ * |  tcu_apbm  |       X       |          |              |
+ * +------------+---------------+----------+--------------+
+ * |  app_axim  |       X       |    X     |              |
+ * +------------+---------------+----------+--------------+
+ * |app_scp_axim|               |          |              |
+ * +------------+---------------+----------+--------------+
+ * |app_si_axim |               |          |              |
+ * +------------+---------------+----------+--------------+
  *  NOTE: 'X' means there is a connection.
  */
 
@@ -301,6 +313,21 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_psam[] = {
 };
 
 /*
+ * Accesses from RSE and SCP targeting Cluster Utility address space are handled
+ * by a NIC-400 which then forwards only the bottom [20:0] address bits of the
+ * request to rse_scp_axis interface. The bottom [20:0] address bits
+ * (range: 0x0 - 0x1FFFFF) are sent from NIC-400 to System Control NI-Tower
+ * for APU filtering of request from RSE/SCP to Clusters.
+ */
+static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
+    {
+        HOST_CLUS_UTIL_SMCF_OFF_ADDR_PHYS_BASE,
+        HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
+        SYSCTRL_CLUS_UTIL_AMNI_ID
+    },
+};
+
+/*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
  * its target ID for each requester in the System Control NI-Tower for nodes
  * under AON domain.
@@ -321,6 +348,12 @@ static int32_t program_sysctrl_psam_aon(void)
             .component = &sysctrl_scp_asni,
             .nh_region_count = ARRAY_SIZE(scp_axis_psam),
             .regions = scp_axis_psam,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_rse_scp_asni,
+            .nh_region_count = ARRAY_SIZE(rse_scp_axis_psam),
+            .regions = rse_scp_axis_psam,
             .add_chip_addr_offset = false,
         },
     };
