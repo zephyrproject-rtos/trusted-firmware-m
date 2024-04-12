@@ -62,6 +62,11 @@ target_sources(bl2
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_legacy.c
 )
 
+target_compile_definitions(bl2
+    PRIVATE
+        MCUBOOT_SIGNATURE_TYPE=${MCUBOOT_SIGNATURE_TYPE}
+)
+
 target_link_libraries(bl2
     PUBLIC
         bootutil

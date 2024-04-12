@@ -37,7 +37,10 @@
 
 #if defined(MCUBOOT_USE_PSA_CRYPTO)
 #include "psa/crypto.h"
-#endif
+/* A few macros for stringification */
+#define str(X) #X
+#define xstr(X) str(X)
+#endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -153,7 +156,7 @@ int main(void)
         BOOT_LOG_ERR("PSA Crypto init failed with error code %d", status);
         FIH_PANIC;
     }
-    BOOT_LOG_INF("PSA Crypto init completed");
+    BOOT_LOG_INF("PSA Crypto init done, sig_type: %s", xstr(MCUBOOT_SIGNATURE_TYPE));
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 #ifdef TEST_BL2
