@@ -38,4 +38,19 @@
 /* SI region end address */
 #define HOST_SI_PHYS_LIMIT                         0x800FFFFFFFFFFULL
 
+/* SI CL0 SRAM base address */
+#define HOST_SI_CL0_SRAM_PHYS_BASE                 0x8000120000000ULL
+/* SI CL0 SRAM end address */
+#define HOST_SI_CL0_SRAM_PHYS_LIMIT                0x800013FFFFFFFULL
+
+/* SI CL1 SRAM base address */
+#define HOST_SI_CL1_SRAM_PHYS_BASE                 0x8000140000000ULL
+/* SI CL1 SRAM end address */
+#define HOST_SI_CL1_SRAM_PHYS_LIMIT                0x800015FFFFFFFULL
+
+/* SI CL2 SRAM base address */
+#define HOST_SI_CL2_SRAM_PHYS_BASE                 0x8000160000000ULL
+/* SI CL2 SRAM end address */
+#define HOST_SI_CL2_SRAM_PHYS_LIMIT                0x800017FFFFFFFULL
+
 #endif /* __HOST_SI_MEMORY_MAP_H__ */

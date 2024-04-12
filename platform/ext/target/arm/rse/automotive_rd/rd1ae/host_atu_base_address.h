@@ -180,9 +180,75 @@ enum rse_atu_ids {
                                            HOST_AP_BL2_ATU_SIZE -              \
                                            RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
-/* Last RSE logical address used for loading images */
-#define RSE_IMAGE_LOADING_END             (HOST_AP_BL2_IMG_CODE_BASE_S +       \
+/* SI CL0 */
+
+/* SI CL0 ATU HEADER logical address start */
+#define HOST_SI_CL0_HDR_ATU_WINDOW_BASE_S (HOST_AP_BL2_IMG_CODE_BASE_S +       \
                                            HOST_AP_BL2_ATU_SIZE)
+/* SI CL0 Image address start, offset so end of HEADER at end of ATU HEADER */
+#define HOST_SI_CL0_IMG_HDR_BASE_S        (HOST_SI_CL0_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE -       \
+                                           BL2_HEADER_SIZE)
+/* SI CL0 Code region and SCP ATU CODE logical address start */
+#define HOST_SI_CL0_IMG_CODE_BASE_S       (HOST_SI_CL0_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* SI CL0 Shared SRAM physical address start */
+#define HOST_SI_CL0_PHYS_BASE             HOST_SI_CL0_SRAM_PHYS_BASE
+/* SI CL0 ATU CODE size (aligned size of SCP image) */
+#define HOST_SI_CL0_ATU_SIZE              ALIGN_UP(SIZE_DEF_SI_CL0_IMAGE,      \
+                                                   RSE_ATU_PAGE_SIZE)
+/* SI CL0 HEADER physical address start (mapped to end of SI CL0 ITCM) */
+#define HOST_SI_CL0_HDR_PHYS_BASE         (HOST_SI_CL0_PHYS_BASE +             \
+                                           HOST_SI_CL0_ATU_SIZE -              \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+/* SI CL1 */
+
+/* SI CL1 ATU HEADER logical address start */
+#define HOST_SI_CL1_HDR_ATU_WINDOW_BASE_S (HOST_SI_CL0_IMG_CODE_BASE_S +       \
+                                           HOST_SI_CL0_ATU_SIZE)
+/* SI CL1 Image address start, offset so end of HEADER at end of ATU HEADER */
+#define HOST_SI_CL1_IMG_HDR_BASE_S        (HOST_SI_CL1_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE -       \
+                                           BL2_HEADER_SIZE)
+/* SI CL1 Code region and SCP ATU CODE logical address start */
+#define HOST_SI_CL1_IMG_CODE_BASE_S       (HOST_SI_CL1_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* SI CL1 Shared SRAM physical address start */
+#define HOST_SI_CL1_PHYS_BASE             HOST_SI_CL1_SRAM_PHYS_BASE
+/* SI CL1 ATU CODE size (aligned size of SCP image) */
+#define HOST_SI_CL1_ATU_SIZE              ALIGN_UP(SIZE_DEF_SI_CL1_IMAGE,      \
+                                                   RSE_ATU_PAGE_SIZE)
+/* SI CL1 HEADER physical address start (mapped to end of SI CL1 ITCM) */
+#define HOST_SI_CL1_HDR_PHYS_BASE         (HOST_SI_CL1_PHYS_BASE +             \
+                                           HOST_SI_CL1_ATU_SIZE -              \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+/* SI CL2 */
+
+/* SI CL2 ATU HEADER logical address start */
+#define HOST_SI_CL2_HDR_ATU_WINDOW_BASE_S (HOST_SI_CL1_IMG_CODE_BASE_S +       \
+                                           HOST_SI_CL1_ATU_SIZE)
+/* SI CL2 Image address start, offset so end of HEADER at end of ATU HEADER */
+#define HOST_SI_CL2_IMG_HDR_BASE_S        (HOST_SI_CL2_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE -       \
+                                           BL2_HEADER_SIZE)
+/* SI CL2 Code region and SCP ATU CODE logical address start */
+#define HOST_SI_CL2_IMG_CODE_BASE_S       (HOST_SI_CL2_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* SI CL2 Shared SRAM physical address start */
+#define HOST_SI_CL2_PHYS_BASE             HOST_SI_CL2_SRAM_PHYS_BASE
+/* SI CL2 ATU CODE size (aligned size of SCP image) */
+#define HOST_SI_CL2_ATU_SIZE              ALIGN_UP(SIZE_DEF_SI_CL2_IMAGE,      \
+                                                   RSE_ATU_PAGE_SIZE)
+/* SI_CL2 HEADER physical address start (mapped to end of SI CL2 ITCM) */
+#define HOST_SI_CL2_HDR_PHYS_BASE         (HOST_SI_CL2_PHYS_BASE +             \
+                                           HOST_SI_CL2_ATU_SIZE -              \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+/* Last RSE logical address used for loading images */
+#define RSE_IMAGE_LOADING_END             (HOST_SI_CL2_IMG_CODE_BASE_S +       \
+                                           HOST_SI_CL2_ATU_SIZE)
 
 /* SCP sysctrl region logical address start */
 #define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END

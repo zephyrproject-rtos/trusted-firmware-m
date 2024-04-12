@@ -23,8 +23,11 @@
 #define RSE_FIRMWARE_NON_SECURE_ID   1
 /* Host Firmware */
 #define RSE_FIRMWARE_AP_BL2_ID       2
-#define RSE_FIRMWARE_SCP_ID          3
+#define RSE_FIRMWARE_SI_CL2_ID       3
+#define RSE_FIRMWARE_SI_CL1_ID       4
+#define RSE_FIRMWARE_SI_CL0_ID       5
+#define RSE_FIRMWARE_SCP_ID          6
 /* Number of firmware loaded by BL2 */
-#define RSE_FIRMWARE_COUNT           4
+#define RSE_FIRMWARE_COUNT           7
 
 #endif /* __BL2_IMAGE_ID_H__ */

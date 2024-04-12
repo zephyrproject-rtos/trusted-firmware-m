@@ -40,6 +40,12 @@
  * 0x24_0000 SCP secondary slot (512 KB)
  * 0x2C_0000 AP BL2 primary slot (512 KB)
  * 0x34_0000 AP BL2 secondary slot (512 KB)
+ * 0x3C_0000 SI CL0 primary slot (2048 KB)
+ * 0x5C_0000 SI CL1 secondary slot (2048 KB)
+ * 0x7C_0000 SI CL0 primary slot (4096 KB)
+ * 0xBC_0000 SI CL1 secondary slot (4096 KB)
+ * 0xFC_0000 SI CL0 primary slot (8192 KB)
+ * 0x17C_0000 SI CL1 secondary slot (8192 KB)
  */
 
 /*
@@ -56,6 +62,9 @@
 #define FLASH_NS_PARTITION_SIZE         (SIZE_DEF_NS_IMAGE)  /* NS  partition */
 #define FLASH_SCP_PARTITION_SIZE        (SIZE_DEF_SCP_IMAGE) /* SCP partition */
 #define FLASH_AP_BL2_PARTITION_SIZE     (SIZE_DEF_AP_BL2_IMAGE) /* AP BL2  partition */
+#define FLASH_SI_CL0_PARTITION_SIZE     (SIZE_DEF_SI_CL0_IMAGE) /* SI CL0 partition */
+#define FLASH_SI_CL1_PARTITION_SIZE     (SIZE_DEF_SI_CL1_IMAGE) /* SI CL1 partition */
+#define FLASH_SI_CL2_PARTITION_SIZE     (SIZE_DEF_SI_CL2_IMAGE) /* SI CL2 partition */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -120,13 +129,37 @@
 #define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
 #define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
 #define FLASH_AREA_9_SIZE          (FLASH_AP_BL2_PARTITION_SIZE)
+/* SI CL0 image primary slot */
+#define FLASH_AREA_10_ID            (FLASH_AREA_9_ID + 1)
+#define FLASH_AREA_10_OFFSET        (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE)
+#define FLASH_AREA_10_SIZE          (FLASH_SI_CL0_PARTITION_SIZE)
+/* SI CL0 image secondary slot */
+#define FLASH_AREA_11_ID            (FLASH_AREA_10_ID + 1)
+#define FLASH_AREA_11_OFFSET        (FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE)
+#define FLASH_AREA_11_SIZE          (FLASH_SI_CL0_PARTITION_SIZE)
+/* SI CL1 image primary slot */
+#define FLASH_AREA_12_ID            (FLASH_AREA_11_ID + 1)
+#define FLASH_AREA_12_OFFSET        (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE)
+#define FLASH_AREA_12_SIZE          (FLASH_SI_CL1_PARTITION_SIZE)
+/* SI CL1 image secondary slot */
+#define FLASH_AREA_13_ID            (FLASH_AREA_12_ID + 1)
+#define FLASH_AREA_13_OFFSET        (FLASH_AREA_12_OFFSET + FLASH_AREA_12_SIZE)
+#define FLASH_AREA_13_SIZE          (FLASH_SI_CL1_PARTITION_SIZE)
+/* SI CL2 image primary slot */
+#define FLASH_AREA_14_ID            (FLASH_AREA_13_ID + 1)
+#define FLASH_AREA_14_OFFSET        (FLASH_AREA_13_OFFSET + FLASH_AREA_13_SIZE)
+#define FLASH_AREA_14_SIZE          (FLASH_SI_CL2_PARTITION_SIZE)
+/* SI CL2 image secondary slot */
+#define FLASH_AREA_15_ID            (FLASH_AREA_14_ID + 1)
+#define FLASH_AREA_15_OFFSET        (FLASH_AREA_14_OFFSET + FLASH_AREA_14_SIZE)
+#define FLASH_AREA_15_SIZE          (FLASH_SI_CL2_PARTITION_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Check that all the images can fit in the Flash area. */
-#if (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE > FLASH_TOTAL_SIZE)
+#if (FLASH_AREA_15_OFFSET + FLASH_AREA_15_SIZE > FLASH_TOTAL_SIZE)
 #error "Out of Flash memory!"
 #endif
 
@@ -135,12 +168,18 @@
          ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_3_ID : \
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_6_ID : \
          ((x) == RSE_FIRMWARE_AP_BL2_ID)     ? FLASH_AREA_8_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL0_ID)     ? FLASH_AREA_10_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL1_ID)     ? FLASH_AREA_12_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL2_ID)     ? FLASH_AREA_14_ID : \
                                               255)
 #define FLASH_AREA_IMAGE_SECONDARY(x) \
         (((x) == RSE_FIRMWARE_SECURE_ID)     ? FLASH_AREA_4_ID : \
          ((x) == RSE_FIRMWARE_NON_SECURE_ID) ? FLASH_AREA_5_ID : \
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_7_ID : \
          ((x) == RSE_FIRMWARE_AP_BL2_ID)     ? FLASH_AREA_9_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL0_ID)     ? FLASH_AREA_11_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL1_ID)     ? FLASH_AREA_13_ID : \
+         ((x) == RSE_FIRMWARE_SI_CL2_ID)     ? FLASH_AREA_15_ID : \
                                               255)
 
 /* Scratch area is not used with RAM loading firmware upgrade */

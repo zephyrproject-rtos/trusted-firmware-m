@@ -29,5 +29,8 @@
 /* Host Firmware */
 #define SIZE_DEF_SCP_IMAGE          (0x80000) /* 512 KB */
 #define SIZE_DEF_AP_BL2_IMAGE       (0x80000) /* 512 KB */
+#define SIZE_DEF_SI_CL0_IMAGE       (0x200000)/* 2048 KB */
+#define SIZE_DEF_SI_CL1_IMAGE       (0x400000)/* 4096 KB */
+#define SIZE_DEF_SI_CL2_IMAGE       (0x800000)/* 8192 KB */
 
 #endif /* __IMAGE_SIZE_DEFS_H__ */

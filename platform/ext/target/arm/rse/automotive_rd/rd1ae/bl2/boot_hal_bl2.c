@@ -407,6 +407,204 @@ static int boot_platform_post_load_ap_bl2(void)
 }
 
 /*
+ * =========================== SI CL0 LOAD FUNCTIONS ===========================
+ */
+
+/* Function called before SI CL0 firmware is loaded. */
+static int boot_platform_pre_load_si_cl0(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL0 pre load start");
+
+    /* Configure RSE ATU to access RSE header region for SI CL0 */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_HDR_LOAD_ID,
+                                    HOST_SI_CL0_HDR_ATU_WINDOW_BASE_S,
+                                    HOST_SI_CL0_HDR_PHYS_BASE,
+                                    RSE_IMG_HDR_ATU_WINDOW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Configure RSE ATU to access SI CL0 Shared SRAM region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_CODE_LOAD_ID,
+                                    HOST_SI_CL0_IMG_CODE_BASE_S,
+                                    HOST_SI_CL0_PHYS_BASE,
+                                    HOST_SI_CL0_ATU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL0 pre load complete");
+
+    return 0;
+}
+
+/* Function called after SI CL0 firmware is loaded. */
+static int boot_platform_post_load_si_cl0(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL0 post load start");
+
+    /*
+     * Since the measurement are taken at this point, clear the image
+     * header part in the Shared SRAM before releasing SI CL0 out of reset.
+     */
+    memset(HOST_SI_CL0_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU region configured to access RSE header region for SI CL0 */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Close RSE ATU region configured to access SI CL0 Shared SRAM region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL0 post load complete");
+
+    return 0;
+}
+
+/*
+ * =========================== SI CL1 LOAD FUNCTIONS ===========================
+ */
+
+/* Function called before SI CL1 firmware is loaded. */
+static int boot_platform_pre_load_si_cl1(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL1 pre load start");
+
+    /* Configure RSE ATU to access RSE header region for SI CL1 */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_HDR_LOAD_ID,
+                                    HOST_SI_CL1_HDR_ATU_WINDOW_BASE_S,
+                                    HOST_SI_CL1_HDR_PHYS_BASE,
+                                    RSE_IMG_HDR_ATU_WINDOW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Configure RSE ATU to access SI CL1 Shared SRAM region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_CODE_LOAD_ID,
+                                    HOST_SI_CL1_IMG_CODE_BASE_S,
+                                    HOST_SI_CL1_PHYS_BASE,
+                                    HOST_SI_CL1_ATU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL1 pre load complete");
+
+    return 0;
+}
+
+/* Function called after SI CL1 firmware is loaded. */
+static int boot_platform_post_load_si_cl1(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL1 post load start");
+
+    /*
+     * Since the measurement are taken at this point, clear the image
+     * header part in the Shared SRAM before releasing SI CL1 out of reset.
+     */
+    memset(HOST_SI_CL1_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU region configured to access RSE header region for SI CL1 */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Close RSE ATU region configured to access SI CL1 Shared SRAM region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL1 post load complete");
+
+    return 0;
+}
+
+/*
+ * =========================== SI CL2 LOAD FUNCTIONS ===========================
+ */
+
+/* Function called before SI CL2 firmware is loaded. */
+static int boot_platform_pre_load_si_cl2(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL2 pre load start");
+
+    /* Configure RSE ATU to access RSE header region for SI CL2 */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_HDR_LOAD_ID,
+                                    HOST_SI_CL2_HDR_ATU_WINDOW_BASE_S,
+                                    HOST_SI_CL2_HDR_PHYS_BASE,
+                                    RSE_IMG_HDR_ATU_WINDOW_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Configure RSE ATU to access SI CL2 Shared SRAM region */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    RSE_ATU_IMG_CODE_LOAD_ID,
+                                    HOST_SI_CL2_IMG_CODE_BASE_S,
+                                    HOST_SI_CL2_PHYS_BASE,
+                                    HOST_SI_CL2_ATU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL2 pre load complete");
+
+    return 0;
+}
+
+/* Function called after SI CL2 firmware is loaded. */
+static int boot_platform_post_load_si_cl2(void)
+{
+    enum atu_error_t atu_err;
+
+    BOOT_LOG_INF("BL2: SI CL2 post load start");
+
+    /*
+     * Since the measurement are taken at this point, clear the image
+     * header part in the Shared SRAM before releasing SI CL2 out of reset.
+     */
+    memset(HOST_SI_CL2_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU region configured to access RSE header region for SI CL2 */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Close RSE ATU region configured to access SI CL2 Shared SRAM region */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_CODE_LOAD_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    BOOT_LOG_INF("BL2: SI CL2 post load complete");
+
+    return 0;
+}
+
+/*
  * ================================= VECTORS ==================================
  */
 
@@ -417,6 +615,9 @@ static int boot_platform_post_load_ap_bl2(void)
 static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
     [RSE_FIRMWARE_SECURE_ID]        = boot_platform_pre_load_secure,
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_pre_load_scp,
+    [RSE_FIRMWARE_SI_CL0_ID]        = boot_platform_pre_load_si_cl0,
+    [RSE_FIRMWARE_SI_CL1_ID]        = boot_platform_pre_load_si_cl1,
+    [RSE_FIRMWARE_SI_CL2_ID]        = boot_platform_pre_load_si_cl2,
     [RSE_FIRMWARE_AP_BL2_ID]        = boot_platform_pre_load_ap_bl2,
 };
 
@@ -427,6 +628,9 @@ static int (*boot_platform_pre_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
 static int (*boot_platform_post_load_vector[RSE_FIRMWARE_COUNT]) (void) = {
     [RSE_FIRMWARE_SECURE_ID]        = boot_platform_post_load_secure,
     [RSE_FIRMWARE_SCP_ID]           = boot_platform_post_load_scp,
+    [RSE_FIRMWARE_SI_CL0_ID]        = boot_platform_post_load_si_cl0,
+    [RSE_FIRMWARE_SI_CL1_ID]        = boot_platform_post_load_si_cl1,
+    [RSE_FIRMWARE_SI_CL2_ID]        = boot_platform_post_load_si_cl2,
     [RSE_FIRMWARE_AP_BL2_ID]        = boot_platform_post_load_ap_bl2,
 };
 

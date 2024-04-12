@@ -9,7 +9,7 @@
 # variables always take the last.
 
 set(CONFIG_TFM_SPM_BACKEND              IPC      CACHE STRING  "The SPM backend")
-set(MCUBOOT_IMAGE_NUMBER                4        CACHE STRING  "Number of images supported by MCUBoot")
+set(MCUBOOT_IMAGE_NUMBER                7        CACHE STRING  "Number of images supported by MCUBoot")
 set(PLATFORM_HAS_BOOT_DMA               OFF      CACHE BOOL    "Enable dma support for memory transactions for bootloader")
 set(PLATFORM_HAS_NI_TOWER               ON       CACHE BOOL    "Enable NI-Tower support")
 set(PLATFORM_HOST_HAS_SCP               ON       CACHE BOOL    "Enable SCP support")
