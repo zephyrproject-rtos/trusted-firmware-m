@@ -22,6 +22,9 @@
 #include <string.h>
 
 #define MHU_SCP_AP_READY_SIGNAL_CHANNEL 1
+#define MHU_SCP_SI_CL0_READY_SIGNAL_CHANNEL 3
+#define MHU_SCP_SI_CL1_READY_SIGNAL_CHANNEL 4
+#define MHU_SCP_SI_CL2_READY_SIGNAL_CHANNEL 5
 #define MHU_SCP_READY_SIGNAL_PAYLOAD 0x1
 
 /*
@@ -54,6 +57,43 @@ int32_t boot_platform_post_init(void)
 static int boot_platform_finish(void)
 {
     enum mhu_v3_x_error_t mhu_error;
+
+    /*
+     * Send doorbell to SCP to indicate that the RSE initialization is
+     * complete and that the SCP can turn on the Safety Island clusters.
+     */
+    mhu_error = mhu_v3_x_doorbell_write(&MHU_V3_RSE_TO_SCP_DEV,
+                                        MHU_SCP_SI_CL0_READY_SIGNAL_CHANNEL,
+                                        MHU_SCP_READY_SIGNAL_PAYLOAD);
+
+    if (mhu_error != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP (SI CL0) doorbell failed to send: %d",
+                     mhu_error);
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: RSE to SCP (SI CL0) doorbell set!");
+
+    mhu_error = mhu_v3_x_doorbell_write(&MHU_V3_RSE_TO_SCP_DEV,
+                                        MHU_SCP_SI_CL1_READY_SIGNAL_CHANNEL,
+                                        MHU_SCP_READY_SIGNAL_PAYLOAD);
+
+    if (mhu_error != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP (SI CL1) doorbell failed to send: %d",
+                     mhu_error);
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: RSE to SCP (SI CL1) doorbell set!");
+
+    mhu_error = mhu_v3_x_doorbell_write(&MHU_V3_RSE_TO_SCP_DEV,
+                                        MHU_SCP_SI_CL2_READY_SIGNAL_CHANNEL,
+                                        MHU_SCP_READY_SIGNAL_PAYLOAD);
+
+    if (mhu_error != MHU_V_3_X_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: RSE to SCP (SI CL2) doorbell failed to send: %d",
+                     mhu_error);
+        return 1;
+    }
+    BOOT_LOG_INF("BL2: RSE to SCP (SI CL2) doorbell set!");
 
     /*
      * Send doorbell to SCP to indicate that the RSE initialization is
