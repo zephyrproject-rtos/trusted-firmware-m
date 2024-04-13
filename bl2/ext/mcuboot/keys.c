@@ -28,6 +28,12 @@
 #include <bootutil/sign_key.h>
 #include "mcuboot_config/mcuboot_config.h"
 #include "tfm_plat_rotpk.h"
+#include "tfm_plat_crypto_keys.h"
+#if defined(MCUBOOT_BUILTIN_KEY)
+#include "tfm_plat_otp.h"
+#endif
+
+#define NUMBER_OF_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
 
 #ifdef MCUBOOT_ENC_IMAGES
 unsigned char enc_priv_key[] = {
@@ -528,12 +534,207 @@ int boot_retrieve_public_key_hash(uint8_t image_index,
                                    (uint32_t *)key_hash_size);
 }
 #elif defined(MCUBOOT_BUILTIN_KEY)
-/*
- * When using builtin keys the signature verification happens based on key IDs.
- * During verification MCUboot feeds the image index as a key ID and it is the
- * underlying crypto library's responsibility to do a mapping (if required)
- * between the image indexes and the builtin key IDs. Therefore it only allows
- * as many IDs as there are images.
+/**
+ * @note When using builtin keys the signature verification happens based on key IDs.
+ *       During verification MCUboot feeds the image index as a key ID and it is the
+ *       underlying crypto library's responsibility to do a mapping (if required)
+ *       between the image indexes and the builtin key IDs. Therefore it only allows
+ *       as many IDs as there are images.
  */
 const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
+
+/* FixMe: Define the IDs of the builtin keys here until this is sorted properly */
+#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_0 (1)
+#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_1 (2)
+#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_2 (3)
+#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_3 (4)
+
+/**
+ * @brief Loader function to retrieve the Root of Trust Public Key
+ *        to perform signature verification of the runtime image
+ *        being loaded during the BL2 stage by MCUboot, with its associated
+ *        metadata in order to be processed by the thin PSA Crypto core
+ *
+ * @param[in]  image_idx The index of the ROTPK, i.e. corresponds to the image index
+ * @param[out] buf       Buffer containing the retrieved key material
+ * @param[in]  buf_len   Size in bytes of the \a buf buffer
+ * @param[out] key_len   Size in bytes of the key material returned in \a buf
+ * @param[out] key_bits  Size in bits of the key, not necessarily the same as \a key_len
+ * @param[out] algorithm Algorithm associated with the key
+ * @param[out] type      Key type
+ *
+ * @return enum tfm_plat_err_t TFM_PLAT_ERR_SUCCESS or an error returned by OTP read
+ */
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk(uint8_t image_idx,
+                                            uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            psa_key_bits_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    enum tfm_plat_err_t err;
+
+    err = tfm_plat_otp_read(PLAT_OTP_ID_BL2_ROTPK_0 + image_idx, buf_len, buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    /* We read the size of the key material in byts, but that is not strictly
+     * related to the properties of the key itself, i.e. its key_bits, due to
+     * encoding of the key (RSA) or alignment requirements of the stored key
+     * material, which in OTP must be 4-bytes aligned
+     */
+    err = tfm_plat_otp_get_size(PLAT_OTP_ID_BL2_ROTPK_0 + image_idx, key_len);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    /* Metadata is not provisioned, so we just determine that on the
+     * assumption that it matches the build time confguration
+     */
+#if defined(MCUBOOT_SIGN_RSA)
+    /* This is either a 2048, 3072 or 4096 bit RSA key, hence the TLV must place
+     * the length at index (6,7) with a leading 0x00. The leading 0x00 is due to
+     * the fact that the MSB will always be set for RSA keys where the length is
+     * a multiple of 8 bits. The format is RSAPublicKey ASN.1
+     */
+    *key_bits =
+        PSA_BYTES_TO_BITS((((uint16_t)buf[6]) << 8) | (uint16_t)buf[7]) - 8;
+    *algorithm = PSA_ALG_RSA_PSS(PSA_ALG_SHA_256);
+    *type = PSA_KEY_TYPE_RSA_PUBLIC_KEY;
+#elif defined(MCUBOOT_SIGN_EC256)
+    /* OTP data is an ECPoint, uncompressed */
+    *key_bits = PSA_BYTES_TO_BITS((65 - 1)/2);
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+#elif defined(MCUBOOT_SIGN_EC384)
+    /* OTP data is an ECPoint, uncompressed */
+    *key_bits = PSA_BYTES_TO_BITS((97 - 1)/2);
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+#else
+    *key_bits = 0;
+    *algorithm = PSA_ALG_NONE;
+    *type = PSA_KEY_TYPE_NONE;
+#endif
+
+#if defined(MCUBOOT_SIGN_EC256) || defined(MCUBOOT_SIGN_EC384)
+    /* Discard padding zero bytes at the end of what is stored on OTP */
+    *key_len = PSA_BITS_TO_BYTES(*key_bits)*2 + 1; /* 0x04 for uncompressed format */
+#endif /* MCUBOOT_SIGN_EC256 || MCUBOOT_SIGN_EC384 */
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_0(
+                                            uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            psa_key_bits_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    return tfm_plat_get_bl2_rotpk(0, buf, buf_len, key_len, key_bits, algorithm, type);
+}
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_1(
+                                            uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            psa_key_bits_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    return tfm_plat_get_bl2_rotpk(1, buf, buf_len, key_len, key_bits, algorithm, type);
+}
+#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_2(
+                                            uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            psa_key_bits_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    return tfm_plat_get_bl2_rotpk(2, buf, buf_len, key_len, key_bits, algorithm, type);
+}
+#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_3(
+                                            uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            psa_key_bits_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    return tfm_plat_get_bl2_rotpk(3, buf, buf_len, key_len, key_bits, algorithm, type);
+}
+#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
+
+/**
+ * @brief Table describing the builtin-in keys (plaform keys) available in the
+ *        platform that are relevant to BL2
+ */
+static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_0,
+     .slot_number = 0, /* Unused */
+     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
+     .loader_key_func = tfm_plat_get_bl2_rotpk_0},
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_1,
+     .slot_number = 0, /* Unused */
+     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
+     .loader_key_func = tfm_plat_get_bl2_rotpk_1},
+#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_2,
+     .slot_number = 0, /* Unused */
+     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
+     .loader_key_func = tfm_plat_get_bl2_rotpk_2},
+#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_3,
+     .slot_number = 0, /* Unused */
+     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
+     .loader_key_func = tfm_plat_get_bl2_rotpk_3},
+#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
+};
+
+/**
+ * @brief Table describing per-key user policies. Keys can't have a per-user
+ *        policy in BL2 as the only user is MCUboot. The usage of each ROTPK
+ *        is always the same, so to save a few bytes in flash this table can
+ *        be reduced to only ROTPK_0, and all the other key IDs should access
+ *        always the image 0 policy
+ */
+static const tfm_plat_builtin_key_policy_t g_builtin_keys_policy[] = {
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_0,
+     .per_user_policy = 0,
+     .usage = PSA_KEY_USAGE_VERIFY_HASH},
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_1,
+     .per_user_policy = 0,
+     .usage = PSA_KEY_USAGE_VERIFY_HASH},
+#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_2,
+     .per_user_policy = 0,
+     .usage = PSA_KEY_USAGE_VERIFY_HASH},
+#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_3,
+     .per_user_policy = 0,
+     .usage = PSA_KEY_USAGE_VERIFY_HASH},
+#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
+};
+
+size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])
+{
+    *desc_ptr = &g_builtin_keys_policy[0];
+    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy);
+}
+
+size_t tfm_plat_builtin_key_get_desc_table_ptr(const tfm_plat_builtin_key_descriptor_t *desc_ptr[])
+{
+    *desc_ptr = &g_builtin_keys_desc[0];
+    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc);
+}
 #endif /* !MCUBOOT_HW_KEY && !MCUBOOT_BUILTIN_KEY */
