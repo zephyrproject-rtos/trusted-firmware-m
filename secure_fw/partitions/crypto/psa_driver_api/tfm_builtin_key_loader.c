@@ -212,7 +212,7 @@ psa_status_t tfm_builtin_key_loader_init(void)
     /* These properties and key material are filled by the loaders */
     uint8_t buf[TFM_BUILTIN_MAX_KEY_LEN];
     size_t key_len;
-    size_t key_bits;
+    psa_key_bits_t key_bits;
     psa_algorithm_t algorithm;
     psa_key_type_t type;
 

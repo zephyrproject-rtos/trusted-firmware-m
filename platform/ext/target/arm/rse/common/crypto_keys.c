@@ -23,7 +23,7 @@
 
 static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
-                                            size_t *key_bits,
+                                            psa_key_bits_t *key_bits,
                                             psa_algorithm_t *algorithm,
                                             psa_key_type_t *type)
 {
@@ -48,7 +48,7 @@ static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
 
 static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
                                      size_t *key_len,
-                                     size_t *key_bits,
+                                     psa_key_bits_t *key_bits,
                                      psa_algorithm_t *algorithm,
                                      psa_key_type_t *type)
 {
@@ -153,7 +153,7 @@ err_release_seed_key:
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
 static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
                                                  size_t *key_len,
-                                                 size_t *key_bits,
+                                                 psa_key_bits_t *key_bits,
                                                  psa_algorithm_t *algorithm,
                                                  psa_key_type_t *type)
 {
@@ -180,7 +180,7 @@ static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
 #ifdef TFM_PARTITION_DPE
 static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
                                                 size_t *key_len,
-                                                size_t *key_bits,
+                                                psa_key_bits_t *key_bits,
                                                 psa_algorithm_t *algorithm,
                                                 psa_key_type_t *type)
 {
@@ -206,7 +206,7 @@ static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
 
 static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_len,
                                                      size_t *key_len,
-                                                     size_t *key_bits,
+                                                     psa_key_bits_t *key_bits,
                                                      psa_algorithm_t *algorithm,
                                                      psa_key_type_t *type)
 {
@@ -225,7 +225,7 @@ static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_le
 
 static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(uint8_t *buf, size_t buf_len,
                                                       size_t *key_len,
-                                                      size_t *key_bits,
+                                                      psa_key_bits_t *key_bits,
                                                       psa_algorithm_t *algorithm,
                                                       psa_key_type_t *type)
 {
@@ -244,7 +244,7 @@ static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(uint8_t *buf, size_t buf_l
 
 static enum tfm_plat_err_t tfm_plat_get_host_cca_rotpk(uint8_t *buf, size_t buf_len,
                                                        size_t *key_len,
-                                                       size_t *key_bits,
+                                                       psa_key_bits_t *key_bits,
                                                        psa_algorithm_t *algorithm,
                                                        psa_key_type_t *type)
 {
