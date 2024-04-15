@@ -278,10 +278,10 @@ void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base, uint32_t exc_return);
  * psa_wait(), by manipulating the control context - this is usaully setting the
  * R0 register of the thread context.
  */
-void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code);
+void tfm_arch_set_context_ret_code(const struct context_ctrl_t *p_ctx_ctrl, uint32_t ret_code);
 
 /* Init a thread context on thread stack and update the control context. */
-void tfm_arch_init_context(void *p_ctx_ctrl,
+void tfm_arch_init_context(struct context_ctrl_t *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr);
 
 /*
@@ -290,7 +290,7 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
  *
  * The p_ctx_ctrl must have been initialized by 'tfm_arch_init_context'.
  */
-uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
+uint32_t tfm_arch_refresh_hardware_context(const struct context_ctrl_t *p_ctx_ctrl);
 
 /*
  * Lock the scheduler. Any scheduling attempt during locked period will not

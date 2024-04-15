@@ -14,6 +14,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "tfm_arch.h"
+
 /* State codes */
 #define THRD_STATE_CREATING       0
 #define THRD_STATE_RUNNABLE       1
@@ -41,11 +43,11 @@ typedef void (*thrd_fn_t)(void *);
 
 /* Thread context */
 struct thread_t {
-    uint8_t         priority;           /* Priority                          */
-    uint8_t         state;              /* State                             */
-    uint16_t        flags;              /* Flags and align, DO NOT REMOVE!   */
-    void            *p_context_ctrl;    /* Context control (sp, splimit, lr) */
-    struct thread_t *next;              /* Next thread in list               */
+    uint8_t                priority;          /* Priority                          */
+    uint8_t                state;             /* State                             */
+    uint16_t               flags;             /* Flags and align, DO NOT REMOVE!   */
+    struct context_ctrl_t *p_context_ctrl;    /* Context control (sp, splimit, lr) */
+    struct thread_t       *next;              /* Next thread in list               */
 };
 
 /* Query thread state function type */
@@ -93,7 +95,7 @@ extern struct thread_t *p_curr_thrd;
  *  x              -     Context pointer to be bound with the current thread.
  */
 #define THRD_UPDATE_CUR_CTXCTRL(x)          \
-                                CURRENT_THREAD->p_context_ctrl = (void *)(x)
+                                CURRENT_THREAD->p_context_ctrl = (x)
 
 /*
  * Init the global query state callback function pointer.

@@ -61,8 +61,7 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
         /* The IRQ Partition's stack is being used */
         ctx_stack = curr_stack;
     } else {
-        ctx_stack =
-                 ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
+        ctx_stack = p_owner_sp->thrd.p_context_ctrl->sp;
     }
 
     if (tfm_hal_boundary_need_switch(p_curr_sp->boundary,

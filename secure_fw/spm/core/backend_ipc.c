@@ -471,7 +471,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
     }
 #endif
 
-    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
+    p_curr_ctx = CURRENT_THREAD->p_context_ctrl;
 
     /*
      * Update SP for current thread, in case tfm_arch_set_context_ret_code have to update R0
