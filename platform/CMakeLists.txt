@@ -273,6 +273,12 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
     target_compile_options(platform_bl1_1
         PUBLIC
             $<$<BOOL:${BL1_1_SANITIZE}>:-fsanitize=${BL1_1_SANITIZE}>
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(platform_bl1_1
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
     )
 
     target_sources(platform_bl1_1
@@ -352,6 +358,12 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
     target_compile_options(platform_bl1_2
         PUBLIC
             $<$<BOOL:${BL1_2_SANITIZE}>:-fsanitize=${BL1_2_SANITIZE}>
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(platform_bl1_2
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
     )
 endif()
 

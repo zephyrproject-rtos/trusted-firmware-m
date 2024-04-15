@@ -233,6 +233,12 @@ macro(tfm_toolchain_reload_compiler)
     # is not actually enabled in BL2, it will cause BL2 runtime fault.
     set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
 
+    set(BL1_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    )
+    set(BL1_LINKER_CP_OPTION --fpu=SoftVFP)
+
     if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
         set(COMPILER_CP_FLAG
             $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>

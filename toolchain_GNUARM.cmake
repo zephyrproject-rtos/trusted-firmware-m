@@ -180,6 +180,10 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
 set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
 set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+set(BL2_LINKER_CP_OPTION -mfloat-abi=soft)
+
+set(BL1_COMPILER_CP_FLAG -mfloat-abi=soft)
+set(BL1_LINKER_CP_OPTION -mfloat-abi=soft)
 
 if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     set(COMPILER_CP_FLAG -mfloat-abi=hard)

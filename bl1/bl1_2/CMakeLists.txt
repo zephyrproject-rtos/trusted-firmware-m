@@ -28,6 +28,16 @@ target_link_options(bl1_2
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl1_2.map>
 )
 
+target_compile_options(bl1_2
+    PUBLIC
+        ${BL1_COMPILER_CP_FLAG}
+)
+
+target_link_options(bl1_2
+    PUBLIC
+        ${BL1_LINKER_CP_OPTION}
+)
+
 target_sources(bl1_2
     PRIVATE
         main.c

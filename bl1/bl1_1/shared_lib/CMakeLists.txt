@@ -105,4 +105,34 @@ if(TFM_BL1_SOFTWARE_CRYPTO)
             $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
+
+    target_compile_options(bl1_1_crypto_mbedcrypto
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedcrypto
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
+
+    target_compile_options(bl1_1_crypto_mbedtls
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedtls
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
+
+    target_compile_options(bl1_1_crypto_mbedx509
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedx509
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
 endif()
