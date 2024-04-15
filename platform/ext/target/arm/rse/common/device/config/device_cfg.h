@@ -66,7 +66,9 @@
 #endif
 
 /* ARM TRAM */
+#ifdef RSE_ENABLE_TRAM
 #define TRAM_S
+#endif /* RSE_ENABLE_TRAM */
 
 /* ARM Integrity Checker */
 #define INTEGRITY_CHECKER_S

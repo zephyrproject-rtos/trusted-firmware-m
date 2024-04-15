@@ -51,6 +51,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
+        $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
 )
 
 # Include region_defs.h and flash_layout.h

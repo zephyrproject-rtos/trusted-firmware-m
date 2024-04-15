@@ -18,3 +18,4 @@ set(PLATFORM_HAS_PS_NV_OTP_COUNTERS         @PLATFORM_HAS_PS_NV_OTP_COUNTERS@ CA
 set(RSE_ENABLE_BRINGUP_HELPERS              @RSE_ENABLE_BRINGUP_HELPERS@ CACHE BOOL "Whether RSE bringup helpers are enabled")
 set(RSE_OTP_TRNG                            @RSE_OTP_TRNG@ CACHE BOOL "Whether to use the TRNG from the OTP")
 set(RSE_TP_MODE                             @RSE_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")
+set(RSE_ENABLE_TRAM                         @RSE_ENABLE_TRAM@ CACHE BOOL "Whether TRAM encryption is enabled")
