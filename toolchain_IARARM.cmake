@@ -106,6 +106,21 @@ macro(tfm_toolchain_reload_compiler)
                 " cores with IAR version between 9.20 and 9.32.1")
     endif()
 
+    set(BL2_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+    )
+    # As BL2 does not use hardware FPU, specify '--fpu=none' explicitly to use software
+    # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
+    # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
+    # is not actually enabled in BL2, it will cause BL2 runtime fault.
+    set(BL2_LINKER_CP_OPTION --fpu=none)
+
+    set(BL1_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+    )
+    set(BL1_LINKER_CP_OPTION --fpu=none)
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
