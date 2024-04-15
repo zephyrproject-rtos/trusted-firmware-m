@@ -22,19 +22,21 @@ place at address BL1_1_CODE_START {block LR_CODE};
 
 define block TFM_SHARED_DATA        with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 define block ER_DATA                with alignment = 32 {readwrite};
-define block CSTACK                 with alignment = 32, size = BL1_1_MSP_STACK_SIZE { };
-define block ARM_LIB_STACK          with alignment = 32, size = BL1_1_MSP_STACK_SIZE { };
-define block HEAP                   with alignment = 8, size = BL1_1_HEAP_SIZE { };
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+define block ARM_LIB_STACK          with alignment = 32, size = BL1_1_MSP_STACK_SIZE - 0x8 { };
+define block STACKSEAL with size = 0x8 { };
+#else
+define block ARM_LIB_STACK   with alignment = 32, size = BL1_1_MSP_STACK_SIZE { };
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+
 define block ARM_LIB_HEAP           with alignment = 8, size = BL1_1_HEAP_SIZE { };
 define block SRAM_WATERMARK         with size = 0 { };
-define overlay HEAP_OVL             {block HEAP};
-define overlay HEAP_OVL             {block ARM_LIB_HEAP};
-define overlay STACK_OVL            {block CSTACK};
-define overlay STACK_OVL            {block ARM_LIB_STACK};
 keep {block TFM_SHARED_DATA,
-      block CSTACK,
       block ARM_LIB_STACK,
-      block HEAP,
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+      block STACKSEAL,
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
       block ARM_LIB_HEAP,
       block SRAM_WATERMARK,
 };
@@ -48,8 +50,11 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 define block BL1_1_ER_DATA with fixed order, maximum size = BL1_1_DATA_SIZE  {
         block TFM_SHARED_DATA,
         block ER_DATA,
-        overlay STACK_OVL,
-        overlay HEAP_OVL,
+        block ARM_LIB_STACK,
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+        block STACKSEAL,
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+        block ARM_LIB_HEAP,
         block SRAM_WATERMARK,
 };
 place at address BL1_1_DATA_START {block BL1_1_ER_DATA};

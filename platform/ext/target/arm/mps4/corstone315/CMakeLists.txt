@@ -30,6 +30,11 @@ if(BL2)
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
         $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_bl2.icf>
     )
+
+    target_compile_options(bl2_scatter
+        PUBLIC
+            ${COMPILER_CMSE_FLAG}
+    )
 endif()
 
 #========================= Device definition lib ===============================#
@@ -60,119 +65,13 @@ target_include_directories(device_definition
         ${CMAKE_SOURCE_DIR}
 )
 
-add_library(device_definition_s STATIC)
-target_sources(device_definition_s
-    PUBLIC
-        device/source/platform_s_device_definition.c
-)
-
-target_compile_options(device_definition_s
-    PRIVATE
-        ${COMPILER_CMSE_FLAG}
-)
-
-add_library(device_definition_bl2 STATIC)
-target_sources(device_definition_bl2
-    PUBLIC
-        device/source/platform_s_device_definition.c
-)
-
-#========================= CMSIS lib ===============================#
-
-add_library(cmsis_includes INTERFACE)
-target_include_directories(cmsis_includes
-    INTERFACE
-        device/include
-        cmsis_drivers
-        partition
-)
-
-add_library(cmsis_includes_s INTERFACE)
-add_library(cmsis_includes_bl1 INTERFACE)
-add_library(cmsis_includes_bl2 INTERFACE)
-target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes cmsis)
-target_link_libraries(cmsis_includes_bl1 INTERFACE cmsis_includes cmsis)
-target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes cmsis)
-target_include_directories(cmsis_includes_bl2
-    INTERFACE
-        cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_LINKER_CP_OPTION}
-)
-
-
-target_include_directories(cmsis_includes_s
-    INTERFACE
-        cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_s
-    INTERFACE
-        ${COMPILER_CMSE_FLAG}
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_s
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
-
-target_include_directories(cmsis_includes_bl1
-    INTERFACE
-        cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_bl1
-    INTERFACE
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_bl1
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
-#========================= Linking ===============================#
-
-target_link_libraries(device_definition_s PUBLIC device_definition)
-target_link_libraries(device_definition_bl2 PUBLIC device_definition)
-
-target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
-target_link_libraries(device_definition_bl2 PRIVATE cmsis_includes_bl2)
-
-target_link_libraries(platform_bl2
-    PUBLIC
-        cmsis_includes
-        cmsis
-    PRIVATE
-        device_definition_bl2
-        cmsis_includes_bl2
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
-)
-
-target_link_libraries(platform_s
-    PUBLIC
-        cmsis_includes_s
-    INTERFACE
-        device_definition
-    PRIVATE
-        device_definition_s
-        tfm_sprt # For tfm_strnlen in attest HAL
-)
-
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE
+        cmsis_drivers/config/secure
+        cmsis_drivers
         device
         services/src
         ${PLATFORM_DIR}/ext/common
@@ -188,6 +87,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_TGU.c
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
+        device/source/platform_s_device_definition.c
         device/source/system_core_init.c
         native_drivers/ppc_corstone315_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/tgu/tgu_armv8_m_drv.c
@@ -242,6 +142,24 @@ target_compile_definitions(platform_s
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
 )
 
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_link_options(platform_s
+    PUBLIC
+        ${LINKER_CP_OPTION}
+)
+
+target_link_libraries(platform_s
+    PUBLIC
+        device_definition
+    PRIVATE
+        tfm_sprt # For tfm_strnlen in attest HAL
+)
+
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -260,6 +178,7 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
             cmsis_drivers/Driver_USART.c
+            device/source/platform_s_device_definition.c
             device/source/system_core_init.c
             ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
@@ -267,16 +186,36 @@ if(BL2)
     )
 
     target_include_directories(platform_bl2
+        PUBLIC
+            device/include
         PRIVATE
             .
             device
             services/src
             ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+            cmsis_drivers/config/secure
     )
 
     target_compile_definitions(platform_bl2
         PUBLIC
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+    )
+
+    target_compile_options(platform_bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+            ${COMPILER_CMSE_FLAG}
+    )
+
+    target_link_options(platform_bl2
+        PUBLIC
+            ${BL2_LINKER_CP_OPTION}
+    )
+
+    target_link_libraries(platform_bl2
+        PRIVATE
+            $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
+            device_definition
     )
 
 endif()
@@ -287,14 +226,19 @@ target_sources(tfm_spm
     PRIVATE
         target_cfg.c
         tfm_hal_platform.c
-        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_platform_v8m.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         ${CMAKE_CURRENT_SOURCE_DIR}/dma_init.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )
 
-add_library(tfm_platform_config INTERFACE)
+# If this is not added to the tfm_s it will not correctly override the weak
+# default handlers declared in assemebly, and will instead be discarded as they
+# are not in use.
+target_sources(tfm_s
+    PRIVATE
+        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
+)
 
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
@@ -321,6 +265,7 @@ add_library(flash_drivers INTERFACE)
 
 target_include_directories(flash_drivers
     INTERFACE
+        cmsis_drivers/config/secure
         ${PLATFORM_DIR}/ext/driver
         partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
@@ -343,10 +288,20 @@ target_add_scatter_file(bl1_1
     $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/corstone315_bl1_1.icf>
 )
 
+target_compile_options(bl1_1_scatter
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
+)
+
 target_compile_definitions(bl1_1
     PRIVATE
         MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
+)
+
+target_compile_options(bl1_1
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
 )
 
 target_sources(platform_bl1_1
@@ -354,8 +309,8 @@ target_sources(platform_bl1_1
         nv_counters.c
         otp_lcm.c
         cmsis_drivers/Driver_USART.c
+        device/source/platform_s_device_definition.c
         device/source/system_core_init.c
-        device/source/startup_corstone315.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
@@ -363,13 +318,22 @@ target_sources(platform_bl1_1
         ${PLATFORM_DIR}/ext/target/arm/drivers/watchdog/arm_watchdog_drv.c
 )
 
+target_include_directories(platform_bl1_1
+    PRIVATE
+        cmsis_drivers/config/secure
+)
+
+target_compile_options(platform_bl1_1
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
+)
+
 target_link_libraries(platform_bl1_1
     PUBLIC
-        device_definition_s
-        flash_drivers_s
+        device_definition
+        flash_drivers_bl2
     PRIVATE
         bl1_1_shared_lib_interface
-        cmsis_includes_bl1
 )
 
 # If this is not added to the bl1_1 it will not correctly override the weak
@@ -377,6 +341,7 @@ target_link_libraries(platform_bl1_1
 target_sources(bl1_1
     PUBLIC
         bl1/boot_hal_bl1_1.c
+        device/source/startup_corstone315.c
 )
 
 #========================= Platform BL1_2 =====================================#
@@ -393,12 +358,30 @@ target_compile_definitions(bl1_2
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
-target_sources(platform_bl1_2
+target_compile_options(bl1_2_scatter
     PUBLIC
-        device/source/startup_corstone315.c
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_options(bl1_2
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_sources(platform_bl1_2
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
 
+)
+
+target_include_directories(platform_bl1_2
+    PRIVATE
+        cmsis_drivers/config/secure
+)
+
+target_compile_options(platform_bl1_2
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
 )
 
 # If this is not added to the bl1_2 it will not correctly override the weak
@@ -406,6 +389,7 @@ target_sources(platform_bl1_2
 target_sources(bl1_2
     PRIVATE
         bl1/boot_hal_bl1_2.c
+        device/source/startup_corstone315.c
 )
 
 target_compile_definitions(platform_bl1_2
@@ -453,6 +437,11 @@ install(FILES       cmsis_drivers/Driver_USART.c
                     cmsis_drivers/config/non_secure/cmsis_driver_config.h
                     cmsis_drivers/config/non_secure/RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/cmsis_drivers)
+
+install(FILES       ${PLATFORM_DIR}/ext/common/common_target_cfg.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.c
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
 
 install(DIRECTORY   device
                     native_drivers

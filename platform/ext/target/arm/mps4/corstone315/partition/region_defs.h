@@ -209,4 +209,8 @@
 
 #define OTP_SAM_CONFIGURATION_SIZE_BYTES 0x60
 
+#if ((OTP_SAM_CONFIGURATION_SIZE_BYTES % 4) != 0)
+#error "OTP_SAM_CONFIGURATION_SIZE_BYTES must be divisible by 4!"
+#endif
+
 #endif /* __REGION_DEFS_H__ */

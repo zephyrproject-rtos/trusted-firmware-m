@@ -216,16 +216,22 @@ static void wipe_ram(void)
 static int load_sam_config(void)
 {
     enum tfm_plat_err_t plat_err;
-    uint8_t sam_icv_block_values[OTP_SAM_CONFIGURATION_SIZE_BYTES] = {0};
+    uint32_t sam_icv_block_values[OTP_SAM_CONFIGURATION_SIZE_BYTES / sizeof(uint32_t)] = {0};
     struct sam_reg_map_t * sam_reg_block = (struct sam_reg_map_t *)SAM_BASE_S;
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_SAM_CONFIG, OTP_SAM_CONFIGURATION_SIZE_BYTES,
-                                 sam_icv_block_values);
+                                 (uint8_t *) sam_icv_block_values);
     if(TFM_PLAT_ERR_SUCCESS != plat_err) {
         return -1;
     }
 
-    memcpy((void *)&(sam_reg_block->samem[0]), (void *)sam_icv_block_values, OTP_SAM_CONFIGURATION_SIZE_BYTES);
+    /* SAM registers can only be accessed with 32bit read/write instructions.
+     * memcpy cannot be used here, because 32bit access is not guaranteed,
+     * the access width depends on the compiler.
+     */
+    for(uint8_t i = 0; i < (OTP_SAM_CONFIGURATION_SIZE_BYTES / sizeof(uint32_t)); i++) {
+        ((uint32_t *)&(sam_reg_block->samem[0]))[i] = sam_icv_block_values[i];
+    }
 
     return 0;
 }

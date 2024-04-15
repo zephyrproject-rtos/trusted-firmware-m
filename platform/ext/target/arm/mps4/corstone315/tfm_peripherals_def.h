@@ -23,6 +23,10 @@ extern "C" {
 #define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
 
 #define TFM_TIMER0_IRQ           (TIMER0_IRQn)
+#define TFM_TIMER1_IRQ           (TIMER1_IRQn)
+
+#define TFM_FPU_S_TEST_IRQ       (UART0_Combined_IRQn)
+#define TFM_FPU_NS_TEST_IRQ      (UART1_Combined_IRQn)
 #define FF_TEST_UART_IRQ         (UARTTX2_IRQn)
 #define FF_TEST_UART_IRQ_Handler UARTTX2_Handler
 
