@@ -46,7 +46,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
         $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
-        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:SHELL:--fpu none>"
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
     )
 endmacro()
@@ -59,7 +58,6 @@ macro(tfm_toolchain_reset_linker_flags)
       --semihosting
       --redirect __write=__write_buffered
       --diag_suppress=lp005,Lp023
-      "SHELL:--fpu none"
     )
 endmacro()
 
@@ -121,6 +119,29 @@ macro(tfm_toolchain_reload_compiler)
         $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
     )
     set(BL1_LINKER_CP_OPTION --fpu=none)
+
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
+        )
+
+        if (CONFIG_TFM_ENABLE_FP)
+            set(COMPILER_CP_FLAG
+                $<$<COMPILE_LANGUAGE:C>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+                $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+            )
+            # armasm and armlink have the same option "--fpu" and are both used to
+            # specify the target FPU architecture. So the supported FPU architecture
+            # names can be shared by armasm and armlink.
+            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_ASM})
+        endif()
+    else()
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+            $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+        )
+        set(LINKER_CP_OPTION --fpu=none)
+    endif()
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first

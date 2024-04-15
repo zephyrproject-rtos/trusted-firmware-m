@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -42,7 +42,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
         $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
-        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:SHELL:--fpu none>"
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
     )
 endmacro()
@@ -55,7 +54,6 @@ macro(tfm_toolchain_reset_linker_flags)
       --semihosting
       --redirect __write=__write_buffered
       --diag_suppress=lp005
-      "SHELL:--fpu none"
     )
 endmacro()
 
@@ -101,6 +99,26 @@ macro(tfm_toolchain_reload_compiler)
         message(FATAL_ERROR "Only debug build available for M55 and M85"
                 " cores with IAR version between 9.20 and 9.32.1")
     endif()
+
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        if (CONFIG_TFM_ENABLE_FP)
+            set(COMPILER_CP_C_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+            set(COMPILER_CP_ASM_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+            # armasm and armlink have the same option "--fpu" and are both used to
+            # specify the target FPU architecture. So the supported FPU architecture
+            # names can be shared by armasm and armlink.
+            set(LINKER_CP_OPTION "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+        endif()
+    else()
+        set(COMPILER_CP_C_FLAG   "--fpu=none")
+        set(COMPILER_CP_ASM_FLAG "--fpu=none")
+        set(LINKER_CP_OPTION     "--fpu=none")
+    endif()
+
+    string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_C_FLAG})
+    string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_ASM_FLAG})
+    string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
+    string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 
 endmacro()
 
