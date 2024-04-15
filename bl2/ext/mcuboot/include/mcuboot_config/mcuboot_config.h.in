@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Open Source Foundries Limited
- * Copyright (c) 2019-2023 Arm Limited
+ * Copyright (c) 2019-2024 Arm Limited
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -42,13 +42,19 @@ extern "C" {
  * Maximum size of the measured boot record.
  *
  * Its size can be calculated based on the following aspects:
- *     - There are 5 allowed software component claims,
- *     - SHA256 is used as the measurement method for the other claims.
- * Considering these aspects, the only claim which size can vary is the type
- * of the software component with a maximum length of 12 bytes, which means
- * the boot record size can be up to 100 bytes.
+ *     - There are 5 allowed software component claims
+ *       (SW type, version, signer ID, measurement description and value),
+ *     - SHA256/SHA384 is used as the measurement method meaning that the
+ *       measurement value and signer ID are 32/48 bytes long,
+ * Considering these aspects and the fact that the string-like claim values
+ * vary in length but have a maximum value, the maximum size of a boot record
+ * can be calculated.
  */
-#define MAX_BOOT_RECORD_SZ  (100u)
+#ifdef MCUBOOT_SIGN_EC384
+#define MAX_BOOT_RECORD_SZ  (164u)
+#else
+#define MAX_BOOT_RECORD_SZ  (132u)
+#endif /* MCUBOOT_SIGN_EC384 */
 
 #cmakedefine MCUBOOT_ENC_IMAGES
 #cmakedefine MCUBOOT_ENCRYPT_RSA
