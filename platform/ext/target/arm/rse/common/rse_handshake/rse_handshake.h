@@ -18,7 +18,8 @@
 #define __RSE_HANDSHAKE_H__
 
 #include <stdint.h>
+#include "tfm_plat_defs.h"
 
-int32_t rse_handshake(uint32_t *vhuk_seeds_buf);
+enum tfm_plat_err_t rse_handshake(uint32_t *vhuk_seeds_buf);
 
 #endif /* __RSE_HANDSHAKE_H__ */
