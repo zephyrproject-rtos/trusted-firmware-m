@@ -6,11 +6,17 @@
 */
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "device_definition.h"
 #include "host_base_address.h"
 #include "host_system.h"
 #include "tfm_hal_device_header.h"
+#include "ni_tower_lib.h"
+
+#define NI_TOWER_SYSCTRL_SYSTOP_PARENT_TYPE      NI_TOWER_VD
+#define NI_TOWER_SYSCTRL_SYSTOP_PARENT_ID        (0)
+#define NI_TOWER_SYSCTRL_SYSTOP_IDX              (1)
 
 static volatile bool scp_setup_signal_received = false;
 
@@ -62,6 +68,33 @@ static int ni_tower_post_init(void)
     return 0;
 }
 
+/* Voltage domain - 0 is the parent node of SYSTOP Power domain */
+const struct ni_tower_component_node systop_parent_node = {
+    .type = NI_TOWER_SYSCTRL_SYSTOP_PARENT_TYPE,
+    .id = NI_TOWER_SYSCTRL_SYSTOP_PARENT_ID,
+};
+
+/* List of node data to be skipped during AON discovery */
+const struct ni_tower_skip_component_discovery_node_data
+    skip_aon_discovery_data[] = {
+    /*
+     * Skip discovery of SYSTOP power domain node since the node is
+     * undiscoverable during AON initialisation.
+     * CFG_NODE - 0
+     *    |
+     *    +--> VD - 0
+     *            |
+     *            +--> PD - 0 (AON) ...
+     *            |
+     *            +--> PD - 1 (SYSTOP) ...
+     *
+     */
+    {
+        .parent_node = &systop_parent_node,
+        .node_idx = NI_TOWER_SYSCTRL_SYSTOP_IDX,
+    },
+};
+
 /*
  * Programs the System control NI-Tower for nodes under Always-On (AON) domain.
  */
@@ -74,10 +107,18 @@ static int ni_tower_sysctrl_aon_init(void)
         return err;
     }
 
+    SYSCTRL_NI_TOWER_DEV.skip_discovery_list =
+        &(struct ni_tower_skip_component_discovery_list ){
+            .skip_node_data = skip_aon_discovery_data,
+            .skip_node_count = ARRAY_SIZE(skip_aon_discovery_data),
+        };
+
     err = program_sysctrl_ni_tower_aon();
     if (err != 0) {
         return err;
     }
+
+    SYSCTRL_NI_TOWER_DEV.skip_discovery_list = NULL;
 
     err = ni_tower_post_init();
     if (err != 0) {
