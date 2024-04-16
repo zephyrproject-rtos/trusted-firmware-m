@@ -80,16 +80,16 @@ uint32_t bl1_image_get_flash_offset(uint32_t image_id)
 
 static int32_t init_atu_regions(void)
 {
-    enum atu_error_t err;
-
 #ifdef RSE_USE_HOST_UART
+    enum atu_error_t atu_err;
+
     /* Initialize UART region */
-    err = atu_initialize_region(&ATU_DEV_S,
+    atu_err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
                                 HOST_UART0_BASE_NS, HOST_UART_BASE,
                                 HOST_UART_SIZE);
-    if (err != ATU_ERR_NONE) {
-        return 1;
+    if (atu_err != ATU_ERR_NONE) {
+        return atu_err;
     }
 #endif /* RSE_USE_HOST_UART */
 
@@ -109,12 +109,12 @@ static int setup_kmu_slot_from_otp(enum rse_kmu_slot_id_t slot,
 
     kmu_err = kmu_get_key_buffer_ptr(&KMU_DEV_S, slot, &kmu_ptr, &kmu_slot_size);
     if (kmu_err != KMU_ERROR_NONE) {
-        return -1;
+        return kmu_err;
     }
 
     plat_err = tfm_plat_otp_read(otp_id, sizeof(key), (uint8_t*)key);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        rc = -1;
+        rc = plat_err;
         goto out;
     }
 
@@ -122,19 +122,19 @@ static int setup_kmu_slot_from_otp(enum rse_kmu_slot_id_t slot,
 
     kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot);
     if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
+        rc = kmu_err;
         goto out;
     }
 
     kmu_err = kmu_set_key_export_config(&KMU_DEV_S, slot, export_config);
     if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
+        rc = kmu_err;
         goto out;
     }
 
     kmu_err = kmu_set_key_export_config_locked(&KMU_DEV_S, slot);
     if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
+        rc = kmu_err;
         goto out;
     }
 
@@ -178,13 +178,13 @@ static int32_t tfm_plat_select_and_apply_debug_permissions(void)
 
 static int32_t debug_preconditions_check(bool *valid_debug_conditions)
 {
-    enum tfm_plat_err_t err;
+    enum tfm_plat_err_t plat_err;
     enum plat_otp_lcs_t lcs;
 
     /* Read LCS from OTP */
-    err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t*)&lcs);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return -1;
+    plat_err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t*)&lcs);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 
     *valid_debug_conditions = (lcs == PLAT_OTP_LCS_SECURED) ? true : false;
@@ -274,11 +274,11 @@ int32_t boot_platform_init(void)
 
     plat_err = tfm_plat_init_nv_counter();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return 1;
+        return plat_err;
     }
 
     result = init_atu_regions();
-    if (result) {
+    if (result != 0) {
         return result;
     }
 
@@ -288,12 +288,12 @@ int32_t boot_platform_init(void)
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
-        return 1;
+        return result;
     }
 
 #ifdef RSE_USE_HOST_FLASH
     result = host_flash_atu_init_regions_for_image(UUID_RSE_FIRMWARE_BL2, image_offsets);
-    if (result) {
+    if (result != 0) {
         return result;
     }
 #endif
@@ -304,6 +304,7 @@ int32_t boot_platform_init(void)
 int32_t boot_platform_post_init(void)
 {
     int32_t rc;
+    enum tfm_plat_err_t plat_err;
 
     const struct kmu_key_export_config_t sic_dr0_export_config = {
         SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
@@ -328,58 +329,58 @@ int32_t boot_platform_post_init(void)
     uint32_t vhuk_seed[8 * RSE_AMOUNT];
     size_t vhuk_seed_len;
 
-    rc = rse_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
-    if (rc) {
-        return rc;
+    plat_err = rse_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 
 #if RSE_AMOUNT > 1
     rc = rse_handshake(vhuk_seed);
-    if (rc) {
+    if (rc != 0) {
         return rc;
     }
 #endif /* RSE_AMOUNT > 1 */
 
-    rc = rse_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSE_KMU_SLOT_VHUK);
-    if (rc) {
-        return rc;
+    plat_err = rse_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSE_KMU_SLOT_VHUK);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 
-    rc = rse_derive_cpak_seed(RSE_KMU_SLOT_CPAK_SEED);
-    if (rc) {
-        return rc;
+    plat_err = rse_derive_cpak_seed(RSE_KMU_SLOT_CPAK_SEED);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 
 #ifdef RSE_BOOT_KEYS_CCA
-    rc = rse_derive_dak_seed(RSE_KMU_SLOT_DAK_SEED);
-    if (rc) {
-        return rc;
+    plat_err = rse_derive_dak_seed(RSE_KMU_SLOT_DAK_SEED);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 #endif
 #ifdef RSE_BOOT_KEYS_DPE
-    rc = rse_derive_rot_cdi(RSE_KMU_SLOT_ROT_CDI);
-    if (rc) {
-        return rc;
+    plat_err = rse_derive_rot_cdi(RSE_KMU_SLOT_ROT_CDI);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 #endif
 
     rc = setup_kmu_slot_from_otp(RSE_KMU_SLOT_SECURE_ENCRYPTION_KEY,
                                  PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
                                  &sic_dr0_export_config);
-    if (rc) {
+    if (rc != 0) {
         return rc;
     }
 
     rc = setup_kmu_slot_from_otp(RSE_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
                                  PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
                                  &sic_dr1_export_config);
-    if (rc) {
+    if (rc != 0) {
         return rc;
     }
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     rc = boot_platform_init_debug();
-    if (rc) {
+    if (rc != 0) {
         return rc;
     }
 #endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
@@ -396,7 +397,7 @@ static int invalidate_hardware_keys(void)
     for (slot = 0; slot < KMU_USER_SLOT_MIN; slot++) {
         kmu_err = kmu_set_slot_invalid(&KMU_DEV_S, slot);
         if (kmu_err != KMU_ERROR_NONE) {
-            return 1;
+            return kmu_err;
         }
     }
 
@@ -464,7 +465,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 
     result = disable_rom_execution();
-    if (result) {
+    if (result != 0) {
         while (1);
     }
 
@@ -498,7 +499,7 @@ int boot_platform_post_load(uint32_t image_id)
     int rc;
 
     rc = invalidate_hardware_keys();
-    if (rc) {
+    if (rc != 0) {
         return rc;
     }
 
