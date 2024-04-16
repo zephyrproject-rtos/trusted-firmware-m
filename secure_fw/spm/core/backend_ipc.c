@@ -53,7 +53,7 @@ struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 uintptr_t *partition_meta_indicator_pos;
 
 #if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
-bool basepri_set_by_ipc_schedule;
+static bool basepri_set_by_ipc_schedule;
 #endif
 
 /*
