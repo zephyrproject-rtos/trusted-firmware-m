@@ -334,10 +334,12 @@ SECTIONS
     .spm_data :
     {
         *libtfm_spm*:*(.data*);
+        . = ALIGN(4);
     } > RAM AT> FLASH
     .spm_bss (NOLOAD):
     {
         *libtfm_spm*:(SORT_BY_ALIGNMENT(.bss*));
+        . = ALIGN(4);
     } > RAM AT> RAM
 
     /**** PSA RoT DATA start here */
