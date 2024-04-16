@@ -43,48 +43,36 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-)
-
-add_library(device_definition_ns STATIC)
-target_sources(device_definition_ns
-    PUBLIC
-        ${CORSTONE300_COMMON_DIR}/device/source/platform_ns_device_definition.c
-)
-
-#========================= CMSIS lib ===============================#
-
-add_library(cmsis_includes INTERFACE)
-target_include_directories(cmsis_includes
-    INTERFACE
-        ${CORSTONE300_COMMON_DIR}/device/config
-        ${CORSTONE300_COMMON_DIR}/device/include
-        ${CORSTONE300_COMMON_DIR}/cmsis_drivers
-        ${PLATFORM_DIR}/ext/cmsis/Include
-        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
-        ${CORSTONE300_COMMON_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
-        ${PLATFORM_DIR}/ext/common
-        ${CORSTONE300_COMMON_DIR}
-)
-
-add_library(cmsis_includes_ns INTERFACE)
-target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
-target_include_directories(cmsis_includes_ns
-    INTERFACE
-        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure
+        ${ETHOS_DRIVER_PATH}/src
+        ${ETHOS_DRIVER_PATH}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
 )
 
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns
     PRIVATE
+        ${CORSTONE300_COMMON_DIR}/device/source/platform_ns_device_definition.c
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     INTERFACE
         $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone300_ns_init.c>
         $<$<BOOL:${TEST_NS_FPU}>:${PLATFORM_DIR}/ext/common/test_interrupt.c>
+)
+
+target_include_directories(platform_ns
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+        ${CORSTONE300_COMMON_DIR}/device/include
+        ${CORSTONE300_COMMON_DIR}/include
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers
+        ${PLATFORM_DIR}/ext/cmsis/Include
+        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
+        ${CORSTONE300_COMMON_DIR}/partition
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure
 )
 
 target_compile_definitions(platform_ns
@@ -92,14 +80,7 @@ target_compile_definitions(platform_ns
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
 )
 
-#========================= Linking ===============================#
-
-target_link_libraries(device_definition_ns PUBLIC device_definition)
-target_link_libraries(device_definition_ns PRIVATE cmsis_includes_ns)
-
 target_link_libraries(platform_ns
     PUBLIC
-        cmsis_includes_ns
-    PRIVATE
-        device_definition_ns
+        device_definition
 )

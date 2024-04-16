@@ -38,6 +38,11 @@ if(BL2)
             $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
             $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_bl2.icf>
     )
+
+    target_compile_options(bl2_scatter
+        PUBLIC
+            ${COMPILER_CMSE_FLAG}
+    )
 endif()
 
 #========================= Device definition lib ===============================#
@@ -64,104 +69,14 @@ target_include_directories(device_definition
         ${CMAKE_SOURCE_DIR}
 )
 
-add_library(device_definition_s STATIC)
-target_sources(device_definition_s
-    PUBLIC
-        ${CORSTONE300_COMMON_DIR}/device/source/platform_s_device_definition.c
-)
-
-target_compile_options(device_definition_s
-    PRIVATE
-        ${COMPILER_CMSE_FLAG}
-)
-
-add_library(device_definition_bl2 STATIC)
-target_sources(device_definition_bl2
-    PUBLIC
-        ${CORSTONE300_COMMON_DIR}/device/source/platform_s_device_definition.c
-)
-
-#========================= CMSIS lib ===============================#
-
-add_library(cmsis_includes INTERFACE)
-target_include_directories(cmsis_includes
-    INTERFACE
-        ${CORSTONE300_COMMON_DIR}/device/include
-        ${CORSTONE300_COMMON_DIR}/cmsis_drivers
-        ${CORSTONE300_COMMON_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/partition
-)
-
-add_library(cmsis_includes_s INTERFACE)
-add_library(cmsis_includes_bl2 INTERFACE)
-target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes cmsis)
-target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes cmsis)
-target_include_directories(cmsis_includes_bl2
-    INTERFACE
-        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_LINKER_CP_OPTION}
-)
-
-
-target_include_directories(cmsis_includes_s
-    INTERFACE
-        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_s
-    INTERFACE
-        ${COMPILER_CMSE_FLAG}
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_s
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
-
-#========================= Linking ===============================#
-
-target_link_libraries(device_definition_s PUBLIC device_definition)
-target_link_libraries(device_definition_bl2 PUBLIC device_definition)
-
-target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
-target_link_libraries(device_definition_bl2 PRIVATE cmsis_includes_bl2)
-
-target_link_libraries(platform_bl2
-    PUBLIC
-        cmsis_includes
-        cmsis
-    PRIVATE
-        device_definition_bl2
-        cmsis_includes_bl2
-)
-
-target_link_libraries(platform_s
-    PUBLIC
-        cmsis_includes_s
-    INTERFACE
-        device_definition
-    PRIVATE
-        device_definition_s
-)
-
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CORSTONE300_COMMON_DIR}
-    PRIVATE
-        ${CORSTONE300_COMMON_DIR}
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE300_COMMON_DIR}/device
         ${CORSTONE300_COMMON_DIR}/services/src
         ${PLATFORM_DIR}/ext/common
@@ -173,6 +88,7 @@ target_sources(platform_s
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_TGU.c
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_SSE300_PPC.c
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
+        ${CORSTONE300_COMMON_DIR}/device/source/platform_s_device_definition.c
         ${CORSTONE300_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE300_COMMON_DIR}/native_drivers/ppc_sse300_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/tgu/tgu_armv8_m_drv.c
@@ -193,11 +109,6 @@ target_sources(tfm_sprt
         $<$<OR:$<BOOL:${TFM_PARTITION_SLIH_TEST}>,$<BOOL:${TFM_PARTITION_FLIH_TEST}>>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c>
 )
 
-target_compile_options(platform_s
-    PUBLIC
-        ${COMPILER_CMSE_FLAG}
-)
-
 # To configure S and NS timer in S side for FP interrupt test
 target_compile_definitions(platform_s
     PUBLIC
@@ -212,6 +123,24 @@ target_compile_definitions(platform_s
         ETHOSU_LOG_SEVERITY=${ETHOSU_LOG_SEVERITY}
 )
 
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_link_options(platform_s
+    PUBLIC
+        ${LINKER_CP_OPTION}
+)
+
+target_link_libraries(platform_s
+    PUBLIC
+        device_definition
+    PRIVATE
+        tfm_sprt # For tfm_strnlen in attest HAL
+)
+
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -223,21 +152,60 @@ if(BL2)
             ${CORSTONE300_COMMON_DIR}/bl2/boot_hal_bl2.c
     )
 
+    target_compile_options(bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+            ${COMPILER_CMSE_FLAG}
+    )
+
+    target_link_options(bl2
+        PUBLIC
+            ${BL2_LINKER_CP_OPTION}
+    )
+
     target_sources(platform_bl2
         PRIVATE
             ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
+            ${CORSTONE300_COMMON_DIR}/device/source/platform_s_device_definition.c
             ${CORSTONE300_COMMON_DIR}/device/source/system_core_init.c
-            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     )
 
     target_include_directories(platform_bl2
+        PUBLIC
+            device/include
+            ${CORSTONE300_COMMON_DIR}/device/include
         PRIVATE
             ${CORSTONE300_COMMON_DIR}/device
             ${CORSTONE300_COMMON_DIR}/services/src
-            ${CORSTONE300_COMMON_DIR}/device/config
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+            ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
             ${CORSTONE300_COMMON_DIR}
     )
+
+    target_compile_definitions(platform_bl2
+        PUBLIC
+            $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+    )
+
+    target_compile_options(platform_bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+            ${COMPILER_CMSE_FLAG}
+    )
+
+    target_link_options(platform_bl2
+        PUBLIC
+            ${BL2_LINKER_CP_OPTION}
+    )
+
+    target_link_libraries(platform_bl2
+        PRIVATE
+            $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
+            device_definition
+    )
+
 endif()
 
 #========================= tfm_spm ============================================#
@@ -259,10 +227,6 @@ target_sources(tfm_s
         ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
 )
 
-if(NOT PLATFORM_DEFAULT_PROVISIONING)
-    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
-endif()
-
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
     INTERFACE
@@ -273,6 +237,10 @@ target_compile_definitions(platform_region_defs
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
 )
+
+if(NOT PLATFORM_DEFAULT_PROVISIONING)
+add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
+endif()
 
 #========================= Files for building NS side platform ================#
 target_compile_definitions(tfm_config
@@ -290,11 +258,6 @@ install(FILES       ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c
                     ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure/RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/cmsis_drivers)
 
-install(FILES       ${PLATFORM_DIR}/ext/common/common_target_cfg.h
-                    ${PLATFORM_DIR}/ext/common/test_interrupt.h
-                    ${PLATFORM_DIR}/ext/common/test_interrupt.c
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
-
 install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/device
                     ${CORSTONE300_COMMON_DIR}/native_drivers
                     ${CORSTONE300_COMMON_DIR}/cmsis_drivers
@@ -307,8 +270,15 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
                     ${PLATFORM_DIR}/ext/driver/Driver_Common.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
-install(FILES       ${PLATFORM_DIR}/include/tfm_plat_defs.h
+install(FILES       ${CORSTONE300_COMMON_DIR}/target_cfg.h
+                    ${CORSTONE300_COMMON_DIR}/tfm_peripherals_def.h
+                    ${PLATFORM_DIR}/include/tfm_plat_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/include)
+
+install(FILES       ${PLATFORM_DIR}/ext/common/common_target_cfg.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.c
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
 
 install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/partition
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
@@ -316,12 +286,9 @@ install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/partition
 install(FILES       ${CORSTONE300_COMMON_DIR}/cpuarch.cmake
                     ${CORSTONE300_COMMON_DIR}/config.cmake
                     ${CORSTONE300_COMMON_DIR}/target_cfg.h
-                    ${CORSTONE300_COMMON_DIR}/tfm_peripherals_def.h
+                    ${CORSTONE300_COMMON_DIR}/check_config.cmake
                     ${CORSTONE300_COMMON_DIR}/ns/common.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
-
-install(FILES       ${CORSTONE300_COMMON_DIR}/check_config.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
