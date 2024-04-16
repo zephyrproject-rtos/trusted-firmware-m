@@ -165,7 +165,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
         p_rt_meta->n_sfn = p_pt_ldi->nservices;
     }
 
-    p_pt->p_metadata = (void *)p_rt_meta;
+    p_pt->p_metadata = p_rt_meta;
 }
 
 /*

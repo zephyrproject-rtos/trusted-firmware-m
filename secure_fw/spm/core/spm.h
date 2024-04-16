@@ -18,6 +18,7 @@
 #include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"
+#include "runtime_defs.h"
 #include "thread.h"
 #include "psa/service.h"
 #include "load/partition_defs.h"
@@ -109,7 +110,7 @@ struct partition_t {
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    void                               *p_metadata;
+    const struct runtime_metadata_t    *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
     struct thread_t                    thrd;            /* IPC model */
     uintptr_t                          reply_value;
