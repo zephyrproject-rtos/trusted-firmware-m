@@ -104,7 +104,6 @@ struct connection_t {
 /* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void                               *p_interrupts;
     uintptr_t                          boundary;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
