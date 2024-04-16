@@ -84,7 +84,7 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
                                  stored_bl2_hash);
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_CALL(bl_fih_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
@@ -104,7 +104,7 @@ static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
                                         (uint8_t *)&security_counter);
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     /* Encodes 0 to true and 1 to false, so the actual comparison is flipped */
@@ -136,7 +136,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
 #else
     FIH_CALL(image_hash_check, fih_rc, img);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 #endif /* TFM_BL1_PQ_CRYPTO */
 
@@ -151,12 +151,12 @@ fih_int validate_image_at_addr(struct bl1_2_image_t *image)
     FIH_CALL(is_image_signature_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image signature failed to validate\r\n");
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
     FIH_CALL(is_image_security_counter_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image security_counter failed to validate\r\n");
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     /* TODO work out if the image actually boots before updating the counter */
@@ -165,7 +165,7 @@ fih_int validate_image_at_addr(struct bl1_2_image_t *image)
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] NV counter update failed\r\n");
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_RET(FIH_SUCCESS);
@@ -245,7 +245,7 @@ static fih_int validate_image(uint32_t image_id)
     FIH_CALL(copy_and_decrypt_image, fih_rc, image_id);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image failed to decrypt\r\n");
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
     image = (struct bl1_2_image_t *)BL2_IMAGE_START;
 
@@ -254,7 +254,7 @@ static fih_int validate_image(uint32_t image_id)
     FIH_CALL(validate_image_at_addr, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image failed to validate\r\n");
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     BL1_LOG("[INF] BL2 image validated successfully\r\n");
@@ -264,7 +264,6 @@ static fih_int validate_image(uint32_t image_id)
 
 int main(void)
 {
-    int rc;
     fih_int fih_rc = FIH_FAILURE;
     fih_int recovery_succeeded = FIH_FAILURE;
 
