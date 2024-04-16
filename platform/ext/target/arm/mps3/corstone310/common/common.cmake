@@ -38,6 +38,11 @@ if(BL2)
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
         $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_bl2.icf>
     )
+
+    target_compile_options(bl2_scatter
+        PUBLIC
+            ${COMPILER_CMSE_FLAG}
+    )
 endif()
 
 #========================= Device definition lib ===============================#
@@ -63,103 +68,14 @@ target_include_directories(device_definition
         ${CMAKE_SOURCE_DIR}
 )
 
-add_library(device_definition_s STATIC)
-target_sources(device_definition_s
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
-)
-
-target_compile_options(device_definition_s
-    PRIVATE
-        ${COMPILER_CMSE_FLAG}
-)
-
-add_library(device_definition_bl2 STATIC)
-target_sources(device_definition_bl2
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
-)
-
-#========================= CMSIS lib ===============================#
-
-add_library(cmsis_includes INTERFACE)
-target_include_directories(cmsis_includes
-    INTERFACE
-        ${CORSTONE310_COMMON_DIR}/device/include
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
-        ${CORSTONE310_COMMON_DIR}/partition
-)
-
-add_library(cmsis_includes_s INTERFACE)
-add_library(cmsis_includes_bl2 INTERFACE)
-target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes cmsis)
-target_link_libraries(cmsis_includes_bl2 INTERFACE cmsis_includes cmsis)
-target_include_directories(cmsis_includes_bl2
-    INTERFACE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_bl2
-    INTERFACE
-        ${BL2_LINKER_CP_OPTION}
-)
-
-
-target_include_directories(cmsis_includes_s
-    INTERFACE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
-)
-
-target_compile_options(cmsis_includes_s
-    INTERFACE
-        ${COMPILER_CMSE_FLAG}
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_s
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
-
-#========================= Linking ===============================#
-
-target_link_libraries(device_definition_s PUBLIC device_definition)
-target_link_libraries(device_definition_bl2 PUBLIC device_definition)
-
-target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
-target_link_libraries(device_definition_bl2 PRIVATE cmsis_includes_bl2)
-
-target_link_libraries(platform_bl2
-    PUBLIC
-        cmsis_includes
-        cmsis
-    PRIVATE
-        device_definition_bl2
-        cmsis_includes_bl2
-)
-
-target_link_libraries(platform_s
-    PUBLIC
-        cmsis_includes_s
-    INTERFACE
-        device_definition
-    PRIVATE
-        device_definition_s
-)
-
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CORSTONE310_COMMON_DIR}
-    PRIVATE
-        ${CORSTONE310_COMMON_DIR}
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE310_COMMON_DIR}/device
         ${CORSTONE310_COMMON_DIR}/services/src
         ${PLATFORM_DIR}/ext/common
@@ -171,6 +87,7 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_TGU.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_PPC.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
+        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/tgu/tgu_armv8_m_drv.c
@@ -191,11 +108,6 @@ target_sources(tfm_sprt
         $<$<OR:$<BOOL:${TFM_PARTITION_SLIH_TEST}>,$<BOOL:${TFM_PARTITION_FLIH_TEST}>>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c>
 )
 
-target_compile_options(platform_s
-    PUBLIC
-        ${COMPILER_CMSE_FLAG}
-)
-
 # To configure S and NS timer in S side for FP interrupt test
 target_compile_definitions(platform_s
     PUBLIC
@@ -210,6 +122,24 @@ target_compile_definitions(platform_s
         ETHOSU_LOG_SEVERITY=${ETHOSU_LOG_SEVERITY}
 )
 
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
+        ${COMPILER_CMSE_FLAG}
+)
+
+target_link_options(platform_s
+    PUBLIC
+        ${LINKER_CP_OPTION}
+)
+
+target_link_libraries(platform_s
+    PUBLIC
+        device_definition
+    PRIVATE
+        tfm_sprt # For tfm_strnlen in attest HAL
+)
+
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -221,21 +151,60 @@ if(BL2)
             ${CORSTONE310_COMMON_DIR}/bl2/boot_hal_bl2.c
     )
 
+    target_compile_options(bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+            ${COMPILER_CMSE_FLAG}
+    )
+
+    target_link_options(bl2
+        PUBLIC
+            ${BL2_LINKER_CP_OPTION}
+    )
+
     target_sources(platform_bl2
         PRIVATE
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
+            ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
             ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     )
 
     target_include_directories(platform_bl2
+        PUBLIC
+            device/include
+            ${CORSTONE310_COMMON_DIR}/device/include
         PRIVATE
             ${CORSTONE310_COMMON_DIR}/device
             ${CORSTONE310_COMMON_DIR}/services/src
             ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+            ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
             ${CORSTONE310_COMMON_DIR}
     )
+
+    target_compile_definitions(platform_bl2
+        PUBLIC
+            $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+    )
+
+    target_compile_options(platform_bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+            ${COMPILER_CMSE_FLAG}
+    )
+
+    target_link_options(platform_bl2
+        PUBLIC
+            ${BL2_LINKER_CP_OPTION}
+    )
+
+    target_link_libraries(platform_bl2
+        PRIVATE
+            $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
+            device_definition
+    )
+
 endif()
 
 #========================= tfm_spm ============================================#
@@ -257,8 +226,6 @@ target_sources(tfm_s
     PRIVATE
         ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
 )
-
-add_library(tfm_platform_config INTERFACE)
 
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
@@ -307,6 +274,11 @@ install(FILES       ${CORSTONE310_COMMON_DIR}/target_cfg.h
                     ${CORSTONE310_COMMON_DIR}/tfm_peripherals_def.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/include)
+
+install(FILES       ${PLATFORM_DIR}/ext/common/common_target_cfg.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.h
+                    ${PLATFORM_DIR}/ext/common/test_interrupt.c
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
 
 install(DIRECTORY   ${CORSTONE310_COMMON_DIR}/partition
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)

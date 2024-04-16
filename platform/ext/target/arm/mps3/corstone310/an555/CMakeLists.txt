@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -25,10 +25,11 @@ target_sources(flash_drivers_bl2
 
 target_include_directories(flash_drivers
     INTERFACE
+        ${PLATFORM_DIR}/ext/driver
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
-        ${PLATFORM_DIR}/ext/driver
         device/include
         device/config
 )
