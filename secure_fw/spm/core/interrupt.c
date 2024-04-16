@@ -16,9 +16,9 @@
 #include "tfm_arch.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
+#include "tfm_svcalls.h"
 #include "thread.h"
 #include "utilities.h"
-
 #include "load/spm_load_api.h"
 #include "ffm/backend.h"
 #include "internal_status_code.h"
