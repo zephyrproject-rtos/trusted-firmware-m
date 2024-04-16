@@ -163,7 +163,7 @@
  * \note The entropy collector will write to the seed file before entropy is
  *       given to an external source, to update it.
  */
-#define MBEDTLS_ENTROPY_NV_SEED
+//#define MBEDTLS_ENTROPY_NV_SEED
 
 /**
  * \def MBEDTLS_SHA256_SMALLER
@@ -304,7 +304,7 @@
  *
  * This module provides a generic entropy pool
  */
-#define MBEDTLS_ENTROPY_C
+//#define MBEDTLS_ENTROPY_C
 
 /**
  * \def MBEDTLS_HKDF_C
@@ -487,13 +487,5 @@
 //#define MBEDTLS_PSA_CRYPTO_USER_CONFIG_FILE "/dev/null"
 
 /** \} name SECTION: General configuration options */
-
-#if CRYPTO_NV_SEED
-#include "tfm_mbedcrypto_config_extra_nv_seed.h"
-#endif /* CRYPTO_NV_SEED */
-
-#if !defined(CRYPTO_HW_ACCELERATOR) && defined(MBEDTLS_ENTROPY_NV_SEED)
-#include "mbedtls_entropy_nv_seed_config.h"
-#endif
 
 #endif /* PROFILE_S_MBEDTLS_CONFIG_H */
