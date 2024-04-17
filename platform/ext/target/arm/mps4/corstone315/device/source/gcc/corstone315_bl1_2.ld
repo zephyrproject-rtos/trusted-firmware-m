@@ -38,7 +38,7 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    .text (READONLY) :
+    .text :
     {
         KEEP(*(.vectors))
         __Vectors_End = .;

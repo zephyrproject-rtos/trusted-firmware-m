@@ -310,7 +310,7 @@ SECTIONS
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    .TFM_UNPRIV_CODE (READONLY) : ALIGN(GTZC_FLASH_ALIGN)
+    .TFM_UNPRIV_CODE : ALIGN(GTZC_FLASH_ALIGN)
     {
         *(SFN)
         *(.text*)

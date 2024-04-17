@@ -175,7 +175,7 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    .ER_TFM_CODE ALIGN(4) (READONLY) :
+    .ER_TFM_CODE ALIGN(4) :
     {
         . = ALIGN(4);
         /* preinit data */
