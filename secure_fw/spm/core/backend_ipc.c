@@ -547,6 +547,33 @@ uint64_t ipc_schedule(uint32_t exc_return)
     }
     p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
 
+#ifdef TFM_FIH_PROFILE_ON
+    /*
+     * ctx_ctrl is set from struct thread_t's p_context_ctrl, and p_part_curr
+     * and p_part_next are calculated from the thread pointer.
+     * struct partition_t's ctx_ctrl is pointed to by struct thread_t's p_context_ctrl,
+     * but the optimiser doesn't know that when building this code.
+     * Use that information to check that the context, thread, and partition
+     * are all consistent
+     */
+    if (ctx_ctrls.u32_regs.r0 != (uint32_t)&p_part_curr->ctx_ctrl) {
+        tfm_core_panic();
+    }
+
+    if (ctx_ctrls.u32_regs.r1 != (uint32_t)&p_part_next->ctx_ctrl) {
+        tfm_core_panic();
+    }
+
+    if (&p_part_next->thrd != CURRENT_THREAD) {
+        tfm_core_panic();
+    }
+
+    /* also double-check the metadata */
+    if ((uintptr_t)GET_CTX_OWNER(ctx_ctrls.u32_regs.r1)->p_metadata != p_partition_metadata) {
+        tfm_core_panic();
+    }
+#endif
+
     CRITICAL_SECTION_LEAVE(cs);
 
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
