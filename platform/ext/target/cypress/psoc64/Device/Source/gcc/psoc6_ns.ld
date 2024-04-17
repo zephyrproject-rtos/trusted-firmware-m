@@ -100,7 +100,7 @@ MEMORY
 
 SECTIONS
 {
-    .text :
+    .text (READONLY) :
     {
         . = ALIGN(4);
         __Vectors = . ;

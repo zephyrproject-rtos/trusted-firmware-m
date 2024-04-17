@@ -164,7 +164,7 @@ SECTIONS
     Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 #endif
 
-    .ER_TFM_CODE : ALIGN(4)
+    .ER_TFM_CODE (READONLY) : ALIGN(4)
     {
         . = ALIGN(4);
         /* preinit data */

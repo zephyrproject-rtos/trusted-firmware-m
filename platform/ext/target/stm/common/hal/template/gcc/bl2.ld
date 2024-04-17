@@ -75,7 +75,7 @@ SECTIONS
         __hdp_end__ = .;
     } > FLASH_NOHDP
 
-    .text (BL2_CODE_START):
+    .text (BL2_CODE_START) (READONLY) :
     {
 
         KEEP(*(.vectors))

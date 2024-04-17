@@ -103,7 +103,7 @@ SECTIONS
 
 #endif /* TFM_ISOLATION_LEVEL != 1 */
 
-    .ER_TFM_CODE : ALIGN(4)
+    .ER_TFM_CODE (READONLY) : ALIGN(4)
     {
         . = ALIGN(4);
         /* preinit data */

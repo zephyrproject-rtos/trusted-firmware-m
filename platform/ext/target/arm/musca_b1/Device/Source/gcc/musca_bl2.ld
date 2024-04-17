@@ -61,7 +61,7 @@ SECTIONS
     Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
     Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 
-    .text :
+    .text (READONLY) :
     {
         *(.text*)
 
