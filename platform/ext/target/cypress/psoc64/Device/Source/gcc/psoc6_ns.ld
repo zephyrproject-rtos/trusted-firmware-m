@@ -25,6 +25,14 @@ ENTRY(Reset_Handler)
 
 #include "region_defs.h"
 
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 __heap_size__  = NS_HEAP_SIZE;
 __stack_size__ = NS_STACK_SIZE;
 
@@ -100,7 +108,7 @@ MEMORY
 
 SECTIONS
 {
-    .text :
+    .text (READONLY) :
     {
         . = ALIGN(4);
         __Vectors = . ;

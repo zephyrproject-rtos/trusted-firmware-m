@@ -24,6 +24,14 @@
 
 #include "region_defs.h"
 
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 /* Include file with definitions for section alignments.
  * Note: it should be included after region_defs.h to let platform define
  * default values if needed. */
@@ -175,7 +183,7 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    .ER_TFM_CODE ALIGN(4) :
+    .ER_TFM_CODE ALIGN(4) (READONLY) :
     {
         . = ALIGN(4);
         /* preinit data */

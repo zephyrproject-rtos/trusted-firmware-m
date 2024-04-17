@@ -21,6 +21,15 @@
 /* This file will be run trough the pre-processor. */
 
 #include "region_defs.h"
+
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 MEMORY
 {
 #if defined(BL2_NVMCNT_AREA_BASE)
@@ -75,7 +84,7 @@ SECTIONS
         __hdp_end__ = .;
     } > FLASH_NOHDP
 
-    .text (BL2_CODE_START):
+    .text (BL2_CODE_START) (READONLY) :
     {
 
         KEEP(*(.vectors))

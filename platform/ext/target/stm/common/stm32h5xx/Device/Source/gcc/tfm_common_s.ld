@@ -24,6 +24,14 @@
 
 #include "region_defs.h"
 
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 MEMORY
 {
   FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
@@ -310,7 +318,7 @@ SECTIONS
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
 
-    .TFM_UNPRIV_CODE : ALIGN(GTZC_FLASH_ALIGN)
+    .TFM_UNPRIV_CODE (READONLY) : ALIGN(GTZC_FLASH_ALIGN)
     {
         *(SFN)
         *(.text*)

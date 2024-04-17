@@ -24,6 +24,14 @@
 
 #include "region_defs.h"
 
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 MEMORY
 {
   FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
@@ -103,7 +111,7 @@ SECTIONS
 
 #endif /* TFM_ISOLATION_LEVEL != 1 */
 
-    .ER_TFM_CODE : ALIGN(4)
+    .ER_TFM_CODE (READONLY) : ALIGN(4)
     {
         . = ALIGN(4);
         /* preinit data */

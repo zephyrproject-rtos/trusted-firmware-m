@@ -22,6 +22,14 @@
 
 #include "region_defs.h"
 
+#ifdef __GNUC__
+#  if __GNUC__ >= 12
+#define READONLY    READONLY
+#  else
+#define READONLY
+#  endif
+#endif
+
 MEMORY
 {
   FLASH (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
@@ -35,7 +43,7 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    .text :
+    .text (READONLY) :
     {
         KEEP(*(.vectors))
         __Vectors_End = .;
