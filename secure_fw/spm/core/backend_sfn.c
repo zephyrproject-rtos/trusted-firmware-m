@@ -68,8 +68,6 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
 
     status = ((service_fn_t)p_connection->service->p_ldinf->sfn)(&p_connection->msg);
 
-    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
-
     return status;
 }
 
