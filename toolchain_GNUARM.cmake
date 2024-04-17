@@ -152,8 +152,13 @@ endif()
 # has a linker issue that required system calls are missing,
 # such as _read and _write. Add stub functions of required
 # system calls to solve this issue.
+#
+# READONLY linker script attribute is not supported in older
+# GNU Arm compilers. For these version the preprocessor will
+# remove the READONLY string from the linker scripts.
 if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
     set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+    set(CONFIG_GNU_LINKER_READONLY_ATTRIBUTE TRUE)
 endif()
 
 if (CMAKE_SYSTEM_PROCESSOR)
@@ -232,6 +237,11 @@ macro(target_add_scatter_file target)
             -E
             -P
             -xc
+    )
+
+    target_compile_definitions(${target}_scatter
+        PRIVATE
+            $<$<NOT:$<BOOL:${CONFIG_GNU_LINKER_READONLY_ATTRIBUTE}>>:READONLY=>
     )
 endmacro()
 

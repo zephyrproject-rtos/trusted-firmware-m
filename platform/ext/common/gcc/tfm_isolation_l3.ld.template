@@ -26,14 +26,6 @@
 
 #include "region_defs.h"
 
-#ifdef __GNUC__
-#  if __GNUC__ >= 12
-#define READONLY    READONLY
-#  else
-#define READONLY
-#  endif
-#endif
-
 /* Include file with definitions for section alignments.
  * Note: it should be included after region_defs.h to let platform define
  * default values if needed. */
