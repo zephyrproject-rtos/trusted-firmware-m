@@ -31,7 +31,10 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         return status;
     }
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }
 
 psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
@@ -123,7 +126,11 @@ psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t cli
 
     p_connection->msg.type = PSA_IPC_DISCONNECT;
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_TO_FREE;
+
+    return status;
 }
 
 psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
