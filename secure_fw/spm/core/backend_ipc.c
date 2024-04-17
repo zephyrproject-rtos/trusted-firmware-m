@@ -209,8 +209,6 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
         }
     }
 
-    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
-
     return ret;
 }
 
