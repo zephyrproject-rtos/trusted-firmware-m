@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,5 +19,8 @@
 
 /* The maximum number of assets to be stored in the Protected Storage area. */
 #define PS_NUM_ASSETS        20
+
+/* The maximum size of asset to be stored in the Internal Trusted Storage area. */
+#define ITS_MAX_ASSET_SIZE   2048
 
 #endif /* __CONFIG_TFM_TARGET_H__ */
