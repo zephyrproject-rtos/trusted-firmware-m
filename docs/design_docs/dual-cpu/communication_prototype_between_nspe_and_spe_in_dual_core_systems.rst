@@ -410,16 +410,7 @@ result to NSPE.
 
 .. code-block:: c
 
-  void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
-
-**Parameters**
-
-+-----------+--------------------------------------------------------------+
-| ``owner`` | A handle to identify the owner of the PSA client call return |
-|           | value.                                                       |
-+-----------+--------------------------------------------------------------+
-| ``ret``   | PSA client call return result value.                         |
-+-----------+--------------------------------------------------------------+
+  void tfm_rpc_client_call_reply(void);
 
 **Usage**
 
