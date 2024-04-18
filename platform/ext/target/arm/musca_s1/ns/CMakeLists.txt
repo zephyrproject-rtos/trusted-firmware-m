@@ -31,7 +31,6 @@ target_include_directories(platform_ns
         ext/common
         Native_Driver
         CMSIS_Driver/Config
-        CMSIS_Driver/include
         Device/Include
         partition
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:services/include>
