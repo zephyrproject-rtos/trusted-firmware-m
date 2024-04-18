@@ -55,6 +55,16 @@ static const struct kmu_key_export_config_t sic_dr1_export_config = {
     false, /* Don't disable the masking */
 };
 
+static const struct kmu_key_export_config_t cc3xx_pka_sram_key_config = {
+    CC3XX_BASE_S + 0x4FD0, /* CC3XX keystore mux */
+    0, /* No delay */
+    0x01, /* Increment by 4 bytes with each write */
+    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 8 writes (total 128 bits) */
+    true,  /* refresh the masking */
+    false, /* Don't disable the masking */
+};
+
 static enum tfm_plat_err_t set_export_config_and_lock_key(enum rse_kmu_slot_id_t slot,
                                                           const struct kmu_key_export_config_t *config)
 {
@@ -460,5 +470,25 @@ enum tfm_plat_err_t rse_setup_runtime_non_secure_image_encryption_key(void)
 #endif /* RSE_XIP */
 
     /* TODO FIXME Allow Mcuboot to decrypt using on-device keys */
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t rse_setup_cc3xx_pka_sram_encryption_key(void)
+{
+    enum tfm_plat_err_t plat_err;
+    enum kmu_error_t kmu_err;
+
+    plat_err = setup_key_from_rng(RSE_KMU_SLOT_CC3XX_PKA_SRAM_ENCRYPTION_KEY,
+                            &cc3xx_pka_sram_key_config, NULL, false);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+
+    /* TODO FIXME remove this when all keys can be locked. */
+    kmu_err = kmu_set_key_locked(&KMU_DEV_S, RSE_KMU_SLOT_CC3XX_PKA_SRAM_ENCRYPTION_KEY);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return (enum tfm_plat_err_t)kmu_err;
+    }
+
     return TFM_PLAT_ERR_SUCCESS;
 }

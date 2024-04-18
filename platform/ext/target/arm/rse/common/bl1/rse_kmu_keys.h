@@ -155,6 +155,14 @@ enum tfm_plat_err_t rse_setup_runtime_secure_image_encryption_key(void);
  */
 enum tfm_plat_err_t rse_setup_runtime_non_secure_image_encryption_key(void);
 
+/**
+ * \brief                     Setup the CC3XX PKA SRAM encryption key, and lock
+ *                            into a KMU slot.
+ *
+ * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
+ */
+enum tfm_plat_err_t rse_setup_cc3xx_pka_sram_encryption_key(void);
+
 #ifdef __cplusplus
 }
 #endif

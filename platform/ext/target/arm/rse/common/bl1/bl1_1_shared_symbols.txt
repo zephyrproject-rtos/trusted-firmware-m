@@ -28,6 +28,7 @@ kmu_set_slot_invalid
 kmu_random_delay
 kmu_set_key_export_config
 kmu_set_key_export_config_locked
+kmu_export_key
 lcm_otp_write
 pq_crypto_verify
 pq_crypto_get_pub_key_hash
@@ -39,6 +40,7 @@ rse_setup_vhuk
 rse_derive_vhuk_seed
 rse_setup_runtime_secure_image_encryption_key
 rse_setup_runtime_non_secure_image_encryption_key
+rse_setup_cc3xx_pka_sram_encryption_key
 stdio_init
 stdio_output_string
 stdio_uninit

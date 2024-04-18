@@ -262,6 +262,7 @@ int32_t boot_platform_post_init(void)
 {
     int32_t rc;
     enum tfm_plat_err_t plat_err;
+    enum kmu_error_t kmu_err;
 
     uint32_t vhuk_seed[8 * RSE_AMOUNT];
     size_t vhuk_seed_len;
@@ -309,6 +310,17 @@ int32_t boot_platform_post_init(void)
     plat_err = rse_setup_runtime_non_secure_image_encryption_key();
     if (plat_err) {
         return plat_err;
+    }
+
+    plat_err = rse_setup_cc3xx_pka_sram_encryption_key();
+    if (plat_err) {
+        return plat_err;
+    }
+
+    /* Load the PKA encryption key, now that it is set up */
+    kmu_err = kmu_export_key(&KMU_DEV_S, RSE_KMU_SLOT_CC3XX_PKA_SRAM_ENCRYPTION_KEY);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return kmu_err;
     }
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
