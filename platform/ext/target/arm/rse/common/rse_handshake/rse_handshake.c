@@ -19,7 +19,7 @@
 #include "device_definition.h"
 #include "mhu.h"
 #include "tfm_plat_otp.h"
-#include "rse_key_derivation.h"
+#include "rse_kmu_keys.h"
 #include "rse_kmu_slot_ids.h"
 #include "crypto.h"
 #include "cc3xx_aes.h"

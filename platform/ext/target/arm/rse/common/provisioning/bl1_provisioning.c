@@ -16,7 +16,7 @@
 #include "platform_regs.h"
 #include "cc3xx_aes.h"
 #include "rse_kmu_slot_ids.h"
-#include "rse_key_derivation.h"
+#include "rse_kmu_keys.h"
 
 enum rse_gpio_val_t {
     RSE_GPIO_STATE_VIRGIN_IDLE = 0x1,
@@ -83,7 +83,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
 
     gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_STARTS);
 
-    plat_err = rse_derive_cm_provisioning_key(RSE_KMU_SLOT_CM_PROVISIONING_KEY);
+    plat_err = rse_setup_cm_provisioning_key();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         BL1_LOG("[ERR] CM provisioning key derivation failed\r\n");
@@ -151,7 +151,7 @@ static enum tfm_plat_err_t provision_psa_rot(void)
 
     gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_STARTS);
 
-    plat_err = rse_derive_dm_provisioning_key(RSE_KMU_SLOT_DM_PROVISIONING_KEY);
+    plat_err = rse_setup_dm_provisioning_key();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         BL1_LOG("[ERR] DM provisioning key derivation failed\r\n");

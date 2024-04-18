@@ -28,6 +28,7 @@ target_sources(bl1_1_lib
 target_include_directories(bl1_1_lib
     INTERFACE
         ./bundle_common
+        ../bl1
 )
 
 add_custom_target(cm_provisioning_key

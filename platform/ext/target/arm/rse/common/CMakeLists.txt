@@ -353,7 +353,8 @@ target_sources(platform_bl1_1
         ./cc312/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
-        ./rse_key_derivation.c
+        ./bl1/rse_kmu_keys.c
+        ./rse_boot_state.c
         $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
