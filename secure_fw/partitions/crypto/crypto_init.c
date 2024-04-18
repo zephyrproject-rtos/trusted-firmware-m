@@ -253,24 +253,23 @@ static psa_status_t tfm_crypto_engine_init(void)
     char *library_info = NULL;
 
 #if CRYPTO_NV_SEED
-    LOG_INFFMT("[INF][Crypto] ");
-    LOG_INFFMT("Provisioning entropy seed... ");
+    LOG_INFFMT("[INF][Crypto] Provision entropy seed...\r\n");
     if (tfm_plat_crypto_provision_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
-    LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
+    LOG_INFFMT("[INF][Crypto] Provision entropy seed... \033[0;32mcomplete\033[0m.\r\n");
 #endif /* CRYPTO_NV_SEED */
 
     /* Initialise the underlying Cryptographic library that provides the
      * PSA Crypto core layer
      */
     library_info = tfm_crypto_library_get_info();
-    LOG_DBGFMT("[DBG][Crypto] Initialising \033[0;32m%s\033[0m as PSA Crypto backend library... ", library_info);
+    LOG_DBGFMT("[DBG][Crypto] Init \033[0;32m%s\033[0m...\r\n", library_info);
     status = tfm_crypto_core_library_init();
     if (status != PSA_SUCCESS) {
         return status;
     }
-    LOG_DBGFMT("\033[0;32mcomplete.\033[0m\r\n");
+    LOG_DBGFMT("[DBG][Crypto] Init \033[0;32m%s\033[0m... \033[0;32mcomplete\033[0m.\r\n", library_info);
 
     /* Initialise the crypto accelerator if one is enabled. If the driver API is
      * the one defined by the PSA Unified Driver interface, the initialisation is
@@ -278,11 +277,11 @@ static psa_status_t tfm_crypto_engine_init(void)
      * initialised
      */
 #if defined(CRYPTO_HW_ACCELERATOR) && defined(LEGACY_DRIVER_API_ENABLED)
-    LOG_INFFMT("[INF][Crypto] Initialising HW accelerator... ");
+    LOG_INFFMT("[INF][Crypto] Init HW accelerator...\r\n");
     if (crypto_hw_accelerator_init() != 0) {
         return PSA_ERROR_HARDWARE_FAILURE;
     }
-    LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
+    LOG_INFFMT("[INF][Crypto] Init HW accelerator... \033[0;32mcomplete\033[0m.\r\n");
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     /* Perform the initialisation of the PSA subsystem available through the chosen
