@@ -35,6 +35,7 @@ target_include_directories(tfm_spm
     PRIVATE
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/secure_fw/include
+        ${CMAKE_SOURCE_DIR}/secure_fw/partitions/lib/runtime
         ${CMAKE_BINARY_DIR}/generated
         ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
         ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/core

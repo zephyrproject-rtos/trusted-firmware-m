@@ -30,6 +30,7 @@
 #include "load/spm_load_api.h"
 #include "psa/error.h"
 #include "internal_status_code.h"
+#include "sprt_partition_metadata_indicator.h"
 
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
@@ -50,9 +51,6 @@ ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
 
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 #endif
-
-/* Indicator point to the partition meta */
-uintptr_t *partition_meta_indicator_pos;
 
 #if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
 static bool basepri_set_by_ipc_schedule;
@@ -349,7 +347,6 @@ uint32_t backend_system_run(void)
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);
 
-    partition_meta_indicator_pos = (uintptr_t *)PART_LOCAL_STORAGE_PTR_POS;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
@@ -543,8 +540,8 @@ uint64_t ipc_schedule(uint32_t exc_return)
     }
 
     /* Update meta indicator */
-    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
-        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
+    if (p_part_next->p_metadata) {
+        p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
     }
     CRITICAL_SECTION_LEAVE(cs);
 
