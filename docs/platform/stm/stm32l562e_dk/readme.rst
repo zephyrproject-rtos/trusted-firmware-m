@@ -23,7 +23,7 @@ in Isolation Level 1.
     cd <trusted-firmware-m folder>
 
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    git checkout <recommended tf-m-tests commit>
+    git checkout <recommended tf-m-tests commit> (..\trusted-firmware-m\lib\ext\tf-m-tests\version.txt)
 
     mkdir build_s && cd build_s
 
@@ -52,7 +52,7 @@ the attestation service in Isolation Level 1 on Linux.
     cd <trusted-firmware-m folder>
 
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    git checkout <recommended tf-m-tests commit>
+    git checkout <recommended tf-m-tests commit> (..\trusted-firmware-m\lib\ext\tf-m-tests\version.txt)
 
     mkdir build_s && cd build_s
 
