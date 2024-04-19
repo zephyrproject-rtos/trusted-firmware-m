@@ -540,9 +540,11 @@ uint64_t ipc_schedule(uint32_t exc_return)
     }
 
     /* Update meta indicator */
-    if (p_part_next->p_metadata) {
-        p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
+    if (p_part_next->p_metadata == NULL) {
+        tfm_core_panic();
     }
+    p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
+
     CRITICAL_SECTION_LEAVE(cs);
 
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
