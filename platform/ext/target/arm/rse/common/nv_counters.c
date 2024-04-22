@@ -177,6 +177,9 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
     case (PLAT_NV_COUNTER_BL1_0):
         return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, val);
 
+    case (PLAT_NV_COUNTER_ATTACK_TRACKING):
+        return read_otp_counter(PLAT_OTP_ID_ATTACK_TRACKING_BITS, val);
+
     default:
         return TFM_PLAT_ERR_READ_NV_COUNTER_UNSUPPORTED;
     }
@@ -212,7 +215,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
         counter_value[idx] = (1 << (val % 32)) - 1;
     }
 
-    err = tfm_plat_otp_write(id, sizeof(counter_value),
+    err = tfm_plat_otp_write(id, counter_size,
                              (uint8_t *)counter_value);
 
     return err;
@@ -279,6 +282,9 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
 
     case (PLAT_NV_COUNTER_BL1_0):
         return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, value);
+
+    case (PLAT_NV_COUNTER_ATTACK_TRACKING):
+        return set_otp_counter(PLAT_OTP_ID_ATTACK_TRACKING_BITS, value);
 
     default:
         return TFM_PLAT_ERR_SET_NV_COUNTER_UNSUPPORTED;

@@ -46,7 +46,7 @@
 #define USER_AREA_SIZE(x)    (sizeof(((struct plat_user_area_layout_t *)0)->x))
 
 #define OTP_ADDRESS(x)       ((LCM_BASE_S) + 0x1000 + OTP_OFFSET(x))
-#define USER_AREA_ADDRESS(x) ((LCM_BASE_S) + 0x1000 + USER_AREA_OFFSET(x))
+#define USER_AREA_ADDRESS(x) ((void *)((LCM_BASE_S) + 0x1000 + USER_AREA_OFFSET(x)))
 
 #define OTP_ROM_ENCRYPTION_KEY KMU_HW_SLOT_KCE_CM
 #define OTP_RUNTIME_ENCRYPTION_KEY KMU_HW_SLOT_KCE_DM
@@ -66,6 +66,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
             uint64_t dm_locked_size;
             uint32_t dm_locked_size_zero_count;
             uint32_t dm_zero_count;
+
+            uint32_t attack_tracking_bits[4];
 
             __PACKED_STRUCT {
                 uint32_t bl1_2_image_len;
@@ -272,6 +274,8 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_RSE_TO_RSE_SENDER_ROUTING_TABLE] = USER_AREA_OFFSET(dm_locked.rse_to_rse_sender_routing_table),
     [PLAT_OTP_ID_RSE_TO_RSE_RECEIVER_ROUTING_TABLE] = USER_AREA_OFFSET(dm_locked.rse_to_rse_receiver_routing_table),
 #endif /* RSE_AMOUNT > 1 */
+
+    [PLAT_OTP_ID_ATTACK_TRACKING_BITS] = USER_AREA_OFFSET(attack_tracking_bits),
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
@@ -392,6 +396,8 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_RSE_TO_RSE_SENDER_ROUTING_TABLE] = USER_AREA_SIZE(dm_locked.rse_to_rse_sender_routing_table),
     [PLAT_OTP_ID_RSE_TO_RSE_RECEIVER_ROUTING_TABLE] = USER_AREA_SIZE(dm_locked.rse_to_rse_receiver_routing_table),
 #endif /* RSE_AMOUNT > 1 */
+
+    [PLAT_OTP_ID_ATTACK_TRACKING_BITS] = USER_AREA_SIZE(attack_tracking_bits),
 };
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
@@ -720,6 +726,8 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     uint32_t otp_size;
     enum lcm_error_t err;
     enum lcm_lcs_t lcs;
+    enum integrity_checker_error_t ic_err;
+    uint32_t unset_tracking_bits;
 
     err = lcm_init(&LCM_DEV_S);
     if (err != LCM_ERROR_NONE) {
@@ -743,6 +751,20 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (err != LCM_ERROR_NONE) {
         return err;
+    }
+
+    ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
+                                             INTEGRITY_CHECKER_MODE_ZERO_COUNT,
+                                             USER_AREA_ADDRESS(attack_tracking_bits),
+                                             USER_AREA_SIZE(attack_tracking_bits),
+                                             &unset_tracking_bits,
+                                             sizeof(unset_tracking_bits), NULL);
+    if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    if (unset_tracking_bits == 0) {
+        return TFM_PLAT_ERR_NOT_PERMITTED;
     }
 
     return check_keys_for_tampering(lcs);
@@ -852,7 +874,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             /* Write the zero-bit count of the CM locked area size */
             ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
                                                      INTEGRITY_CHECKER_MODE_ZERO_COUNT,
-                                                     &region_size,
+                                                     (uint32_t*)&region_size,
                                                      sizeof(region_size),
                                                      &zero_bit_count,
                                                      sizeof(zero_bit_count),
@@ -898,7 +920,7 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
             /* Write the zero-bit count of the DM locked area size */
             ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
                                                      INTEGRITY_CHECKER_MODE_ZERO_COUNT,
-                                                     &region_size,
+                                                     (uint32_t*)&region_size,
                                                      sizeof(region_size),
                                                      &zero_bit_count,
                                                      sizeof(zero_bit_count),
