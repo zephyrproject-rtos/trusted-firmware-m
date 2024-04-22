@@ -6,7 +6,7 @@ TF-M has been under active development since it was launched in Q1'18. It is
 being designed to include
 
 1. Secure boot ensuring integrity of runtime images and responsible for firmware upgrade.
-2. Runtime firmware consisting of TF-M Core responsible for secure isolation,
+2. Runtime firmware consisting of TF-M Core is responsible for secure isolation,
    execution and communication aspects. and a set of Secure Services providing
    services to the Non-Secure and Secure Applications. The secures services
    currently supported are Secure Storage, Cryptography, Firmware Update,
@@ -26,11 +26,9 @@ Supported Features
 - PSA Initial Attestation Service v1.0
 - PSA Firmware Update v1.0
 - PSA ADAC Specification Implementation
-- Base Config
-- kconfig based configuration
+- Base Config, kconfig based configuration
 - Profile Small, Medium, ARoT-less Medium, Large
 - Secure Partition Interrupt Handling, Pre-emption of SPE execution
-- Platform Reset Service
 - Dual CPU
 - Open Continuous Integration (CI) System
 - Boot and Runtime Crypto Hardware Integration
@@ -41,29 +39,27 @@ Supported Features
 - CC-312 PSA Cryptoprocessor Driver Interface
 - Secure Storage - Key Diversification Enhancements
 - Build System - Separate Secure and Non-Secure builds
+- PSA Crypto layer for mcuboot/BL2
 
 ******
-CQ1'24
+CQ2'24
 ******
 - Supporting multiple clients (Hybrid Platforms) i.e. TF-M supporting multiple on
   core and off core clients on heterogeneous (e.g. Cortex-A + Cortex-M platforms)
   Mailbox API etc.
-- PSA Crypto layer for mcuboot/BL2
-- Enable PSA Crypto Client from Non-Secure via. IPC
-- Long Term Stable (LTS) Release preparations
+- Mbed TLS 3.6-LTS integration
+- TF-M v2.1.0 Long Term Stable (LTS) Release
+- Remote Test Infrastructure
+- Arm v8.1-M Architecture Enablement - PAC/BTI
 
 ******
 Future
 ******
-- TF-M v2.1.0 Long Term Stable (LTS) Release
-- Demonstrating TLS in Non-Secure using PSA Crypto APIs in TF-M
-- Implement support for multiple clients (Hybrid Platforms)
-- Build System Enhancements - Separate Secure, Non-Secure Builds
-- Remote Test Infrastructure
+- Implement support for multiple clients (Hybrid Platforms) contd.
+- Build System Enhancements - Simplify build scripts
 - MISRA testing/documentation
 - TF-M Performance - Further Benchmarking and Optimization
 - Scheduler - Multiple Secure Context Implementation
-- Arm v8.1-M Architecture Enablement - PAC/BTI
 - PSA FWU Service Enhancements
 - PSA ADAC Spec - Enhancements and Testing
 - Arm v8.1-M Unprevileged Debug
