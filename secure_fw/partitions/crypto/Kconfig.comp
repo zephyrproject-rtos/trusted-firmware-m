@@ -17,8 +17,8 @@ config CRYPTO_ENGINE_BUF_SIZE
     default 0x4000 if CRYPTO_HW_ACCELERATOR_CC312
     default 0x2080
     help
-      The mbed TLS library requires to provide a static buffer to be used as
-      heap for its internal allocation CRYPTO_ENGINE_BUF_SIZE needs to be >8KB
+      The Mbed TLS library requires to provide a static buffer to be used as
+      heap for its internal allocation CRYPTO_ENGINE_BUF_SIZE needs to be > 8KB
       for EC signing by attest module.
 
 config CRYPTO_IOVEC_BUFFER_SIZE
