@@ -159,6 +159,9 @@ __PACKED_STRUCT plat_user_area_layout_t {
     } dma_initial_command_sequence;
 };
 
+uint32_t * const attack_tracking_bits_ptr = USER_AREA_ADDRESS(attack_tracking_bits);
+const uint32_t attack_tracking_bits_word_size = USER_AREA_SIZE(attack_tracking_bits) / sizeof(uint32_t);
+
 static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_HUK] = OTP_OFFSET(huk),
     [PLAT_OTP_ID_GUK] = OTP_OFFSET(guk),

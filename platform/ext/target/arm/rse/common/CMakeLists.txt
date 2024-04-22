@@ -207,6 +207,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
         ./cc3xx/cc3xx_aes_external_key_loader.c
+        ./rse_attack_tracking_counter.c
 )
 
 target_link_libraries(platform_s
@@ -287,6 +288,7 @@ target_sources(platform_bl2
         $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
+        ./rse_attack_tracking_counter.c
 )
 
 target_include_directories(platform_bl2
@@ -375,6 +377,7 @@ target_sources(platform_bl1_1
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
         $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
         $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+        ./rse_attack_tracking_counter.c
 )
 
 target_include_directories(platform_bl1_1_interface
