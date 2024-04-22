@@ -105,7 +105,8 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
     case 0xC1:
         P_CC3XX->aes.aes_dummy_rounds_enable = 0x1;
         while(!P_CC3XX->aes.aes_rbg_seeding_rdy){}
-        err = cc3xx_lowlevel_rng_get_random((uint8_t *)&aes_rbg_seed, 1);
+        err = cc3xx_lowlevel_rng_get_random((uint8_t *)&aes_rbg_seed, 1,
+                                            CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }

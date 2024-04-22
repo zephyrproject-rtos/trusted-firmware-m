@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +17,11 @@
 extern "C" {
 #endif
 
+enum cc3xx_rng_quality_t {
+    CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE,
+    CC3XX_RNG_FAST,
+};
+
 /**
  * @brief                        Get random bytes from the CC3XX TRNG.
  *
@@ -32,7 +37,8 @@ extern "C" {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length);
+cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
+                                          enum cc3xx_rng_quality_t quality);
 
 /**
  * @brief                        Get a random unsigned integer from the CC3XX
@@ -48,7 +54,25 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint);
+cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint,
+                                               enum cc3xx_rng_quality_t quality);
+
+/**
+ * @brief                        Get a random unsigned integer from the CC3XX
+ *                               TRNG. The value is uniformly distributed
+ *                               between 0 and bound - 1.
+ *
+ * @note                         This function may take a variable amount of
+ *                               time to execute.
+ *
+ * @param[in]  bound             A value N such that 0 <= output < N
+ * @param[out] uint              A pointer to the uint32_t to output into.
+ *
+ * @return                       CC3XX_ERR_SUCCESS on success, another
+ *                               cc3xx_err_t on error.
+ */
+cc3xx_err_t cc3xx_lowlevel_rng_get_random_permutation(uint8_t *permutation_buf, size_t len,
+                                                      enum cc3xx_rng_quality_t quality);
 
 #ifdef __cplusplus
 }

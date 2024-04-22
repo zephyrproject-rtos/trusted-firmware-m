@@ -65,7 +65,8 @@ psa_status_t cc3xx_init_random(cc3xx_random_context_t *context)
 
     CC3XX_ASSERT(context != NULL);
 
-    err = cc3xx_lowlevel_rng_get_random(initial_entropy, sizeof(initial_entropy));
+    err = cc3xx_lowlevel_rng_get_random(initial_entropy, sizeof(initial_entropy),
+                                        CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
     if (err != CC3XX_ERR_SUCCESS) {
         return cc3xx_to_psa_err(err);
     }

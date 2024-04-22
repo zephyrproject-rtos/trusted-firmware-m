@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2023-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -309,7 +309,8 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
     bool are_different = 0;
 
     if (chacha_state.direction == CC3XX_CHACHA_DIRECTION_DECRYPT) {
-        cc3xx_random_permutation_generate(permutation_buf, tag_word_size);
+        cc3xx_lowlevel_rng_get_random_permutation(permutation_buf, tag_word_size,
+                                                  CC3XX_RNG_FAST);
 
         for (idx = 0; idx < tag_word_size; idx++) {
             are_different |= tag[permutation_buf[idx]] ^ calculated_tag[permutation_buf[idx]];

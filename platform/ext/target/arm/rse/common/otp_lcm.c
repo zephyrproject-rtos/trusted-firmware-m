@@ -567,7 +567,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
         return plat_err;
     }
 
-    cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
+    cc3xx_secure_erase_buffer(tmp_buf, sizeof(tmp_buf) / sizeof(uint32_t));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }

@@ -17,7 +17,11 @@
 extern "C" {
 #endif
 
-cc3xx_err_t rng_get_random(uint8_t* buf, size_t length);
+cc3xx_err_t trng_init(void);
+
+cc3xx_err_t trng_get_random(uint32_t *buf, size_t word_count);
+
+cc3xx_err_t trng_finish(void);
 
 #ifdef __cplusplus
 }

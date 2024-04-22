@@ -36,7 +36,8 @@ psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
 
     *estimate_bits = 0;
 
-    err = cc3xx_lowlevel_rng_get_random(output, output_size);
+    err = cc3xx_lowlevel_rng_get_random(output, output_size,
+                                        CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
     if (err != CC3XX_ERR_SUCCESS) {
         return cc3xx_to_psa_err(err);
     }
