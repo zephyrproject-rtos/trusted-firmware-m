@@ -9,6 +9,8 @@
 #define __TFM_MULTI_CORE_H__
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 /* Follow CMSE flag definitions */
 #define MEM_CHECK_MPU_READWRITE         (1 << 0x0)
