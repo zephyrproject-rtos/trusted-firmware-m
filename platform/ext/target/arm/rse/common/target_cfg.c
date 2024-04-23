@@ -363,8 +363,14 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (HOST_ACCESS_LIMIT_NS & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
-    /* Allows SAU to define the RAM region as a NSC */
+    /* Allows SAU to define the CODE region as NSC when XIP is enabled or the
+     * RAM region otherwise
+     */
+#ifdef RSE_XIP
+    sacfg->nsccfg |= CODENSC;
+#else
     sacfg->nsccfg |= RAMNSC;
+#endif
 
     /* Configure MSC to enable secure accesses for the DMA */
     sacfg->nsmscexp = 0x0;
