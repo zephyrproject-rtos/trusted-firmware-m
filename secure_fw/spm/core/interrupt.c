@@ -154,7 +154,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 {
     psa_flih_result_t flih_result;
     struct partition_t *p_part;
-    psa_status_t ret = 0;
+    psa_status_t ret;
     FIH_RET_TYPE(bool) fih_bool;
 
     if (!p_pt || !p_ildi) {
@@ -175,6 +175,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         /* FLIH Model Handling */
 #if TFM_ISOLATION_LEVEL == 1
         flih_result = p_ildi->flih_func();
+        (void)fih_bool;
 #else
         FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
                  spm_boundary, p_part->boundary);
@@ -196,6 +197,8 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         if (ret == STATUS_NEED_SCHEDULE) {
             arch_attempt_schedule();
         }
+#else
+        (void)ret;
 #endif
     }
 }

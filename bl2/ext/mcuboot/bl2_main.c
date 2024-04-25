@@ -70,6 +70,7 @@ static void do_boot(struct boot_rsp *rsp)
      */
     rc = flash_device_base(rsp->br_flash_dev_id, &flash_base);
     assert(rc == 0);
+    (void)rc;
 
     if (rsp->br_hdr->ih_flags & IMAGE_F_RAM_LOAD) {
        /* The image has been copied to SRAM, find the vector table

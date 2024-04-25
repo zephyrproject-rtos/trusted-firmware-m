@@ -144,10 +144,13 @@ enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev)
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
     uint32_t i = (mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
-    fih_int fih_rc = FIH_FAILURE;
+    fih_int fih_rc;
 
     while (i > 0) {
         FIH_CALL(mpu_armv8m_region_disable, fih_rc, dev, i - 1);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            return MPU_ARMV8M_ERROR;
+        }
         i--;
     }
 
