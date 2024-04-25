@@ -142,6 +142,15 @@ macro(tfm_toolchain_reload_compiler)
         )
         set(LINKER_CP_OPTION --fpu=none)
     endif()
+
+    add_compile_definitions(
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:__ARM_ARCH_6M__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:__ARM_ARCH_7M__=1>
+        $<$<AND:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>,$<BOOL:__ARM_FEATURE_DSP>>:__ARM_ARCH_7EM__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:__ARM_ARCH_8M_BASE__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:__ARM_ARCH_8M_MAIN__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>
+    )
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first

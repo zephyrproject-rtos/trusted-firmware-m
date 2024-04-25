@@ -342,7 +342,15 @@ __attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
                     "eor  r0, r0, r0         \n"
                     "vmsr fpscr, r0          \n"
 #if (defined(__ARM_ARCH_8_1M_MAIN__))
+/* IAR throws an error if the S0-S31 syntax is used.
+ * Splitting the command into two parts solved the issue.
+ */
+#if defined(__ICCARM__)
+                    "vscclrm {s0-s30,vpr}    \n"
+                    "vscclrm {s31,vpr}       \n"
+#else
                     "vscclrm {s0-s31,vpr}    \n"
+#endif
 #else
                     "vmov s0, r0             \n"
                     "vmov s1, r0             \n"
