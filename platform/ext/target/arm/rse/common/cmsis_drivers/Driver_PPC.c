@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2024 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,9 @@ static RSE_PPC_Resources MAIN0_PPC_DEV = {
 /* MAIN0 PPC Driver wrapper functions */
 static int32_t PPC_RSE_MAIN0_Initialize(void)
 {
-    ppc_rse_init(MAIN0_PPC_DEV.dev);
+    if (ppc_rse_init(MAIN0_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -163,7 +165,9 @@ static RSE_PPC_Resources MAIN_EXP0_PPC_DEV = {
 /* MAIN PPCEXP0 Driver wrapper functions */
 static int32_t PPC_RSE_MAIN_EXP0_Initialize(void)
 {
-    ppc_rse_init(MAIN_EXP0_PPC_DEV.dev);
+    if (ppc_rse_init(MAIN_EXP0_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -278,7 +282,9 @@ static RSE_PPC_Resources MAIN_EXP1_PPC_DEV = {
 /* MAIN PPCEXP1 Driver wrapper functions */
 static int32_t PPC_RSE_MAIN_EXP1_Initialize(void)
 {
-    ppc_rse_init(MAIN_EXP1_PPC_DEV.dev);
+    if (ppc_rse_init(MAIN_EXP1_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -393,7 +399,9 @@ static RSE_PPC_Resources MAIN_EXP2_PPC_DEV = {
 /* MAIN PPCEXP2 Driver wrapper functions */
 static int32_t PPC_RSE_MAIN_EXP2_Initialize(void)
 {
-    ppc_rse_init(MAIN_EXP2_PPC_DEV.dev);
+    if (ppc_rse_init(MAIN_EXP2_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -508,7 +516,9 @@ static RSE_PPC_Resources MAIN_EXP3_PPC_DEV = {
 /* MAIN PPCEXP3 Driver wrapper functions */
 static int32_t PPC_RSE_MAIN_EXP3_Initialize(void)
 {
-    ppc_rse_init(MAIN_EXP3_PPC_DEV.dev);
+    if (ppc_rse_init(MAIN_EXP3_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -623,7 +633,9 @@ static RSE_PPC_Resources PERIPH0_PPC_DEV = {
 /* PERIPH0 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH0_Initialize(void)
 {
-    ppc_rse_init(PERIPH0_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH0_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -738,7 +750,9 @@ static RSE_PPC_Resources PERIPH1_PPC_DEV = {
 /* PERIPH1 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH1_Initialize(void)
 {
-    ppc_rse_init(PERIPH1_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH1_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -853,7 +867,9 @@ static RSE_PPC_Resources PERIPH_EXP0_PPC_DEV = {
 /* PERIPH PPCEXP0 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH_EXP0_Initialize(void)
 {
-    ppc_rse_init(PERIPH_EXP0_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH_EXP0_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -968,7 +984,9 @@ static RSE_PPC_Resources PERIPH_EXP1_PPC_DEV = {
 /* PERIPH PPCEXP1 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH_EXP1_Initialize(void)
 {
-    ppc_rse_init(PERIPH_EXP1_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH_EXP1_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -1083,7 +1101,9 @@ static RSE_PPC_Resources PERIPH_EXP2_PPC_DEV = {
 /* PERIPH PPCEXP2 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH_EXP2_Initialize(void)
 {
-    ppc_rse_init(PERIPH_EXP2_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH_EXP2_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -1198,7 +1218,9 @@ static RSE_PPC_Resources PERIPH_EXP3_PPC_DEV = {
 /* PERIPH PPCEXP3 Driver wrapper functions */
 static int32_t PPC_RSE_PERIPH_EXP3_Initialize(void)
 {
-    ppc_rse_init(PERIPH_EXP3_PPC_DEV.dev);
+    if (ppc_rse_init(PERIPH_EXP3_PPC_DEV.dev) != PPC_RSE_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }

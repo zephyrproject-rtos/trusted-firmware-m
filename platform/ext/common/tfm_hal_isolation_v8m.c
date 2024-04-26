@@ -195,7 +195,9 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
     if (mpc_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
-    ppc_init_cfg();
+    if (ppc_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
 
     /* Set up static isolation boundaries inside SPE */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
