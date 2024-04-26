@@ -255,7 +255,7 @@ static thrd_fn_t partition_init(struct partition_t *p_pt,
         p_pt->signals_allowed |= ASYNC_MSG_REPLY;
     }
 
-    UNI_LISI_INIT_NODE(p_pt, p_handles);
+    UNI_LIST_INIT_NODE(p_pt, p_handles);
 
     if (IS_IPC_MODEL(p_pt->p_ldinf)) {
         /* IPC Partition */
