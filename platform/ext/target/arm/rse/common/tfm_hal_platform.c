@@ -12,6 +12,7 @@
 #include "uart_stdout.h"
 #include "device_definition.h"
 #include "rse_clocks.h"
+#include "rse_sam_config.h"
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "host_base_address.h"
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
@@ -52,7 +53,8 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     __enable_irq();
     stdio_init();
 
-    if (sam_init(&SAM_DEV_S) != SAM_ERROR_NONE) {
+    plat_err = rse_sam_init(RSE_SAM_INIT_SETUP_FULL);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
 

@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- *
  * SPDX-License-Identifier: BSD-3-Clause
- *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  */
 
 #include "boot_hal.h"
@@ -36,6 +34,7 @@
 #include "tfm_hal_device_header.h"
 #include "dpa_hardened_word_copy.h"
 #include "rse_clocks.h"
+#include "rse_sam_config.h"
 #if RSE_AMOUNT > 1
 #include "rse_handshake.h"
 #endif
@@ -318,6 +317,8 @@ void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
         while (1);
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+    rse_sam_finish();
 
     result = FLASH_DEV_NAME.Uninitialize();
     if (result != ARM_DRIVER_OK) {

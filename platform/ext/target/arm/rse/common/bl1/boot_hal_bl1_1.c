@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- *
  * SPDX-License-Identifier: BSD-3-Clause
- *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  */
 
 #include "boot_hal.h"
@@ -31,6 +29,7 @@
 #include "rse_otp_emulation.h"
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 #include "trng.h"
+#include "rse_sam_config.h"
 #include "tfm_log.h"
 #include "bl1_1_debug.h"
 
@@ -92,6 +91,11 @@ int32_t boot_platform_init(void)
         rse_run_bringup_helpers_if_requested();
     }
 #endif /* RSE_ENABLE_BRINGUP_HELPERS */
+
+    err = rse_sam_init(RSE_SAM_INIT_SETUP_HANDLERS_ONLY);
+    if (err != 0) {
+        return err;
+    }
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
     if (rse_otp_emulation_is_enabled()) {

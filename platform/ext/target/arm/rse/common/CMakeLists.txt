@@ -208,7 +208,6 @@ target_sources(platform_s
         otp_lcm.c
         nv_counters.c
         attest_hal.c
-        sam_interrupts.c
         tfm_hal_platform_reset.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_checker_layer.c>
@@ -217,6 +216,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
         ./cc3xx/cc3xx_aes_external_key_loader.c
+        ./rse_sam_config.c
         ./rse_attack_tracking_counter.c
         runtime_shared_data.c
         soft_crc/soft_crc.c
@@ -319,6 +319,8 @@ target_sources(platform_bl2
         $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
+        ./rse_sam_config.c
         ./rse_attack_tracking_counter.c
         $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/staged_boot.c>
         $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash_memcpy.c>
@@ -381,6 +383,11 @@ target_compile_options(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${COMPILER_CMSE_FLAG}>
 )
 
+target_sources(bl2
+    PRIVATE
+        sam_interrupts.c
+)
+
 #========================= Platform bl1_1 =======================================#
 
 target_sources(platform_bl1_1
@@ -414,6 +421,8 @@ target_sources(platform_bl1_1
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
         $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
         $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+        ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
+        ./rse_sam_config.c
         ./rse_attack_tracking_counter.c
         runtime_shared_data.c
         soft_crc/soft_crc.c
@@ -506,6 +515,11 @@ target_sources(bl1_1_shared_lib
         $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
 )
 
+target_sources(bl1_1
+    PRIVATE
+        sam_interrupts.c
+)
+
 #========================= Platform BL1_2 =====================================#
 
 target_sources(platform_bl1_2
@@ -516,6 +530,7 @@ target_sources(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ./bl1/bl1_2_debug.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
+        ./sam_interrupts.c
 )
 
 target_include_directories(platform_bl1_2
@@ -575,6 +590,7 @@ target_sources(tfm_spm
 target_sources(tfm_s
     PRIVATE
         ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
+        sam_interrupts.c
 )
 
 #=========================== CPAK generator tool ===============================

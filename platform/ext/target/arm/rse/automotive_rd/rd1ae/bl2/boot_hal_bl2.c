@@ -21,6 +21,7 @@
 #include "platform_regs.h"
 #include "rse_expansion_regs.h"
 #include "tfm_plat_defs.h"
+#include "rse_sam_config.h"
 
 #include <string.h>
 
@@ -106,6 +107,11 @@ int32_t boot_platform_post_init(void)
 {
     int32_t result;
 
+    result = rse_sam_init(RSE_SAM_INIT_SETUP_FULL);
+    if (result != 0) {
+        return result;
+    }
+
     result = AP_FLASH_DEV_NAME.Initialize(NULL);
     if (result != 0) {
         return result;
@@ -185,6 +191,8 @@ static int boot_platform_finish(void)
         return 1;
     }
     BOOT_LOG_INF("BL2: RSE to SCP doorbell set!");
+
+    rse_sam_finish();
 
     /*
      * Disable SCP to RSE MHUv3 Interrupt to ensure interrupt doesn't trigger

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+
 #include "sam_drv.h"
+
 #include "sam_reg_map.h"
 #include "tfm_hal_device_header.h"
 
@@ -35,7 +38,16 @@
 /* Mask for response in the samrrls register for event_id */
 #define SAMRRLS_MASK(event_id) (0xFUL << SAMRRLS_OFF(event_id))
 
-static uint32_t zero_count(uint32_t val)
+/* Mask for NEC in SAMBC */
+#define SAMBC_NUMBER_EVENT_COUNTERS_MASK (0x03)
+
+/* Position for NEC in SAMBC */
+#define SAMBC_NUMBER_EVENT_COUNTERS_POS 8
+
+/* Mask for Initialization value for the Watchdog */
+#define SAMWDCIV_INIT_VALUE_WDT_MASK (0x3FFFFFFUL)
+
+static uint32_t count_zero_bits(uint32_t val)
 {
     uint32_t res = 32;
 
@@ -58,15 +70,16 @@ static uint32_t log2(uint32_t val)
     return res;
 }
 
+static inline struct sam_reg_map_t *get_sam_dev_base(
+    const struct sam_dev_t *dev)
+{
+    assert(dev != NULL);
+    return (struct sam_reg_map_t *)dev->cfg->base;
+}
+
 enum sam_error_t sam_init(const struct sam_dev_t *dev)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
-    volatile uint32_t *sam_cfg_base = regs->samem;
-
-    /* Write the default config */
-    for (size_t i = 0; i < SAM_CONFIG_LEN; i++) {
-        sam_cfg_base[i] = dev->cfg->default_config[i];
-    }
+    /* Nothing to do, the configuration is written by the OTP DMA ICS */
 
     return SAM_ERROR_NONE;
 }
@@ -74,9 +87,9 @@ enum sam_error_t sam_init(const struct sam_dev_t *dev)
 enum sam_error_t sam_enable_event(const struct sam_dev_t *dev,
                                   enum sam_event_id_t event_id)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
 
-    if (event_id > SAM_MAX_EVENT_ID) {
+    if (event_id > SAM_EVENT_ID_MAX) {
         return SAM_ERROR_INVALID_ARGUMENT;
     }
 
@@ -92,9 +105,9 @@ enum sam_error_t sam_enable_event(const struct sam_dev_t *dev,
 enum sam_error_t sam_disable_event(const struct sam_dev_t *dev,
                                    enum sam_event_id_t event_id)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
 
-    if (event_id > SAM_MAX_EVENT_ID) {
+    if (event_id > SAM_EVENT_ID_MAX) {
         return SAM_ERROR_INVALID_ARGUMENT;
     }
 
@@ -109,22 +122,22 @@ enum sam_error_t sam_disable_event(const struct sam_dev_t *dev,
 
 enum sam_error_t sam_set_event_response(const struct sam_dev_t *dev,
                                         enum sam_event_id_t event_id,
-                                        enum sam_response_t response,
-                                        bool enable_response)
+                                        enum sam_response_t response)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
     uint32_t old_reg_val;
     uint32_t new_reg_val;
     uint32_t rrl_val;
+    uint32_t event_enabled;
 
-    if (event_id > SAM_MAX_EVENT_ID || response > SAM_MAX_RESPONSE_ACTION ||
-        response == SAM_RESPONSE_NONE) {
+    if ((event_id > SAM_EVENT_ID_MAX) || (response > SAM_RESPONSE_ACTION_MAX)) {
         return SAM_ERROR_INVALID_ARGUMENT;
     }
 
     old_reg_val = regs->samrrls[SAMRRLS_IDX(event_id)];
 
-    rrl_val = ((uint32_t)enable_response << 3UL) | log2((uint32_t)response);
+    event_enabled = (response != SAM_RESPONSE_NONE);
+    rrl_val = (event_enabled << 3UL) | log2((uint32_t)response);
 
     new_reg_val = (old_reg_val & ~SAMRRLS_MASK(event_id)) |
                   ((rrl_val << SAMRRLS_OFF(event_id)) & SAMRRLS_MASK(event_id));
@@ -132,7 +145,7 @@ enum sam_error_t sam_set_event_response(const struct sam_dev_t *dev,
     regs->samrrls[SAMRRLS_IDX(event_id)] = new_reg_val;
 
     /* Update integrity check value with the difference in zero count */
-    regs->samicv += zero_count(new_reg_val) - zero_count(old_reg_val);
+    regs->samicv += count_zero_bits(new_reg_val) - count_zero_bits(old_reg_val);
 
     return SAM_ERROR_NONE;
 }
@@ -141,23 +154,23 @@ void sam_set_watchdog_counter_initial_value(const struct sam_dev_t *dev,
                                             uint32_t count_value,
                                             enum sam_response_t responses)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
-    uint32_t prev_zero_count = zero_count(regs->samwdciv);
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uint32_t prev_zero_count = count_zero_bits(regs->samwdciv);
 
-    uint32_t wdciv_val = (count_value & 0x3FFFFFFUL) |
+    uint32_t wdciv_val = (count_value & SAMWDCIV_INIT_VALUE_WDT_MASK) |
                          ((((uint32_t)responses >> 2UL) & 0x3FUL) << 26UL);
 
     regs->samwdciv = wdciv_val;
 
     /* Update integrity check value with the difference in zero count */
-    regs->samicv += zero_count(wdciv_val) - prev_zero_count;
+    regs->samicv += count_zero_bits(wdciv_val) - prev_zero_count;
 }
 
 enum sam_error_t sam_register_event_handler(struct sam_dev_t *dev,
                                             enum sam_event_id_t event_id,
                                             sam_event_handler_t event_handler)
 {
-    if (event_id > SAM_MAX_EVENT_ID) {
+    if (event_id > SAM_EVENT_ID_MAX) {
         return SAM_ERROR_INVALID_ARGUMENT;
     }
 
@@ -166,9 +179,62 @@ enum sam_error_t sam_register_event_handler(struct sam_dev_t *dev,
     return SAM_ERROR_NONE;
 }
 
-void sam_handle_event(const struct sam_dev_t *dev)
+bool sam_is_event_pending(const struct sam_dev_t *dev,
+                          enum sam_event_id_t event_id)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+
+    if (event_id > SAM_EVENT_ID_MAX) {
+        return false;
+    }
+
+    return (regs->sames[SAMEx_IDX(event_id)] & SAMEx_MASK(event_id)) != 0;
+}
+
+enum sam_error_t sam_clear_event(const struct sam_dev_t *dev,
+                                 enum sam_event_id_t event_id)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+
+    if (event_id > SAM_EVENT_ID_MAX) {
+        return SAM_ERROR_INVALID_ARGUMENT;
+    }
+
+    regs->samecl[SAMEx_IDX(event_id)] |= SAMEx_MASK(event_id);
+
+    return SAM_ERROR_NONE;
+}
+
+void sam_clear_all_events(const struct sam_dev_t *dev)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+
+    for (uint32_t idx = 0; idx < ARRAY_LEN(regs->samecl); idx++) {
+        regs->samecl[idx] = 0xFFFFFFFF;
+    }
+}
+
+enum sam_error_t sam_handle_event(const struct sam_dev_t *dev,
+                                  enum sam_event_id_t event_id)
+{
+    if (event_id > SAM_EVENT_ID_MAX) {
+        return SAM_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (sam_is_event_pending(dev, event_id)) {
+        if (dev->event_handlers[event_id] != NULL) {
+            dev->event_handlers[event_id](event_id);
+        }
+
+        return sam_clear_event(dev, event_id);
+    }
+
+    return SAM_ERROR_NONE;
+}
+
+void sam_handle_all_events(const struct sam_dev_t *dev)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
     uint32_t reg_idx;
     uint32_t event_id;
     uint32_t mask;
@@ -182,25 +248,16 @@ void sam_handle_event(const struct sam_dev_t *dev)
         sames_val = regs->sames[reg_idx];
         samecl_val = 0;
 
-        /* Skip ECC events, which have their own separate interrupt handlers */
-        if (reg_idx == SAMEx_IDX(SAM_EVENT_SRAM_PARTIAL_WRITE)) {
-            sames_val &= ~(SAMEx_MASK(SAM_EVENT_SRAM_PARTIAL_WRITE) |
-                           SAMEx_MASK(SAM_EVENT_VM0_SINGLE_ECC_ERROR) |
-                           SAMEx_MASK(SAM_EVENT_VM1_SINGLE_ECC_ERROR) |
-                           SAMEx_MASK(SAM_EVENT_VM2_SINGLE_ECC_ERROR) |
-                           SAMEx_MASK(SAM_EVENT_VM3_SINGLE_ECC_ERROR));
-        }
-
         /* Check each bit position until all pending event have been handled
          * (when the clear value equals the status value). In most cases there
          * will only be one pending event.
          */
         for (event_id = reg_idx << 5UL, mask = 1;
-             event_id <= SAM_MAX_EVENT_ID && samecl_val != sames_val;
+             event_id <= SAM_EVENT_ID_MAX && samecl_val != sames_val;
              event_id++, mask <<= 1) {
             if (sames_val & mask) {
-                if (dev->event_handlers[event_id]) {
-                    dev->event_handlers[event_id]();
+                if (dev->event_handlers[event_id] != NULL) {
+                    dev->event_handlers[event_id](event_id);
                 }
                 samecl_val |= mask;
             }
@@ -212,51 +269,55 @@ void sam_handle_event(const struct sam_dev_t *dev)
     }
 }
 
-void sam_handle_partial_write(const struct sam_dev_t *dev)
+uintptr_t sam_get_vm_partial_write_addr(const struct sam_dev_t *dev,
+                                        uint32_t vm_id)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
-    volatile uint64_t *vm_ptr;
-    size_t i;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uintptr_t addr = regs->vmpwca[vm_id];
 
-    /* Handle any partial writes by reading & writing-back the affected memory
-     * address.
-     */
-    for (i = 0; i < ARRAY_LEN(regs->vmpwca); i++) {
-        vm_ptr = (volatile uint64_t *)regs->vmpwca[i];
-        if (vm_ptr) {
-            *vm_ptr = *vm_ptr;
-            regs->vmpwca[i] = 0;
-        }
-    }
+    regs->vmpwca[vm_id] = 0;
 
-    /* Clear partial write error event */
-    regs->samecl[SAMEx_IDX(SAM_EVENT_SRAM_PARTIAL_WRITE)] =
-        SAMEx_MASK(SAM_EVENT_SRAM_PARTIAL_WRITE);
+    return addr;
 }
 
-void sam_handle_single_ecc_error(const struct sam_dev_t *dev)
+uintptr_t sam_get_vm_single_corrected_err_addr(const struct sam_dev_t *dev,
+                                               uint32_t vm_id)
 {
-    struct sam_reg_map_t *regs = (struct sam_reg_map_t *)dev->cfg->base;
-    volatile uint64_t *vm_ptr;
-    size_t i;
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uintptr_t addr = regs->vmsceeca[vm_id];
 
-    /* Handle any single ECC error events by reading & writing-back the affected
-     * memory address.
-     */
-    for (i = 0; i < ARRAY_LEN(regs->vmsceeca); i++) {
-        if (regs->sames[0] & SAMEx_MASK(SAM_EVENT_VM0_SINGLE_ECC_ERROR + i)) {
-            vm_ptr = (volatile uint64_t *)regs->vmsceeca[i];
-            if (vm_ptr) {
-                *vm_ptr = *vm_ptr;
-                regs->vmsceeca[i] = 0;
-            }
-        }
-    }
+    regs->vmsceeca[vm_id] = 0;
 
-    /* Clear single ECC error events */
-    regs->samecl[SAMEx_IDX(SAM_EVENT_VM0_SINGLE_ECC_ERROR)] =
-        SAMEx_MASK(SAM_EVENT_VM0_SINGLE_ECC_ERROR) |
-        SAMEx_MASK(SAM_EVENT_VM1_SINGLE_ECC_ERROR) |
-        SAMEx_MASK(SAM_EVENT_VM2_SINGLE_ECC_ERROR) |
-        SAMEx_MASK(SAM_EVENT_VM3_SINGLE_ECC_ERROR);
+    return addr;
+}
+
+uintptr_t sam_get_vm_double_uncorrected_err_addr(const struct sam_dev_t *dev,
+                                                 uint32_t vm_id)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uintptr_t addr = regs->vmdueeca[vm_id];
+
+    regs->vmdueeca[vm_id] = 0;
+
+    return addr;
+}
+
+uintptr_t sam_get_tram_single_corrected_err_addr(const struct sam_dev_t *dev)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uintptr_t addr = regs->tramsceeca;
+
+    regs->tramsceeca = 0;
+
+    return addr;
+}
+
+uintptr_t sam_get_tram_double_uncorrected_err_addr(const struct sam_dev_t *dev)
+{
+    struct sam_reg_map_t *regs = get_sam_dev_base(dev);
+    uintptr_t addr = regs->tramdueeca;
+
+    regs->tramdueeca = 0;
+
+    return addr;
 }

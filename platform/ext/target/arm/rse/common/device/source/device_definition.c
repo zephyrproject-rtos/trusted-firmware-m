@@ -538,29 +538,6 @@ struct kmu_dev_t KMU_DEV_S = {
 #ifdef SAM_S
 static const struct sam_dev_cfg_t SAM_DEV_CFG_S = {
     .base = SAM_BASE_S,
-
-    /* Default SAM config that enables all events and sets all response actions
-     * to reset (except watchdog).
-     */
-    .default_config = {
-        0xFFFFFFFF, 0x0000001F,
-        0xF99FFFFF, 0x0000001F,
-        0x88888828, 0x88888888,
-        0x80000088, 0x88888008,
-        0x00088888, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000, 0x00000000,
-        0x00000000,
-
-        /* This is the integrity check value, it must equal the zero count of
-         * the rest of the SAM config.
-         */
-        0x0000027C,
-    },
 };
 struct sam_dev_t SAM_DEV_S = {
     .cfg = &SAM_DEV_CFG_S,

@@ -1,8 +1,6 @@
 /*
- * Copyright (c) 2019-2025, Arm Limited. All rights reserved.
- *
  * SPDX-License-Identifier: BSD-3-Clause
- *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  */
 
 #include "boot_hal.h"
@@ -34,6 +32,7 @@
 #include "plat_def_fip_uuid.h"
 #include "flash_map/flash_map.h"
 #include "mhu.h"
+#include "rse_sam_config.h"
 
 #ifdef RSE_BL2_ENABLE_IMAGE_STAGING
 #include "staged_boot.h"
@@ -81,10 +80,14 @@ int32_t boot_platform_post_init(void)
 #ifdef PLATFORM_HAS_BOOT_DMA
     enum tfm_plat_err_t plat_err;
 #endif /* PLATFORM_HAS_BOOT_DMA */
-
-#ifdef CRYPTO_HW_ACCELERATOR
     int32_t result;
 
+    result = rse_sam_init(RSE_SAM_INIT_SETUP_FULL);
+    if (result != 0) {
+        return result;
+    }
+
+#ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();
     if (result) {
         return 1;
@@ -398,6 +401,8 @@ void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
         while(1){}
     }
 #endif /* FLASH_DEV_NAME_SCRATCH */
+
+    rse_sam_finish();
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 

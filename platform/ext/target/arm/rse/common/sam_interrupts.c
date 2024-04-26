@@ -15,28 +15,29 @@
  */
 
 #include "device_definition.h"
+#include "rse_sam_config.h"
 
 void NMI_Handler(void)
 {
-    sam_handle_event(&SAM_DEV_S);
+    sam_handle_fast_attack_counter_increment();
 }
 
 void SAM_Critical_Sec_Fault_S_Handler(void)
 {
-    sam_handle_event(&SAM_DEV_S);
+    sam_handle_all_events(&SAM_DEV_S);
 }
 
 void SAM_Sec_Fault_S_Handler(void)
 {
-    sam_handle_event(&SAM_DEV_S);
+    sam_handle_all_events(&SAM_DEV_S);
 }
 
 void SRAM_TRAM_ECC_Err_S_Handler(void)
 {
-    sam_handle_single_ecc_error(&SAM_DEV_S);
+    sam_handle_all_events(&SAM_DEV_S);
 }
 
 void SRAM_ECC_Partial_Write_S_Handler(void)
 {
-    sam_handle_partial_write(&SAM_DEV_S);
+    sam_handle_all_events(&SAM_DEV_S);
 }

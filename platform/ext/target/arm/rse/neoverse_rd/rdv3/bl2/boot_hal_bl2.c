@@ -25,6 +25,7 @@
 #include "platform_regs.h"
 #include "psa/crypto.h"
 #include "rse_expansion_regs.h"
+#include "rse_sam_config.h"
 #include "size_defs.h"
 #include "tfm_boot_status.h"
 #include "tfm_plat_defs.h"
@@ -212,6 +213,11 @@ int32_t boot_platform_post_init(void)
 {
     int32_t result;
 
+    result = rse_sam_init(RSE_SAM_INIT_SETUP_FULL);
+    if (result != 0) {
+        return result;
+    }
+
     result = host_system_init();
     if (result != 0) {
         return result;
@@ -264,6 +270,8 @@ static int boot_platform_finish(void)
         return 1;
     }
     BOOT_LOG_INF("BL2: RSE to SCP doorbell set!");
+
+    rse_sam_finish();
 
     /*
      * Disable SCP to RSE MHUv3 Interrupt to ensure interrupt doesn't trigger

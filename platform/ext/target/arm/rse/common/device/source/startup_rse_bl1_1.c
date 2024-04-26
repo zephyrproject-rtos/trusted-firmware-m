@@ -29,6 +29,7 @@
 #if defined(RSE_ENABLE_TRAM)
 #include "uart_stdout.h"
 #endif
+#include "sam_interrupts.h"
 
 /*----------------------------------------------------------------------------
   External References
@@ -78,7 +79,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
        const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
   (VECTOR_TABLE_Type)(&__INITIAL_SP), /*     Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
-  exception_handler,                 /* -14: NMI Handler */
+  NMI_Handler,                       /* -14: NMI Handler */
   exception_handler,                 /* -13: Hard Fault Handler */
   exception_handler,                 /* -12: MPU Fault Handler */
   exception_handler,                 /* -11: Bus Fault Handler */
@@ -127,12 +128,12 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   0,                                 /*  31: Reserved */
 
   /* External interrupts */
-  invalid_irq_handler,               /*  32: SAM Critical Security Fault (Secure) Handler */
-  invalid_irq_handler,               /*  33: SAM Security Fault (Secure) Handler */
+  SAM_Critical_Sec_Fault_S_Handler,  /*  32: SAM Critical Security Fault (Secure) Handler */
+  SAM_Sec_Fault_S_Handler,           /*  33: SAM Security Fault (Secure) Handler */
   invalid_irq_handler,               /*  34: GPIO Combined (Secure) Handler */
   invalid_irq_handler,               /*  35: Secure Debug Channel Handler */
   invalid_irq_handler,               /*  36: FPU Exception Handler */
-  invalid_irq_handler,               /*  37: SRAM or TRAM Corrected ECC Error (Secure) Handler */
+  SRAM_TRAM_ECC_Err_S_Handler,       /*  37: SRAM or TRAM Corrected ECC Error (Secure) Handler */
   invalid_irq_handler,               /*  38: Secure I-Cache (Secure) Handler */
   invalid_irq_handler,               /*  39: ATU (Secure) Handler */
   invalid_irq_handler,               /*  40: CMU MHU 0 Sender Handler */
@@ -156,7 +157,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   invalid_irq_handler,               /*  58: Crypto Engine (Secure) Handler */
   invalid_irq_handler,               /*  59: SoC System Timer 0 AON Handler */
   invalid_irq_handler,               /*  60: SoC System Timer 1 AON Handler */
-  invalid_irq_handler,               /*  61: SRAM ECC Detected Partial Write (Secure) Handler */
+  SRAM_ECC_Partial_Write_S_Handler,  /*  61: SRAM ECC Detected Partial Write (Secure) Handler */
   invalid_irq_handler,               /*  62: Integrity Checker Handler */
   0,                                 /*  63: Reserved */
   0,                                 /*  64: Reserved */

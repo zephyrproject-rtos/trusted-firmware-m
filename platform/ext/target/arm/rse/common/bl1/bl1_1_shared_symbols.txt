@@ -3,6 +3,7 @@ Driver_FLASH0
 KMU_DEV_S
 INTEGRITY_CHECKER_DEV_S
 LCM_DEV_S
+SAM_DEV_S
 atu_initialize_region
 bl1_aes_256_ctr_decrypt
 bl1_derive_key
@@ -41,6 +42,9 @@ rse_derive_vhuk_seed
 rse_setup_runtime_secure_image_encryption_key
 rse_setup_runtime_non_secure_image_encryption_key
 rse_setup_cc3xx_pka_sram_encryption_key
+rse_sam_finish
+sam_handle_all_events
+sam_handle_fast_attack_counter_increment
 stdio_init
 stdio_output_string
 stdio_uninit

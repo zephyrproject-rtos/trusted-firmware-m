@@ -76,6 +76,7 @@ target_sources(rse_bl1_tests
         ../../device/source/system_core_init.c
         ./rse_test_executable.c
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+        ../../sam_interrupts.c
 )
 
 target_link_libraries(rse_bl1_tests
