@@ -367,8 +367,8 @@ uint32_t tfm_spm_init(void)
 
     spm_init_connection_space();
 
-    UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
-    UNI_LISI_INIT_NODE(&services_listhead, next);
+    UNI_LIST_INIT_NODE(PARTITION_LIST_ADDR, next);
+    UNI_LIST_INIT_NODE(&services_listhead, next);
 
     /* Init the nonsecure context. */
     tfm_nspm_ctx_init();
