@@ -501,7 +501,14 @@ target_sources(tfm_spm
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         tfm_hal_platform.c
         tfm_interrupts.c
-        faults.c
+)
+
+# If this is not added to the tfm_s it will not correctly override the weak
+# default handlers declared in assemebly, and will instead be discarded as they
+# are not in use.
+target_sources(tfm_s
+    PRIVATE
+        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
 )
 
 #=========================== CPAK generator tool ===============================
