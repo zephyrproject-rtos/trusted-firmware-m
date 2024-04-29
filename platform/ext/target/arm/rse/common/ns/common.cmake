@@ -53,7 +53,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
         $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
-        TFM_UNIQUE_ERROR_CODES=ON
+        TFM_UNIQUE_ERROR_CODES=1
 )
 
 # Include region_defs.h and flash_layout.h

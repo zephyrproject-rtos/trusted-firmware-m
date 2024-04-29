@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#ifdef TFM_UNIQUE_ERROR_CODES
+#if TFM_UNIQUE_ERROR_CODES == 1
 #include "error_codes_mapping.h"
 #else
 #define LCM_ERROR_BASE 0x1u

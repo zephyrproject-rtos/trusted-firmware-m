@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-#ifdef TFM_UNIQUE_ERROR_CODES
+#if TFM_UNIQUE_ERROR_CODES == 1
 #include "error_codes_mapping.h"
 #else
 #define MHU_ERROR_BASE 0x1u
