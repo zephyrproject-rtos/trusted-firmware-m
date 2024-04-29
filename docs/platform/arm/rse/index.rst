@@ -15,6 +15,7 @@ Previously known as Runtime Security Subsystem (RSS).
     RSE routing table <rse_routing_table.rst>
     RSE ROM releases <rom_releases/index.rst>
     RSE Platforms <platforms/index.rst>
+    RSE ROM unit test guidelines <rse_unit_tests_guidelines.rst>
 
 RSE also includes the following extra partitions:
 

@@ -1,0 +1,19 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2024, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+:cmock:
+  :verbosity: 0
+  :mock_path: "."
+  :mock_prefix: "mock_"
+  :strippables:
+    - __NO_RETURN
+  :plugins:
+    - :callback
+    - :expect_any_args
+    - :return_thru_ptr
+    - :array
+    - :ignore_arg
+    - :ignore
