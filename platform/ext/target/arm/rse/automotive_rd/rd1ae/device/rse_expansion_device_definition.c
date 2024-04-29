@@ -58,3 +58,28 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
     .program_unit = 0,
     .is_initialized = false
 };
+
+/* Message Handling Units (MHU) */
+struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV = {
+    .base = MHU0_RECEIVER_BASE_S,
+    .frame = MHU_V3_X_MBX_FRAME,
+    .subversion = 0
+};
+
+struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV = {
+    .base = MHU0_SENDER_BASE_S,
+    .frame = MHU_V3_X_PBX_FRAME,
+    .subversion = 0
+};
+
+struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV = {
+    .base = MHU4_RECEIVER_BASE_S,
+    .frame = MHU_V3_X_MBX_FRAME,
+    .subversion = 0
+};
+
+struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV = {
+    .base = MHU4_SENDER_BASE_S,
+    .frame = MHU_V3_X_PBX_FRAME,
+    .subversion = 0
+};

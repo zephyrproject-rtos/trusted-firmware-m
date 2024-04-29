@@ -23,12 +23,19 @@
 #ifndef __RSE_EXPANSION_DEVICE_DEFINITION_H__
 #define __RSE_EXPANSION_DEVICE_DEFINITION_H__
 
+#include "mhu_v3_x.h"
 #include "rse_expansion_device_cfg.h"
 #include "spi_strataflashj3_flash_lib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Message Handling Units (MHU) */
+extern struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV;
+extern struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV;
+extern struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV;
+extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
 
 #ifdef RSE_USE_LOCAL_UART
 /* UART PL011 driver structures */
