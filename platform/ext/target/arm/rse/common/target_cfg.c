@@ -325,6 +325,7 @@ enum tfm_plat_err_t init_debug(void)
 void sau_and_idau_cfg(void)
 {
     struct rse_sacfg_t *sacfg = (struct rse_sacfg_t *)RSE_SACFG_BASE_S;
+    struct cpu0_secctrl_t *secctrl = (struct cpu0_secctrl_t *)CPU0_SECCTRL_BASE_S;
 
     /* Ensure all memory accesses are completed */
     __DMB();
@@ -379,12 +380,21 @@ void sau_and_idau_cfg(void)
     __DSB();
     __ISB();
 
+    /* Lock down SAU registers to prevent further changes */
+    secctrl->cpuseccfg |= CPUSECCFG_LOCKSAU_POS_MASK;
 }
 
 /*------------------- Memory configuration functions -------------------------*/
 enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
+    struct cpu0_secctrl_t *secctrl = (struct cpu0_secctrl_t *)CPU0_SECCTRL_BASE_S;
+
+    /* TCM config is left as default (all Secure, faults enabled) */
+    /* Lock down TCM config registers to prevent further changes */
+    secctrl->cpuseccfg |= CPUSECCFG_LOCKTCM_POS_MASK |
+                          CPUSECCFG_LOCKITGU_POS_MASK |
+                          CPUSECCFG_LOCKDTGU_POS_MASK;
 
     ret = Driver_VM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
