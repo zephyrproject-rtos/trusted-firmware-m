@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,6 +15,7 @@
 #ifdef TFM_MEASURED_BOOT_API
 #include "boot_hal.h"
 #include "boot_measurement.h"
+#include "bootutil/crypto/sha.h"
 #include "bootutil_priv.h"
 #include "psa/crypto.h"
 
@@ -27,7 +28,6 @@
 #endif /* MCUBOOT_SIGN_EC384 */
 
 #ifdef MCUBOOT_HW_KEY
-#include  "bootutil/crypto/sha.h"
 #if defined(MCUBOOT_SIGN_RSA)
 #define SIG_BUF_SIZE (MCUBOOT_SIGN_RSA_LEN / 8)
 #define SIG_EXTRA_BYTES     (24) /* Few extra bytes for encoding and for public exponent. */
