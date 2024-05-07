@@ -90,6 +90,8 @@ set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal e
 
 set(CONFIG_TFM_STACK_WATERMARKS         OFF         CACHE BOOL      "Whether to pre-fill partition stacks with a set value to help determine stack usage")
 
+set(CONFIG_TFM_BRANCH_PROTECTION_FEAT   BRANCH_PROTECTION_DISABLED   CACHE STRING    "Set default branch protection usage to disabled")
+
 ############################ Platform ##########################################
 
 set(NUM_MAILBOX_QUEUE_SLOT              1           CACHE BOOL      "Number of mailbox queue slots")

@@ -14,6 +14,7 @@ with other hardware platforms and operating systems.
     Floating-Point Support  <tfm_fpu_support.rst>
     Secure Interrupt        <tfm_secure_irq_integration_guide.rst>
     Platform Provisioning   <platform_provisioning.rst>
+    Branch Protection       <branch_protection.rst>
 
 .. toctree::
     :maxdepth: 2
