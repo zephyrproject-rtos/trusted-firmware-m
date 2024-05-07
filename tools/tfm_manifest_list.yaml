@@ -79,6 +79,7 @@
         "library_list": [
            "*tfm_*partition_crypto.*",
            "*mbedcrypto.*",
+           "*mbedtls*acceleration.*",
          ]
       }
     },
