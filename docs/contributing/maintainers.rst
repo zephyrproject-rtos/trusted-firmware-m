@@ -21,14 +21,6 @@ Chris Brand
     :email: `Chris.Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
 
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
-
-Ken Liu
-    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
-    :github: `KenLSoft <https://github.com/KenLSoft>`__
-
 Code owners
 ===========
 
@@ -39,9 +31,9 @@ Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
     :github: `tamasban <https://github.com/tamasban>`__
 
-Sherry Zhang
-    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
-    :github: `sherryzhang <https://github.com/sherryzhang>`__
+David Vincze
+    :email: `David.Vincze@arm.com <David.Vincze@arm.com>`__
+    :github: `davidvincze <https://github.com/davidvincze>`__
 
 BL1 immutable bootloader
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,10 +49,6 @@ Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
     :github: `jf549 <https://github.com/jf549>`__
 
-Sherry Zhang
-    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
-    :github: `sherryzhang <https://github.com/sherryzhang>`__
-
 Crypto
 ~~~~~~
 
@@ -68,20 +56,12 @@ Antonio de Angelis
     :email: `Antonio.deAngelis@arm.com <Antonio.deAngelis@arm.com>`__
     :github: `adeaarm <https://github.com/adeaarm>`__
 
-Summer Qin
-    :email: `Summer.Qin@arm.com <Summer.Qin@arm.com>`__
-    :github: `Summer-ARM <https://github.com/Summer-ARM>`__
-
 Framework (SPM, etc.)
 ~~~~~~~~~~~~~~~~~~~~~
 
-Ken Liu
-    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
-    :github: `KenLSoft <https://github.com/KenLSoft>`__
-
-Kevin Peng
-    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
-    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
+Nicola Mazzucato
+    :email: `Nicola.Mazzucato@arm.com <Nicola.Mazzucato@arm.com>`__
+    :github: `nicola-mazzucato-arm <https://github.com/nicola-mazzucato-arm>`__
 
 Attestation
 ~~~~~~~~~~~
@@ -89,10 +69,6 @@ Attestation
 Maulik Patel
     :email: `Maulik.Patel@arm.com <Maulik.Patel@arm.com>`__
     :github: `maulik-arm <https://github.com/maulik-arm>`__
-
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
 
 Build System
 ~~~~~~~~~~~~
@@ -108,14 +84,9 @@ Anton Komlev
 Tests
 ~~~~~
 
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
-
-Kevin Peng
-    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
-    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
-
+Matthew Dalzell
+    :email: `Matthew.Dalzell@arm.com <Matthew.Dalzell@arm.com>`__
+    :github: `mdalzellarm <https://github.com/mdalzellarm>`__
 
 Arm Platforms
 ~~~~~~~~~~~~~
