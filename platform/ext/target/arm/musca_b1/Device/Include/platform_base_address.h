@@ -170,6 +170,7 @@ extern "C" {
 
 /** @} */ /* End of group Device_Peripheral_peripheralAddr */
 
+#define CC3XX_BASE_S MUSCA_B1_CRYPTOCELL_S_BASE
 
 #ifdef __cplusplus
 }

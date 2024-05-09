@@ -240,13 +240,6 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/stm32u5xx_hal_msp.c
     )
 
-    # Required because Mbed TLS PSA crypto headers require the configuration to be
-    # available when including the header itself
-    target_link_libraries(platform_bl2
-        PUBLIC
-            bl2_mbedcrypto_config
-    )
-
 endif()
 
 #========================= tfm_spm ============================================#

@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef MBEDTLS_ACCELERATOR_CONF_H
-#define MBEDTLS_ACCELERATOR_CONF_H
+#ifndef MBEDTLS_ACCELERATOR_CONFIG_H
+#define MBEDTLS_ACCELERATOR_CONFIG_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -143,4 +143,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* MBEDTLS_ACCELERATOR_CONF_H */
+#endif /* MBEDTLS_ACCELERATOR_CONFIG_H */

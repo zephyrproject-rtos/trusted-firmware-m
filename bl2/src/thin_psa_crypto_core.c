@@ -100,7 +100,6 @@ static mbedtls_psa_external_random_context_t *g_ctx = NULL;
 #if defined(BLX_BUILTIN_KEY_LOADER)
 static psa_status_t get_builtin_key(psa_key_id_t key_id)
 {
-
     const tfm_plat_builtin_key_descriptor_t *desc_table = NULL;
     size_t number_of_keys = tfm_plat_builtin_key_get_desc_table_ptr(&desc_table);
     size_t idx;
@@ -354,6 +353,11 @@ psa_status_t psa_verify_hash(psa_key_id_t key,
     return status;
 }
 
+void mbedtls_psa_crypto_free(void)
+{
+    psa_driver_wrapper_free();
+}
+
 psa_status_t mbedtls_to_psa_error(int ret)
 {
     /* We don't require precise error translation */
@@ -459,4 +463,19 @@ psa_status_t psa_driver_wrapper_export_public_key(
 
     return PSA_SUCCESS;
 }
+
+#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
+/* This function is stubbed as no source of randomness is required
+ * by APIs used in the BLx stages. Nevertheless, an hardwware driver
+ * for a TRNG might override this implementation with a valid one
+ * hence mark it as a weak
+ */
+__attribute__((weak))
+psa_status_t mbedtls_psa_external_get_random(
+    mbedtls_psa_external_random_context_t *context,
+    uint8_t *output, size_t output_size, size_t *output_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+#endif /* MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG */
 /*!@}*/

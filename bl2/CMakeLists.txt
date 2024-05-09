@@ -9,13 +9,120 @@ cmake_minimum_required(VERSION 3.21)
 
 project("Bootloader" VERSION 0.1.0 LANGUAGES C ASM)
 
+############################### BL2_CRYPTO_CONFIG ##############################
+
+if(NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "")
+    string(REGEX MATCH "[0-9]*$" SIG_LEN ${MCUBOOT_SIGNATURE_TYPE})
+    string(REGEX MATCH "^[A-Z]*" SIG_TYPE ${MCUBOOT_SIGNATURE_TYPE})
+endif()
+
+set(is_ec_signature  "$<STREQUAL:${SIG_TYPE},EC>")
+set(is_rsa_signature "$<STREQUAL:${SIG_TYPE},RSA>")
+
+add_library(bl2_crypto_config INTERFACE)
+
+target_compile_definitions(bl2_crypto_config
+    INTERFACE
+        MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH}"
+        # The config files have conditional includes based on these four definitions
+        $<${is_rsa_signature}:MCUBOOT_SIGN_RSA>
+        $<${is_rsa_signature}:MCUBOOT_SIGN_RSA_LEN=${SIG_LEN}>
+        $<${is_ec_signature}:MCUBOOT_SIGN_EC${SIG_LEN}>
+        $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:MCUBOOT_USE_PSA_CRYPTO>
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:BLX_BUILTIN_KEY_LOADER>
+)
+
+target_include_directories(bl2_crypto_config
+    INTERFACE
+        ${MBEDCRYPTO_PATH}/include
+)
+
+# Check if the p256m driver is enabled in the config file, as that will require
+# to build some 3rd party specific source code in addition to Mbed TLS source.
+# Note that 0 means SUCCESS here, 1 means FAILURE
+set(MBEDTLS_P256M_NOT_FOUND 1)
+execute_process(COMMAND
+    ${Python3_EXECUTABLE}
+    ${MBEDCRYPTO_PATH}/scripts/config.py -f "${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+    RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+
+# If the enablement is conditional, the script would still mark it as found
+if (${MBEDTLS_P256M_NOT_FOUND} EQUAL 0)
+    set(MBEDTLS_P256M_ENABLED true)
+else()
+    set(MBEDTLS_P256M_ENABLED false)
+endif()
+
+############################### BL2_CRYPTO #####################################
+
+set(is_384_bit_curve "$<STREQUAL:${SIG_LEN},384>")
+set(is_256_bit_curve "$<STREQUAL:${SIG_LEN},256>")
+set(build_sha_384    "$<AND:${is_ec_signature},${is_384_bit_curve}>")
+set(build_sha_256    "$<NOT:${build_sha_384}>")
+set(build_p256m      "$<IF:$<BOOL:${MBEDTLS_P256M_ENABLED}>,$<AND:${is_ec_signature},${is_256_bit_curve}>,0>")
+
+list(APPEND BL2_CRYPTO_SRC
+    $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:src/thin_psa_crypto_core.c>
+    ${MBEDCRYPTO_PATH}/library/platform.c
+    ${MBEDCRYPTO_PATH}/library/platform_util.c
+    ${MBEDCRYPTO_PATH}/library/memory_buffer_alloc.c
+    ${MBEDCRYPTO_PATH}/library/psa_crypto_hash.c
+    $<${build_sha_256}:${MBEDCRYPTO_PATH}/library/sha256.c>
+    $<${build_sha_384}:${MBEDCRYPTO_PATH}/library/sha512.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/psa_crypto_ecp.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/ecp.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/ecp_curves.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/ecdsa.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/bignum.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/bignum_core.c>
+    $<$<AND:${is_ec_signature},$<NOT:${build_p256m}>>:${MBEDCRYPTO_PATH}/library/constant_time.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/psa_crypto_rsa.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/rsa.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/rsa_alt_helpers.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/bignum.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/bignum_core.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/constant_time.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/asn1parse.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/asn1write.c>
+    $<${is_rsa_signature}:${MBEDCRYPTO_PATH}/library/md.c>
+    $<$<AND:${is_ec_signature},${build_p256m}>:${MBEDCRYPTO_PATH}/3rdparty/p256-m/p256-m_driver_entrypoints.c>
+    $<$<AND:${is_ec_signature},${build_p256m}>:${MBEDCRYPTO_PATH}/3rdparty/p256-m/p256-m/p256-m.c>
+    ${MBEDCRYPTO_PATH}/library/aes.c
+)
+
+add_library(bl2_crypto STATIC ${BL2_CRYPTO_SRC})
+
+target_include_directories(bl2_crypto
+    PUBLIC
+        ${MBEDCRYPTO_PATH}/library
+)
+
+target_compile_options(bl2_crypto
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_link_libraries(bl2_crypto
+    PUBLIC
+        bl2_crypto_config
+)
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
+if (${BUILD_TYPE_LOWER} STREQUAL "debug")
+    set_source_files_properties(${BL2_CRYPTO_SRC}
+        PROPERTIES COMPILE_FLAGS -Os
+    )
+endif()
+
+############################### BL2 ############################################
+
 add_executable(bl2
     src/flash_map.c
     $<$<BOOL:${DEFAULT_MCUBOOT_SECURITY_COUNTERS}>:src/security_cnt.c>
     $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:src/default_flash_map.c>
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
     $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:src/provisioning.c>
-    $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:src/thin_psa_crypto_core.c>
     $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
@@ -38,7 +145,8 @@ target_link_libraries(bl2
     PRIVATE
         tfm_boot_status
         $<$<BOOL:${TEST_BL2}>:mcuboot_tests>
-        platform_bl2
+    PUBLIC
+        bl2_crypto
 )
 
 target_compile_options(bl2
@@ -61,6 +169,7 @@ target_compile_definitions(bl2
         $<$<BOOL:${TEST_BL2}>:TEST_BL2>
         $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:TFM_PARTITION_FIRMWARE_UPDATE>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
 )
 
 add_convert_to_bin_target(bl2)
@@ -72,83 +181,6 @@ add_library(bl2_hal INTERFACE)
 target_include_directories(bl2_hal
     INTERFACE
         include
-)
-
-############################### MBEDCRYPTO #####################################
-
-add_library(bl2_mbedcrypto_config INTERFACE)
-
-if(NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "")
-    string(REGEX MATCH "[0-9]*$" SIG_LEN ${MCUBOOT_SIGNATURE_TYPE})
-    string(REGEX MATCH "^[A-Z]*" SIG_TYPE ${MCUBOOT_SIGNATURE_TYPE})
-endif()
-
-# FixMe: The MBEDTLS_CONFIG_FILE and MBEDTLS_PSA_CRYPTO_CONFIG_FILE should be
-# put in a dedicated target that can be linked by other targets, for example
-# bl2 provisioning related targets, to be able to include correctly psa/crypto.h
-target_compile_definitions(bl2_mbedcrypto_config
-    INTERFACE
-        $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA>
-        $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${SIG_LEN}>
-        $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:MCUBOOT_USE_PSA_CRYPTO>
-        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
-        $<$<STREQUAL:${SIG_TYPE},EC>:MCUBOOT_SIGN_EC${SIG_LEN}>
-        MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
-        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH}"
-        $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
-        # Specific option required on thin_psa_crypto_core.c
-        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:BLX_BUILTIN_KEY_LOADER>
-)
-
-set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
-set(ENABLE_TESTING OFF)
-set(ENABLE_PROGRAMS OFF)
-set(MBEDTLS_FATAL_WARNINGS OFF)
-set(ENABLE_DOCS OFF)
-set(INSTALL_MBEDTLS_HEADERS OFF)
-set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
-set(GEN_FILES OFF)
-
-# Set the prefix to be used by mbedTLS targets
-set(MBEDTLS_TARGET_PREFIX bl2_)
-
-# Mbedcrypto in Debug builds uses too much memory. As a compromise, if `Debug` build type
-# is selected mbedcrypto will build under `RelWithDebInfo` which preserves debug
-# symbols while optimizing space.
-set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto EXCLUDE_FROM_ALL)
-set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
-
-if(NOT TARGET ${MBEDTLS_TARGET_PREFIX}mbedcrypto)
-    message(FATAL_ERROR "Target ${MBEDTLS_TARGET_PREFIX}mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
-    Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
-endif()
-
-target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
-    PUBLIC
-        bl2_mbedcrypto_config
-)
-
-target_link_libraries(${MBEDTLS_TARGET_PREFIX}p256m
-    PUBLIC
-        ${MBEDTLS_TARGET_PREFIX}mbedcrypto
-)
-
-target_include_directories(${MBEDTLS_TARGET_PREFIX}mbedcrypto
-    PUBLIC
-        ${MBEDCRYPTO_PATH}/library
-)
-
-target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
-    PRIVATE
-        ${BL2_COMPILER_CP_FLAG}
-)
-
-target_compile_options(${MBEDTLS_TARGET_PREFIX}p256m
-    PRIVATE
-        ${BL2_COMPILER_CP_FLAG}
 )
 
 ############################### CODE SHARING ###################################

@@ -222,16 +222,25 @@ int main(void)
     return FIH_FAILURE;
 }
 
-#if defined(MCUBOOT_USE_PSA_CRYPTO)
-/* When MCUBOOT_USE_PSA_CRYPTO is set, the PSA Crypto layer is configured
- * to use an external RNG generator through MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG.
- * But the cryptographic APIs required by BL2 don't require access to randomness
- * hence we can just stub this API to always return an error code
+/* The PSA Crypto core acts as an Hardware Abstraction Layer which replaces
+ * functionalities offered by crypto_hw_accelerator_* functions called by the
+ * boot_hal_bl2 in the legacy solution when CRYPTO_HW_ACCELERATOR is present.
+ * Hence we can just stub them here to avoid breaking compatibility with the
+ * boot_hal_bl2. Note that by not supporting the _ALT interfaces anymore, these
+ * APIs won't do anything in case the define MCUBOOT_USE_PSA_CRYPTO is not enabled
  */
-psa_status_t mbedtls_psa_external_get_random(
-    mbedtls_psa_external_random_context_t *context,
-    uint8_t *output, size_t output_size, size_t *output_length)
+int crypto_hw_accelerator_init(void)
 {
-    return PSA_ERROR_NOT_SUPPORTED;
+    /* Do not perform any init in the boot_hal_bl2 itself as the init will
+     * be done by psa_crypto_init() in this case
+     */
+    return 0;
 }
+
+int crypto_hw_accelerator_finish(void)
+{
+#if defined(MCUBOOT_USE_PSA_CRYPTO)
+    mbedtls_psa_crypto_free();
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
+    return 0;
+}

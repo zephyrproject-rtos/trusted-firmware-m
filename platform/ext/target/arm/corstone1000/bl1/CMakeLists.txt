@@ -31,14 +31,14 @@ target_link_options(bl1
 
 add_convert_to_bin_target(bl1)
 
-# bl2_mbedcrypto reused as it is, but it pulls the MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
+# bl2_crypto reused as it is, but it pulls the MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
 # configuration, where image number is 3. (Coming from BL2 build). To not to collide with BL1's
 # build where image number is 1 mbedcrypto library is separated from the build of other source
 # files.
 target_link_libraries(bl1
     PRIVATE
         bl1_main
-        bl2_mbedcrypto
+        bl2_crypto
         cmsis_stack_override
         cmsis
 )
@@ -137,7 +137,7 @@ target_include_directories(bl1_main
 target_link_libraries(bl1_main
     PRIVATE
         mcuboot_config
-        bl2_mbedcrypto_config
+        bl2_crypto_config
 )
 
 target_include_directories(bl1_main

@@ -31,7 +31,7 @@ target_link_libraries(bootutil
     PUBLIC
         mcuboot_config
         platform_bl2
-        bl2_mbedcrypto
+        bl2_crypto
 )
 
 target_compile_options(bootutil

@@ -13,10 +13,6 @@ cmake_policy(SET CMP0076 NEW)
 if(NOT DEFINED PLATFORM_DIR)
     set(PLATFORM_DIR ../../.. CACHE PATH "Path to plaform dir")
 endif()
-target_compile_definitions(platform_bl2
-    PRIVATE
-        CRYPTO_HW_ACCELERATOR
-)
 
 if (PLATFORM_DEFAULT_PROVISIONING)
     # mbedtls_accelerator_config.h is included from the profile config files and must
@@ -37,19 +33,24 @@ if (PLATFORM_DEFAULT_PROVISIONING)
 endif()
 
 ################################ BL2 ###########################################
-if(BL2)
+if (BL2)
 
-    set(STM_LIB_TARGET bl2_crypto_hw)
-
-    target_compile_definitions(bl2_mbedcrypto
-        PUBLIC
+    target_compile_definitions(platform_bl2
+        PRIVATE
             CRYPTO_HW_ACCELERATOR
     )
 
-    target_compile_options(bl2_mbedcrypto
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
+    target_link_libraries(platform_bl2
+        PUBLIC
+            bl2_crypto_config
+    )
+
+    target_compile_definitions(bl2_crypto
+        PUBLIC
+            # Uncomment when BL2 specific accelerator config files are provided, which
+            # don't enable any _ALT feature which are going to be deprecated
+            # MBEDTLS_ACCELERATOR_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/mbedtls_accelerator_config.h"
+            # MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/crypto_accelerator_config.h"
     )
 endif()
 include(${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/CMakeLists.txt)

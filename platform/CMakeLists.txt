@@ -214,6 +214,7 @@ if(BL2)
             cmsis_stack_override
             cmsis
         PRIVATE
+            bl2_crypto
             bl2_hal
             mcuboot_config
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:tfm_boot_status>
@@ -241,6 +242,11 @@ if(BL2)
         PUBLIC
             ${BL2_COMPILER_CP_FLAG}
             $<$<BOOL:${BL2_SANITIZE}>:-fsanitize=${BL2_SANITIZE}>
+    )
+
+    target_link_libraries(bl2_crypto
+        PRIVATE
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:platform_bl2>
     )
 endif()
 

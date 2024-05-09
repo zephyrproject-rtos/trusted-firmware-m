@@ -5,10 +5,6 @@
 #
 #-------------------------------------------------------------------------------
 
-if(BL2)
-    add_library(bl2_crypto_hw STATIC)
-endif()
-
 if (TFM_PARTITION_CRYPTO)
     add_library(crypto_service_crypto_hw STATIC)
 endif()
@@ -22,20 +18,6 @@ target_compile_definitions(tfm_config
     INTERFACE
         CRYPTO_HW_ACCELERATOR
 )
-
-################################ BL2 ###########################################
-
-if(BL2)
-    target_include_directories(bl2_crypto_hw
-        PUBLIC
-            interface
-    )
-
-    target_compile_definitions(bl2_crypto_hw
-        PUBLIC
-            CRYPTO_HW_ACCELERATOR
-    )
-endif()
 
 ############################ Crypto Service ####################################
 

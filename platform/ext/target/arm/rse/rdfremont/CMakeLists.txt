@@ -109,6 +109,11 @@ target_compile_definitions(platform_bl2
         PLAT_LCP_COUNT=${PLAT_LCP_COUNT}
 )
 
+target_link_libraries(platform_bl2
+    PUBLIC
+        bl2_crypto_config
+)
+
 #========================= Platform BL1_1 =====================================#
 
 target_sources(platform_bl1_1

@@ -24,106 +24,41 @@ target_include_directories(psa_crypto_library_config
 
 ################################ BL2 ###########################################
 
-if(BL2)
+if (BL2)
 
-    set(CC312_LIB_PREFIX bl2_)
-    # Platform depedency needed to access platform specific dx_reg_base_host.h
-    set(CC312_PLATFORM_DEPENDENCY platform_bl2)
-
-    target_sources(bl2_crypto_hw
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
+    target_compile_definitions(bl2_crypto_config
+        INTERFACE
+            MBEDTLS_ACCELERATOR_CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/mbedtls_accelerator_config_bl2.h"
+            MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/crypto_accelerator_config.h"
     )
 
-    target_include_directories(bl2_crypto_hw
+    # BL2 only supports CC3XX
+    set(CC3XX_PLATFORM_INTERFACE platform_bl2)
+
+    set(CC3XX_TARGET_PREFIX bl2_)
+    set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
+    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc3xx)
+    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
+
+    target_link_libraries(bl2_crypto
         PUBLIC
-            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CC3XX_TARGET_PREFIX}cc3xx_psa_driver_api
     )
 
-    target_include_directories(bl2_mbedcrypto_config
+    target_include_directories(bl2_crypto_config
         INTERFACE
             ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    target_link_libraries(${CC3XX_TARGET_PREFIX}cc3xx_psa_driver_api
+        PUBLIC
+            bl2_crypto_config
     )
 
     if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
         add_subdirectory(psa-adac)
     endif()
-
-    target_link_libraries(bl2_crypto_hw
-        PUBLIC
-            ${CC312_LIB_PREFIX}cc312
-        PRIVATE
-            bl2_mbedcrypto
-            platform_bl2
-    )
-
-    set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-    set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
-
-    target_sources(${CC312_LIB_PREFIX}cc312
-        PUBLIC
-            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
-    )
-
-    # Adding two targets as link-time dependencies of each other seems bad, but
-    # in reality it just means that they'll share headers and compile defs.
-    target_link_libraries(${CC312_LIB_PREFIX}cc312_mbedtls_api
-        PRIVATE
-            bl2_mbedcrypto
-            platform_bl2
-        PUBLIC
-            platform_common_interface
-    )
-    target_link_libraries(bl2_mbedcrypto
-        PRIVATE
-            ${CC312_LIB_PREFIX}cc312_mbedtls_api
-        PUBLIC
-            bl2_crypto_hw
-    )
-
-    # boot_hal depends on crypto_hw_accelerator abstractions
-    target_link_libraries(platform_bl2
-        PRIVATE
-            bl2_crypto_hw
-            tfm_config
-    )
-
-    target_link_libraries(${CC312_LIB_PREFIX}cc312_cdmpu
-        INTERFACE
-            bl2_mbedcrypto
-    )
-
-    target_compile_definitions(bl2_mbedcrypto
-        PUBLIC
-            CRYPTO_HW_ACCELERATOR
-            MBEDTLS_ECDH_LEGACY_CONTEXT
-    )
-
-    target_compile_options(bl2_mbedcrypto
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
-    )
-
-    target_compile_options(${CC312_LIB_PREFIX}cc312
-        PRIVATE
-            ${BL2_COMPILER_CP_FLAG}
-    )
-
-    target_compile_options(bl2_crypto_hw
-        PRIVATE
-            ${BL2_COMPILER_CP_FLAG}
-    )
-
-    target_compile_options(${CC312_LIB_PREFIX}cc312_cdmpu
-        INTERFACE
-            ${BL2_COMPILER_CP_FLAG}
-    )
-
-    unset(CC312_LIB_PREFIX)
-    unset(CC312_PLATFORM_DEPENDENCY)
 
 endif()
 

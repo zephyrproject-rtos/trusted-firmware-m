@@ -43,12 +43,6 @@
  * Don't define MBEDTLS_PSA_CRYPTO_STORAGE_C to make sure that support
  * for permanent keys is not enabled, as it is not available during boot
  */
-#define MBEDTLS_PK_PARSE_C
-#define MBEDTLS_PK_WRITE_C
-#define MBEDTLS_PK_C
-#define MBEDTLS_CTR_DRBG_C
-#define MBEDTLS_CIPHER_C
-#define MBEDTLS_ENTROPY_C
 #define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
 #define MBEDTLS_PSA_CRYPTO_CONFIG
 #define MBEDTLS_PSA_CRYPTO_C
@@ -94,31 +88,20 @@
 #define MBEDTLS_PLATFORM_EXIT_ALT
 #define MBEDTLS_PLATFORM_PRINTF_ALT
 
-
 /* mbed TLS modules */
 #define MBEDTLS_ASN1_PARSE_C
 #define MBEDTLS_ASN1_WRITE_C
 #define MBEDTLS_BIGNUM_C
 #define MBEDTLS_MD_C
 #define MBEDTLS_OID_C
-#define MBEDTLS_AES_C
-#define MBEDTLS_CIPHER_MODE_CTR
-#if defined(MCUBOOT_SIGN_EC256) || \
-    defined(MCUBOOT_SIGN_EC384)
+#if defined(MCUBOOT_SIGN_EC256) || defined(MCUBOOT_SIGN_EC384)
 #define MBEDTLS_ECP_C
 #define MBEDTLS_ECP_NIST_OPTIM
 #define MBEDTLS_ECDSA_C
 #endif
 
-#define MBEDTLS_SSL_MAX_CONTENT_LEN 1024
-
-/* Save ROM and a few bytes of RAM by specifying our own ciphersuite list */
-#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
-
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
-#ifndef MBEDTLS_CIPHER_C
 #define MBEDTLS_CIPHER_C
-#endif
 #define MBEDTLS_CCM_C
 #define MBEDTLS_ECDSA_C
 #define MBEDTLS_ECP_C
@@ -126,19 +109,13 @@
 #define MBEDTLS_ECP_DP_CURVE25519_ENABLED
 #endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
 
-#ifdef CRYPTO_HW_ACCELERATOR
-#ifndef LEGACY_DRIVER_API_ENABLED
-/*
- * Forcing the legacy driver API enabled all the time regardless of
- * cmake configuration in BL2.
- */
-#define LEGACY_DRIVER_API_ENABLED
-#warning "Use legacy driver API for BL2"
-#include "mbedtls_accelerator_config.h"
-#undef LEGACY_DRIVER_API_ENABLED
-#else
-#include "mbedtls_accelerator_config.h"
-#endif /* !LEGACY_DRIVER_API_ENABLED */
+/* This is still required by encrypted.c until that part is moved to MBED_TLS_USE_PSA_CRYPTO as well */
+#define MBEDTLS_AES_C
+#define MBEDTLS_AES_FEWER_TABLES
+#define MBEDTLS_CIPHER_MODE_CTR
+
+#if defined(CRYPTO_HW_ACCELERATOR) && defined(MBEDTLS_ACCELERATOR_CONFIG_FILE)
+#include MBEDTLS_ACCELERATOR_CONFIG_FILE
 #endif
 
 #endif /* __MCUBOOT_MBEDTLS_CFG__ */
