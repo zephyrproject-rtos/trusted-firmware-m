@@ -381,6 +381,12 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
         tfm_hal_multi_core.c
 )
 
+if (PLATFORM_IS_FVP)
+target_compile_definitions(tfm_psa_rot_partition_ns_agent_mailbox
+    PUBLIC
+       $<$<BOOL:${ENABLE_MULTICORE}>:CORSTONE1000_FVP_MULTICORE>
+)
+endif()
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
