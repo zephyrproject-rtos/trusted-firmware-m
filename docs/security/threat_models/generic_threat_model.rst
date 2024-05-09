@@ -10,7 +10,7 @@ This document introduces a generic threat model of Trusted Firmware-M (TF-M).
 This generic threat model provides an overall analysis of TF-M implementation
 and identifies general threats and mitigation.
 
-There is also a dedicated document for physical attacks mitigations which can be found
+There is also a dedicated document for physical attack mitigations which can be found
 :doc:`here </design_docs/tfm_physical_attack_mitigation>`.
 
 .. note::
@@ -65,7 +65,7 @@ A typical TF-M system diagram from a high-level overview is shown below. TF-M is
 running in the Secure Processing Environment (SPE) and NS software is running in
 Non-secure Processing Environment (NSPE). For more details, please refer to
 Platform Security Architecture Firmware Framework for M (FF-M) [FF-M]_ and
-FF-M 1.1 Extensions [FF-M 1.1 Extensions]_.
+FF-M 1.1 Extensions [FF-M-1.1-Extensions]_.
 
 .. figure:: TF-M-block-diagram.png
 
@@ -116,7 +116,7 @@ The Trust Boundary isolates SPE from NSPE, according to the TOE definition in
 `Target of Evaluation`_. The Trust Boundary mapped to block diagram is shown
 in the figure below. Other modules inside SPE stay in the same TOE as TF-M does.
 
-Valid Data flows across the Trust Boundary are also shown in the figure below.
+Valid data flows across the Trust Boundary are also shown in the figure below.
 This threat model only focuses on the data flows related to TF-M.
 
 .. figure:: overall-DFD.png
@@ -132,7 +132,7 @@ More details of data flows are listed below.
   +===========+================================================================+
   | ``DF1``   | TF-M initializes NS entry and activates NSPE.                  |
   |           |                                                                |
-  |           | - On single Armv8-M core platforms, TF-M will hand over the    |
+  |           | - On Armv8-M platforms with TrustZone, TF-M will hand over the |
   |           |   control to Non-secure state.                                 |
   |           | - On dual-cpu platforms, Secure core starts NS core booting.   |
   +-----------+----------------------------------------------------------------+
@@ -141,8 +141,8 @@ More details of data flows are listed below.
   |           | NSPE requests RoT services via PSA Client APIs defined in      |
   |           | [FF-M]_.                                                       |
   |           |                                                                |
-  |           | In single Armv8-M core scenarios, SG instruction is executed   |
-  |           | in Non-secure Callable region to trigger a transition from     |
+  |           | In Armv8-M TrustZone scenarios, SG instruction is executed in  |
+  |           | a Non-secure Callable region to trigger a transition from      |
   |           | Non-secure state to Secure state.                              |
   |           |                                                                |
   |           | On dual-cpu platforms, non-secure core sends PSA Client calls  |
@@ -158,22 +158,22 @@ More details of data flows are listed below.
   | ``DF4``   | TF-M returns RoT service results to NSPE after NS request to   |
   |           | RoT service is completed.                                      |
   |           |                                                                |
-  |           | In single Armv8-M core scenarios, it also trigger a transition |
+  |           | In Armv8-M TrustZone scenarios, it also triggers a transition  |
   |           | from Secure state back to Non-secure state.                    |
   |           |                                                                |
   |           | On dual-cpu platforms, secure core returns the result to       |
   |           | non-secure core via mailbox.                                   |
   +-----------+----------------------------------------------------------------+
-  | ``DF5``   | Non-secure interrupts preempt SPE execution in single Armv8-M  |
-  |           | core scenarios.                                                |
+  | ``DF5``   | Non-secure interrupts preempt SPE execution in Armv8-M         |
+  |           | TrustZone scenarios.                                           |
   +-----------+----------------------------------------------------------------+
-  | ``DF6``   | Secure interrupts preempt NSPE execution in single Armv8-M     |
-  |           | core scenarios.                                                |
+  | ``DF6``   | Secure interrupts preempt NSPE execution in Armv8-M TrustZone  |
+  |           | scenarios.                                                     |
   +-----------+----------------------------------------------------------------+
 
 .. note::
 
-  All the other data flows across the Trusted Boundary besides the valid ones
+  All the other data flows across the Trust Boundary besides the valid ones
   mentioned above should be prohibited by default.
   Proper isolation must be configured to prevent NSPE directly accessing SPE.
 
@@ -404,7 +404,7 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   |               | registers before NS starts.                                |
   |               |                                                            |
   |               | TF-M invalidates registers not banked before handing over  |
-  |               | the system to NSPE on single Armv8-M platform.             |
+  |               | the system to NSPE on Armv8-M platforms with TrustZone.    |
   |               |                                                            |
   |               | On dual-cpu platforms, shared registers are implementation |
   |               | defined, such as Inter-Processor Communication registers.  |
@@ -682,7 +682,7 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   | Mitigation    | TF-M executes memory access check to the memory addresses  |
   |               | in all the NS requests.                                    |
   |               |                                                            |
-  |               | On single Armv8-M core platforms, TF-M invokes ``TT``      |
+  |               | On Armv8-M platforms with TrustZone, TF-M invokes ``TT``   |
   |               | instructions to execute memory address check. If a NS      |
   |               | memory area is not matched in any valid SAU or MPU region, |
   |               | it will be marked as invalid and any access permission is  |
@@ -859,10 +859,10 @@ This section identifies threats on ``DF4`` defined in `Data Flow Diagram`_.
 When RoT service completes the request from NSPE, TF-M returns the success or
 failure error code to NS application.
 
-In single Armv8-M core scenario, TF-M writes the return code value in the
-general purpose register and returns to Non-secure state.
+In Armv8-M TrustZone scenarios, TF-M writes the return code value in the general
+purpose register and returns to Non-secure state.
 
-On dual-cpu platforms, TF-M writes the return code to NSPE mailbox message queue
+On dual-cpu platforms, TF-M writes the return code to NS mailbox message queue
 via mailbox.
 
 .. table:: TFM-GENERIC-RETURN-CODE-I-1
@@ -881,7 +881,7 @@ via mailbox.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In single Armv8-M core scenario, TF-M cleans general       |
+  | Mitigation    | In Armv8-M TrustZone scenarios, TF-M cleans general        |
   |               | purpose registers not banked before switching into NSPE to |
   |               | prevent NSPE probing secure context from the registers.    |
   |               |                                                            |
@@ -917,7 +917,7 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In single Armv8-M core scenario, Armv8-M architecture      |
+  | Mitigation    | On Armv8-M processors with TrustZone, Armv8-M architecture |
   |               | automatically cleans up the registers not banked before    |
   |               | switching to Non-secure state while taking NS interrupts.  |
   |               |                                                            |
@@ -926,7 +926,7 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   |               | context in FP callee registers will also be cleaned by     |
   |               | hardware automatically when NS interrupts occur, to prevent|
   |               | NSPE from probing secure FP context in FP registers. Refer |
-  |               | to Armv8-M Architecture Reference Manual[ARM arm]_ for     |
+  |               | to Armv8-M Architecture Reference Manual [Arm-ARM]_ for    |
   |               | details.                                                   |
   |               |                                                            |
   |               | On dual-cpu platforms, shared registers are implementation |
@@ -949,9 +949,9 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   | Description   | An attacker may trigger spurious NS interrupts frequently  |
   |               | to block SPE execution.                                    |
   +---------------+------------------------------------------------------------+
-  | Justification | In single Armv8-M core scenario, an attacker may inject a  |
-  |               | malicious NS application or hijack a NS hardware to        |
-  |               | frequently trigger spurious NS interrupts to keep          |
+  | Justification | On Armv8-M processors with TrustZone, an attacker may      |
+  |               | inject a malicious NS application or hijack a NS hardware  |
+  |               | to frequently trigger spurious NS interrupts to keep       |
   |               | preempting SPE and block SPE to perform normal secure      |
   |               | execution.                                                 |
   +---------------+------------------------------------------------------------+
@@ -1010,7 +1010,7 @@ This section identifies threats on ``DF6`` defined in `Data Flow Diagram`_.
   |               | registers will also be cleaned by hardware automatically   |
   |               | during S exception return, to prevent NSPE from probing    |
   |               | secure FP context in FP registers. Refer to Armv8-M        |
-  |               | Architecture Reference Manual [ARM arm]_ for details.      |
+  |               | Architecture Reference Manual [Arm-ARM]_ for details.      |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 4.3 (Medium)                                               |
   +---------------+------------------------------------------------------------+
@@ -1069,8 +1069,8 @@ above.
   +---------------+------------------------------------------------------------+
   | Justification | On Armv8-M based processors with TrustZone, if NSPE calls  |
   |               | a secure function via Secure Gateway (SG) from non-secure  |
-  |               | Handler mode , TF-M selects secure process stack by        |
-  |               | mistake for SVC handling.                                  |
+  |               | Handler mode, TF-M selects secure process stack by mistake |
+  |               | for SVC handling.                                          |
   |               | It will most likely trigger a crash in secure world or     |
   |               | reset the whole system, with a very low likelihood of      |
   |               | overwriting some memory contents.                          |
@@ -1098,7 +1098,7 @@ above.
   | Description   | Secure data in FP registers may be disclosed to NSPE when  |
   |               | VLLDM instruction is abandoned due to an exception mid-way.|
   +---------------+------------------------------------------------------------+
-  | Justification | Refer to [VLLDM Vulnerability]_ for details.               |
+  | Justification | Refer to [VLLDM-Vulnerability]_ for details.               |
   +---------------+------------------------------------------------------------+
   | Category      | Tampering/Information disclosure                           |
   +---------------+------------------------------------------------------------+
@@ -1107,7 +1107,7 @@ above.
   |               | Therefore, secure data in FP registers is protected from   |
   |               | NSPE.                                                      |
   |               |                                                            |
-  |               | Refer to [VLLDM Vulnerability]_, for details on analysis   |
+  |               | Refer to [VLLDM-Vulnerability]_, for details on analysis   |
   |               | and mitigation.                                            |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 3.4 (Low)                                                  |
@@ -1133,30 +1133,32 @@ Version control
   +---------+--------------------------------------------------+---------------+
   | v1.2    | Update details to align FP support in NSPE.      | TF-M v1.5.0   |
   +---------+--------------------------------------------------+---------------+
+  | v1.3    | Update for validity of dual-cpu model Armv8-M    | TF-M v2.1.0   |
+  +---------+--------------------------------------------------+---------------+
 
 *********
 Reference
 *********
 
-.. [Security-Incident-Process] `Security Incident Process <https://developer.trustedfirmware.org/w/collaboration/security_center/reporting/>`_
+.. [Security-Incident-Process] `Security Incident Handling Process <https://trusted-firmware-docs.readthedocs.io/en/latest/security_center/incident_handling_process.html>`_
 
 .. [FF-M] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/documentation/den0063/latest/>`_
 
-.. [FF-M 1.1 Extensions] `Arm® Firmware Framework for M 1.1 Extensions <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`_
+.. [FF-M-1.1-Extensions] `Arm® Firmware Framework for M 1.1 Extensions <https://developer.arm.com/documentation/aes0039/latest/>`_
 
 .. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </design_docs/dual-cpu/booting_a_dual_core_system>`
 
 .. [CVSS] `Common Vulnerability Scoring System Version 3.1 Calculator <https://www.first.org/cvss/calculator/3.1>`_
 
-.. [CVSS_SPEC] `CVSS v3.1 Specification Document <https://www.first.org/cvss/v3-1/cvss-v31-specification_r1.pdf>`_
+.. [CVSS_SPEC] `CVSS v3.1 Specification Document <https://www.first.org/cvss/v3.1/specification-document>`_
 
-.. [STRIDE] `The STRIDE Threat Model <https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)?redirectedfrom=MSDN>`_
+.. [STRIDE] `The STRIDE Threat Model <https://learn.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)>`_
 
 .. [SECURE-BOOT] :doc:`Secure boot </design_docs/booting/tfm_secure_boot>`
 
 .. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </design_docs/booting/secure_boot_rollback_protection>`
 
-.. [ARM arm] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
+.. [Arm-ARM] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 
 .. [STACK-SEAL] `Armv8-M processor Secure software Stack Sealing vulnerability <https://developer.arm.com/support/arm-security-updates/armv8-m-stack-sealing>`_
 
@@ -1164,8 +1166,8 @@ Reference
 
 .. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </security/security_advisories/svc_caller_sp_fetching_vulnerability>`
 
-.. [VLLDM Vulnerability] : `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
+.. [VLLDM-Vulnerability] `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
 
 --------------------
 
-*Copyright (c) 2020-2022 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2020-2024 Arm Limited. All Rights Reserved.*
