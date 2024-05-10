@@ -34,6 +34,12 @@ int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
             break;
 #endif /* RSE_USE_SDS_LIB */
 
+#ifdef TFM_PARTITION_DPE
+        case TFM_SVC_PLATFORM_GET_MAILBOX_LOCALITY:
+            retval = (int32_t)tfm_plat_get_mailbox_locality((int32_t)svc_args[0]);
+            break;
+#endif /* TFM_PARTITION_DPE */
+
         default:
             retval = PSA_ERROR_GENERIC_ERROR;
             break;
