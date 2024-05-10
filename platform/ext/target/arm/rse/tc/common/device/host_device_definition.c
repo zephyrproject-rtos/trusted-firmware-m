@@ -80,6 +80,7 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
 };
 #endif
 
+#if PLAT_MHU_VERSION == 2
 /* Message Handling Units (MHU) */
 #ifdef MHU_AP_MONITOR_TO_RSE
 struct mhu_v2_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV = {
@@ -116,3 +117,51 @@ struct mhu_v2_x_dev_t MHU_RSE_TO_SCP_DEV = {
     MHU2_SENDER_BASE_S,
     MHU_V2_X_SENDER_FRAME};
 #endif
+
+#elif PLAT_MHU_VERSION == 3
+/* Message Handling Units (MHU) */
+#ifdef MHU_AP_MONITOR_TO_RSE
+struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV = {
+    MHU0_RECEIVER_BASE_S,
+    MHU_V3_X_MBX_FRAME,
+};
+#endif
+
+#ifdef MHU_RSE_TO_AP_MONITOR
+struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV = {
+    MHU0_SENDER_BASE_S,
+    MHU_V3_X_PBX_FRAME,
+};
+#endif
+
+#ifdef MHU_AP_NS_TO_RSE
+struct mhu_v3_x_dev_t MHU_AP_NS_TO_RSE_DEV = {
+    MHU1_RECEIVER_BASE_S,
+    MHU_V3_X_MBX_FRAME,
+};
+#endif
+
+#ifdef MHU_RSE_TO_AP_NS
+struct mhu_v3_x_dev_t MHU_RSE_TO_AP_NS_DEV = {
+    MHU1_SENDER_BASE_S,
+    MHU_V3_X_PBX_FRAME,
+};
+#endif
+
+#ifdef MHU_SCP_TO_RSE
+struct mhu_v3_x_dev_t MHU_SCP_TO_RSE_DEV = {
+    MHU2_RECEIVER_BASE_S,
+    MHU_V3_X_MBX_FRAME,
+};
+#endif
+
+#ifdef MHU_RSE_TO_SCP
+struct mhu_v3_x_dev_t MHU_RSE_TO_SCP_DEV = {
+    MHU2_SENDER_BASE_S,
+    MHU_V3_X_PBX_FRAME,
+};
+#endif
+
+#else
+#error Invalid MHU version
+#endif /* PLATFORM_MHU_VERSION == 2 */
