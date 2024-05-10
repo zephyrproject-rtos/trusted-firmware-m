@@ -27,12 +27,10 @@
 #define EXCEPTION_TYPE_USAGEFAULT  4
 #define EXCEPTION_TYPE_PLATFORM    5
 
-#ifndef __STRINGIFY
 /* This level of indirection is needed to fully resolve exception info when it's
  * a macro
  */
 #define __STRINGIFY(exception_info) #exception_info
-#endif
 
 /* Store context for an exception, and print an error message with the context.
  *
