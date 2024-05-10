@@ -6,10 +6,8 @@
 #-------------------------------------------------------------------------------
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/lib/ext CACHE STRING "" FORCE)
 
-if(TFM_PARTITION_INITIAL_ATTESTATION)
-  add_subdirectory(qcbor)
-  add_subdirectory(t_cose)
-endif()
+add_subdirectory(qcbor)
+add_subdirectory(t_cose)
 add_subdirectory(mbedcrypto)
 if(BL2)
     add_subdirectory(mcuboot)
