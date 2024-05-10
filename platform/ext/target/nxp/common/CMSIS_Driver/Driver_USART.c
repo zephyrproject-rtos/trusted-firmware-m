@@ -38,7 +38,6 @@ typedef struct {
     usart_config_t  config;         /* USART configuration structure */
     uint32_t        tx_nbr_bytes;   /* Number of bytes transfered */
     uint32_t        rx_nbr_bytes;   /* Number of bytes recevied */
-    bool            is_initialized; /* true if initialized */
 } UARTx_Resources;
 
 /* Driver version */
@@ -88,16 +87,16 @@ static ARM_USART_CAPABILITIES ARM_USART_GetCapabilities(void)
 
 static int32_t ARM_USARTx_Initialize(UARTx_Resources* uart_dev)
 {
+    
+#if (__ARM_FEATURE_CMSE & 0x2) /* Initialize once in S */
     uint32_t usartClkFreq;
 
     usartClkFreq = BOARD_DEBUG_UART_CLK_FREQ;
 
-    if (USART_Init(uart_dev->base, &uart_dev->config, usartClkFreq) == kStatus_Success) {
-        uart_dev->is_initialized = true;
-        return ARM_DRIVER_OK;
-    } else {
-        return ARM_DRIVER_ERROR;
-    }
+    USART_Init(uart_dev->base, &uart_dev->config, usartClkFreq);
+#endif
+
+    return ARM_DRIVER_OK;
 }
 
 static int32_t ARM_USARTx_PowerControl(UARTx_Resources* uart_dev,
@@ -119,10 +118,7 @@ static int32_t ARM_USARTx_PowerControl(UARTx_Resources* uart_dev,
 
 static int32_t ARM_USARTx_Deinitialize(UARTx_Resources* uart_dev)
 {
-    if(uart_dev->is_initialized) {
-        USART_Deinit(uart_dev->base);
-        uart_dev->is_initialized = false;
-    }
+    USART_Deinit(uart_dev->base);
 
     return ARM_DRIVER_OK;
 }
@@ -130,9 +126,9 @@ static int32_t ARM_USARTx_Deinitialize(UARTx_Resources* uart_dev)
 static int32_t ARM_USARTx_Send(UARTx_Resources* uart_dev, const uint8_t *data, size_t length)
 {
     USART_WriteBlocking(uart_dev->base, data, length);
-
+    
     uart_dev->tx_nbr_bytes = length;
-
+    
     return ARM_DRIVER_OK;
 }
 
