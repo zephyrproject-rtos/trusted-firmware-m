@@ -80,9 +80,6 @@ if(NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "")
     string(REGEX MATCH "^[A-Z]*" SIG_TYPE ${MCUBOOT_SIGNATURE_TYPE})
 endif()
 
-# FixMe: The MBEDTLS_CONFIG_FILE and MBEDTLS_PSA_CRYPTO_CONFIG_FILE should be
-# put in a dedicated target that can be linked by other targets, for example
-# bl2 provisioning related targets, to be able to include correctly psa/crypto.h
 target_compile_definitions(bl2_mbedcrypto_config
     INTERFACE
         $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA>

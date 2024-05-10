@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.15)
 include(spe_config)
 include(spe_export)
 
-set_target_properties(tfm_config psa_interface psa_crypto_config PROPERTIES IMPORTED_GLOBAL True)
+set_target_properties(tfm_config psa_interface PROPERTIES IMPORTED_GLOBAL True)
 target_link_libraries(tfm_config INTERFACE psa_interface)
 
 # In actual NS integration, NS side build should include the source files
@@ -47,42 +47,6 @@ target_include_directories(tfm_api_ns
         ${INTERFACE_INC_DIR}/crypto_keys
         $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_INC_DIR}/multi_core>
 )
-
-if (CONFIG_TFM_USE_TRUSTZONE)
-    add_library(tfm_api_ns_tz INTERFACE)
-
-    target_sources(tfm_api_ns_tz
-        INTERFACE
-            ${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c
-    )
-
-    target_link_libraries(tfm_api_ns_tz
-        INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o
-    )
-endif()
-
-if (TFM_PARTITION_NS_AGENT_MAILBOX)
-    add_library(tfm_api_ns_mailbox INTERFACE)
-
-    target_sources(tfm_api_ns_mailbox
-        INTERFACE
-            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
-            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
-    )
-
-    target_include_directories(tfm_api_ns_mailbox
-        INTERFACE
-            ${INTERFACE_INC_DIR}/multi_core
-    )
-endif()
-
-if (TFM_PARTITION_CRYPTO)
-    target_link_libraries(tfm_api_ns
-        PUBLIC
-            psa_crypto_config
-    )
-endif()
 
 add_library(platform_region_defs INTERFACE)
 

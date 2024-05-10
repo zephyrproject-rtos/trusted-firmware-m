@@ -7,6 +7,7 @@
 
 #include "psa/initial_attestation.h"
 #include "psa/client.h"
+#include "psa/crypto_types.h"
 #include "psa_manifest/sid.h"
 #include "tfm_attest_defs.h"
 

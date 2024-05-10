@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file psa/crypto_types.h
  *
@@ -13,25 +19,9 @@
  *
  * This header file does not declare any function.
  */
-/*
- *  Copyright The Mbed TLS Contributors
- *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
- */
 
 #ifndef PSA_CRYPTO_TYPES_H
 #define PSA_CRYPTO_TYPES_H
-
-/*
- * Include the build-time configuration information header. Here, we do not
- * include `"mbedtls/build_info.h"` directly but `"psa/build_info.h"`, which
- * is basically just an alias to it. This is to ease the maintenance of the
- * TF-PSA-Crypto repository which has a different build system and
- * configuration.
- */
-#include "psa/build_info.h"
-
-/* Define the MBEDTLS_PRIVATE macro. */
-#include "mbedtls/private_access.h"
 
 #if defined(MBEDTLS_PSA_CRYPTO_PLATFORM_FILE)
 #include MBEDTLS_PSA_CRYPTO_PLATFORM_FILE
@@ -292,7 +282,9 @@ typedef uint32_t psa_key_id_t;
 typedef psa_key_id_t mbedtls_svc_key_id_t;
 
 #else /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
-/* Implementation-specific: The Mbed TLS library can be built as
+/* Define the MBEDTLS_PRIVATE macro. */
+#include "mbedtls/private_access.h"
+/* Implementation-specific: The Mbed Cryptography library can be built as
  * part of a multi-client service that exposes the PSA Cryptography API in each
  * client and encodes the client identity in the key identifier argument of
  * functions such as psa_open_key().
@@ -437,7 +429,8 @@ typedef struct psa_key_attributes_s psa_key_attributes_t;
 /* Mbed TLS defines this type in crypto_types.h because it is also
  * visible to applications through an implementation-specific extension.
  * For the PSA Cryptography specification, this type is only visible
- * via crypto_se_driver.h. */
+ * via crypto_se_driver.h.
+ */
 typedef uint64_t psa_key_slot_number_t;
 #endif /* MBEDTLS_PSA_CRYPTO_SE_C */
 #endif /* !__DOXYGEN_ONLY__ */
@@ -454,30 +447,6 @@ typedef uint64_t psa_key_slot_number_t;
  * `PSA_KEY_DERIVATION_INPUT_xxx`.
  */
 typedef uint16_t psa_key_derivation_step_t;
-
-/** \brief Custom parameters for key generation or key derivation.
- *
- * This is a structure type with at least the following fields:
- *
- * - \c flags: an unsigned integer type. 0 for the default production parameters.
- * - \c data: a flexible array of bytes.
- *
- * The interpretation of this structure depend on the type of the
- * created key.
- *
- * - #PSA_KEY_TYPE_RSA_KEY_PAIR:
- *     - \c flags: must be 0.
- *     - \c data: the public exponent, in little-endian order.
- *       This must be an odd integer and must not be 1.
- *       Implementations must support 65537, should support 3 and may
- *       support other values.
- *       When not using a driver, Mbed TLS supports values up to \c INT_MAX.
- *       If this is empty or if the custom production parameters are omitted
- *       altogether, the default value 65537 is used.
- * - Other key types: reserved for future use. \c flags must be 0.
- *
- */
-typedef struct psa_key_production_parameters_s psa_key_production_parameters_t;
 
 /**@}*/
 

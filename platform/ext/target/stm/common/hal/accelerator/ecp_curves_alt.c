@@ -37,9 +37,11 @@
 #error "MBEDTLS_ECP_NIST_OPTIM defined, but it cannot coexist with ST alternative ECP implementation"
 #endif
 
-/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
-#define ECP_VALIDATE_RET( cond ) do { } while(0)
-#define ECP_VALIDATE( cond ) do { } while(0)
+/* Parameter validation macros based on platform_util.h */
+#define ECP_VALIDATE_RET( cond )    \
+    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_ECP_BAD_INPUT_DATA )
+#define ECP_VALIDATE( cond )        \
+    MBEDTLS_INTERNAL_VALIDATE( cond )
 
 #if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) )  \
     && !defined(inline) && !defined(__cplusplus)

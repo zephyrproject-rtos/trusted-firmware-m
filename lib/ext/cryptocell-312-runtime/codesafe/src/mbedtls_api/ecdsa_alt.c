@@ -224,7 +224,7 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
 
     if( ecp_get_type( grp ) == ECP_TYPE_SHORT_WEIERSTRASS )
     {
-        if(NULL == f_rng) /* Check only f_rng as mbedtls_psa_get_random does not need p_rng to be non-NULL */
+        if(NULL == f_rng || NULL == p_rng)
         {
             CC_PAL_LOG_ERR("Error - NULL pointer exception\n");
             return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );

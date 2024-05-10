@@ -1,14 +1,27 @@
+/*
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file psa/crypto.h
  * \brief Platform Security Architecture cryptography module
  */
-/*
- *  Copyright The Mbed TLS Contributors
- *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
- */
 
 #ifndef PSA_CRYPTO_H
 #define PSA_CRYPTO_H
+
+/* In Mbed TLS, we would query the current config through inclusion of
+ * mbedtls/build_info.h, but in TF-M, we don't rely on build_info.h
+ * hence we just include the current configuration if it has been passed
+ * through command line. These config defines are required in crypto_sizes.h
+ * to compute macros that define sizes which depend on algorithms supported
+ * by the implementation
+ */
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
+#include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+#endif /* MBEDTLS_PSA_CRYPTO_CONFIG_FILE */
 
 #if defined(MBEDTLS_PSA_CRYPTO_PLATFORM_FILE)
 #include MBEDTLS_PSA_CRYPTO_PLATFORM_FILE
@@ -119,9 +132,8 @@ static psa_key_attributes_t psa_key_attributes_init(void);
  * value in the structure.
  * The persistent key will be written to storage when the attribute
  * structure is passed to a key creation function such as
- * psa_import_key(), psa_generate_key(), psa_generate_key_ext(),
- * psa_key_derivation_output_key(), psa_key_derivation_output_key_ext()
- * or psa_copy_key().
+ * psa_import_key(), psa_generate_key(),
+ * psa_key_derivation_output_key() or psa_copy_key().
  *
  * This function may be declared as `static` (i.e. without external
  * linkage). This function may be provided as a function-like macro,
@@ -164,9 +176,8 @@ static void mbedtls_set_key_owner_id(psa_key_attributes_t *attributes,
  * value in the structure.
  * The persistent key will be written to storage when the attribute
  * structure is passed to a key creation function such as
- * psa_import_key(), psa_generate_key(), psa_generate_key_ext(),
- * psa_key_derivation_output_key(), psa_key_derivation_output_key_ext()
- * or psa_copy_key().
+ * psa_import_key(), psa_generate_key(),
+ * psa_key_derivation_output_key() or psa_copy_key().
  *
  * This function may be declared as `static` (i.e. without external
  * linkage). This function may be provided as a function-like macro,
@@ -526,11 +537,6 @@ psa_status_t psa_copy_key(mbedtls_svc_key_id_t source_key,
  *
  * If a key is currently in use in a multipart operation, then destroying the
  * key will cause the multipart operation to fail.
- *
- * \warning    We can only guarantee that the the key material will
- *             eventually be wiped from memory. With threading enabled
- *             and during concurrent execution, copies of the key material may
- *             still exist until all threads have finished using the key.
  *
  * \param key  Identifier of the key to erase. If this is \c 0, do nothing and
  *             return #PSA_SUCCESS.
@@ -3233,8 +3239,7 @@ static psa_key_derivation_operation_t psa_key_derivation_operation_init(void);
  *    psa_key_derivation_set_capacity(). You may do this before, in the middle
  *    of or after providing inputs. For some algorithms, this step is mandatory
  *    because the output depends on the maximum capacity.
- * -# To derive a key, call psa_key_derivation_output_key() or
- *    psa_key_derivation_output_key_ext().
+ * -# To derive a key, call psa_key_derivation_output_key().
  *    To derive a byte string for a different purpose, call
  *    psa_key_derivation_output_bytes().
  *    Successive calls to these functions use successive output bytes
@@ -3457,8 +3462,7 @@ psa_status_t psa_key_derivation_input_integer(
  * \note Once all inputs steps are completed, the operations will allow:
  * - psa_key_derivation_output_bytes() if each input was either a direct input
  *   or  a key with #PSA_KEY_USAGE_DERIVE set;
- * - psa_key_derivation_output_key() or psa_key_derivation_output_key_ext()
- *   if the input for step
+ * - psa_key_derivation_output_key() if the input for step
  *   #PSA_KEY_DERIVATION_INPUT_SECRET or #PSA_KEY_DERIVATION_INPUT_PASSWORD
  *   was from a key slot with #PSA_KEY_USAGE_DERIVE and each other input was
  *   either a direct input or a key with #PSA_KEY_USAGE_DERIVE set;
@@ -3706,11 +3710,6 @@ psa_status_t psa_key_derivation_output_bytes(
  * Future versions of this specification may include additional restrictions
  * on the derived key based on the attributes and strength of the secret key.
  *
- * \note This function is equivalent to calling
- *       psa_key_derivation_output_key_ext()
- *       with the production parameters #PSA_KEY_PRODUCTION_PARAMETERS_INIT
- *       and `params_data_length == 0` (i.e. `params->data` is empty).
- *
  * \param[in] attributes    The attributes for the new key.
  *                          If the key type to be created is
  *                          #PSA_KEY_TYPE_PASSWORD_HASH then the algorithm in
@@ -3762,83 +3761,6 @@ psa_status_t psa_key_derivation_output_bytes(
 psa_status_t psa_key_derivation_output_key(
     const psa_key_attributes_t *attributes,
     psa_key_derivation_operation_t *operation,
-    mbedtls_svc_key_id_t *key);
-
-/** Derive a key from an ongoing key derivation operation with custom
- *  production parameters.
- *
- * See the description of psa_key_derivation_out_key() for the operation of
- * this function with the default production parameters.
- * Mbed TLS currently does not currently support any non-default production
- * parameters.
- *
- * \note This function is experimental and may change in future minor
- *       versions of Mbed TLS.
- *
- * \param[in] attributes    The attributes for the new key.
- *                          If the key type to be created is
- *                          #PSA_KEY_TYPE_PASSWORD_HASH then the algorithm in
- *                          the policy must be the same as in the current
- *                          operation.
- * \param[in,out] operation The key derivation operation object to read from.
- * \param[in] params        Customization parameters for the key derivation.
- *                          When this is #PSA_KEY_PRODUCTION_PARAMETERS_INIT
- *                          with \p params_data_length = 0,
- *                          this function is equivalent to
- *                          psa_key_derivation_output_key().
- *                          Mbed TLS currently only supports the default
- *                          production parameters, i.e.
- *                          #PSA_KEY_PRODUCTION_PARAMETERS_INIT,
- *                          for all key types.
- * \param params_data_length
- *                          Length of `params->data` in bytes.
- * \param[out] key          On success, an identifier for the newly created
- *                          key. For persistent keys, this is the key
- *                          identifier defined in \p attributes.
- *                          \c 0 on failure.
- *
- * \retval #PSA_SUCCESS
- *         Success.
- *         If the key is persistent, the key material and the key's metadata
- *         have been saved to persistent storage.
- * \retval #PSA_ERROR_ALREADY_EXISTS
- *         This is an attempt to create a persistent key, and there is
- *         already a persistent key with the given identifier.
- * \retval #PSA_ERROR_INSUFFICIENT_DATA
- *         There was not enough data to create the desired key.
- *         Note that in this case, no output is written to the output buffer.
- *         The operation's capacity is set to 0, thus subsequent calls to
- *         this function will not succeed, even with a smaller output buffer.
- * \retval #PSA_ERROR_NOT_SUPPORTED
- *         The key type or key size is not supported, either by the
- *         implementation in general or in this particular location.
- * \retval #PSA_ERROR_INVALID_ARGUMENT
- *         The provided key attributes are not valid for the operation.
- * \retval #PSA_ERROR_NOT_PERMITTED
- *         The #PSA_KEY_DERIVATION_INPUT_SECRET or
- *         #PSA_KEY_DERIVATION_INPUT_PASSWORD input was not provided through a
- *         key; or one of the inputs was a key whose policy didn't allow
- *         #PSA_KEY_USAGE_DERIVE.
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY \emptydescription
- * \retval #PSA_ERROR_INSUFFICIENT_STORAGE \emptydescription
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE \emptydescription
- * \retval #PSA_ERROR_HARDWARE_FAILURE \emptydescription
- * \retval #PSA_ERROR_CORRUPTION_DETECTED \emptydescription
- * \retval #PSA_ERROR_DATA_INVALID \emptydescription
- * \retval #PSA_ERROR_DATA_CORRUPT \emptydescription
- * \retval #PSA_ERROR_STORAGE_FAILURE \emptydescription
- * \retval #PSA_ERROR_BAD_STATE
- *         The operation state is not valid (it must be active and completed
- *         all required input steps), or the library has not been previously
- *         initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
-psa_status_t psa_key_derivation_output_key_ext(
-    const psa_key_attributes_t *attributes,
-    psa_key_derivation_operation_t *operation,
-    const psa_key_production_parameters_t *params,
-    size_t params_data_length,
     mbedtls_svc_key_id_t *key);
 
 /** Compare output data from a key derivation operation to an expected value.
@@ -3926,8 +3848,7 @@ psa_status_t psa_key_derivation_verify_bytes(
  *                          and the permitted algorithm must match the
  *                          operation. The value of this key was likely
  *                          computed by a previous call to
- *                          psa_key_derivation_output_key() or
- *                          psa_key_derivation_output_key_ext().
+ *                          psa_key_derivation_output_key().
  *
  * \retval #PSA_SUCCESS \emptydescription
  * \retval #PSA_ERROR_INVALID_SIGNATURE
@@ -3961,7 +3882,7 @@ psa_status_t psa_key_derivation_verify_bytes(
  */
 psa_status_t psa_key_derivation_verify_key(
     psa_key_derivation_operation_t *operation,
-    psa_key_id_t expected);
+    mbedtls_svc_key_id_t expected);
 
 /** Abort a key derivation operation.
  *
@@ -4095,10 +4016,6 @@ psa_status_t psa_generate_random(uint8_t *output,
  *   between 2^{n-1} and 2^n where n is the bit size specified in the
  *   attributes.
  *
- * \note This function is equivalent to calling psa_generate_key_ext()
- *       with the production parameters #PSA_KEY_PRODUCTION_PARAMETERS_INIT
- *       and `params_data_length == 0` (i.e. `params->data` is empty).
- *
  * \param[in] attributes    The attributes for the new key.
  * \param[out] key          On success, an identifier for the newly created
  *                          key. For persistent keys, this is the key
@@ -4130,60 +4047,6 @@ psa_status_t psa_generate_random(uint8_t *output,
  */
 psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
                               mbedtls_svc_key_id_t *key);
-
-/**
- * \brief Generate a key or key pair using custom production parameters.
- *
- * See the description of psa_generate_key() for the operation of this
- * function with the default production parameters. In addition, this function
- * supports the following production customizations, described in more detail
- * in the documentation of ::psa_key_production_parameters_t:
- *
- * - RSA keys: generation with a custom public exponent.
- *
- * \note This function is experimental and may change in future minor
- *       versions of Mbed TLS.
- *
- * \param[in] attributes    The attributes for the new key.
- * \param[in] params        Customization parameters for the key generation.
- *                          When this is #PSA_KEY_PRODUCTION_PARAMETERS_INIT
- *                          with \p params_data_length = 0,
- *                          this function is equivalent to
- *                          psa_generate_key().
- * \param params_data_length
- *                          Length of `params->data` in bytes.
- * \param[out] key          On success, an identifier for the newly created
- *                          key. For persistent keys, this is the key
- *                          identifier defined in \p attributes.
- *                          \c 0 on failure.
- *
- * \retval #PSA_SUCCESS
- *         Success.
- *         If the key is persistent, the key material and the key's metadata
- *         have been saved to persistent storage.
- * \retval #PSA_ERROR_ALREADY_EXISTS
- *         This is an attempt to create a persistent key, and there is
- *         already a persistent key with the given identifier.
- * \retval #PSA_ERROR_NOT_SUPPORTED \emptydescription
- * \retval #PSA_ERROR_INVALID_ARGUMENT \emptydescription
- * \retval #PSA_ERROR_INSUFFICIENT_MEMORY \emptydescription
- * \retval #PSA_ERROR_INSUFFICIENT_ENTROPY \emptydescription
- * \retval #PSA_ERROR_COMMUNICATION_FAILURE \emptydescription
- * \retval #PSA_ERROR_HARDWARE_FAILURE \emptydescription
- * \retval #PSA_ERROR_CORRUPTION_DETECTED \emptydescription
- * \retval #PSA_ERROR_INSUFFICIENT_STORAGE \emptydescription
- * \retval #PSA_ERROR_DATA_INVALID \emptydescription
- * \retval #PSA_ERROR_DATA_CORRUPT \emptydescription
- * \retval #PSA_ERROR_STORAGE_FAILURE \emptydescription
- * \retval #PSA_ERROR_BAD_STATE
- *         The library has not been previously initialized by psa_crypto_init().
- *         It is implementation-dependent whether a failure to initialize
- *         results in this error code.
- */
-psa_status_t psa_generate_key_ext(const psa_key_attributes_t *attributes,
-                                  const psa_key_production_parameters_t *params,
-                                  size_t params_data_length,
-                                  mbedtls_svc_key_id_t *key);
 
 /**@}*/
 
@@ -4545,9 +4408,9 @@ psa_status_t psa_sign_hash_start(
  * \retval #PSA_ERROR_BUFFER_TOO_SMALL
  *         The size of the \p signature buffer is too small. You can
  *         determine a sufficient buffer size by calling
- *         #PSA_SIGN_OUTPUT_SIZE(\c key_type, \c key_bits, \c alg)
+ *         #PSA_SIGN_OUTPUT_SIZE(\c key_type, \c key_bits, \p alg)
  *         where \c key_type and \c key_bits are the type and bit-size
- *         respectively of \c key.
+ *         respectively of \p key.
  *
  * \retval #PSA_ERROR_BAD_STATE
  *         An operation was not previously started on this context via

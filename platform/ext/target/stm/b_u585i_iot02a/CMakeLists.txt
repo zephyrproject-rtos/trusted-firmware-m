@@ -58,12 +58,6 @@ install(FILES
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )
 
-install(DIRECTORY
-    ${STM_COMMON_DIR}/hal/accelerator/
-    DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
-    FILES_MATCHING PATTERN "*.h"
-)
-
 install(FILES
     ${B_U585I_IOT02A_DIR}/partition/flash_layout.h
     ${B_U585I_IOT02A_DIR}/partition/region_defs.h

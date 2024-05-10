@@ -49,5 +49,4 @@ target_sources(tfm_t_cose_common
 target_link_libraries(tfm_t_cose_common
     INTERFACE
         tfm_config
-        psa_crypto_config
 )

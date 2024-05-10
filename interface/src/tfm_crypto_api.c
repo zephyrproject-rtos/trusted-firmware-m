@@ -5,11 +5,8 @@
  *
  */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "tfm_crypto_defs.h"
-
+#include "psa/crypto.h"
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
 
@@ -141,6 +138,22 @@ TFM_CRYPTO_API(psa_status_t, psa_get_key_attributes)(psa_key_id_t key,
     };
 
     return API_DISPATCH(in_vec, out_vec);
+}
+
+TFM_CRYPTO_API(void, psa_reset_key_attributes)(psa_key_attributes_t *attributes)
+{
+    struct tfm_crypto_pack_iovec iov = {
+        .function_id = TFM_CRYPTO_RESET_KEY_ATTRIBUTES_SID,
+    };
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = attributes, .len = sizeof(psa_key_attributes_t)},
+    };
+
+    (void)API_DISPATCH(in_vec, out_vec);
+    return;
 }
 
 TFM_CRYPTO_API(psa_status_t, psa_export_key)(psa_key_id_t key,
@@ -1642,15 +1655,4 @@ TFM_CRYPTO_API(psa_status_t, psa_key_derivation_output_key)(
     };
 
     return API_DISPATCH(in_vec, out_vec);
-}
-
-/* The implementation of the following helper function is marked
- * weak to allow for those integrations where this is directly
- * provided by the psa_crypto_client.c module of Mbed TLS
- */
-__attribute__((weak))
-TFM_CRYPTO_API(void, psa_reset_key_attributes)(
-                                      psa_key_attributes_t *attributes)
-{
-    memset(attributes, 0, sizeof(*attributes));
 }

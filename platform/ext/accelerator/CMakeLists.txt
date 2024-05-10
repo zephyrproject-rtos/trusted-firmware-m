@@ -14,7 +14,6 @@ if (TFM_PARTITION_CRYPTO)
 add_library(crypto_service_crypto_hw STATIC)
 endif()
 
-message(STATUS "[Platform] Crypto HW accelerator type: ${CRYPTO_HW_ACCELERATOR_TYPE}")
 add_subdirectory(${CRYPTO_HW_ACCELERATOR_TYPE})
 
 ############################ Project Config ####################################

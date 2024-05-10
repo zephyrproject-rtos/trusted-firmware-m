@@ -34,9 +34,11 @@
 #define ST_ECDSA_TIMEOUT     (5000U)
 
 /* Private macro -------------------------------------------------------------*/
-/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
-#define ECDSA_VALIDATE_RET( cond ) do { } while(0)
-#define ECDSA_VALIDATE( cond ) do { } while(0)
+/* Parameter validation macros based on platform_util.h */
+#define ECDSA_VALIDATE_RET( cond )    \
+    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_ECP_BAD_INPUT_DATA )
+#define ECDSA_VALIDATE( cond )        \
+    MBEDTLS_INTERNAL_VALIDATE( cond )
 
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/

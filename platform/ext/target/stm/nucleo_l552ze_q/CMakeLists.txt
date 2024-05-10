@@ -45,17 +45,12 @@ install(FILES
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )
 
-install(DIRECTORY
-    ${STM_COMMON_DIR}/hal/accelerator/
-    DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
-    FILES_MATCHING PATTERN "*.h"
-)
-
 install(FILES
     ${TARGET_PLATFORM_PATH}/partition/flash_layout.h
     ${TARGET_PLATFORM_PATH}/partition/region_defs.h
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition
 )
+
 
 if(BL2)
     target_sources(bl2

@@ -1,39 +1,47 @@
-From ba6536c5140df75a669fc92cdef2729a6913f6af Mon Sep 17 00:00:00 2001
+From 05d237704ded16405382cbef7cc867e2d7382e13 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
-Date: Thu, 21 Mar 2024 11:58:19 +0000
+Date: Tue, 23 Aug 2022 13:06:07 +0100
 Subject: [PATCH 4/6] Initialise driver wrappers as first step in
  psa_crypto_init()
 
-This patch amends the order of initialisations performed in
-psa_crypto_init() to make sure that the driver wrappers based
-on the PSA driver API are initialised just after the key slots
-in memory, both of them at the beginning of the initialisation
-sequence.
+This patch amends the order of initialisations performed in psa_crypto_init()
+to make sure that the driver wrappers based on the PSA driver API are initialised
+just after the key slots in memory, both of them at the beginning of the
+initialisation sequence.
 
 Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
 ---
- library/psa_crypto.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ library/psa_crypto.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index fd1d28fc6..1d91739da 100644
+index 755091aa..0b934079 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -8274,12 +8274,12 @@ psa_status_t psa_crypto_init(void)
+@@ -7730,6 +7730,11 @@ psa_status_t psa_crypto_init(void)
          return PSA_SUCCESS;
      }
  
--    status = mbedtls_psa_crypto_init_subsystem(PSA_CRYPTO_SUBSYSTEM_DRIVER_WRAPPERS);
-+    status = mbedtls_psa_crypto_init_subsystem(PSA_CRYPTO_SUBSYSTEM_KEY_SLOTS);
++    status = psa_initialize_key_slots();
++    if (status != PSA_SUCCESS) {
++        goto exit;
++    }
++
+     /* Init drivers */
+     status = psa_driver_wrapper_init();
      if (status != PSA_SUCCESS) {
-         goto exit;
+@@ -7746,11 +7751,6 @@ psa_status_t psa_crypto_init(void)
      }
+     global_data.rng_state = RNG_SEEDED;
  
--    status = mbedtls_psa_crypto_init_subsystem(PSA_CRYPTO_SUBSYSTEM_KEY_SLOTS);
-+    status = mbedtls_psa_crypto_init_subsystem(PSA_CRYPTO_SUBSYSTEM_DRIVER_WRAPPERS);
-     if (status != PSA_SUCCESS) {
-         goto exit;
-     }
+-    status = psa_initialize_key_slots();
+-    if (status != PSA_SUCCESS) {
+-        goto exit;
+-    }
+-
+ #if defined(PSA_CRYPTO_STORAGE_HAS_TRANSACTIONS)
+     status = psa_crypto_load_transaction();
+     if (status == PSA_SUCCESS) {
 -- 
-2.34.1
+2.25.1
 

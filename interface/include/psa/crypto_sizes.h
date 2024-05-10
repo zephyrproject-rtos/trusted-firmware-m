@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file psa/crypto_sizes.h
  *
@@ -20,22 +26,9 @@
  * Macros that compute sizes whose values do not depend on the
  * implementation are in crypto.h.
  */
-/*
- *  Copyright The Mbed TLS Contributors
- *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
- */
 
 #ifndef PSA_CRYPTO_SIZES_H
 #define PSA_CRYPTO_SIZES_H
-
-/*
- * Include the build-time configuration information header. Here, we do not
- * include `"mbedtls/build_info.h"` directly but `"psa/build_info.h"`, which
- * is basically just an alias to it. This is to ease the maintenance of the
- * TF-PSA-Crypto repository which has a different build system and
- * configuration.
- */
-#include "psa/build_info.h"
 
 #define PSA_BITS_TO_BYTES(bits) (((bits) + 7u) / 8u)
 #define PSA_BYTES_TO_BITS(bytes) ((bytes) * 8u)
@@ -117,7 +110,9 @@
  * 136 bytes for HMAC-SHA3-256, 104 bytes for SHA3-384, 72 bytes for
  * HMAC-SHA3-512. */
 /* Note: PSA_HASH_MAX_SIZE should be kept in sync with MBEDTLS_MD_MAX_SIZE,
- * see the note on MBEDTLS_MD_MAX_SIZE for details. */
+ * see the note on MBEDTLS_MD_MAX_SIZE for details.
+ */
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
 #if defined(PSA_WANT_ALG_SHA3_224)
 #define PSA_HMAC_MAX_HASH_BLOCK_SIZE 144u
 #elif defined(PSA_WANT_ALG_SHA3_256)
@@ -149,6 +144,11 @@
 #else /* SHA-1 or smaller */
 #define PSA_HASH_MAX_SIZE 20u
 #endif
+#else /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
+/* Without any PSA configuration we must assume the maximum size possible. */
+#define PSA_HASH_MAX_SIZE 64u
+#define PSA_HMAC_MAX_HASH_BLOCK_SIZE 144u
+#endif /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
 
 /** \def PSA_MAC_MAX_SIZE
  *
@@ -224,23 +224,15 @@
 #endif
 
 /* The maximum size of an DH key on this implementation, in bits.
- * This is a vendor-specific macro.*/
-#if defined(PSA_WANT_DH_RFC7919_8192)
+ *
+ * Note that an implementation may set different size limits for different
+ * operations, and does not need to accept all key sizes up to the limit.
+ */
 #define PSA_VENDOR_FFDH_MAX_KEY_BITS 8192u
-#elif defined(PSA_WANT_DH_RFC7919_6144)
-#define PSA_VENDOR_FFDH_MAX_KEY_BITS 6144u
-#elif defined(PSA_WANT_DH_RFC7919_4096)
-#define PSA_VENDOR_FFDH_MAX_KEY_BITS 4096u
-#elif defined(PSA_WANT_DH_RFC7919_3072)
-#define PSA_VENDOR_FFDH_MAX_KEY_BITS 3072u
-#elif defined(PSA_WANT_DH_RFC7919_2048)
-#define PSA_VENDOR_FFDH_MAX_KEY_BITS 2048u
-#else
-#define PSA_VENDOR_FFDH_MAX_KEY_BITS 0u
-#endif
 
 /* The maximum size of an ECC key on this implementation, in bits.
  * This is a vendor-specific macro. */
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
 #if defined(PSA_WANT_ECC_SECP_R1_521)
 #define PSA_VENDOR_ECC_MAX_CURVE_BITS 521u
 #elif defined(PSA_WANT_ECC_BRAINPOOL_P_R1_512)
@@ -270,6 +262,10 @@
 #else
 #define PSA_VENDOR_ECC_MAX_CURVE_BITS 0u
 #endif
+#else /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
+/* Without any PSA configuration we must assume the maximum size possible. */
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 521
+#endif /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
 
 /** This macro returns the maximum supported length of the PSK for the
  * TLS-1.2 PSK-to-MS key derivation
@@ -298,7 +294,8 @@
 #define PSA_TLS12_ECJPAKE_TO_PMS_DATA_SIZE 32u
 
 /* The maximum number of iterations for PBKDF2 on this implementation, in bits.
- * This is a vendor-specific macro. This can be configured if necessary */
+ * This is a vendor-specific macro. This can be configured if necessary.
+ */
 #define PSA_VENDOR_PBKDF2_MAX_ITERATIONS 0xffffffffU
 
 /** The maximum size of a block cipher. */

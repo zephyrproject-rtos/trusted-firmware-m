@@ -10,6 +10,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_sprt STATIC)
+
 target_include_directories(tfm_sprt
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -41,7 +42,6 @@ target_link_libraries(tfm_sprt
         platform_s
     PRIVATE
         tfm_spm
-        psa_crypto_config
 )
 
 target_compile_definitions(tfm_config
@@ -53,27 +53,4 @@ target_compile_definitions(tfm_config
 target_include_directories(tfm_sprt
     INTERFACE
         $<BUILD_INTERFACE:$<$<BOOL:${CONFIG_TFM_PARTITION_META}>:${CMAKE_CURRENT_SOURCE_DIR}/include>>
-)
-
-
-# A dedicated logging target
-add_library(tfm_sp_log STATIC)
-target_include_directories(tfm_sp_log
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-target_sources(tfm_sp_log
-    PRIVATE
-        tfm_sp_log_raw.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_sp_logdev_periph.c
-)
-
-target_link_libraries(tfm_sp_log
-    PUBLIC
-        tfm_spm_defs
-        tfm_config
-        platform_s
-    PRIVATE
-        tfm_spm
 )

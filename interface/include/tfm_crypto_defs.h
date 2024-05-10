@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include "psa/crypto.h"
 #ifdef PLATFORM_DEFAULT_CRYPTO_KEYS
 #include "crypto_keys/tfm_builtin_key_ids.h"
@@ -43,7 +44,7 @@ struct tfm_crypto_aead_pack_input {
 struct tfm_crypto_pack_iovec {
     psa_key_id_t key_id;     /*!< Key id */
     psa_algorithm_t alg;     /*!< Algorithm */
-    uint32_t op_handle;      /*!< Client context handle associated to a
+    uint32_t op_handle;      /*!< Frontend context handle associated to a
                               *   multipart operation
                               */
     size_t capacity;         /*!< Key derivation capacity */
