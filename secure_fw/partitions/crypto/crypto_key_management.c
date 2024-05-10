@@ -80,15 +80,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     {
         psa_key_attributes_t *key_attributes = out_vec[0].base;
 
-        status = psa_get_key_attributes(library_key, &srv_key_attr);
-
-        /* Note that we just copy out_vec[0].len, because in this context
-         * sizeof(psa_key_attributes_t) would return the size of the service
-         * view of the attributes, while we are passing back to the caller
-         * only the client view of it, i.e. without the owner field at the
-         * end of the structure
-         */
-        memcpy(key_attributes, &srv_key_attr, out_vec[0].len);
+        status = psa_get_key_attributes(library_key, key_attributes);
     }
     break;
     case TFM_CRYPTO_EXPORT_KEY_SID:
