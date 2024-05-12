@@ -51,6 +51,7 @@ set(PLATFORM_DEFAULT_ATTEST_HAL         OFF             CACHE BOOL     "Use defa
 set(PLATFORM_DEFAULT_NV_COUNTERS        OFF             CACHE BOOL     "Use default nv counter implementation.")
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS     ON              CACHE BOOL     "Platform supports nvm counters for PS in OTP")
 set(CRYPTO_NV_SEED                      1               CACHE STRING   "Use stored NV seed to provide entropy")
+set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(BL1_SHARED_SYMBOLS_PATH         ${TARGET_PLATFORM_PATH}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
 set(RTL_KEY_PATH                    ${TARGET_PLATFORM_PATH}/provisioning/tci_krtl.bin    CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")

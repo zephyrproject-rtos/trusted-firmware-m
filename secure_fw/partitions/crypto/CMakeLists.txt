@@ -140,10 +140,17 @@ set(MBEDTLS_TARGET_PREFIX crypto_service_)
 # Check if the p256m driver is enabled in the config file, as that will require a
 # dedicated target to be linked in. Note that 0 means SUCCESS here, 1 means FAILURE
 set(MBEDTLS_P256M_NOT_FOUND 1)
-execute_process(COMMAND
-    ${Python3_EXECUTABLE}
-    ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
-    RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+if(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH)
+    execute_process(COMMAND
+        ${Python3_EXECUTABLE}
+        ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" -f "${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+        RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+else()
+    execute_process(COMMAND
+        ${Python3_EXECUTABLE}
+        ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+        RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+endif()
 
 if (${MBEDTLS_P256M_NOT_FOUND} EQUAL 0)
     message(STATUS "[Crypto service] Using P256M software driver in PSA Crypto backend")
