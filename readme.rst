@@ -51,4 +51,4 @@ Feedback can be submitted via email to
 .. _git.trustedfirmware.org: https://git.trustedfirmware.org/
 .. _GitHub: https://github.com/TrustedFirmware-M
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
