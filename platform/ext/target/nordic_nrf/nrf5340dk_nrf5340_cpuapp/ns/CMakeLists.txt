@@ -27,5 +27,5 @@ target_link_libraries(platform_ns
 
 target_include_directories(platform_region_defs
     INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/partition
+        ${CMAKE_CURRENT_LIST_DIR}/common/nrf5340/partition
 )

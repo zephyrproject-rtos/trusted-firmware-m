@@ -63,5 +63,6 @@ install(FILES       nrfx_config_nrf5340_application.h
 )
 
 install(DIRECTORY    tests
+                     partition
         DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf5340
 )
