@@ -37,7 +37,9 @@
 
 // TODO: NCSDK-25009: Support configuring which UART is used by TF-M on nrf54L
 
-#if NRF_SECURE_UART_INSTANCE == 0
+#ifndef NRF_SECURE_UART_INSTANCE
+#define TFM_DRIVER_STDIO    Driver_USART1
+#elif NRF_SECURE_UART_INSTANCE == 0
 #define TFM_DRIVER_STDIO    Driver_USART0
 #elif NRF_SECURE_UART_INSTANCE == 1
 #define TFM_DRIVER_STDIO    Driver_USART1
