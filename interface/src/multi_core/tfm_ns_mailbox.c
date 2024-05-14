@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,14 +29,14 @@ static inline void set_queue_slot_empty(uint8_t idx)
 static inline void set_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].reply.is_woken = true;
+        mailbox_queue_ptr->slots_ns[idx].is_woken = true;
     }
 }
 
 static inline bool is_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        return mailbox_queue_ptr->queue[idx].reply.is_woken;
+        return mailbox_queue_ptr->slots_ns[idx].is_woken;
     }
 
     return false;
@@ -43,7 +45,7 @@ static inline bool is_queue_slot_woken(uint8_t idx)
 static inline void clear_queue_slot_woken(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].reply.is_woken = false;
+        mailbox_queue_ptr->slots_ns[idx].is_woken = false;
     }
 }
 
@@ -51,14 +53,14 @@ static inline void clear_queue_slot_woken(uint8_t idx)
 static inline void clear_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->replied_slots &= ~(1UL << idx);
+        mailbox_queue_ptr->status.replied_slots &= ~(1UL << idx);
     }
 }
 
 static inline bool is_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        return mailbox_queue_ptr->replied_slots & (1UL << idx);
+        return mailbox_queue_ptr->status.replied_slots & (1UL << idx);
     }
 
     return false;
@@ -95,7 +97,7 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 static void set_msg_owner(uint8_t idx, const void *owner)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
-        mailbox_queue_ptr->queue[idx].reply.owner = owner;
+        mailbox_queue_ptr->slots_ns[idx].owner = owner;
     }
 }
 
@@ -118,7 +120,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
 #endif
 
     /* Fill the mailbox message */
-    msg_ptr = &mailbox_queue_ptr->queue[idx].msg;
+    msg_ptr = &mailbox_queue_ptr->slots[idx].msg;
 
     msg_ptr->call_type = call_type;
     memcpy(&msg_ptr->params, params, sizeof(msg_ptr->params));
@@ -144,7 +146,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
 
 static int32_t mailbox_rx_client_reply(uint8_t idx, int32_t *reply)
 {
-    *reply = mailbox_queue_ptr->queue[idx].reply.return_val;
+    *reply = mailbox_queue_ptr->slots[idx].reply.return_val;
 
     /* Clear up the owner field */
     set_msg_owner(idx, NULL);
@@ -215,8 +217,7 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
     }
 
     tfm_ns_mailbox_hal_enter_critical_isr();
-    replied_status = mailbox_queue_ptr->replied_slots;
-    clear_queue_slot_all_replied(mailbox_queue_ptr, replied_status);
+    replied_status = clear_queue_slot_all_replied(mailbox_queue_ptr);
     tfm_ns_mailbox_hal_exit_critical_isr();
 
     if (!replied_status) {
@@ -238,7 +239,7 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
         tfm_ns_mailbox_hal_exit_critical_isr();
 
         tfm_ns_mailbox_os_wake_task_isr(
-                                     mailbox_queue_ptr->queue[idx].reply.owner);
+                                     mailbox_queue_ptr->slots_ns[idx].owner);
 
         replied_status &= ~(0x1UL << idx);
         if (!replied_status) {

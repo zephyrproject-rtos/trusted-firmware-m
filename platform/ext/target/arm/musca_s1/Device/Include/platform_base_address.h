@@ -93,6 +93,7 @@ extern "C" {
 #define MUSCA_S1_MPC_SRAM1_S_BASE        (0x50084000UL)                              /*!< (Secure MPC SRAM Bank 1   ) Base Address */
 #define MUSCA_S1_MPC_SRAM2_S_BASE        (0x50085000UL)                              /*!< (Secure MPC SRAM Bank 2   ) Base Address */
 #define MUSCA_S1_MPC_SRAM3_S_BASE        (0x50086000UL)                              /*!< (Secure MPC SRAM Bank 3   ) Base Address */
+#define CC3XX_BASE_S                     (0x50088000UL)                              /*!< (CryptoCell CC3XX Secure  ) Base Address */
 #define MUSCA_S1_UART0_S_BASE            (0x50101000UL)                              /*!< (Secure UART0             ) Base Address */
 #define MUSCA_S1_UART1_S_BASE            (0x50102000UL)                              /*!< (Secure UART1             ) Base Address */
 #define MUSCA_S1_SPI0_S_BASE             (0x50103000UL)                              /*!< (Secure SPI0              ) Base Address */

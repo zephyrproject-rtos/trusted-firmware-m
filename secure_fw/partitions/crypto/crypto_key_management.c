@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "config_tfm.h"
 #include "tfm_mbedcrypto_include.h"
@@ -29,29 +30,30 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-    int32_t partition_id = encoded_key->owner;
-
+    /* Build a key_id in the library key format, i.e. (owner, key_id) */
     tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
                                                   encoded_key->owner, encoded_key->key_id);
+    psa_key_attributes_t srv_key_attr;
+
+    switch (iov->function_id) {
+    case TFM_CRYPTO_IMPORT_KEY_SID:
+    case TFM_CRYPTO_COPY_KEY_SID:
+    case TFM_CRYPTO_GENERATE_KEY_SID:
+        memcpy(&srv_key_attr, in_vec[1].base, in_vec[1].len);
+        tfm_crypto_library_get_library_key_id_set_owner(encoded_key->owner, &srv_key_attr);
+        break;
+    default:
+        break;
+    }
+
     switch (iov->function_id) {
     case TFM_CRYPTO_IMPORT_KEY_SID:
     {
-        const struct psa_client_key_attributes_s *client_key_attr =
-                                                                 in_vec[1].base;
         const uint8_t *data = in_vec[2].base;
         size_t data_length = in_vec[2].len;
         psa_key_id_t *key_id = out_vec[0].base;
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
 
-        status = tfm_crypto_core_library_key_attributes_from_client(
-                                                       client_key_attr,
-                                                       partition_id,
-                                                       &key_attributes);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-
-        status = psa_import_key(&key_attributes,
+        status = psa_import_key(&srv_key_attr,
                                 data, data_length, &library_key);
         /* Update the imported key id */
         *key_id = CRYPTO_LIBRARY_GET_KEY_ID(library_key);
@@ -77,33 +79,17 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID:
     {
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        struct psa_client_key_attributes_s *client_key_attr = out_vec[0].base;
+        psa_key_attributes_t *key_attributes = out_vec[0].base;
 
-        status = psa_get_key_attributes(library_key, &key_attributes);
-        if (status == PSA_SUCCESS) {
-            status = tfm_crypto_core_library_key_attributes_to_client(&key_attributes,
-                                                                      client_key_attr);
-        }
-    }
-    break;
-    case TFM_CRYPTO_RESET_KEY_ATTRIBUTES_SID:
-    {
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        struct psa_client_key_attributes_s *client_key_attr = out_vec[0].base;
+        status = psa_get_key_attributes(library_key, &srv_key_attr);
 
-        status = tfm_crypto_core_library_key_attributes_from_client(
-                                                       client_key_attr,
-                                                       partition_id,
-                                                       &key_attributes);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-
-        psa_reset_key_attributes(&key_attributes);
-
-        status = tfm_crypto_core_library_key_attributes_to_client(&key_attributes,
-                                                                  client_key_attr);
+        /* Note that we just copy out_vec[0].len, because in this context
+         * sizeof(psa_key_attributes_t) would return the size of the service
+         * view of the attributes, while we are passing back to the caller
+         * only the client view of it, i.e. without the owner field at the
+         * end of the structure
+         */
+        memcpy(key_attributes, &srv_key_attr, out_vec[0].len);
     }
     break;
     case TFM_CRYPTO_EXPORT_KEY_SID:
@@ -137,22 +123,11 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_COPY_KEY_SID:
     {
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        const struct psa_client_key_attributes_s *client_key_attr =
-                                                                 in_vec[1].base;
         psa_key_id_t *target_key_id = out_vec[0].base;
         tfm_crypto_library_key_id_t target_key = tfm_crypto_library_key_id_init_default();
 
-        status = tfm_crypto_core_library_key_attributes_from_client(
-                                                       client_key_attr,
-                                                       partition_id,
-                                                       &key_attributes);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-
         status = psa_copy_key(library_key,
-                              &key_attributes,
+                              &srv_key_attr,
                               &target_key);
         if (status != PSA_SUCCESS) {
             return status;
@@ -163,20 +138,9 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_GENERATE_KEY_SID:
     {
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        const struct psa_client_key_attributes_s *client_key_attr =
-                                                                 in_vec[1].base;
         psa_key_id_t *key_handle = out_vec[0].base;
 
-        status = tfm_crypto_core_library_key_attributes_from_client(
-                                                       client_key_attr,
-                                                       partition_id,
-                                                       &key_attributes);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-
-        status = psa_generate_key(&key_attributes, &library_key);
+        status = psa_generate_key(&srv_key_attr, &library_key);
         if (status != PSA_SUCCESS) {
             return status;
         }

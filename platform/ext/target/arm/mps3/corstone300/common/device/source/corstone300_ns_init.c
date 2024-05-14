@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "Driver_USART.h"

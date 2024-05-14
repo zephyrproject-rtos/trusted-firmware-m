@@ -7,6 +7,7 @@
 ********************************************************************************
 * \copyright
 * Copyright 2016-2020 Cypress Semiconductor Corporation
+* Copyright (c) 2024, Arm Limited. All rights reserved.
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -532,7 +533,7 @@ __cy_memory_4_row_size  EQU __cpp(1)
 }
 #endif /* defined (__ARMCC_VERSION) && (__ARMCC_VERSION < 6010050) */
 
-void __WEAK PendSV_Handler(void) __NO_RETURN;
+__NO_RETURN void __WEAK PendSV_Handler(void);
 void PendSV_Handler(void) {
     while(1);
 }

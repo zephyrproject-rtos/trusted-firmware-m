@@ -26,7 +26,7 @@
 #define NS_CLIENT_TOKEN_TO_GID(token)       (((token) >> 8) & 0xff)
 #define NS_CLIENT_TOKEN_TO_TID(token)       ((token) & 0xff)
 
-__tfm_nspm_secure_gateway_attributes__
+__tz_c_veneer
 uint32_t tfm_nsce_init(uint32_t ctx_requested)
 {
     if (__get_active_exc_num() == EXC_NUM_THREAD_MODE) {
@@ -44,7 +44,7 @@ uint32_t tfm_nsce_init(uint32_t ctx_requested)
     }
 }
 
-__tfm_nspm_secure_gateway_attributes__
+__tz_c_veneer
 uint32_t tfm_nsce_acquire_ctx(uint8_t group_id, uint8_t thread_id)
 {
     uint8_t ns_ctx_idx;
@@ -63,7 +63,7 @@ uint32_t tfm_nsce_acquire_ctx(uint8_t group_id, uint8_t thread_id)
     return MAKE_NS_CLIENT_TOKEN(thread_id, group_id, ns_ctx_idx);
 }
 
-__tfm_nspm_secure_gateway_attributes__
+__tz_c_veneer
 uint32_t tfm_nsce_release_ctx(uint32_t token)
 {
     /* Free the context slot assigned */
@@ -92,7 +92,7 @@ uint32_t tfm_nsce_release_ctx(uint32_t token)
     }
 }
 
-__tfm_nspm_secure_gateway_attributes__
+__tz_c_veneer
 uint32_t tfm_nsce_load_ctx(uint32_t token, int32_t nsid)
 {
     uint8_t ctx_idx;
@@ -125,7 +125,7 @@ uint32_t tfm_nsce_load_ctx(uint32_t token, int32_t nsid)
     }
 }
 
-__tfm_nspm_secure_gateway_attributes__
+__tz_c_veneer
 uint32_t tfm_nsce_save_ctx(uint32_t token)
 {
     uint8_t ctx_idx;

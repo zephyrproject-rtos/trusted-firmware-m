@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 ################################ t_cose defs ###################################
 
@@ -49,4 +49,5 @@ target_sources(tfm_t_cose_common
 target_link_libraries(tfm_t_cose_common
     INTERFACE
         tfm_config
+        psa_crypto_config
 )

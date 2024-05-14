@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -17,14 +17,13 @@
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 
-#include <stdbool.h>
 #include <stdint.h>
 #include "cmsis_compiler.h"
 #include "psa/client.h"
 #include "psa/service.h"
 #include "thread.h"
 #include "spm.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)
@@ -38,13 +37,10 @@
  * handle_req() - Handle PSA client call request from NSPE
  * reply()      - Reply PSA client call return result to NSPE. The parameter
  *                owner identifies the owner of the PSA client call.
- * get_caller_data() - Get the private data of NSPE client from mailbox to
- *                     identify the PSA client call.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);
     void (*reply)(const void *owner, int32_t ret);
-    const void * (*get_caller_data)(int32_t client_id);
 };
 
 /**
@@ -117,14 +113,17 @@ psa_status_t tfm_rpc_psa_call(psa_handle_t handle, uint32_t control,
  * \brief RPC handler for \ref psa_close.
  *
  * \param[in] handle            A handle to an established connection, or the null handle.
+ * \param[in] ns_client_id      NS client's identifier.
  *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
+ * \retval PSA_SUCCESS          Success.
+ * \retval "PROGRAMMER ERROR"   The call is a PROGRAMMER ERROR if one or more
+ *                              of the following are true:
  * \arg                           An invalid handle was provided that is not
- *                                the null handle..
+ *                                the null handle.
+ * \arg                           The connection is currently handling a
+ *                                request.
  */
-void tfm_rpc_psa_close(psa_handle_t handle);
+psa_status_t tfm_rpc_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 /**
  * \brief Register underlying mailbox communication operations.
@@ -162,50 +161,6 @@ void tfm_rpc_client_call_handler(void);
  */
 void tfm_rpc_client_call_reply(void);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
-
-/*
- * Check if the message was allocated for a non-secure request via RPC
- *
- * \param[in] handle        The connection handle context pointer
- *                          \ref connection_t structures
- *
- * \retval true             The message was allocated for a NS request via RPC.
- * \retval false            Otherwise.
- */
-__STATIC_INLINE bool is_tfm_rpc_msg(const struct connection_t *handle)
-{
-    /*
-     * FIXME
-     * The ID should be smaller than 0 if the message is allocated by a
-     * non-secure caller.
-     * However, current TF-M implementation use 0 as the default non-secure
-     * caller ID. Therefore, treat the caller as non-secure when client_id == 0.
-     *
-     * This condition check should be improved after TF-M non-secure client ID
-     * management is implemented.
-     */
-    if (handle && (handle->caller_data) && (handle->msg.client_id <= 0)) {
-        return true;
-    }
-
-    return false;
-}
-
-/*
- * \brief Set the private data of the NS caller in \ref connection_t, to
- *        identify the caller after PSA client call is compeleted.
- *
- * \param[in] handle        The address of \ref connection_t structure
- * \param[in] client_id     The client ID of the NS caller.
- */
-void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
-
-#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
-
-/* RPC is only available in multi-core scenario */
-#define is_tfm_rpc_msg(x)                       (false)
-
-#define tfm_rpc_client_call_reply(owner, ret)   do {} while (0)
 
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */

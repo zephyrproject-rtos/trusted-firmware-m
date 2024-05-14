@@ -15,7 +15,7 @@ Configuration
     test_configuration.rst
 
 TF-M is highly configurable project with many configuration options to meet
-a user needs. A user can select the desired set of services and fine-tune
+a user's needs. A user can select the desired set of services and fine-tune
 them to their requirements. There are two types of configuration options
 
 Build configuration
@@ -58,7 +58,7 @@ Use :ref:`tf-m_profiles`.
    Building (CMake) options and Component options (.h file)
 
 Use a custom profile.
-   Another method is to take existing TF-M profile and adjust the desired
+   Another method is to take an existing TF-M profile and adjust the desired
    options manually editing CMake and config header files. This is for users
    familiar with TF-M.
 
@@ -92,7 +92,7 @@ check the corresponded document.
 .. Note::
    To ensure a clear intention and conscious choice, all options must be
    provided explicitly via a project configuration file. Default values
-   on step 1 will generate warnings which expected to break a build.
+   on step 1 will generate warnings which are expected to break a build.
 
 .. _Base_configuration:
 
@@ -288,6 +288,6 @@ Secure Partition Manager
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022,2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

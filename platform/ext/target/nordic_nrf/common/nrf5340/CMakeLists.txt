@@ -9,22 +9,8 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+set(target nrf5340)
 add_subdirectory(../core nrf_common)
-
-#========================= Platform common defs ===============================#
-
-# Specify the location of platform specific build dependencies.
-target_sources(tfm_s
-    PRIVATE
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf5340.c>
-)
-
-if(BL2)
-    target_sources(bl2
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf5340.c>
-    )
-endif()
 
 #========================= Platform Secure ====================================#
 
@@ -70,15 +56,12 @@ target_sources(tfm_spm
 #========================= Files for building NS side platform ================#
 
 install(FILES       nrfx_config_nrf5340_application.h
-                    target_cfg.h
                     ns/CMakeLists.txt
                     config.cmake
                     cpuarch.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf5340
 )
 
-install(DIRECTORY    partition
-                     gcc
-                     tests
+install(DIRECTORY    tests
         DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf5340
 )

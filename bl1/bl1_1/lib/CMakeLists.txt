@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,7 +11,7 @@ target_sources(bl1_1_lib
     INTERFACE
         $<$<BOOL:${TFM_BL1_DEFAULT_PROVISIONING}>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning.c>
         $<$<BOOL:${TFM_BL1_2_IN_OTP}>:${CMAKE_CURRENT_SOURCE_DIR}/image_otp.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_2_IN_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/image_flash.c>
+        $<$<BOOL:${TFM_BL1_2_IN_FLASH}>:${CMAKE_CURRENT_SOURCE_DIR}/image_flash.c>
 )
 
 target_include_directories(bl1_1_lib

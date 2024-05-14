@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited
+ * Copyright (c) 2017-2024, Arm Limited
  * Copyright (c) 2021 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "region_defs.h"

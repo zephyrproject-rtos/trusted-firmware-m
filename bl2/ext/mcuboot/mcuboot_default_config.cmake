@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,6 +19,7 @@ set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to 
 set(MCUBOOT_EXECUTION_SLOT              1           CACHE STRING    "Slot from which to execute the image, used for XIP mode")
 set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]")
 set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
+set(MCUBOOT_BUILTIN_KEY                 OFF         CACHE BOOL      "Use builtin key(s) for validation, no public key data is embedded into the image metadata")
 set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
 set(BL2_HEADER_SIZE                     0x400       CACHE STRING    "Header size")
 set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer size")
@@ -40,7 +41,7 @@ set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encr
 set(MCUBOOT_BOOTSTRAP                   OFF         CACHE BOOL      "Support initial state with empty primary slot and images installed from secondary slots")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
 set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
-set(MCUBOOT_USE_PSA_CRYPTO              OFF         CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto")
+set(MCUBOOT_USE_PSA_CRYPTO              OFF         CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto APIs")
 
 # Note - If SIGNATURE_TYPE is changed, the entries for KEY_S
 # and KEY_NS will either have to be updated manually or removed from the cache.
@@ -58,4 +59,5 @@ set(MCUBOOT_SECURITY_COUNTER_NS         1           CACHE STRING    "Security co
 set(MCUBOOT_S_IMAGE_MIN_VER             0.0.0+0     CACHE STRING    "Minimum version of secure image required by the non-secure image for upgrade to this non-secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
 set(MCUBOOT_NS_IMAGE_MIN_VER            0.0.0+0     CACHE STRING    "Minimum version of non-secure image required by the secure image for upgrade to this secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
 set(MCUBOOT_ENC_KEY_LEN                 128         CACHE STRING    "Length of the AES key for encrypting images")
-set(MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/config/mcuboot-mbedtls-cfg.h" CACHE FILEPATH "Mbedtls config file to use with MCUboot")
+set(MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/config/mcuboot-mbedtls-cfg.h" CACHE FILEPATH "Mbed TLS config file to use with MCUboot")
+set(MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/config/mcuboot_crypto_config.h" CACHE FILEPATH "Mbed TLS PSA Crypto config file to use with MCUboot")

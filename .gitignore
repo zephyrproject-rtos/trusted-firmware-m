@@ -19,3 +19,4 @@ localrepos.cmake
 **/__pycache__
 *.pyc
 
+.clang-format

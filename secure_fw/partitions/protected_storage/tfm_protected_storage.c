@@ -13,6 +13,12 @@
 #ifndef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 #include "tfm_internal_trusted_storage.h"
 #endif /* !TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
+#include "tfm_sp_log.h"
+#include "psa/crypto.h"
+
+#ifdef PS_ENCRYPTION
+static const psa_algorithm_t ps_crypto_aead_alg = PS_CRYPTO_AEAD_ALG;
+#endif
 
 psa_status_t tfm_ps_init(void)
 {
@@ -24,6 +30,11 @@ psa_status_t tfm_ps_init(void)
         return err;
     }
 #endif /* !TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
+
+#ifdef PS_ENCRYPTION
+    (void)ps_crypto_aead_alg; /* Suppress warning if logging disabled */
+    LOG_INFFMT("[INF][PS] Encryption alg: 0x%x\r\n", ps_crypto_aead_alg);
+#endif
 
     err = ps_system_prepare();
 #if PS_CREATE_FLASH_LAYOUT

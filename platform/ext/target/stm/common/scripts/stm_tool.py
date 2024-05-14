@@ -26,7 +26,7 @@ import fileinput
 
 
 def do_flash(args):
-    image_value_re = re.compile(r"^\s*"+args.macro+"\s*=\s*(.*)")
+    image_value_re = re.compile(r"^\s*"+args.macro+r"\s*=\s*(.*)")
     value = macro_parser.evaluate_macro(args.layout, image_value_re, 0, 1,
                                         True)
     if args.setting == 1:

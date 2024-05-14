@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -47,58 +47,39 @@ target_include_directories(device_definition
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
 )
 
-add_library(device_definition_ns STATIC)
-target_sources(device_definition_ns
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
-)
-
-#========================= CMSIS lib ===============================#
-
-add_library(cmsis_includes INTERFACE)
-target_include_directories(cmsis_includes
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-        ${CORSTONE310_COMMON_DIR}/device/include
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
-        ${PLATFORM_DIR}/ext/cmsis
-        ${CORSTONE310_COMMON_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
-)
-
-add_library(cmsis_includes_ns INTERFACE)
-target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
-target_include_directories(cmsis_includes_ns
-    INTERFACE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
-)
-
-#========================= Linking ===============================#
-
-target_link_libraries(device_definition_ns PUBLIC device_definition)
-target_link_libraries(device_definition_ns PRIVATE cmsis_includes_ns)
-
-target_link_libraries(platform_ns
-    PUBLIC
-        cmsis_includes_ns
-    PRIVATE
-        device_definition_ns
-)
-
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns
     PRIVATE
+        ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     INTERFACE
-        $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE300_COMMON_DIR}/device/source/corstone310_ns_init.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${CORSTONE310_COMMON_DIR}/device/source/corstone310_ns_init.c>
         $<$<BOOL:${TEST_NS_FPU}>:${PLATFORM_DIR}/ext/common/test_interrupt.c>
+)
+
+target_include_directories(platform_ns
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+        ${CORSTONE310_COMMON_DIR}/device/include
+        ${CORSTONE310_COMMON_DIR}/include
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
+        ${PLATFORM_DIR}/ext/cmsis/Include
+        ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
+        ${CORSTONE310_COMMON_DIR}/partition
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
 )
 
 target_compile_definitions(platform_ns
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+)
+
+target_link_libraries(platform_ns
+    PUBLIC
+        device_definition
 )

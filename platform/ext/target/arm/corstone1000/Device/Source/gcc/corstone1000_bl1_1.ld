@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2023, Arm Limited. All rights reserved.
+; * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -31,14 +31,11 @@ MEMORY
 __heap_size__  = BL1_1_HEAP_SIZE;
 __msp_stack_size__ = BL1_1_MSP_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
-    .text :
+    .text (READONLY) :
     {
         KEEP(*(.vectors))
         __Vectors_End = .;
@@ -46,6 +43,26 @@ SECTIONS
         __end__ = .;
 
         *(.text*)
+
+        . = ALIGN(4);
+        /* preinit data */
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP(*(.preinit_array))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+
+        . = ALIGN(4);
+        /* init data */
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array))
+        PROVIDE_HIDDEN (__init_array_end = .);
+
+        . = ALIGN(4);
+        /* finit data */
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(.fini_array))
+        PROVIDE_HIDDEN (__fini_array_end = .);
 
         /* .copy.table
          * To copy multiple ROM to RAM sections,
@@ -121,27 +138,6 @@ SECTIONS
         __data_start__ = .;
         *(vtable)
         *(.data*)
-
-        . = ALIGN(4);
-        /* preinit data */
-        PROVIDE_HIDDEN (__preinit_array_start = .);
-        KEEP(*(.preinit_array))
-        PROVIDE_HIDDEN (__preinit_array_end = .);
-
-        . = ALIGN(4);
-        /* init data */
-        PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        PROVIDE_HIDDEN (__init_array_end = .);
-
-
-        . = ALIGN(4);
-        /* finit data */
-        PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array))
-        PROVIDE_HIDDEN (__fini_array_end = .);
 
         KEEP(*(.jcr*))
         . = ALIGN(4);

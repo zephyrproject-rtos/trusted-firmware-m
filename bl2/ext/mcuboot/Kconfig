@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -46,12 +46,24 @@ config MCUBOOT_USE_PSA_CRYPTO
     bool "Enable cryptography through PSA Crypto APIs"
     default n
 
+choice
+    prompt "Hardware key options for signature verification"
+    optional
+
 config MCUBOOT_HW_KEY
     bool "Embed the entire public key"
     default y
     help
       Whether to embed the entire public key in the image metadata instead of
       the hash only
+
+config MCUBOOT_BUILTIN_KEY
+    bool "Use builtin key(s) for verification"
+    default n
+    help
+      No public key data is in the image metadata or boot code, key IDs
+      are used instead to select a builtin key for signature verification.
+endchoice
 
 choice
     prompt "Upgrade strategy for images"

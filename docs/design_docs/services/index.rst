@@ -6,7 +6,7 @@ Secure Services
     :maxdepth: 1
 
     Secure Partition Manager    <secure_partition_manager.rst>
-    Secure RTL                  <secure_partition_runtime_library.rst>
+    Secure Partition RTL        <secure_partition_runtime_library.rst>
     Inter-Process Communication <tfm_psa_inter_process_communication.rst>
     Stateless Services          <stateless_rot_service.rst>
     Service Signing             <tfm_uniform_secure_service_signature.rst>
@@ -18,4 +18,4 @@ Secure Services
 
 --------------
 
-*Copyright (c) 2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2023-2024, Arm Limited. All rights reserved.*

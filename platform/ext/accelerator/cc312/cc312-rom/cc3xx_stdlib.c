@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,16 +13,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#ifdef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
-#include "dpa_hardened_word_copy.h"
-#else
-/**
- * \brief This is a requirement for the maximum number of words that can
- *        be copied through a single call to \ref cc3xx_dpa_hardened_word_copy
- */
-#define CC3XX_STDLIB_SECURE_COPY_MAX_WORDS (256)
-#endif /* CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY */
-
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static uint32_t xorshift_plus_128_lfsr(void)
 {
     static uint64_t state[2] = {0};
@@ -34,7 +25,7 @@ static uint32_t xorshift_plus_128_lfsr(void)
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
-        cc3xx_rng_get_random((uint8_t *)&state, sizeof(state));
+        cc3xx_lowlevel_rng_get_random((uint8_t *)&state, sizeof(state));
         seed_done = true;
     }
 
@@ -50,6 +41,7 @@ static uint32_t xorshift_plus_128_lfsr(void)
 
     return (temp0 + temp1) >> 32;
 }
+
 
 static uint32_t xorshift_get_random_uint(uint32_t bound)
 {
@@ -70,7 +62,7 @@ static uint32_t xorshift_get_random_uint(uint32_t bound)
     do {
         value = xorshift_plus_128_lfsr() & mask;
 
-        if (retry_count < CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS) {
+        if (retry_count < 32) {
             /* In the case of an error 0 is always a reasonable return value */
             return 0;
         }
@@ -103,6 +95,21 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len)
         permutation_buf[swap_idx] = temp_elem;
     }
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+
+void cc3xx_random_permutation_generate(uint8_t *permutation_buf, size_t len)
+{
+    uint32_t idx;
+
+    /* Initializes the permutation buffer */
+    for (idx = 0; idx < len; idx++) {
+        permutation_buf[idx] = idx;
+    }
+
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
+    fisher_yates_shuffle(permutation_buf, len);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+}
 
 void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count)
 {
@@ -110,7 +117,7 @@ void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count)
     uint32_t random_val;
 
     /* Overwrites the input buffer with random values */
-    cc3xx_rng_get_random((uint8_t *)&random_val, sizeof(random_val));
+    cc3xx_lowlevel_rng_get_random((uint8_t *)&random_val, sizeof(random_val));
     for (idx = 0; idx < word_count; idx++) {
         buf[idx] = random_val;
     }
@@ -124,14 +131,10 @@ void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
     size_t idx;
 
     /* We don't support more than 256 word permutations per copy, i.e. 2048 bit copy */
-    assert(word_count <= CC3XX_STDLIB_SECURE_COPY_MAX_WORDS);
+    assert(word_count <= UINT8_MAX);
 
-    /* Initializes the permutation buffer */
-    for (idx = 0; idx < word_count; idx++) {
-        permutation_buf[idx] = idx;
-    }
+    cc3xx_random_permutation_generate(permutation_buf, word_count);
 
-    fisher_yates_shuffle(permutation_buf, word_count);
     for(idx = 0; idx < word_count; idx++) {
         dst[permutation_buf[idx]] = src[permutation_buf[idx]];
     }

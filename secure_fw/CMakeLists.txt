@@ -8,7 +8,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)

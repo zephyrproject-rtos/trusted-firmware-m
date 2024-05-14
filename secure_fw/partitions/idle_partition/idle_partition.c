@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "fih.h"
 #include "psa/service.h"
 
@@ -24,7 +27,7 @@ void tfm_idle_thread(void)
     }
 
 #ifdef TFM_FIH_PROFILE_ON
-    fih_delay();
+    (void)fih_delay();
 
     while (1) {
         /*

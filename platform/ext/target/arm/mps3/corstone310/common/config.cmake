@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -10,6 +10,7 @@
 set(DEFAULT_NS_SCATTER           ON         CACHE BOOL      "Use default NS scatter files for target")
 set(PROVISIONING_KEYS_CONFIG     ""         CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
 
+set(S_DATA_OVERALL_SIZE      "0x20000"    CACHE STRING    "Secure data size")
 set(FLASH_S_PARTITION_SIZE   "0x80000"    CACHE STRING    "Secure code size")
 set(FLASH_NS_PARTITION_SIZE  "0x300000"   CACHE STRING    "Non-secure code size")
 

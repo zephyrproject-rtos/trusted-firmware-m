@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/mcu-tools/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2019-2023 Arm Limited.
+ * Modifications are Copyright (c) 2019-2024 Arm Limited.
  */
 
 #include <stddef.h>
@@ -140,7 +140,7 @@ const struct bootutil_key bootutil_enc_key = {
 };
 #endif /* MCUBOOT_ENC_IMAGES */
 
-#if !defined(MCUBOOT_HW_KEY)
+#if !defined(MCUBOOT_HW_KEY) && !defined(MCUBOOT_BUILTIN_KEY)
 #if defined(MCUBOOT_SIGN_RSA)
 #if MCUBOOT_SIGN_RSA_LEN == 2048
 #define HAVE_KEYS
@@ -508,7 +508,8 @@ const struct bootutil_key bootutil_keys[] = {
 };
 #endif /* MCUBOOT_SIGN_RSA */
 #endif /* HAVE_KEYS */
-#else  /* MCUBOOT_HW_KEY */
+
+#elif defined(MCUBOOT_HW_KEY)
 unsigned int pub_key_len;
 struct bootutil_key bootutil_keys[1] = {
     {
@@ -526,4 +527,13 @@ int boot_retrieve_public_key_hash(uint8_t image_index,
                                    public_key_hash,
                                    (uint32_t *)key_hash_size);
 }
-#endif /* !MCUBOOT_HW_KEY */
+#elif defined(MCUBOOT_BUILTIN_KEY)
+/*
+ * When using builtin keys the signature verification happens based on key IDs.
+ * During verification MCUboot feeds the image index as a key ID and it is the
+ * underlying crypto library's responsibility to do a mapping (if required)
+ * between the image indexes and the builtin key IDs. Therefore it only allows
+ * as many IDs as there are images.
+ */
+const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
+#endif /* !MCUBOOT_HW_KEY && !MCUBOOT_BUILTIN_KEY */

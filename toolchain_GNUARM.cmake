@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -107,6 +107,7 @@ endif()
 
 add_compile_options(
     -specs=nano.specs
+    -specs=nosys.specs
     -Wall
     -Wno-format
     -Wno-return-type
@@ -118,7 +119,6 @@ add_compile_options(
     -fshort-enums
     -funsigned-char
     -mthumb
-    -nostdlib
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
@@ -127,6 +127,7 @@ add_compile_options(
 add_link_options(
     --entry=Reset_Handler
     -specs=nano.specs
+    -specs=nosys.specs
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections
@@ -151,8 +152,13 @@ endif()
 # has a linker issue that required system calls are missing,
 # such as _read and _write. Add stub functions of required
 # system calls to solve this issue.
+#
+# READONLY linker script attribute is not supported in older
+# GNU Arm compilers. For these version the preprocessor will
+# remove the READONLY string from the linker scripts.
 if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
     set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+    set(CONFIG_GNU_LINKER_READONLY_ATTRIBUTE TRUE)
 endif()
 
 if (CMAKE_SYSTEM_PROCESSOR)
@@ -174,6 +180,10 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
 set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
 set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+set(BL2_LINKER_CP_OPTION -mfloat-abi=soft)
+
+set(BL1_COMPILER_CP_FLAG -mfloat-abi=soft)
+set(BL1_LINKER_CP_OPTION -mfloat-abi=soft)
 
 if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     set(COMPILER_CP_FLAG -mfloat-abi=hard)
@@ -188,7 +198,7 @@ else()
 endif()
 
 # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
-add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
+add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>)
 
 macro(target_add_scatter_file target)
     target_link_options(${target}
@@ -231,6 +241,11 @@ macro(target_add_scatter_file target)
             -E
             -P
             -xc
+    )
+
+    target_compile_definitions(${target}_scatter
+        PRIVATE
+            $<$<NOT:$<BOOL:${CONFIG_GNU_LINKER_READONLY_ATTRIBUTE}>>:READONLY=>
     )
 endmacro()
 
@@ -275,15 +290,19 @@ macro(add_convert_to_bin_target target)
     )
 endmacro()
 
-macro(target_share_symbols target symbol_name_file)
+macro(target_share_symbols target)
     get_target_property(TARGET_TYPE ${target} TYPE)
     if (NOT TARGET_TYPE STREQUAL "EXECUTABLE")
         message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
     endif()
 
-    FILE(STRINGS ${symbol_name_file} KEEP_SYMBOL_LIST
-        LENGTH_MINIMUM 1
-    )
+    foreach(symbol_file ${ARGN})
+        FILE(STRINGS ${symbol_file} SYMBOLS
+            LENGTH_MINIMUM 1
+        )
+        list(APPEND KEEP_SYMBOL_LIST ${SYMBOLS})
+    endforeach()
+
     set(STRIP_SYMBOL_KEEP_LIST ${KEEP_SYMBOL_LIST})
 
     # Force the target to not remove the symbols if they're unused.
@@ -299,7 +318,7 @@ macro(target_share_symbols target symbol_name_file)
         TARGET ${target}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY}
-        ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.axf
+        ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 endmacro()
 
@@ -313,7 +332,7 @@ macro(target_link_shared_code target)
         endif()
 
         add_dependencies(${target} ${symbol_provider})
-        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}_shared_symbols.axf)
+        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
 

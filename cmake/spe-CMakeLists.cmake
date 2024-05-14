@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 # This CMake script is prepard by TF-M for building the non-secure side
 # application and not used in secure build a tree being for export only.
@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.15)
 include(spe_config)
 include(spe_export)
 
-set_target_properties(tfm_config psa_interface PROPERTIES IMPORTED_GLOBAL True)
+set_target_properties(tfm_config psa_interface psa_crypto_config PROPERTIES IMPORTED_GLOBAL True)
 target_link_libraries(tfm_config INTERFACE psa_interface)
 
 # In actual NS integration, NS side build should include the source files
@@ -33,20 +33,48 @@ target_sources(tfm_api_ns
         $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${INTERFACE_SRC_DIR}/tfm_fwu_api.c>
 )
 
-target_sources(tfm_api_ns
-    PRIVATE
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c>
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c>
-        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c>
-)
-
 # Include interface headers exported by TF-M
 target_include_directories(tfm_api_ns
     PUBLIC
         ${INTERFACE_INC_DIR}
         ${INTERFACE_INC_DIR}/crypto_keys
-        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_INC_DIR}/multi_core>
 )
+
+if (CONFIG_TFM_USE_TRUSTZONE)
+    add_library(tfm_api_ns_tz INTERFACE)
+
+    target_sources(tfm_api_ns_tz
+        INTERFACE
+            ${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c
+    )
+
+    target_link_libraries(tfm_api_ns_tz
+        INTERFACE
+            ${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o
+    )
+endif()
+
+if (TFM_PARTITION_NS_AGENT_MAILBOX)
+    add_library(tfm_api_ns_mailbox INTERFACE)
+
+    target_sources(tfm_api_ns_mailbox
+        INTERFACE
+            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
+            ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
+    )
+
+    target_include_directories(tfm_api_ns_mailbox
+        INTERFACE
+            ${INTERFACE_INC_DIR}/multi_core
+    )
+endif()
+
+if (TFM_PARTITION_CRYPTO)
+    target_link_libraries(tfm_api_ns
+        PUBLIC
+            psa_crypto_config
+    )
+endif()
 
 add_library(platform_region_defs INTERFACE)
 
@@ -87,7 +115,6 @@ target_compile_definitions(platform_ns
 target_link_libraries(tfm_api_ns
     PUBLIC
         platform_region_defs
-        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o>
         platform_ns
 )
 
@@ -97,15 +124,15 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
 
     add_custom_target(tfm_s_ns_signed_bin
         ALL
-        SOURCES tfm_s_ns_signed.bin
+        SOURCES ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
     )
 
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 
         add_custom_target(tfm_ns_signed_bin
-            SOURCES tfm_ns_signed.bin
+            SOURCES ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
         )
-        add_custom_command(OUTPUT tfm_ns_signed.bin
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
             DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_ns.o
@@ -129,32 +156,30 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_enc_key.pem>
                 $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
                 $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-                tfm_ns_signed.bin
-            COMMAND ${CMAKE_COMMAND} -E copy tfm_ns_signed.bin ${CMAKE_BINARY_DIR}/bin
+                ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
         )
 
         # Create concatenated binary image from the two independently signed
         # binary file. This only uses the local assemble.py script (not from
         # upstream mcuboot) because that script is geared towards zephyr
         # support
-        add_custom_command(OUTPUT tfm_s_ns_signed.bin
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
-            DEPENDS tfm_ns_signed_bin tfm_ns_signed.bin
+            DEPENDS tfm_ns_signed_bin ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
                 --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
-                --non_secure tfm_ns_signed.bin
-                --output tfm_s_ns_signed.bin
-            COMMAND ${CMAKE_COMMAND} -E copy tfm_s_ns_signed.bin ${CMAKE_BINARY_DIR}
+                --non_secure ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
+                --output ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
         )
     else()
         add_custom_target(tfm_s_ns_bin
-            SOURCES tfm_s_ns.bin
+            SOURCES ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
         )
-        add_custom_command(OUTPUT tfm_s_ns.bin
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
             DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
@@ -165,12 +190,11 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
                 --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
                 --non_secure $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-                --output tfm_s_ns.bin
-            COMMAND ${CMAKE_COMMAND} -E copy tfm_s_ns.bin ${CMAKE_BINARY_DIR}/bin
+                --output ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
         )
 
-        add_custom_command(OUTPUT tfm_s_ns_signed.bin
-            DEPENDS tfm_s_ns_bin tfm_s_ns.bin
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
+            DEPENDS tfm_s_ns_bin ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
             DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
@@ -192,9 +216,8 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
                 $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_enc_key.pem>
                 $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-                tfm_s_ns.bin
-                tfm_s_ns_signed.bin
-            COMMAND ${CMAKE_COMMAND} -E copy tfm_s_ns_signed.bin ${CMAKE_BINARY_DIR}
+                ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
+                ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
         )
     endif()
 endif()

@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 include(${CMAKE_CURRENT_LIST_DIR}/tfm_t_cose.cmake)
 
@@ -19,6 +19,7 @@ target_link_libraries(tfm_t_cose_s
         tfm_t_cose_defs
         psa_interface
         qcbor
+        platform_s
 )
 
 target_compile_options(tfm_t_cose_s

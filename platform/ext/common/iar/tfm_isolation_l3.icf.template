@@ -114,7 +114,6 @@ define block ER_{{partition.manifest.name}}_RO  with alignment = {{ 'TFM_LINKER_
 
 /**** Block Unprivileged Secure code + RO-data definition starts here */
 define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-    section SFN,
     readonly
 };
 

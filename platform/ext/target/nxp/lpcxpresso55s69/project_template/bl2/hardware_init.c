@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
  * All rights reserved.
@@ -12,7 +13,7 @@
 #include "board.h"
 #include "fsl_power.h"
 #include "fsl_device_registers.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 /*${header:end}*/
 
 /*${variable:start}*/

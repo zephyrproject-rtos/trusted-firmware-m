@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@
 /*****************/
 
 #define FLASH_BASE_ADDRESS              (0x68000000)
+#define FLASH_BL1_BASE_ADDRESS          (FLASH_BASE_ADDRESS)
 
 #if PLATFORM_IS_FVP
 /* INTEL STRATA J3 NOR FLASH NVM */
@@ -88,6 +89,8 @@
 
 #endif
 
+#define FLASH_DEV_NAME_BL1              FLASH_DEV_NAME
+
 /* Static Configurations of the Flash */
 #define SE_BL2_PARTITION_SIZE           (0x18000)    /* 96 KB */
 #define SE_BL2_BANK_0_OFFSET            (0x9000)  /* 72nd LBA */
@@ -134,7 +137,7 @@
 
 /* Bank configurations */
 #define BANK_PARTITION_SIZE             (0xFE0000)   /* 15.875 MB */
-#define TFM_PARTITION_SIZE              (0x5E000)    /* 376 KB */
+#define TFM_PARTITION_SIZE              (0x5C000)    /* 368 KB */
 
 /************************************************************/
 /* Bank : Images flash offsets are with respect to the bank */

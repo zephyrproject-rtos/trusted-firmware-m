@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -11,12 +11,14 @@
 #ifndef __SPM_H__
 #define __SPM_H__
 
+#include <stdbool.h>
 #include <stdint.h>
 #include "config_impl.h"
 #include "config_spm.h"
 #include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"
+#include "runtime_defs.h"
 #include "thread.h"
 #include "psa/service.h"
 #include "load/partition_defs.h"
@@ -77,7 +79,7 @@ struct connection_t {
                                               * TFM_HANDLE_STATUS_TO_FREE
                                               */
     struct partition_t *p_client;            /* Caller partition               */
-    struct service_t *service;               /* RoT service pointer            */
+    const struct service_t *service;         /* RoT service pointer            */
     psa_msg_t msg;                           /* PSA message body               */
     const void *invec_base[PSA_MAX_IOVEC];   /* Base addresses of invec from client */
     size_t invec_accessed[PSA_MAX_IOVEC];    /* Size of data accessed by psa_read/skip */
@@ -85,10 +87,10 @@ struct connection_t {
     size_t outvec_written[PSA_MAX_IOVEC];    /* Size of data written by psa_write */
     psa_outvec *caller_outvec;               /* Save caller outvec pointer for write length update*/
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-    const void *caller_data;                 /*
+    const void *client_data;                 /*
                                               * Pointer to the private data of the
-                                              * caller. It identifies the NSPE PSA
-                                              * client calls in multi-core topology
+                                              * client. It saves the mailbox private
+                                              * data in multi-core topology.
                                               */
 #endif
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
@@ -103,13 +105,12 @@ struct connection_t {
 /* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void                               *p_interrupts;
     uintptr_t                          boundary;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    void                               *p_metadata;
+    const struct runtime_metadata_t    *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
     struct thread_t                    thrd;            /* IPC model */
     uintptr_t                          reply_value;
@@ -184,29 +185,36 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
  * \retval "Not NULL"       Target service context pointer,
  *                          \ref service_t structures
  */
-struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
+const struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /************************ Message functions **********************************/
 
 /**
- * \brief                   Convert the given user handle to SPM recognised
- *                          connection and verify it.
+ * \brief                   Convert the given user handle to an SPM recognised
+ *                          connection and verify that it is a valid idle
+ *                          connection that the caller is authorised to access.
  *
- * \param[in] p_connection  The address of connection pointer to be converted
+ * \param[out] p_connection The address of connection pointer to be converted
  *                          from the given user handle.
  *
- * \param[in] handle        A handle to an established connection that is
- *                          returned by a prior psa_connect call.
+ * \param[in] handle        Either a static handle or a handle to an established
+ *                          connection that was returned by a prior psa_connect
+ *                          call.
+ *
+ * \param[in] client_id     The client ID of the caller.
  *
  * \retval PSA_SUCCESS      Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
  *                          connection.
  * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
  *                          connection at the moment.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The handle is invalid, the caller is not
+ *                          authorised to use it or the connection is already
+ *                          handling a request.
  */
-psa_status_t spm_get_connection(struct connection_t **p_connection,
-                                psa_handle_t handle,
-                                int32_t client_id);
+psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
+                                     psa_handle_t handle,
+                                     int32_t client_id);
 
 /**
  * \brief                   Convert the given message handle to SPM recognised
@@ -222,16 +230,17 @@ psa_status_t spm_get_connection(struct connection_t **p_connection,
 struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
 
 /**
- * \brief                   Initialize connection and fill in with the input information.
+ * \brief                   Initialize connection, fill in with the input
+ *                          information and set to idle.
  *
  * \param[in] p_connection  The 'p_connection' to initialize and fill information in.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \param[in] client_id     Partition ID of the sender of the message
  */
-void spm_init_connection(struct connection_t *p_connection,
-                         struct service_t *service,
-                         int32_t client_id);
+void spm_init_idle_connection(struct connection_t *p_connection,
+                              const struct service_t *service,
+                              int32_t client_id);
 
 /*
  * Update connection content with information extracted from control param,
@@ -254,7 +263,7 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
  * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval SPM_ERROR_VERSION Check failed
  */
-int32_t tfm_spm_check_client_version(struct service_t *service,
+int32_t tfm_spm_check_client_version(const struct service_t *service,
                                      uint32_t version);
 
 /**
@@ -269,7 +278,7 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
  * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
-                                    struct service_t *service,
+                                    const struct service_t *service,
                                     bool ns_caller);
 
 /**
@@ -294,7 +303,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  * PendSV specified function.
  *
  * Parameters :
- *  p_actx        -    Architecture context storage pointer
+ *  exc_return    -    EXC_RETURN value for the PendSV handler
  *
  * Return:
  *  Pointers to context control (sp, splimit, dummy, lr) of the current and
@@ -302,7 +311,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  *  Each takes 32 bits. The context control is used by PendSV_Handler to do
  *  context switch.
  */
-uint64_t ipc_schedule(void);
+uint64_t ipc_schedule(uint32_t exc_return);
 
 /**
  * \brief                      SPM initialization implementation
@@ -324,11 +333,75 @@ psa_handle_t connection_to_handle(struct connection_t *p_connection);
  */
 struct connection_t *handle_to_connection(psa_handle_t handle);
 
-/**
- * \brief Move to handler mode by a SVC for specific purpose
- */
-void tfm_core_handler_mode(void);
-
 void update_caller_outvec_len(struct connection_t *handle);
+
+
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/* Handler for \ref psa_connect.
+ *
+ * \param[in] p_connection      The address of connection pointer.
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ * \param[in] client_id         Client id of the service caller. It should be
+ *                              validated before this API is being called.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
+                                                  uint32_t sid, uint32_t version,
+                                                  int32_t client_id);
+
+/* Handler for \ref psa_close.
+ *
+ * \param[in] handle            Service handle to the connection to be closed,
+ *                              \ref psa_handle_t
+ * \param[in] client_id         Client id of the connection caller.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           Called with a stateless handle.
+ * \arg                           An invalid handle was provided that is not
+ *                                the null handle.
+ * \arg                           The connection is handling a request.
+ */
+psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t client_id);
+
+#endif /* #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+
+/*
+ * Check if the message was allocated for a non-secure request via RPC
+ *
+ *  param[in] handle        The connection handle context pointer
+ *                          connection_t structures
+ *
+ *  retval true             The message was allocated for a NS request via RPC.
+ *  retval false            Otherwise.
+ */
+__STATIC_INLINE bool tfm_spm_is_rpc_msg(const struct connection_t *handle)
+{
+    if (handle && (handle->client_data) && (handle->msg.client_id < 0)) {
+        return true;
+    }
+
+    return false;
+}
+#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
+
+/* RPC is only available in multi-core scenario */
+#define tfm_spm_is_rpc_msg(x)                       (false)
+
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 #endif /* __SPM_H__ */

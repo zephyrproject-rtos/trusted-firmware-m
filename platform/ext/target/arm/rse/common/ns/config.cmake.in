@@ -1,0 +1,21 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+# This CMake script template contains the set of options settled on secure side
+# build but necessary for building the non-secure side too.
+
+set(RSE_XIP                                 @RSE_XIP@ CACHE BOOL "Whether to use XIP via SIC")
+set(RSE_DEBUG_UART                          @RSE_DEBUG_UART@ CACHE BOOL "Whether to use the RSE debug UART")
+set(RSE_USE_HOST_UART                       @RSE_USE_HOST_UART@ CACHE BOOL "Whether to use the host system UART")
+set(RSE_USE_HOST_FLASH                      @RSE_USE_HOST_FLASH@ CACHE BOOL "Whether to use the host system flash")
+set(RSE_GPT_SUPPORT                         @RSE_GPT_SUPPORT@ CACHE BOOL "Whether to read a GPT header to find images")
+set(RSE_HAS_EXPANSION_PERIPHERALS           @RSE_HAS_EXPANSION_PERIPHERALS@ CACHE BOOL "Whether there are extra peripherals on the RSE subsystem")
+set(PLATFORM_HAS_PS_NV_OTP_COUNTERS         @PLATFORM_HAS_PS_NV_OTP_COUNTERS@ CACHE BOOL "Whether OTP counters will be used for PS")
+set(RSE_ENABLE_BRINGUP_HELPERS              @RSE_ENABLE_BRINGUP_HELPERS@ CACHE BOOL "Whether RSE bringup helpers are enabled")
+set(RSE_OTP_TRNG                            @RSE_OTP_TRNG@ CACHE BOOL "Whether to use the TRNG from the OTP")
+set(RSE_TP_MODE                             @RSE_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")
+set(RSE_ENABLE_TRAM                         @RSE_ENABLE_TRAM@ CACHE BOOL "Whether TRAM encryption is enabled")

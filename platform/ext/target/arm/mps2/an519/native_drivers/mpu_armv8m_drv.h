@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #define PRIVILEGED_DEFAULT_ENABLE 1
 #define HARDFAULT_NMI_ENABLE      1

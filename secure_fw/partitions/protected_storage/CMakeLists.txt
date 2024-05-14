@@ -9,8 +9,7 @@ if (NOT TFM_PARTITION_PROTECTED_STORAGE)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_app_rot_partition_ps STATIC)
 
@@ -80,6 +79,7 @@ target_link_libraries(tfm_app_rot_partition_ps
         platform_s
         tfm_config
         tfm_sprt
+        psa_crypto_config
 )
 
 target_compile_definitions(tfm_app_rot_partition_ps

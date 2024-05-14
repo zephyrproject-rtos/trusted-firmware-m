@@ -1,0 +1,25 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include "corstone315_provisioning_bundle.h"
+
+const struct cm_provisioning_data data = {
+    /* BL1_2_IMAGE_HASH */
+    {},
+    /* BL2_IMAGE_HASH */
+    {},
+    /* BL1_2_IMAGE */
+    {},
+    /* SAM config */
+    {
+        {{sam_config | indent(12)}}
+    },
+    /* GUK */
+    {
+        {{guk | indent(12)}}
+    },
+};

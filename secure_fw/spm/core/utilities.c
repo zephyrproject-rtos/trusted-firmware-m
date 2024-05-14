@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +15,7 @@
 
 void tfm_core_panic(void)
 {
-    fih_delay();
+    (void)fih_delay();
 
 #ifdef CONFIG_TFM_HALT_ON_CORE_PANIC
 
@@ -23,7 +26,7 @@ void tfm_core_panic(void)
     tfm_hal_system_halt();
 
 #ifdef TFM_FIH_PROFILE_ON
-    fih_delay();
+    (void)fih_delay();
 
     tfm_hal_system_halt();
 #endif
@@ -40,7 +43,7 @@ void tfm_core_panic(void)
     tfm_hal_system_reset();
 
 #ifdef TFM_FIH_PROFILE_ON
-    fih_delay();
+    (void)fih_delay();
 
     tfm_hal_system_reset();
 #endif

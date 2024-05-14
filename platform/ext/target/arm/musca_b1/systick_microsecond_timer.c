@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "microsecond_timer.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /* Maximum count for the SysTick */
 #define MAX_SYSTICK_VAL (0x00ffffff)

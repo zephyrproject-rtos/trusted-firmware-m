@@ -6,9 +6,6 @@
 #
 #-------------------------------------------------------------------------------
 
-include(${PLATFORM_PATH}/common/core/config.cmake)
+set(HAS_NVMC 1)
 
-set(SECURE_UART1                        ON         CACHE BOOL      "Enable secure UART1")
-set(NRF_NS_STORAGE                      OFF        CACHE BOOL      "Enable non-secure storage partition")
-set(BL2                                 ON         CACHE BOOL      "Whether to build BL2")
-set(NRF_NS_SECONDARY                    ${BL2}     CACHE BOOL      "Enable non-secure secondary partition")
+include(${PLATFORM_PATH}/common/core/config.cmake)

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,18 +12,21 @@
 
 target_link_libraries(flash_drivers_s
     PRIVATE
+        cmsis
         flash_drivers
-        cmsis_includes_s
+        device_definition
 )
 target_link_libraries(flash_drivers_bl2
     PRIVATE
+        cmsis
         flash_drivers
-        cmsis_includes_bl2
+        device_definition
 )
 
 target_compile_options(flash_drivers_s
     PRIVATE
         ${COMPILER_CP_FLAG}
+        ${COMPILER_CMSE_FLAG}
 )
 
 target_link_options(flash_drivers_s
@@ -34,6 +37,7 @@ target_link_options(flash_drivers_s
 target_compile_options(flash_drivers_bl2
     PRIVATE
         ${BL2_COMPILER_CP_FLAG}
+        ${COMPILER_CMSE_FLAG}
 )
 
 target_link_options(flash_drivers_bl2

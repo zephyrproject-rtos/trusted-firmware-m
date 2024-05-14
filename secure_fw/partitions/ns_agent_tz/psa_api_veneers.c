@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 
 #include "config_impl.h"
 #include "security_defs.h"
+#include "tfm_arch.h"
 #include "tfm_psa_call_pack.h"
 
 #include "psa/client.h"
@@ -25,13 +26,29 @@
 __tz_c_veneer
 uint32_t tfm_psa_framework_version_veneer(void)
 {
-    return psa_framework_version();
+    uint32_t ret;
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+#endif
+    ret = psa_framework_version();
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(0);
+#endif
+    return ret;
 }
 
 __tz_c_veneer
 uint32_t tfm_psa_version_veneer(uint32_t sid)
 {
-    return psa_version(sid);
+    uint32_t ret;
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+#endif
+    ret = psa_version(sid);
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(0);
+#endif
+    return ret;
 }
 
 __tz_c_veneer
@@ -40,9 +57,17 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
                                  const psa_invec *in_vec,
                                  psa_outvec *out_vec)
 {
-    return tfm_psa_call_pack(handle,
-                             PARAM_SET_NS_VEC(ctrl_param),
-                             in_vec, out_vec);
+    psa_status_t ret;
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+#endif
+    ret = tfm_psa_call_pack(handle,
+                            PARAM_SET_NS_VEC(ctrl_param),
+                            in_vec, out_vec);
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(0);
+#endif
+    return ret;
 }
 
 /* Following veneers are only needed by connection-based services */
@@ -50,13 +75,27 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
 __tz_c_veneer
 psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 {
-    return psa_connect(sid, version);
+    psa_handle_t ret;
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+#endif
+    ret = psa_connect(sid, version);
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(0);
+#endif
+    return ret;
 }
 
 __tz_c_veneer
 void tfm_psa_close_veneer(psa_handle_t handle)
 {
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+#endif
     psa_close(handle);
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    __set_BASEPRI(0);
+#endif
 }
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 __tz_c_veneer

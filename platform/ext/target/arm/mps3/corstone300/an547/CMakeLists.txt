@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -35,6 +35,7 @@ target_include_directories(flash_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/driver
         device/include
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE300_COMMON_DIR}/device/config
 )
 

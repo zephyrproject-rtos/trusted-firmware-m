@@ -69,7 +69,7 @@
 
 /* Enable PSA Crypto Cipher module */
 #ifndef CRYPTO_CIPHER_MODULE_ENABLED
-#define CRYPTO_CIPHER_MODULE_ENABLED           1
+#define CRYPTO_CIPHER_MODULE_ENABLED           0
 #endif
 
 /* Enable PSA Crypto asymmetric key signature module */
@@ -140,7 +140,9 @@
 #endif
 
 /* Set the initial attestation token profile */
-#ifndef ATTEST_TOKEN_PROFILE_PSA_IOT_1
+#if (!ATTEST_TOKEN_PROFILE_PSA_IOT_1) && \
+    (!ATTEST_TOKEN_PROFILE_PSA_2_0_0) && \
+    (!ATTEST_TOKEN_PROFILE_ARM_CCA)
 #define ATTEST_TOKEN_PROFILE_PSA_IOT_1         1
 #endif
 

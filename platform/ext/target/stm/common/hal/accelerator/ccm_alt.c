@@ -39,11 +39,9 @@
 #include "mbedtls/platform_util.h"
 #include "mbedtls/error.h"
 
-/* Parameter validation macros */
-#define CCM_VALIDATE_RET( cond ) \
-    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_CCM_BAD_INPUT )
-#define CCM_VALIDATE( cond ) \
-    MBEDTLS_INTERNAL_VALIDATE( cond )
+/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
+#define CCM_VALIDATE_RET( cond ) do { } while(0)
+#define CCM_VALIDATE( cond ) do { } while(0)
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

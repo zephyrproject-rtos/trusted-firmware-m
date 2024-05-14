@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+/* Linker script to configure memory regions. */
+/* This file will be run trough the pre-processor. */
+
+#include "region_defs.h"
+
+do not initialize  { section .noinit };
+initialize by copy { readwrite };
+
+define block ER_CODE            with fixed order, alignment = 8, size = BL1_2_CODE_SIZE {
+       section .intvec,
+       readonly
+};
+define block LR_CODE with fixed order {block ER_CODE};
+place at address BL1_2_CODE_START {block LR_CODE};
+
+define block TFM_SHARED_DATA        with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
+define block ER_DATA                with alignment = 32 {readwrite};
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+define block ARM_LIB_STACK          with alignment = 32, size = BL1_2_MSP_STACK_SIZE - 0x8 { };
+define block STACKSEAL with size = 0x8 { };
+#else
+define block ARM_LIB_STACK   with alignment = 32, size = BL1_2_MSP_STACK_SIZE { };
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+
+define block ARM_LIB_HEAP           with alignment = 8, size = BL1_2_HEAP_SIZE { };
+define block SRAM_WATERMARK         with size = 0 { };
+keep {block TFM_SHARED_DATA,
+      block ARM_LIB_STACK,
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+      block STACKSEAL,
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+      block ARM_LIB_HEAP,
+      block SRAM_WATERMARK,
+};
+
+if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
+{
+  // Required in a multi-threaded application
+  initialize by copy with packing = none { section __DLIB_PERTHREAD };
+}
+
+define block BL1_2_ER_DATA with fixed order, maximum size = BL1_2_DATA_SIZE  {
+        block TFM_SHARED_DATA,
+        block ER_DATA,
+        block ARM_LIB_STACK,
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+        block STACKSEAL,
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+        block ARM_LIB_HEAP,
+        block SRAM_WATERMARK,
+};
+place at address BL1_2_DATA_START {block BL1_2_ER_DATA};
+
+define block BL1_1_ER_DATA with fixed order, size = BL1_1_DATA_SIZE  {
+};
+place at address BL1_1_DATA_START {block BL1_1_ER_DATA};
+keep {block BL1_1_ER_DATA,
+};

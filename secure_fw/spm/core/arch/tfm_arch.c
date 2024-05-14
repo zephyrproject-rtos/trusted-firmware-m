@@ -34,12 +34,10 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 
 extern uint32_t scheduler_lock;
 
-void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
+void tfm_arch_set_context_ret_code(const struct context_ctrl_t *p_ctx_ctrl, uint32_t ret_code)
 {
-    struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
-
     /* Write the return value to the state context on stack. */
-    ((struct full_context_t *)ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
+    ((struct full_context_t *)p_ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
 }
 
 __naked void arch_acquire_sched_lock(void)
@@ -103,11 +101,42 @@ __naked uint32_t arch_attempt_schedule(void)
 }
 #endif
 
-void tfm_arch_init_context(void *p_ctx_ctrl,
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+__naked void arch_clean_stack_and_launch(void *param, uintptr_t spm_init_func,
+                                         uintptr_t ns_agent_entry, uint32_t msp_base)
+{
+    __ASM volatile(
+        SYNTAX_UNIFIED
+        "msr  msp, r3                       \n" /* Reset MSP */
+        "mov  lr, r2                        \n" /*
+                                                 * Set lr - the return address of the first
+                                                 * init function (r1) - to the second init
+                                                 * function (r2) so that they will be executed
+                                                 * in turn. The return value of first init
+                                                 * function is passed to second init function
+                                                 * through "r0".
+                                                 */
+        "movs r2, #"M2S(CONTROL_SPSEL_Msk)" \n"
+        "mrs  r3, control                   \n"
+        "orrs r3, r3, r2                    \n" /*
+                                                 * CONTROL.SPSEL, bit [1], stack-pointer
+                                                 * select.
+                                                 * 0: Use SP_main as the current stack.
+                                                 * 1: In Thread mode use PSP as the
+                                                 * current stack
+                                                 */
+        "msr  control, r3                   \n" /* Use PSP as the current stack */
+        "isb                                \n"
+        "bx   r1                            \n" /* Execute first init function */
+    );
+}
+#endif
+
+void tfm_arch_init_context(struct context_ctrl_t *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr)
 {
-    uintptr_t sp = ((struct context_ctrl_t *)p_ctx_ctrl)->sp;
-    uintptr_t sp_limit = ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit;
+    uintptr_t sp = p_ctx_ctrl->sp;
+    uintptr_t sp_limit = p_ctx_ctrl->sp_limit;
     struct full_context_t *p_tctx =
             (struct full_context_t *)arch_seal_thread_stack(sp);
 
@@ -133,19 +162,17 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 
     ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, param, 0, 0, 0, pfn, pfnlr);
 
-    ((struct context_ctrl_t *)p_ctx_ctrl)->exc_ret  = EXC_RETURN_THREAD_PSP;
-    ((struct context_ctrl_t *)p_ctx_ctrl)->sp       = (uintptr_t)p_tctx;
+    p_ctx_ctrl->exc_ret  = EXC_RETURN_THREAD_PSP;
+    p_ctx_ctrl->sp       = (uintptr_t)p_tctx;
 }
 
-uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl)
+uint32_t tfm_arch_refresh_hardware_context(const struct context_ctrl_t *p_ctx_ctrl)
 {
-    struct context_ctrl_t *ctx_ctrl;
     struct tfm_state_context_t *sc;
 
-    ctx_ctrl  = (struct context_ctrl_t *)p_ctx_ctrl;
-    sc = &(((struct full_context_t *)(ctx_ctrl->sp))->stat_ctx);
+    sc = &(((struct full_context_t *)(p_ctx_ctrl->sp))->stat_ctx);
 
-    arch_update_process_sp((uint32_t)sc, ctx_ctrl->sp_limit);
+    arch_update_process_sp((uint32_t)sc, p_ctx_ctrl->sp_limit);
 
-    return ctx_ctrl->exc_ret;
+    return p_ctx_ctrl->exc_ret;
 }

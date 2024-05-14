@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,7 @@
 
 #include "tfm_peripherals_def.h"
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /* Allowed named MMIO of this platform */
 static const uintptr_t partition_named_mmio_list[] = {

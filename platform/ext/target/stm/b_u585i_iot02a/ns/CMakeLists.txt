@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,7 +33,8 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         include
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         ext/common
         Device/Include
         hal/Inc

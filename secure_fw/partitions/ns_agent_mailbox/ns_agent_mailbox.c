@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -8,8 +8,10 @@
  */
 
 #include "async.h"
+#include "config_tfm.h"
 #include "psa/service.h"
 #include "psa_manifest/ns_agent_mailbox.h"
+#include "tfm_hal_mailbox.h"
 #include "tfm_hal_multi_core.h"
 #include "tfm_hal_platform.h"
 #include "tfm_multi_core.h"
@@ -36,12 +38,12 @@ void ns_agent_mailbox_entry(void)
         psa_panic();
     }
 
-    psa_irq_enable(MAILBOX_SIGNAL);
+    MAILBOX_ENABLE_INTERRUPTS();
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & MAILBOX_SIGNAL) {
-            psa_eoi(MAILBOX_SIGNAL);
+        if (MAILBOX_SIGNAL_IS_ACTIVE(signals)) {
+            psa_eoi(MAILBOX_SIGNAL_GET_ACTIVE(signals));
             tfm_rpc_client_call_handler();
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         } else if (signals & ASYNC_MSG_REPLY) {

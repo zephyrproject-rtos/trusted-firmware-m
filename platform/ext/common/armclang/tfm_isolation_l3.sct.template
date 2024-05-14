@@ -126,7 +126,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 
     /**** Unprivileged Secure code + RO-data starts here */
     TFM_UNPRIV_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-        *(SFN)
         * (+RO)
     }
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2024 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,10 @@
 
 #if defined(MCUBOOT_USE_PSA_CRYPTO)
 #include "psa/crypto.h"
-#endif
+/* A few macros for stringification */
+#define str(X) #X
+#define xstr(X) str(X)
+#endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -67,6 +70,7 @@ static void do_boot(struct boot_rsp *rsp)
      */
     rc = flash_device_base(rsp->br_flash_dev_id, &flash_base);
     assert(rc == 0);
+    (void)rc;
 
     if (rsp->br_hdr->ih_flags & IMAGE_F_RAM_LOAD) {
        /* The image has been copied to SRAM, find the vector table
@@ -94,6 +98,7 @@ static void do_boot(struct boot_rsp *rsp)
 int main(void)
 {
     fih_ret fih_rc = FIH_FAILURE;
+    fih_ret recovery_succeeded = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
     int32_t image_id;
 
@@ -152,7 +157,7 @@ int main(void)
         BOOT_LOG_ERR("PSA Crypto init failed with error code %d", status);
         FIH_PANIC;
     }
-    BOOT_LOG_INF("PSA Crypto init completed");
+    BOOT_LOG_INF("PSA Crypto init done, sig_type: %s", xstr(MCUBOOT_SIGNATURE_TYPE));
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 #ifdef TEST_BL2
@@ -163,21 +168,33 @@ int main(void)
      * TF-M image, which means the response is filled correctly.
      */
     for (image_id = MCUBOOT_IMAGE_NUMBER - 1; image_id >= 0; image_id--) {
+        if (!boot_platform_should_load_image(image_id)) {
+            continue;
+        }
+
         if (boot_platform_pre_load(image_id)) {
             BOOT_LOG_ERR("Pre-load step for image %d failed", image_id);
             FIH_PANIC;
         }
 
-        /* Primary goal to zeroize the 'rsp' is to avoid to accidentally load
-         * the NS image in case of a fault injection attack. However, it is
-         * done anyway as a good practice to sanitize memory.
-         */
-        memset(&rsp, 0, sizeof(struct boot_rsp));
-        FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
-        if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
-            BOOT_LOG_ERR("Unable to find bootable image");
-            FIH_PANIC;
-        }
+        do {
+            /* Primary goal to zeroize the 'rsp' is to avoid to accidentally load
+             * the NS image in case of a fault injection attack. However, it is
+             * done anyway as a good practice to sanitize memory.
+             */
+            memset(&rsp, 0, sizeof(struct boot_rsp));
+
+            FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
+
+            if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
+                BOOT_LOG_ERR("Unable to find bootable image");
+
+                recovery_succeeded = fih_ret_encode_zero_equality(boot_initiate_recovery_mode(image_id));
+                if (FIH_NOT_EQ(recovery_succeeded, FIH_SUCCESS)) {
+                    FIH_PANIC;
+                }
+            }
+        } while FIH_NOT_EQ(fih_rc, FIH_SUCCESS);
 
         if (boot_platform_post_load(image_id)) {
             BOOT_LOG_ERR("Post-load step for image %d failed", image_id);

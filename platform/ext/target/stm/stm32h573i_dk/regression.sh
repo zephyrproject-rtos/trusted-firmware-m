@@ -19,8 +19,8 @@ fi
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
 # remove write protection
-connect="-c port=SWD "$sn_option" mode=UR --hardRst"
-connect_no_reset="-c port=SWD "$sn_option" mode=HotPlug"
+connect="-c port=SWD ap=1 "$sn_option" mode=UR --hardRst"
+connect_no_reset="-c port=SWD ap=1 "$sn_option" mode=HotPlug"
 echo "Regression platforme H5"
 product_state="-ob PRODUCT_STATE=0xED  TZEN=0xB4"
 remove_bank1_protect="-ob SECWM1_STRT=127 SECWM1_END=0 WRPSGn1=0xffffffff" 
@@ -32,7 +32,7 @@ default_ob2="-ob SECWM2_STRT=0 SECWM2_END=127 SECWM1_STRT=0 SECWM1_END=127"
 
 
 echo "Regression to PRODUCT_STATE 0xED and  tzen=1"
-$stm32programmercli $connect_no_reset $product_state
+$stm32programmercli $connect $product_state
 echo "Remove bank1 protection and erase all"
 $stm32programmercli $connect $remove_bank1_protect $erase_all
 echo "Remove bank2 protection and erase all"

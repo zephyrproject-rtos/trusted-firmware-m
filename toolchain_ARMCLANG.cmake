@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 SET(CMAKE_SYSTEM_NAME Generic)
 
@@ -202,6 +202,7 @@ macro(tfm_toolchain_reload_compiler)
 
     if (DEFINED TFM_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
@@ -231,6 +232,12 @@ macro(tfm_toolchain_reload_compiler)
     # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
     # is not actually enabled in BL2, it will cause BL2 runtime fault.
     set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
+
+    set(BL1_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    )
+    set(BL1_LINKER_CP_OPTION --fpu=SoftVFP)
 
     if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
         set(COMPILER_CP_FLAG
@@ -354,15 +361,19 @@ macro(add_convert_to_bin_target target)
     )
 endmacro()
 
-macro(target_share_symbols target symbol_name_file)
+macro(target_share_symbols target)
     get_target_property(TARGET_TYPE ${target} TYPE)
     if (NOT TARGET_TYPE STREQUAL "EXECUTABLE")
         message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
     endif()
 
-    FILE(STRINGS ${symbol_name_file} KEEP_SYMBOL_LIST
-        LENGTH_MINIMUM 1
-    )
+    foreach(symbol_file ${ARGN})
+        FILE(STRINGS ${symbol_file} SYMBOLS
+            LENGTH_MINIMUM 1
+        )
+        list(APPEND KEEP_SYMBOL_LIST ${SYMBOLS})
+    endforeach()
+
 
     # strip all the symbols except those proveded as arguments. Long inline
     # python scripts aren't ideal, but this is both portable and possibly easier
@@ -370,7 +381,7 @@ macro(target_share_symbols target symbol_name_file)
     add_custom_command(TARGET ${target}
         POST_BUILD
         VERBATIM
-        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.txt ${KEEP_SYMBOL_LIST})
+        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX} ${KEEP_SYMBOL_LIST})
 
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --undefined=)
@@ -382,7 +393,7 @@ macro(target_share_symbols target symbol_name_file)
     # Ask armclang to produce a symdefs file that will
     target_link_options(${target}
         PRIVATE
-            --symdefs=$<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.txt
+            --symdefs=$<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 endmacro()
 
@@ -398,27 +409,7 @@ macro(target_link_shared_code target)
         endif()
 
         add_dependencies(${target} ${symbol_provider})
-        # Some cmake functions don't allow generator expressions, so get the
-        # property as a backup. If the symbol provider hasn't been created yet,
-        # then use the output dir of the target.
-        if (TARGET ${symbol_provider})
-            get_target_property(SYMBOL_PROVIDER_OUTPUT_DIR ${symbol_provider} RUNTIME_OUTPUT_DIRECTORY)
-        else()
-            get_target_property(SYMBOL_PROVIDER_OUTPUT_DIR ${target} RUNTIME_OUTPUT_DIRECTORY)
-        endif()
-        # Set these properties so that cmake will allow us to use a source file
-        # that doesn't exist at cmake-time, but we guarantee will exist at
-        # compile-time.
-        set_source_files_properties(${SYMBOL_PROVIDER_OUTPUT_DIR}/${symbol_provider}_shared_symbols.txt
-            DIRECTORY ${TARGET_SOURCE_DIR}
-            PROPERTIES
-                EXTERNAL_OBJECT true
-                GENERATED true
-        )
-        target_sources(${target}
-            PRIVATE
-                $<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}_shared_symbols.txt
-        )
+        target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
 

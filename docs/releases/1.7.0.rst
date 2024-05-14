@@ -1,3 +1,5 @@
+:orphan:
+
 *************
 Version 1.7.0
 *************
@@ -25,7 +27,7 @@ New major features
 New platforms supported
 =======================
 
- - :doc:`/platform/arm/rss/readme`
+ - :doc:`/platform/arm/rse/readme`
  - Platform `arm/mps3/Polaris` renamed to :doc:`Corstone-310 </platform/arm/mps3/corstone310/README>`
 
 Deprecated platforms and features

@@ -10,7 +10,6 @@
 #include "tfm_platform_api.h"
 #include "tfm_ioctl_core_api.h"
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t tfm_platform_mem_read(void *destination, uint32_t addr,
 					      size_t len, uint32_t *result)
 {
@@ -36,7 +35,6 @@ enum tfm_platform_err_t tfm_platform_mem_read(void *destination, uint32_t addr,
 	return (enum tfm_platform_err_t) ret;
 }
 
-__attribute__((section("SFN")))
 enum tfm_platform_err_t tfm_platform_gpio_pin_mcu_select(uint32_t pin_number, uint32_t mcu,
 							 uint32_t *result)
 {

@@ -9,10 +9,8 @@ Contributions to the TF-M project need to follow the process below.
 
 - It is recommended to subscribe to `TF-M mailing list <mailing_list_>`_
   via `this page <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org>`_.
-- Refer to the `Roadmap
-  <https://developer.trustedfirmware.org/w/tf_m/planning>`_ or send a mail to
-  the `TF-M mailing list <mailing_list_>`_ to get the latest status and plan of
-  TF-M.
+- Refer to the :doc:`/roadmap` or send a mail to the `TF-M mailing list <mailing_list_>`_
+  to get the latest status and plan of TF-M.
 - Follow :doc:`Design Proposal Guideline </contributing/tfm_design_proposal_guideline>`
   to propose your design.
 - Follow guidelines below to prepare the patch:

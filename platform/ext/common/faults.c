@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "utilities.h"
 /* "exception_info.h" must be the last include because of the IAR pragma */
 #include "exception_info.h"
@@ -21,7 +21,7 @@ void C_HardFault_Handler(void)
 
 __attribute__((naked)) void HardFault_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "bl        C_HardFault_Handler     \n"
@@ -41,7 +41,7 @@ void C_MemManage_Handler(void)
 
 __attribute__((naked)) void MemManage_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "bl        C_MemManage_Handler     \n"
@@ -61,7 +61,7 @@ void C_BusFault_Handler(void)
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "bl        C_BusFault_Handler      \n"
@@ -81,7 +81,7 @@ void C_SecureFault_Handler(void)
 
 __attribute__((naked)) void SecureFault_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_SECUREFAULT);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "bl        C_SecureFault_Handler   \n"
@@ -96,7 +96,7 @@ void C_UsageFault_Handler(void)
 
 __attribute__((naked)) void UsageFault_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "bl        C_UsageFault_Handler   \n"

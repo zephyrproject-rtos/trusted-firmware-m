@@ -1,11 +1,14 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# Skip "up-to-date" prints to avoid flooding the build output. Just print "installing"
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
         DESTINATION bin
@@ -72,17 +75,32 @@ if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 endif()
 
 if (TFM_PARTITION_CRYPTO)
-    install(FILES       ${INTERFACE_INC_DIR}/psa/crypto_extra.h
-                        ${INTERFACE_INC_DIR}/psa/crypto_compat.h
+    install(FILES       ${INTERFACE_INC_DIR}/psa/README.rst
+                        ${INTERFACE_INC_DIR}/psa/build_info.h
                         ${INTERFACE_INC_DIR}/psa/crypto.h
-                        ${INTERFACE_INC_DIR}/psa/crypto_client_struct.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_adjust_auto_enabled.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_adjust_config_key_pair_types.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_adjust_config_synonyms.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_builtin_composites.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_builtin_key_derivation.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_builtin_primitives.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_compat.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_driver_common.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_driver_contexts_composites.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_driver_contexts_key_derivation.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_driver_contexts_primitives.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_extra.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_legacy.h
                         ${INTERFACE_INC_DIR}/psa/crypto_platform.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_se_driver.h
                         ${INTERFACE_INC_DIR}/psa/crypto_sizes.h
                         ${INTERFACE_INC_DIR}/psa/crypto_struct.h
                         ${INTERFACE_INC_DIR}/psa/crypto_types.h
                         ${INTERFACE_INC_DIR}/psa/crypto_values.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_crypto_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+    install(DIRECTORY   ${INTERFACE_INC_DIR}/mbedtls
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
@@ -127,8 +145,8 @@ if (TFM_PARTITION_NS_AGENT_TZ)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
-    install(DIRECTORY   ${INTERFACE_INC_DIR}/os_wrapper
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+install(DIRECTORY   ${INTERFACE_INC_DIR}/os_wrapper
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 if (CONFIG_TFM_USE_TRUSTZONE)
     install(DIRECTORY   ${INTERFACE_SRC_DIR}/os_wrapper
@@ -216,12 +234,16 @@ endif()
 install(FILES       ${CMAKE_SOURCE_DIR}/config/cp_check.cmake
         DESTINATION ${INSTALL_CONFIG_DIR})
 
+################### Read recommended tf-m-tests version ########################
+
+include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/read_version.cmake)
+
 ###################### Install NS platform sources #############################
 
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/cmsis
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
+install(DIRECTORY   $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/cmsis)
 
 if(PLATFORM_DEFAULT_UART_STDOUT)
     install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c

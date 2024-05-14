@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 SET(CMAKE_SYSTEM_NAME Generic)
 
@@ -203,6 +203,7 @@ macro(tfm_toolchain_reload_compiler)
 
     if (DEFINED TFM_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")

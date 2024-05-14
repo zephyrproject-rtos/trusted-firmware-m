@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -72,7 +72,7 @@
 
 /* Enable PSA Crypto Cipher module */
 #ifndef CRYPTO_CIPHER_MODULE_ENABLED
-#define CRYPTO_CIPHER_MODULE_ENABLED           1
+#define CRYPTO_CIPHER_MODULE_ENABLED           0
 #endif
 
 /* Enable PSA Crypto asymmetric key signature module */
@@ -143,7 +143,9 @@
 #endif
 
 /* Set the initial attestation token profile */
-#ifndef ATTEST_TOKEN_PROFILE_PSA_IOT_1
+#if (!ATTEST_TOKEN_PROFILE_PSA_IOT_1) && \
+    (!ATTEST_TOKEN_PROFILE_PSA_2_0_0) && \
+    (!ATTEST_TOKEN_PROFILE_ARM_CCA)
 #define ATTEST_TOKEN_PROFILE_PSA_IOT_1         1
 #endif
 
@@ -228,9 +230,11 @@
 
 /* SPM Partition Configs */
 
+#ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
 /* The maximal number of secure services that are connected or requested at the same time */
 #ifndef CONFIG_TFM_CONN_HANDLE_MAX_NUM
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
+#endif
 #endif
 
 /* Disable the doorbell APIs */

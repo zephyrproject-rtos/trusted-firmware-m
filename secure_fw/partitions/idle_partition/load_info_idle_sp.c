@@ -51,7 +51,7 @@ const struct partition_tfm_sp_idle_load_info_t
     tfm_sp_idle_load __attribute__((used, section(".part_load_priority_00"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
-        .pid                        = TFM_SP_IDLE_ID,
+        .pid                        = TFM_SP_IDLE,
         .flags                      = PARTITION_PRI_LOWEST | PARTITION_MODEL_IPC
                                       | PARTITION_MODEL_PSA_ROT,
         .entry                      = ENTRY_TO_POSITION(tfm_idle_thread),

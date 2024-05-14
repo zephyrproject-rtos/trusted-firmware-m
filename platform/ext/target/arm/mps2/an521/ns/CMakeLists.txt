@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,7 +29,8 @@ target_include_directories(platform_ns
         retarget
     PUBLIC
         include
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         cmsis_core
         ext/common
 )
@@ -37,6 +38,8 @@ target_include_directories(platform_ns
 target_compile_definitions(platform_ns
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+    PRIVATE
+        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
 )
 
 # Include region_defs.h and flash_layout.h

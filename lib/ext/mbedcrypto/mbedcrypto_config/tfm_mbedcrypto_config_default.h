@@ -1,3 +1,9 @@
+/*
+ * Copyright The TrustedFirmware-M Contributors
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file config.h
  *
@@ -6,24 +12,6 @@
  *  This set of compile-time options may be used to enable
  *  or disable features selectively, and reduce the global
  *  memory footprint.
- */
-/*
- *  Copyright (C) 2006-2022, ARM Limited, All Rights Reserved
- *  SPDX-License-Identifier: Apache-2.0
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may
- *  not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
 #ifndef MBEDTLS_CONFIG_H
@@ -211,20 +199,6 @@
 #define MBEDTLS_PK_RSA_ALT_SUPPORT
 
 /**
- * \def MBEDTLS_PSA_CRYPTO_SPM
- *
- * When MBEDTLS_PSA_CRYPTO_SPM is defined, the code is built for SPM (Secure
- * Partition Manager) integration which separates the code into two parts: a
- * NSPE (Non-Secure Process Environment) and an SPE (Secure Process
- * Environment).
- *
- * Module:  library/psa_crypto.c
- * Requires: MBEDTLS_PSA_CRYPTO_C
- *
- */
-#define MBEDTLS_PSA_CRYPTO_SPM
-
-/**
  * \def MBEDTLS_PSA_CRYPTO_CONFIG
  *
  * This setting allows support for cryptographic mechanisms through the PSA
@@ -401,6 +375,55 @@
  *           the PSA ITS interface
  */
 #define MBEDTLS_PSA_CRYPTO_STORAGE_C
+
+/**
+ * \def MBEDTLS_PSA_CRYPTO_SPM
+ *
+ * When MBEDTLS_PSA_CRYPTO_SPM is defined, the code is built for SPM (Secure
+ * Partition Manager) integration which separates the code into two parts: a
+ * NSPE (Non-Secure Process Environment) and an SPE (Secure Process
+ * Environment).
+ *
+ * If you enable this option, your build environment must include a header
+ * file `"crypto_spe.h"` (either in the `psa` subdirectory of the Mbed TLS
+ * header files, or in another directory on the compiler's include search
+ * path). Alternatively, your platform may customize the header
+ * `psa/crypto_platform.h`, in which case it can skip or replace the
+ * inclusion of `"crypto_spe.h"`.
+ *
+ * Module:  library/psa_crypto.c
+ * Requires: MBEDTLS_PSA_CRYPTO_C
+ *
+ */
+#define MBEDTLS_PSA_CRYPTO_SPM
+
+/* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+ *
+ * Enable key identifiers that encode a key owner identifier.
+ *
+ * The owner of a key is identified by a value of type ::mbedtls_key_owner_id_t
+ * which is currently hard-coded to be int32_t.
+ *
+ * Note that this option is meant for internal use only and may be removed
+ * without notice.
+ */
+#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+
+/** \def MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+ *
+ * Enable support for platform built-in keys. If you enable this feature,
+ * you must implement the function mbedtls_psa_platform_get_builtin_key().
+ * See the documentation of that function for more information.
+ *
+ * Built-in keys are typically derived from a hardware unique key or
+ * stored in a secure element.
+ *
+ * Requires: MBEDTLS_PSA_CRYPTO_C.
+ *
+ * \warning This interface is experimental and may change or be removed
+ * without notice.
+ */
+#define MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
 
 /* \} name SECTION: mbed TLS modules */
 

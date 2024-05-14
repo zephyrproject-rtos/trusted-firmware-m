@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -17,7 +17,7 @@
 #include "psa/client.h"
 #include "psa/error.h"
 #include "psa/service.h"
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 
 /* SFN defs */
 typedef psa_status_t (*service_fn_t)(psa_msg_t *msg);
@@ -73,6 +73,8 @@ struct psa_api_tbl_t {
     psa_handle_t     (*agent_psa_connect)(uint32_t sid, uint32_t version,
                                           int32_t ns_client_id,
                                           const void *client_data);
+    psa_status_t     (*agent_psa_close)(psa_handle_t handle,
+                                        int32_t ns_client_id);
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 };

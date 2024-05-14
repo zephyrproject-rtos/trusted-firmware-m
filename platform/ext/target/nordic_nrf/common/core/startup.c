@@ -1,10 +1,11 @@
 /*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
  * Copyright (c) 2023 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #ifdef NRF_HW_INIT_RESET_ON_BOOT
 #include "hw_init.h"

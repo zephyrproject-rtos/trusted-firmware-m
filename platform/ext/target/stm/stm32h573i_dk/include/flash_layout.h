@@ -30,22 +30,22 @@
  * 0x0002_0000 OTP / NV counters area (32 KB)
  * 0x0002_8000 Secure Storage Area (16 KB)
  * 0x0002_c000 Internal Trusted Storage Area (32 KB)
- * 0x0003_4000 Secure image     primary slot (184 KB)
- * 0x0006_2000 Non-secure image primary slot (640 KB)
- * 0x0010_2000 Secure image     secondary slot (184 KB)
- * 0x0013_0000 Non-secure image secondary slot (640 KB)
- * 
+ * 0x0003_4000 Secure image     primary slot (256 KB)
+ * 0x0007_4000 Non-secure image primary slot (640 KB)
+ * 0x0011_4000 Secure image     secondary slot (256 KB)
+ * 0x0015_4000 Non-secure image secondary slot (640 KB)
+ *
  ** Flash layout (internal flash) on stm32h573i_dk with BL2 (multiple image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (128 KB)
  * 0x0002_0000 SCRATCH (32 KB)
  * 0x0002_8000 OTP / NV counters area (32 KB)
  * 0x0003_2000 Secure Storage Area (16 KB)
- * 0x0003_6000 Internal Trusted Storage Area (32 KB)
- * 0x0003_e000 Secure image     primary slot (184 KB)
- * 0x0006_c000 Non-secure image primary slot (640 KB)
- * 0x0010_c000 Secure image     secondary slot (184 KB)
- * 0x0013_a000 Non-secure image secondary slot (640 KB)
+ * 0x0003_6000 Internal Trusted Storage (32 KB)
+ * 0x0003_e000 Secure image     primary slot (256 KB)
+ * 0x0007_e000 Non-secure image primary slot (640 KB)
+ * 0x0014_c000 Secure image     secondary slot (256 KB)
+ * 0x0017_a000 Non-secure image secondary slot (640 KB)
  */
 /* TFM Partition configuration : begin */
 
@@ -205,7 +205,7 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (FLASH_AREA_IMAGE_SECTOR_SIZE+FLASH_AREA_IMAGE_SECTOR_SIZE+FLASH_AREA_IMAGE_SECTOR_SIZE+FLASH_AREA_IMAGE_SECTOR_SIZE)   /* 8 KB */
 
-#define FLASH_S_PARTITION_SIZE          (0x2E000) /* 184 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (0x40000) /* 256 KB for S partition */
 #if !defined(MCUBOOT_PRIMARY_ONLY)
 #define FLASH_NS_PARTITION_SIZE         (0xA0000) /* 640 KB for NS partition */
 #else

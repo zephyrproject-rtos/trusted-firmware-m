@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
- * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -12,6 +12,7 @@
 
 #include "runtime_defs.h"
 #include "sprt_partition_metadata_indicator.h"
+#include "tfm_sp_log.h"
 
 #include "psa/error.h"
 #include "psa/service.h"
@@ -30,6 +31,7 @@ void common_sfn_thread(void *param)
     signal_mask = (1UL << meta->n_sfn) - 1;
 
     if (sfn_init && sfn_init(param) != PSA_SUCCESS) {
+        LOG_ERRFMT("Partition initialization FAILED in 0x%x\r\n", sfn_init);
         psa_panic();
     }
 

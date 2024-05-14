@@ -5,8 +5,7 @@
 #
 #------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(mcuboot_config INTERFACE)
 
@@ -61,6 +60,11 @@ target_sources(bl2
         ${CMAKE_CURRENT_SOURCE_DIR}/keys.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_extended.c
         ${CMAKE_CURRENT_SOURCE_DIR}/flash_map_legacy.c
+)
+
+target_compile_definitions(bl2
+    PRIVATE
+        MCUBOOT_SIGNATURE_TYPE=${MCUBOOT_SIGNATURE_TYPE}
 )
 
 target_link_libraries(bl2

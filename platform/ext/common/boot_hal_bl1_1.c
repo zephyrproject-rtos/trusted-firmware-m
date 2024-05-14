@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <string.h>
 #include "target_cfg.h"
 #include "region.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
@@ -25,7 +25,7 @@
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_BL1;
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
@@ -35,11 +35,6 @@ REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
-
-REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
-REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
-REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
-REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
 
 /*!
  * \brief Chain-loading the next image in the boot sequence.
@@ -53,9 +48,6 @@ REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
  *  - There are secrets in the memory: KDF parameter, symmetric key,
  *    manufacturer sensitive code/data, etc.
  */
-#if defined(__ICCARM__)
-#pragma required = boot_clear_ram_area
-#endif
 
 __WEAK __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
 {
@@ -105,11 +97,11 @@ __WEAK int32_t boot_platform_init(void)
         return 1;
     }
 
-#ifndef TFM_BL1_2_IN_OTP
-    if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
+#ifdef TFM_BL1_2_IN_FLASH
+    if (FLASH_DEV_NAME_BL1.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
-#endif /* !TFM_BL1_2_IN_OTP */
+#endif /* TFM_BL1_2_IN_FLASH */
 
     /* Clear boot data area */
     memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
@@ -131,11 +123,11 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     static struct boot_arm_vector_table *vt_cpy;
 
-#ifndef TFM_BL1_2_IN_OTP
-    if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
+#ifdef TFM_BL1_2_IN_FLASH
+    if (FLASH_DEV_NAME_BL1.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
-#endif /* !TFM_BL1_2_IN_OTP */
+#endif /* TFM_BL1_2_IN_FLASH */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
@@ -271,3 +263,11 @@ __WEAK int boot_store_measurement(
     return rc;
 }
 #endif /* TFM_MEASURED_BOOT_API */
+
+__WEAK int boot_initiate_recovery_mode(uint32_t image_id)
+{
+    (void)image_id;
+
+    /* We haven't done anything, therefore recovery has failed */
+    return 1;
+}

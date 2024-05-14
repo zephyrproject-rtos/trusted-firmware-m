@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,18 +38,15 @@ fih_int fih_cfi_get_and_increment(uint8_t cnt)
 
     _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) + cnt);
 
-    fih_int_validate(_fih_cfi_ctr);
-    fih_int_validate(saved_ctr);
+    (void)fih_int_validate(_fih_cfi_ctr);
+    (void)fih_int_validate(saved_ctr);
 
     return saved_ctr;
 }
 
 void fih_cfi_validate(fih_int saved)
 {
-    volatile int32_t rc = FIH_FALSE;
-
-    rc = fih_eq(saved, _fih_cfi_ctr);
-    if (rc != FIH_TRUE) {
+    if (fih_not_eq(saved, _fih_cfi_ctr)) {
         FIH_PANIC;
     }
 }
@@ -59,7 +59,7 @@ void fih_cfi_decrement(void)
 
     _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) - 1);
 
-    fih_int_validate(_fih_cfi_ctr);
+    (void)fih_int_validate(_fih_cfi_ctr);
 }
 #endif /* FIH_ENABLE_CFI */
 

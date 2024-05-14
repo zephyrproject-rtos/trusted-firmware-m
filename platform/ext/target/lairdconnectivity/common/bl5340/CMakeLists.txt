@@ -19,20 +19,20 @@ set(NRF_FOLDER_PATH ${NRF_PLATFORM_PATH}/common/nrf5340)
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/gcc/startup_nrf5340.c>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_PLATFORM_PATH}/common/core/startup_nrf5340.c>
 )
 
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/gcc/startup_nrf5340.c>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_PLATFORM_PATH}/common/core/startup_nrf5340.c>
     )
 endif()
 
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/gcc/startup_nrf5340.c>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_PLATFORM_PATH}/common/core/startup_nrf5340.c>
     )
 endif()
 

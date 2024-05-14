@@ -9,8 +9,7 @@ if (NOT TFM_PARTITION_INITIAL_ATTESTATION)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/initial_attestation.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/initial_attestation.h)

@@ -11,4 +11,6 @@
 /* Calculate the service set. In SFN, nothing is calculated. */
 #define BACKEND_SERVICE_SET(set, p_service)
 
+#define BACKEND_SPM_INIT() tfm_spm_init()
+
 #endif /* __BACKEND_SFN_H__ */

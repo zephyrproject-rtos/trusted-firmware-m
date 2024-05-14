@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -64,6 +64,8 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 {
     struct partition_load_info_t *p_ptldinf;
     struct partition_t           *partition;
+    int32_t client_id_base;
+    int32_t client_id_limit;
 
     if (!head) {
         tfm_core_panic();
@@ -95,6 +97,25 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
     if (p_ptldinf->pid < 0) {
         /* 0 is the internal NS Agent, besides the normal positive PIDs */
         tfm_core_panic();
+    }
+
+    if (p_ptldinf->client_id_base > p_ptldinf->client_id_limit) {
+        tfm_core_panic();
+    }
+
+    /* Client ID range overlap check between NS agent partitions. */
+    if (IS_NS_AGENT(p_ptldinf)) {
+        UNI_LIST_FOREACH(partition, head, next) {
+            if (!IS_NS_AGENT(partition->p_ldinf)) {
+                continue;
+            }
+            client_id_base = partition->p_ldinf->client_id_base;
+            client_id_limit = partition->p_ldinf->client_id_limit;
+            if ((p_ptldinf->client_id_limit >= client_id_base) &&
+                (p_ptldinf->client_id_base <= client_id_limit)) {
+                tfm_core_panic();
+            }
+        }
     }
 
     partition = tfm_allocate_partition_assuredly();
@@ -177,6 +198,15 @@ void load_irqs_assuredly(struct partition_t *p_partition)
 
     for (i = 0; i < p_ldinf->nirqs; i++) {
         p_partition->signals_allowed |= p_irq_info->signal;
+
+        /* The client ID range of the irq should not beyond that of the partition. */
+        if (IS_NS_AGENT_MAILBOX(p_ldinf)) {
+            if ((p_irq_info->client_id_base > p_irq_info->client_id_limit) ||
+               (p_irq_info->client_id_base < p_ldinf->client_id_base) ||
+               (p_irq_info->client_id_limit > p_ldinf->client_id_limit)) {
+                tfm_core_panic();
+            }
+        }
 
         if (p_irq_info->init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
             tfm_core_panic();

@@ -39,7 +39,7 @@ menu.
 
 .. code-block:: bash
 
-    <DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M  \
+    <DS_PATH>/sw/models/bin/FVP_MPS2_AEMv8M \
     --parameter fvp_mps2.platform_type=2 \
     --parameter cpu0.baseline=0 \
     --parameter cpu0.INITVTOR_S=0x10000000 \
@@ -65,11 +65,11 @@ To test TF-M with bootloader, one must apply the following changes:
 .. code-block:: bash
 
     --application cpu0=<build_dir>/bin/bl2.axf \
-    --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10080000
+    --data cpu0=<build_dir>/tfm_s_ns_signed.bin@0x10080000
 
 Test software upgrade with BL2 bootloader
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-BL2 bootloader is mandatory to test software update. Furthermore two TF-M blob
+BL2 bootloader is mandatory to test software update. Furthermore, two TF-M blobs
 must be built. Outputs of example application and regression test can be used to
 test it. Load output of example application to the primary slot (0x10080000) and
 output of regression test to the secondary slot (0x10180000). Add the following
@@ -77,7 +77,7 @@ line to the end of the previous chapter:
 
 .. code-block:: bash
 
-    --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10180000
+    --data cpu0=<build_dir>/tfm_s_ns_signed.bin@0x10180000
 
 To run the example code on SSE 200 FPGA on MPS2 board
 =====================================================
@@ -562,4 +562,4 @@ upgrade is described in :doc:`secure boot </design_docs/booting/tfm_secure_boot>
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*

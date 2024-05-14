@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <string.h>
 #include "target_cfg.h"
 #include "region.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
@@ -24,7 +24,7 @@
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_BL1;
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
@@ -35,11 +35,17 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
 
+#if defined(__ICCARM__)
+REGION_DECLARE(Image$$, BL1_1_ER_DATA, $$Base)[];
+REGION_DECLARE(Image$$, BL1_1_ER_DATA, $$Limit)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA, $$Base)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA, $$Limit)[];
+#else
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
 REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
 REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
-
+#endif
 /* Erase both BL1 data sections at the end of BL1_2
  * At the point this function is called, the SP has been set to the next image's
  * initial SP and this function itself will wipe the executing image's data
@@ -54,8 +60,13 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
 #endif
         /* Clear the entire BL1_1 data section */
         "movs    r0, #0                                \n"
+#if defined(__ICCARM__)
+        "ldr     r1, =BL1_1_ER_DATA$$Base \n"
+        "ldr     r2, =BL1_1_ER_DATA$$Limit \n"
+#else
         "ldr     r1, =Image$$BL1_1_ER_DATA_START$$Base \n"
         "ldr     r2, =Image$$BL1_1_ER_DATA_LIMIT$$Base \n"
+#endif
         "subs    r2, r2, r1                            \n"
         "Loop_1:                                       \n"
         "subs    r2, #4                                \n"
@@ -65,8 +76,13 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
         "Clear_done_1:                                 \n"
         /* Clear the entire BL1_2 data section */
         "movs    r0, #0                                \n"
+#if defined(__ICCARM__)
+        "ldr     r1, =BL1_2_ER_DATA$$Base \n"
+        "ldr     r2, =BL1_2_ER_DATA$$Limit \n"
+#else
         "ldr     r1, =Image$$BL1_2_ER_DATA_START$$Base \n"
         "ldr     r2, =Image$$BL1_2_ER_DATA_LIMIT$$Base \n"
+#endif
         "subs    r2, r2, r1                            \n"
         "Loop_2:                                       \n"
         "subs    r2, #4                                \n"
@@ -140,7 +156,7 @@ __WEAK int32_t boot_platform_init(void)
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
-    if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME_BL1.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
@@ -163,7 +179,7 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
-    if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME_BL1.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
@@ -302,3 +318,11 @@ __WEAK int boot_store_measurement(
     return rc;
 }
 #endif /* TFM_MEASURED_BOOT_API */
+
+__WEAK int boot_initiate_recovery_mode(uint32_t image_id)
+{
+    (void)image_id;
+
+    /* We haven't done anything, therefore recovery has failed */
+    return 1;
+}

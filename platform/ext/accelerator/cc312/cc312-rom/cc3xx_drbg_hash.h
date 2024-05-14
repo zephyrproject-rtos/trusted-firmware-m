@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,7 +45,7 @@ struct cc3xx_drbg_hash_state_t {
  * @param[in] personalization_len Size in bytes of the personalisation string
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_hash_init(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_init(
     struct cc3xx_drbg_hash_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *nonce, size_t nonce_len,
@@ -61,7 +61,7 @@ cc3xx_err_t cc3xx_drbg_hash_init(
  * @param[in] additional_input_len Size in bytes of the additional input to be used
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_hash_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_generate(
     struct cc3xx_drbg_hash_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -76,7 +76,7 @@ cc3xx_err_t cc3xx_drbg_hash_generate(
  * @param[in] additional_input_len Size in bytes of the additional input buffer
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_hash_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_reseed(
     struct cc3xx_drbg_hash_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len);
@@ -87,7 +87,7 @@ cc3xx_err_t cc3xx_drbg_hash_reseed(
  * @param[out] state Pointer to the state structure
  * @return cc3xx_err_t
  */
-cc3xx_err_t cc3xx_drbg_hash_uninit(struct cc3xx_drbg_hash_state_t *state);
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_uninit(struct cc3xx_drbg_hash_state_t *state);
 
 #ifdef __cplusplus
 }

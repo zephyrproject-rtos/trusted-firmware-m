@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,7 +20,7 @@
 #include "RTE_Device.h"
 #include "flash_device_definition.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 #if (RTE_FLASH0)
 

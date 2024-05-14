@@ -1,14 +1,12 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0076 NEW)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(platform_s STATIC)
 add_library(platform_region_defs INTERFACE)
@@ -29,6 +27,9 @@ if (TFM_PARTITION_CRYPTO)
 endif()
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE PATH "Path to platform directory")
+
+# Skip "up-to-date" prints to avoid flooding the build output. Just print "installing"
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
@@ -52,7 +53,6 @@ target_compile_options(cmsis_stack_override
 target_include_directories(platform_common_interface
     INTERFACE
         ext
-        ext/cmsis
         ext/common
         ext/driver
         include
@@ -81,6 +81,8 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
         $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:ext/common/provisioning.c>
         $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
+        $<$<BOOL:${TFM_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+        ./ext/common/tfm_fatal_error.c
 )
 
 # If this is not added to the tfm_s it will not correctly override the weak
@@ -97,8 +99,8 @@ target_link_libraries(platform_s
         platform_region_defs
         tfm_fih_headers
         cmsis_stack_override
+        cmsis
     PRIVATE
-        psa_interface
         tfm_config
         tfm_spm_defs # For tfm_spm_log.h
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:platform_crypto_keys>
@@ -106,6 +108,7 @@ target_link_libraries(platform_s
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:tfm_attestation_defs>
         $<$<NOT:$<STREQUAL:${TFM_FIH_PROFILE},OFF>>:tfm_fih>
+        psa_crypto_library_config
 )
 
 target_compile_definitions(platform_s
@@ -123,6 +126,8 @@ target_compile_definitions(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
+        $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},"TFM_SPM_LOG_LEVEL_SILENCE">>>:LOG_FATAL_ERRORS>
+        $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},"TFM_SPM_LOG_LEVEL_SILENCE">>>:LOG_NONFATAL_ERRORS>
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
@@ -132,6 +137,7 @@ target_compile_definitions(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CP_FLAG}
+        $<$<BOOL:${TFM_SANITIZE}>:-fsanitize=${TFM_SANITIZE}>
 )
 
 #========================= Platform Crypto Keys ===============================#
@@ -159,7 +165,6 @@ if(TFM_PARTITION_CRYPTO)
 
     target_compile_definitions(platform_crypto_keys
         PRIVATE
-            MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
             $<$<BOOL:${TEST_S_ATTESTATION}>:TEST_S_ATTESTATION>
@@ -190,6 +195,8 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+            $<$<BOOL:${BL2_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+            ./ext/common/tfm_fatal_error.c
     )
 
     target_link_libraries(platform_bl2
@@ -197,6 +204,7 @@ if(BL2)
             platform_common_interface
             platform_region_defs
             cmsis_stack_override
+            cmsis
         PRIVATE
             bl2_hal
             mcuboot_config
@@ -217,11 +225,14 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${MCUBOOT_LOG_LEVEL}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${MCUBOOT_LOG_LEVEL}>>:LOG_NONFATAL_ERRORS>
     )
 
     target_compile_options(platform_bl2
         PUBLIC
             ${BL2_COMPILER_CP_FLAG}
+            $<$<BOOL:${BL2_SANITIZE}>:-fsanitize=${BL2_SANITIZE}>
     )
 endif()
 
@@ -232,7 +243,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         INTERFACE
             .
             include
-            ext/cmsis
             ext/driver
     )
 
@@ -241,6 +251,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
             platform_common_interface
             cmsis_stack_override
+            cmsis
     )
 
     target_compile_definitions(platform_bl1_1_interface
@@ -255,6 +266,19 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
             $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_NONFATAL_ERRORS>
+    )
+
+    target_compile_options(platform_bl1_1
+        PUBLIC
+            $<$<BOOL:${BL1_1_SANITIZE}>:-fsanitize=${BL1_1_SANITIZE}>
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(platform_bl1_1
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
     )
 
     target_sources(platform_bl1_1
@@ -263,6 +287,8 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             ext/common/uart_stdout.c
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+            $<$<OR:$<BOOL:${BL1_1_SANITIZE}>,$<BOOL:${TFM_BL1_2_SANITIZE}>>:ext/common/tfm_sanitize_handlers.c>
+            ./ext/common/tfm_fatal_error.c
     )
 
     target_link_libraries(platform_bl1_1
@@ -283,7 +309,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         PRIVATE
             .
             include
-            ext/cmsis
             ext/driver
     )
 
@@ -292,6 +317,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
             platform_common_interface
             cmsis_stack_override
+            cmsis
     )
 
     target_compile_definitions(platform_bl1_2
@@ -306,6 +332,8 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
             $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
+            $<$<AND:$<BOOL:${TFM_LOG_FATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_FATAL_ERRORS>
+            $<$<AND:$<BOOL:${TFM_LOG_NONFATAL_ERRORS}>,$<BOOL:${TFM_BL1_LOGGING}>>:LOG_NONFATAL_ERRORS>
     )
 
     target_sources(platform_bl1_2
@@ -326,9 +354,25 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
             bl1_1_shared_lib_interface
     )
+
+    target_compile_options(platform_bl1_2
+        PUBLIC
+            $<$<BOOL:${BL1_2_SANITIZE}>:-fsanitize=${BL1_2_SANITIZE}>
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(platform_bl1_2
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
 endif()
 
 #========================= Platform region defs ===============================#
+
+if(NOT ${MCUBOOT_SIGNATURE_TYPE} STREQUAL "")
+    string(REGEX MATCH "[0-9]*$" SIG_LEN ${MCUBOOT_SIGNATURE_TYPE})
+    string(REGEX MATCH "^[A-Z]*" SIG_TYPE ${MCUBOOT_SIGNATURE_TYPE})
+endif()
 
 #TODO maybe just link the other platforms to this
 target_compile_definitions(platform_region_defs
@@ -343,13 +387,17 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
-        $<$<BOOL:${BL2}>:MCUBOOT_SIGNATURE_TYPE=${MCUBOOT_SIGNATURE_TYPE}>
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
+        $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA>
+        $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${SIG_LEN}>
         $<$<STREQUAL:${SIG_TYPE},EC>:MCUBOOT_SIGN_EC${SIG_LEN}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
         $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:ENABLE_HEAP>
         PLATFORM_NS_NV_COUNTERS=${TFM_NS_NV_COUNTER_AMOUNT}
+        $<$<BOOL:${TFM_HALT_ON_FATAL_ERRORS}>:HALT_ON_FATAL_ERROR>
+        $<$<BOOL:${TFM_LOG_ERR_FILE_AND_LINE}>:FATAL_ERR_LOG_FILE_AND_LINE>
 )
 
 target_include_directories(platform_region_defs

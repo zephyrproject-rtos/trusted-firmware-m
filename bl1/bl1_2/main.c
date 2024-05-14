@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,9 @@
 #include "crypto.h"
 #include "otp.h"
 #include "boot_hal.h"
+#ifdef TFM_MEASURED_BOOT_API
 #include "boot_measurement.h"
+#endif /* TFM_MEASURED_BOOT_API */
 #include "psa/crypto.h"
 #include "uart_stdout.h"
 #include "fih.h"
@@ -141,7 +143,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     FIH_RET(fih_rc);
 }
 
-static fih_int validate_image_at_addr(struct bl1_2_image_t *image)
+fih_int validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
@@ -169,7 +171,7 @@ static fih_int validate_image_at_addr(struct bl1_2_image_t *image)
     FIH_RET(FIH_SUCCESS);
 }
 
-static fih_int copy_and_decrypt_image(uint32_t image_id)
+fih_int copy_and_decrypt_image(uint32_t image_id)
 {
     int rc;
     struct bl1_2_image_t *image_to_decrypt;
@@ -184,7 +186,7 @@ static fih_int copy_and_decrypt_image(uint32_t image_id)
      * invocation calls through to a crypto accelerator with a DMA, and slightly
      * faster otherwise.
      */
-    image_to_decrypt = (struct bl1_2_image_t *)(FLASH_BASE_ADDRESS +
+    image_to_decrypt = (struct bl1_2_image_t *)(FLASH_BL1_BASE_ADDRESS +
                        bl1_image_get_flash_offset(image_id));
 
     /* Copy everything that isn't encrypted, to prevent TOCTOU attacks and
@@ -262,7 +264,9 @@ static fih_int validate_image(uint32_t image_id)
 
 int main(void)
 {
+    int rc;
     fih_int fih_rc = FIH_FAILURE;
+    fih_int recovery_succeeded = FIH_FAILURE;
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -284,15 +288,22 @@ int main(void)
         FIH_PANIC;
     }
 
-    BL1_LOG("[INF] Attempting to boot image 0\r\n");
-    FIH_CALL(validate_image, fih_rc, 0);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[INF] Attempting to boot image 1\r\n");
-        FIH_CALL(validate_image, fih_rc, 1);
+    do {
+        BL1_LOG("[INF] Attempting to boot image 0\r\n");
+        FIH_CALL(validate_image, fih_rc, 0);
+
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            FIH_PANIC;
+            BL1_LOG("[INF] Attempting to boot image 1\r\n");
+            FIH_CALL(validate_image, fih_rc, 1);
         }
-    }
+
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
+            if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
+                FIH_PANIC;
+            }
+        }
+    } while (fih_not_eq(fih_rc, FIH_SUCCESS));
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

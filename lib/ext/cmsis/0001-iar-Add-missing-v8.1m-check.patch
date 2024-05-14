@@ -1,0 +1,29 @@
+From 7aa79a3f45bcf1ef34181b96245a9cb1fc5ae95e Mon Sep 17 00:00:00 2001
+From: Dávid Házi <david.hazi@arm.com>
+Date: Thu, 25 Apr 2024 09:53:10 +0200
+Subject: [PATCH] iar: Add missing v8.1m check
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Dávid Házi <david.hazi@arm.com>
+---
+ CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h b/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h
+index 4fe09f20..c726cecf 100644
+--- a/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h
++++ b/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h
+@@ -77,7 +77,7 @@
+
+ /* Alternativ core deduction for older ICCARM's */
+ #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && !defined(__ARM_ARCH_7EM__) && \
+-    !defined(__ARM_ARCH_8M_BASE__) && !defined(__ARM_ARCH_8M_MAIN__)
++    !defined(__ARM_ARCH_8M_BASE__) && !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
+   #if defined(__ARM6M__) && (__CORE__ == __ARM6M__)
+     #define __ARM_ARCH_6M__ 1
+   #elif defined(__ARM7M__) && (__CORE__ == __ARM7M__)
+--
+2.40.1
+

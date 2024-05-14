@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -20,7 +20,7 @@ from subprocess import check_output
 # -- Project information -----------------------------------------------------
 
 project = 'Trusted Firmware-M'
-copyright = '2017-2022, ARM CE-OSS'
+copyright = '2017-2024, ARM CE-OSS'
 author = 'ARM CE-OSS'
 title = 'User Guide'
 
@@ -60,6 +60,10 @@ intersphinx_mapping = {
 }
 
 intersphinx_disabled_reftypes = ["*"]
+
+#PlantUML
+if 'PLANTUML_JAR_PATH' in os.environ:
+    plantuml = 'java -jar ' + os.environ['PLANTUML_JAR_PATH']
 
 # Make auto section labels generated be prefixed with file name.
 autosectionlabel_prefix_document=True

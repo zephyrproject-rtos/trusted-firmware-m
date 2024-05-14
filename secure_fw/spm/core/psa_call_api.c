@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -15,8 +15,6 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_psa_call_pack.h"
 #include "utilities.h"
-
-extern struct service_t *stateless_services_ref_tbl[];
 
 psa_status_t spm_associate_call_params(struct connection_t *p_connection,
                                        uint32_t            ctrl_param,
@@ -106,6 +104,10 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
         ns_access = TFM_HAL_ACCESS_NS;
     }
 
+    /* Make sure in_size and out_size arrays in the msg structure are cleared first */
+    spm_memset(p_connection->msg.in_size, 0, sizeof(p_connection->msg.in_size));
+    spm_memset(p_connection->msg.out_size, 0, sizeof(p_connection->msg.out_size));
+
     /*
      * For client input vector, it is a PROGRAMMER ERROR if the provided payload
      * memory reference was invalid or not readable.
@@ -163,7 +165,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 
     client_id = tfm_spm_get_client_id(ns_caller);
 
-    status = spm_get_connection(&p_connection, handle, client_id);
+    status = spm_get_idle_connection(&p_connection, handle, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }

@@ -1,13 +1,19 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-add_library(cc312_rom STATIC)
+set(CC3XX_TARGET_NAME ${CC3XX_TARGET_PREFIX}cc312_rom)
 
-target_sources(cc312_rom
+add_library(${CC3XX_TARGET_NAME} STATIC)
+
+if (NOT DEFINED CC3XX_PLATFORM_INTERFACE)
+    message(FATAL "When building cc312-rom, the platform dependency must be specified")
+endif()
+
+target_sources(${CC3XX_TARGET_NAME}
     PRIVATE
         ./cc3xx_lcs.c
         ./cc3xx_otp.c
@@ -27,14 +33,32 @@ target_sources(cc312_rom
         ./cc3xx_drbg_hash.c
         ./cc3xx_drbg_hmac.c
         ./cc3xx_drbg.c
+        ./cc3xx_ecdsa.c
+        ./cc3xx_ec.c
+        ./cc3xx_ec_curve_data.c
+        ./cc3xx_ec_weierstrass.c
+        ./cc3xx_ec_projective_point.c
+        ./cc3xx_ecdh.c
 )
 
-target_include_directories(cc312_rom
+# This file is the performance-limit for ECDSA, so should be compiled with the
+# highest possible optimizations for speed, even when we are optimizing for
+# code size.
+string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
+if (${BUILD_TYPE_LOWER} STREQUAL "release" OR ${BUILD_TYPE_LOWER} STREQUAL "minsizerel")
+    set_source_files_properties(./cc3xx_pka.c
+        PROPERTIES COMPILE_FLAGS -Ofast
+    )
+endif()
+
+target_include_directories(${CC3XX_TARGET_NAME}
     PUBLIC
         .
 )
 
-target_link_libraries(cc312_rom
+target_link_libraries(${CC3XX_TARGET_NAME}
     PRIVATE
-        platform_bl1_1_interface
+        ${CC3XX_PLATFORM_INTERFACE}
 )
+
+add_subdirectory(psa_driver_api)

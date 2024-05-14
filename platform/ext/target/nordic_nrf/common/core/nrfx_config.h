@@ -35,10 +35,20 @@
 #include <RTE_Device.h>
 
 #if RTE_FLASH0
+
+#include <nrf.h>
+
+#if defined(NRF_NVMC_S)
 #define NRFX_NVMC_ENABLED 1
+#elif defined(NRF_RRAMC_S)
+#define NRFX_RRAMC_ENABLED 1
+#else
+#error "Unrecognized platform"
 #endif
 
-#if RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3
+#endif /* RTE_FLASH0 */
+
+#if RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3 || RTE_USART20 || RTE_USART22
 #define NRFX_UARTE_ENABLED 1
 #endif
 #if RTE_USART0
@@ -52,6 +62,14 @@
 #endif
 #if RTE_USART3
 #define NRFX_UARTE3_ENABLED 1
+#endif
+
+// TODO: NCSDK-25009: Moonlight: Make it possible to use different UARTS with TF-M
+#if RTE_USART20
+#define NRFX_UARTE20_ENABLED 1
+#endif
+#if RTE_USART22
+#define NRFX_UARTE22_ENABLED 1
 #endif
 
 /*
@@ -72,6 +90,8 @@
     #include <nrfx_config_nrf5340_application.h>
 #elif defined(NRF91_SERIES)
     #include <nrfx_config_nrf91.h>
+#elif defined(NRF54L15_ENGA_XXAA)
+    #include <nrfx_config_nrf54l15_application.h>
 #else
     #error "Unknown device."
 #endif

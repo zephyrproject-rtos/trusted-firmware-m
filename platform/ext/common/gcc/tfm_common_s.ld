@@ -1,6 +1,6 @@
 ;/*
-; * Copyright (c) 2009-2023 Arm Limited
-; * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+; * Copyright (c) 2009-2024 Arm Limited
+; * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
 ; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,7 @@
 MEMORY
 {
   FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
-  RAM      (rwx) : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
+  RAM      (rw)  : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
 #if defined(S_RAM_CODE_START)
   CODE_RAM (rwx) : ORIGIN = S_RAM_CODE_START, LENGTH = S_RAM_CODE_SIZE
 #endif
@@ -65,13 +65,13 @@ MEMORY
 
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
+    /* Start address of the code. */
+    Image$$PT_RO_START$$Base = ADDR(.TFM_VECTORS);
+
     .TFM_VECTORS : ALIGN(4)
     {
         __vectors_start__ = .;
@@ -79,6 +79,8 @@ SECTIONS
         . = ALIGN(4);
         __vectors_end__ = .;
     } > FLASH
+
+    ASSERT(__vectors_start__ != __vectors_end__, ".vectors should not be empty")
 
 #if defined(S_CODE_VECTOR_TABLE_SIZE)
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
@@ -173,8 +175,28 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    .ER_TFM_CODE ALIGN(4) :
+    .ER_TFM_CODE ALIGN(4) (READONLY) :
     {
+        . = ALIGN(4);
+        /* preinit data */
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP(*(.preinit_array))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+
+        . = ALIGN(4);
+        /* init data */
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array))
+        PROVIDE_HIDDEN (__init_array_end = .);
+
+        . = ALIGN(4);
+        /* finit data */
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(.fini_array))
+        PROVIDE_HIDDEN (__fini_array_end = .);
+
         /* .copy.table */
         . = ALIGN(4);
         __copy_table_start__ = .;
@@ -229,7 +251,6 @@ SECTIONS
 
     .TFM_UNPRIV_CODE ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT) :
     {
-        *(SFN)
         *(SORT_BY_ALIGNMENT(.text*))
 
         KEEP(*(.init))
@@ -260,6 +281,10 @@ SECTIONS
 #if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
     VENEERS()
 #endif
+
+    /* Position tag */
+    . = ALIGN(TFM_LINKER_PT_RO_ALIGNMENT);
+    Image$$PT_RO_END$$Base = .;
 
     /**** Base address of secure data area */
     .tfm_secure_data_start :
@@ -444,26 +469,6 @@ SECTIONS
 #endif
     {
         *(SORT_BY_ALIGNMENT(.data*))
-
-        . = ALIGN(4);
-        /* preinit data */
-        PROVIDE_HIDDEN (__preinit_array_start = .);
-        KEEP(*(.preinit_array))
-        PROVIDE_HIDDEN (__preinit_array_end = .);
-
-        . = ALIGN(4);
-        /* init data */
-        PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        PROVIDE_HIDDEN (__init_array_end = .);
-
-        . = ALIGN(4);
-        /* finit data */
-        PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array))
-        PROVIDE_HIDDEN (__fini_array_end = .);
 
         KEEP(*(.jcr*))
         . = ALIGN(4);

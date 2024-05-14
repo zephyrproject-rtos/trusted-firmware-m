@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,22 +28,26 @@
 #include "load/partition_defs.h"
 #include "psa/client.h"
 
+#define INVALID_PSP_VALUE 0xFFFFFFFFU
+
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_number,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
 #if TFM_ISOLATION_LEVEL > 1
+
+extern uintptr_t spm_boundary;
+
 /*
  * TODO: To be updated after secure context management is going to implemented.
  * The variables are used to save PSP, PSPLimit and the EXC_RETURN payload because
  * they will be changed when preparing to Thread mode to run the PSA API functions.
  * Later they will be restored when returning from the functions.
  */
-static uint32_t saved_psp;
+static uint32_t saved_psp = INVALID_PSP_VALUE;
 static uint32_t saved_psp_limit;
 static uint32_t saved_exc_return;
-static uint32_t saved_control;
 
 typedef psa_status_t (*psa_api_svc_func_t)(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 
@@ -73,11 +77,24 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
     (psa_api_svc_func_t)tfm_spm_partition_psa_reset_signal,
     (psa_api_svc_func_t)tfm_spm_agent_psa_call,
     (psa_api_svc_func_t)tfm_spm_agent_psa_connect,
+    (psa_api_svc_func_t)tfm_spm_agent_psa_close,
 };
 
 static uint32_t thread_mode_spm_return(uint32_t result)
 {
+    fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
+    struct partition_t *p_part_next = GET_CURRENT_COMPONENT();
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
+
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_bool, spm_boundary, p_part_next->boundary);
+    if (fih_not_eq(fih_bool, fih_int_encode(false))) {
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                 p_part_next->p_ldinf, p_part_next->boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
+    }
 
     backend_abi_leaving_spm(result);
 
@@ -86,8 +103,8 @@ static uint32_t thread_mode_spm_return(uint32_t result)
     tfm_arch_set_psplim(saved_psp_limit);
     __set_PSP(saved_psp);
 
-    /* Restore the previous CONTROL register value */
-    __set_CONTROL(saved_control);
+    /* Invalidate saved_psp */
+    saved_psp = INVALID_PSP_VALUE;
 
     return saved_exc_return;
 }
@@ -95,39 +112,41 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 {
     AAPCS_DUAL_U32_T sp_info;
-    struct context_ctrl_t      ctxctl;
     struct tfm_state_context_t *p_statctx;
     uint32_t sp = __get_PSP();
     uint32_t sp_limit = tfm_arch_get_psplim();
+    const uint32_t stack_alloc_size = (sizeof(*p_statctx) + 7UL) & ~0x7UL;
 
     saved_psp       = sp;
     saved_psp_limit = sp_limit;
 
-    ctxctl.sp       = sp;
-    ctxctl.sp_limit = sp_limit;
-
     sp_info.u64_val = backend_abi_entering_spm();
     /* SPM SP is saved in R0 */
     if (sp_info.u32_regs.r0 != 0) {
-        ctxctl.sp       = sp_info.u32_regs.r0;
-        ctxctl.sp_limit = sp_info.u32_regs.r1;
+        sp       = sp_info.u32_regs.r0;
+        sp_limit = sp_info.u32_regs.r1;
     }
 
-    ARCH_CTXCTRL_ALLOCATE_STACK(&ctxctl, sizeof(*p_statctx));
-    /* Check if enough space on stack */
-    if (ctxctl.sp < ctxctl.sp_limit) {
+    /* Check if there is enough space on stack. */
+    if ((sp_limit + stack_alloc_size) > sp) {
         tfm_core_panic();
     }
 
-    p_statctx = (struct tfm_state_context_t *)ARCH_CTXCTRL_ALLOCATED_PTR(&ctxctl);
+    /* Allocate memory for p_statctx on the stack. */
+    sp -= stack_alloc_size;
+
+    p_statctx = (struct tfm_state_context_t *)sp;
     ARCH_CTXCTRL_EXCRET_PATTERN(p_statctx, ctx[0], ctx[1], ctx[2], ctx[3],
                                 svc_func, tfm_svc_thread_mode_spm_return);
 
-    arch_update_process_sp(ctxctl.sp, ctxctl.sp_limit);
+    arch_update_process_sp(sp, sp_limit);
 }
 
 static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uint32_t exc_return)
 {
+    fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
+    struct partition_t *p_curr_sp;
     psa_api_svc_func_t svc_func = NULL;
     uint8_t svc_idx = svc_number & TFM_SVC_NUM_INDEX_MSK;
 
@@ -151,23 +170,36 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 
     saved_exc_return = exc_return;
 
-    init_spm_func_context(svc_func, ctx);
+    p_curr_sp = GET_CURRENT_COMPONENT();
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_bool, p_curr_sp->boundary, spm_boundary);
+    if (fih_not_eq(fih_bool, fih_int_encode(false))) {
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc, NULL, spm_boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
+    }
 
-    /* svc_func can be executed in privileged Thread mode. Save the current
-     * CONTROL register value so that it can be restored afterwards.
-     */
-    saved_control = __get_CONTROL();
-    __set_CONTROL_nPRIV(0);
+    init_spm_func_context(svc_func, ctx);
 
     ctx[0] = PSA_SUCCESS;
 
     return EXC_RETURN_THREAD_PSP;
+}
+
+bool tfm_svc_thread_mode_spm_active(void)
+{
+    return saved_psp != INVALID_PSP_VALUE;
 }
 #endif
 
 static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return,
                                         uint32_t *svc_args, uint32_t *msp)
 {
+#if TFM_SP_LOG_RAW_ENABLED
+    struct partition_t *curr_partition;
+    fih_int fih_rc = FIH_FAILURE;
+#endif
+
     switch (svc_number) {
     case TFM_SVC_SPM_INIT:
         exc_return = tfm_spm_init();
@@ -189,7 +221,17 @@ static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return
 #endif
 #if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0], svc_args[1]);
+        /* Protect PRoT data from unauthorised access from ARoT partition.
+         * This fixes the TFMV-7 vulnerability
+         */
+        curr_partition = GET_CURRENT_COMPONENT();
+        FIH_CALL(tfm_hal_memory_check, fih_rc, curr_partition->boundary, (uintptr_t)svc_args[0],
+                svc_args[1], TFM_HAL_ACCESS_READABLE);
+        if (fih_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+            svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0], svc_args[1]);
+        } else {
+            tfm_core_panic();
+        }
         break;
 #endif
 #if TFM_ISOLATION_LEVEL > 1
@@ -273,11 +315,4 @@ __attribute__((naked))
 void tfm_svc_thread_mode_spm_return(psa_status_t result)
 {
     __ASM volatile("SVC "M2S(TFM_SVC_THREAD_MODE_SPM_RETURN)"           \n");
-}
-
-__attribute__ ((naked)) void tfm_core_handler_mode(void)
-{
-    __ASM volatile("SVC %0           \n"
-                   "BX LR            \n"
-                   : : "I" (TFM_SVC_SPM_INIT));
 }

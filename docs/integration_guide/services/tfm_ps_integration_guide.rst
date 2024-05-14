@@ -27,9 +27,10 @@ The design addresses the following high level requirements as well:
 - **Access Authentication** - Mechanism to establish requester's identity (a
   non-secure entity, secure entity, or a remote server).
 
-- **Integrity** - Resistant to tampering by either the normal users of a product,
-  package, or system or others with physical access to it. If the content of the
-  protected storage is changed maliciously, the service is able to detect it.
+- **Integrity** - Resistant to tampering by either the normal users of a
+  product, package, or system or others with physical access to it. If the
+  content of the protected storage is changed maliciously, the service is able
+  to detect it.
 
 - **Reliability** - Resistant to power failure scenarios and incomplete write
   cycles.
@@ -53,8 +54,8 @@ Current PS Service Limitations
 - **Fragmentation** - The current design does not support fragmentation, as an
   asset is stored in a contiguous space in a block.
   Each block can potentially store multiple assets.
-  A delete operation implicitly moves all the assets towards the top of the block
-  to avoid fragmentation within block. However, this may also result in
+  A delete operation implicitly moves all the assets towards the top of the
+  block to avoid fragmentation within block. However, this may also result in
   unutilized space at the end of each block.
 
 - **Non-hierarchical storage model** - The current design uses a
@@ -142,6 +143,9 @@ Core Files
 - ``ps_utils.c`` - Contains common and basic functionalities used across the
   PS service code.
 
+- ``ps_filesystem_interface.c`` - Contains the interface to directly use ITS
+  implementation of services.
+
 Flash Filesystem and Flash Interfaces
 =====================================
 
@@ -150,14 +154,15 @@ Internal Trusted Storage service directory. The way PS service uses
 them depends on the config option ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE``.
 
 When TF-M Internal trusted storage service is active (i.e.
-``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` = ON), all file system and storage interfaces
-are built as part of ITS service library. Thus, the PS service stores encrypted, authenticated
-objects by making service calls to the ITS service.
+``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` = ON), all file system and storage
+interfaces are built as part of ITS service library. Thus, the PS service stores
+encrypted, authenticated objects by making service calls to the ITS service.
 
 When TF-M Internal trusted storage service is disabled (i.e.
-``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` = OFF), all file system and storage interfaces
-are built as part of PS service library. Thus, the PS service stores encrypted, authenticated
-objects by making standard function calls to the file system within its own partition code.
+``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` = OFF), all file system and storage
+interfaces are built as part of PS service library. Thus, the PS service stores
+encrypted, authenticated objects by making standard function calls to the file
+system within its own partition code.
 
 The ITS filesystem and flash interfaces and their implementation can be found in
 ``secure_fw/partitions/internal_trusted_storage/flash_fs`` and
@@ -344,9 +349,9 @@ definitions is:
   authenticated encryption in Protected Storage.
 
   .. Note::
-    For GCM/CCM it is essential that IV doesn't get repeated. If this flag is set to
-    ``PSA_ALG_GCM`` or ``PSA_ALG_CCM``, ``PS_ROLLBACK_PROTECTION`` must be enabled
-    to protect against IV rollback.
+    For GCM/CCM it is essential that IV doesn't get repeated. If this flag is
+    set to ``PSA_ALG_GCM`` or ``PSA_ALG_CCM``, ``PS_ROLLBACK_PROTECTION`` must
+    be enabled to protect against IV rollback.
 
 - ``PS_CREATE_FLASH_LAYOUT``- this flag indicates that it is required
   to create a PS flash layout. If this flag is set, PS service will
@@ -411,5 +416,5 @@ definitions is:
 
 --------------
 
-*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

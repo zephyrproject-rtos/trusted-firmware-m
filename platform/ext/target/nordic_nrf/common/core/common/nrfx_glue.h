@@ -32,7 +32,7 @@
 #ifndef NRFX_GLUE_H__
 #define NRFX_GLUE_H__
 
-#include <assert.h>
+#include <utilities.h>
 
 #include <soc/nrfx_coredep.h>
 
@@ -59,7 +59,7 @@ extern "C" {
 #if defined(NDEBUG)
 #define NRFX_ASSERT(expression)  if (0 && (expression)) {}
 #else
-#define NRFX_ASSERT(expression)  assert(expression)
+#define NRFX_ASSERT(expression)  SPM_ASSERT(expression)
 #endif
 
 /**

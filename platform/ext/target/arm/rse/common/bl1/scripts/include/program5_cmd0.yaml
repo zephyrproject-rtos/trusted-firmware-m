@@ -1,0 +1,77 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2023, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+# This command loads the SAM configuration from OTP into the SAM registers
+# (FIXME which ones?)
+
+Header:
+  - REGCLEAR: 0
+  - Reserved: 0
+  - INTREN: 0
+  - CTRL: 1
+  - SRCADDR: 1
+  - SRCADDRHI: 0
+  - DESADDR: 1
+  - DESADDRHI: 0
+  - XSIZE: 1
+  - XSIZEHI: 0
+  - SRCTRANSCFG: 1
+  - DESTRANSCFG: 1
+  - XADDRINC: 1
+  - YADDRSTRIDE: 0
+  - FILLVAL: 0
+  - YSIZE: 0
+  - TMPLTCFG: 0
+  - SRCTMPLT: 0
+  - DESTMPLT: 0
+  - SRCTRIGINCFG: 0
+  - DESTRIGINCFG: 0
+  - TRIGOUTCFG: 0
+  - GPOEN0: 0
+  - Reserved: 0
+  - GPOVAL0: 1
+  - Reserved: 0
+  - STREAMINTCFG: 0
+  - Reserved: 0
+  - LINKATTR: 0
+  - AUTOCFG: 0
+  - LINKADDR: 1
+  - LINKADDRHI: 0
+CTRL: 0x10000202
+SRCADDR: "program5_cmd0_exec_addr + program5_cmd0_size - 0x60"
+DESADDR: "sam_base_address + 0x14"
+XSIZE: 0x00180018
+SRCTRANSCFG: 0x00000000
+DESTRANSCFG: 0x00000000
+XADDRINC: 0x00010001
+GPOVAL0: 0x00000005
+LINKADDR: "program5_cmd1_exec_addr"
+
+SAMEM0: 0xFFFFFFFF
+SAMEM1: 0x0000001F
+SAMIM0: 0xF99FFFFF
+SAMIM1: 0x0000001F
+SAMRRLS0: 0x88888828
+SAMRRLS1: 0x88888888
+SAMRRLS2: 0x80000088
+SAMRRLS3: 0x88888008
+SAMRRLS4: 0x00088888
+SAMRRLS5: 0x00000000
+SAMRRLS6: 0x00000000
+SAMRRLS7: 0x00000000
+SAMEC0: 0x00000000
+SAMEC1: 0x00000000
+SAMEC2: 0x00000000
+SAMEC3: 0x00000000
+SAMEC4: 0x00000000
+SAMEC5: 0x00000000
+SAMEC6: 0x00000000
+SAMEC7: 0x00000000
+SAMECTIV: 0x00000000
+SAMWDCIV: 0x00000000
+SAMRL: 0x00000000
+SAMICV: 0x000001FC

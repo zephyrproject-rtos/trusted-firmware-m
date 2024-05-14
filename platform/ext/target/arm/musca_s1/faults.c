@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "utilities.h"
@@ -29,7 +29,7 @@ void C_MPC_Handler(void)
 
 __attribute__((naked)) void MPC_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_MPC_Handler           \n"
@@ -57,7 +57,7 @@ void C_PPC_Handler(void)
 
 __attribute__((naked)) void PPC_Handler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_PPC_Handler           \n"

@@ -1,11 +1,12 @@
 /*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <platform/include/tfm_platform_system.h>
-#include <cmsis.h>
+#include <tfm_hal_device_header.h>
 #include <stdio.h>
 #include <tfm_ioctl_core_api.h>
 #include <string.h>

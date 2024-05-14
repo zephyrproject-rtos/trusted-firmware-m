@@ -237,11 +237,6 @@ function(fetch_remote_library)
         set(FETCHCONTENT_BASE_DIR "${ARG_LIB_BASE_DIR}")
     endif()
 
-    # Set to not download submodules if that option is available
-    if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
-        cmake_policy(SET CMP0097 NEW)
-    endif()
-
     if ("${${ARG_LIB_SOURCE_PATH_VAR}}" STREQUAL "DOWNLOAD")
         set(SOURCE_PATH_IS_DOWNLOAD TRUE)
         # Process arguments which can be an empty string

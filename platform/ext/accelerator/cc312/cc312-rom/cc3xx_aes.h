@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -127,11 +127,11 @@ struct cc3xx_aes_state_t {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
-                           cc3xx_aes_mode_t mode, cc3xx_aes_key_id_t key_id,
-                           const uint32_t *key, cc3xx_aes_keysize_t key_size,
-                           const uint32_t *iv, size_t iv_len);
-
+cc3xx_err_t cc3xx_lowlevel_aes_init(
+    cc3xx_aes_direction_t direction,
+    cc3xx_aes_mode_t mode, cc3xx_aes_key_id_t key_id,
+    const uint32_t *key, cc3xx_aes_keysize_t key_size,
+    const uint32_t *iv, size_t iv_len);
 
 /**
  * @brief                        Get the current state of the AES operation.
@@ -139,7 +139,7 @@ cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
 
  * @param[out] state            The cc3xx_aes_state_t to write the state into.
  */
-void cc3xx_aes_get_state(struct cc3xx_aes_state_t *state);
+void cc3xx_lowlevel_aes_get_state(struct cc3xx_aes_state_t *state);
 /**
  * @brief                        Set the current state of the AES operation.
  *                               Allows for restartable AES operations.
@@ -152,7 +152,7 @@ void cc3xx_aes_get_state(struct cc3xx_aes_state_t *state);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_aes_set_state(const struct cc3xx_aes_state_t *state);
+cc3xx_err_t cc3xx_lowlevel_aes_set_state(const struct cc3xx_aes_state_t *state);
 
 /**
  * @brief                        Set the length of the tag produced or verfied
@@ -162,7 +162,7 @@ cc3xx_err_t cc3xx_aes_set_state(const struct cc3xx_aes_state_t *state);
  *
  * @param[in]  tag_len           The length of the tag.
  */
-void cc3xx_aes_set_tag_len(uint32_t tag_len);
+void cc3xx_lowlevel_aes_set_tag_len(uint32_t tag_len);
 
 /**
  * @brief                        Set the length of the data that will be input.
@@ -173,7 +173,7 @@ void cc3xx_aes_set_tag_len(uint32_t tag_len);
  * @param[in]  to_auth_len       How many bytes of data will be authenticated,
  *                               but not encrypted.
  */
-void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
+void cc3xx_lowlevel_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
 
 /**
  * @brief                        Get the amount of bytes that have been output
@@ -183,7 +183,7 @@ void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
  *                               input that has been submitted, due to DMA
  *                               buffering)
  */
-size_t cc3xx_aes_get_current_output_size(void);
+size_t cc3xx_lowlevel_aes_get_current_output_size(void);
 
 /**
  * @brief                        Set the buffer that the AES engine will output
@@ -195,7 +195,7 @@ size_t cc3xx_aes_get_current_output_size(void);
  *                               cc3xx_aes_update, that function will fail with
  *                               an error.
  */
-void cc3xx_aes_set_output_buffer(uint8_t *out, size_t out_len);
+void cc3xx_lowlevel_aes_set_output_buffer(uint8_t *out, size_t out_len);
 
 /**
  * @brief                        Input data to be encrypted/decrypted into an
@@ -204,7 +204,7 @@ void cc3xx_aes_set_output_buffer(uint8_t *out, size_t out_len);
  * @param[in]  in                A pointer to the data to be input.
  * @param[in]  in_len            The size of the data to be input.
  */
-cc3xx_err_t cc3xx_aes_update(const uint8_t* in, size_t in_len);
+cc3xx_err_t cc3xx_lowlevel_aes_update(const uint8_t* in, size_t in_len);
 
 /**
  * @brief                        Input data to be authenticated, but not
@@ -221,7 +221,7 @@ cc3xx_err_t cc3xx_aes_update(const uint8_t* in, size_t in_len);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-void cc3xx_aes_update_authed_data(const uint8_t* in, size_t in_len);
+void cc3xx_lowlevel_aes_update_authed_data(const uint8_t* in, size_t in_len);
 
 /**
  * @brief                        Finish an AES operation. Calling this will
@@ -238,7 +238,7 @@ void cc3xx_aes_update_authed_data(const uint8_t* in, size_t in_len);
  * @return                       CC3XX_ERR_SUCCESS on success / tag comparison
  *                               succeeded, another cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_aes_finish(uint32_t *tag, size_t *size);
+cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size);
 
 /**
  * @brief                       Uninitialize the AES engine.
@@ -247,7 +247,7 @@ cc3xx_err_t cc3xx_aes_finish(uint32_t *tag, size_t *size);
  *                              on an error.
  *
  */
-void cc3xx_aes_uninit(void);
+void cc3xx_lowlevel_aes_uninit(void);
 
 #ifdef __cplusplus
 }

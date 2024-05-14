@@ -1,0 +1,160 @@
+*************
+Version 2.1.0
+*************
+
+New major features
+==================
+
+  - TF-M aligns the Crypto service to the same PSA Crypto headers used by the Mbed TLS 3.6.0 reference implementation
+
+    - Refer to the :doc:`TF-M Crypto service design document </design_docs/services/tfm_crypto_design>` for a detailed
+      description of the firmware architecture of the service.
+
+  - Initial support for on-core and off-core clients on Hybrid platforms (A-profile + M-profile or M-profile + M-profile)
+    using solution 1 as described in [1]_, [2]_. The functionality is still under active development.
+  - P256-M [3]_ component is enabled on the BL2 stage for image signature verification based on ECDSA.
+  - MCUboot upgrade to v2.1.0.
+  - Mbed TLS upgrade to v3.6.0.
+  - BL2 now provides a `thin` PSA Crypto core layer when ``MCUBOOT_USE_PSA_CRYPTO=ON`` and can use builtin
+    keys when ECDSA based signature verification is selected with ``MCUBOOT_SIGNATURE_TYPE="EC-P256"``.
+
+New security advisories
+=======================
+
+A new security vulnerability has been fixed in v2.1.0.
+Refer to :doc:`TFMV-7 </security/security_advisories/debug_log_vulnerability>` for more details.
+The mitigation is included in this release.
+
+New platforms supported
+=======================
+
+ - :doc:`Alcor (AN557). </platform/armchina/mps3/alcor/README>`
+ - :doc:`Corstone-315. </platform/arm/mps4/corstone315/README>`
+
+Tested platforms
+================
+
+The following platforms are successfully tested in this release.
+
+- **Arm**
+
+  - AN519
+  - AN521
+  - AN555
+  - Corstone-300
+  - Corstone-310
+  - Corstone-315
+  - Corstone-1000
+  - Musca-B1
+  - Musca-S1
+
+- **ArmChina**
+
+  - Alcor (AN557)
+
+- **STM**
+
+  - NUCLEO-L552ZE-Q
+  - STM32H573idk
+
+- **Infineon/Cypress**
+
+  - PSoC 64
+
+- **NXP**
+
+  - LPCXpresso55S69
+
+Reference memory footprint
+==========================
+
+All measurements below are made for *AN521* platform, built `TF-Mv2.1.0-RC2
+<https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/tag/?h=TF-Mv2.1.0-RC2>`_
+on Windows 10 using Armclang v6.18 and build type MinSizeRel.
+
+All modules are measured in bytes. Some minor modules are not shown in the table below.
+
+.. note::
+
+  Profile `Medium-ARoT-less` built with disabled Firmware Update service to align with other
+  TF-M Profiles.
+
++----------------------+---------------+---------------+---------------+---------------+---------------+
+| Module               |      Base     |     Small     |   ARoT-less   |    Medium     |    Large      |
++                      +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|                      | Flash |  RAM  | Flash |  RAM  | Flash |  RAM  | Flash |  RAM  | Flash |  RAM  |
++======================+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
+|Generated             |112    |3184   |160    |3184   |160    |3184   |208    |3184   |272    |3184   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|Objects               |972    |1056   |1282   |5444   |1379   |6128   |1517   |1468   |1588   |1468   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|c_w.l                 |190    |0      |568    |0      |568    |0      |568    |0      |808    |0      |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|platform_s.a          |5142   |288    |5474   |288    |5826   |288    |6198   |288    |6328   |288    |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|spm.a                 |3640   |173    |4522   |173    |4012   |173    |6616   |1385   |6782   |1390   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|sprt.a                |274    |0      |1438   |0      |1284   |0      |2438   |4      |2418   |4      |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|mbedcrypto.a          |0      |0      |25588  |2108   |30104  |2104   |30104  |2104   |78012  |1988   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|PROT_attestation.a    |0      |0      |2341   |557    |2571   |1218   |2571   |3010   |2687   |3010   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|PROT_crypto.a         |0      |0      |3336   |2046   |3846   |16002  |3846   |22914  |4318   |25794  |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|PROT_its.a            |0      |0      |4830   |80     |4894   |112    |5064   |1988   |5068   |2468   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|PROT_platform.a       |0      |0      |0      |0      |486    |0      |526    |1280   |526    |1280   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|AROT_ps.a             |0      |0      |0      |0      |0      |0      |3280   |4364   |3280   |4364   |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|Padding               |34     |35     |113    |44     |114    |15     |120    |47     |171    |38     |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|platform_crypto_keys.a|0      |0      |246    |0      |252    |0      |252    |0      |252    |0      |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|qcbor.a               |0      |0      |854    |0      |854    |0      |854    |0      |854    |0      |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|crypto_service_p256m.a|0      |0      |0      |0      |3534   |0      |3534   |0      |0      |0      |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+|Total inc. Padding    |10364  |4736   |50752  |13924  |59884  |29224  |67696  |42036  |113364 |45276  |
++----------------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+
+Known issues
+============
+
+Some open issues are not fixed in this release.
+
+.. list-table::
+  :header-rows: 1
+
+  * - Descriptions
+    - Issue links
+  * - TF-M Kconfig is broken due to build split. It will be recovered in a future release.
+    - Not tracked
+  * - The message rhandle is overridden in the backend for ns_agent_mailbox. PSA ACK tests in IPC mode on platforms
+      using ns_agent_mailbox fail for this reason.
+    - Not tracked
+
+Issues fixed since v2.0.0
+-------------------------
+
+The following issues have been fixed since the v2.0.0 release.
+
+.. list-table::
+  :header-rows: 1
+
+  * - Descriptions
+    - Issue links
+  * - <None>
+    - <None>
+
+Reference
+=========
+
+.. [1] `TF-M Hybrid Platform Demo, TF-M tech forum 11-04-2024 <https://www.trustedfirmware.org/docs/hybrid_platform_demo.pdf>`_
+.. [2] `Trusted Firmware-M and Hybrid platforms, TF-M tech forum 14-09-2023 <https://www.trustedfirmware.org/docs/tech_forum_20230914_non_seucure_clients.pdf>`_
+.. [3] `P256-M <https://github.com/mpg/p256-m>`_
+
+--------------
+
+*Copyright (c) 2024, Arm Limited. All rights reserved.*

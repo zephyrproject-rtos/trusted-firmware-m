@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022 Arm Limited
+ * Copyright (c) 2013-2024, Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "Driver_Flash.h"
 #include "low_level_flash.h"
 #include <string.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "flash_layout.h"
 #include "stm32hal.h"
 #include <stdio.h>

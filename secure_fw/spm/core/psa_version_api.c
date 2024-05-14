@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -19,7 +19,7 @@ uint32_t tfm_spm_client_psa_framework_version(void)
 
 uint32_t tfm_spm_client_psa_version(uint32_t sid)
 {
-    struct service_t *service;
+    const struct service_t *service;
     bool ns_caller = tfm_spm_is_ns_caller();
 
     /*

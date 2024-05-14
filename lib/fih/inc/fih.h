@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -108,7 +111,7 @@ extern "C" {
  * All ints are replaced with two int - the normal one and a backup which is
  * XORed with the mask.
  */
-typedef volatile struct {
+typedef struct {
     volatile int32_t val;
     volatile int32_t msk;
 } fih_int;
@@ -167,7 +170,7 @@ uint8_t fih_delay_random(void);
 
 /* Delaying logic, with randomness from a CSPRNG */
 __attribute__((always_inline)) inline
-void fih_delay(void)
+int fih_delay(void)
 {
     uint32_t i = 0;
     volatile uint32_t delay = FIH_NEGATIVE_VALUE;
@@ -188,27 +191,31 @@ void fih_delay(void)
     if (counter != delay) {
         FIH_PANIC;
     }
+
+    return 1;
 }
 #else /* FIH_ENABLE_DELAY */
 #define fih_delay_init()
 
-#define fih_delay()
+#define fih_delay()     1
 #endif /* FIH_ENABLE_DELAY */
 
 #ifdef FIH_ENABLE_DOUBLE_VARS
 __attribute__((always_inline)) inline
-void fih_int_validate(fih_int x)
+int fih_int_validate(fih_int x)
 {
     if (x.val != (x.msk ^ _FIH_MASK_VALUE)) {
         FIH_PANIC;
     }
+
+    return 1;
 }
 
 /* Convert a fih_int to an int. Validate for tampering. */
 __attribute__((always_inline)) inline
 int32_t fih_int_decode(fih_int x)
 {
-    fih_int_validate(x);
+    (void)fih_int_validate(x);
     return x.val;
 }
 
@@ -221,64 +228,34 @@ fih_int fih_int_encode(int32_t x)
 }
 
 /* Standard equality. If A == B then 1, else 0 */
-__attribute__((always_inline)) inline
-int32_t fih_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc1 = FIH_FALSE;
-    volatile int32_t rc2 = FIH_FALSE;
+/* Note that this is designed to be difficult to glitch so as to make it
+ * return 1 when it should return 0. It may not be as resistant the other
+ * way.
+ */
+#define fih_eq(x, y)          \
+    ( fih_int_validate(x) &&  \
+      fih_int_validate(y) &&  \
+      ((x).val == (y).val) && \
+      fih_delay() &&          \
+      ((x).msk == (y).msk) && \
+      fih_delay() &&          \
+      ((x).val == (_FIH_MASK_VALUE ^ (y).msk)) )
 
-    fih_int_validate(x);
-    fih_int_validate(y);
-
-    if (x.val == y.val) {
-        rc1 = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (x.msk == y.msk) {
-        rc2 = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (rc1 != rc2) {
-        FIH_PANIC;
-    }
-
-    return rc1;
-}
-
-__attribute__((always_inline)) inline
-int32_t fih_not_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc1 = FIH_FALSE;
-    volatile int32_t rc2 = FIH_FALSE;
-
-    fih_int_validate(x);
-    fih_int_validate(y);
-
-    if (x.val != y.val) {
-        rc1 = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (x.msk != y.msk) {
-        rc2 = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (rc1 != rc2) {
-        FIH_PANIC;
-    }
-
-    return rc1;
-}
+/* Note that this is designed to be difficult to glitch so as to make it
+ * return 0 when it should return 1. It may not be as resistant the other
+ * way.
+ */
+#define fih_not_eq(x, y)      \
+    ( !fih_int_validate(x) || \
+      !fih_int_validate(y) || \
+      ((x).val != (y).val) || \
+      !fih_delay() ||         \
+      ((x).msk != (y).msk) || \
+      !fih_delay() ||         \
+      ((x).val != (_FIH_MASK_VALUE ^ (y).msk)) )
 #else /* FIH_ENABLE_DOUBLE_VARS */
 /* NOOP */
-#define fih_int_validate(x)
+#define fih_int_validate(x)        1
 
 /* NOOP */
 #define fih_int_decode(x)          (x)
@@ -286,41 +263,15 @@ int32_t fih_not_eq(fih_int x, fih_int y)
 /* NOOP */
 #define fih_int_encode(x)          (x)
 
-__attribute__((always_inline)) inline
-int32_t fih_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc = FIH_FALSE;
+#define fih_eq(x, y) \
+    ( (x == y) &&    \
+      fih_delay() && \
+      !(x != y) )
 
-    if (x == y) {
-        rc = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (x != y) {
-        rc = FIH_FALSE;
-    }
-
-    return rc;
-}
-
-__attribute__((always_inline)) inline
-int32_t fih_not_eq(fih_int x, fih_int y)
-{
-    volatile int32_t rc = FIH_FALSE;
-
-    if (x != y) {
-        rc = FIH_TRUE;
-    }
-
-    fih_delay();
-
-    if (x == y) {
-        rc = FIH_FALSE;
-    }
-
-    return rc;
-}
+#define fih_not_eq(x, y) \
+    ( (x != y) ||        \
+      !fih_delay() ||    \
+      !(x == y) )
 #endif /* FIH_ENABLE_DOUBLE_VARS */
 
 /*
@@ -424,7 +375,7 @@ void fih_cfi_decrement(void);
 #define FIH_CFI_STEP_ERR_RESET() \
         do { \
             _fih_cfi_ctr = _fih_cfi_step_saved_value; \
-            fih_int_validate(_fih_cfi_ctr); \
+            (void)fih_int_validate(_fih_cfi_ctr); \
         } while(0)
 
 #else /* FIH_ENABLE_CFI */
@@ -465,10 +416,10 @@ void fih_cfi_decrement(void);
         FIH_LABEL("FIH_CALL_START_" # f); \
         FIH_CFI_PRECALL_BLOCK; \
         ret = FIH_FAILURE; \
-        fih_delay(); \
+        (void)fih_delay(); \
         ret = f(__VA_ARGS__); \
         FIH_CFI_POSTCALL_BLOCK; \
-        fih_int_validate(ret); \
+        (void)fih_int_validate(ret); \
         FIH_LABEL("FIH_CALL_END"); \
     } while (0)
 
@@ -498,7 +449,7 @@ typedef int32_t fih_int;
 #define FIH_SUCCESS           0
 #define FIH_FAILURE           -1
 
-#define fih_int_validate(x)
+#define fih_int_validate(x)   1
 
 #define fih_int_decode(x)     (x)
 
@@ -511,7 +462,7 @@ typedef int32_t fih_int;
 #define fih_not_eq(x, y)      ((x) != (y))
 
 #define fih_delay_init()      (0)
-#define fih_delay()
+#define fih_delay()           1
 
 #define FIH_CALL(f, ret, ...) \
     do { \

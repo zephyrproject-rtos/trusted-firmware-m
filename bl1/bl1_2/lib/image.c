@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "fih.h"
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_BL1;
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 uint32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
@@ -35,7 +35,7 @@ fih_int bl1_image_copy_to_sram(uint32_t image_id, uint8_t *out)
     fih_int fih_rc;
 
     flash_offset = bl1_image_get_flash_offset(image_id);
-    fih_rc = fih_int_encode(FLASH_DEV_NAME.ReadData(flash_offset, out,
+    fih_rc = fih_int_encode(FLASH_DEV_NAME_BL1.ReadData(flash_offset, out,
                                                     sizeof(struct bl1_2_image_t)));
 
     FIH_RET(fih_rc);

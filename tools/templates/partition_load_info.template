@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -130,6 +130,10 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
         .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
         .nirqs                      = {{(manifest.name|upper + "_NIRQS")}},
+{% if manifest.ns_agent is sameas true %}
+        .client_id_base             = {{manifest.client_id_base}},
+        .client_id_limit            = {{manifest.client_id_limit}},
+{% endif %}
     },
 {% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
     .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
@@ -268,12 +272,20 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         {% else %}
             {% set irq_info.signal = irq.name + "_SIGNAL" %}
         {% endif %}
+        {% if manifest.ns_agent is sameas true %}
+            {% set irq_info.client_id_base = irq.client_id_base %}
+            {% set irq_info.client_id_limit = irq.client_id_limit %}
+        {% endif %}
         {
             .init = {{irq_info.source_symbol + "_init"}},
             .flih_func = {{irq_info.flih_func}},
             .pid = {{manifest.name}},
             .source = {{irq_info.source}},
             .signal = {{irq_info.signal}},
+        {% if manifest.ns_agent is sameas true %}
+            .client_id_base = {{irq_info.client_id_base}},
+            .client_id_limit = {{irq_info.client_id_limit}},
+        {% endif %}
         },
     {% endfor %}
     },

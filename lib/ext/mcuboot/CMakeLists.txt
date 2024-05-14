@@ -7,13 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 
-# Because of https://gitlab.kitware.com/cmake/cmake/-/issues/20579 CMP0097 is
-# non-functional until cmake 3.18.0.
-if(${CMAKE_VERSION} VERSION_LESS "3.18.0")
-    # Workaround for not having CMP0097. Use existing directory.
-    set(MCUBOOT_SUBMODULES "docs")
-endif()
-
 fetch_remote_library(
     LIB_NAME                mcuboot
     LIB_SOURCE_PATH_VAR     MCUBOOT_PATH

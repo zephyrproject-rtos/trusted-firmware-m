@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <string.h>
 #include "target_cfg.h"
 #include "region.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
@@ -245,6 +245,11 @@ __WEAK int boot_platform_post_load(uint32_t image_id)
     return 0;
 }
 
+__WEAK bool boot_platform_should_load_image(uint32_t image_id)
+{
+    return true;
+}
+
 #ifdef TFM_MEASURED_BOOT_API
 static int boot_add_data_to_shared_area(uint8_t        major_type,
                                         uint16_t       minor_type,
@@ -347,3 +352,11 @@ __WEAK int boot_store_measurement(
     return rc;
 }
 #endif /* TFM_MEASURED_BOOT_API */
+
+__WEAK int boot_initiate_recovery_mode(uint32_t image_id)
+{
+    (void)image_id;
+
+    /* We haven't done anything, therefore recovery has failed */
+    return 1;
+}

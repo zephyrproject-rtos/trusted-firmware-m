@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,14 +26,19 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         include
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         ext/common
         Native_Driver
         CMSIS_Driver/Config
-        CMSIS_Driver/include
         Device/Include
         partition
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:services/include>
+)
+
+target_compile_definitions(platform_ns
+    PRIVATE
+        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
 )
 
 target_include_directories(platform_region_defs

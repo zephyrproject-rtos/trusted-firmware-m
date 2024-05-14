@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -97,7 +97,7 @@ __attribute__((naked)) void TFM_FPU_NS_TEST_Handler(void)
         * If LR.BIT[6] equals 1, the interrupt is triggerred by secure thread.
         */
         "ands      r0, lr, #0x40           \n"
-        "cmp       r0, 0x40                \n"
+        "cmp       r0, #0x40               \n"
         "bne       change_regs             \n"
         "push      {r7, lr}                \n"
         "vpush     {s0-s15}                \n"
@@ -109,7 +109,7 @@ __attribute__((naked)) void TFM_FPU_NS_TEST_Handler(void)
         "vpop      {s0-s15}                \n"
         "pop       {r7, lr}                \n"
         "cmp       r0, #0                  \n"
-        "bne       panic                   \n"
+        "bne.w     panic                   \n"
     "change_regs:                          \n"
         "mov       r0, #0x000000E0         \n"
         "vmov      s0, r0                  \n"

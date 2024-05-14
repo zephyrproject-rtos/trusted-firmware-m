@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,7 +21,7 @@
  * Git SHA: b5f0603d6a584d1724d952fd8b0737458b90d62b
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /*----------------------------------------------------------------------------
   External References
@@ -32,18 +32,18 @@ extern uint32_t __STACK_LIMIT;
 extern uint64_t __STACK_SEAL;
 #endif
 
-extern void __PROGRAM_START(void) __NO_RETURN;
+extern __NO_RETURN void __PROGRAM_START(void);
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Reset_Handler  (void) __NO_RETURN;
+__NO_RETURN void Reset_Handler (void);
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void __WEAK handler_name(void) __NO_RETURN; \
+__NO_RETURN void __WEAK handler_name(void); \
 void handler_name(void) { \
     while(1); \
 }

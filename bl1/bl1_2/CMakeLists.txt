@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,6 +26,16 @@ target_link_options(bl1_2
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl1_2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl1_2.map>
+)
+
+target_compile_options(bl1_2
+    PUBLIC
+        ${BL1_COMPILER_CP_FLAG}
+)
+
+target_link_options(bl1_2
+    PUBLIC
+        ${BL1_LINKER_CP_OPTION}
 )
 
 target_sources(bl1_2
@@ -101,6 +111,7 @@ add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
                     --img_version ${TFM_BL1_IMAGE_VERSION_BL2}
                     --img_security_counter ${TFM_BL1_IMAGE_SECURITY_COUNTER_BL2}
                     --header_size ${BL1_HEADER_SIZE}
+                    --kdf_alg $<IF:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>,hkdf,cmac>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin $<TARGET_FILE_DIR:bl2>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed_hash.bin $<TARGET_FILE_DIR:bl2>
 )

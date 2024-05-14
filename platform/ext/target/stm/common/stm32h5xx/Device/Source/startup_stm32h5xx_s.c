@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -21,7 +21,7 @@
  * Git SHA: b5f0603d6a584d1724d952fd8b0737458b90d62b
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "region.h"
 
 /*----------------------------------------------------------------------------
@@ -39,12 +39,12 @@ extern uint32_t __MSP_INITIAL_SP;
 extern uint32_t __MSP_STACK_LIMIT;
 
 extern void Error_Handler(void);
-extern void __PROGRAM_START(void) __NO_RETURN;
+extern __NO_RETURN void __PROGRAM_START(void);
 
 /*----------------------------------------------------------------------------
   Internal References
  *----------------------------------------------------------------------------*/
-void Reset_Handler  (void) __NO_RETURN;
+__NO_RETURN void Reset_Handler (void);
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Handler

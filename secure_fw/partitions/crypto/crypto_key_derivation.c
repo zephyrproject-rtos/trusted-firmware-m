@@ -34,7 +34,7 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_key_derivation_operation_t *operation = NULL;
     uint32_t *p_handle = NULL;
-    uint16_t sid = iov->function_id;
+    enum tfm_crypto_func_sid_t sid = iov->function_id;
 
     tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
                                                   encoded_key->owner, encoded_key->key_id);
@@ -94,6 +94,10 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
         return psa_key_derivation_input_bytes(operation, iov->step, data,
                                               data_length);
     }
+    case TFM_CRYPTO_KEY_DERIVATION_INPUT_INTEGER_SID:
+    {
+        return psa_key_derivation_input_integer(operation, iov->step, iov->value);
+    }
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID:
     {
         uint8_t *output = out_vec[0].base;
@@ -109,21 +113,13 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     }
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID:
     {
-        const struct psa_client_key_attributes_s *client_key_attr =
-                                                            in_vec[1].base;
         psa_key_id_t *key_handle = out_vec[0].base;
-        psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        int32_t partition_id = encoded_key->owner;
+        psa_key_attributes_t srv_key_attr;
 
-        status = tfm_crypto_core_library_key_attributes_from_client(
-                                                       client_key_attr,
-                                                       partition_id,
-                                                       &key_attributes);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
+        memcpy(&srv_key_attr, in_vec[1].base, in_vec[1].len);
+        tfm_crypto_library_get_library_key_id_set_owner(encoded_key->owner, &srv_key_attr);
 
-        status = psa_key_derivation_output_key(&key_attributes, operation,
+        status = psa_key_derivation_output_key(&srv_key_attr, operation,
                                                &library_key);
 
         *key_handle = CRYPTO_LIBRARY_GET_KEY_ID(library_key);

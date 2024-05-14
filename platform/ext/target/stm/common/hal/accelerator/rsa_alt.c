@@ -73,11 +73,9 @@
 
 #if defined(MBEDTLS_RSA_ALT)
 
-/* Parameter validation macros */
-#define RSA_VALIDATE_RET( cond )                                       \
-    MBEDTLS_INTERNAL_VALIDATE_RET( cond, MBEDTLS_ERR_RSA_BAD_INPUT_DATA )
-#define RSA_VALIDATE( cond )                                           \
-    MBEDTLS_INTERNAL_VALIDATE( cond )
+/* Parameter validation macros - mbedtls/platform_util.h has deprecated them */
+#define RSA_VALIDATE_RET( cond ) do { } while(0)
+#define RSA_VALIDATE( cond ) do { } while(0)
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -160,8 +158,12 @@ static int rsa_pka_arithmetic_mul( const unsigned char *A,
     HAL_PKA_Arithmetic_GetResult( &hpka, (uint32_t *)AxB );
 
 cleanup:
-    /* De-initialize HW peripheral */
-    HAL_PKA_DeInit( &hpka );
+
+    if (HAL_PKA_GetState(&hpka) != HAL_PKA_STATE_RESET)
+    {
+        /* De-initialize HW peripheral */
+        HAL_PKA_DeInit( &hpka );
+    }
 
     /* Disable HW peripheral clock */
     __HAL_RCC_PKA_CLK_DISABLE();
@@ -423,8 +425,11 @@ static int rsa_pka_modexp( mbedtls_rsa_context *ctx,
 
 cleanup:
 
-    /* De-initialize HW peripheral */
-    HAL_PKA_DeInit( &hpka );
+    if (HAL_PKA_GetState(&hpka) != HAL_PKA_STATE_RESET)
+    {
+        /* De-initialize HW peripheral */
+        HAL_PKA_DeInit( &hpka );
+    }
 
     /* Disable HW peripheral clock */
     __HAL_RCC_PKA_CLK_DISABLE();
@@ -542,8 +547,11 @@ static int rsa_crt_pka_modexp( const mbedtls_mpi *dp,
 
 cleanup:
 
-    /* De-initialize HW peripheral */
-    HAL_PKA_DeInit( &hpka );
+    if (HAL_PKA_GetState(&hpka) != HAL_PKA_STATE_RESET)
+    {
+        /* De-initialize HW peripheral */
+        HAL_PKA_DeInit( &hpka );
+    }
 
     /* Disable HW peripheral clock */
     __HAL_RCC_PKA_CLK_DISABLE();

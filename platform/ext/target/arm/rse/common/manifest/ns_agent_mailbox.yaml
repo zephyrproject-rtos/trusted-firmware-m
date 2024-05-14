@@ -1,0 +1,40 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# company) or an affiliate of Cypress Semiconductor Corporation. All rights
+# reserved.
+# Copyright (c) 2024, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+# Identical to the standard TF-M Non-Secure Mailbox Agent manifest except for
+# the addition of the MAILBOX_INTERRUPT_1 interrupt request
+{
+  "psa_framework_version": 1.1,
+  "name": "TFM_NS_MAILBOX_AGENT",
+  "type": "PSA-ROT",
+  "ns_agent": true,
+  "priority": "LOW",
+  "model": "IPC",
+  "entry_point": "ns_agent_mailbox_entry",
+  "stack_size": "NS_AGENT_MAILBOX_STACK_SIZE",
+  "client_id_base": "-0x0800ffff",
+  "client_id_limit": "-0x04000000",
+  "irqs": [
+    {
+      "source": "MAILBOX_IRQ",
+      "name": "MAILBOX_INTERRUPT",
+      "handling": "SLIH",
+      "client_id_base": "-0x0400ffff",
+      "client_id_limit": "-0x04000000",
+    },
+    {
+      "source": "MAILBOX_IRQ_1",
+      "name": "MAILBOX_INTERRUPT_1",
+      "handling": "SLIH",
+      "client_id_base": "-0x0800ffff",
+      "client_id_limit": "-0x08000000",
+    }
+  ],
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -547,7 +547,6 @@ enum fwu_agent_error_t fwu_metadata_init(void)
     enum fwu_agent_error_t ret;
     ARM_FLASH_INFO* flash_info;
 
-    FWU_LOG_MSG("%s: enter\n\r", __func__);
 
     if (is_initialized) {
         return FWU_AGENT_SUCCESS;
@@ -574,8 +573,6 @@ enum fwu_agent_error_t fwu_metadata_init(void)
     }
 
     is_initialized = 1;
-
-    FWU_LOG_MSG("%s: is_initialized = %d\n\r", __func__, is_initialized);
 
     return FWU_AGENT_SUCCESS;
 }

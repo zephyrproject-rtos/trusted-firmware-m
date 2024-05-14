@@ -26,15 +26,16 @@ extern "C" {
  * \param[out] buf       Buffer to hold the retrieved key material from the platform
  * \param[in]  buf_len   Size of the buf buffer
  * \param[out] key_len   Actual length of the key material in bytes retrieved from the platform
- * \param[out] key_bits  Size in bits of the key (important for those keys that are not byte-multiple)
+ * \param[out] key_bits  Size in bits of the key (important for those keys that are not
+ *                       byte-multiple or encoded in different format than raw bytes)
  * \param[out] algorithm \ref psa_algorithm_t value associated to the retrieved key material
  * \param[out] type      \ref psa_key_type_t value associated to the retrieved key material
  *
  * \return Returns an error value as specified by the \ref tfm_plat_err_t type.
- * 
+ *
  */
 typedef enum tfm_plat_err_t (*key_loader_func_ptr)
-    (uint8_t *buf, size_t buf_len, size_t *key_len, size_t *key_bits, psa_algorithm_t *algorithm, psa_key_type_t *type);
+    (uint8_t *buf, size_t buf_len, size_t *key_len, psa_key_bits_t *key_bits, psa_algorithm_t *algorithm, psa_key_type_t *type);
 
 /**
  * \brief This type describes the information that each TF-M builtin key

@@ -10,30 +10,6 @@
 /* "exception_info.h" must be the last include because of the IAR pragma */
 #include "exception_info.h"
 
-struct exception_info_t {
-    uint32_t EXC_RETURN;        /* EXC_RETURN value in LR. */
-    uint32_t MSP;               /* (Secure) MSP. */
-    uint32_t PSP;               /* (Secure) PSP. */
-    uint32_t *EXC_FRAME;        /* Exception frame on stack. */
-    uint32_t EXC_FRAME_COPY[8]; /* Copy of the basic exception frame. */
-    uint32_t xPSR;              /* Program Status Registers. */
-
-#ifdef FAULT_STATUS_PRESENT
-    uint32_t CFSR;              /* Configurable Fault Status Register. */
-    uint32_t HFSR;              /* Hard Fault Status Register. */
-    uint32_t BFAR;              /* Bus Fault address register. */
-    uint32_t BFARVALID;         /* Whether BFAR contains a valid address. */
-    uint32_t MMFAR;             /* MemManage Fault address register. */
-    uint32_t MMARVALID;         /* Whether MMFAR contains a valid address. */
-#ifdef TRUSTZONE_PRESENT
-    uint32_t SFSR;              /* SecureFault Status Register. */
-    uint32_t SFAR;              /* SecureFault Address Register. */
-    uint32_t SFARVALID;         /* Whether SFAR contains a valid address. */
-#endif
-
-#endif
-};
-
 static struct exception_info_t exception_info;
 
 /**
@@ -69,8 +45,14 @@ __STATIC_INLINE bool is_return_psp(uint32_t lr)
     return ((lr == EXC_RETURN_THREAD_PSP) || (lr == EXC_RETURN_THREAD_PSP_FPU));
 #elif defined(__ARM_ARCH_8M_BASE__) || defined(__ARM_ARCH_8M_MAIN__) \
         || defined(__ARM_ARCH_8_1M_MAIN__)
-    /* PSP is used only if SPSEL is set, and we came from thread mode. */
-    return ((lr & EXC_RETURN_SPSEL) && is_return_thread_mode(lr));
+    if (is_return_secure_stack(lr)) {
+        /* PSP is used only if SPSEL is set, and we came from thread mode. */
+        return ((lr & EXC_RETURN_SPSEL) && is_return_thread_mode(lr));
+    } else {
+        /* PSP is used only if CONTROL_NS.SPSEL is set, and we came from thread mode. */
+        bool sp_sel = _FLD2VAL(CONTROL_SPSEL, __TZ_get_CONTROL_NS()) != 0;
+        return (sp_sel && is_return_thread_mode(lr));
+    }
 #else
     return (lr == EXC_RETURN_THREAD_PSP);
 #endif
@@ -101,7 +83,7 @@ uint32_t *get_exception_frame(uint32_t lr, uint32_t msp, uint32_t psp)
 }
 
 static void dump_exception_info(bool stack_error,
-                                struct exception_info_t *ctx)
+                                const struct exception_info_t *ctx)
 {
     SPMLOG_DBGMSG("Here is some context for the exception:\r\n");
     SPMLOG_DBGMSGVAL("    EXC_RETURN (LR): ", ctx->EXC_RETURN);
@@ -141,6 +123,16 @@ static void dump_exception_info(bool stack_error,
     SPMLOG_DBGMSGVAL("        PC:   ", ctx->EXC_FRAME_COPY[6]);
     SPMLOG_DBGMSGVAL("        xPSR: ", ctx->EXC_FRAME_COPY[7]);
 
+    SPMLOG_DBGMSG("    Callee saved register state:");
+    SPMLOG_DBGMSGVAL("        R4:   ", ctx->CALLEE_SAVED_COPY[0]);
+    SPMLOG_DBGMSGVAL("        R5:   ", ctx->CALLEE_SAVED_COPY[1]);
+    SPMLOG_DBGMSGVAL("        R6:   ", ctx->CALLEE_SAVED_COPY[2]);
+    SPMLOG_DBGMSGVAL("        R7:   ", ctx->CALLEE_SAVED_COPY[3]);
+    SPMLOG_DBGMSGVAL("        R8:   ", ctx->CALLEE_SAVED_COPY[4]);
+    SPMLOG_DBGMSGVAL("        R9:   ", ctx->CALLEE_SAVED_COPY[5]);
+    SPMLOG_DBGMSGVAL("        R10:  ", ctx->CALLEE_SAVED_COPY[6]);
+    SPMLOG_DBGMSGVAL("        R11:  ", ctx->CALLEE_SAVED_COPY[7]);
+
 #ifdef FAULT_STATUS_PRESENT
     SPMLOG_DBGMSGVAL("    CFSR:  ", ctx->CFSR);
     SPMLOG_DBGMSGVAL("    BFSR:  ",
@@ -172,19 +164,17 @@ static void dump_exception_info(bool stack_error,
 #endif
 }
 
-static void dump_error(uint32_t error_type)
+static void dump_error(const struct exception_info_t *ctx)
 {
     bool stack_error = false;
 
     SPMLOG_ERRMSG("FATAL ERROR: ");
-    switch (error_type) {
-    case EXCEPTION_TYPE_SECUREFAULT:
-        SPMLOG_ERRMSG("SecureFault\r\n");
-        break;
+    switch (ctx->VECTACTIVE) {
     case EXCEPTION_TYPE_HARDFAULT:
         SPMLOG_ERRMSG("HardFault\r\n");
         break;
-    case EXCEPTION_TYPE_MEMFAULT:
+#ifdef FAULT_STATUS_PRESENT
+    case EXCEPTION_TYPE_MEMMANAGEFAULT:
         SPMLOG_ERRMSG("MemManage fault\r\n");
         stack_error = true;
         break;
@@ -196,30 +186,48 @@ static void dump_error(uint32_t error_type)
         SPMLOG_ERRMSG("UsageFault\r\n");
         stack_error = true;
         break;
-    case EXCEPTION_TYPE_PLATFORM:
-        SPMLOG_ERRMSG("Platform Exception\r\n");
+#ifdef TRUSTZONE_PRESENT
+    case EXCEPTION_TYPE_SECUREFAULT:
+        SPMLOG_ERRMSG("SecureFault\r\n");
+        break;
+#endif
+#endif
+    /* Platform specific external interrupt secure handler. */
+    default:
+        if (ctx->VECTACTIVE < 16) {
+            SPMLOG_ERRMSGVAL("Reserved Exception ", ctx->VECTACTIVE);
+        } else {
+            SPMLOG_ERRMSGVAL("Platform external interrupt (IRQn): ", ctx->VECTACTIVE - 16);
+        }
         /* Depends on the platform, assume it may cause stack error */
         stack_error = true;
         break;
-    default:
-        SPMLOG_ERRMSG("Unknown\r\n");
-        break;
     }
 
-    dump_exception_info(stack_error, &exception_info);
+    dump_exception_info(stack_error, ctx);
 }
 
-void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
-                            uint32_t exception_type)
+void tfm_exception_info_get_context(struct exception_info_t *ctx)
+{
+    memcpy(ctx, &exception_info, sizeof(exception_info));
+}
+
+void store_and_dump_context(uint32_t MSP_in, uint32_t PSP_in, uint32_t LR_in,
+                            uint32_t *callee_saved)
 {
     struct exception_info_t *ctx = &exception_info;
 
+    ctx->VECTACTIVE = SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk;
     ctx->xPSR = __get_xPSR();
     ctx->EXC_RETURN = LR_in;
     ctx->MSP = MSP_in;
     ctx->PSP = PSP_in;
     ctx->EXC_FRAME = get_exception_frame(ctx->EXC_RETURN, ctx->MSP, ctx->PSP);
     memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME, sizeof(ctx->EXC_FRAME_COPY));
+
+    if (callee_saved) {
+        memcpy(ctx->CALLEE_SAVED_COPY, callee_saved, sizeof(ctx->CALLEE_SAVED_COPY));
+    }
 
 #ifdef FAULT_STATUS_PRESENT
     ctx->CFSR = SCB->CFSR;
@@ -238,5 +246,5 @@ void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
 #endif
 #endif
 
-    dump_error(exception_type);
+    dump_error(ctx);
 }

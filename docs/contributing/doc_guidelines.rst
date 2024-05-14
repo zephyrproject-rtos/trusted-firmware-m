@@ -2,7 +2,7 @@
 Documentation Contribution Guidelines
 #####################################
 
-The Trusted Firmware-M project uses `Sphinx`_ to generated the Official
+The Trusted Firmware-M project uses `Sphinx`_ to generate the Official
 Documentation from `Restructed Text`_ `.rst` source files,
 
 The aim is to align as much as possible with the official
@@ -85,7 +85,7 @@ Headers
     ###################
 
     ******************
-    Chapter Ttitle(H2)
+    Chapter Title (H2)
     ******************
 
     Chapter Section (H3)
@@ -226,6 +226,27 @@ A document included in the documentation can be referenced by the `doc:` notatio
 
 The path is relative to the root of the Trusted Firmware-M code.
 
+Trusted Firmware-M project is spread among multiple repositories: Trusted Firmware-M, TF-M Tests,
+TF-M Tools and TF-M Extras. Every repository has its own documentation, and since
+:doc:`v2.0.0<../releases/2.0.0>`, they can be found under `Links`.
+
+Using `Intersphinx`_, it is now possible to use cross-reference roles from Sphinx to reference
+documentation from different projects (repositories), like TF-M Tests. Referencing documentation
+using the `doc:` notation is preferred and helps to avoid broken cross-references if the link of
+the document changes.
+
+For example, to get this: :doc:`Adding TF-M Regression Test Suite
+<TF-M-Tests:tfm_test_suites_addition>`; the Restructed Text would look like this:
+
+.. code-block:: restructuredtext
+
+    :doc:`Adding TF-M Regression Test Suite <TF-M-Tests:tfm_test_suites_addition>`
+
+As can be seen, it is quite similar to cross-referencing in Sphinx, except the path to the document
+is preceded with the external project name. For TF-M Tests, it is ``TF-M-Tests``. The names of
+other projects configured to be referenced using `Intersphinx`_ can be seen in the `conf.py`_ file
+under ``intersphinx_mapping``.
+
 Reference specific section of a document
 ========================================
 
@@ -273,11 +294,14 @@ References
 #. `Restructed Text`_
 #. `Python Documentation Guidelines`_
 #. `Pygments Lexers`_
+#. `Intersphinx`_
 
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _Restructed Text: https://docutils.sourceforge.io/rst.html
 .. _Python Documentation Guidelines: https://devguide.python.org/documentation/style-guide/
 .. _Pygments Lexers: https://pygments.org/docs/api/#lexers
+.. _Intersphinx: https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+.. _conf.py: https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/tree/docs/conf.py
 
 --------------
 

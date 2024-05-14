@@ -1,13 +1,11 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-if(POLICY CMP0123)
-    cmake_policy(SET CMP0123 NEW)
-endif()
+cmake_minimum_required(VERSION 3.21)
 
 if(NOT COMMAND tfm_invalid_config)
     function(tfm_invalid_config)
@@ -28,7 +26,6 @@ endif()
 ########################## FPU and MVE #########################################
 
 tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND (CONFIG_TFM_ENABLE_MVE OR CONFIG_TFM_ENABLE_MVE_FP))
-tfm_invalid_config((NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND CONFIG_TFM_ENABLE_FP)
 tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP))
 tfm_invalid_config((CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND (NOT CONFIG_TFM_FP_ARCH_ASM) AND CONFIG_TFM_ENABLE_FP)
 tfm_invalid_config((NOT CONFIG_TFM_ENABLE_FP AND NOT CONFIG_TFM_ENABLE_MVE AND NOT CONFIG_TFM_ENABLE_MVE_FP) AND CONFIG_TFM_LAZY_STACKING)
@@ -56,12 +53,20 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
             RESULT_VARIABLE ret
             ERROR_VARIABLE err
         )
-    else()
+    elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
         execute_process (
             COMMAND ${CMAKE_C_COMPILER} -mfix-cmse-cve-2021-35465 -S ${CMAKE_CURRENT_BINARY_DIR}/cvetest.c -o ${CMAKE_CURRENT_BINARY_DIR}/cvetest.s
             RESULT_VARIABLE ret
             ERROR_VARIABLE err
         )
+    elseif (CMAKE_C_COMPILER_ID STREQUAL "IAR")
+        execute_process (
+            COMMAND ${CMAKE_C_COMPILER} --enable_hardware_workaround fix-cmse-cve-2021-35465 ${CMAKE_CURRENT_BINARY_DIR}/cvetest.c -o ${CMAKE_CURRENT_BINARY_DIR}/cvetest.s
+            RESULT_VARIABLE ret
+            ERROR_VARIABLE err
+        )
+    else()
+        message(FATAL_ERROR "Unsupported compiler.")
     endif()
     file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/cvetest.c)
     # Check result

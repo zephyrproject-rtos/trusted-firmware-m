@@ -32,7 +32,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_cipher_operation_t *operation = NULL;
     uint32_t *p_handle = NULL;
-    uint16_t sid = iov->function_id;
+    enum tfm_crypto_func_sid_t sid = iov->function_id;
 
     tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
                                                   encoded_key->owner, encoded_key->key_id);
