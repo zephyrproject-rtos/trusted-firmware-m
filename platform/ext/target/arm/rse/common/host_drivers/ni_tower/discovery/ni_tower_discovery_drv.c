@@ -149,7 +149,7 @@ enum ni_tower_err ni_tower_discover_offset(
                          .parent_node->id == cfg_node->node_id)
                     {
                         if (dev->skip_discovery_list->skip_node_data[s_idx]
-                             .node_idx == s_idx) {
+                             .node_idx == c_idx) {
                             should_skip_discovery = true;
                             break;
                         }
