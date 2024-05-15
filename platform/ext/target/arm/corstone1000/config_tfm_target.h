@@ -23,4 +23,12 @@
 /* The maximum size of asset to be stored in the Internal Trusted Storage area. */
 #define ITS_MAX_ASSET_SIZE   2048
 
+/* The maximum asset size to be stored in the Protected Storage */
+#define PS_MAX_ASSET_SIZE   2592
+
+/* This is needed to be able to process the EFI variables during PS writes. */
+#define CRYPTO_ENGINE_BUF_SIZE 0x5000
+
+/* This is also has to be increased to fit the EFI variables into the iovecs. */
+#define CRYPTO_IOVEC_BUFFER_SIZE    6000
 #endif /* __CONFIG_TFM_TARGET_H__ */
