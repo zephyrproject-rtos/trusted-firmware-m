@@ -122,6 +122,24 @@ struct ni_tower_dev {
      * flag.
      */
     uint64_t chip_addr_offset;
+#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+    /* Function to fetch xSNI labels for log prints by passing the xSNI id */
+    const char* (*get_xSNI_label)(uint64_t xSNI_id);
+    /* Function to fetch xMNI labels for log prints by passing the xMNI id */
+    const char* (*get_xMNI_label)(uint64_t xMNI_id);
+#endif
 };
+
+#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+/**
+ * \brief NI-Tower device data structure for a subfeature
+ */
+struct ni_tower_dev_data {
+    /* Pointer to the NI-Tower device where the subfeature exists */
+    struct ni_tower_dev const* ni_tower_dev;
+    /* Pointer to the component node where the subfeature exists */
+    struct ni_tower_component_node const* component;
+};
+#endif
 
 #endif /* __NI_TOWER_DRV_H__ */

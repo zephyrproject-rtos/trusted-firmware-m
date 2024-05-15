@@ -31,6 +31,10 @@ struct ni_tower_psam_dev {
     uintptr_t base;
     /* Offset to be added to the memory map base and end addresses */
     uint64_t region_mapping_offset;
+#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+    /* Device data */
+    struct ni_tower_dev_data data;
+#endif
 };
 
 /**

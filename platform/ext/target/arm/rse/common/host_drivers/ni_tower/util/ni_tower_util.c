@@ -6,6 +6,36 @@
  */
 #include "ni_tower_util.h"
 
+#include <stdbool.h>
+
+#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+enum ni_tower_err ni_tower_sorted_add_entry(
+        struct ni_tower_sorted_region_list *list,
+        uint32_t region,
+        uint64_t address)
+{
+    uint32_t r_idx;
+    uint64_t temp_address;
+
+    for (r_idx = list->sorted_region_count; r_idx > 0; --r_idx) {
+        temp_address = list->sorted_regions[r_idx - 1].address;
+
+        if (temp_address <= address) {
+            break;
+        }
+
+        list->sorted_regions[r_idx].region_idx =
+                list->sorted_regions[r_idx - 1].region_idx;
+    }
+
+    list->sorted_regions[r_idx].region_idx = region;
+    list->sorted_regions[r_idx].address = address;
+    list->sorted_region_count += 1;
+
+    return NI_TOWER_SUCCESS;
+}
+#endif
+
 enum ni_tower_err ni_tower_check_region_overlaps(uint64_t region_base_1,
                                                  uint64_t region_end_1,
                                                  uint64_t region_base_2,
