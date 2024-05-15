@@ -21,9 +21,7 @@ process for removing platform support from TF-M.
        proposal.
 
     3. Once a decision is made to remove the platform, the platform is
-       considered to be in `deprecated` state as per platform support lifecyle
-       defined here: "https://developer.trustedfirmware.org/w/collaboration/project-maintenance-process/".
-       The platform will be marked as deprecated and the TF-M version after
+       considered to be in `deprecated` state and the TF-M version after
        which it will be removed will also be mentioned. Suitable build time
        or runtime messages needs to be incorporated to the platform to warn
        about the `deprecation`.
