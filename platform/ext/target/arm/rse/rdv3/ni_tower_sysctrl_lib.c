@@ -204,12 +204,12 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_0_psam[] = {
         SYSCTRL_CONFIG_SPACE_ID
     },
     /*
-     * IO Block NI-Tower + Peripheral Block NI-Tower + System Fabric
-     * NI-Tower + Debug Block NCI GPV + UART Peripherals + Generic refclk +
-     * AP Watchdog peripherals + SID + ECC error record registers
+     * System Fabric NI-Tower + Peripheral Block NI-Tower + Debug Block NCI GPV
+     * + UART Peripherals + Generic refclk + AP Watchdog peripherals + SID + ECC
+     * error record registers
      */
     {
-        HOST_IO_MACRO_NI_TOWER_PHYS_BASE,
+        HOST_FABRIC_NI_TOWER_PHYS_BASE,
         HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
         SYSCTRL_APP_AMNI_ID
     },
