@@ -107,7 +107,7 @@ enum tfm_plat_err_t gpt_get_list_entry_by_name(uint32_t list_base, uint32_t list
 
         if (gpt_strncmp(entry->name,
                         list_entry_size - offsetof(gpt_entry_t, name),
-                        name, name_size)) {
+                        name, name_size) == TFM_PLAT_ERR_SUCCESS) {
             return TFM_PLAT_ERR_SUCCESS;
         }
     }
