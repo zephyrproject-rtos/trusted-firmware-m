@@ -56,7 +56,11 @@ target_compile_definitions(bl1_1
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
 )
 
-target_share_symbols(bl1_1 ${BL1_SHARED_SYMBOLS_PATH})
+if (BL1_1_SHARED_SYMBOLS_PATH)
+    target_share_symbols(bl1_1
+        ${BL1_1_SHARED_SYMBOLS_PATH}
+    )
+endif()
 
 ################################################################################
 
