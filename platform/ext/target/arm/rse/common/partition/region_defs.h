@@ -22,6 +22,9 @@
 #include "flash_layout.h"
 #include "platform_base_address.h"
 #include "rse_memory_sizes.h"
+#if defined(RSE_BL1_TEST_BINARY) && !defined(RSE_TEST_BINARY_IN_ROM)
+#include "rse_test_binary_location.h"
+#endif /* defined(RSE_BL1_TEST_BINARY) && defined(RSE_TEST_BINARY_IN_ROM) */
 
 /* RSE memory layout is as follows during BL1
  *      |----------------------------------------|
@@ -251,5 +254,15 @@
 #if PROVISIONING_BUNDLE_CODE_SIZE + PROVISIONING_BUNDLE_VALUES_SIZE + OTP_DMA_ICS_SIZE > VM0_SIZE
 #error Provisioning bundle is too large for slot
 #endif
+
+#define RSE_TESTS_HEAP_SIZE      0x1000
+#define RSE_TESTS_MSP_STACK_SIZE 0x1800
+
+#if defined(RSE_BL1_TEST_BINARY) && defined(RSE_TEST_BINARY_IN_ROM)
+#define RSE_TESTS_CODE_START (ROM_BASE_S + BL1_1_CODE_SIZE)
+#define RSE_TESTS_CODE_SIZE  (ROM_SIZE - BL1_1_CODE_SIZE - ROM_DMA_ICS_SIZE)
+#define RSE_TESTS_DATA_START VM0_BASE_S
+#define RSE_TESTS_DATA_SIZE  VM0_SIZE
+#endif /* defined(RSE_BL1_TEST_BINARY) && defined(RSE_TEST_BINARY_IN_ROM) */
 
 #endif /* __REGION_DEFS_H__ */

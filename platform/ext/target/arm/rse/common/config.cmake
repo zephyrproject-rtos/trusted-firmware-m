@@ -126,7 +126,6 @@ set(RSE_MHU_SCP_DEVICE                  2          CACHE STRING  "MHU device ind
 
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
-set(BL1_1_SHARED_SYMBOLS_PATH           ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
 set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
 
 if (RSE_TP_MODE STREQUAL "TCI")
@@ -154,6 +153,29 @@ set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared RO
 set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
 
 set(RSE_DEFAULT_CLOCK_CONFIG            ON         CACHE BOOL "Use default RSE clock config implementation")
+
+if (TEST_BL1_1 OR TEST_BL1_2)
+    set(RSE_BL1_TEST_BINARY                 ON         CACHE BOOL "Create and run a separate BL1 test binary")
+    set(RSE_TEST_BINARY_IN_ROM              ON         CACHE BOOL "Whether the RSE BL1 test binary is stored in ROM")
+endif()
+
+if (RSE_BL1_TEST_BINARY)
+    set(PLATFORM_DEFAULT_BL1_1_TESTS    OFF        CACHE BOOL "Whether to use platform-specific BL1_1 testsuite")
+    set(PLATFORM_DEFAULT_BL1_2_TESTS    OFF        CACHE BOOL "Whether to use platform-specific BL1_2 testsuite")
+    set(BL1_1_PLATFORM_SPECIFIC_LINK_LIBRARIES rse_bl1_tests_platform)
+    set(BL1_2_PLATFORM_SPECIFIC_LINK_LIBRARIES rse_bl1_tests_platform)
+endif()
+
+set(TEMP_BL1_1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt)
+if (TEST_BL1_1 AND RSE_BL1_TEST_BINARY)
+    list(APPEND TEMP_BL1_1_SHARED_SYMBOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable/bl1_1_tests_shared_symbols.txt)
+endif()
+
+set(BL1_1_SHARED_SYMBOLS_PATH             ${TEMP_BL1_1_SHARED_SYMBOLS_PATH} CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
+
+if (TEST_BL1_2 AND RSE_BL1_TEST_BINARY)
+    set(BL1_2_SHARED_SYMBOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable/bl1_2_tests_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_2 that can be referenced from tests")
+endif()
 
 ################################################################################
 

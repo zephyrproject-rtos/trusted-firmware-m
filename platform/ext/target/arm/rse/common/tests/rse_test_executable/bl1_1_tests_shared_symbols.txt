@@ -1,0 +1,2 @@
+bl1_read_bl1_2_image
+bl1_1_validate_image_at_addr

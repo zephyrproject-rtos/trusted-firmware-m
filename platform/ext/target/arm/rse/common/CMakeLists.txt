@@ -47,6 +47,8 @@ target_compile_definitions(platform_region_defs
         LCM_DCU_PARITY
         $<$<BOOL:${PLAT_MHU_VERSION}>:PLAT_MHU_VERSION=${PLAT_MHU_VERSION}>
         $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
+        $<$<BOOL:${RSE_BL1_TEST_BINARY}>:RSE_BL1_TEST_BINARY>
+        $<$<BOOL:${RSE_TEST_BINARY_IN_ROM}>:RSE_TEST_BINARY_IN_ROM>
 )
 
 #========================= Platform common defs ===============================#
@@ -115,6 +117,10 @@ if (RSE_AMOUNT GREATER 1)
 endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
+
+if (RSE_BL1_TEST_BINARY)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable rse_test_executable)
+endif()
 
 # Set which PLATFORM depedency must be used by the CC3XX driver
 set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
@@ -471,6 +477,7 @@ target_include_directories(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
+        ./tests/rse_test_executable
 )
 
 target_compile_definitions(platform_bl1_2
