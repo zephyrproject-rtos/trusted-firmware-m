@@ -310,7 +310,7 @@ def process_partition_manifests(manifest_lists, configs):
                 dict['manifest'] = manifest_path
                 all_manifests.append(dict)
 
-    logging.info("------------ Display partition configuration - start ------------")
+    logging.info("----------- Secure Partitions ------------------------")
 
     # Parse the manifests
     for i, manifest_item in enumerate(all_manifests):
@@ -435,7 +435,7 @@ def process_partition_manifests(manifest_lists, configs):
                                'output_dir': output_dir,
                                'numbered_priority': numbered_priority})
 
-    logging.info("------------ Display partition configuration - end ------------")
+    logging.info("------------------------------------------------------")
 
     check_circular_dependency(partition_list, service_partition_map)
 
