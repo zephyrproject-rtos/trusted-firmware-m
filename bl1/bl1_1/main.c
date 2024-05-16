@@ -57,7 +57,7 @@ static void collect_boot_measurement(void)
 }
 #endif /* TFM_MEASURED_BOOT_API */
 
-fih_int validate_image_at_addr(const uint8_t *image)
+fih_int bl1_1_validate_image_at_addr(const uint8_t *image)
 {
     enum tfm_plat_err_t plat_err;
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
@@ -126,7 +126,7 @@ int main(void)
             FIH_PANIC;
         }
 
-        FIH_CALL(validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
+        FIH_CALL(bl1_1_validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");

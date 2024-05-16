@@ -143,7 +143,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     FIH_RET(fih_rc);
 }
 
-fih_int validate_image_at_addr(struct bl1_2_image_t *image)
+fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
@@ -237,7 +237,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     FIH_RET(FIH_SUCCESS);
 }
 
-static fih_int validate_image(uint32_t image_id)
+static fih_int bl1_2_validate_image(uint32_t image_id)
 {
     fih_int fih_rc = FIH_FAILURE;
     struct bl1_2_image_t *image;
@@ -251,7 +251,7 @@ static fih_int validate_image(uint32_t image_id)
 
     BL1_LOG("[INF] BL2 image decrypted successfully\r\n");
 
-    FIH_CALL(validate_image_at_addr, fih_rc, image);
+    FIH_CALL(bl1_2_validate_image_at_addr, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image failed to validate\r\n");
         FIH_RET(fih_rc);
@@ -289,11 +289,11 @@ int main(void)
 
     do {
         BL1_LOG("[INF] Attempting to boot image 0\r\n");
-        FIH_CALL(validate_image, fih_rc, 0);
+        FIH_CALL(bl1_2_validate_image, fih_rc, 0);
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             BL1_LOG("[INF] Attempting to boot image 1\r\n");
-            FIH_CALL(validate_image, fih_rc, 1);
+            FIH_CALL(bl1_2_validate_image, fih_rc, 1);
         }
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
