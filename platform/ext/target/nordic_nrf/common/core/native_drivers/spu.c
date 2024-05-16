@@ -283,10 +283,13 @@ uint32_t spu_regions_sram_get_region_size(void) {
     return SRAM_SECURE_ATTRIBUTION_REGION_SIZE;
 }
 
+#endif /* NRF_SPU_HAS_MEMORY */
+
 void spu_peripheral_config_secure(const uint32_t periph_base_address, bool periph_lock)
 {
     uint8_t periph_id = NRFX_PERIPHERAL_ID_GET(periph_base_address);
 
+#if NRF_SPU_HAS_MEMORY
     /* ASSERT checking that this is not an explicit Non-Secure peripheral */
     NRFX_ASSERT((NRF_SPU->PERIPHID[periph_id].PERM &
         SPU_PERIPHID_PERM_SECUREMAPPING_Msk) !=
@@ -297,12 +300,26 @@ void spu_peripheral_config_secure(const uint32_t periph_base_address, bool perip
         1 /* Secure */,
         1 /* Secure DMA */,
         periph_lock);
+
+#else
+
+	NRF_SPU_Type * nrf_spu = spu_instance_from_peripheral_addr(periph_base_address);
+
+    uint8_t spu_id = NRFX_PERIPHERAL_ID_GET(nrf_spu);
+
+	uint8_t index = periph_id - spu_id;
+
+	nrf_spu_periph_perm_secattr_set(nrf_spu, index, true /* Secure */);
+	nrf_spu_periph_perm_dmasec_set(nrf_spu, index, true /* Secure */);
+	nrf_spu_periph_perm_lock_enable(nrf_spu, index);
+#endif
 }
 
 void spu_peripheral_config_non_secure(const uint32_t periph_base_address, bool periph_lock)
 {
     uint8_t periph_id = NRFX_PERIPHERAL_ID_GET(periph_base_address);
 
+#if NRF_SPU_HAS_MEMORY
     /* ASSERT checking that this is not an explicit Secure peripheral */
     NRFX_ASSERT((NRF_SPU->PERIPHID[periph_id].PERM &
         SPU_PERIPHID_PERM_SECUREMAPPING_Msk) !=
@@ -313,4 +330,15 @@ void spu_peripheral_config_non_secure(const uint32_t periph_base_address, bool p
         0 /* Non-Secure */,
         0 /* Non-Secure DMA */,
         periph_lock);
+#else
+	NRF_SPU_Type * nrf_spu = spu_instance_from_peripheral_addr(periph_base_address);
+
+    uint8_t spu_id = NRFX_PERIPHERAL_ID_GET(nrf_spu);
+
+	uint8_t index = periph_id - spu_id;
+
+	nrf_spu_periph_perm_secattr_set(nrf_spu, index, false /* Non-Secure */);
+	nrf_spu_periph_perm_dmasec_set(nrf_spu, index, false /* Non-Secure */);
+	nrf_spu_periph_perm_lock_enable(nrf_spu, index);
+#endif
 }
