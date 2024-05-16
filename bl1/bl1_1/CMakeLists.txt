@@ -47,7 +47,7 @@ target_link_libraries(bl1_1
         bl1_1_lib
         bl1_1_shared_lib
         platform_bl1_1
-        $<$<BOOL:${TEST_BL1_1}>:bl1_1_tests>
+        $<$<AND:$<BOOL:${TEST_BL1_1}>,$<BOOL:${PLATFORM_DEFAULT_BL1_1_TESTS}>>:bl1_1_tests>
 )
 
 target_compile_definitions(bl1_1

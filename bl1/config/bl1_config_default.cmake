@@ -32,3 +32,8 @@ set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer
 set(BL1_2_BUILD_TYPE                    ${CMAKE_BUILD_TYPE} CACHE STRING "Build type of BL1_2")
 
 set(BL1_1_SHARED_SYMBOLS_PATH ${CMAKE_SOURCE_DIR}/bl1/bl1_1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
+
+set(PLATFORM_DEFAULT_BL1_1_TESTS        ON         CACHE BOOL "Whether to use platform-specific BL1_1 testsuite")
+set(PLATFORM_DEFAULT_BL1_2_TESTS        ON         CACHE BOOL "Whether to use platform-specific BL1_2 testsuite")
+set(EXTRA_BL1_1_TEST_SUITE_PATH         ""         CACHE STRING "path to extra BL1_1 testsuite")
+set(EXTRA_BL1_2_TEST_SUITE_PATH         ""         CACHE STRING "path to extra BL1_2 testsuite")

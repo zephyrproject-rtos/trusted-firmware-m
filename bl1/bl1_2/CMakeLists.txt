@@ -50,7 +50,7 @@ target_link_libraries(bl1_2
         bl1_2_lib
         platform_bl1_1_interface
         platform_bl1_2
-        $<$<BOOL:${TEST_BL1_2}>:bl1_2_tests>
+        $<$<AND:$<BOOL:${TEST_BL1_2}>,$<BOOL:${PLATFORM_DEFAULT_BL1_2_TESTS}>>:bl1_2_tests>
 )
 
 target_compile_definitions(bl1_2

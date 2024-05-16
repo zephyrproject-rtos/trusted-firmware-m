@@ -96,6 +96,10 @@ int main(void)
     }
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
 
+#ifdef TEST_BL1_1
+    run_bl1_1_testsuite();
+#endif /* TEST_BL1_1 */
+
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
             BL1_LOG("[ERR] BL1 provisioning failed\r\n");
@@ -109,10 +113,6 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-
-#ifdef TEST_BL1_1
-    run_bl1_1_testsuite();
-#endif /* TEST_BL1_1 */
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
