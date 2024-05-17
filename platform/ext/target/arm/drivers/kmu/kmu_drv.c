@@ -277,6 +277,8 @@ enum kmu_error_t kmu_set_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
 
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_IKS_MASK;
 
+    while(p_kmu->kmuksc[slot] & KMU_KMUKSC_IKS_MASK){}
+
     if (p_kmu->kmuis & KMU_KMISR_AIKSWE_MASK) {
         err = KMU_ERROR_SLOT_INTERNAL_ERROR;
     } else {

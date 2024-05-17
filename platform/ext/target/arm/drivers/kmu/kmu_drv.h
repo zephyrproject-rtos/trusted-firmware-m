@@ -291,8 +291,6 @@ enum kmu_error_t kmu_get_key_buffer_ptr(struct kmu_dev_t *dev, uint32_t slot,
                                         volatile uint32_t **key_slot,
                                         size_t *slot_size);
 
-enum kmu_error_t kmu_reset_slot(struct kmu_dev_t *dev, uint32_t slot);
-
 enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot);
 
 enum kmu_error_t kmu_random_delay(struct kmu_dev_t *dev,
