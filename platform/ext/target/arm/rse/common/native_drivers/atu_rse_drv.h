@@ -63,7 +63,7 @@ enum atu_roba_t {
  * \brief Arm ATU device configuration structure
  */
 struct atu_dev_cfg_t {
-    const uint32_t base;                         /*!< ATU base address */
+    const uintptr_t base;                         /*!< ATU base address */
 };
 
 /**
