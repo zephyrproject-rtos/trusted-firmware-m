@@ -364,16 +364,21 @@ enum atu_error_t atu_initialize_region(struct atu_dev_t *dev, uint8_t region,
                                        uint32_t size)
 {
     enum atu_error_t err;
-    struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
-
-    uint32_t end_log_addr = log_addr + size - 1;
-    uint8_t ps = ATU_GET_ATUPS(p_atu);
-    uint64_t add_value = (phys_addr - log_addr) >> ps;
+    struct _atu_reg_map_t* p_atu;
+    uint8_t ps;
+    uint32_t end_log_addr;
+    uint64_t add_value;
 
     if (dev == NULL) {
         /* Invalid parameters */
         return ATU_ERR_INIT_REGION_INVALID_ARG;
     }
+
+    p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+
+    ps = ATU_GET_ATUPS(p_atu);
+    end_log_addr = log_addr + size - 1;
+    add_value = (phys_addr - log_addr) >> ps;
 
     if ((phys_addr & ((1 << ps) - 1)) != 0 || (log_addr & ((1 << ps) - 1)) != 0
          || (size & ((1 << ps) - 1)) != 0) {
