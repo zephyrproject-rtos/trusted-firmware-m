@@ -176,6 +176,8 @@ Service source files
 - Initial Attestation Service:
     - ``attest_core.c`` : Implements core functionalities such as implementation
       of APIs, retrieval of claims and token creation.
+    - ``attest_boot_data.c`` : Implements core functionalities for measured
+      boot.
     - ``attest_token_encode.c``: Implements the token creation functions such as
       start and finish token creation and adding claims to the token.
     - ``attest_asymmetric_key.c``: Calculate the Instance ID value based on
@@ -194,7 +196,7 @@ Service interface definitions
   in the token about the distinct software components in the device. This data
   is provided by the boot loader and must be encoded in the TLV format,
   definition is described below in the boot loader interface paragraph. Possible
-  claims in the boot status are describe above in the software components
+  claims in the boot status are described above in the software components
   paragraph.
 - **Hardware abstraction layer**:
     - Headers are located in ``platform/include`` folder.
@@ -355,12 +357,12 @@ The structure of shared data must be the following:
 -  Arbitrary number and size of data entry can be in the shared memory
    area.
 
-The figure below gives of overview about the ``tlv_type`` field in the entry
-header. The ``tlv_type`` always composed from a major and minorbnumber. Major
-number identifies the addressee in runtime software, which the databentry is
-sent to. Minor number used to encode more info about the data entry. The actual
-definition of minor number could change per major number. In case of boot
-status data, which is going to be processed by initial attestation service
+The figure below gives an overview about the ``tlv_type`` field in the entry
+header. The ``tlv_type`` is always composed from a major and a minor number.
+Major number identifies the addressee in runtime software, which the data entry
+is sent to. Minor number is used to encode more info about the data entry. The
+actual definition of minor number could change per major number. In case of boot
+status data, which is going to be processed by initial attestation service,
 the minor number is split further to two part: ``sw_module`` and ``claim``. The
 ``sw_module`` identifies the SW component in the system which the data item
 belongs to and the ``claim`` part identifies the exact type of the data.
@@ -404,13 +406,13 @@ Device **must** contain an asymmetric key pair. The private part of it is used
 to sign the initial attestation token. Current implementation supports only the
 ECDSA P256 signature over SHA256. The public part of the key pair is used to
 create the key identifier (kid) in the unprotected part of the COSE header. The
-kid is used by verification entity to look up the corresponding public key to
-verify the signature in the token. The `t_cose` part of the initial attestation
-service implements the signature generation and kid creation. But the actual
-calculation of token's hash and signature is done by the Crypto service in the
-device. System integrators might need to re-implement the following functions
-if they want to use initial attestation service with a different cryptographic
-library than Crypto service:
+kid is used by the verification entity to look up the corresponding public key
+to verify the signature in the token. The `t_cose` part of the initial
+attestation service implements the signature generation and kid creation. But
+the actual calculation of token's hash and signature is done by the Crypto
+service in the device. System integrators might need to re-implement the
+following functions if they want to use initial attestation service with a
+different cryptographic library than Crypto service:
 
 - ``t_cose_crypto_pub_key_sign()``: Calculates the signature over a hash value.
 - ``t_cose_crypto_get_ec_pub_key()``: Get the public key to create the key
@@ -487,7 +489,7 @@ available by Crypto service:
 Initial Attestation Service compile time options
 ================================================
 There is a defined set of flags that can be used to compile in/out certain
-service features. The ``CommonConfig.cmake`` file sets the default values of
+service features. The ``config_base.cmake`` file sets the default values of
 those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
@@ -496,10 +498,6 @@ those flags. The list of flags are:
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
   on the value of this flag. Default value: OFF.
-- ``ATTEST_CLAIM_VALUE_CHECK``: Check attestation claims against hard-coded
-  values found in ``platform/ext/common/template/attest_hal.c``. Default value
-  is OFF. Set to ON in a platform's CMake file if the attest HAL is not yet
-  properly ported to it.
 - ``SYMMETRIC_INITIAL_ATTESTATION``: Select symmetric initial attestation.
   Default value: OFF.
 - ``ATTEST_INCLUDE_TEST_CODE``: The initial attestation implementation is
@@ -511,18 +509,24 @@ those flags. The list of flags are:
   Enabling this option enables T_COSE_DISABLE_SHORT_CIRCUIT_SIGN which will
   short circuit the signing operation.
   Default value: OFF.
-- ``ATTEST_STACK_SIZE``- Defines the stack size of the Initial Attestation Partition.
-  This value mainly depends on the build type(debug, release and minisizerel) and
-  compiler.
+- ``ATTEST_STACK_SIZE``- Defines the stack size of the Initial Attestation
+  Partition. This value mainly depends on the build type(debug, release and
+  minisizerel) and compiler.
+  Default value: Depends on the profile.
+- ``ATTEST_KEY_BITS`` Defines the size of the initial attestation key, in bits.
+  Default value: 256.
+- ``PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE`` Defines the maximum possible size of a
+  token.
+  Default value: 0x250.
 
 Related compile time options
 ----------------------------
 - ``BOOT_DATA_AVAILABLE``: The boot data is expected to be present in the shared
-  data area between the boot loader and the runtime firmware when it's ON.
-  Otherwise, when it's OFF does not check the content of the shared data area
-  but instead assumes that the TLV header is present and valid (the magic number
-  is correct) and there are no data entries. Its default value depends on the
-  BL2 flag.
+  data area between the boot loader and the runtime firmware when set to ``ON``.
+  Otherwise, when it's ``OFF`` TF-M does not check the content of the shared
+  data area but instead assumes that the TLV header is present and valid (the
+  magic number is correct) and there are no data entries. Its default value
+  depends on the BL2 flag.
 
 ***************************************************************************
 Comparison of asymmetric and symmetric algorithm based token authentication
@@ -649,4 +653,4 @@ that user has license for DS-5 and FVP models:
 
 --------------
 
-*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2024, Arm Limited. All rights reserved.*
