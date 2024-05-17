@@ -60,6 +60,7 @@ set_target_properties(tfm_s
     PROPERTIES
         SUFFIX ".axf"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ADDITIONAL_CLEAN_FILES "${CMAKE_BINARY_DIR}/generated;${CMAKE_BINARY_DIR}/bin/tfm_s.map"
 )
 
 target_compile_options(tfm_s

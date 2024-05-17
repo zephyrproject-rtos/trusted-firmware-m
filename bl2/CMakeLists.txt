@@ -25,6 +25,7 @@ set_target_properties(bl2
     PROPERTIES
         SUFFIX ".axf"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ADDITIONAL_CLEAN_FILES "${CMAKE_BINARY_DIR}/generated;${CMAKE_BINARY_DIR}/bin/bl2.map"
 )
 
 target_include_directories(bl2
