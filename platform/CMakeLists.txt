@@ -68,8 +68,8 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_ps.c>
-        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
+        $<$<AND:$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>,$<BOOL:PLATFORM_DEFAULT_PS_HAL>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_ps.c>
+        $<$<AND:$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>,$<BOOL:${PLATFORM_DEFAULT_ITS_HAL}>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
         $<$<BOOL:${PLATFORM_DEFAULT_SYSTEM_RESET_HALT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_reset_halt.c>
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
         $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>

@@ -109,6 +109,8 @@ set(PLATFORM_ERROR_CODES                OFF         CACHE BOOL      "Whether to 
 
 set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
 set(PLATFORM_DEFAULT_ATTEST_HAL         ON          CACHE BOOL      "Use default attest hal implementation.")
+set(PLATFORM_DEFAULT_ITS_HAL            ON          CACHE BOOL      "Use default ITS HAL implementation.")
+set(PLATFORM_DEFAULT_PS_HAL             ON          CACHE BOOL      "Use default Protected Storage HAL implementation.")
 set(PLATFORM_DEFAULT_NV_COUNTERS        ON          CACHE BOOL      "Use default nv counter implementation.")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        ON          CACHE BOOL      "Use default crypto keys implementation.")
 set(PLATFORM_DEFAULT_ROTPK              ON          CACHE BOOL      "Use default root of trust public key.")
