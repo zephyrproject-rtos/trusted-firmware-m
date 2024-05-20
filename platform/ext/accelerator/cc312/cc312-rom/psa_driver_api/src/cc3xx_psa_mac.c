@@ -26,6 +26,7 @@
  */
 #include "mbedtls/build_info.h"
 
+#if defined(PSA_WANT_ALG_CMAC)
 /**
  * @brief Perform CMAC in integrated way directly calling
  *        the low level driver APIs
@@ -155,7 +156,9 @@ static psa_status_t cmac_finish(struct cc3xx_aes_state_t *state,
     cc3xx_lowlevel_aes_uninit();
     return PSA_SUCCESS;
 }
+#endif /* PSA_WANT_ALG_CMAC */
 
+#if defined(PSA_WANT_ALG_HMAC)
 /**
  * @brief Perform HMAC in integrated way directly calling
  *        the low level driver APIs
@@ -248,6 +251,7 @@ static psa_status_t hmac_setup(struct cc3xx_hmac_state_t *state,
 
     return PSA_SUCCESS;
 }
+#endif /* PSA_WANT_ALG_HMAC */
 
 /** @brief Setup a multipart MAC operation context with given key and algorithm
  *
@@ -333,6 +337,7 @@ psa_status_t cc3xx_mac_update(cc3xx_mac_operation_t *operation,
     } else
 #endif /* PSA_WANT_ALG_HMAC */
     {
+        (void)err;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -373,16 +378,19 @@ psa_status_t cc3xx_mac_verify_finish(cc3xx_mac_operation_t *operation,
                                      const uint8_t *mac, size_t mac_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
+#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_HMAC)
     uint32_t actual_mac[SHA256_OUTPUT_SIZE / sizeof(uint32_t)]; /* needs to take into account both hash and mac */
     uint8_t idx, diff;
-    size_t produced_mac_length;
-
-    CC3XX_ASSERT(operation != NULL);
-    CC3XX_ASSERT(mac != NULL);
+    size_t produced_mac_length = 0;
 
     if (mac_length > sizeof(actual_mac)) {
         return PSA_ERROR_INVALID_SIGNATURE;
     }
+#endif /* PSA_WANT_ALG_CMAC || PSA_WANT_ALG_HMAC */
+
+    CC3XX_ASSERT(operation != NULL);
+    CC3XX_ASSERT(mac != NULL);
 
 #if defined(PSA_WANT_ALG_CMAC)
     if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CMAC) {
@@ -398,6 +406,7 @@ psa_status_t cc3xx_mac_verify_finish(cc3xx_mac_operation_t *operation,
         status = PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_CMAC) || defined(PSA_WANT_ALG_HMAC)
     if (status != PSA_SUCCESS) {
         goto out;
     }
@@ -418,6 +427,7 @@ psa_status_t cc3xx_mac_verify_finish(cc3xx_mac_operation_t *operation,
 
 out:
     memset(actual_mac, 0, sizeof(actual_mac));
+#endif /* PSA_WANT_ALG_CMAC || PSA_WANT_ALG_HMAC */
     return status;
 }
 

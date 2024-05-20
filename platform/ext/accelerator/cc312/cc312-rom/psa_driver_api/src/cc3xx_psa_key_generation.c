@@ -45,13 +45,13 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
 
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_bits_t key_bits = psa_get_key_bits(attributes);
-    cc3xx_err_t err;
 
     /* Initialise the return value to 0 */
     *key_buffer_length = 0;
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
 #if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
         if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+            cc3xx_err_t err;
             /* Translate from PSA curve ID to CC3XX curve ID*/
             const cc3xx_ec_curve_id_t curve_id =
                 cc3xx_to_curve_id(PSA_KEY_TYPE_ECC_GET_FAMILY(key_type), key_bits);
@@ -90,6 +90,7 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
     } else if (PSA_KEY_TYPE_IS_UNSTRUCTURED(key_type)) {
         return mbedtls_psa_external_get_random(NULL, key_buffer, key_buffer_size, key_buffer_length);
     } else {
+        (void)key_bits;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -105,8 +106,6 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     CC3XX_ASSERT(data_length != NULL);
 
     psa_key_type_t key_type = psa_get_key_type(attributes);
-    psa_key_bits_t key_bits = psa_get_key_bits(attributes);
-    cc3xx_err_t err;
 
     /* Initialise the return value to 0 */
     *data_length = 0;
@@ -125,6 +124,8 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
 
 #if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
     if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+        cc3xx_err_t err;
+        psa_key_bits_t key_bits = psa_get_key_bits(attributes);
         /* Translate from PSA curve ID to CC3XX curve ID*/
         const cc3xx_ec_curve_id_t curve_id =
             cc3xx_to_curve_id(PSA_KEY_TYPE_ECC_GET_FAMILY(key_type), key_bits);

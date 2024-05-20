@@ -224,7 +224,10 @@ static psa_status_t aead_crypt(
 #endif /* PSA_WANT_KEY_TYPE_AES */
 
     default:
-        return PSA_ERROR_NOT_SUPPORTED;
+        (void)default_alg;
+        (void)err;
+        status = PSA_ERROR_NOT_SUPPORTED;
+        goto out;
     }
 
     /* Bytes produced on finish will take into account all bytes up to finish, minus the tag */
@@ -502,6 +505,7 @@ out_aes:
 
     default:
         (void)err;
+        (void)current_output_size;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -518,7 +522,7 @@ psa_status_t cc3xx_aead_finish(
         size_t *tag_length)
 {
     cc3xx_err_t err;
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status;
     size_t bytes_produced_on_finish;
     uint32_t local_tag[16 / sizeof(uint32_t)];
 
@@ -617,6 +621,9 @@ out_aes:
 
     default:
         (void)err;
+        (void)local_tag;
+        (void)bytes_produced_on_finish;
+        (void)status;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -632,7 +639,7 @@ psa_status_t cc3xx_aead_verify(
         size_t tag_size)
 {
     cc3xx_err_t err;
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status;
     size_t bytes_produced_on_finish;
     uint32_t local_tag[16 / sizeof(uint32_t)];
 
@@ -743,6 +750,9 @@ out_aes:
 #endif /* PSA_WANT_KEY_TYPE_AES */
 
     default:
+        (void)bytes_produced_on_finish;
+        (void)err;
+        (void)status;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 

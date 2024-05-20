@@ -27,6 +27,7 @@
  */
 #include "mbedtls/build_info.h"
 
+#if defined(PSA_WANT_ALG_ECDSA) && defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
 /**
  * @brief Wrapper function around the lowlevel ECDSA signing API that takes care
  *        of input/output formatting and hashing if required
@@ -100,7 +101,9 @@ static psa_status_t ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
 
     return PSA_SUCCESS;
 }
+#endif /* PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC */
 
+#if defined(PSA_WANT_ALG_ECDSA) && defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
 /**
  * @brief Wrapper function around the lowlevel ECDSA verification API that takes care
  *        of input/output formatting and hashing if required
@@ -191,6 +194,7 @@ static psa_status_t ecdsa_verify(const psa_key_attributes_t *attributes, cc3xx_e
 
      return cc3xx_to_psa_err(err);
 }
+#endif /* PSA_WANT_ALG_ECDSA && PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY */
 
 /** @defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
  *
@@ -263,6 +267,9 @@ psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
     } else
 #endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC */
     {
+        (void)hash_alg;
+        (void)key_bits;
+        (void)key_type;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -283,7 +290,7 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_bits_t key_bits = psa_get_key_bits(attributes);
 
-#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC) || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
     if (PSA_KEY_TYPE_IS_ECC(key_type)) {
 
         if (!PSA_ALG_IS_HASH_AND_SIGN(alg)) {
@@ -311,15 +318,18 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
                     signature, signature_length,
                     true, hash_alg);
     } else
-#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC */
-#if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC)
+#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC) */
+#if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC) || defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
     if (PSA_KEY_TYPE_IS_RSA(key_type)) {
 
         return PSA_ERROR_NOT_SUPPORTED;
 
     } else
-#endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC */
+#endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC || PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY */
     {
+        (void)hash_alg;
+        (void)key_bits;
+        (void)key_type;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -381,6 +391,9 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
     } else
 #endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC */
     {
+        (void)key_type;
+        (void)key_bits;
+        (void)hash_alg;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -431,6 +444,9 @@ psa_status_t cc3xx_verify_message(const psa_key_attributes_t *attributes,
     } else
 #endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC */
     {
+        (void)key_type;
+        (void)key_bits;
+        (void)hash_alg;
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

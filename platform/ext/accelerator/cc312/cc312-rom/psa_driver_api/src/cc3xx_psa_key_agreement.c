@@ -48,9 +48,6 @@ psa_status_t cc3xx_key_agreement(
     CC3XX_ASSERT(output_length != NULL);
 
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_key_type_t key_type = psa_get_key_type(attributes);
-    psa_key_bits_t key_bits = psa_get_key_bits(attributes);
-    cc3xx_err_t err;
 
     /* Initialize output_length */
     *output_length = 0;
@@ -59,6 +56,9 @@ psa_status_t cc3xx_key_agreement(
 #if defined(PSA_WANT_ALG_ECDH)
     case PSA_ALG_ECDH:
     {
+        cc3xx_err_t err;
+        psa_key_type_t key_type = psa_get_key_type(attributes);
+        psa_key_bits_t key_bits = psa_get_key_bits(attributes);
         /* Translate from PSA curve ID to CC3XX curve ID*/
         const cc3xx_ec_curve_id_t curve_id =
             cc3xx_to_curve_id(PSA_KEY_TYPE_ECC_GET_FAMILY(key_type), key_bits);

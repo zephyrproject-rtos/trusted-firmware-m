@@ -97,7 +97,7 @@ static psa_status_t cipher_crypt(
         size_t *output_length,
         psa_encrypt_or_decrypt_t dir)
 {
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status;
     psa_key_type_t key_type = PSA_KEY_TYPE_NONE;
     cc3xx_err_t err;
     size_t bytes_produced_on_finish;
@@ -278,6 +278,7 @@ out_aes:
     default:
         (void)err;
         (void)bytes_produced_on_finish;
+        (void)status;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -465,6 +466,7 @@ out_aes:
 
     default:
         (void)err;
+        (void)current_output_size;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -475,7 +477,7 @@ psa_status_t cc3xx_cipher_finish(
         cc3xx_cipher_operation_t *operation,
         uint8_t *output, size_t output_size, size_t *output_length)
 {
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status;
     cc3xx_err_t err;
     size_t bytes_produced_on_finish;
 
@@ -589,6 +591,8 @@ out_aes:
 #endif /* PSA_WANT_KEY_TYPE_AES */
     default:
         (void)err;
+        (void)bytes_produced_on_finish;
+        (void)status;
         return PSA_ERROR_NOT_SUPPORTED;
     }
 

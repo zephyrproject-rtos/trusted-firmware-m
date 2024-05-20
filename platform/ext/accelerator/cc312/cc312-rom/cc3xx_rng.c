@@ -313,6 +313,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random_uint(uint32_t bound, uint32_t *uint,
     return CC3XX_ERR_SUCCESS;
 }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 /* https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle. This returns a
  * uniformly random permutation, verified by experiment.
  */
@@ -340,6 +341,7 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len,
         permutation_buf[swap_idx] = temp_elem;
     }
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
 cc3xx_err_t cc3xx_lowlevel_rng_get_random_permutation(uint8_t *permutation_buf, size_t len,
                                                       enum cc3xx_rng_quality_t quality)
