@@ -13,6 +13,8 @@
  *
  */
 
+#include <string.h>
+
 #include "cc3xx_psa_key_generation.h"
 #include "cc3xx_misc.h"
 
