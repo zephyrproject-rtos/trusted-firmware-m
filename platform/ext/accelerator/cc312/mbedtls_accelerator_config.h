@@ -29,6 +29,13 @@ extern "C" {
 #define MBEDTLS_MD_C
 #endif
 
+#ifndef LEGACY_DRIVER_API_ENABLED
+#ifdef CC3XX_RUNTIME_ENABLED
+/* CC3XX integrates the cc3xx_random entry point through this mechanism */
+#define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
+#endif
+#endif
+
 /* Main Config */
 #ifdef LEGACY_DRIVER_API_ENABLED
 #ifdef MBEDTLS_DHM_C
