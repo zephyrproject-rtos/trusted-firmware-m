@@ -225,7 +225,8 @@ if (TFM_PARTITION_CRYPTO)
         set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
     else()
         if (${CC3XX_RUNTIME_ENABLED})
-            set(CC312_DRIVER_API_TARGET cc312_rom_psa_driver_api)
+            set(CC3XX_TARGET_PREFIX crypto_service_)
+            set(CC312_DRIVER_API_TARGET ${CC3XX_TARGET_PREFIX}cc312_rom_psa_driver_api)
         else()
             set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
         endif()
@@ -233,7 +234,7 @@ if (TFM_PARTITION_CRYPTO)
 
     if (NOT ${CC312_LEGACY_DRIVER_API_ENABLED} AND ${CC3XX_RUNTIME_ENABLED})
         set(CC3XX_PLATFORM_INTERFACE platform_s)
-        add_subdirectory(cc312-rom)
+        add_subdirectory(cc312-rom ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc312-rom)
     endif()
 
     # Adding two targets as link-time dependencies of each other seems bad, but
