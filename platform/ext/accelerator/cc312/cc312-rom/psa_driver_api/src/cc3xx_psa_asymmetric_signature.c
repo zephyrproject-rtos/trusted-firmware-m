@@ -131,6 +131,10 @@ static psa_status_t ecdsa_verify(const psa_key_attributes_t *attributes, cc3xx_e
     cc3xx_err_t err;
     psa_status_t status;
 
+#if !defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
+    assert(is_key_private == false);
+#endif
+
     if (!is_input_hash) {
         assert(PSA_ALG_IS_HASH(hash_alg) && hash_alg != PSA_ALG_ANY_HASH);
     }
@@ -160,13 +164,18 @@ static psa_status_t ecdsa_verify(const psa_key_attributes_t *attributes, cc3xx_e
     }
 
     /* Public keys are in uncompressed format, i.e. 0x04 X Y */
+#if !defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
+    const size_t modulus_size_in_bytes = (key_length - 1) / 2;
+#else
     const size_t modulus_size_in_bytes = (is_key_private) ? key_length : (key_length - 1) / 2;
+#endif
     uint32_t pubkey[1 + 2 * CEIL_ALLOC_SZ(modulus_size_in_bytes, sizeof(uint32_t))];
     uint32_t *key_x = &pubkey[1];
     uint32_t *key_y = &pubkey[1 + CEIL_ALLOC_SZ(modulus_size_in_bytes, sizeof(uint32_t))];
 
     const uint8_t *p_key;
     size_t key_length_public;
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)
     if (is_key_private) {
         p_key = &((uint8_t *)pubkey)[3];
         /* In this case we need to extract the public key from the private first */
@@ -176,7 +185,9 @@ static psa_status_t ecdsa_verify(const psa_key_attributes_t *attributes, cc3xx_e
         if (status != PSA_SUCCESS) {
             return status;
         }
-    } else {
+    } else
+#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC */
+    {
         /* Just copy the public key points in the aligned buffers */
         p_key = key;
         key_length_public = key_length;
