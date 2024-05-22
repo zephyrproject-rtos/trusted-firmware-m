@@ -116,6 +116,21 @@ Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
     :github: `jf549 <https://github.com/jf549>`__
 
+Arm Automotive RD
+"""""""""""""""""
+
+Diego Sueiro
+    :email: `diego.sueiro@arm.com <diego.sueiro@arm.com>`__
+    :github: `diego-sueiro <https://github.com/diego-sueiro>`__
+
+Peter Hoyes
+    :email: `peter.hoyes@arm.com <peter.hoyes@arm.com>`__
+    :github: `hoyes <https://github.com/hoyes>`__
+
+Ziad Elhanafy
+   :email: `ziad.elhanafy@arm.com <ziad.elhanafy@arm.com>`__
+   :github: `ZiadElhanafy <https://github.com/ZiadElhanafy>`__
+
 NXP Platforms
 ~~~~~~~~~~~~~
 
