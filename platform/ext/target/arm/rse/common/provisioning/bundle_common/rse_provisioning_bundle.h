@@ -32,29 +32,7 @@ extern "C" {
 #define CM_BUNDLE_MAGIC 0xAAAAC0DEFEEDAAAA
 #define DM_BUNDLE_MAGIC 0xAAAABEEFFEEDAAAA
 
-struct __attribute__((__packed__)) cm_provisioning_bundle {
-    /* This section is authenticated */
-    uint64_t magic;
-    /* This section is encrypted */
-    uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
-    union __attribute__((__packed__)) {
-        struct __attribute__((__packed__)) cm_provisioning_data {
-            uint8_t bl1_2_image_hash[32];
-            uint8_t bl1_2_image[BL1_2_CODE_SIZE];
-            uint8_t dma_otp_ics[OTP_DMA_ICS_SIZE];
-            uint8_t guk[32];
-            uint32_t cca_system_properties;
-        } values;
-        uint8_t _pad[PROVISIONING_BUNDLE_VALUES_SIZE];
-    };
-    uint8_t data[PROVISIONING_BUNDLE_DATA_SIZE];
-    /* This section is metadata */
-    uint32_t iv[3];
-    uint32_t tag[4];
-    uint64_t magic2;
-};
-
-struct __attribute__((__packed__)) dm_provisioning_bundle {
+struct __attribute__((__packed__)) rse_provisioning_bundle {
     /* This section is authenticated */
     uint64_t magic;
     /* This section is encrypted */
@@ -78,8 +56,15 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
             uint8_t verification_service_url[32];
             uint8_t profile_definition[32];
             uint8_t secure_debug_pk[32];
-        } values;
-        uint8_t _pad[PROVISIONING_BUNDLE_VALUES_SIZE];
+        } dm_values;
+        struct __attribute__((__packed__)) cm_provisioning_data {
+            uint8_t bl1_2_image_hash[32];
+            uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+            uint8_t dma_otp_ics[OTP_DMA_ICS_SIZE];
+            uint8_t guk[32];
+            uint32_t cca_system_properties;
+        } cm_values;
+        uint8_t values_as_bytes[PROVISIONING_BUNDLE_VALUES_SIZE];
     };
     uint8_t data[PROVISIONING_BUNDLE_DATA_SIZE];
     /* This section is metadata */
