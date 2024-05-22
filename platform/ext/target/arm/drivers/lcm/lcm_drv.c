@@ -283,6 +283,17 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
     enum lcm_bool_t fatal_err;
     enum lcm_error_t err;
     uint32_t idx;
+    enum lcm_tp_mode_t tp_mode;
+
+    err = lcm_get_tp_mode(dev, &tp_mode);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
+
+    if (!((tp_mode == LCM_TP_MODE_PCI) || (tp_mode == LCM_TP_MODE_TCI))) {
+        FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TP_MODE);
+        return LCM_ERROR_SET_LCS_INVALID_TP_MODE;
+    }
 
     mask_dcus_for_sp_enable(dev);
 
