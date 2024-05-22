@@ -85,11 +85,7 @@ int32_t boot_platform_init(void)
     }
 
 #ifdef RSE_ENABLE_BRINGUP_HELPERS
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return lcm_err;
-    }
-
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN || tp_mode == LCM_TP_MODE_TCI) {
         rse_run_bringup_helpers_if_requested();
     }

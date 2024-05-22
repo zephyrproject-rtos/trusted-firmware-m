@@ -277,10 +277,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
     BL1_LOG("[INF] Beginning RSE provisioning\r\n");
 
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return lcm_err;
-    }
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN) {
         gpio_set(RSE_GPIO_STATE_VIRGIN_IDLE);
         plat_err = set_tp_mode();

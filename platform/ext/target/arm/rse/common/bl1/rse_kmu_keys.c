@@ -365,15 +365,9 @@ static enum tfm_plat_err_t derive_using_krtl_or_zero_key(const uint8_t *label,
     enum rse_kmu_slot_id_t input_slot;
     uint32_t *key_buf;
 
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return (enum tfm_plat_err_t)lcm_err;
-    }
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
 
-    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
 
     if (sp_enabled != LCM_TRUE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;

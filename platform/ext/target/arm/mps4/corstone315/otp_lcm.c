@@ -588,10 +588,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
-    if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+    lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if (otp_size < OTP_OFFSET(user_data) +
                    sizeof(struct plat_user_area_layout_t)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;

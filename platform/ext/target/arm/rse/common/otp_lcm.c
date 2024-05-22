@@ -400,10 +400,7 @@ static enum tfm_plat_err_t check_if_otp_is_emulated(uint32_t offset, uint32_t le
     enum lcm_error_t lcm_err;
     enum lcm_tp_mode_t tp_mode;
 
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return lcm_err;
-    }
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
 
     /* If the OTP is outside the emulated region, and the emulation is enabled,
      * then return UNSUPPORTED.
@@ -729,10 +726,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return err;
     }
 
-    err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if ((otp_size < OTP_OFFSET(user_data) + sizeof(struct plat_user_area_layout_t)) ||
         (OTP_TOTAL_SIZE < OTP_OFFSET(user_data) + sizeof(struct plat_user_area_layout_t))) {
         return TFM_PLAT_ERR_OTP_INIT_SYSTEM_ERR;
@@ -1035,10 +1029,7 @@ enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
     enum lcm_lcs_t lcs;
 #endif /* LCM_VERSION == 0 */
 
-    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return lcm_err;
-    }
+    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
 
     if (sp_enabled != LCM_TRUE) {
         lcm_set_sp_enabled(&LCM_DEV_S);

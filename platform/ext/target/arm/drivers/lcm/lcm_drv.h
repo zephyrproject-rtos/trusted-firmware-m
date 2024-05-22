@@ -161,10 +161,8 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev);
  *
  * \param[in]  dev     The LCM device structure.
  * \param[out] mode    The TP mode the device is currently in.
- *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
+void lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
 /**
  * \brief This function sets the TP mode
  *
@@ -181,9 +179,8 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
  * \param[in]  dev         The LCM device structure.
  * \param[out] enabled     Whether secure provisioning mode is enabled.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
+void lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
 /**
  * \brief This function enables secure provisioning mode.
  *
@@ -202,9 +199,8 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev);
  * \param[in]  dev     The LCM device structure.
  * \param[out] error   Whether fatal error mode is enabled.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error);
+void lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error);
 /**
  * \brief This function enables fatal error mode.
  *
@@ -213,9 +209,8 @@ enum lcm_error_t lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *err
  * \note This function will cause the LCM to be inoperable until the device is
  *       reset.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_set_fatal_error(struct lcm_dev_t *dev);
+void lcm_set_fatal_error(struct lcm_dev_t *dev);
 
 /**
  * \brief This function gets the General purpose persistent configuration.
@@ -223,9 +218,8 @@ enum lcm_error_t lcm_set_fatal_error(struct lcm_dev_t *dev);
  * \param[in]  dev     The LCM device structure.
  * \param[out] gppc    The value of the gppc.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
+void lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
 
 /**
  * \brief This function gets the size of the OTP managed by the LCM.
@@ -233,9 +227,8 @@ enum lcm_error_t lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
  * \param[in]  dev     The LCM device structure.
  * \param[out] size    The size (in bytes) of the OTP.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size);
+void lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size);
 
 /**
  * \brief This function gets Lifecycle State the LCM is currently in.

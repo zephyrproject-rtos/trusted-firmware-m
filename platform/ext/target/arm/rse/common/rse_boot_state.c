@@ -34,10 +34,7 @@ int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
     }
 
     if (mask & RSE_BOOT_STATE_INCLUDE_TP_MODE) {
-        lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-        if (lcm_err != LCM_ERROR_NONE) {
-            return lcm_err;
-        }
+        lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
 
         err = cc3xx_lowlevel_hash_update((uint8_t *)&tp_mode, sizeof(tp_mode));
         if (err != CC3XX_ERR_SUCCESS) {
