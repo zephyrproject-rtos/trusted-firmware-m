@@ -177,6 +177,10 @@ if (TEST_BL1_2 AND RSE_BL1_TEST_BINARY)
     set(BL1_2_SHARED_SYMBOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable/bl1_2_tests_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_2 that can be referenced from tests")
 endif()
 
+set(EXTRA_BL1_1_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_1" CACHE STRING "path to extra BL1_1 testsuite")
+# TODO uncomment this once we have some extra BL1_2 tests, else this causes an error
+# set(EXTRA_BL1_2_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_2" CACHE STRING "path to extra BL1_2 testsuite")
+
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate

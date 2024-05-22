@@ -53,6 +53,7 @@ target_link_libraries(bl1_1
 target_compile_definitions(bl1_1
     PRIVATE
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
+        $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
 )
 

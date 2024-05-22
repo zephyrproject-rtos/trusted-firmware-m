@@ -49,6 +49,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
         $<$<BOOL:${RSE_BL1_TEST_BINARY}>:RSE_BL1_TEST_BINARY>
         $<$<BOOL:${RSE_TEST_BINARY_IN_ROM}>:RSE_TEST_BINARY_IN_ROM>
+        $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
 )
 
 #========================= Platform common defs ===============================#

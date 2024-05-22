@@ -21,12 +21,12 @@ int main(void)
 {
     stdio_init();
 
-#ifdef TEST_BL1_1
-    run_bl1_1_testsuite();
-#endif /* TEST_BL1_1 */
 #ifdef TEST_BL1_2
     run_bl1_2_testsuite();
 #endif /* TEST_BL1_2 */
+#ifdef TEST_BL1_1
+    run_bl1_1_testsuite();
+#endif /* TEST_BL1_1 */
 
     while(1){
         __asm volatile("wfi");

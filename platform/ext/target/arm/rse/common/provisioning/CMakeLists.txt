@@ -25,7 +25,7 @@ target_sources(bl1_1_lib
         ./bl1_provisioning.c
 )
 
-target_include_directories(bl1_1_lib
+target_include_directories(platform_bl1_1_interface
     INTERFACE
         ./bundle_common
         ../bl1

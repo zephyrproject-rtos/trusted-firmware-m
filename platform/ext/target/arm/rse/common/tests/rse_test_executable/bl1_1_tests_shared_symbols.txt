@@ -1,2 +1,16 @@
 bl1_read_bl1_2_image
 bl1_1_validate_image_at_addr
+validate_and_unpack_encrypted_bundle
+setup_key_from_rng
+kmu_set_slot_invalid
+setup_provisioning_key
+provision_assembly_and_test
+provision_psa_rot
+lcm_get_sp_enabled
+lcm_set_sp_enabled
+lcm_get_lcs
+lcm_set_lcs
+lcm_get_tp_mode
+lcm_set_tp_mode
+tfm_hal_system_reset
+tfm_plat_otp_secure_provisioning_start
