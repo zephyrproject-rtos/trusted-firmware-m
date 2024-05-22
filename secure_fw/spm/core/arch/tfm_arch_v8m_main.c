@@ -275,6 +275,10 @@ FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1) && (BRANCH_PROTECTION_CONTROL > 0)
+    CONTROL_Type ctrl;
+#endif
+
 #if defined(CONFIG_TFM_ENABLE_CP10CP11)
     /*
      * Enable SPE privileged and unprivileged access to the FP Extension.
@@ -334,6 +338,22 @@ void tfm_arch_config_extensions(void)
 #if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1)
     SCB->CCR |= SCB_CCR_TRD_Msk;
 #endif
+
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1) && (BRANCH_PROTECTION_CONTROL > 0)
+    ctrl.w = __get_CONTROL();
+
+#if (BRANCH_PROTECTION_CONTROL == 1) || (BRANCH_PROTECTION_CONTROL == 2)
+    ctrl.b.UPAC_EN = 1;
+    ctrl.b.PAC_EN = 1;
+#endif /* BRANCH_PROTECTION_CONTROL == 1, 2 */
+
+#if (BRANCH_PROTECTION_CONTROL == 1) || (BRANCH_PROTECTION_CONTROL == 3)
+    ctrl.b.UBTI_EN = 1;
+    ctrl.b.BTI_EN = 1;
+#endif /* BRANCH_PROTECTION_CONTROL == 1, 3 */
+
+    __set_CONTROL(ctrl.w);
+#endif /* BRANCH_PROTECTION_CONTROL > 0 */
 }
 
 #if (CONFIG_TFM_FLOAT_ABI > 0)
