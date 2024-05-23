@@ -38,6 +38,7 @@ else()
 endif()
 set(RSE_LOAD_NS_IMAGE                   OFF      CACHE BOOL    "Whether to load an NS image")
 set(CONFIG_TFM_SPM_BACKEND              IPC      CACHE STRING  "The SPM backend")
+set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
 
 # Once all cache options are set, set common options as fallback
 include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)
