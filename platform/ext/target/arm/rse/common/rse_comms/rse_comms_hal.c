@@ -85,14 +85,9 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
     NVIC_ClearPendingIRQ(source);
 
     if (mhu_err != MHU_ERR_NONE) {
-        SPMLOG_DBGMSGVAL("[COMMS] MHU receive failed: ", mhu_err);
         /* Can't respond, since we don't know anything about the message */
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-
-    SPMLOG_DBGMSG("[COMMS] Received message\r\n");
-    SPMLOG_DBGMSGVAL("[COMMS] size=", msg_len);
-    SPMLOG_DBGMSGVAL("[COMMS] seq_num=", msg.header.seq_num);
 
     struct client_request_t *req = tfm_pool_alloc(req_pool);
     if (!req) {
@@ -108,7 +103,6 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
     err = rse_protocol_deserialize_msg(req, &msg, msg_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         /* Deserialisation failed, drop message */
-        SPMLOG_DBGMSGVAL("[COMMS] Deserialize message failed: ", err);
         goto out_return_err;
     }
 
