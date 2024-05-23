@@ -74,21 +74,20 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 
     tfm_ns_mailbox_os_spin_lock();
     status = queue->empty_slots;
-    tfm_ns_mailbox_os_spin_unlock();
 
     if (!status) {
         /* No empty slot */
+        tfm_ns_mailbox_os_spin_unlock();
         return NUM_MAILBOX_QUEUE_SLOT;
     }
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
         if (status & (1 << idx)) {
+            clear_queue_slot_empty(queue, idx);
             break;
         }
     }
 
-    tfm_ns_mailbox_os_spin_lock();
-    clear_queue_slot_empty(queue, idx);
     tfm_ns_mailbox_os_spin_unlock();
 
     return idx;
