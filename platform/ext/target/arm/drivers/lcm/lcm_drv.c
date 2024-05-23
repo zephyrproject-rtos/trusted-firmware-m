@@ -113,25 +113,28 @@ static int is_pointer_word_aligned(void *ptr) {
     return !((uint32_t)ptr & (sizeof(uint32_t) - 1));
 }
 
-static enum lcm_error_t rma_erase_all_keys(struct lcm_dev_t *dev)
+static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
+                                uint32_t len, uint32_t *p_buf_word)
 {
-    enum lcm_error_t err;
+    uint32_t idx;
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+
+    /* Perform the actual write */
+    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
+        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
+    }
+}
+
+static void rma_erase_all_keys(struct lcm_dev_t *dev)
+{
     uint32_t idx;
     uint32_t otp_overwrite_val = 0xFFFFFFFFu;
 
     /* Overwrite all secret keys, and rotpk, with all-one words */
     for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, tp_mode_config);
          idx += sizeof(uint32_t)) {
-        err = lcm_otp_write(dev, idx, sizeof(otp_overwrite_val),
-                            (uint8_t *)&otp_overwrite_val);
-        /* The HW keys are writable in RMA state, but not readable */
-        if (err != LCM_ERROR_NONE && err != LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL) {
-            FATAL_ERR(err);
-            return err;
-        }
+        otp_write_unchecked(dev, idx, sizeof(otp_overwrite_val), &otp_overwrite_val);
     }
-
-    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
@@ -151,10 +154,7 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
             return LCM_ERROR_INIT_INVALID_KEY;
         }
     } else if (lcs == LCM_LCS_RMA) {
-        err = rma_erase_all_keys(dev);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
+        rma_erase_all_keys(dev);
     }
 
     return LCM_ERROR_NONE;
@@ -407,18 +407,6 @@ static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
 
     return count_zero_bits((uint32_t *)(((uint8_t *)p_lcm->raw_otp) + offset),
                            len, zero_bits);
-}
-
-static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
-                                uint32_t len, uint32_t *p_buf_word)
-{
-    uint32_t idx;
-    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
-
-    /* Perform the actual write */
-    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
-        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
-    }
 }
 
 static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
