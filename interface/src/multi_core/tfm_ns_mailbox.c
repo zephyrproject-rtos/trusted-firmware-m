@@ -233,9 +233,9 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
         }
 
         /* Set woken-up flag */
-        tfm_ns_mailbox_hal_enter_critical_isr();
+        tfm_ns_mailbox_os_spin_lock();
         set_queue_slot_woken(idx);
-        tfm_ns_mailbox_hal_exit_critical_isr();
+        tfm_ns_mailbox_os_spin_unlock();
 
         tfm_ns_mailbox_os_wake_task_isr(
                                      mailbox_queue_ptr->slots_ns[idx].owner);
