@@ -35,7 +35,7 @@ following commands:
 .. code-block:: bash
 
    cmake -S <TF-M base folder> -B build_spe \
-           -DTFM_PLATFORM=nordic_nrf/nrf9160dk_nrf9160 \
+           -DTFM_PLATFORM=nordic_nrf/nrf5340dk_nrf5340_cpuapp \
            -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
    cmake --build build_spe -- install
 
@@ -113,14 +113,14 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --recover -f nrf91
+   nrfjprog --recover -f nrf53
 
 * Flash the BL2 and the TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
 
-   nrfjprog --program build_spe/bin/bl2.hex -f nrf91 --sectorerase
-   nrfjprog --program build_app/tfm_s_ns_signed.hex -f nrf91 --sectorerase
+   nrfjprog --program build_spe/bin/bl2.hex -f nrf53 --sectorerase
+   nrfjprog --program build_app/tfm_s_ns_signed.hex -f nrf53 --sectorerase
 
 * Reset and start TF-M:
 
@@ -133,8 +133,8 @@ Secure UART Console on nRF5340 DK
 **********************************
 
 SECURE_UART1 is enabled by default when building TF-M on nRF5340 DK, so the secure firmware console output
-is available via USART1. To route the USART1 output to one of the serial ports, wire the default USART1 TxD
-and RxD (pins P0.25 and P0.26) to RxD and TxD pins on the DK.
+is available via USART1.
+When using the nRF5340 network MCU make sure to configure different UART pins or disable SECURE_UART1.
 
 Non-Secure console output is available via USART0.
 

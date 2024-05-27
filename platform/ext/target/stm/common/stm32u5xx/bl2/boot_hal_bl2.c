@@ -7,6 +7,7 @@
   ******************************************************************************
   * @attention
   *
+  * <h2><center>&copy; Copyright (c) 2024, Arm Limited. All rights reserved.
   * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
@@ -45,7 +46,7 @@
 #endif
 #include "bootutil/boot_record.h"
 #include "target_cfg.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Flash.h"
 #include "region_defs.h"
 #if defined(EXTERNAL_FLASH)
@@ -137,7 +138,7 @@ volatile uint32_t uFlowStage = FLOW_STAGE_CFG;
   * @{
   */
 #ifdef MCUBOOT_EXT_LOADER
-void execute_loader(void) __NO_RETURN;
+__NO_RETURN void execute_loader(void);
 #endif /* MCUBOOT_EXT_LOADER */
 void boot_clean_ns_ram_area(void);
 __attribute__((naked)) void boot_jump_to_ns_image(uint32_t reset_handler_addr);

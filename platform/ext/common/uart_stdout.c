@@ -49,6 +49,8 @@ int stdio_output_string(const unsigned char *str, uint32_t len)
     return STDIO_DRIVER.GetTxCount();
 }
 
+uint32_t stdio_is_initialized = 0;
+
 /* Redirects printf to STDIO_DRIVER in case of ARMCLANG*/
 #if defined(__ARMCC_VERSION)
 /* Struct FILE is implemented in stdio.h. Used to redirect printf to
@@ -102,6 +104,8 @@ void stdio_init(void)
     (void)ret;
 
     (void)STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
+
+    stdio_is_initialized = true;
 }
 
 void stdio_uninit(void)
@@ -113,4 +117,6 @@ void stdio_uninit(void)
     ret = STDIO_DRIVER.Uninitialize();
     ASSERT_HIGH(ret);
     (void)ret;
+
+    stdio_is_initialized = false;
 }

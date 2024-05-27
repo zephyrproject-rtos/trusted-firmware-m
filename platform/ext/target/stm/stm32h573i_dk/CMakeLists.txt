@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -65,8 +65,7 @@ install(DIRECTORY   ${STM_COMMON_DIR}/hal/accelerator/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
         FILES_MATCHING PATTERN "*.h")
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/cmsis
-                    ${PLATFORM_DIR}/ext/common
+install(DIRECTORY   ${PLATFORM_DIR}/ext/common
                     ${PLATFORM_DIR}/ext/driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
 

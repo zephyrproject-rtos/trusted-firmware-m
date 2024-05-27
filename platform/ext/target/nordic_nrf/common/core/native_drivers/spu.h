@@ -36,6 +36,17 @@
  */
 void spu_enable_interrupts(void);
 
+enum spu_events {
+       SPU_EVENT_RAMACCERR = 1 << 0,
+       SPU_EVENT_FLASHACCERR = 1 << 1,
+       SPU_EVENT_PERIPHACCERR= 1 << 2,
+};
+
+/**
+ * \brief Retrieve bitmask of SPU events.
+ */
+uint32_t spu_events_get(void);
+
 /**
  * \brief SPU event clearing
  *
@@ -89,28 +100,26 @@ void spu_regions_flash_config_non_secure_callable(uint32_t start_addr, uint32_t 
  *
  *  Configure a device peripheral to be accessible from Secure domain only.
  *
- * \param periph_base_addr peripheral base address
- *                         (must correspond to a valid peripheral ID)
+ * \param periph_id ID number of a particular peripheral.
  * \param periph_lock Variable indicating whether to lock peripheral security
  *
  * \note
  * - peripheral shall not be a Non-Secure only peripheral
  * - DMA transactions are configured as Secure
  */
-void spu_peripheral_config_secure(uint32_t periph_base_addr, bool periph_lock);
+void spu_peripheral_config_secure(const uint8_t periph_id, bool periph_lock);
 
 /**
  * Configure a device peripheral to be accessible from Non-Secure domain.
  *
- * \param periph_base_addr peripheral base address
- *                         (must correspond to a valid peripheral ID)
+ * \param periph_id ID number of a particular peripheral.
  * \param periph_lock Variable indicating whether to lock peripheral security
  *
  * \note
  * - peripheral shall not be a Secure-only peripheral
  * - DMA transactions are configured as Non-Secure
  */
-void spu_peripheral_config_non_secure(uint32_t periph_base_addr, bool periph_lock);
+void spu_peripheral_config_non_secure(const uint8_t periph_id, bool periph_lock);
 
 /**
  * Configure DPPI channels to be accessible from Non-Secure domain.

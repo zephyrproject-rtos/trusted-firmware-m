@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -11,16 +11,17 @@
 #include <stdint.h>
 #include "aapcs_local.h"
 #include "async.h"
+#include "config_spm.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
-#include "config_spm.h"
 #include "ffm/psa_api.h"
+#include "fih.h"
 #include "runtime_defs.h"
 #include "stack_watermark.h"
 #include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_rpc.h"
+#include "tfm_nspm.h"
 #include "ffm/backend.h"
 #include "utilities.h"
 #include "memory_symbols.h"
@@ -29,6 +30,7 @@
 #include "load/spm_load_api.h"
 #include "psa/error.h"
 #include "internal_status_code.h"
+#include "sprt_partition_metadata_indicator.h"
 
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
@@ -50,8 +52,9 @@ ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 #endif
 
-/* Indicator point to the partition meta */
-uintptr_t *partition_meta_indicator_pos;
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
+static bool basepri_set_by_ipc_schedule;
+#endif
 
 /*
  * Query the state of current thread.
@@ -122,6 +125,9 @@ static void prv_process_metadata(struct partition_t *p_pt)
     struct runtime_metadata_t *p_rt_meta;
     service_fn_t *p_sfn_table;
     uint32_t allocate_size;
+#if TFM_ISOLATION_LEVEL != 1
+    FIH_RET_TYPE(bool) fih_rc;
+#endif
 
     p_pt_ldi = p_pt->p_ldinf;
     p_srv_ldi = LOAD_INFO_SERVICE(p_pt_ldi);
@@ -142,7 +148,8 @@ static void prv_process_metadata(struct partition_t *p_pt)
 #if TFM_ISOLATION_LEVEL == 1
     p_rt_meta->psa_fns = &psa_api_thread_fn_call;
 #else
-    if (tfm_hal_boundary_need_switch(spm_boundary, p_pt->boundary)) {
+    FIH_CALL(tfm_hal_boundary_need_switch, fih_rc, spm_boundary, p_pt->boundary);
+    if (fih_not_eq(fih_rc, fih_int_encode(false))) {
         p_rt_meta->psa_fns = &psa_api_svc;
     } else {
         p_rt_meta->psa_fns = &psa_api_thread_fn_call;
@@ -162,7 +169,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
         p_rt_meta->n_sfn = p_pt_ldi->nservices;
     }
 
-    p_pt->p_metadata = (void *)p_rt_meta;
+    p_pt->p_metadata = p_rt_meta;
 }
 
 /*
@@ -193,7 +200,7 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
      * If it is a NS request via RPC, it is unnecessary to block current
      * thread.
      */
-    if (is_tfm_rpc_msg(p_connection)) {
+    if (tfm_spm_is_rpc_msg(p_connection)) {
         ret = PSA_SUCCESS;
     } else {
         signal = backend_wait_signals(p_connection->p_client, ASYNC_MSG_REPLY);
@@ -211,7 +218,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     struct partition_t *client = handle->p_client;
 
-    if (is_tfm_rpc_msg(handle)) {
+    if (tfm_spm_is_rpc_msg(handle)) {
         /*
          * Add to the list of outstanding responses.
          * Note that we use the partition's p_handles pointer.
@@ -270,6 +277,9 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
     (void)service_setting;
     SPM_ASSERT(p_pt);
     SPM_ASSERT(param);
+
+    tz_ns_agent_register_client_id_range(p_pt->p_ldinf->client_id_base,
+                                         p_pt->p_ldinf->client_id_limit);
 
     /* Get the context from ns_agent_tz */
     SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
@@ -339,7 +349,6 @@ uint32_t backend_system_run(void)
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);
 
-    partition_meta_indicator_pos = (uintptr_t *)PART_LOCAL_STORAGE_PTR_POS;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
@@ -443,9 +452,10 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     return result;
 }
 
-uint64_t ipc_schedule(void)
+uint64_t ipc_schedule(uint32_t exc_return)
 {
     fih_int fih_rc = FIH_FAILURE;
+    FIH_RET_TYPE(bool) fih_bool;
     AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
@@ -455,8 +465,30 @@ uint64_t ipc_schedule(void)
     /* Protect concurrent access to current thread/component and thread status */
     CRITICAL_SECTION_ENTER(cs);
 
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
+    if (__get_BASEPRI() == 0) {
+        /*
+         * If BASEPRI is not set, that means an interrupt was taken when
+         * Non-Secure code was executing, and a scheduling is necessary because
+         * a secure partition become runnable.
+         */
+        SPM_ASSERT(!basepri_set_by_ipc_schedule);
+        basepri_set_by_ipc_schedule = true;
+        __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+    }
+#endif
+
+    p_curr_ctx = CURRENT_THREAD->p_context_ctrl;
+
+    /*
+     * Update SP for current thread, in case tfm_arch_set_context_ret_code have to update R0
+     * in the current thread's saved context.
+     */
+    p_curr_ctx->sp = __get_PSP() -
+        (is_default_stacking_rules_apply(exc_return) ?
+            sizeof(struct tfm_additional_context_t) : 0);
+
     pth_next = thrd_next();
-    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
 
     AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
 
@@ -474,8 +506,9 @@ uint64_t ipc_schedule(void)
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
          */
-        if (tfm_hal_boundary_need_switch(p_part_curr->boundary,
-                                         p_part_next->boundary)) {
+        FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
+                 p_part_curr->boundary, p_part_next->boundary);
+        if (fih_not_eq(fih_bool, fih_int_encode(false))) {
             FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                      p_part_next->p_ldinf, p_part_next->boundary);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
@@ -484,15 +517,36 @@ uint64_t ipc_schedule(void)
         }
         ARCH_FLUSH_FP_CONTEXT();
 
+#if (CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
+        if (IS_NS_AGENT_TZ(p_part_next->p_ldinf)) {
+            /*
+             * The Non-Secure Agent for TrustZone is going to be scheduled.
+             * A secure partition was scheduled previously, so BASEPRI must be
+             * set to non-zero. However BASEPRI only needs to be reset to 0 if
+             * Non-Secure code execution was interrupted (and not got to secure
+             * execution through a veneer call. Veneers set and unset BASEPRI on
+             * enter and exit). In this case basepri_set_by_ipc_schedule is set,
+             * so it can be used in the condition.
+             */
+            SPM_ASSERT(__get_BASEPRI() == SECURE_THREAD_EXECUTION_PRIORITY);
+            if (basepri_set_by_ipc_schedule) {
+                basepri_set_by_ipc_schedule = false;
+                __set_BASEPRI(0);
+            }
+        }
+#endif
+
         AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
 
         CURRENT_THREAD = pth_next;
     }
 
     /* Update meta indicator */
-    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
-        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
+    if (p_part_next->p_metadata == NULL) {
+        tfm_core_panic();
     }
+    p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
+
     CRITICAL_SECTION_LEAVE(cs);
 
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);

@@ -8,7 +8,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 if(PSA_FRAMEWORK_HAS_MM_IOVEC)
     message(NOTICE "**** MM-IOVEC is enabled for memory and runtime optimizations for larger buffers, ****\n"
@@ -35,6 +35,7 @@ target_include_directories(tfm_spm
     PRIVATE
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/secure_fw/include
+        ${CMAKE_SOURCE_DIR}/secure_fw/partitions/lib/runtime
         ${CMAKE_BINARY_DIR}/generated
         ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
         ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/core
@@ -42,7 +43,6 @@ target_include_directories(tfm_spm
 
 target_sources(tfm_spm
     PRIVATE
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/agent_api.c>
         core/tfm_boot_data.c
         core/utilities.c
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:core/spm_log.c>
@@ -52,6 +52,7 @@ target_sources(tfm_spm
         core/rom_loader.c
         core/psa_api.c
         core/psa_call_api.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/mailbox_agent_api.c>
         core/psa_version_api.c
         core/psa_read_write_skip_api.c
         $<$<BOOL:${PSA_FRAMEWORK_HAS_MM_IOVEC}>:core/psa_mmiovec_api.c>

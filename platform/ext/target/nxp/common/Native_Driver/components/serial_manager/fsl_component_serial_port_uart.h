@@ -35,8 +35,7 @@
 #endif
 
 #if (defined(HAL_UART_DMA_ENABLE) && (HAL_UART_DMA_ENABLE > 0U))
-#define SERIAL_PORT_UART_DMA_HANDLE_SIZE \
-    (HAL_UART_HANDLE_SIZE + HAL_UART_DMA_HANDLE_SIZE + SERIAL_PORT_UART_DMA_RECEIVE_DATA_LENGTH + 32U)
+#define SERIAL_PORT_UART_DMA_HANDLE_SIZE (76U + HAL_UART_DMA_HANDLE_SIZE + 132U)
 #endif
 
 #ifndef SERIAL_USE_CONFIGURE_STRUCTURE
@@ -65,12 +64,12 @@ typedef struct _serial_port_uart_config
     serial_port_uart_parity_mode_t parityMode;      /*!< Parity mode, disabled (default), even, odd */
     serial_port_uart_stop_bit_count_t stopBitCount; /*!< Number of stop bits, 1 stop bit (default) or 2 stop bits  */
 
-    uint8_t enableRx;    /*!< Enable RX */
-    uint8_t enableTx;    /*!< Enable TX */
-    uint8_t enableRxRTS; /*!< Enable RX RTS */
-    uint8_t enableTxCTS; /*!< Enable TX CTS */
-    uint8_t instance;    /*!< Instance (0 - UART0, 1 - UART1, ...), detail information
-                              please refer to the SOC corresponding RM. */
+    uint8_t enableRx;                               /*!< Enable RX */
+    uint8_t enableTx;                               /*!< Enable TX */
+    uint8_t enableRxRTS;                            /*!< Enable RX RTS */
+    uint8_t enableTxCTS;                            /*!< Enable TX CTS */
+    uint8_t instance;                               /*!< Instance (0 - UART0, 1 - UART1, ...), detail information
+                                                         please refer to the SOC corresponding RM. */
 
 #if (defined(HAL_UART_ADAPTER_FIFO) && (HAL_UART_ADAPTER_FIFO > 0u))
     uint8_t txFifoWatermark;
@@ -85,12 +84,12 @@ typedef struct _serial_port_uart_dma_config
     serial_port_uart_parity_mode_t parityMode;      /*!< Parity mode, disabled (default), even, odd */
     serial_port_uart_stop_bit_count_t stopBitCount; /*!< Number of stop bits, 1 stop bit (default) or 2 stop bits  */
 
-    uint8_t enableRx;    /*!< Enable RX */
-    uint8_t enableTx;    /*!< Enable TX */
-    uint8_t enableRxRTS; /*!< Enable RX RTS */
-    uint8_t enableTxCTS; /*!< Enable TX CTS */
-    uint8_t instance;    /*!< Instance (0 - UART0, 1 - UART1, ...), detail information
-                              please refer to the SOC corresponding RM. */
+    uint8_t enableRx;                               /*!< Enable RX */
+    uint8_t enableTx;                               /*!< Enable TX */
+    uint8_t enableRxRTS;                            /*!< Enable RX RTS */
+    uint8_t enableTxCTS;                            /*!< Enable TX CTS */
+    uint8_t instance;                               /*!< Instance (0 - UART0, 1 - UART1, ...), detail information
+                                                         please refer to the SOC corresponding RM. */
 #if (defined(HAL_UART_ADAPTER_FIFO) && (HAL_UART_ADAPTER_FIFO > 0u))
     uint8_t txFifoWatermark;
     uint8_t rxFifoWatermark;

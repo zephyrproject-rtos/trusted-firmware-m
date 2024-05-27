@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,5 +29,15 @@ uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp);
  * \returns                     none.
  */
 void tfm_svc_thread_mode_spm_return(psa_status_t result);
+
+#if TFM_ISOLATION_LEVEL > 1
+/**
+ * \brief Returns whether the current Thread mode context executes SPM code
+ *
+ * \returns                     True if the current thread mode context executes SPM code.
+ *                              False otherwise.
+ */
+bool tfm_svc_thread_mode_spm_active(void);
+#endif /* TFM_ISOLATION_LEVEL > 1 */
 
 #endif

@@ -24,6 +24,9 @@
 #include "tfm_s_linker_alignments.h"
 
 LR_CODE S_CODE_START S_CODE_SIZE {
+    PT_RO_START +0 ALIGN TFM_LINKER_PT_RO_ALIGNMENT EMPTY 0x0 {
+        /* Position tag: code + RO-data */
+    }
 
     /****  This initial section contains common code for secure binary */
     ER_VECTORS S_CODE_START S_CODE_VECTOR_TABLE_SIZE {
@@ -56,7 +59,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-        *(SFN)
         * (+RO)
     }
 
@@ -140,6 +142,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     ScatterAssert(ImageLimit(ER_CODE_SRAM_WATERMARK) <=
                   S_RAM_CODE_START + S_RAM_CODE_SIZE)
 #endif
+
+    PT_RO_END +0 ALIGN TFM_LINKER_PT_RO_ALIGNMENT EMPTY 0x0 {
+        /* Position tag */
+    }
 
     /**** Base address of secure data area */
     TFM_SECURE_DATA_START S_DATA_START {

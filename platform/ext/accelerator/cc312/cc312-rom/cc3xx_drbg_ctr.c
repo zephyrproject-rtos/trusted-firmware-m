@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,9 +12,7 @@
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_drbg_ctr.h"
 #include "cc3xx_rng.h"
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 #include "cc3xx_stdlib.h"
-#endif
 
 static void long_inc_int(uint32_t *acc, size_t acc_size, bool is_increment)
 {
@@ -22,22 +20,22 @@ static void long_inc_int(uint32_t *acc, size_t acc_size, bool is_increment)
     assert(acc_size == CC3XX_DRBG_CTR_BLOCKLEN);
 
     /* Accumulation happen only on 128 bit accumulators */
-    cc3xx_pka_init(CC3XX_DRBG_CTR_BLOCKLEN);
+    cc3xx_lowlevel_pka_init(CC3XX_DRBG_CTR_BLOCKLEN);
 
     /* Allocate a register among those not in use, given configured size */
-    r0 = cc3xx_pka_allocate_reg();
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Initialize the accumulator register with the current value of acc */
-    cc3xx_pka_write_reg(r0, (const uint32_t *)acc, CC3XX_DRBG_CTR_BLOCKLEN);
+    cc3xx_lowlevel_pka_write_reg(r0, (const uint32_t *)acc, CC3XX_DRBG_CTR_BLOCKLEN);
 
     /* Perform the actual operation */
-    cc3xx_pka_add_si(r0, is_increment ? 1 : -1, r0);
+    cc3xx_lowlevel_pka_add_si(r0, is_increment ? 1 : -1, r0);
 
     /* Read back the accumulator register */
-    cc3xx_pka_read_reg(r0, acc, CC3XX_DRBG_CTR_BLOCKLEN);
+    cc3xx_lowlevel_pka_read_reg(r0, acc, CC3XX_DRBG_CTR_BLOCKLEN);
 
     /* Uninit the engine */
-    cc3xx_pka_uninit();
+    cc3xx_lowlevel_pka_uninit();
 }
 
 static inline void long_inc(uint32_t *acc, size_t acc_size)
@@ -71,18 +69,18 @@ static cc3xx_err_t cc3xx_drbg_ctr_update(
 
     long_inc((uint32_t *)state->block_v, sizeof(state->block_v));
 
-    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
-                         CC3XX_AES_MODE_CTR,
-                         CC3XX_AES_KEY_ID_USER_KEY,
-                         (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
-                         (const uint32_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
+                                  CC3XX_AES_MODE_CTR,
+                                  CC3XX_AES_KEY_ID_USER_KEY,
+                                  (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
+                                  (const uint32_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
-    cc3xx_aes_set_output_buffer((uint8_t *)state->key_k, CC3XX_DRBG_CTR_SEEDLEN);
+    cc3xx_lowlevel_aes_set_output_buffer((uint8_t *)state->key_k, CC3XX_DRBG_CTR_SEEDLEN);
 
-    err = cc3xx_aes_update(data, data_len);
+    err = cc3xx_lowlevel_aes_update(data, data_len);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -91,13 +89,13 @@ static cc3xx_err_t cc3xx_drbg_ctr_update(
     if (data_len < CC3XX_DRBG_CTR_SEEDLEN) {
         uint8_t all_zeros[CC3XX_DRBG_CTR_SEEDLEN - data_len];
         memset(all_zeros, 0, sizeof(all_zeros));
-        err = cc3xx_aes_update(all_zeros, sizeof(all_zeros));
+        err = cc3xx_lowlevel_aes_update(all_zeros, sizeof(all_zeros));
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
     }
 
-    err = cc3xx_aes_finish(NULL, NULL);
+    err = cc3xx_lowlevel_aes_finish(NULL, NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -105,7 +103,7 @@ static cc3xx_err_t cc3xx_drbg_ctr_update(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_ctr_init(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_init(
     struct cc3xx_drbg_ctr_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *nonce, size_t nonce_len,
@@ -165,7 +163,7 @@ out:
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_ctr_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_generate(
     struct cc3xx_drbg_ctr_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -202,19 +200,19 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
 
     long_inc((uint32_t *)state->block_v, sizeof(state->block_v));
 
-    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
-                         CC3XX_AES_MODE_CTR,
-                         CC3XX_AES_KEY_ID_USER_KEY,
-                         (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
-                         (const uint32_t *)state->block_v, sizeof(state->block_v));
+    err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
+                                  CC3XX_AES_MODE_CTR,
+                                  CC3XX_AES_KEY_ID_USER_KEY,
+                                  (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
+                                  (const uint32_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
-    cc3xx_aes_set_output_buffer(returned_bits, len_bits/8); /* length is in bytes */
+    cc3xx_lowlevel_aes_set_output_buffer(returned_bits, len_bits/8); /* length is in bytes */
 
     for (idx = 0; idx < num_whole_blocks; idx++) {
-        err = cc3xx_aes_update(all_zeros, sizeof(all_zeros));
+        err = cc3xx_lowlevel_aes_update(all_zeros, sizeof(all_zeros));
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -225,7 +223,7 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
     /* Deal with a partial block */
     if ((len_bits - produced_bits) != 0) {
         /* Produce the last block */
-        err = cc3xx_aes_update(all_zeros, (len_bits - produced_bits)/8); /* in bytes */
+        err = cc3xx_lowlevel_aes_update(all_zeros, (len_bits - produced_bits)/8); /* in bytes */
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -234,9 +232,9 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
     /* We need to get the value of the counter back from the AES subsystem
      * as it's required in update()
      */
-    cc3xx_aes_get_state(&aes_state);
+    cc3xx_lowlevel_aes_get_state(&aes_state);
 
-    err = cc3xx_aes_finish(NULL, NULL);
+    err = cc3xx_lowlevel_aes_finish(NULL, NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -261,7 +259,7 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_ctr_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_reseed(
     struct cc3xx_drbg_ctr_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -304,7 +302,7 @@ out:
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_ctr_uninit(struct cc3xx_drbg_ctr_state_t *state)
+cc3xx_err_t cc3xx_lowlevel_drbg_ctr_uninit(struct cc3xx_drbg_ctr_state_t *state)
 {
     /* Secure erase only the sensitive material*/
     cc3xx_secure_erase_buffer((uint32_t *)state, CC3XX_DRBG_CTR_SEEDLEN_WORDS);

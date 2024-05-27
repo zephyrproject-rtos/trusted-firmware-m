@@ -25,11 +25,11 @@ uint32_t InstallIRQHandler(IRQn_Type irq, uint32_t irqHandler)
 #if defined(__CC_ARM) || defined(__ARMCC_VERSION)
     extern uint32_t Image$$VECTOR_ROM$$Base[];
     extern uint32_t Image$$VECTOR_RAM$$Base[];
-    extern uint32_t Image$$RW_m_data$$Base[];
+    extern uint32_t Image$$VECTOR_RAM$$ZI$$Limit[];
 
 #define __VECTOR_TABLE          Image$$VECTOR_ROM$$Base
 #define __VECTOR_RAM            Image$$VECTOR_RAM$$Base
-#define __RAM_VECTOR_TABLE_SIZE (((uint32_t)Image$$RW_m_data$$Base - (uint32_t)Image$$VECTOR_RAM$$Base))
+#define __RAM_VECTOR_TABLE_SIZE (((uint32_t)Image$$VECTOR_RAM$$ZI$$Limit - (uint32_t)Image$$VECTOR_RAM$$Base))
 #elif defined(__ICCARM__)
     extern uint32_t __RAM_VECTOR_TABLE_SIZE[];
     extern uint32_t __VECTOR_TABLE[];
@@ -121,9 +121,9 @@ void DisableDeepSleepIRQ(IRQn_Type interrupt)
 void MSDK_EnableCpuCycleCounter(void)
 {
     /* Make sure the DWT trace fucntion is enabled. */
-    if (CoreDebug_DEMCR_TRCENA_Msk != (CoreDebug_DEMCR_TRCENA_Msk & CoreDebug->DEMCR))
+    if (DCB_DEMCR_TRCENA_Msk != (DCB_DEMCR_TRCENA_Msk & DCB->DEMCR))
     {
-        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+        DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;
     }
 
     /* CYCCNT not supported on this device. */

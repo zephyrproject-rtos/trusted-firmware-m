@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "config_spm.h"
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-#include "ffm/agent_api.h"
+#include "ffm/mailbox_agent_api.h"
 #endif
 #include "psa/client.h"
 #include "psa/service.h"
@@ -124,11 +124,30 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
 psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
                                        int32_t ns_client_id,
                                        const void *client_data);
+
+/**
+ * \brief handler for \ref agent_psa_close.
+ *
+ * \param[in] handle            Service handle to the connection to be closed,
+ * \param[in] ns_client_id      NS agent's client identifier.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           Called with a stateless handle.
+ * \arg                           An invalid handle was provided that is not
+ *                                the null handle.
+ * \arg                           The connection is handling a request.
+ */
+psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
+
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #define tfm_spm_agent_psa_connect           NULL
+#define tfm_spm_agent_psa_close             NULL
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #else /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #define tfm_spm_agent_psa_connect           NULL
+#define tfm_spm_agent_psa_close             NULL
 #define tfm_spm_agent_psa_call              NULL
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 

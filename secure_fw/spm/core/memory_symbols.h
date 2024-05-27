@@ -52,13 +52,4 @@ REGION_DECLARE(Image$$, ER_SERV_RT_POOL, $$ZI$$Limit);
 #define SERV_INFORAM_END              \
                 (uintptr_t)&REGION_NAME(Image$$, ER_SERV_RT_POOL, $$ZI$$Limit)
 
-/* ----------- IPC Local Storage specific symbols ------------------------ */
-#ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-
-#define PART_LOCAL_STORAGE_PTR_POS    \
-                ((uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base))
-
-#endif
-
 #endif /* __MEMORY_SYMBOLS_H__ */

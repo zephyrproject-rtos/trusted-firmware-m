@@ -185,7 +185,7 @@ versions are:
           This defect has been fixed since Arm compiler v6.18.
           See [SDCOMP-59788] in Armclang v6.18 `release note`__ for details.
 
-          .. __: https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/Arm%20Compiler%20for%20Embedded/6-18/Release%20notes%20for%20Arm%20Compiler%20for%20Embedded%206.pdf
+          .. __: https://developer.arm.com/documentation/107814/6-18
 
     - GNU Arm compiler v7.3.1+
 
@@ -221,7 +221,7 @@ versions are:
 
           .. group-tab:: Linux
 
-              - Download IAR build tools from `here <https://www.iar.com/iar-embedded-workbench/build-tools-for-linux/>`__.
+              - Download IAR build tools from `here <https://www.iar.com/products/architectures/arm/iar-embedded-workbench-for-arm>`__.
               - Add IAR Arm compiler into environment:
 
                 .. code-block:: bash
@@ -230,7 +230,7 @@ versions are:
 
           .. group-tab:: Windows
 
-              - Download IAR build tools from `here <https://www.iar.com/iar-embedded-workbench/#!?architecture=Arm>`__.
+              - Download IAR build tools from `here <https://www.iar.com/products/architectures/arm/iar-embedded-workbench-for-arm>`__.
               - Add IAR Arm compiler into environment:
 
                 .. code-block:: bash
@@ -259,13 +259,13 @@ as an example:
         .. code-block:: bash
 
             cd </tf-m-tests/tests_reg>
-            cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir> \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake \
+            cmake -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir absolute path> \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<TF-M source dir absolute path>/toolchain_GNUARM.cmake \
                   -DTEST_S=ON -DTEST_NS=ON \
             cmake --build build_spe -- install
 
-            cmake -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake
+            cmake -S . -B build_test -DCONFIG_SPE_PATH=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns/cmake/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
     .. group-tab:: Windows
@@ -285,13 +285,13 @@ as an example:
         .. code-block:: bash
 
             cd </tf-m-tests/tests_reg>
-            cmake -G"Unix Makefiles" -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir> \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake \
+            cmake -G"Unix Makefiles" -S spe -B build_spe -DTFM_PLATFORM=arm/mps2/an521 -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir absolute path> \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<TF-M source dir absolute path>/toolchain_GNUARM.cmake \
                   -DTEST_S=ON -DTEST_NS=ON \
             cmake --build build_spe -- install
 
-            cmake -G"Unix Makefiles" -S . -B build_test -DCONFIG_SPE_PATH=<absolute path to>/build_spe/api_ns \
-                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<Absolute path to>/toolchain_GNUARM.cmake
+            cmake -G"Unix Makefiles" -S . -B build_test -DCONFIG_SPE_PATH=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns \
+                  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-tests absolute path>/tests_reg/build_spe/api_ns/cmake/toolchain_ns_GNUARM.cmake
             cmake --build build_test
 
         .. note::
@@ -422,7 +422,7 @@ To build the TF-M firmware the following tools are needed:
    - Git
    - gmake, aka GNU Make
    - Python v3.x
-   - a set of python modules listed in ``tools/requiremtns.txt``
+   - a set of python modules listed in ``tools/requirements.txt``
 
 ****************
 Dependency chain
@@ -477,6 +477,6 @@ Here are some next steps for exploring TF-M:
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

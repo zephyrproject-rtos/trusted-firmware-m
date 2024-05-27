@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -95,34 +96,31 @@ struct mailbox_msg_t {
  */
 struct mailbox_reply_t {
     int32_t    return_val;
-    const void *owner;                      /* Handle of owner task. */
-    int32_t    *reply;                      /* Address of reply value belonging
-                                             * to owner task.
-                                             */
-#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
-    uint8_t    *woken_flag;                 /* Indicate that owner task has been
-                                             * or should be woken up, after the
-                                             * reply is received.
-                                             */
-#else
-    bool        is_woken;                   /* Indicate that owner task has been
-                                             * or should be woken up, after the
-                                             * reply is received.
-                                             */
-#endif
 };
 
-/* A single slot structure in NSPE mailbox queue */
-struct ns_mailbox_slot_t {
+/*
+ * A single slot structure in NSPE mailbox queue.
+ * This structure is an ABI between SPE and NSPE mailbox instances.
+ * So, it must not include data that are not used by SPE like information about NS threads
+ * or that depends on NSPE build settings.
+ * TODO: It's good to align each slot structure according to the cache row,
+ * so it will be easier to clean and invalidate slot during transfer between cores.
+ */
+struct mailbox_slot_t {
     struct mailbox_msg_t   msg;
     struct mailbox_reply_t reply;
 };
 
 typedef uint32_t   mailbox_queue_status_t;
 
-/* NSPE mailbox queue */
-struct ns_mailbox_queue_t {
-    mailbox_queue_status_t   empty_slots;       /* Bitmask of empty slots */
+/*
+ * NSPE mailbox status shared between TF-M and mailbox client.
+ * This structure is separated from slots to allow flexible allocation of slots.
+ * So, it's safe to change number of slots on non-secure side without rebuild of TF-M.
+ * TODO: It's good to align structure according to the cache row,
+ * so it will be easier to clean and invalidate slot during transfer between cores.
+ */
+struct mailbox_status_t {
     mailbox_queue_status_t   pend_slots;        /* Bitmask of slots pending
                                                  * for SPE handling
                                                  */
@@ -130,23 +128,18 @@ struct ns_mailbox_queue_t {
                                                  * containing PSA client call
                                                  * return result
                                                  */
+};
 
-    struct ns_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
+/* Data used to send information to mailbox partition about mailbox queue allocated by non-secure image */
+struct mailbox_init_t {
+    /* Shared data with fixed size */
+    struct mailbox_status_t *status;
 
-#ifdef TFM_MULTI_CORE_TEST
-    uint32_t                 nr_tx;             /* The total number of
-                                                 * submission of NS PSA Client
-                                                 * calls from NS task via
-                                                 * mailbox.
-                                                 */
-    uint32_t                 nr_used_slots;     /* The total number of used
-                                                 * mailbox queue slots each time
-                                                 * NS thread requests a mailbox
-                                                 * queue slot.
-                                                 */
-#endif
+    /* Number of slots allocated by NS. */
+    uint32_t slot_count;
 
-    bool                     is_full;           /* Queue if full */
+    /* Pointer to struct mailbox_slot_t[slot_count] allocated by NS */
+    struct mailbox_slot_t *slots;
 };
 
 #ifdef __cplusplus

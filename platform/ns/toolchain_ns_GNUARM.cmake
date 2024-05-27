@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -166,18 +166,24 @@ string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
 string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 
 # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
-add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
+add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>)
 
 # GNU Arm compiler version greater equal than *11.3.Rel1*
 # has a linker issue that required system calls are missing,
 # such as _read and _write. Add stub functions of required
 # system calls to solve this issue.
+#
+# READONLY linker script attribute is not supported in older
+# GNU Arm compilers. For these version the preprocessor will
+# remove the READONLY string from the linker scripts.
 if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
     set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+    set(CONFIG_GNU_LINKER_READONLY_ATTRIBUTE TRUE)
 endif()
 
 add_compile_options(
     -specs=nano.specs
+    -specs=nosys.specs
     -Wall
     -Wno-format
     -Wno-return-type
@@ -189,7 +195,6 @@ add_compile_options(
     -fshort-enums
     -funsigned-char
     -mthumb
-    -nostdlib
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
@@ -199,6 +204,7 @@ add_compile_options(
 add_link_options(
     --entry=Reset_Handler
     -specs=nano.specs
+    -specs=nosys.specs
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections
@@ -258,6 +264,11 @@ macro(target_add_scatter_file target)
             -E
             -P
             -xc
+    )
+
+    target_compile_definitions(${target}_scatter
+        PRIVATE
+            $<$<NOT:$<BOOL:${CONFIG_GNU_LINKER_READONLY_ATTRIBUTE}>>:READONLY=>
     )
 
     target_link_libraries(${target}_scatter

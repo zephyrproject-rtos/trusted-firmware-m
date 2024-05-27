@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "utilities.h"
 #include "common_target_cfg.h"
 #include "Driver_PPC.h"
@@ -370,8 +370,10 @@ void sau_and_idau_cfg(void)
           |               |  |                       | |            |
 0x21000000+--------+      |  +--------+  S           | |     S      |
           | ISRAM0 |      |  | ISRAM0 |              | |            |
-          +--------+      |  +--------+------+-------+ +------------+
-          | ISRAM1 |      |  | ISRAM1 |  NS  | RNR 3 | |     NS     |
+0x21020000+--------+      |  +--------+------+-------+ +------------+
+          | ISRAM0 |      |  | ISRAM0 |  NS  |       | |     NS     |
+0x21200000+--------+      |  +--------+------+ RNR 3 + +------------+
+          | ISRAM1 |      |  | ISRAM1 |  NS  |       | |     NS     |
 0x21400000+--------+      |  +--------+------+-------+ +------------+
           |               |  |                       | |            |
 0x28000000+-------+       |  +-------+               | |            |
@@ -458,9 +460,9 @@ void sau_and_idau_cfg(void)
     SAU->RBAR = (DTCM0_BASE_NS & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = ((DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1)
                  & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
-    /* Configure ISRAM0: secure, ISRAM1: non-secure */
+    /* Configure ISRAM0 first sections secure, ISRAM0: remain sections, ISRAM1: non-secure */
     SAU->RNR = 3;
-    SAU->RBAR = (ISRAM1_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = ((ISRAM1_BASE_NS + ISRAM1_SIZE - 1)
                  & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
     /* Configure QSPI */
@@ -542,6 +544,14 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     ret = Driver_ISRAM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_NS +
+                                         S_DATA_OVERALL_SIZE,
+                                         MPC_ISRAM0_RANGE_LIMIT_NS,
+                                         ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for ISRAM1!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 

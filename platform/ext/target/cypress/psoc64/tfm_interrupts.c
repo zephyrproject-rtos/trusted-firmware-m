@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -10,11 +10,12 @@
 
 #include <stdint.h>
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "cy_ipc_drv.h"
 #include "spe_ipc_config.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
+#include "tfm_multi_core.h"
 #include "tfm_peripherals_def.h"
 #include "interrupt.h"
 #include "load/interrupt_defs.h"
@@ -78,6 +79,11 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     NVIC_SetPriority(NvicMux7_IRQn, DEFAULT_IRQ_PRIORITY);
     NVIC_DisableIRQ(NvicMux7_IRQn);
 
+    if (tfm_multi_core_register_client_id_range(CLIENT_ID_OWNER_MAGIC,
+                                                p_ildi->client_id_base,
+                                                p_ildi->client_id_limit) != 0) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
     return TFM_HAL_SUCCESS;
 }
 #ifdef PSA_API_TEST_IPC

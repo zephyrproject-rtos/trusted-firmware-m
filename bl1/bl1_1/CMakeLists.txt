@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,6 +24,16 @@ target_link_options(bl1_1
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl1_1.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl1_1.map>
+)
+
+target_compile_options(bl1_1
+    PUBLIC
+        ${BL1_COMPILER_CP_FLAG}
+)
+
+target_link_options(bl1_1
+    PUBLIC
+        ${BL1_LINKER_CP_OPTION}
 )
 
 target_sources(bl1_1

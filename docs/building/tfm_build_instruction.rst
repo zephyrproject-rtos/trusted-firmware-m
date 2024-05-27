@@ -154,7 +154,7 @@ are listed below.
 +----------------------------+------------------------------------------+---------------+
 | PROJECT_CONFIG_HEADER_FILE | User defined header file for TF-M config |               |
 +----------------------------+------------------------------------------+---------------+
-| TFM_ISOLATION_LEVEL        | Set TFM isolation level.                 | 1             |
+| TFM_ISOLATION_LEVEL        | Set TF-M isolation level.                | 1             |
 +----------------------------+------------------------------------------+---------------+
 | TFM_PROFILE                | See :ref:`tf-m_profiles`.                |               |
 +----------------------------+------------------------------------------+---------------+
@@ -269,8 +269,8 @@ cloning the repo and checking out the correct branch.
     cd <Mbed Crypto base folder>
     git clone https://github.com/ARMmbed/mbedtls
     cd mbedtls
-    git checkout <MBEDCRYPTO_VERSION from <TF-M source dir>/config_base.cmake>
-    git apply <TF-M source dir>/lib/ext/mbedcrypo/*.patch
+    git checkout <MBEDCRYPTO_VERSION> from <TF-M source dir>/config/config_base.cmake>
+    git apply <TF-M source dir>/lib/ext/mbedcrypto/*.patch
 
 .. Note::
 
@@ -351,5 +351,5 @@ of TF-M applications in **tf-m-extras** repository.
 
 --------------
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.*

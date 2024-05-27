@@ -62,9 +62,9 @@ Supported Platforms
         - `PSoc64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
 
-    - Runtime Security Subsystem (RSS):
+    - Runtime Security Engine (RSE):
 
-        - :doc:`RSS. </platform/arm/rss/readme>`
+        - :doc:`RSE. </platform/arm/rse/readme>`
 
 The document :doc:`Platform Deprecation and Removal </integration_guide/platform/platform_deprecation>`
 lists the deprecated platforms, removed from the upstream.

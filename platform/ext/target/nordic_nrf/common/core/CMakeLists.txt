@@ -19,6 +19,17 @@ if (NOT NRF_BOARD_SELECTED)
         "Instead of '${TFM_PLATFORM}', choose e.g. '${hint}'.")
 endif()
 
+# At the time of writing there is no systematic way to identify which
+# NVM technology is used by the SoC from the Kconfig, so we just
+# hardcode this information here instead.
+if((NRF_SOC_VARIANT STREQUAL nrf54l15) OR (target STREQUAL nrf54l15))
+  # Maybe we only need to check one of these options but these
+  # variables keep changing so we check both to be future proof
+  set(HAS_RRAMC 1)
+else()
+  set(HAS_NVMC 1)
+endif()
+
 #========================= Platform dependencies ===============================#
 
 include(hal_nordic.cmake)
@@ -63,13 +74,29 @@ target_include_directories(platform_s
         services/include
 )
 
+set(nvm_sources
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c
+)
+
+if(HAS_RRAMC)
+  list(APPEND nvm_sources
+    ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_rramc.c
+  )
+elseif(HAS_NVMC)
+  list(APPEND nvm_sources
+    ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+  )
+else()
+  message(FATAL_ERROR "Unexpected device")
+endif()
+
 target_sources(platform_s
-    PRIVATE
-        cmsis_drivers/Driver_Flash.c
-        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+  PRIVATE
+       ${nvm_sources}
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
+        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:${CMAKE_CURRENT_SOURCE_DIR}/nrf_exception_info.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
         $<$<BOOL:${ITS_ENCRYPTION}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_its_encryption.c>
@@ -121,11 +148,11 @@ target_compile_definitions(platform_s
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            cmsis_drivers/Driver_Flash.c
+            ${nvm_sources}
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
-            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
             nrfx_glue.c
+            $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>
     )
     target_sources(bl2
         PRIVATE
@@ -142,6 +169,12 @@ if(BL2)
         PRIVATE
             ${PLATFORM_DIR}/..
     )
+
+    target_compile_definitions(platform_bl2
+         PUBLIC
+         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL} # Required by nvm_sources
+    )
+
 endif()
 
 if (TFM_PARTITION_PLATFORM)
@@ -163,6 +196,18 @@ target_sources(tfm_spm
         target_cfg.c
 )
 
+target_sources(tfm_s
+    PRIVATE
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+)
+
+if(BL2)
+    target_sources(bl2
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+    )
+endif()
+
 #========================= Files for building NS side platform ================#
 
 configure_file(config_nordic_nrf_spe.cmake.in
@@ -179,6 +224,7 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
 
 
 install(FILES       startup.c
+                    startup_${target}.c
                     nrfx_glue.c
                     pal_plat_test.c
                     pal_plat_test.h
@@ -186,6 +232,7 @@ install(FILES       startup.c
 )
 
 install(FILES       startup.h
+                    target_cfg.h
                     nrfx_config.h
                     ns/CMakeLists.txt
                     config.cmake

@@ -155,7 +155,7 @@ The sequence of handling PSA Client call request in TF-M is listed as below
 1. Platform specific Inter-Processor Communication interrupt handler is
    triggered after the mailbox event is asserted by NSPE. The interrupt handler
    shall call ``spm_handle_interrupt()``
-2. SPM will send a ``SIGNAL_MAILBOX`` to ``ns_agent_mailbox`` partition
+2. SPM will send a ``MAILBOX_INTERRUPT_SIGNAL`` to ``ns_agent_mailbox`` partition
 3. ``ns_agent_mailbox`` partition deals with the mailbox message(s) which
    contain(s) the PSA client call information and parameters.
    Then the PSA client call request is dispatched to dedicated PSA client call
@@ -235,7 +235,7 @@ A partition will be dedicated to interacting with the NSPE through the mailbox.
 This partition will call ``tfm_hal_boot_ns_cpu()`` and
 tfm_hal_wait_for_ns_cpu_ready() to ensure that the non-secure core is running.
 It will then initialise the SPE mailbox and enable the IPC interrupt. Once these
-tasks are complete, it will enter an infinite loop waiting for a MAILBOX_SIGNAL
+tasks are complete, it will enter an infinite loop waiting for a ``MAILBOX_INTERRUPT_SIGNAL``
 signal indicating that a mailbox message has arrived.
 
 Mailbox handling will be done in the context of the ``ns_agent_mailbox``
@@ -428,30 +428,6 @@ specific mailbox reply.
 Please note that ``tfm_rpc_client_call_reply()`` doesn't return the status of
 underlying mailbox reply process.
 
-``tfm_rpc_set_caller_data()``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This function sets the private data of the NS caller in TF-M message to identify
-the caller after PSA client call is completed.
-
-.. code-block:: c
-
-  void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
-
-**Parameters**
-
-+---------------+--------------------------------------------------------------+
-| ``handle``    | The connection handle to be set with NS caller private data. |
-+---------------+--------------------------------------------------------------+
-| ``client_id`` | The client ID of the NS caller.                              |
-+---------------+--------------------------------------------------------------+
-
-**Usage**
-
-``tfm_rpc_set_caller_data()`` invokes callback function ``get_caller_data()`` to
-fetch the private data of caller of PSA client call and set it into TF-M message
-structure. It must always return non-NULL.
-
 TF-M RPC definitions for mailbox
 --------------------------------
 
@@ -465,7 +441,6 @@ This structures contains the callback functions for specific mailbox operations.
   struct tfm_rpc_ops_t {
       void (*handle_req)(void);
       void (*reply)(const void *owner, int32_t ret);
-      const void * (*get_caller_data)(int32_t client_id);
   };
 
 ``tfm_rpc_register_ops()``
@@ -653,7 +628,7 @@ TF-M RPC ``psa_close()`` handler
 
 .. code-block:: c
 
-  void tfm_rpc_psa_close(psa_handle_t handle);
+  psa_status_t tfm_rpc_psa_close(psa_handle_t handle);
 
 **Parameters**
 
@@ -663,11 +638,11 @@ TF-M RPC ``psa_close()`` handler
 
 **Return**
 
-+---------------------+---------------------------------------------+
-| ``void``            | Success.                                    |
-+---------------------+---------------------------------------------+
-| ``Does not return`` | The call is invalid, or invalid parameters. |
-+---------------------+---------------------------------------------+
++----------------------+---------------------------------------------+
+| ``PSA_SUCCESS``      | Success.                                    |
++----------------------+---------------------------------------------+
+| ``PROGRAMMER ERROR`` | The call is invalid, or invalid parameters. |
++----------------------+---------------------------------------------+
 
 **Usage**
 
@@ -691,7 +666,7 @@ Reference
 
 ----------------
 
-*Copyright (c) 2019-2023 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2019-2024 Arm Limited. All Rights Reserved.*
 
 *Copyright (c) 2020-2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

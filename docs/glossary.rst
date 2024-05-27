@@ -7,7 +7,7 @@ Glossary of terms and abbreviations
 
     Application RoT
         `PSA term`_. The security domain in which additional security services
-        are implemented.
+        are implemented. Also referred as ARoT.
 
     HAL
         Hardware Abstraction Layer:
@@ -41,7 +41,7 @@ Glossary of terms and abbreviations
 
     PSA RoT
         `PSA term`_. This defines the most trusted security domain within a PSA
-        system.
+        system. Also referred as PRoT.
 
     SFN
         Secure Function:
@@ -140,4 +140,4 @@ Glossary of terms and abbreviations
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*

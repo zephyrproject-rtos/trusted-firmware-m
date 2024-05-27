@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,7 @@
  */
 struct tfm_pool_chunk_t {
     struct tfm_pool_chunk_t *next;        /* Chunk list                     */
+    uint32_t magic;                       /* Magic value indicating allocation state */
     uint8_t data[];                       /* Data indicator                 */
 };
 
@@ -85,7 +86,8 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool);
 void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr);
 
 /**
- * \brief Checks whether a pointer points to a chunk data in the pool.
+ * \brief Checks whether a pointer points to a valid allocated chunk of data in
+ *        the pool.
  *
  * \param[in] pool              Pointer to memory pool declared by
  *                              \ref TFM_POOL_DECLARE.

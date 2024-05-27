@@ -34,7 +34,7 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_key_derivation_operation_t *operation = NULL;
     uint32_t *p_handle = NULL;
-    uint16_t sid = iov->function_id;
+    enum tfm_crypto_func_sid_t sid = iov->function_id;
 
     tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
                                                   encoded_key->owner, encoded_key->key_id);
@@ -93,6 +93,10 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
 
         return psa_key_derivation_input_bytes(operation, iov->step, data,
                                               data_length);
+    }
+    case TFM_CRYPTO_KEY_DERIVATION_INPUT_INTEGER_SID:
+    {
+        return psa_key_derivation_input_integer(operation, iov->step, iov->value);
     }
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID:
     {

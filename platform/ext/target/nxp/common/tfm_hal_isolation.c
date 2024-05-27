@@ -1,6 +1,9 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright 2020-2022 NXP. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +13,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "Driver_Common.h"
 #include "mmio_defs.h"
 #include "mpu_armv8m_drv.h"
@@ -33,8 +36,15 @@ extern const struct memory_region_limits memory_regions;
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
+
+#if TFM_ISOLATION_LEVEL == 3
+#define PROT_BOUNDARY_VAL \
+    (((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK) | \
+     ((1U << HANDLE_ATTR_SPM_POS) & HANDLE_ATTR_SPM_MASK))
+#else
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+#endif
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
@@ -103,7 +113,6 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
-    fih_int fih_rc = FIH_FAILURE;
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
 
@@ -117,6 +126,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
 
     /* Set up static isolation boundaries inside SPE */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+    fih_int fih_rc = FIH_FAILURE;
     struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
     mpu_armv8m_clean(&dev_mpu_s);
@@ -429,6 +439,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 #if TFM_ISOLATION_LEVEL == 3
+    bool is_spm = !!(local_handle & HANDLE_ATTR_SPM_MASK);
     fih_int fih_rc = FIH_FAILURE;
     struct mpu_armv8m_region_cfg_t localcfg;
     uint32_t i, mmio_index;
@@ -442,6 +453,10 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     __set_CONTROL(ctrl.w);
 
 #if TFM_ISOLATION_LEVEL == 3
+    if (is_spm) {
+        FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
+    }
+
     if (!p_ldinf) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
@@ -560,18 +575,18 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
     }
 }
 
-bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
-                                  uintptr_t boundary_to)
+FIH_RET_TYPE(bool) tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                                uintptr_t boundary_to)
 {
     if (boundary_from == boundary_to) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
 
     if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
         ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
-        return false;
+        FIH_RET(fih_int_encode(false));
     }
-    return true;
+    FIH_RET(fih_int_encode(true));
 }
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/

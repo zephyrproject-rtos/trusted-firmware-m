@@ -5,13 +5,12 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_policy(SET CMP0079 NEW)
-
 if(BL2)
     add_library(bl2_crypto_hw STATIC)
 endif()
+
 if (TFM_PARTITION_CRYPTO)
-add_library(crypto_service_crypto_hw STATIC)
+    add_library(crypto_service_crypto_hw STATIC)
 endif()
 
 message(STATUS "[Platform] Crypto HW accelerator type: ${CRYPTO_HW_ACCELERATOR_TYPE}")

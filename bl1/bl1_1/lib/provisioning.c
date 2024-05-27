@@ -135,7 +135,17 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
             return TFM_PLAT_ERR_INVALID_INPUT;
         }
 
+        err = tfm_plat_otp_secure_provisioning_start();
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
         err = provision_assembly_and_test();
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
+        err = tfm_plat_otp_secure_provisioning_finish();
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }

@@ -39,9 +39,6 @@ MEMORY
 __heap_size__  = S_HEAP_SIZE;
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS
@@ -106,8 +103,28 @@ SECTIONS
 
 #endif /* TFM_ISOLATION_LEVEL != 1 */
 
-    .ER_TFM_CODE : ALIGN(4)
+    .ER_TFM_CODE (READONLY) : ALIGN(4)
     {
+        . = ALIGN(4);
+        /* preinit data */
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP(*(.preinit_array))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+
+        . = ALIGN(4);
+        /* init data */
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(.init_array))
+        PROVIDE_HIDDEN (__init_array_end = .);
+
+        . = ALIGN(4);
+        /* finit data */
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(.fini_array))
+        PROVIDE_HIDDEN (__fini_array_end = .);
+
         . = ALIGN(4);
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
@@ -299,26 +316,6 @@ SECTIONS
     {
         *(.data*)
 
-        . = ALIGN(4);
-        /* preinit data */
-        PROVIDE_HIDDEN (__preinit_array_start = .);
-        KEEP(*(.preinit_array))
-        PROVIDE_HIDDEN (__preinit_array_end = .);
-
-        . = ALIGN(4);
-        /* init data */
-        PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
-        KEEP(*(.init_array))
-        PROVIDE_HIDDEN (__init_array_end = .);
-
-        . = ALIGN(4);
-        /* finit data */
-        PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
-        KEEP(*(.fini_array))
-        PROVIDE_HIDDEN (__fini_array_end = .);
-
         KEEP(*(.jcr*))
         . = ALIGN(4);
 
@@ -331,7 +328,6 @@ SECTIONS
 
     .TFM_UNPRIV_CODE : ALIGN(GTZC_FLASH_ALIGN)
     {
-        *(SFN)
         *(.text*)
 
         KEEP(*(.init))

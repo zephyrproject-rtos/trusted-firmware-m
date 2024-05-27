@@ -17,7 +17,7 @@ such as Secure Partitions and manifests.
 Interrupt Handling Model
 ************************
 
-TF-M supports the two interrupt handling model defined by FF-M:
+TF-M supports the two interrupt handling models defined by FF-M:
 
 - First-Level Interrupt Handling (FLIH)
 
@@ -259,7 +259,7 @@ The ``{source_symbol}`` is:
 
 For example if the manifest declares ``"source": 5``, then the function name
 is ``irq_5_init``.
-If the mannifest declares ``"source"  : "TIMER_1_IRQ"`` then the function
+If the manifest declares ``"source"  : "TIMER_1_IRQ"`` then the function
 name is ``timer_1_irq_init``.
 
 The function will be called by the Framework automatically during
@@ -402,6 +402,6 @@ References
 
 --------------
 
-*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

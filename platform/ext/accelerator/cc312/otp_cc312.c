@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "tfm_attest_hal.h"
 #include "uart_stdout.h"
 #include "region_defs.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include <string.h>
 
 /* Define some offsets from the CC312 base address, to access particular
@@ -1148,5 +1148,15 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
+{
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_finish(void)
+{
     return TFM_PLAT_ERR_SUCCESS;
 }

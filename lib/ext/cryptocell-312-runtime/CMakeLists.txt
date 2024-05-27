@@ -5,12 +5,9 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21)
 
 project("CC312 Runtime Library" LANGUAGES C ASM)
-
-cmake_policy(SET CMP0076 NEW)
-cmake_policy(SET CMP0079 NEW)
 
 set(CC312_LIB_TARGET            ${CC312_LIB_PREFIX}cc312)
 set(CC312_PAL_TARGET            ${CC312_LIB_PREFIX}cc312_pal)

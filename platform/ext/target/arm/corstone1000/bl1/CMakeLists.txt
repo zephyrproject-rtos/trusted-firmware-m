@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -40,6 +40,7 @@ target_link_libraries(bl1
         bl1_main
         bl2_mbedcrypto
         cmsis_stack_override
+        cmsis
 )
 
 # add_convert_to_bin_target(bl1) requires at least one source file added to bl1. This sources will
@@ -55,7 +56,6 @@ target_include_directories(bl1
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/include
         ../Device/Include
-        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
 )
 
 # target_add_scatter_file(bl1) cannot be used as it would add the platform_region_defs dependency
@@ -183,7 +183,6 @@ target_include_directories(bl1_main
 target_include_directories(bl1_main
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/platform/include>
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/platform/ext/cmsis>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/platform/ext/driver>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/platform/ext/common>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/platform/ext>
@@ -201,6 +200,7 @@ target_sources(bl1_main
 target_link_libraries(bl1_main
     PRIVATE
         bl2_hal
+        cmsis
 )
 
 target_compile_definitions(bl1_main

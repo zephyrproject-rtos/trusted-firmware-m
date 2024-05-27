@@ -33,7 +33,7 @@ This runtime library is named the ``Secure Partition Runtime Library``, and the
 abbreviation is ``SPRTL``.
 
 ****************
-Design Principal
+Design Principle
 ****************
 The following requirements are mandatory for SPRTL implementation:
 
@@ -77,7 +77,7 @@ requirements.
 C Runtime API
 -------------
 PSA FF describes a small set of the C standard library. Part of toolchain
-library API can be used as default if these APIs meet the `Design Principal`_
+library API can be used as default if these APIs meet the `Design Principle`_
 and `Security Implementation Requirements`_. The toolchain 'header' and 'types'
 can be reused to simplify the implementation.
 
@@ -365,4 +365,4 @@ from the Secure Partition Local Storage. The implementation can be:
 
 --------------
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2024, Arm Limited. All rights reserved.*

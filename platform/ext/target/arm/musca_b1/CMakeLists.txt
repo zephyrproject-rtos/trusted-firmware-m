@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -179,8 +179,8 @@ target_include_directories(flash_drivers
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         ${PLATFORM_DIR}/ext/driver
-        ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/common
+        ${PLATFORM_DIR}/include
         Native_Driver
         CMSIS_Driver/Config
         Device/Config
@@ -195,6 +195,11 @@ target_sources(flash_drivers
         Native_Driver/gfc100_eflash_drv.c
         Native_Driver/musca_b1_eflash_drv.c
         Device/Source/gfc100_eflash_definition.c
+)
+
+target_link_libraries(flash_drivers
+    PRIVATE
+        cmsis
 )
 
 if(BL2)

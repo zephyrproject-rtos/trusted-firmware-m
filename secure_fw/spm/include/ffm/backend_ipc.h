@@ -9,9 +9,15 @@
 #define __BACKEND_IPC_H__
 
 #include <stdint.h>
+#include "svc_num.h"
 
 /* Calculate the service setting. In IPC it is the signal set. */
 #define BACKEND_SERVICE_SET(set, p_service) ((set) |= (p_service)->signal)
+
+/* Trigger SVC handler to run SPM initialization */
+#define BACKEND_SPM_INIT()  __ASM volatile("SVC %0           \n"         \
+                                           "BX LR            \n"         \
+                                           : : "I" (TFM_SVC_SPM_INIT))
 
 /*
  * Actions done before entering SPM.

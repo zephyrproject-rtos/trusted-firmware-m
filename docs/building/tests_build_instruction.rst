@@ -6,7 +6,7 @@ The tests is a TF-M application which verifies TF-M functionality on both SPE an
 Thus, tests require an extension of SPE side with test code and extra functionality
 for some Non-Secure test cases. To inject that test code into SPE the
 ``CONFIG_TFM_TEST_DIR`` option is used. When SPE build system sees this option
-it adds the corresponding folder via ``add_subdirectory(${CONFIG_TFM_TEST_DIR} tf-m-test)``
+it adds the corresponding folder via ``add_subdirectory(${CONFIG_TFM_TEST_DIR} tf-m-tests)``
 and includes it to SPE binary.
 Also, test configurations should be passed to SPE build to include building Secure Tests.
 
@@ -104,5 +104,5 @@ Reference
 
 --------------
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.*

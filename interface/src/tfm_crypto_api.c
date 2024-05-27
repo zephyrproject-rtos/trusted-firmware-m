@@ -1644,6 +1644,42 @@ TFM_CRYPTO_API(psa_status_t, psa_key_derivation_output_key)(
     return API_DISPATCH(in_vec, out_vec);
 }
 
+TFM_CRYPTO_API(psa_status_t, psa_key_derivation_input_integer)(
+                                      psa_key_derivation_operation_t *operation,
+                                      psa_key_derivation_step_t step,
+                                      uint64_t value)
+{
+    struct tfm_crypto_pack_iovec iov = {
+        .function_id = TFM_CRYPTO_KEY_DERIVATION_INPUT_INTEGER_SID,
+        .step = step,
+        .value = value,
+        .op_handle = operation->handle,
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+    };
+
+    return API_DISPATCH_NO_OUTVEC(in_vec);
+}
+
+TFM_CRYPTO_API(psa_status_t, psa_key_derivation_verify_bytes)(
+                                      psa_key_derivation_operation_t *operation,
+                                      const uint8_t *expected_output,
+                                      size_t output_length)
+{
+    /* To be implemented when the PSA backend supports it */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+TFM_CRYPTO_API(psa_status_t, psa_key_derivation_verify_key)(
+                                      psa_key_derivation_operation_t *operation,
+                                      psa_key_id_t expected)
+{
+    /* To be implemented when the PSA backend supports it */
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
 /* The implementation of the following helper function is marked
  * weak to allow for those integrations where this is directly
  * provided by the psa_crypto_client.c module of Mbed TLS

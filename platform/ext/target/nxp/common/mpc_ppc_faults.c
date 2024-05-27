@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "utilities.h"
 #include "target_cfg.h"
 /* "exception_info.h" must be the last include because of the IAR pragma */
@@ -25,7 +25,7 @@ void C_SEC_VIO_IRQHandler(void)
 
 __attribute__((naked)) void SEC_VIO_IRQHandler(void)
 {
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+    EXCEPTION_INFO();
 
     __ASM volatile(
         "BL        C_SEC_VIO_IRQHandler    \n"

@@ -1,0 +1,88 @@
+From 5f1f13a6607a145ab6169810207ca1be8b844468 Mon Sep 17 00:00:00 2001
+From: Antonio de Angelis <Antonio.deAngelis@arm.com>
+Date: Tue, 9 Apr 2024 15:26:59 +0100
+Subject: [PATCH 7/7] Enable sources when MCUBOOT_USE_PSA_CRYPTO and not
+ MBEDTLS_PSA_CRYPTO_C
+
+Gate relevant files for the thin PSA crypto core on MCUBOOT_USE_PSA_CRYPTO
+during BL2 build instead of MBEDTLS_PSA_CRYPTO_C which is not defined in
+such case. A full solution might require a change in config strategy of
+Mbed TLS with the definition
+
+Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
+---
+ include/mbedtls/psa_util.h           | 2 +-
+ library/psa_crypto_driver_wrappers.h | 2 +-
+ library/psa_crypto_ecp.c             | 2 +-
+ library/psa_crypto_hash.c            | 2 +-
+ library/psa_crypto_rsa.c             | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/include/mbedtls/psa_util.h b/include/mbedtls/psa_util.h
+index c78cc2333..7350eafcb 100644
+--- a/include/mbedtls/psa_util.h
++++ b/include/mbedtls/psa_util.h
+@@ -21,7 +21,7 @@
+  * otherwise error codes would be unknown in test_suite_psa_crypto_util.data.*/
+ #include <mbedtls/asn1write.h>
+ 
+-#if defined(MBEDTLS_PSA_CRYPTO_CLIENT)
++#if defined(MBEDTLS_PSA_CRYPTO_CLIENT) || defined(MCUBOOT_USE_PSA_CRYPTO)
+ 
+ /** The random generator function for the PSA subsystem.
+  *
+diff --git a/library/psa_crypto_driver_wrappers.h b/library/psa_crypto_driver_wrappers.h
+index 3fa4583b7..1769ad405 100644
+--- a/library/psa_crypto_driver_wrappers.h
++++ b/library/psa_crypto_driver_wrappers.h
+@@ -23,7 +23,7 @@
+ #include "mbedtls/constant_time.h"
+ /* END-common headers */
+ 
+-#if defined(MBEDTLS_PSA_CRYPTO_C)
++#if defined(MBEDTLS_PSA_CRYPTO_C) || defined(MCUBOOT_USE_PSA_CRYPTO)
+ 
+ /* BEGIN-driver headers */
+ /* Headers for mbedtls_test opaque driver */
+diff --git a/library/psa_crypto_ecp.c b/library/psa_crypto_ecp.c
+index 95baff6a0..317554bfb 100644
+--- a/library/psa_crypto_ecp.c
++++ b/library/psa_crypto_ecp.c
+@@ -8,7 +8,7 @@
+ 
+ #include "common.h"
+ 
+-#if defined(MBEDTLS_PSA_CRYPTO_C)
++#if defined(MBEDTLS_PSA_CRYPTO_C) || defined(MCUBOOT_USE_PSA_CRYPTO)
+ 
+ #include <psa/crypto.h>
+ #include "psa_crypto_core.h"
+diff --git a/library/psa_crypto_hash.c b/library/psa_crypto_hash.c
+index eeb7666c1..5c025b335 100644
+--- a/library/psa_crypto_hash.c
++++ b/library/psa_crypto_hash.c
+@@ -8,7 +8,7 @@
+ 
+ #include "common.h"
+ 
+-#if defined(MBEDTLS_PSA_CRYPTO_C)
++#if defined(MBEDTLS_PSA_CRYPTO_C) || defined(MCUBOOT_USE_PSA_CRYPTO)
+ 
+ #include <psa/crypto.h>
+ #include "psa_crypto_core.h"
+diff --git a/library/psa_crypto_rsa.c b/library/psa_crypto_rsa.c
+index 2f613b32d..2594b110f 100644
+--- a/library/psa_crypto_rsa.c
++++ b/library/psa_crypto_rsa.c
+@@ -8,7 +8,7 @@
+ 
+ #include "common.h"
+ 
+-#if defined(MBEDTLS_PSA_CRYPTO_C)
++#if defined(MBEDTLS_PSA_CRYPTO_C) || defined(MCUBOOT_USE_PSA_CRYPTO)
+ 
+ #include <psa/crypto.h>
+ #include "psa/crypto_values.h"
+-- 
+2.34.1
+

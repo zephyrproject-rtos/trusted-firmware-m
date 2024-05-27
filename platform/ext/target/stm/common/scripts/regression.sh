@@ -31,7 +31,7 @@ remove_hdp_protection="-ob HDP1_PEND=0 HDP1EN=0 HDP2_PEND=0 HDP2EN=0"
 default_ob1="-ob SRAM2_RST=0 SECBOOTADD0="$secbootadd0" DBANK=1 SWAP_BANK=0 SECWM1_PSTRT=0 SECWM1_PEND=127"
 default_ob2="-ob SECWM2_PSTRT=0 SECWM2_PEND=127"
 echo "Regression to RDP 0 and  tzen=1"
-$stm32programmercli $connect_no_reset $rdp_0
+$stm32programmercli $connect $rdp_0
 echo "Remove bank1 protection and erase all"
 $stm32programmercli $connect $remove_bank1_protect $erase_all
 echo "Remove bank2 protection and erase all"

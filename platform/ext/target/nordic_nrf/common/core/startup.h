@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +22,7 @@ extern uint64_t __STACK_SEAL;
 
 typedef void(*VECTOR_TABLE_Type)(void);
 
-void __PROGRAM_START(void) __NO_RETURN;
+__NO_RETURN void __PROGRAM_START(void);
 
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
 __NO_RETURN void __attribute__((weak, alias("default_tfm_IRQHandler"))) handler_name(void);

@@ -39,9 +39,6 @@ MEMORY
 __heap_size__  = S_HEAP_SIZE;
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
-
 ENTRY(Reset_Handler)
 
 SECTIONS
@@ -303,6 +300,24 @@ SECTIONS
     {
         *(.data*)
 
+        KEEP(*(.jcr*))
+        . = ALIGN(4);
+
+    } > RAM AT> FLASH
+    Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
+    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
+
+    /**** PSA RoT DATA end here */
+    Image$$TFM_PSA_RW_STACK_END$$Base = .;
+
+    .TFM_UNPRIV_CODE (READONLY) : ALIGN(GTZC_FLASH_ALIGN)
+    {
+        *(SFN)
+        *(.text*)
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
+
         . = ALIGN(4);
         /* preinit data */
         PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -322,24 +337,6 @@ SECTIONS
         KEEP(*(SORT(.fini_array.*)))
         KEEP(*(.fini_array))
         PROVIDE_HIDDEN (__fini_array_end = .);
-
-        KEEP(*(.jcr*))
-        . = ALIGN(4);
-
-    } > RAM AT> FLASH
-    Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
-    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
-
-    /**** PSA RoT DATA end here */
-    Image$$TFM_PSA_RW_STACK_END$$Base = .;
-
-    .TFM_UNPRIV_CODE : ALIGN(GTZC_FLASH_ALIGN)
-    {
-        *(SFN)
-        *(.text*)
-
-        KEEP(*(.init))
-        KEEP(*(.fini))
 
         /* .ctors */
         *crtbegin.o(.ctors)

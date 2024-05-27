@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -106,6 +106,9 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
 #endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   mov     r0, lr                              \n" /* Pass the EXC_RETURN value as
+                                                             * parameter
+                                                             */
         "   bl      ipc_schedule                        \n"
         "   pop     {r2, lr}                            \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
@@ -242,7 +245,7 @@ FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) != SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }
-    fih_delay();
+    (void)fih_delay();
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) != SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }
@@ -319,14 +322,15 @@ void tfm_arch_config_extensions(void)
                   | FPU_FPCCR_LSPENS_Msk;
 
     /* Prevent non-secure from modifying FPU’s power setting. */
-#if defined(__ARM_ARCH_8_1M_MAIN__) && defined(ICB)
-    ICB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1)
+    ICB->CPPWR |=
 #else
-    SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+    SCnSCB->CPPWR |=
 #endif
+      SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
 #endif /* CONFIG_TFM_FLOAT_ABI >= 1 */
 
-#if defined(__ARM_ARCH_8_1M_MAIN__)
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1)
     SCB->CCR |= SCB_CCR_TRD_Msk;
 #endif
 }
@@ -338,7 +342,15 @@ __attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
                     "eor  r0, r0, r0         \n"
                     "vmsr fpscr, r0          \n"
 #if (defined(__ARM_ARCH_8_1M_MAIN__))
+/* IAR throws an error if the S0-S31 syntax is used.
+ * Splitting the command into two parts solved the issue.
+ */
+#if defined(__ICCARM__)
+                    "vscclrm {s0-s30,vpr}    \n"
+                    "vscclrm {s31,vpr}       \n"
+#else
                     "vscclrm {s0-s31,vpr}    \n"
+#endif
 #else
                     "vmov s0, r0             \n"
                     "vmov s1, r0             \n"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited
+ * Copyright (c) 2017-2024, Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "musca_s1_scc_drv.h"
 /* Use __ISB(), __DSB() */
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /** Setter bit manipulation macro */
 #define SET_BIT(WORD, BIT_INDEX) ((WORD) |= (1u << (BIT_INDEX)))

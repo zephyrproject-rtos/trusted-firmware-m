@@ -30,6 +30,8 @@
         PSA_FUNCTION_NAME(psa_key_derivation_set_capacity)
 #define psa_key_derivation_input_bytes \
         PSA_FUNCTION_NAME(psa_key_derivation_input_bytes)
+#define psa_key_derivation_input_integer \
+        PSA_FUNCTION_NAME(psa_key_derivation_input_integer)
 #define psa_key_derivation_output_bytes \
         PSA_FUNCTION_NAME(psa_key_derivation_output_bytes)
 #define psa_key_derivation_input_key \

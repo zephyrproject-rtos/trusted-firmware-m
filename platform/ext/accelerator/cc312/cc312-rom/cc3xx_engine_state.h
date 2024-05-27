@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,7 +34,7 @@ extern enum cc3xx_engine_t cc3xx_engine_in_use;
  *
  * @param engine Value of type \ref enum cc3xx_engine_t to be set
  */
-void cc3xx_set_engine(enum cc3xx_engine_t engine);
+void cc3xx_lowlevel_set_engine(enum cc3xx_engine_t engine);
 
 #ifdef __cplusplus
 }

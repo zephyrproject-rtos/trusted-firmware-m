@@ -122,8 +122,8 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
  * \return true  - a switching is needed.
  *         false - do not need a switch.
  */
-bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
-                                  uintptr_t boundary_to);
+FIH_RET_TYPE(bool) tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                                uintptr_t boundary_to);
 
 #ifdef __cplusplus
 }

@@ -63,6 +63,12 @@
 #define HAL_UART_ADAPTER_FIFO (1U)
 #endif /* HAL_UART_ADAPTER_FIFO */
 
+#if (defined(SERIAL_PORT_TYPE_UART_DMA) && (SERIAL_PORT_TYPE_UART_DMA > 0U))
+#ifndef HAL_UART_DMA_ENABLE
+#define HAL_UART_DMA_ENABLE (1U)
+#endif
+#endif
+
 #ifndef HAL_UART_DMA_ENABLE
 #define HAL_UART_DMA_ENABLE (0U)
 #endif /* HAL_UART_DMA_ENABLE */
@@ -88,9 +94,9 @@
 /*! @brief Definition of uart dma adapter handle size. */
 #if (defined(HAL_UART_DMA_ENABLE) && (HAL_UART_DMA_ENABLE > 0U))
 #if (defined(FSL_FEATURE_SOC_DMA_COUNT) && (FSL_FEATURE_SOC_DMA_COUNT > 0U))
-#define HAL_UART_DMA_HANDLE_SIZE (124U)
+#define HAL_UART_DMA_HANDLE_SIZE (124U + HAL_UART_ADAPTER_LOWPOWER * 36U)
 #elif (defined(FSL_FEATURE_SOC_EDMA_COUNT) && (FSL_FEATURE_SOC_EDMA_COUNT > 0U))
-#define HAL_UART_DMA_HANDLE_SIZE (140U)
+#define HAL_UART_DMA_HANDLE_SIZE (140U + HAL_UART_ADAPTER_LOWPOWER * 36U)
 #else
 #error This SOC does not have DMA or EDMA available!
 #endif
@@ -293,11 +299,11 @@ extern "C" {
  * #UART_HANDLE_DEFINE(handle);
  * or
  * uint32_t handle[((HAL_UART_HANDLE_SIZE + sizeof(uint32_t) - 1U) / sizeof(uint32_t))];
- * @param config Pointer to user-defined configuration structure.
+ * @param uart_config Pointer to user-defined configuration structure.
  * @retval kStatus_HAL_UartBaudrateNotSupport Baudrate is not support in current clock source.
  * @retval kStatus_HAL_UartSuccess UART initialization succeed
  */
-hal_uart_status_t HAL_UartInit(hal_uart_handle_t handle, const hal_uart_config_t *config);
+hal_uart_status_t HAL_UartInit(hal_uart_handle_t handle, const hal_uart_config_t *uart_config);
 
 /*!
  * @brief Deinitializes a UART instance.
@@ -389,7 +395,7 @@ hal_uart_status_t HAL_UartTransferInstallCallback(hal_uart_handle_t handle,
  * The receive request is saved by the UART driver.
  * When the new data arrives, the receive request is serviced first.
  * When all data is received, the UART driver notifies the upper layer
- * through a callback function and passes the status parameter @ref kStatus_UART_RxIdle.
+ * through a callback function and passes the status parameter @ref kStatus_HAL_UartRxIdle.
  *
  * @note The function #HAL_UartReceiveBlocking and the function #HAL_UartTransferReceiveNonBlocking
  * cannot be used at the same time.
@@ -408,7 +414,7 @@ hal_uart_status_t HAL_UartTransferReceiveNonBlocking(hal_uart_handle_t handle, h
  * This function sends data using an interrupt method. This is a non-blocking function, which
  * returns directly without waiting for all data to be written to the TX register. When
  * all data is written to the TX register in the ISR, the UART driver calls the callback
- * function and passes the @ref kStatus_UART_TxIdle as status parameter.
+ * function and passes the @ref kStatus_HAL_UartTxIdle as status parameter.
  *
  * @note The function #HAL_UartSendBlocking and the function #HAL_UartTransferSendNonBlocking
  * cannot be used at the same time.
@@ -510,7 +516,7 @@ hal_uart_status_t HAL_UartInstallCallback(hal_uart_handle_t handle,
  * The receive request is saved by the UART adapter.
  * When the new data arrives, the receive request is serviced first.
  * When all data is received, the UART adapter notifies the upper layer
- * through a callback function and passes the status parameter @ref kStatus_UART_RxIdle.
+ * through a callback function and passes the status parameter @ref kStatus_HAL_UartRxIdle.
  *
  * @note The function #HAL_UartReceiveBlocking and the function #HAL_UartReceiveNonBlocking
  * cannot be used at the same time.
@@ -530,7 +536,7 @@ hal_uart_status_t HAL_UartReceiveNonBlocking(hal_uart_handle_t handle, uint8_t *
  * This function sends data using an interrupt method. This is a non-blocking function, which
  * returns directly without waiting for all data to be written to the TX register. When
  * all data is written to the TX register in the ISR, the UART driver calls the callback
- * function and passes the @ref kStatus_UART_TxIdle as status parameter.
+ * function and passes the @ref kStatus_HAL_UartTxIdle as status parameter.
  *
  * @note The function #HAL_UartSendBlocking and the function #HAL_UartSendNonBlocking
  * cannot be used at the same time.
@@ -550,7 +556,7 @@ hal_uart_status_t HAL_UartSendNonBlocking(hal_uart_handle_t handle, uint8_t *dat
  * This function gets the number of bytes that have been received.
  *
  * @param handle UART handle pointer.
- * @param count Receive bytes count.
+ * @param reCount Receive bytes count.
  * @retval kStatus_HAL_UartError An error occurred.
  * @retval kStatus_Success Get successfully through the parameter \p count.
  */
@@ -563,7 +569,7 @@ hal_uart_status_t HAL_UartGetReceiveCount(hal_uart_handle_t handle, uint32_t *re
  * register by using the interrupt method.
  *
  * @param handle UART handle pointer.
- * @param count Send bytes count.
+ * @param seCount Send bytes count.
  * @retval kStatus_HAL_UartError An error occurred.
  * @retval kStatus_Success Get successfully through the parameter \p count.
  */
@@ -756,7 +762,7 @@ hal_uart_dma_status_t HAL_UartDMAGetReceiveCount(hal_uart_handle_t handle, uint3
  * register by using the DMA method.
  *
  * @param handle UART handle pointer.
- * @param count Send bytes count.
+ * @param seCount Send bytes count.
  * @retval kStatus_HAL_UartDmaError An error occurred.
  * @retval kStatus_HAL_UartDmaSuccess Get successfully through the parameter \p seCount.
  */

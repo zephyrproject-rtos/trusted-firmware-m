@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -25,12 +25,10 @@
 #include "utilities.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
-#include "tfm_rpc.h"
 #include "tfm_hal_platform.h"
+#include "tfm_plat_otp.h"
 #include "tfm_psa_call_pack.h"
 #include "tfm_hal_isolation.h"
-
-
 
 void spm_handle_programmer_errors(psa_status_t status)
 {
@@ -44,11 +42,27 @@ void spm_handle_programmer_errors(psa_status_t status)
 
 uint32_t tfm_spm_get_lifecycle_state(void)
 {
-    /*
-     * FixMe: return PSA_LIFECYCLE_UNKNOWN to the caller directly. It will be
-     * implemented in the future.
-     */
-    return PSA_LIFECYCLE_UNKNOWN;
+    enum tfm_plat_err_t err;
+    enum plat_otp_lcs_t otp_lcs;
+
+    err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(otp_lcs),
+                            (uint8_t *)&otp_lcs);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_LIFECYCLE_UNKNOWN;
+    }
+
+    switch (otp_lcs) {
+    case PLAT_OTP_LCS_ASSEMBLY_AND_TEST:
+        return PSA_LIFECYCLE_ASSEMBLY_AND_TEST;
+    case PLAT_OTP_LCS_PSA_ROT_PROVISIONING:
+        return  PSA_LIFECYCLE_PSA_ROT_PROVISIONING;
+    case PLAT_OTP_LCS_SECURED:
+        return  PSA_LIFECYCLE_SECURED;
+    case PLAT_OTP_LCS_DECOMMISSIONED:
+        return PSA_LIFECYCLE_DECOMMISSIONED;
+    default:
+        return PSA_LIFECYCLE_UNKNOWN;
+    }
 }
 
 /* PSA Partition API function body */
@@ -186,7 +200,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {
-    struct service_t *service;
+    const struct service_t *service;
     struct connection_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
@@ -291,7 +305,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * until the response has been collected by the agent.
      */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    if (is_tfm_rpc_msg(handle)) {
+    if (tfm_spm_is_rpc_msg(handle)) {
         return ret;
     }
 #endif

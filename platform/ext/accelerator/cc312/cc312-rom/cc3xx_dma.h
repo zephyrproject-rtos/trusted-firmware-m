@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -65,8 +65,8 @@ extern "C" {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-void cc3xx_dma_remap_region_init(uint32_t remap_region_idx,
-                                 cc3xx_dma_remap_region_t *region);
+void cc3xx_lowlevel_dma_remap_region_init(uint32_t remap_region_idx,
+                                          cc3xx_dma_remap_region_t *region);
 /**
  * @brief                        Clear and disable a remap region.
  *
@@ -76,7 +76,7 @@ void cc3xx_dma_remap_region_init(uint32_t remap_region_idx,
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-void cc3xx_dma_remap_region_clear(uint32_t remap_region_idx);
+void cc3xx_lowlevel_dma_remap_region_clear(uint32_t remap_region_idx);
 
 /**
  * @brief             Select which CPU memory space should be used for remap
@@ -88,7 +88,7 @@ void cc3xx_dma_remap_region_clear(uint32_t remap_region_idx);
  * @return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
  *                    error.
  */
-void cc3xx_dma_tcm_cpusel(uint32_t cpuid);
+void cc3xx_lowlevel_dma_tcm_cpusel(uint32_t cpuid);
 
 #endif /* CC3XX_CONFIG_DMA_REMAP_ENABLE */
 
@@ -101,7 +101,7 @@ void cc3xx_dma_tcm_cpusel(uint32_t cpuid);
  * @param[in]  src    The pointer to copy data from.
  * @param[in]  length The size of the data.
  */
-void cc3xx_dma_copy_data(void* dest, const void* src, size_t length);
+void cc3xx_lowlevel_dma_copy_data(void* dest, const void* src, size_t length);
 
 /**
  * @brief             Set the DMA input location. This triggers DMA input to be
@@ -116,8 +116,8 @@ void cc3xx_dma_copy_data(void* dest, const void* src, size_t length);
  * @return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
  *                    error.
  */
-cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
-                                          bool write_output);
+cc3xx_err_t cc3xx_lowlevel_dma_buffered_input_data(const void* buf, size_t length,
+                                                   bool write_output);
 
 /**
  * @brief             Flush the DMA buffer. Engine setup is not saved with the
@@ -127,7 +127,7 @@ cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
  * @param[in]  zero_pad_first Whether the data should be zero-padded to the DMA
  *                            buffer size before being input.
  */
-void cc3xx_dma_flush_buffer(bool zero_pad_first);
+void cc3xx_lowlevel_dma_flush_buffer(bool zero_pad_first);
 
 /**
  * @brief             Set the size of the DMA block buffer. This must be called
@@ -137,7 +137,7 @@ void cc3xx_dma_flush_buffer(bool zero_pad_first);
  * @param[in]  size   The size of the block buffer. Must not be larger than
  *                    CC3XX_DMA_BLOCK_BUF_MAX_SIZE.
  */
-void cc3xx_dma_set_buffer_size(size_t size);
+void cc3xx_lowlevel_dma_set_buffer_size(size_t size);
 
 /**
  * @brief             Set the DMA output location. This controls where the
@@ -147,7 +147,7 @@ void cc3xx_dma_set_buffer_size(size_t size);
  * @param[in]  length The size of the output location. The DMA will not copy
  *                    more data than this to the pointer.
  */
-void cc3xx_dma_set_output(void* buf, size_t length);
+void cc3xx_lowlevel_dma_set_output(void* buf, size_t length);
 
 /**
  * @brief                       Uninitialize the DMA.
@@ -156,7 +156,7 @@ void cc3xx_dma_set_output(void* buf, size_t length);
  *                              on an error.
  *
  */
-void cc3xx_dma_uninit(void);
+void cc3xx_lowlevel_dma_uninit(void);
 
 #ifdef __cplusplus
 }

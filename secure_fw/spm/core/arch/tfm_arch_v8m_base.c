@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -106,6 +106,9 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
 #endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   mov     r0, lr                              \n" /* Pass the EXC_RETURN value as
+                                                             * parameter
+                                                             */
         "   bl      ipc_schedule                        \n"
         "   pop     {r2, r3}                            \n"
         "   mov     lr, r3                              \n"
@@ -274,7 +277,7 @@ FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }
-    fih_delay();
+    (void)fih_delay();
     if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
         FIH_RET(FIH_FAILURE);
     }

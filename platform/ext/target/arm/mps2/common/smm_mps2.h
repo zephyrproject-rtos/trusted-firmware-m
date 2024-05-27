@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited
+ * Copyright (c) 2016-2024, Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __SMM_MPS2_H__
 #define __SMM_MPS2_H__
 
-#include "cmsis.h"   /* device specific header file */
+#include "tfm_hal_device_header.h"   /* device specific header file */
 
 /* FPGAIO register map structure */
 struct arm_mps2_fpgaio_t {

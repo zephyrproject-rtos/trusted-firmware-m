@@ -164,6 +164,24 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
 enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
                                           size_t *size);
 
+/**
+ * \brief                               Enable a secure provisioning mode, if
+ *                                      supported.
+ *
+ * \retval TFM_PLAT_ERR_SUCCESS         The mode was enabled successfully.
+ * \retval TFM_PLAT_ERR_SYSTEM_ERR      An unspecified error occurred.
+ */
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void);
+
+/**
+ * \brief                               Disable the secure provisioning mode
+ *                                      once provisioning has finished.
+ *
+ * \retval TFM_PLAT_ERR_SUCCESS         The mode was disabled successfully.
+ * \retval TFM_PLAT_ERR_SYSTEM_ERR      An unspecified error occurred.
+ */
+enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_finish(void);
+
 #ifdef __cplusplus
 }
 #endif

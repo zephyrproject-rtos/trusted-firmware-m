@@ -891,7 +891,6 @@ psa_status_t cc3xx_ccm_finish(
 
     ret = ccm_finish(ctx, macBuf, &sizeOfT);
     if (ret != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("ccm_finish failed: %d", ret);
         return ret;
     }
 

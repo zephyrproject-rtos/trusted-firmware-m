@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stdio.h>
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "region.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
@@ -78,7 +78,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     int32_t result;
 
 #ifdef CRYPTO_HW_ACCELERATOR
-    result = cc3xx_uninit();
+    result = cc3xx_lowlevel_uninit();
     if (result) {
         while (1);
     }

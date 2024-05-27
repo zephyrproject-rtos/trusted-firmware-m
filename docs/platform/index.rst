@@ -8,6 +8,7 @@ TF-M Platforms
     :maxdepth: 2
 
     Arm <arm/index>
+    ArmChina <armchina/index>
     Cypress <cypress/index>
     Laird Connectivity <lairdconnectivity/index>
     Nordic <nordic_nrf/index>

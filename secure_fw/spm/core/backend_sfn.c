@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -13,6 +13,7 @@
 #include "current.h"
 #include "runtime_defs.h"
 #include "tfm_hal_platform.h"
+#include "tfm_nspm.h"
 #include "ffm/backend.h"
 #include "stack_watermark.h"
 #include "load/partition_defs.h"
@@ -21,6 +22,7 @@
 #include "psa/error.h"
 #include "psa/service.h"
 #include "spm.h"
+#include "memory_symbols.h"
 
 /* SFN Partition state */
 #define SFN_PARTITION_STATE_NOT_INITED        0
@@ -87,7 +89,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
     return status;
 }
 
-static uint32_t spm_thread_fn(uint32_t param)
+static uint32_t spm_init_function(uint32_t param)
 {
     struct partition_t *p_part, *p_curr;
     psa_status_t status;
@@ -125,8 +127,6 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
                                  uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
-    struct context_ctrl_t ns_agent_ctrl;
-    void *param = NULL;
 
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
@@ -134,27 +134,52 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     watermark_stack(p_pt);
 
     /*
-     * Built-in partitions have only one thread instance: NS Agent (TZ) and it
-     * needs to be specific cared here.
+     * Built-in partitions have only one thread instance: NS Agent (TZ or Mailbox)
+     * It needs to be specific cared here.
      */
     if (IS_NS_AGENT(p_pldi)) {
         if (IS_NS_AGENT_TZ(p_pldi)) {
-            /* NS agent TZ expects NSPE entry point as the parameter */
-            param = (void *)tfm_hal_get_ns_entry_point();
+            tz_ns_agent_register_client_id_range(p_pt->p_ldinf->client_id_base,
+                                                 p_pt->p_ldinf->client_id_limit);
         }
-        ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
-                          LOAD_ALLOCED_STACK_ADDR(p_pldi),
-                          p_pldi->stack_size);
-        tfm_arch_init_context(&ns_agent_ctrl, (uintptr_t)spm_thread_fn,
-                              param, p_pldi->entry);
-        tfm_arch_refresh_hardware_context(&ns_agent_ctrl);
         SET_CURRENT_COMPONENT(p_pt);
     }
 }
 
 uint32_t backend_system_run(void)
 {
-    return EXC_RETURN_THREAD_PSP;
+    void *param;
+    uint32_t psp;
+    uint32_t psp_limit;
+    const struct partition_load_info_t *pldi;
+    struct partition_t *partition = GET_CURRENT_COMPONENT();
+
+    SPM_ASSERT(partition != NULL);
+
+    pldi = partition->p_ldinf;
+
+    if (!IS_NS_AGENT(pldi)) {
+        tfm_core_panic();
+    }
+
+    /* NS agent expects NSPE entry point as the parameter */
+    param      = (void *)tfm_hal_get_ns_entry_point();
+
+    /* Assign stack and stack limit. */
+    psp        = arch_seal_thread_stack(((uint32_t)(LOAD_ALLOCED_STACK_ADDR(pldi)) +
+                                         (uint32_t)(pldi->stack_size)) & ~0x7UL);
+    psp_limit  = ((uint32_t)(LOAD_ALLOCED_STACK_ADDR(pldi)) + 7) & ~0x7UL;
+
+    arch_update_process_sp(psp, psp_limit);
+
+    /*
+     * The current execution is Thread mode using MSP.
+     * Change to use PSP and reset MSP.
+     */
+    arch_clean_stack_and_launch(param, (uintptr_t)spm_init_function,
+                                pldi->entry, SPM_BOOT_STACK_BOTTOM);
+
+    return 0;
 }
 
 psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)

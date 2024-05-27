@@ -35,10 +35,10 @@
 
 #define RTE_USART1_PINS            \
 {                                  \
-        NRF_PSEL(UART_TX,  0, 25), \
-        NRF_PSEL(UART_RX,  0, 26), \
-        NRF_PSEL(UART_RTS, 0,  5), \
-        NRF_PSEL(UART_CTS, 0,  6), \
+        NRF_PSEL(UART_TX,  1,  1), \
+        NRF_PSEL(UART_RX,  1,  0), \
+        NRF_PSEL(UART_RTS, 0, 11), \
+        NRF_PSEL(UART_CTS, 0, 10), \
 }
 
 #define RTE_FLASH0 1

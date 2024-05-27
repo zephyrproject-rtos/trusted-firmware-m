@@ -168,18 +168,18 @@ Other implementations are the same as those in Profile Medium.
 Platform support
 ****************
 
-To enable Profile Medium on a platform, the platform specific CMake file should
-be added into the platform support list in top-level Profile Medium CMake config
+To enable Profile Medium-ARoT-less on a platform, the platform specific CMake file should
+be added into the platform support list in top-level Profile Medium-ARoT-less CMake config
 file.
 
-Building Profile Medium
-=======================
+Building Profile Medium-ARoT-less
+=================================
 
-To build Profile Medium, argument ``TFM_PROFILE`` in build command line should be
+To build Profile Medium-ARoT-less, argument ``TFM_PROFILE`` in build command line should be
 set to ``profile_medium_arotless``.
 
 Take Musca-B1 as an example.
-The following commands build Profile Medium without test cases on **Musca-B1** with
+The following commands build Profile Medium-ARoT-less without test cases on **Musca-B1** with
 build type **MinSizeRel**, built by **Armclang**.
 
 .. code-block:: bash

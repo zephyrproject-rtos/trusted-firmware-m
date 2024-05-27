@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -52,13 +52,8 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/Device/Config
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/partition
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(FILES       ${PLATFORM_DIR}/ext/cmsis/cmsis_armclang.h
-                    ${PLATFORM_DIR}/ext/cmsis/cmsis_compiler.h
-                    ${PLATFORM_DIR}/ext/cmsis/cmsis_gcc.h
-                    ${PLATFORM_DIR}/ext/cmsis/cmsis_iccarm.h
-                    ${PLATFORM_DIR}/ext/cmsis/cmsis_version.h
-                    ${PLATFORM_DIR}/ext/cmsis/core_cm4.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/cmsis)
+install(DIRECTORY   $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/cmsis)
 
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/Native_Driver/generated_source
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/Native_Driver)

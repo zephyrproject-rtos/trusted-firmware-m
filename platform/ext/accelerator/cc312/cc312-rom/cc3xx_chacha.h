@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,9 @@
 #include "cc3xx_error.h"
 #include "cc3xx_config.h"
 #include "cc3xx_dma.h"
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
 #include "cc3xx_poly1305.h"
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -22,6 +24,8 @@ extern "C" {
 #endif
 
 #define CC3XX_CHACHA_KEY_SIZE 32
+
+#define CC3XX_CHACHA_BLOCK_SIZE 64
 
 typedef enum {
     CC3XX_CHACHA_MODE_CHACHA = 0b0,
@@ -39,7 +43,6 @@ struct cc3xx_chacha_state_t {
     bool iv_is_96_bit;
     uint32_t key[8];
 
-    size_t bytes_since_dma_output_addr_set;
     size_t crypted_len;
     size_t authed_len;
 
@@ -47,7 +50,9 @@ struct cc3xx_chacha_state_t {
     uint32_t iv[3];
 
     struct cc3xx_dma_state_t dma_state;
+#if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     struct cc3xx_poly1305_state_t poly_state;
+#endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 };
 
 /**
@@ -64,11 +69,12 @@ struct cc3xx_chacha_state_t {
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
-                                cc3xx_chacha_mode_t mode,
-                                const uint32_t *key,
-                                uint64_t initial_counter,
-                                const uint32_t *iv, size_t iv_len);
+cc3xx_err_t cc3xx_lowlevel_chacha20_init(
+    cc3xx_chacha_direction_t direction,
+    cc3xx_chacha_mode_t mode,
+    const uint32_t *key,
+    uint64_t initial_counter,
+    const uint32_t *iv, size_t iv_len);
 
 /**
  * @brief                        Get the current state of the CHACHA operation.
@@ -77,7 +83,7 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
  * @param[out] state            The cc3xx_chacha20_state_t to write the state
  *                              into.
  */
-void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state);
+void cc3xx_lowlevel_chacha20_get_state(struct cc3xx_chacha_state_t *state);
 
 /**
  * @brief                        Set the current state of the CHACHA operation.
@@ -92,7 +98,7 @@ void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
+cc3xx_err_t cc3xx_lowlevel_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
 
 /**
  * @brief                        Get the amount of bytes that have been output
@@ -102,7 +108,7 @@ cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
  *                               input that has been submitted, due to DMA
  *                               buffering)
  */
-size_t cc3xx_chacha20_get_current_output_size(void);
+size_t cc3xx_lowlevel_chacha20_get_current_output_size(void);
 
 /**
  * @brief                        Set the buffer that the CHACHA engine will
@@ -114,7 +120,7 @@ size_t cc3xx_chacha20_get_current_output_size(void);
  *                               cc3xx_chacha20_update, that function will fail
  *                               with an error.
  */
-void cc3xx_chacha20_set_output_buffer(uint8_t *out, size_t out_len);
+void cc3xx_lowlevel_chacha20_set_output_buffer(uint8_t *out, size_t out_len);
 
 /**
  * @brief                        Input data to be encrypted/decrypted into an
@@ -126,7 +132,7 @@ void cc3xx_chacha20_set_output_buffer(uint8_t *out, size_t out_len);
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len);
+cc3xx_err_t cc3xx_lowlevel_chacha20_update(const uint8_t* in, size_t in_len);
 
 /**
  * @brief                        Input data to be authenticated, but not
@@ -142,7 +148,7 @@ cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len);
  * @param[in]  in                A pointer to the data to be input.
  * @param[in]  in_len            The size of the data to be input.
  */
-void cc3xx_chacha20_update_authed_data(const uint8_t* in, size_t in_len);
+void cc3xx_lowlevel_chacha20_update_authed_data(const uint8_t* in, size_t in_len);
 
 /**
  * @brief                        Finish a CHACHA operation. Calling this will
@@ -158,7 +164,7 @@ void cc3xx_chacha20_update_authed_data(const uint8_t* in, size_t in_len);
  * @return                       CC3XX_ERR_SUCCESS on success / tag comparison
  *                               succeeded, another cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size);
+cc3xx_err_t cc3xx_lowlevel_chacha20_finish(uint32_t *tag, size_t *size);
 
 /**
  * @brief                       Uninitialize the CHACHA engine.
@@ -167,7 +173,7 @@ cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size);
  *                              uninitialized on an error.
  *
  */
-void cc3xx_chacha20_uninit(void);
+void cc3xx_lowlevel_chacha20_uninit(void);
 
 #ifdef __cplusplus
 }

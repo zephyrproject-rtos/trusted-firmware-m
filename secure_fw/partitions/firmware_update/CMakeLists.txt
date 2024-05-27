@@ -9,8 +9,7 @@ if (NOT TFM_PARTITION_FIRMWARE_UPDATE)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_psa_rot_partition_fwu STATIC)
 
@@ -52,19 +51,12 @@ target_link_libraries(tfm_psa_rot_partition_fwu
 )
 
 
-# Generate firmware update feature
+# Generate firmware update feature if FWU_DEVICE_CONFIG_FILE is not provided
 if (NOT FWU_DEVICE_CONFIG_FILE)
     configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
                    ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
                    @ONLY)
     set(FWU_DEVICE_CONFIG_FILE "${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h")
-else()
-    # FWU_DEVICE_CONFIG_FILE exists and is a file
-    if(NOT EXISTS ${FWU_DEVICE_CONFIG_FILE})
-        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} does not exist.")
-    elseif(IS_DIRECTORY ${FWU_DEVICE_CONFIG_FILE})
-        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} is a folder while a file is expected.")
-    endif()
 endif()
 
 

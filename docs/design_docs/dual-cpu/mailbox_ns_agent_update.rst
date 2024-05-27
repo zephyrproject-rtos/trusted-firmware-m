@@ -20,7 +20,7 @@ handles inter-processor communication messages is called ``Mailbox NS Agent``.
   in their names. The concept ``mailbox`` in this document represent the
   mechanism described above, which is not referring to the external concepts.
 
-When the first version ``Mailbox NS Agent`` was introduced, the generic FFM
+When the first version ``Mailbox NS Agent`` was introduced, the generic FF-M
 interrupt handling was not ready. Hence a customized solution
 ``Multiple Core`` is implemented. This customized implementation:
 
@@ -33,19 +33,19 @@ maintenance. To address the issue, an updated design shall:
 
 - Make SPM manage other components in a unified way (For example, it is
   simpler for SPM if all non-SPM components under the IPC model act as
-  ``processes``.)
+  ``processes``).
 - Can use FF-M compliant interrupt mechanism and APIs.
 
 Following the above guidelines makes the ``Mailbox NS Agent`` work like a
-``partition``. The agent has an endless loop and waits for signals, calls FFM
+``partition``. The agent has an endless loop and waits for signals, calls FF-M
 API based on the parsing result on the communication messages. But there are
 still issues after looking closer to the requirements of the agent:
 
-- SPM treats FFM Client API caller's ID as the client ID. While the mailbox NS
+- SPM treats FF-M Client API caller's ID as the client ID. While the mailbox NS
   agent may represent multiple non-secure clients. Hence it needs to tell
-  SPM which non-secure client it is representing, and the default FFM Client
+  SPM which non-secure client it is representing, and the default FF-M Client
   API does not have such capability.
-- FFM Client API blocks caller before the call is replied; while the
+- FF-M Client API blocks caller before the call is replied; while the
   mailbox NS Agent needs to respond to the non-secure interrupts in time.
   Blocking while waiting for a reply may cause the non-secure communication
   message not to be handled in time.
@@ -70,19 +70,19 @@ a generic secure partition.
     Component types and the callable API set
 
 .. note::
-  3 non-SPM component types here: FFM-compliant Secure Partition
+  3 non-SPM component types here: FF-M-compliant Secure Partition
   (aka ``partition``), Trustzone-based NS Agent (aka ``Trustzone NS Agent``)
   and mailbox-based NS Agent (aka ``Mailbox NS Agent``).
   ``Trustzone NS Agent`` is mentioned here for the comparison purpose. The
   implementation details for this NS agent type is not introduced here.
 
-To make the programming model close to the FFM compliance, the
+To make the programming model close to the FF-M compliance, the
 ``Mailbox NS Agent`` is designed as:
 
 - Working like a standard Secure Partition under the IPC model, has one
-  single thread, can call FFM standard API.
+  single thread, can call FF-M standard API.
 - Having a manifest file to describe the attributes and resources and a
-  positive valued ``Partition ID`` in the manifest.
+  positive value ``Partition ID`` in the manifest.
 
 Services rely on the ``client_id`` to apply policy-checking, hence SPM
 needs to know which ``client_id`` the mailbox NS Agent is representing when
@@ -106,6 +106,7 @@ Updated programming interfaces
 These Client APIs are expanded from the standard Client APIs:
 
 - ``agent_psa_connect()`` is extended from ``psa_connect()``.
+- ``agent_psa_close()`` is extended from ``psa_close()``.
 - ``agent_psa_call()`` is extended from ``psa_call()``.
 
 And to cooperate with the changed behaviour of these APIs, extra defined
@@ -184,7 +185,7 @@ A composition type is created for packing the vectors:
 
 .. code-block:: c
 
-  struct client_param_t {
+  struct client_params_t {
     int32_t         ns_client_id_stateless;
     const psa_invec *p_invecs;
     psa_outvec      *p_outvecs;
@@ -196,17 +197,18 @@ is a connection-based one.
 
 .. note::
   The vectors and non-secure client ID are recorded in the internal handle.
-  Hence it is safe to claim ``client_param_t`` instance as local variable.
+  Hence it is safe to claim ``client_params_t`` instance as local variable.
 
 Agent-specific Client API
 =========================
-``agent_psa_connect()`` is the API added to support agent forwarding NS
-requests.
+``agent_psa_connect()`` and ``agent_psa_close()`` are the APIs added to support
+agent forwarding NS requests.
 
 .. code-block:: c
 
   psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                  int32_t ns_client_id, const void *client_data);
+  psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 One extra parameter ``ns_client_id`` added to tell SPM which NS client the
 agent is representing when API gets called. It is recorded in the handle
@@ -216,7 +218,7 @@ in the message. Instead, it puts the agent's ID into the messaging in this
 case. This mechanism can provide chances for the agents calling APIs for their
 own service accessing and API works asynchronously.
 
-As mentioned, the standard FFM Client service accessing API are blocked until
+As mentioned, the standard FF-M Client service accessing API are blocked until
 the IPC message gets replied to. While this API returns immediately without
 waiting for acknowledgement. Unless an error occurred, these agent-specific
 API returns PSA_SUCCESS always. The replies for these access requests are
@@ -236,7 +238,7 @@ Compared to the standard ``psa_call()``, this API:
   for the auxiliary data added. This member is ignored for connection-based
   services because ``agent_psa_connect()`` already assigned one in the
   connected handle.
-- Has a composited agrument ``control``.
+- Has a composite argument ``control``.
 
 The encoding scheme for ``control``:
 
@@ -315,7 +317,7 @@ Code Example
                   status = agent_psa_connect(SID(ns_msg), VER(ns_msg),
                                              NSID(ns_msg), &ns_msg);
               } else if (ns_msg.type == PSA_IPC_CLOSE) {
-                  psa_close(ns_msg.handle);
+                  status = agent_psa_close(ns_msg.handle, NSID(ns_msg));
               } else {
                   /* Other types as call type and let API check errors. */
                   client_param.ns_client_id_stateless = NSID(ns_msg);
@@ -357,30 +359,46 @@ Code Example
 
 Customized manifest attribute
 =============================
-Two extra customized manifest attributes are added:
+Three extra customized manifest attributes are added:
 
-============= ====================================================
-Name          Description
-============= ====================================================
-ns_agent      Indicate if manifest owner is an Agent.
-------------- ----------------------------------------------------
-ns_client_ids Possible non-secure Client ID values (<0).
-============= ====================================================
+=============== ====================================================
+Name            Description
+=============== ====================================================
+ns_agent        Indicate if manifest owner is an Agent.
+--------------- ----------------------------------------------------
+client_id_base  The minimum client ID value (<0)
+--------------- ----------------------------------------------------
+client_id_limit The maximum client ID value (<0)
+=============== ====================================================
 
-Attribute 'ns_client_ids' can be a set of numbers, or it can use a range
-expression such as [min, max]. The tooling can detect ID overlap between
-multiple non-secure agents.
+``client_id_base`` and ``client_id_limit`` are negative numbers. This means that
+``client_id_base <= client_id_limit``, but
+``abs(client_id_base) >= abs(client_id_limit)``. SPM can detect ID overlap when
+initialising secure partitions
 
-.. note::
-  Per-non-secure-client dependencies scheme is now assumed to be implemented
-  by agent customization. Feedback if there are requirements for a unified
-  scheme.
+The Non-secure callers are expected to provide a negative (<0) client ID when
+calling PSA API. A uniform mapping is implemented across all the NS agents,
+where the mapping is defined as the following:
+
++---------------------------------------------+---------------------+
+|NS client ID                                 |Transformed client ID|
++=============================================+=====================+
+|  -1                                         | client_id_limit     |
++---------------------------------------------+---------------------+
+|  -2                                         | client_id_limit - 1 |
++---------------------------------------------+---------------------+
+| ...                                                               |
++---------------------------------------------+---------------------+
+|-(abs(client_id_limit)-abs(client_id_base)+1)| client_id_base      |
++---------------------------------------------+---------------------+
+
+Any other IDs provided by the NSPE will result in PSA_ERROR_INVALID_ARGUMENT.
 
 ***********************
 Manifest tooling update
 ***********************
 The manifest for agents involves specific keys ('ns_agent' e.g.), these keys
-give hints about how to achieve out-of-FFM partitions which might be abused
+give hints about how to achieve out-of-FF-M partitions which might be abused
 easily by developers, for example, claim partitions as agents. Some
 restrictions need to be applied in the manifest tool to limit the general
 secure service development referencing these keys.
@@ -398,7 +416,7 @@ One mechanism: adding a confirmation in the partition list file.
   "non_ffm_attributes": "ns_agent", "other_option",
 
 ``non_ffm_attributes`` tells the manifest tool that ``ns_agent`` is valid
-in ns_agent_mailbox.ymal. Otherwise, the manifest tool reports an error when a
+in ns_agent_mailbox.yaml. Otherwise, the manifest tool reports an error when a
 non-agent service abuses ns_agent in its manifest.
 
 ***********************************
@@ -416,7 +434,7 @@ Only ONE place is recommended to enter IDLE. The place is decided based on the
 system topologies:
 
 - If there is one Trustzone-based NSPE, this NSPE is the recommended place no
-  matter how many mailbox agents are in the system.
+  matter how many mailbox agents there are in the system.
 - If there are only mailbox-based NSPEs, entering IDLE can happen in
   one of the mailbox agents.
 
@@ -429,6 +447,6 @@ The solution is:
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited. All rights reserved.*
 *Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

@@ -25,16 +25,16 @@
  * being renamed and cloned
  */
 #define __tz_c_veneer \
-        __attribute__((cmse_nonsecure_entry, noclone, section("SFN")))
+        __attribute__((cmse_nonsecure_entry, noclone))
 #define __tz_naked_veneer \
-        __attribute__((cmse_nonsecure_entry, noclone, naked, section("SFN")))
+        __attribute__((cmse_nonsecure_entry, noclone, naked))
 
 #else /* __GNUC__ && !__ARMCC_VERSION */
 
 #define __tz_c_veneer \
-        __attribute__((cmse_nonsecure_entry, section("SFN")))
+        __attribute__((cmse_nonsecure_entry))
 #define __tz_naked_veneer \
-        __attribute__((cmse_nonsecure_entry, naked, section("SFN")))
+        __attribute__((cmse_nonsecure_entry, naked))
 
 #endif /* __GNUC__ && !__ARMCC_VERSION */
 

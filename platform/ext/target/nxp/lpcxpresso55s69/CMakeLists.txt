@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
-# Copyright 2021-2023 NXP. All rights reserved.
+# Copyright 2021-2024 NXP. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,7 +14,7 @@ set(NXP_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 # Pull drivers from NXP git
 if (TFM_PLATFORM_NXP_HAL_FILE_PATH STREQUAL "DOWNLOAD")
     set(NXP_HAL_FILE_PATH ${PLATFORM_DIR}/ext/target/nxp)
-    Message("-- Pulling MCUxpresso NXP SDK drivers from https://github.com/NXPmicro/mcux-sdk")
+    Message("-- Pulling MCUxpresso NXP SDK drivers from "${NXP_SDK_GIT_REP}/${NXP_SDK_GIT_TAG})
     include(pull_drivers.cmake)
 # Use specified path to NXP hal folder provided by user
 else()
@@ -103,18 +103,14 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_manager.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_port_uart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_gpio.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_hashcrypt.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_iap.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_rng.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_usart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c
-        ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
@@ -179,16 +175,12 @@ if(BL2)
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_manager.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager/fsl_component_serial_port_uart.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_hashcrypt.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_iap.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_rng.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_usart.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c
-            ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
     )
@@ -209,9 +201,16 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        ${NXP_COMMON_DIR}/mpc_ppc_faults.c
         ${NXP_COMMON_DIR}/tfm_hal_isolation.c
         ${NXP_COMMON_DIR}/tfm_hal_platform.c
+)
+
+# If this is not added to the tfm_s it will not correctly override the weak
+# default handlers declared in assemebly, and will instead be discarded as they
+# are not in use.
+target_sources(tfm_s
+    PRIVATE
+        ${NXP_COMMON_DIR}/mpc_ppc_faults.c
 )
 
 #========================= Files for building NS side platform ================#

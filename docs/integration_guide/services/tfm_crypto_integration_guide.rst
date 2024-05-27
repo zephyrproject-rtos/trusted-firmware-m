@@ -1,3 +1,5 @@
+.. _tfm-crypto-integration-guide-label:
+
 ################################
 Crypto Service Integration Guide
 ################################
@@ -84,7 +86,7 @@ A brief description of what is implemented by each source file is as below:
    ``CRYPTO_IOVEC_BUFFER_SIZE`` config define
  - ``crypto_library.c`` : Library abstractions to interface the dispatchers
    towards the underlying library providing *backend* crypto functions.
-   Currently this only supports the mbed TLS library. In particular, the mbed
+   Currently this only supports the Mbed TLS library. In particular, the mbed
    TLS library requires to provide a static buffer to be used as heap for its
    internal allocation. The size of this buffer is controlled by the
    ``CRYPTO_ENGINE_BUF_SIZE`` config define
@@ -102,14 +104,14 @@ A brief description of what is implemented by each source file is as below:
    prefix, ``tfm_crypto__`` to all functions. The prefix can be changed editing
    the interface file. This config option is for the NS environment or
    integration setup only, hence it is not accessible through the TF-M config
- - ``tfm_mbedcrypto_alt.c`` : This module is specific to the mbed TLS [3]_
-   library integration and provides some alternative implementation of mbed TLS
+ - ``tfm_mbedcrypto_alt.c`` : This module is specific to the Mbed TLS [3]_
+   library integration and provides some alternative implementation of Mbed TLS
    APIs that can be used when a optimised profile is chosen. Through the
    ``_ALT`` mechanism it is possible to replace at link time default
-   implementations available in mbed TLS with the ones available in this file
+   implementations available in Mbed TLS with the ones available in this file
 
    .. Note::
-     The ``_ALT`` mechanism will be deprecated in future releases of the mbed
+     The ``_ALT`` mechanism will be deprecated in future releases of the Mbed
      TLS library
 
 ***************************************
@@ -125,7 +127,7 @@ TLS [3]_.
 
 The configuration of the backend library is supplied using the
 ``TFM_MBEDCRYPTO_CONFIG_PATH`` and ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``
-config option that point to configuration headers following the legacy mbed TLS
+config option that point to configuration headers following the legacy Mbed TLS
 configuration scheme or the new PSA based configuration scheme.
 
 Platforms can specify an extra config file by setting the
@@ -137,13 +139,13 @@ config changes due to TFM Profile.
 
 .. Note::
 
-    The default entropy source configured for mbed TLS is
+    The default entropy source configured for Mbed TLS is
     ``MBEDTLS_ENTROPY_NV_SEED`` with a unique seed. For production devices, an
     alternative hardware entropy source can be specified using the config option
     ``MBEDTLS_ENTROPY_HARDWARE_ALT``
 
 .. Note::
-    Starting from mbed TLS 3.3.0, the Python package ``jsonschema`` must be
+    Starting from Mbed TLS 3.3.0, the Python package ``jsonschema`` must be
     available when building as it is required by the autogen framework for the
     driver integrations into the PSA Crypto core and driver wrapper modules
 
@@ -169,7 +171,7 @@ available in the ``tfm_builtin_key_loader``
 .. Note::
 
     The crypto service integration with builtin keys relies on implementation
-    details of mbed TLS that are not standardized in the spec and might change
+    details of Mbed TLS that are not standardized in the spec and might change
     between releases due to ongoing work [4]_
 
 
@@ -178,7 +180,7 @@ References
 
 .. [1] PSA Crypto APIs: \ https://armmbed.github.io/mbed-crypto/html/
 .. [2] PSA cryptoprocessor driver interface: \ https://github.com/Mbed-TLS/mbedtls/blob/development/docs/proposed/psa-driver-interface.md
-.. [3] mbed TLS library: \ https://www.trustedfirmware.org/projects/mbed-tls/
+.. [3] Mbed TLS library: \ https://www.trustedfirmware.org/projects/mbed-tls/
 .. [4] Interface for platform keys: \ https://github.com/ARM-software/psa-crypto-api/issues/550
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,7 @@
 #include "cc3xx_drbg_hash.h"
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_pka.h"
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 #include "cc3xx_stdlib.h"
-#endif
 
 /**
  * @brief Ceiling of a / b
@@ -33,28 +31,28 @@ static void long_acc(uint8_t *acc, const uint8_t *val, size_t acc_size, size_t v
     assert(acc_size == CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Accumulation happen only on 440 bit accumulators */
-    cc3xx_pka_init(CC3XX_DRBG_HASH_SEEDLEN);
+    cc3xx_lowlevel_pka_init(CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Allocate a register among those not in use, given configured size */
-    r0 = cc3xx_pka_allocate_reg();
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Initialize the accumulator register with the current value of acc */
-    cc3xx_pka_write_reg(r0, (const uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
+    cc3xx_lowlevel_pka_write_reg(r0, (const uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Request another register for the value to accumulate */
-    r1 = cc3xx_pka_allocate_reg();
+    r1 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Write the value to accumulate into the register */
-    cc3xx_pka_write_reg(r1, (const uint32_t *)val, val_size);
+    cc3xx_lowlevel_pka_write_reg(r1, (const uint32_t *)val, val_size);
 
     /* Perform the actual operation */
-    cc3xx_pka_add(r0, r1, r0);
+    cc3xx_lowlevel_pka_add(r0, r1, r0);
 
     /* Read back the accumulator register */
-    cc3xx_pka_read_reg(r0, (uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
+    cc3xx_lowlevel_pka_read_reg(r0, (uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Uninit the engine */
-    cc3xx_pka_uninit();
+    cc3xx_lowlevel_pka_uninit();
 }
 
 /* Hardcode support for SHA-256 based HMAC only */
@@ -92,24 +90,24 @@ static cc3xx_err_t hash_df(
 
     for (idx = 0; idx < num_hash; idx++) {
 
-        err = cc3xx_hash_init(alg);
+        err = cc3xx_lowlevel_hash_init(alg);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
 
-        err = cc3xx_hash_update(counter_out_len_bits, sizeof(counter_out_len_bits));
+        err = cc3xx_lowlevel_hash_update(counter_out_len_bits, sizeof(counter_out_len_bits));
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
 
         for (hash_input_idx = 0; hash_input_idx < hash_inputs_num && hash_inputs_len[hash_input_idx] != 0; hash_input_idx++) {
-            err = cc3xx_hash_update(hash_inputs[hash_input_idx], hash_inputs_len[hash_input_idx]);
+            err = cc3xx_lowlevel_hash_update(hash_inputs[hash_input_idx], hash_inputs_len[hash_input_idx]);
             if (err != CC3XX_ERR_SUCCESS) {
                 return err;
             }
         }
 
-        cc3xx_hash_finish((idx != num_hash - 1) ? (uint32_t *)out : temp, SHA256_OUTPUT_SIZE);
+        cc3xx_lowlevel_hash_finish((idx != num_hash - 1) ? (uint32_t *)out : temp, SHA256_OUTPUT_SIZE);
 
         if (idx != num_hash - 1) {
             out += SHA256_OUTPUT_SIZE;
@@ -122,7 +120,7 @@ static cc3xx_err_t hash_df(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hash_init(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_init(
     struct cc3xx_drbg_hash_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *nonce, size_t nonce_len,
@@ -179,12 +177,12 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
         const uint8_t byte1 = 0x1;
         uint32_t *p_output_buf = NULL;
 
-        err = cc3xx_hash_init(alg);
+        err = cc3xx_lowlevel_hash_init(alg);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
 
-        err = cc3xx_hash_update((uint8_t *)data, CC3XX_DRBG_HASH_SEEDLEN);
+        err = cc3xx_lowlevel_hash_update((uint8_t *)data, CC3XX_DRBG_HASH_SEEDLEN);
         if (err!= CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -202,7 +200,7 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
             }
         }
 
-        cc3xx_hash_finish(p_output_buf, SHA256_OUTPUT_SIZE);
+        cc3xx_lowlevel_hash_finish(p_output_buf, SHA256_OUTPUT_SIZE);
 
         long_acc((uint8_t *)data, &byte1, CC3XX_DRBG_HASH_SEEDLEN, sizeof(byte1));
 
@@ -218,7 +216,7 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hash_generate(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_generate(
     struct cc3xx_drbg_hash_state_t *state,
     size_t len_bits, uint8_t *returned_bits,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -246,24 +244,24 @@ cc3xx_err_t cc3xx_drbg_hash_generate(
     if (additional_input_len && additional_input != NULL) {
         const uint8_t byte2 = 0x02;
 
-        err = cc3xx_hash_init(alg);
+        err = cc3xx_lowlevel_hash_init(alg);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_hash_update(&byte2, sizeof(byte2));
+        err = cc3xx_lowlevel_hash_update(&byte2, sizeof(byte2));
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_hash_update(state->value_v, sizeof(state->value_v) - 1);
+        err = cc3xx_lowlevel_hash_update(state->value_v, sizeof(state->value_v) - 1);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
-        err = cc3xx_hash_update(additional_input, additional_input_len);
+        err = cc3xx_lowlevel_hash_update(additional_input, additional_input_len);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
 
-        cc3xx_hash_finish(hash_output_buffer, SHA256_OUTPUT_SIZE);
+        cc3xx_lowlevel_hash_finish(hash_output_buffer, SHA256_OUTPUT_SIZE);
         long_acc(state->value_v, (uint8_t *)hash_output_buffer,
                  sizeof(state->value_v) - 1, sizeof(hash_output_buffer));
     }
@@ -273,20 +271,20 @@ cc3xx_err_t cc3xx_drbg_hash_generate(
         return err;
     }
 
-    err = cc3xx_hash_init(alg);
+    err = cc3xx_lowlevel_hash_init(alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hash_update(&byte3, sizeof(byte3));
+    err = cc3xx_lowlevel_hash_update(&byte3, sizeof(byte3));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-    err = cc3xx_hash_update(state->value_v, sizeof(state->value_v) - 1);
+    err = cc3xx_lowlevel_hash_update(state->value_v, sizeof(state->value_v) - 1);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
 
-    cc3xx_hash_finish(hash_output_buffer, SHA256_OUTPUT_SIZE);
+    cc3xx_lowlevel_hash_finish(hash_output_buffer, SHA256_OUTPUT_SIZE);
 
     /* V = V + H + C + reseed_counter */
     long_acc(state->value_v, (uint8_t *)hash_output_buffer,
@@ -303,7 +301,7 @@ cc3xx_err_t cc3xx_drbg_hash_generate(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hash_reseed(
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_reseed(
     struct cc3xx_drbg_hash_state_t *state,
     const uint8_t *entropy, size_t entropy_len,
     const uint8_t *additional_input, size_t additional_input_len)
@@ -338,7 +336,7 @@ cc3xx_err_t cc3xx_drbg_hash_reseed(
     return err;
 }
 
-cc3xx_err_t cc3xx_drbg_hash_uninit(struct cc3xx_drbg_hash_state_t *state)
+cc3xx_err_t cc3xx_lowlevel_drbg_hash_uninit(struct cc3xx_drbg_hash_state_t *state)
 {
     cc3xx_secure_erase_buffer((uint32_t *)state, sizeof(struct cc3xx_drbg_hash_state_t)/4);
     return CC3XX_ERR_SUCCESS;

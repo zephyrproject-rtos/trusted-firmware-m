@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -30,6 +30,8 @@ set(INSTALL_PLATFORM_NS_DIR             ${CMAKE_INSTALL_PREFIX}/platform)
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
 
+set(TFM_TESTS_REVISION_CHECKS           ON          CACHE BOOL      "Whether to perform checks on the tf-m-tests repository revision.")
+
 set(PROJECT_CONFIG_HEADER_FILE          ""          CACHE FILEPATH  "User defined header file for TF-M config")
 
 # External libraries source and version
@@ -39,13 +41,16 @@ set(MBEDCRYPTO_VERSION                  "mbedtls-3.6.0" CACHE STRING "The versio
 set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/Mbed-TLS/mbedtls.git" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "v2.0.0"    CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "v2.1.0"    CACHE STRING    "The version of MCUboot to use")
 
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
 set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
-set(PLATFORM_PSA_ADAC_VERSION           "4c35930fb6df95400ea4fe5722acaaa594ac3b8b" CACHE STRING "The version of psa-adac to use.")
+set(PLATFORM_PSA_ADAC_VERSION           "5f5490cebe66" CACHE STRING "The version of psa-adac to use.")
 
 set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to enable FVP or FPGA build of the platform.")
+
+set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
+set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing input files")
 
 ####################################################################################################
 # These configurations below are also referred by Kconfig configuration system,
@@ -76,6 +81,10 @@ set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS  ON  CACHE BOOL      "Enable stor
 set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
 
 set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal errors in the secure firmware, capture info about the exception. Print the info if the SPM log level is sufficient.")
+set(TFM_LOG_FATAL_ERRORS                OFF         CACHE BOOL      "Log fatal errors when they occur to aid debugging")
+set(TFM_LOG_NONFATAL_ERRORS             OFF         CACHE BOOL      "Log non-fatal errors when they occur to aid debugging")
+set(TFM_HALT_ON_FATAL_ERRORS            OFF         CACHE BOOL      "On fatal errors in the secure firmware, halt immediately to allow debugging")
+set(TFM_LOG_ERR_FILE_AND_LINE           OFF         CACHE BOOL      "Log file name and line numbers of fatal and non-fatal errors")
 
 set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal errors in the secure firmware, halt instead of rebooting.")
 
@@ -161,6 +170,13 @@ else()
     set(MCUBOOT_MEASURED_BOOT OFF)
 endif()
 
+########################## TF-M Runtime Sanitization ###########################
+
+set(BL1_1_SANITIZE                      OFF         CACHE STRING    "Enable a runtime sanitizer for BL1_1")
+set(BL1_2_SANITIZE                      OFF         CACHE STRING    "Enable a runtime sanitizer for BL1_2")
+set(BL2_SANITIZE                        OFF         CACHE STRING    "Enable a runtime sanitizer for BL2")
+set(TFM_SANITIZE                        OFF         CACHE STRING    "Enable a runtime sanitizer for the TF-M runtime")
+
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate
@@ -169,3 +185,12 @@ endif()
 ########################## FIH #################################################
 
 set_property(CACHE TFM_FIH_PROFILE PROPERTY STRINGS "OFF;LOW;MEDIUM;HIGH")
+
+########################## TF-M Runtime Sanitization ###########################
+
+set(SANITIZE_OPTIONS "undefined;shift;shift-exponent;shift-base; integer-divide-by-zero;unreachable;vla-bound; null;return;signed-integer-overflow;bounds; bounds-strict;alignment;object-size; float-divide-by-zero;float-cast-overflow; nonnull-attribute;returns-nonnull-attribute; bool;enum;vptr;pointer-overflow;builtin")
+
+set_property(CACHE BL1_1_SANITIZE PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE BL1_2_SANITIZE PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE BL2_SANITIZE   PROPERTY STRINGS ${SANITIZE_OPTIONS})
+set_property(CACHE TFM_SANITIZE   PROPERTY STRINGS ${SANITIZE_OPTIONS})

@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +55,17 @@
 
 #define S_DATA_START            (SRAM_BASE + TFM_PARTITION_SIZE)
 #define S_DATA_SIZE             (SRAM_SIZE - TFM_PARTITION_SIZE)
-#define S_UNPRIV_DATA_SIZE      (0x2160)
+#define S_UNPRIV_DATA_SIZE      (0x4000)
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 
-/* OpenAMP shared memory region */
-#define OPENAMP_SE_SHARED_MEMORY_START_ADDR 0xA8000000
-#define OPENAMP_HOST_SHARED_MEMORY_START_ADDR 0x88000000
-#define OPENAMP_SHARED_MEMORY_SIZE (1024 * 1024) /* 1MB */
+/* Shared memory region */
+#define INTER_PROCESSOR_SE_SHARED_MEMORY_START_ADDR 0xA8000000
+#define INTER_PROCESSOR_HOST_SHARED_MEMORY_START_ADDR 0x88000000
+#define INTER_PROCESSOR_SHARED_MEMORY_SIZE (1024 * 1024) /* 1MB */
 
-#define NS_DATA_START OPENAMP_SE_SHARED_MEMORY_START_ADDR
-#define NS_DATA_SIZE OPENAMP_SHARED_MEMORY_SIZE
+#define NS_DATA_START INTER_PROCESSOR_SE_SHARED_MEMORY_START_ADDR
+#define NS_DATA_SIZE INTER_PROCESSOR_SHARED_MEMORY_SIZE
 
 #define S_CODE_VECTOR_TABLE_SIZE    (0xc0)
 

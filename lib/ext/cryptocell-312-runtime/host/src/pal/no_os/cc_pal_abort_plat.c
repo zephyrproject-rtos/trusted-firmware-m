@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2024, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,5 +10,5 @@ void CC_PalAbort(const char * exp)
 {
     CC_PAL_LOG_ERR("ASSERT:%s:%d: %s", __FILE__, __LINE__, exp);
     CC_UNUSED_PARAM(exp); /* to avoid compilation error in case DEBUG isn't defined*/
-    abort();
+    exit(1); /* exit() instead of abort() to avoid heap usage */
 }

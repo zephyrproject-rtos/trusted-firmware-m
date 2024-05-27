@@ -1,7 +1,7 @@
 From f3d7c2b7000b98a5191007cbdf0b8910642fb685 Mon Sep 17 00:00:00 2001
 From: Benjamin Baratte <benjamin.baratte@st.com>
 Date: Thu, 9 Feb 2023 10:35:01 +0100
-Subject: [PATCH 3/6] Allow SE key to use key vendor id within PSA crypto
+Subject: [PATCH 3/7] Allow SE key to use key vendor id within PSA crypto
 
 Signed-off-by: Benjamin Baratte <benjamin.baratte@st.com>
 ---

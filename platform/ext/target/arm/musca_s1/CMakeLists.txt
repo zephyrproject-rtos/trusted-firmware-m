@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -102,10 +102,13 @@ if(BL2)
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             CMSIS_Driver/Driver_Flash_MRAM.c
+            CMSIS_Driver/Driver_MPC.c
+            Native_Driver/mpc_sie200_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
             Native_Driver/cache_drv.c
             Native_Driver/musca_s1_scc_drv.c
             CMSIS_Driver/Driver_USART.c
+            boot_hal_bl2.c
     )
 
     target_include_directories(platform_bl2

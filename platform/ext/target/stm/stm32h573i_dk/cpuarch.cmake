@@ -18,5 +18,4 @@ set(CRYPTO_HW_ACCELERATOR_TYPE stm)
 add_compile_definitions(
     STM32H573xx
     USE_HAL_DRIVER
-
 )

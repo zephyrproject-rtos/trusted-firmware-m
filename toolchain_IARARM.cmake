@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, IAR Systems AB. All rights reserved.
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -46,7 +46,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
         $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
-        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:SHELL:--fpu none>"
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
     )
 endmacro()
@@ -58,8 +57,7 @@ macro(tfm_toolchain_reset_linker_flags)
       --silent
       --semihosting
       --redirect __write=__write_buffered
-      --diag_suppress=lp005
-      "SHELL:--fpu none"
+      --diag_suppress=lp005,Lp023
     )
 endmacro()
 
@@ -106,6 +104,53 @@ macro(tfm_toolchain_reload_compiler)
                 " cores with IAR version between 9.20 and 9.32.1")
     endif()
 
+    set(BL2_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+    )
+    # As BL2 does not use hardware FPU, specify '--fpu=none' explicitly to use software
+    # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
+    # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
+    # is not actually enabled in BL2, it will cause BL2 runtime fault.
+    set(BL2_LINKER_CP_OPTION --fpu=none)
+
+    set(BL1_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+    )
+    set(BL1_LINKER_CP_OPTION --fpu=none)
+
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
+        )
+
+        if (CONFIG_TFM_ENABLE_FP)
+            set(COMPILER_CP_FLAG
+                $<$<COMPILE_LANGUAGE:C>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+                $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+            )
+            # armasm and armlink have the same option "--fpu" and are both used to
+            # specify the target FPU architecture. So the supported FPU architecture
+            # names can be shared by armasm and armlink.
+            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_ASM})
+        endif()
+    else()
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:--fpu=none>
+            $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+        )
+        set(LINKER_CP_OPTION --fpu=none)
+    endif()
+
+    add_compile_definitions(
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:__ARM_ARCH_6M__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:__ARM_ARCH_7M__=1>
+        $<$<AND:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>,$<BOOL:__ARM_FEATURE_DSP>>:__ARM_ARCH_7EM__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:__ARM_ARCH_8M_BASE__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:__ARM_ARCH_8M_MAIN__=1>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>
+    )
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
@@ -198,6 +243,58 @@ macro(add_convert_to_bin_target target)
         DEPENDS ${target}_elf
         DEPENDS ${target}_hex
     )
+endmacro()
+
+macro(target_share_symbols target)
+    get_target_property(TARGET_TYPE ${target} TYPE)
+    if (NOT TARGET_TYPE STREQUAL "EXECUTABLE")
+        message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
+    endif()
+
+    foreach(symbol_file ${ARGN})
+        FILE(STRINGS ${symbol_file} SYMBOLS
+            LENGTH_MINIMUM 1
+        )
+        list(APPEND KEEP_SYMBOL_LIST ${SYMBOLS})
+    endforeach()
+
+    set(IAR_STEERING_FILE ${KEEP_SYMBOL_LIST})
+
+    list(TRANSFORM IAR_STEERING_FILE PREPEND "show ")
+    list(TRANSFORM IAR_STEERING_FILE APPEND " \n")
+    list(INSERT IAR_STEERING_FILE 0 "hide *\n")
+    string(REPLACE ";" "" IAR_STEERING_FILE ${IAR_STEERING_FILE})
+    file( GENERATE OUTPUT "$<TARGET_FILE_DIR:${target}>/iar_steering_file" CONTENT "${IAR_STEERING_FILE}")
+
+    add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CMAKE_IAR_SYMEXPORT}
+        ARGS --edit $<TARGET_FILE_DIR:${target}>/iar_steering_file $<TARGET_FILE:${target}> $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+    )
+
+    # Force the target to not remove the symbols if they're unused.
+    list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --keep=)
+    target_link_options(${target}
+        PRIVATE
+            ${KEEP_SYMBOL_LIST}
+    )
+endmacro()
+
+macro(target_link_shared_code target)
+    get_target_property(TARGET_SOURCE_DIR ${target} SOURCE_DIR)
+
+    foreach(symbol_provider ${ARGN})
+        if (TARGET ${symbol_provider})
+            get_target_property(SYMBOL_PROVIDER_TYPE ${symbol_provider} TYPE)
+            if (NOT SYMBOL_PROVIDER_TYPE STREQUAL "EXECUTABLE")
+                message(FATAL_ERROR "${symbol_provider} is not an executable. Symbols cannot be shared from libraries.")
+            endif()
+        endif()
+
+        add_dependencies(${target} ${symbol_provider})
+        target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
+    endforeach()
 endmacro()
 
 macro(compiler_create_shared_code TARGET SHARED_SYMBOL_TEMPLATE)

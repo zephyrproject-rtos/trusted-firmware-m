@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -21,6 +21,33 @@ target_include_directories(platform_region_defs
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+)
+
+# The Armv6-M MPU requires that the MPU regions be aligned to the region sizes.
+# The minimal region size is 0x100 bytes.
+#
+# The alignments have to be a power of two and ideally bigger than the section size (which
+# can be checked in the map file).
+# In some cases the alignment value is smaller than the actual section
+# size to save memory. In that case, multiple MPU region has to be configured to cover it.
+#
+# To save memory, the attributes are set to XN_EXEC_OK and AP_RO_PRIV_UNPRIV for
+# the SRAM so the PSA_ROT_LINKER_CODE, TFM_UNPRIV_CODE and APP_ROT_LINKER_CODE don't have to
+# be aligned. The higher-priority regions will overwrite these attributes if needed.
+# The RAM is also located in the SRAM so it has to be configured to overwrite these default
+# attributes.
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT=0x2000
+        TFM_LINKER_SP_META_PTR_ALIGNMENT=0x100
+
+        # The RAM MPU Region block sizes are calculated manually. The RAM has to be covered
+        # with the MPU regions. These regions also have to be the power of 2 and
+        # the start addresses have to be aligned to these sizes. The sizes can be calculated
+        # from the S_DATA_START and S_DATA_SIZE defines.
+        RAM_MPU_REGION_BLOCK_1_SIZE=0x4000
+        RAM_MPU_REGION_BLOCK_2_SIZE=0x20000
+
 )
 #========================= Platform common defs ===============================#
 
@@ -60,8 +87,10 @@ target_add_scatter_file(bl1_2
 
 #========================= Platform Secure ====================================#
 
-add_subdirectory(openamp)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_comms rse_comms)
 
+# Set which PLATFORM depedency must be used by the CC3XX driver
+set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
 add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
 
 target_include_directories(platform_s
@@ -97,6 +126,7 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
+        Native_Driver/mhu_wrapper_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -110,6 +140,7 @@ target_sources(platform_s
         partition/partition.c
         partition/gpt.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
+        rse_comms_permissions_hal.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -177,7 +208,8 @@ target_compile_definitions(platform_bl1_1
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
-
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -198,6 +230,7 @@ target_include_directories(platform_bl1_1_interface
         ${CMAKE_SOURCE_DIR}/bl1/bl1_1/shared_lib/interface/
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/platform/ext/accelerator/interface>
+        ${PLATFORM_DIR}/ext/accelerator/cc312/
 )
 
 target_link_libraries(platform_bl1_1
@@ -216,6 +249,8 @@ target_compile_definitions(platform_bl1_2
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
+        MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
 target_include_directories(platform_bl1_2
@@ -235,6 +270,7 @@ target_include_directories(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/
+        ${PLATFORM_DIR}/ext/accelerator/cc312/
 )
 
 #========================= Platform BL2 =======================================#
@@ -349,6 +385,7 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
 
 target_sources(tfm_spm
     PRIVATE
+        tfm_interrupts.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
         $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>

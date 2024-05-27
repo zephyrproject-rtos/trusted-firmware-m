@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -19,9 +19,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include "array.h"
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "region.h"
-#include "mpu_armv8.h"
+#include "armv8m_mpu.h"
 #include "common_target_cfg.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"

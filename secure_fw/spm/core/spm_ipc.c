@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -28,7 +28,6 @@
 #include "spm.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_nspm.h"
-#include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
 #include "lists.h"
 #include "tfm_pools.h"
@@ -83,7 +82,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 }
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
-struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
+const struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
     struct service_t *p_prev, *p_curr;
 
@@ -121,7 +120,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 }
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
-int32_t tfm_spm_check_client_version(struct service_t *service,
+int32_t tfm_spm_check_client_version(const struct service_t *service,
                                      uint32_t version)
 {
     SPM_ASSERT(service);
@@ -144,7 +143,7 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
 }
 
 int32_t tfm_spm_check_authorization(uint32_t sid,
-                                    struct service_t *service,
+                                    const struct service_t *service,
                                     bool ns_caller)
 {
     struct partition_t *partition = NULL;
@@ -178,12 +177,12 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 }
 
 /* Message functions */
-psa_status_t spm_get_connection(struct connection_t **p_connection,
-                                psa_handle_t handle,
-                                int32_t client_id)
+psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
+                                     psa_handle_t handle,
+                                     int32_t client_id)
 {
     struct connection_t *connection;
-    struct service_t *service;
+    const struct service_t *service;
     uint32_t sid, version, index;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
@@ -227,7 +226,7 @@ psa_status_t spm_get_connection(struct connection_t **p_connection,
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
-        spm_init_connection(connection, service, client_id);
+        spm_init_idle_connection(connection, service, client_id);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         connection = handle_to_connection(handle);
@@ -293,9 +292,9 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
     return p_conn_handle;
 }
 
-void spm_init_connection(struct connection_t *p_connection,
-                         struct service_t *service,
-                         int32_t client_id)
+void spm_init_idle_connection(struct connection_t *p_connection,
+                              const struct service_t *service,
+                              int32_t client_id)
 {
     SPM_ASSERT(p_connection);
     SPM_ASSERT(service);
@@ -315,13 +314,7 @@ void spm_init_connection(struct connection_t *p_connection,
 #endif
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-    /* Set the private data of NSPE client caller in multi-core topology */
-    if (IS_NS_AGENT_MAILBOX(p_connection->p_client->p_ldinf)
-         && TFM_CLIENT_ID_IS_NS(client_id)) {
-        tfm_rpc_set_caller_data(p_connection, client_id);
-    } else {
-        p_connection->caller_data = NULL;
-    }
+    p_connection->client_data = NULL;
 #endif
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -26,6 +26,8 @@ struct irq_load_info_t {
     int32_t      pid;                         /* Owner Partition ID           */
     uint32_t     source;                      /* IRQ source (number/index)    */
     psa_signal_t signal;                      /* The signal assigned for IRQ  */
+    int32_t     client_id_base;               /* The min translated client ID */
+    int32_t     client_id_limit;              /* The max translated client ID */
 };
 
 /* IRQ runtime data */

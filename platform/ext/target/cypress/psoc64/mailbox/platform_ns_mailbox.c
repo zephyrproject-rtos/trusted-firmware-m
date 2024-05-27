@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved
+ * Copyright (c) 2019-2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -80,7 +81,11 @@ int32_t tfm_ns_mailbox_hal_init(struct ns_mailbox_queue_t *queue)
     }
 
     /* Send out the address */
-    platform_mailbox_send_msg_ptr(queue);
+    struct mailbox_init_t ns_init;
+    ns_init.status = &queue->status;
+    ns_init.slot_count = NUM_MAILBOX_QUEUE_SLOT;
+    ns_init.slots = &queue->slots[0];
+    platform_mailbox_send_msg_ptr(&ns_init);
 
     /* Wait until SPE mailbox service is ready */
     while (1) {

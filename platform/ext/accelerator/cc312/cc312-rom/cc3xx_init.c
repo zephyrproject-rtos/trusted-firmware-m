@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -65,8 +65,15 @@ static void check_features(void)
 
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
-    uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
+#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
+    const uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
     uint32_t lock_dfa_enabled = dfa_is_supported;
+#else
+    /* If the DFA countermeasures are not enabled, the setup just locks them to false
+     * regardless of the HW being capable of DFA support or not
+     */
+    uint32_t lock_dfa_enabled = false;
+#endif
 
 #ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
     /* If tunnelling is enabled then the DFA countermeasures will need to be
@@ -87,6 +94,7 @@ static cc3xx_err_t setup_dfa_countermeasures(void)
     return CC3XX_ERR_SUCCESS;
 }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 static cc3xx_err_t setup_dpa_countermeasures(void)
 {
     cc3xx_err_t err;
@@ -97,7 +105,7 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
     case 0xC1:
         P_CC3XX->aes.aes_dummy_rounds_enable = 0x1;
         while(!P_CC3XX->aes.aes_rbg_seeding_rdy){}
-        err = cc3xx_rng_get_random((uint8_t*)&aes_rbg_seed, 1);
+        err = cc3xx_lowlevel_rng_get_random((uint8_t *)&aes_rbg_seed, 1);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
@@ -107,10 +115,12 @@ static cc3xx_err_t setup_dpa_countermeasures(void)
 
     return CC3XX_ERR_SUCCESS;
 }
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
-cc3xx_err_t cc3xx_init(void)
+cc3xx_err_t cc3xx_lowlevel_init(void)
 {
     cc3xx_err_t err;
+
     /* If on a debug build, check that the CC3XX has all the features that have
      * been chosen by config */
     check_features();
@@ -118,12 +128,10 @@ cc3xx_err_t cc3xx_init(void)
     /* Configure entire system to litte endian */
     P_CC3XX->host_rgf.host_rgf_endian = 0x0U;
 
-#ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
     err = setup_dfa_countermeasures();
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
-#endif /* CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE */
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     err = setup_dpa_countermeasures();
@@ -142,7 +150,7 @@ cc3xx_err_t cc3xx_init(void)
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_uninit(void)
+cc3xx_err_t cc3xx_lowlevel_uninit(void)
 {
     return CC3XX_ERR_SUCCESS;
 }

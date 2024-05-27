@@ -1,7 +1,7 @@
 ########################
 Secure Partition Manager
 ########################
-This document describes the Secure Partition Manager(`SPM`) implementation
+This document describes the Secure Partition Manager (`SPM`) implementation
 design in Trusted Firmware-M (`TF-M`).
 
 .. note::
@@ -27,7 +27,7 @@ The service access process of FF-M:
 
 Secure services (aka `Service`) is the component providing secure
 functionalities in `SPE`, and `Client` is the user of the `Service`. A service
-act as a client when it is accessing its depending services.
+acts as a client when it is accessing its depending services.
 
 Services are grouped into `Secure Partition` (aka `partition`). A partition:
 
@@ -40,7 +40,7 @@ usage. Clients access services by `SID` or `Handle` through FF-M `Client API`.
 Partitions use FF-M `Secure Partition API` when it needs to operate on client
 data or reply to a client.
 
-`SPM` is the centre of an FF-M compliant implementation, which set up and
+`SPM` is the centre of an FF-M compliant implementation, which sets up and
 maintains a firmware framework that:
 
 - Implements `Client API` and `Secure Partition API`.
@@ -48,7 +48,7 @@ maintains a firmware framework that:
 - Involves necessary implementation-defined items to support the
   implementation.
 
-SPM interfaces are consist of these two categories:
+SPM interfaces consist of these two categories:
 
 - FF-M defined API.
 - Extended API to support the implementation.
@@ -130,7 +130,7 @@ unified way instead of care about the special boundaries.
   non-secure can not share the stack. It also has dedicated execution bodies.
   For example, RPC-based `NS Agent` has a while loop that keeps waiting for
   messages; and Trustzone-based `NS Agent` has veneer code to take over `NSPE`
-  secure call. This makes `NS Agent` is a component more like a `process`.
+  secure call. This makes `NS Agent` to be a component more like a `process`.
   Hence in the simplest implementation (`SFN model implementation` mentioned
   above), `NS Agent` is the only process in the system, the scheduling
   logic can be extremely simplified since no other process execution needs to
@@ -225,10 +225,10 @@ boundary, and ARoT/PRoT boundary if isolation level 2 is applied.
 The lifecycle is initiated by a secure bootloader usually. And in this stage
 of SPM initializing, SPM double-checks the lifecycle set up status (following
 a specific lifecycle management guidelines). Note that the hardware debugger
-setting can be part of lifecycle settings.
+settings can be part of lifecycle settings.
 
 .. important::
-  Double-check debugger setting when performing a product release.
+  Double-check debugger settings when performing a product release.
 
 SPM runtime initialization
 --------------------------
@@ -248,7 +248,7 @@ The general processes:
     * Init partition isolation boundaries (MMIO e.g.).
     * Init partition interrupts.
 
-After no more partitions to be loaded, the SPM runtime is set up but
+After no more partitions need to be loaded, the SPM runtime is set up but
 partitions' initialization routines have not run yet - the partition runtime
 context is initialized for the routine call.
 
@@ -298,7 +298,7 @@ This state indicates the serving is ongoing. It is mainly the service routine
 execution, plus a few SPM executions when SPM API gets called.
 
 .. important::
-  The service access process introduce in this chapter
+  The service access process introduced in this chapter
   (Such as `Secure service access`_) is abstracted from the FF-M
   specification. Reference the FF-M specification for the details of each
   step.
@@ -355,10 +355,10 @@ Calling SPM API
 SPM is placed in the PRoT domain. It MAY have isolation boundaries under
 particular isolation levels. For example:
 
-- There are boundaries between ARoT components and SPM under isolated level 2
+- There are boundaries between ARoT components and SPM under isolation level 2
   and 3.
 
-Then API SPM provided needs to support the function call (no boundary
+The API SPM provided needs to support the function call (no boundary
 switching) and cross-boundary call. A direct call reaches the API entrance
 directly, while a cross-boundary call needs a mechanism (Supervisor call e.g.)
 to cross the boundary first before reaching the API entrance.
@@ -399,7 +399,7 @@ The API handler:
 - Can see the prepared caller and callee context, with exited SPM context. It
   is an ideal place for subsequent operations such as context switching.
 
-A example code:
+An example code:
 
 .. code-block:: c
 
@@ -407,7 +407,7 @@ A example code:
   {
       status = spm_api(p);
       /*
-       * Now both the caller and calle context are
+       * Now both the caller and callee contexts are
        * managed by spm_api.
        */
       if (status == ACTION1) {
@@ -441,7 +441,7 @@ the final accessing:
   if the target partition model is `SFN` and there are boundaries between SPM
   and the target partition. After this, requests a specific call type to the
   SPM ABI module.
-- The target service routine is get called with the message parameter if
+- The target service routine is called with the message parameter if
   there are no boundaries between SPM and the target partition and the
   partition runtime is `SFN`.
 - The message is queued into the partition message list if the target
@@ -458,19 +458,19 @@ Sessions and contexts
 ---------------------
 FF-M API allows multiple sessions for a service if the service is classic
 connection-based. The service can maintain multiple local session data and use
-`rhande` in the message body to identify which client this session is bound
+`rhandle` in the message body to identify which client this session is bound
 with.
 
 But this does not mean when an ongoing service accessing is preempted,
 another service access request can get a chance for new access. This is
 because of the limited context storage - supporting multiple contexts in a
-common service costs much memory, and runtime operations(allocation and
+common service costs much memory, and runtime operations (allocation and
 re-location). Limited the context content in the stack only can mitigate the
 effort, but this requirement requires too much for the service development.
 
 The implementation-decisions are:
 
-- IPC partitions handles messages one by one, the client get blocked before
+- IPC partitions handles messages one by one, the client gets blocked before
   the service replying to the client.
 - The client is blocked when accessing services are handling a service
   request in an SFN partition.
@@ -634,13 +634,13 @@ be a direct function call.
 
 NS Agent
 ========
-The `NS Agent`(`NSA`) forwards NSPE service access request to SPM. It is a
+The `NS Agent` (`NSA`) forwards NSPE service access request to SPM. It is a
 special `partition` that:
 
 - It does not provide FF-M aligned secure services.
 - It runs with the second-lowest priority under `IPC model implementation`
   (The IDLE thread has the lowest priority).
-- It has isolation boundaries and an individual stacks.
+- It has isolation boundaries and an individual stack.
 - It requires specific services and mechanisms compared to common partitions.
 
 There are two known types for NS Agent:
@@ -653,7 +653,7 @@ PRoT permissions to the NSPE request parsing logic.
 
 Trustzone-M specific
 --------------------
-The functionalities of a Truszone-M specific NSA is:
+The functionalities of a Trustzone-M specific NSA is:
 
 - Launch NSPE when booting.
 - Wait in the veneer code, and get executed when NSPE accesses services.
@@ -671,7 +671,7 @@ Check specific NS ID client ID or context related documents for details.
 
 RPC specific
 ------------
-Compare to Trustzone-M NSA, RPC NSA looks closer to a generic partition:
+Compared to Trustzone-M NSA, RPC NSA looks closer to a generic partition:
 
 - It has a message loop, keep waiting for RPC events.
 - It converts received RPC events into FF-M API call to target services.
@@ -688,7 +688,7 @@ Partition
 =========
 A partition is a set of services in the same scope. Services are generally
 implemented as functions, and the partition exposes the services in different
-ways bases on the partition model: `IPC` or `SFN`.
+ways based on the partition model: `IPC` or `SFN`.
 
 A partition build generates these outputs:
 
@@ -703,15 +703,15 @@ Partition loading
 -----------------
 SPM needs to set up runtime objects to manage partitions by parsing the load
 information of partitions. In general, the partition load information is
-stored in a const memory are can be random read directly, hence SPM can direct
+stored in a const memory area can be random read directly, hence SPM can direct
 link runtime objects to the load information without a copy operation. This
 is called a `Static Load` mechanism.
 
 Each partition has different numbers of dependencies and services, this makes
-the load information size of each partition is different, it would be hard
-to put such variable size elements in an array. The solution here is putting
-these elements in a dedicated section, for SPM enumerating while loading.
-Each partition can define variable size load information type bases on the
+the load information size of each partition different, it would be hard to put
+such variable size elements in an array. The solution here is putting these
+elements in a dedicated section, for SPM enumerating while loading.
+Each partition can define variable size load information type based on the
 common load info type.
 
 The common load information:
@@ -746,8 +746,8 @@ peripherals). The peripherals binding process:
 - The tooling references symbols in a fixed pattern in the partition load
   information.
 - The HAL implementation needs to provide the symbols being referenced.
-- SPM calls HAL API to bind the partition info with devices When the partition
-  gets loading.
+- SPM calls HAL API to bind the partition info with devices when the partition
+  gets loaded.
 - The platform HAL acknowledges the binding if validation pass on SPM given
   load information.
 
@@ -808,4 +808,4 @@ History
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021,2024, Arm Limited. All rights reserved.*

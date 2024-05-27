@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,7 +23,8 @@ target_include_directories(platform_ns
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/Device/Include
-        ${CMAKE_CURRENT_LIST_DIR}/ext/cmsis
+        ${CMAKE_CURRENT_LIST_DIR}/ext/cmsis/Include
+        ${CMAKE_CURRENT_LIST_DIR}/ext/cmsis/Include/m-profile
         ${CMAKE_CURRENT_LIST_DIR}/ext/common
         ${CMAKE_CURRENT_LIST_DIR}/ext/driver
         ${CMAKE_CURRENT_LIST_DIR}/hal/Inc

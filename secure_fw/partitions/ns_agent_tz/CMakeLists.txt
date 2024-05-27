@@ -11,8 +11,7 @@ if (NOT TFM_PARTITION_NS_AGENT_TZ)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 target_sources(tfm_partitions
     INTERFACE

@@ -9,8 +9,7 @@ if (NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_psa_rot_partition_its STATIC)
 

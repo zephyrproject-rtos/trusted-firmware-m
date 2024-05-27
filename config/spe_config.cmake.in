@@ -57,20 +57,6 @@ set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@            CACH
 set(PLATFORM_DEFAULT_CRYPTO_KEYS           @PLATFORM_DEFAULT_CRYPTO_KEYS@   CACHE BOOL   "Use the default crypto keys")
 set(PLATFORM_DEFAULT_UART_STDOUT           @PLATFORM_DEFAULT_UART_STDOUT@   CACHE BOOL   "Use default uart stdout implementation.")
 
-# Testing related options.
-
-set(TEST_PSA_API                           @TEST_PSA_API@          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
-set(PSA_ARCH_TESTS_PATH                    @PSA_ARCH_TESTS_PATH@   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
-set(INCLUDE_PANIC_TESTS                    @INCLUDE_PANIC_TESTS@   CACHE BOOL      "Include panic tests")
-
-set(ATTEST_KEY_BITS                        @ATTEST_KEY_BITS@                        CACHE STRING "The size of the initial attestation key in bits")
-set(SYMMETRIC_INITIAL_ATTESTATION          @SYMMETRIC_INITIAL_ATTESTATION@          CACHE BOOL   "Use symmetric crypto for inital attestation")
-set(ATTEST_INCLUDE_TEST_CODE               @ATTEST_INCLUDE_TEST_CODE@               CACHE BOOL   "Include minimal development tests in the initial attestation regression test suite")
-set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH  @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@  CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
-set(CC312_LEGACY_DRIVER_API_ENABLED        @CC312_LEGACY_DRIVER_API_ENABLED@        CACHE BOOL   "This variable controls whether the legacy driver interface is used for CC-312")
-
-set(TFM_FWU_BOOTLOADER_LIB                 @TFM_FWU_BOOTLOADER_LIB@              CACHE STRING    "Bootloader configure file for Firmware Update partition")
-
 # Other common options
 
 # Coprocessor settings
@@ -88,3 +74,6 @@ set(CONFIG_TFM_LAZY_STACKING               @CONFIG_TFM_LAZY_STACKING@   CACHE BO
 
 set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)
+
+set(RECOMMENDED_TFM_TESTS_VERSION          @TFM_TESTS_VERSION@)
+set(CHECK_TFM_TESTS_VERSION                @TFM_TESTS_REVISION_CHECKS@)

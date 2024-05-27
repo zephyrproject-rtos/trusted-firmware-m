@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
-# Copyright 2023 NXP. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# Copyright 2023-2024 NXP. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,18 +29,14 @@ target_sources(platform_ns
         Native_Driver/components/serial_manager/fsl_component_serial_manager.c
         Native_Driver/components/serial_manager/fsl_component_serial_port_uart.c
         Native_Driver/components/uart/fsl_adapter_usart.c
-        Native_Driver/drivers/fsl_casper.c
         Native_Driver/drivers/fsl_common.c
         Native_Driver/drivers/fsl_common_arm.c
         Native_Driver/drivers/fsl_ctimer.c
         Native_Driver/drivers/fsl_flexcomm.c
         Native_Driver/drivers/fsl_gpio.c
-        Native_Driver/drivers/fsl_hashcrypt.c
         Native_Driver/drivers/fsl_iap.c
-        Native_Driver/drivers/fsl_rng.c
         Native_Driver/drivers/fsl_usart.c
         Native_Driver/utilities/fsl_assert.c
-        Native_Driver/utilities/fsl_sbrk.c
         Native_Driver/utilities/debug_console/fsl_debug_console.c
         Native_Driver/utilities/str/fsl_str.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:plat_test.c>
@@ -50,7 +46,8 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         include
-        ext/cmsis
+        ext/cmsis/Include
+        ext/cmsis/Include/m-profile
         ext/common
         ext/driver
         Native_Driver

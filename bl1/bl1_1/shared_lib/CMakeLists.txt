@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,7 +24,7 @@ target_link_libraries(bl1_1_shared_lib_interface
 
 target_sources(bl1_1_shared_lib
     PRIVATE
-        $<$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>:crypto/crypto_mbedcrypto>
+        $<$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>:crypto/crypto_mbedcrypto.c>
         $<$<BOOL:${TFM_BL1_DUMMY_TRNG}>:trng/trng_dummy.c>
         ./util.c
         $<$<BOOL:${TFM_BL1_DEFAULT_OTP}>:./otp/otp_default.c>
@@ -47,7 +47,8 @@ target_link_libraries(bl1_1_shared_lib
 target_compile_options(bl1_1_shared_lib_interface
     INTERFACE
         #Prevents warnings caused by C99 static assert workaround
-        -Wno-unused-local-typedefs
+        $<$<C_COMPILER_ID:GNU>:-Wno-unused-local-typedefs>
+        $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-local-typedefs>
 )
 
 target_compile_definitions(bl1_1_shared_lib_interface
@@ -58,8 +59,6 @@ target_compile_definitions(bl1_1_shared_lib_interface
 )
 
 if(TFM_BL1_SOFTWARE_CRYPTO)
-    cmake_policy(SET CMP0079 NEW)
-
     set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
     set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
     set(ENABLE_TESTING OFF)
@@ -105,5 +104,35 @@ if(TFM_BL1_SOFTWARE_CRYPTO)
         PRIVATE
             $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
+    )
+
+    target_compile_options(bl1_1_crypto_mbedcrypto
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedcrypto
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
+
+    target_compile_options(bl1_1_crypto_mbedtls
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedtls
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
+    )
+
+    target_compile_options(bl1_1_crypto_mbedx509
+        PRIVATE
+            ${BL1_COMPILER_CP_FLAG}
+    )
+
+    target_link_options(bl1_1_crypto_mbedx509
+        PUBLIC
+            ${BL1_LINKER_CP_OPTION}
     )
 endif()

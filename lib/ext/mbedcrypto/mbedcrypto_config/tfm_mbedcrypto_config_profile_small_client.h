@@ -1,3 +1,9 @@
+/*
+ * Copyright The TrustedFirmware-M Contributors
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file config.h
  *
@@ -6,24 +12,6 @@
  *  This set of compile-time options may be used to enable
  *  or disable features selectively, and reduce the global
  *  memory footprint.
- */
-/*
- *  Copyright (C) 2006-2022, ARM Limited, All Rights Reserved
- *  SPDX-License-Identifier: Apache-2.0
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may
- *  not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
 #ifndef PROFILE_S_MBEDTLS_CONFIG_H
@@ -175,7 +163,7 @@
  * \note The entropy collector will write to the seed file before entropy is
  *       given to an external source, to update it.
  */
-#define MBEDTLS_ENTROPY_NV_SEED
+//#define MBEDTLS_ENTROPY_NV_SEED
 
 /**
  * \def MBEDTLS_SHA256_SMALLER
@@ -316,7 +304,7 @@
  *
  * This module provides a generic entropy pool
  */
-#define MBEDTLS_ENTROPY_C
+//#define MBEDTLS_ENTROPY_C
 
 /**
  * \def MBEDTLS_HKDF_C
@@ -499,13 +487,5 @@
 //#define MBEDTLS_PSA_CRYPTO_USER_CONFIG_FILE "/dev/null"
 
 /** \} name SECTION: General configuration options */
-
-#if CRYPTO_NV_SEED
-#include "tfm_mbedcrypto_config_extra_nv_seed.h"
-#endif /* CRYPTO_NV_SEED */
-
-#if !defined(CRYPTO_HW_ACCELERATOR) && defined(MBEDTLS_ENTROPY_NV_SEED)
-#include "mbedtls_entropy_nv_seed_config.h"
-#endif
 
 #endif /* PROFILE_S_MBEDTLS_CONFIG_H */

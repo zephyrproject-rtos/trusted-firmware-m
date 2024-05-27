@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
  * \Device\ARM\ARMCM0plus\Source\system_ARMCM0plus.c
  */
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 
 /*----------------------------------------------------------------------------
   Define clocks

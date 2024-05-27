@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -15,8 +15,9 @@
 #include <stdint.h>
 
 /* TF-M internal partition ID */
-#define TFM_SP_IDLE_ID                          (1)
-#define INVALID_PARTITION_ID                    (~0U)
+#define TFM_SP_IDLE                          (1U)
+#define TFM_SP_TZ_AGENT                      (2U)
+#define INVALID_PARTITION_ID                 (0U)
 
 /* Encode a magic number into version for validating partition info */
 #define PARTITION_INFO_VERSION_MASK             (0x0000FFFF)
@@ -70,12 +71,12 @@
 #ifdef CONFIG_TFM_USE_TRUSTZONE
 #define IS_NS_AGENT_TZ(pldi)                    (!!((pldi)->flags & PARTITION_NS_AGENT_TZ))
 #else
-#define IS_NS_AGENT_TZ(pldi)                    false
+#define IS_NS_AGENT_TZ(pldi)                    ((void)pldi, false)
 #endif
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 #define IS_NS_AGENT_MAILBOX(pldi)               (!!((pldi)->flags & PARTITION_NS_AGENT_MB))
 #else
-#define IS_NS_AGENT_MAILBOX(pldi)               false
+#define IS_NS_AGENT_MAILBOX(pldi)               ((void)pldi, false)
 #endif
 
 #define PARTITION_TYPE_TO_INDEX(type)           (!!((type) & PARTITION_NS_AGENT_TZ))
@@ -99,6 +100,8 @@ struct partition_load_info_t {
     uint32_t        nservices;          /* Service number                   */
     uint32_t        nassets;            /* Asset numbers                    */
     uint32_t        nirqs;              /* Number of IRQ owned by Partition */
+    int32_t         client_id_base;     /* The min translated client ID     */
+    int32_t         client_id_limit;    /* The max translated client ID     */
 } __attribute__((aligned(4)));
 
 #endif /* __PARTITION_DEFS_H__ */

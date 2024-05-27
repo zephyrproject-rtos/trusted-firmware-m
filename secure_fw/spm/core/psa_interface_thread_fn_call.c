@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -249,6 +249,13 @@ psa_handle_t agent_psa_connect_thread_fn_call(uint32_t sid, uint32_t version,
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_agent_psa_connect);
 }
+
+__naked
+__section(".psa_interface_thread_fn_call")
+psa_status_t agent_psa_close_thread_fn_call(psa_handle_t handle, int32_t ns_client_id)
+{
+    TFM_THREAD_FN_CALL_ENTRY(tfm_spm_agent_psa_close);
+}
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
@@ -293,6 +300,7 @@ const struct psa_api_tbl_t psa_api_thread_fn_call = {
                                 agent_psa_call_thread_fn_call,
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
                                 agent_psa_connect_thread_fn_call,
+                                agent_psa_close_thread_fn_call,
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
                             };

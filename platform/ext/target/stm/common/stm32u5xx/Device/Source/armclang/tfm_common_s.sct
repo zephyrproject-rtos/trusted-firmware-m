@@ -61,7 +61,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE_START  AlignExpr(+0, GTZC_FLASH_ALIGN) FIXED {
-        *(SFN)
         * (+RO)
     }
 

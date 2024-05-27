@@ -267,7 +267,7 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | BL5340 DVK          | Yes             | Yes           | Yes      | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| RSS                 | No              | No            | No       | No             | Yes          |
+| RSE                 | No              | No            | No       | No             | Yes          |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 
 .. [1] To disable BL2, please set the ``BL2`` cmake option to ``OFF``
@@ -392,6 +392,14 @@ MCUBoot related compile time switches can be set by cmake variables.
       key that corresponds to the retrieved key-hash (it can have more public
       keys embedded in and it may have to look for the matching one). All the
       public key(s) must be known at MCUBoot build time.
+- MCUBOOT_BUILTIN_KEY (default: False):
+    - **True:** When enabled, the entire public key used for signature
+      verification must be provisioned to the target device. In this case,
+      neither the code nor the image metadata needs to contain any public
+      key data. During image validation only a key ID is passed to the verifier
+      function for the required key to be selected. The key handling is entirely
+      the responsibility of the underlying crypto library and the details of the
+      key handling mechanism are abstracted away from the boot code.
 - MCUBOOT_LOG_LEVEL:
     Can be used to configure the level of logging in MCUBoot. The possible
     values are the following:
@@ -825,4 +833,4 @@ bootutil_misc.c to control the image status.
     image. As a result, the firmware update service is not supported in
     direct-xip mode and ram-load mode.
 
-*Copyright (c) 2018-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2024, Arm Limited. All rights reserved.*

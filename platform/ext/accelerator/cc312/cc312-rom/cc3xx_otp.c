@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,15 +13,15 @@
 #include <stddef.h>
 #include <string.h>
 
-static void cc3xx_otp_wait_until_fuse_programming_complete(void) {
+static void wait_until_fuse_programming_complete(void) {
 
     while (! (P_CC3XX->nvm.aib_fuse_prog_completed & 1)) {}
 }
 
-cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
-                            size_t size, const uint8_t *buf)
+cc3xx_err_t cc3xx_lowlevel_otp_write(uint8_t *otp_addr,
+                                     size_t size, const uint8_t *buf)
 {
-    uint32_t* word_ptr;
+    uint32_t *word_ptr;
     uint32_t current_word;
     uint32_t word;
     uint32_t start_offset;
@@ -33,7 +33,7 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
      */
     for(in_done = 0; in_done < size;) {
         start_offset = ((uint32_t)otp_addr + in_done) & 0x3;
-        word_ptr = (uint32_t*)(otp_addr + in_done - start_offset);
+        word_ptr = (uint32_t *)(otp_addr + in_done - start_offset);
 
         current_word = *word_ptr;
         word = 0;
@@ -43,10 +43,10 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
             copy_size = size - in_done;
         }
 
-        memcpy(((uint8_t*)&word) + start_offset, buf + in_done, copy_size);
+        memcpy(((uint8_t *)&word) + start_offset, buf + in_done, copy_size);
         word |= current_word;
 
-        if (memcmp(((uint8_t*)&word) + start_offset, buf + in_done, copy_size)) {
+        if (memcmp(((uint8_t *)&word) + start_offset, buf + in_done, copy_size)) {
             return CC3XX_ERR_INVALID_DATA;
         }
 
@@ -56,7 +56,7 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
     /* Then write the OTP */
     for(in_done = 0; in_done < size;) {
         start_offset = ((uint32_t)otp_addr + in_done) & 0x3;
-        word_ptr = (uint32_t*)(otp_addr + in_done - start_offset);
+        word_ptr = (uint32_t *)(otp_addr + in_done - start_offset);
 
         word = *word_ptr;
 
@@ -65,10 +65,10 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
             copy_size = size - in_done;
         }
 
-        memcpy(((uint8_t*)&word) + start_offset, buf + in_done, copy_size);
+        memcpy(((uint8_t *)&word) + start_offset, buf + in_done, copy_size);
 
         *word_ptr = word;
-        cc3xx_otp_wait_until_fuse_programming_complete();
+        wait_until_fuse_programming_complete();
 
         in_done += copy_size;
     }
@@ -76,10 +76,10 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr,
-                           size_t size, uint8_t *buf)
+cc3xx_err_t cc3xx_lowlevel_otp_read(const uint8_t *otp_addr,
+                                    size_t size, uint8_t *buf)
 {
-    uint32_t* word_ptr;
+    uint32_t *word_ptr;
     uint32_t word;
     uint32_t start_offset;
     uint8_t out_done;
@@ -87,7 +87,7 @@ cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr,
 
     for(out_done = 0; out_done < size;) {
         start_offset = ((uint32_t)otp_addr + out_done) & 0x3;
-        word_ptr = (uint32_t*)(otp_addr + out_done - start_offset);
+        word_ptr = (uint32_t *)(otp_addr + out_done - start_offset);
 
         word = *word_ptr;
 
@@ -96,7 +96,7 @@ cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr,
             copy_size = size - out_done;
         }
 
-        memcpy(buf + out_done, ((uint8_t*)&word) + start_offset, copy_size);
+        memcpy(buf + out_done, ((uint8_t *)&word) + start_offset, copy_size);
         out_done += copy_size;
     }
 

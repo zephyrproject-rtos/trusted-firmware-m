@@ -251,8 +251,6 @@ static enum strataflashj3_error_t cfi_strataflashj3_verify_id(
 enum strataflashj3_error_t cfi_strataflashj3_initialize(
                                         struct cfi_strataflashj3_dev_t* dev)
 {
-    enum strataflashj3_error_t flash_ret;
-
     if (dev->is_initialized) {
         CFI_FLASH_LOG_MSG("%s: already initialized\n\r", __func__);
         return STRATAFLASHJ3_ERR_NONE;

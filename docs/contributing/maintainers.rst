@@ -4,9 +4,7 @@ Technical ownership of most parts of the codebase falls on the code owners
 listed below. An acknowledgement from these code owners is required before
 the maintainers merge a contribution.
 
-More details may be found in the `Project Maintenance Process
-<https://developer.trustedfirmware.org/w/collaboration/project-maintenance-process/>`_
-document.
+More details may be found in the `Project Maintenance Process`_ document.
 
 Maintainers
 ===========
@@ -15,18 +13,13 @@ Anton Komlev
     :email: `Anton.Komlev@arm.com <Anton.Komlev@arm.com>`__
     :github: `Anton-TF <https://github.com/Anton-TF>`__
 
+Antonio de Angelis
+    :email: `Antonio.deAngelis@arm.com <Antonio.deAngelis@arm.com>`__
+    :github: `adeaarm <https://github.com/adeaarm>`__
+
 Chris Brand
     :email: `Chris.Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
-
-Ken Liu
-    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
-    :github: `KenLSoft <https://github.com/KenLSoft>`__
-
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
-
 
 Code owners
 ===========
@@ -38,9 +31,9 @@ Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
     :github: `tamasban <https://github.com/tamasban>`__
 
-Sherry Zhang
-    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
-    :github: `sherryzhang <https://github.com/sherryzhang>`__
+David Vincze
+    :email: `David.Vincze@arm.com <David.Vincze@arm.com>`__
+    :github: `davidvincze <https://github.com/davidvincze>`__
 
 BL1 immutable bootloader
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,10 +49,6 @@ Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
     :github: `jf549 <https://github.com/jf549>`__
 
-Sherry Zhang
-    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
-    :github: `sherryzhang <https://github.com/sherryzhang>`__
-
 Crypto
 ~~~~~~
 
@@ -67,20 +56,12 @@ Antonio de Angelis
     :email: `Antonio.deAngelis@arm.com <Antonio.deAngelis@arm.com>`__
     :github: `adeaarm <https://github.com/adeaarm>`__
 
-Summer Qin
-    :email: `Summer.Qin@arm.com <Summer.Qin@arm.com>`__
-    :github: `Summer-ARM <https://github.com/Summer-ARM>`__
-
 Framework (SPM, etc.)
 ~~~~~~~~~~~~~~~~~~~~~
 
-Ken Liu
-    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
-    :github: `KenLSoft <https://github.com/KenLSoft>`__
-
-Kevin Peng
-    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
-    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
+Nicola Mazzucato
+    :email: `Nicola.Mazzucato@arm.com <Nicola.Mazzucato@arm.com>`__
+    :github: `nicola-mazzucato-arm <https://github.com/nicola-mazzucato-arm>`__
 
 Attestation
 ~~~~~~~~~~~
@@ -88,10 +69,6 @@ Attestation
 Maulik Patel
     :email: `Maulik.Patel@arm.com <Maulik.Patel@arm.com>`__
     :github: `maulik-arm <https://github.com/maulik-arm>`__
-
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
 
 Build System
 ~~~~~~~~~~~~
@@ -107,20 +84,15 @@ Anton Komlev
 Tests
 ~~~~~
 
-David Hu
-    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
-    :github: `davidhuziji <https://github.com/davidhuziji>`__
-
-Kevin Peng
-    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
-    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
-
+Matthew Dalzell
+    :email: `Matthew.Dalzell@arm.com <Matthew.Dalzell@arm.com>`__
+    :github: `mdalzellarm <https://github.com/mdalzellarm>`__
 
 Arm Platforms
 ~~~~~~~~~~~~~
 
-MPS2, MPS3, Musca(B1,S1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+MPS2, MPS3, MPS4, Musca(B1,S1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 David Hazi
     :email: `David.Hazi@arm.com <david.hazi@arm.com>`__
@@ -137,7 +109,7 @@ Emekcan Aras
     :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
     :github: `ememarar <https://github.com/ememarar>`__
 
-RSS
+RSE
 ^^^
 
 Jamie Fox
@@ -149,7 +121,7 @@ NXP Platforms
 
 Andrej Butok
     :email: `Andrey.Butok@nxp.com <andrey.butok@nxp.com>`__
-    :github: `AndreyButokNXP <https://github.com/AndreyButokNXP>`__
+    :github: `butok <https://github.com/butok>`__
 
 STM Platforms: DISCO_L562QE, NUCLEO_L552ZE_Q
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -176,9 +148,9 @@ Greg Leach
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Joakim Andersson
-    :email: `joakim.andersson@nordicsemi.no <joakim.andersson@nordicsemi.no>`__
-    :github: `joerchan <https://github.com/joerchan>`__
+Georgios Vasilakis
+    :email: `georgios.vasilakis@nordicsemi.no <georgios.vasilakis@nordicsemi.no>`__
+    :github: `Vge0rge <https://github.com/Vge0rge>`__
 
 
 Nuvoton Platform:
@@ -188,6 +160,16 @@ WS Chang
     :email: `MS20 WSChang0@nuvoton.com <wschang0@nuvoton.com>`__
     :github: `wschang0 <https://github.com/wschang0>`__
 
+
+ArmChina Platform:
+~~~~~~~~~~~~~~~~~~
+
+Jidong Mei
+    :email: `Jidong.Mei@armchina.com <Jidong.Mei@armchina.com>`__
+    :github: `JidongMei <https://github.com/JidongMei>`__
+
 =============
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+.. _Project Maintenance Process: https://trusted-firmware-docs.readthedocs.io/en/latest/generic_processes/project_maintenance_process.html
+
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -57,7 +57,6 @@ target_include_directories(platform_s
         bsp/Library/StdDriver/inc
         ../common/bsp/Include
         ../common/bsp/StdDriver/inc
-        ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/driver
 )
 
@@ -85,6 +84,8 @@ target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
 )
+
+target_link_libraries(platform_s INTERFACE cmsis)
 
 #========================= Platform BL2 =======================================#
 

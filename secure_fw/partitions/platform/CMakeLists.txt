@@ -9,8 +9,7 @@ if (NOT TFM_PARTITION_PLATFORM)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_psa_rot_partition_platform STATIC
     platform_sp.c

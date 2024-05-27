@@ -174,8 +174,8 @@ RAM memory layout in SPE with code sharing enabled:
     |       Heap        |
     +-------------------+
 
-Patching mbedTLS
-================
+Patching Mbed TLS
+=================
 In order to share some global function pointers from mbed-crypto that are
 related to dynamic memory allocation, their scope must be extended from private
 to global. This is needed because some compiler toolchain only extract the
@@ -185,7 +185,7 @@ created for the mbed-crypto library, which "globalises" these function pointers:
 
 `lib/ext/mbedcrypto/0002-Enable-crypto-code-sharing-between-independent-binar.patch`
 
-The patch need to manually applied in the mbedtls repo, if code sharing is
+The patch needs to be manually applied in the Mbed TLS repo, if code sharing is
 enabled. The patch has no effect on the functional behaviour of the
 cryptographic library, it only extends the scope of some variables.
 
@@ -304,7 +304,7 @@ API backward compatibility also can be an issue. If the API has changed in newer
 version of the shared code. Then new code cannot rely on the shared version.
 The changed code and all the other shared code where it is referenced from must
 be ignored and the updated version of the functions must be compiled in the
-SPE binary. The mbedTLS library is API compatible with its current version
+SPE binary. The Mbed TLS library is API compatible with its current version
 (``v2.24.0``) since the ``mbedtls-2.7.0 release`` (2018-02-03).
 
 To minimise the risk of incompatibility, use the same compiler flags to build
@@ -364,4 +364,4 @@ could be shared as well. Some possibilities:
 
 --------------
 
-*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*

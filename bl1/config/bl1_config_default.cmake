@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,6 +24,7 @@ set(TFM_BL1_IMAGE_VERSION_BL2           "1.9.0+0"   CACHE STRING    "Image versi
 set(TFM_BL1_IMAGE_SECURITY_COUNTER_BL2  1           CACHE STRING    "Security counter value to include with BL2 image")
 
 set(TFM_BL1_2_IN_OTP                    TRUE        CACHE BOOL      "Whether BL1_2 is stored in OTP")
+set(TFM_BL1_2_IN_FLASH                  FALSE       CACHE BOOL      "Whether BL1_2 is stored in FLASH")
 
 set(BL1_HEADER_SIZE                     0x800       CACHE STRING    "BL1 Header size")
 set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")

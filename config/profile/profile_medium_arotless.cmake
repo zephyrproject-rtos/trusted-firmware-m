@@ -26,10 +26,3 @@ set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Prot
 
 set(TFM_MBEDCRYPTO_CONFIG_PATH              "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h" CACHE PATH "Config to use for Mbed Crypto")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_medium.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
-
-# If the platform doesn't support FWU, stop the configuration right now to give users a more
-# specific error message, rather than letting check_config step to throw out a general error
-# description.
-if(NOT PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT)
-    message(FATAL_ERROR "${TFM_PLATFORM} doesn't support FWU. Fail to select Profile Medium-ARoT-less")
-endif()

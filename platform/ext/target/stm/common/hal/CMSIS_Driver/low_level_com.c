@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,7 +18,7 @@
 
 #include "Driver_USART.h"
 
-#include "cmsis.h"
+#include "tfm_hal_device_header.h"
 #include "stm32hal.h"
 /* board configuration  */
 #include "board.h"

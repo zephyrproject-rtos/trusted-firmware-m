@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -15,31 +15,7 @@
 #define TFM_NS_CLIENT_INVALID_ID            ((int32_t)0)
 
 #ifdef CONFIG_TFM_USE_TRUSTZONE
-/*
- * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
- * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
- * cannot be used in the code. As a workaround cmse_nsfptr_create is redefined
- * here to use only standard language elements.
- */
-#undef cmse_nsfptr_create
-#define cmse_nsfptr_create(p) ((intptr_t) (p) & ~1)
 
-/*!
- * \def __tfm_nspm_secure_gateway_attributes__
- *
- * \brief Attributes for secure gateway functions for NSPM
- */
-#if !defined(__ARMCC_VERSION) && !defined(__ICCARM__)
-/*
- * GNUARM requires noclone attribute to protect gateway function symbol from
- * being renamed and cloned
- */
-#define __tfm_nspm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noclone))
-#else
-#define __tfm_nspm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry))
-#endif /* !defined(__ARMCC_VERSION) && !defined(__ICCARM__) */
 #endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /**
@@ -54,5 +30,14 @@ void tfm_nspm_ctx_init(void);
  *         returned in case of error.
  */
 int32_t tfm_nspm_get_current_client_id(void);
+
+/**
+ * \brief Register a non-secure client ID range.
+ *
+ * \param[in] client_id_base  The minimum client ID for this client.
+ * \param[in] client_id_limit The maximum client ID for this client.
+ */
+void tz_ns_agent_register_client_id_range(int32_t client_id_base,
+                                          int32_t client_id_limit);
 
 #endif /* __TFM_NSPM_H__ */

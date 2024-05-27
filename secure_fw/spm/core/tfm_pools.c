@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,9 @@
 #include "utilities.h"
 #include "lists.h"
 #include "tfm_pools.h"
+
+/* Magic value that indicates a pool chunk has been allocated */
+#define POOL_MAGIC_ALLOCATED UINT32_C(0xF0F0CCAA)
 
 psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
                            size_t chunksz, size_t num)
@@ -67,6 +70,8 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
     node = UNI_LIST_NEXT_NODE(pool, next);
     UNI_LIST_REMOVE_NODE(pool, node, next);
 
+    node->magic = POOL_MAGIC_ALLOCATED;
+
     return &(((struct tfm_pool_chunk_t *)node)->data);
 }
 
@@ -74,9 +79,19 @@ void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
 {
     struct tfm_pool_chunk_t *pchunk;
 
+    /* In debug builds, trap invalid frees. */
+    SPM_ASSERT(is_valid_chunk_data_in_pool(pool, ptr));
+
     pchunk = TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
 
+    pchunk->magic = 0;
+
     UNI_LIST_INSERT_AFTER(pool, pchunk, next);
+
+    /* In debug builds, overwrite the data to catch use-after-free bugs. */
+#ifndef NDEBUG
+    spm_memset(pchunk->data, 0xFF, pool->chunksz);
+#endif
 }
 
 bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
@@ -84,6 +99,7 @@ bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
 {
     const uintptr_t chunks_start = (uintptr_t)(pool->chunks);
     const size_t chunks_offset = (uintptr_t)data - chunks_start;
+    struct tfm_pool_chunk_t *pchunk;
 
     /* Check that the message was allocated from the pool. */
     if ((uintptr_t)data < chunks_start || chunks_offset >= pool->pool_sz) {
@@ -92,6 +108,12 @@ bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
 
     if ((chunks_offset % (pool->chunksz + sizeof(struct tfm_pool_chunk_t)))
         != offsetof(struct tfm_pool_chunk_t, data)) {
+        return false;
+    }
+
+    pchunk = TO_CONTAINER(data, struct tfm_pool_chunk_t, data);
+
+    if (pchunk->magic != POOL_MAGIC_ALLOCATED) {
         return false;
     }
 

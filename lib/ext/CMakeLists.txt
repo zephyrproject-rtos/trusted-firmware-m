@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,6 +11,7 @@ if(TFM_PARTITION_INITIAL_ATTESTATION)
   add_subdirectory(t_cose)
 endif()
 add_subdirectory(mbedcrypto)
+add_subdirectory(cmsis)
 if(BL2)
     add_subdirectory(mcuboot)
 endif()

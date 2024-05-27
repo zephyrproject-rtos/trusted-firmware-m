@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -16,6 +16,7 @@ add_library(flash_drivers_bl2 STATIC)
 target_include_directories(flash_drivers
     INTERFACE
         ${PLATFORM_DIR}/ext/driver
+        ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
         ${CMAKE_CURRENT_SOURCE_DIR}/partition
         ${CORSTONE300_COMMON_DIR}/partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
@@ -40,10 +41,8 @@ install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
         RENAME      cpuarch.cmake)
 
 install(FILES       ${TARGET_PLATFORM_PATH}/ns/CMakeLists.txt
+                    ${TARGET_PLATFORM_PATH}/cmsis_drivers/Driver_Flash.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES       ${TARGET_PLATFORM_PATH}/cmsis_drivers/Driver_Flash.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

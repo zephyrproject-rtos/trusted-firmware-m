@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020 STMicroelectronics. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -49,7 +49,7 @@ void boot_clear_ram_area(void);
  * \param[in] reset_handler_addr Address of next image's Reset_Handler() in
                                  the boot chain (TF-M SPE, etc.)
  */
-void boot_jump_to_next_image(uint32_t reset_handler_addr) __NO_RETURN;
+__NO_RETURN void boot_jump_to_next_image(uint32_t reset_handler_addr);
 
 /**
  * \brief Platform peripherals and devices initialization.
@@ -74,7 +74,7 @@ int32_t boot_platform_post_init(void);
  *
  * \param[in] vt  pointer to secure application vector table descriptor
  */
-void boot_platform_quit(struct boot_arm_vector_table *vt) __NO_RETURN;
+__NO_RETURN void boot_platform_quit(struct boot_arm_vector_table *vt);
 
 /**
  * \brief Platform operation to perform steps required before image load.
@@ -95,6 +95,15 @@ int boot_platform_pre_load(uint32_t image_id);
  * \return Returns 0 on success, non-zero otherwise
  */
 int boot_platform_post_load(uint32_t image_id);
+
+/**
+ * \brief Platform operation to check if a particular image should be loaded.
+ *
+ * \param[in] image_id  The ID of the image that is being queried.
+ *
+ * \return Returns true if image should be loaded, false otherwise
+ */
+bool boot_platform_should_load_image(uint32_t image_id);
 
 /**
  * Version of a SW component, to be encoded as "major.minor.revision+build_num".
@@ -142,6 +151,19 @@ int boot_store_measurement(uint8_t index,
                            size_t measurement_size,
                            const struct boot_measurement_metadata *metadata,
                            bool lock_measurement);
+
+/**
+ * \brief Run when boot has failed to load any images. Allows for a
+ *        platform-specific response.
+ *
+ * \note  Care must be taken when implementing this function that it preserves
+ *        the security of the secure-boot chain.
+ *
+ * \param[in] image_id  The ID of the image that failed to validate.
+ *
+ * \return Returns zero if recovery succeeded, non-zero otherwise.
+ */
+int boot_initiate_recovery_mode(uint32_t image_id);
 
 #ifdef __cplusplus
 }

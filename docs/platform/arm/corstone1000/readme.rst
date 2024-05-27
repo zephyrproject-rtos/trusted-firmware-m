@@ -19,13 +19,8 @@ and boots the software ecosystem based on linux, u-boot, UEFI run time
 services, TF-A, Secure Partitions and Optee.
 
 The communication between NSPE and SPE is based on PSA IPC protocol running on
-top of FF-A/OpenAMP.
-
-.. toctree::
-    :maxdepth: 1
-    :glob:
-
-    openamp/**
+top of the RSE communication protocol. The Corstone-1000 supports only the
+`Embed protocol`, and the ATU support is removed.
 
 The secure enclave subsystem has ARM's CC-312 (Crypto Cell) hardware to
 accelerate cryptographic operations. Additionaly, platform supports Secure Debug
@@ -116,7 +111,7 @@ Other test configurations are:
 - -DTEST_S_PS=ON/OFF
 - -DTEST_S_PLATFORM=ON/OFF
 
-*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited. All rights reserved.*
 
 .. _Arm Ecosystem FVPs: https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps
 .. _Arm Corstone-1000 User Guide: https://corstone1000.docs.arm.com/en/corstone1000-2022.11.23/user-guide.html

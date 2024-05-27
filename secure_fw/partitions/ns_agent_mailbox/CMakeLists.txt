@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -11,8 +11,7 @@ if (NOT TFM_PARTITION_NS_AGENT_MAILBOX)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.15)
-cmake_policy(SET CMP0079 NEW)
+cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_psa_rot_partition_ns_agent_mailbox STATIC)
 
@@ -21,9 +20,10 @@ add_dependencies(tfm_psa_rot_partition_ns_agent_mailbox manifest_tool)
 target_sources(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE
         ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/tfm_rpc.c
-        $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/tfm_spe_mailbox.c>
+        $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:tfm_spe_mailbox.c>
         ns_agent_mailbox.c
         tfm_multi_core_mem_check.c
+        tfm_multi_core_client_id.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox

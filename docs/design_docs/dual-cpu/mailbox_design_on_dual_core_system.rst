@@ -449,7 +449,7 @@ to corresponding NSPE mailbox queue slot.
 
 Platform specific Inter-Processor Communication interrupt handler in SPE should
 call ``spm_handle_interrupt()`` to notify SPM of the interrupt. SPM will then
-send the ``SIGNAL_MAILBOX`` signal to the ``ns_agent_mailbox`` partition, which
+send the ``MAILBOX_INTERRUPT_SIGNAL`` signal to the ``ns_agent_mailbox`` partition, which
 will call ``tfm_rpc_client_call_handler()``.
 
 **********************
@@ -746,8 +746,6 @@ SPE mailbox queue structure
 - ``empty_slots`` is the bitmask of empty slots.
 - ``queue`` is the SPE mailbox queue of slots.
 - ``ns_queue`` stores the address of NSPE mailbox queue structure.
-- ``cur_proc_slot_idx`` indicates the index of mailbox queue slot currently
-  under processing.
 
 .. code-block:: c
 
@@ -757,7 +755,6 @@ SPE mailbox queue structure
       struct secure_mailbox_slot_t queue[NUM_MAILBOX_QUEUE_SLOT];
       /* Base address of NSPE mailbox queue in non-secure memory */
       struct ns_mailbox_queue_t    *ns_queue;
-      uint8_t                      cur_proc_slot_idx;
   };
 
 NSPE mailbox APIs
@@ -1458,5 +1455,5 @@ Reference
 
 --------------------
 
-*Copyright (c) 2019-2021 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2019-2024 Arm Limited. All Rights Reserved.*
 *Copyright (c) 2022 Cypress Semiconductor Corporation. All rights reserved.*
