@@ -18,6 +18,7 @@
 #include "region_defs.h"
 
 /* Platform-specific configuration */
+#if NRF_SPU_HAS_MEMORY
 #define FLASH_SECURE_ATTRIBUTION_REGION_SIZE SPU_FLASH_REGION_SIZE
 #define SRAM_SECURE_ATTRIBUTION_REGION_SIZE  SPU_SRAM_REGION_SIZE
 
