@@ -301,7 +301,10 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
 #endif
 
 typedef thrd_fn_t (*comp_init_fn_t)(struct partition_t *, uint32_t, uint32_t *);
-comp_init_fn_t comp_init_fns[] = {partition_init, ns_agent_tz_init};
+static const comp_init_fn_t comp_init_fns[] = {
+    partition_init,
+    ns_agent_tz_init,
+};
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_setting)
