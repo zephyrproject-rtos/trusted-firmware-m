@@ -26,6 +26,11 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 enum tfm_platform_err_t
 tfm_platform_hal_gpio_service(const psa_invec  *in_vec, const psa_outvec *out_vec);
 
+
+enum tfm_platform_err_t
+tfm_platform_hal_write32_service(const psa_invec  *in_vec,
+				 const psa_outvec *out_vec);
+
 #ifdef __cplusplus
 }
 #endif

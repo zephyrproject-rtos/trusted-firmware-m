@@ -66,3 +66,31 @@ enum tfm_platform_err_t tfm_platform_gpio_pin_mcu_select(uint32_t pin_number, ui
 	return TFM_PLATFORM_ERR_NOT_SUPPORTED;
 #endif
 }
+
+enum tfm_platform_err_t tfm_platform_mem_write32(uint32_t addr, uint32_t value,
+						 uint32_t mask, uint32_t *result)
+{
+	enum tfm_platform_err_t ret;
+	psa_invec in_vec;
+	psa_outvec out_vec;
+	struct tfm_write32_service_args_t args;
+	struct tfm_write32_service_out_t out;
+
+	in_vec.base = (const void *)&args;
+	in_vec.len = sizeof(args);
+
+	out_vec.base = (void *)&out;
+	out_vec.len = sizeof(out);
+
+	args.addr = addr;
+	args.value = value;
+	args.mask = mask;
+	/* Allowed values cannot be specified by the user */
+
+	ret = tfm_platform_ioctl(TFM_PLATFORM_IOCTL_WRITE32_SERVICE, &in_vec,
+				 &out_vec);
+
+	*result = out.result;
+
+	return ret;
+}

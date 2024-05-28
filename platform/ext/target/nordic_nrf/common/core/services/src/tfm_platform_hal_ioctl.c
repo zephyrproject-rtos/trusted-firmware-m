@@ -15,7 +15,7 @@
 #include <tfm_hal_isolation.h>
 
 /* This contains the user provided allowed ranges */
-#include <tfm_read_ranges.h>
+#include <tfm_platform_user_memory_ranges.h>
 
 #include <hal/nrf_gpio.h>
 
@@ -127,3 +127,76 @@ tfm_platform_hal_gpio_service(const psa_invec  *in_vec, const psa_outvec *out_ve
 }
 #endif /* NRF_GPIO_HAS_SEL */
 
+enum tfm_platform_err_t tfm_platform_hal_write32_service(const psa_invec *in_vec,
+							 const psa_outvec *out_vec)
+{
+	uint32_t addr;
+	uint32_t mask;
+	uint32_t allowed_values_array_size;
+
+	struct tfm_write32_service_args_t *args;
+	struct tfm_write32_service_out_t *out;
+
+	enum tfm_platform_err_t err;
+
+	if (in_vec->len != sizeof(struct tfm_write32_service_args_t) ||
+	    out_vec->len != sizeof(struct tfm_write32_service_out_t)) {
+		return TFM_PLATFORM_ERR_INVALID_PARAM;
+	}
+
+	args = (struct tfm_write32_service_args_t *)in_vec->base;
+	out = (struct tfm_write32_service_out_t *)out_vec->base;
+
+	/* Assume failure, in case we don't find a match */
+	out->result = TFM_WRITE32_SERVICE_ERROR_INVALID_ADDRESS;
+	err = TFM_PLATFORM_ERR_INVALID_PARAM;
+
+	for (size_t i = 0; i < ARRAY_SIZE(tfm_write32_service_addresses); i++) {
+		addr = tfm_write32_service_addresses[i].addr;
+		mask = tfm_write32_service_addresses[i].mask;
+		allowed_values_array_size =
+			tfm_write32_service_addresses[i].allowed_values_array_size;
+
+		if (args->addr == addr) {
+			out->result = TFM_WRITE32_SERVICE_ERROR_INVALID_MASK;
+
+			if (args->mask == mask) {
+				/* Check for allowed values if provided */
+				if (allowed_values_array_size > 0 &&
+				    tfm_write32_service_addresses[i].allowed_values != NULL) {
+					bool is_value_allowed = false;
+
+					for (int j = 0; j < allowed_values_array_size; j++) {
+
+						const uint32_t allowed_value =
+							tfm_write32_service_addresses[i]
+								.allowed_values[j];
+
+						if (allowed_value == (args->value & args->mask)) {
+							is_value_allowed = true;
+							break;
+						}
+					}
+
+					if (!is_value_allowed) {
+						out->result =
+							TFM_WRITE32_SERVICE_ERROR_INVALID_VALUE;
+						break;
+					}
+				}
+
+				uint32_t new_value = *(uint32_t *)addr;
+				/* Invert the mask to convert the masked bits to 0 first */
+				new_value &= ~args->mask;
+				new_value |= (args->value & args->mask);
+				*(uint32_t *)addr = new_value;
+
+				out->result = TFM_WRITE32_SERVICE_SUCCESS;
+				err = TFM_PLATFORM_ERR_SUCCESS;
+				break;
+			}
+		}
+	}
+
+	return err;
+}
