@@ -262,8 +262,6 @@ SECTIONS
         /* .zero.table */
         . = ALIGN(4);
         __zero_table_start__ = .;
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS) / 4)
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
