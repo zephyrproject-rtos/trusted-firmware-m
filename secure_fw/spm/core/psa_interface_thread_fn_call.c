@@ -36,21 +36,18 @@
     )
 
 __naked
-__section(".psa_interface_thread_fn_call")
 uint32_t psa_framework_version_thread_fn_call(void)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_client_psa_framework_version);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 uint32_t psa_version_thread_fn_call(uint32_t sid)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_client_psa_version);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_status_t tfm_psa_call_pack_thread_fn_call(psa_handle_t handle,
                                               uint32_t ctrl_param,
                                               const psa_invec *in_vec,
@@ -60,21 +57,18 @@ psa_status_t tfm_psa_call_pack_thread_fn_call(psa_handle_t handle,
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_signal_t psa_wait_thread_fn_call(psa_signal_t signal_mask, uint32_t timeout)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_wait);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_status_t psa_get_thread_fn_call(psa_signal_t signal, psa_msg_t *msg)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_get);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 size_t psa_read_thread_fn_call(psa_handle_t msg_handle, uint32_t invec_idx,
                                void *buffer, size_t num_bytes)
 {
@@ -82,7 +76,6 @@ size_t psa_read_thread_fn_call(psa_handle_t msg_handle, uint32_t invec_idx,
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 size_t psa_skip_thread_fn_call(psa_handle_t msg_handle,
                                uint32_t invec_idx, size_t num_bytes)
 {
@@ -90,7 +83,6 @@ size_t psa_skip_thread_fn_call(psa_handle_t msg_handle,
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_write_thread_fn_call(psa_handle_t msg_handle, uint32_t outvec_idx,
                               const void *buffer, size_t num_bytes)
 {
@@ -98,7 +90,6 @@ void psa_write_thread_fn_call(psa_handle_t msg_handle, uint32_t outvec_idx,
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_reply_thread_fn_call(psa_handle_t msg_handle, psa_status_t status)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_reply);
@@ -106,14 +97,12 @@ void psa_reply_thread_fn_call(psa_handle_t msg_handle, psa_status_t status)
 
 #if CONFIG_TFM_DOORBELL_API == 1
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_notify_thread_fn_call(int32_t partition_id)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_notify);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_clear_thread_fn_call(void)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_clear);
@@ -121,14 +110,12 @@ void psa_clear_thread_fn_call(void)
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_panic_thread_fn_call(void)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_panic);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 uint32_t psa_rot_lifecycle_state_thread_fn_call(void)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_get_lifecycle_state);
@@ -138,21 +125,18 @@ uint32_t psa_rot_lifecycle_state_thread_fn_call(void)
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_handle_t psa_connect_thread_fn_call(uint32_t sid, uint32_t version)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_client_psa_connect);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_close_thread_fn_call(psa_handle_t handle)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_client_psa_close);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_set_rhandle_thread_fn_call(psa_handle_t msg_handle, void *rhandle)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_set_rhandle);
@@ -162,14 +146,12 @@ void psa_set_rhandle_thread_fn_call(psa_handle_t msg_handle, void *rhandle)
 
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_irq_enable_thread_fn_call(psa_signal_t irq_signal)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_irq_enable);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_irq_status_t psa_irq_disable_thread_fn_call(psa_signal_t irq_signal)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_irq_disable);
@@ -178,7 +160,6 @@ psa_irq_status_t psa_irq_disable_thread_fn_call(psa_signal_t irq_signal)
 /* This API is only used for FLIH. */
 #if CONFIG_TFM_FLIH_API == 1
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_reset_signal_thread_fn_call(psa_signal_t irq_signal)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_reset_signal);
@@ -188,7 +169,6 @@ void psa_reset_signal_thread_fn_call(psa_signal_t irq_signal)
 /* This API is only used for SLIH. */
 #if CONFIG_TFM_SLIH_API == 1
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_eoi_thread_fn_call(psa_signal_t irq_signal)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_eoi);
@@ -199,28 +179,24 @@ void psa_eoi_thread_fn_call(psa_signal_t irq_signal)
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
 __naked
-__section(".psa_interface_thread_fn_call")
 const void *psa_map_invec_thread_fn_call(psa_handle_t msg_handle, uint32_t invec_idx)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_map_invec);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_unmap_invec_thread_fn_call(psa_handle_t msg_handle, uint32_t invec_idx)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_unmap_invec);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void *psa_map_outvec_thread_fn_call(psa_handle_t msg_handle, uint32_t outvec_idx)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_partition_psa_map_outvec);
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 void psa_unmap_outvec_thread_fn_call(psa_handle_t msg_handle, uint32_t outvec_idx,
                                      size_t len)
 {
@@ -231,7 +207,6 @@ void psa_unmap_outvec_thread_fn_call(psa_handle_t msg_handle, uint32_t outvec_id
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_status_t agent_psa_call_thread_fn_call(psa_handle_t handle,
                                            uint32_t control,
                                            const struct client_params_t *params,
@@ -242,7 +217,6 @@ psa_status_t agent_psa_call_thread_fn_call(psa_handle_t handle,
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_handle_t agent_psa_connect_thread_fn_call(uint32_t sid, uint32_t version,
                                               int32_t ns_client_id,
                                               const void *client_data)
@@ -251,7 +225,6 @@ psa_handle_t agent_psa_connect_thread_fn_call(uint32_t sid, uint32_t version,
 }
 
 __naked
-__section(".psa_interface_thread_fn_call")
 psa_status_t agent_psa_close_thread_fn_call(psa_handle_t handle, int32_t ns_client_id)
 {
     TFM_THREAD_FN_CALL_ENTRY(tfm_spm_agent_psa_close);
