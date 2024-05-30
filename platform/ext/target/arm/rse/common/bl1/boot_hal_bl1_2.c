@@ -35,6 +35,7 @@
 #include "mpu_armv8m_drv.h"
 #include "tfm_hal_device_header.h"
 #include "dpa_hardened_word_copy.h"
+#include "rse_clocks.h"
 #if RSE_AMOUNT > 1
 #include "rse_handshake.h"
 #endif
@@ -271,6 +272,13 @@ int32_t boot_platform_init(void)
             (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
     __set_MSPLIM(msp_stack_bottom);
+
+    /* Early clock config to speed up boot */
+    result = rse_clock_config();
+    if (result != 0) {
+        return result;
+    }
+    SystemCoreClockUpdate();
 
     plat_err = tfm_plat_init_nv_counter();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {

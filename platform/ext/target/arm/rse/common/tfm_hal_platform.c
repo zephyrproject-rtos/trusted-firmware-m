@@ -11,6 +11,7 @@
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "device_definition.h"
+#include "rse_clocks.h"
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "host_base_address.h"
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
@@ -27,6 +28,11 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
     enum atu_error_t err;
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
+
+    if (rse_clock_config() != 0) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+    SystemCoreClockUpdate();
 
     plat_err = enable_fault_handlers();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {

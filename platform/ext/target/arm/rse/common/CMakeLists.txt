@@ -152,6 +152,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_PPC.c
         device/source/device_definition.c
+        $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c
@@ -449,6 +450,7 @@ target_link_libraries(cc312_rom
 
 target_sources(platform_bl1_2
     PRIVATE
+        $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
         ./bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
@@ -734,6 +736,7 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 install(FILES       device/source/device_definition.c
+                    $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
                     device/source/startup_rse.c
                     device/source/system_core_init.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/device/source

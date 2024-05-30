@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2022 Arm Limited
+ * Copyright (c) 2009-2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 /*
- * This file is derivative of CMSIS V5.9.0 system_ARMCM55.h
- * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
+ * This file is derivative of CMSIS V6.1.0 system_Device.h
+ * Git SHA: b0bbb0423b278ca632cfe1474eb227961d835fd2
  */
 
 #ifndef __SYSTEM_CORE_INIT_H__
@@ -28,13 +28,20 @@
 extern "C" {
 #endif
 
-extern uint32_t SystemCoreClock;  /*!< System Clock Frequency (Core Clock)  */
-extern uint32_t PeripheralClock;  /*!< Peripheral Clock Frequency */
-
 /**
   \brief Exception / Interrupt Handler Function Prototype
  */
 typedef void(*VECTOR_TABLE_Type)(void);
+
+/**
+  \brief System Clock Frequency (Core Clock)
+ */
+extern uint32_t SystemCoreClock;
+
+/**
+  \brief Peripheral Clock Frequency
+ */
+extern uint32_t PeripheralClock;
 
 /**
   \brief Setup the microcontroller system.

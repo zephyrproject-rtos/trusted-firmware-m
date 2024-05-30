@@ -37,4 +37,10 @@
                         (((signals) & MAILBOX_INTERRUPT_SIGNAL) ? \
                          MAILBOX_INTERRUPT_SIGNAL : MAILBOX_INTERRUPT_1_SIGNAL)
 
+/* Default RSE SYSCLK/CPU0CLK value in Hz */
+#define SYSCLK         100000000UL /* 100 MHz */
+
+/* Clock configuration value to write to CLK_CFG1.SYSCLKCFG to drive SYSCLKCFG signal */
+#define SYSCLKCFG_VAL  0
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

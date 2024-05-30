@@ -425,6 +425,15 @@ struct rse_sysctrl_t {
     volatile uint32_t cidr3;             /* 0xFFC (R/ ) Component ID 3 */
 };
 
+#define CLK_CFG1_SYSCLKCFG_POS         0
+#define CLK_CFG1_SYSCLKCFG_MASK        (0xFUL << CLK_CFG1_SYSCLKCFG_POS)
+#define CLK_CFG1_AONCLKCFG_POS         4
+#define CLK_CFG1_AONCLKCFG_MASK        (0xFUL << CLK_CFG1_AONCLKCFG_POS)
+#define CLK_CFG1_SYSCLKCFGSTATUS_POS   16
+#define CLK_CFG1_SYSCLKCFGSTATUS_MASK  (0xFUL << CLK_CFG1_SYSCLKCFGSTATUS_POS)
+#define CLK_CFG1_AONCLKCFGSTATUS_POS   20
+#define CLK_CFG1_AONCLKCFGSTATUS_MASK  (0xFUL << CLK_CFG1_AONCLKCFGSTATUS_POS)
+
 struct rse_ewic_t {
     volatile uint32_t ewic_cr;        /* 0x000 (R/W) EWIC Control */
     volatile uint32_t ewic_ascr;      /* 0x004 (R/W) Automatic Sequence

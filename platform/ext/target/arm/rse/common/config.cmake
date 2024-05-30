@@ -149,6 +149,8 @@ set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared RO
 
 set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
 
+set(RSE_DEFAULT_CLOCK_CONFIG            ON         CACHE BOOL "Use default RSE clock config implementation")
+
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate

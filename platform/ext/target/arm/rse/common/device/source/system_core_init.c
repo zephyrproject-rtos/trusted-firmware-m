@@ -17,18 +17,18 @@
  */
 
 /*
- * This file is derivative of CMSIS V5.9.0 system_ARMCM55.c
- * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
+ * This file is derivative of CMSIS V6.1.0 system_ARMCM55.c
+ * Git SHA: b0bbb0423b278ca632cfe1474eb227961d835fd2
  */
 
+#include "config_tfm.h"
+#include "rse_clocks.h"
 #include "tfm_hal_device_header.h"
 
 /*----------------------------------------------------------------------------
   Define clocks
  *----------------------------------------------------------------------------*/
- #define  XTAL             (32000000UL)
- #define  SYSTEM_CLOCK     (XTAL)
- #define  PERIPHERAL_CLOCK (25000000UL)
+#define PERIPHERAL_CLOCK  (75000000UL)
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -38,7 +38,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
 /*----------------------------------------------------------------------------
   System Core Clock Variable
  *----------------------------------------------------------------------------*/
-uint32_t SystemCoreClock = SYSTEM_CLOCK;
+uint32_t SystemCoreClock = SYSCLK;
 uint32_t PeripheralClock = PERIPHERAL_CLOCK;
 
 /*----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ uint32_t PeripheralClock = PERIPHERAL_CLOCK;
  *----------------------------------------------------------------------------*/
 void SystemCoreClockUpdate (void)
 {
-    SystemCoreClock = SYSTEM_CLOCK;
+    SystemCoreClock = rse_get_sysclk();
     PeripheralClock = PERIPHERAL_CLOCK;
 }
 
@@ -87,7 +87,6 @@ void SystemInit (void)
     __DSB();
     __ISB();
 
-
-    SystemCoreClock = SYSTEM_CLOCK;
+    SystemCoreClock = SYSCLK;
     PeripheralClock = PERIPHERAL_CLOCK;
 }

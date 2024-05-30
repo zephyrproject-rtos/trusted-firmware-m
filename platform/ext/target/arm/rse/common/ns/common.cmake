@@ -15,6 +15,7 @@ target_sources(platform_ns
     PRIVATE
         device/source/device_definition.c
         device/source/startup_rse.c
+        device/source/rse_clocks.c
         device/source/system_core_init.c
         uart_stdout.c
 )
