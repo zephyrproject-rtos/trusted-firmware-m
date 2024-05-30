@@ -10,6 +10,7 @@
 
 set(PLAT_NEOVERSE_HOST_VERSION_VERSION  4        CACHE STRING  "Version of Neoverse-RD host mapping to use - coresponds to nrdX directories.")
 set(PLAT_LCP_COUNT                      7        CACHE STRING  "Number of LCPs to load")
+set(PLAT_SHARED_LCP                     TRUE     CACHE BOOL    "Whether shared LCP is enabled where LCP cores are mapped to AP cores in 1:N mapping opposed to 1:1")
 set(RSE_AMOUNT                          2        CACHE STRING  "Amount of RSEs in the system")
 set(MULTI_RSE_TOPOLOGY_FILE             ${CMAKE_CURRENT_LIST_DIR}/bl1/rdv3r1.tgf CACHE STRING "Topology file for RSE to RSE BL1 communication")
 

@@ -637,7 +637,7 @@ static int boot_platform_pre_load_lcp(void)
                                     RSE_ATU_IMG_HDR_LOAD_ID,
                                     HOST_LCP_HDR_ATU_WINDOW_BASE_S,
                                     (host_system_info->chip_ap_phys_base +
-                                        HOST_LCP_0_PHYS_HDR_BASE),
+                                        HOST_LCP_0_HDR_PHYS_BASE),
                                     RSE_IMG_HDR_ATU_WINDOW_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_ERR("BL2: ATU could not init LCP header load region");
@@ -651,7 +651,7 @@ static int boot_platform_pre_load_lcp(void)
                                     RSE_ATU_IMG_CODE_LOAD_ID,
                                     HOST_LCP_IMG_CODE_BASE_S,
                                     (host_system_info->chip_ap_phys_base +
-                                        HOST_LCP_0_PHYS_BASE),
+                                        HOST_LCP_N_CODE_PHYS_BASE(0)),
                                     HOST_LCP_ATU_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");
@@ -704,7 +704,7 @@ static int boot_platform_post_load_lcp(void)
                                         RSE_ATU_IMG_CODE_LOAD_ID,
                                         HOST_LCP_IMG_CODE_BASE_S,
                                         (host_system_info->chip_ap_phys_base +
-                                            HOST_LCP_N_PHYS_BASE(lcp_idx)),
+                                            HOST_LCP_N_CODE_PHYS_BASE(lcp_idx)),
                                         HOST_LCP_ATU_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             BOOT_LOG_ERR("BL2: ATU could not init LCP code load region");

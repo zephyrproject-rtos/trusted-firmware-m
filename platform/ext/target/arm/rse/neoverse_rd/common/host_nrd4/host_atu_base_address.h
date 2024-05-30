@@ -13,6 +13,7 @@
 #define __HOST_ATU_BASE_ADDRESS_H__
 
 #include "platform_base_address.h"
+#include "host_clus_util_lcp_memory_map.h"
 #include "size_defs.h"
 
 #define ALIGN_UP(num, align)    (((num) + ((align) - 1)) & ~((align) - 1))
@@ -216,20 +217,23 @@ enum rse_atu_ids {
 /* LCP Code region and LCP ATU CODE logical address start */
 #define HOST_LCP_IMG_CODE_BASE_S        (HOST_LCP_HDR_ATU_WINDOW_BASE_S +   \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
-/* LCP0 ITCM window in AP address start */
-#define HOST_LCP_0_PHYS_BASE            (HOST_CLUST_UTIL_PHYS_BASE + 0x50000ULL)
-/* Offset between LCP ITCM windows */
-#define HOST_LCP_N_PHYS_OFFSET          0x200000U /* 2 MB */
+
 /* LCP ITCM window in AP address start for LCP N */
-#define HOST_LCP_N_PHYS_BASE(n)         (HOST_LCP_0_PHYS_BASE +             \
-                                         HOST_LCP_N_PHYS_OFFSET * (n))
+#define HOST_LCP_N_CODE_PHYS_BASE(n)    (HOST_LCP_N_PHYS_BASE(n) +          \
+                                         HOST_LCP_ITCM_BASE)
 /* LCP ATU CODE size (aligned size of LCP image) */
 #define HOST_LCP_ATU_SIZE               ALIGN_UP(SIZE_DEF_LCP_IMAGE,        \
                                                  RSE_ATU_PAGE_SIZE)
 /* LCP HEADER physical address start (mapped to end of LCP0 ITCM) */
-#define HOST_LCP_0_PHYS_HDR_BASE        (HOST_LCP_0_PHYS_BASE +             \
+#define HOST_LCP_0_HDR_PHYS_BASE        (HOST_LCP_N_CODE_PHYS_BASE(0) +     \
                                          HOST_LCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
+#define HOST_LCP_N_EXT_CTRL_BASE_S          RSE_MSCP_INIT_CTRL_ATU_BASE
+#define HOST_LCP_N_EXT_CTRL_PHYS_BASE(n)    (HOST_LCP_N_PHYS_BASE(n) + \
+                                             HOST_LCP_EXTENDED_CONTROL_BASE)
+#define HOST_LCP_N_EXT_CTRL_SIZE            RSE_MSCP_INIT_CTRL_SIZE
+#define HOST_LCP_N_EXT_CTRL_ATU_ID          RSE_ATU_FW_INIT_ID
 
 /* ****************************************************************************
  *                                   AP BL1                                   *

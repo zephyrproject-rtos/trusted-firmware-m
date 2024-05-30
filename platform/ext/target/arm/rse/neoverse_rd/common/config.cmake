@@ -23,6 +23,7 @@ set(PLATFORM_HAS_SMMU_V3                ON       CACHE BOOL    "Enable SMMU V3 s
 # PLAT_MHU_VERSION to 0 so neither gets added by the common cmake and
 # sub-platform specific cmake can be used to handle the mix of MHUv2 and MHUv3.
 set(PLAT_MHU_VERSION                    0        CACHE STRING  "Supported MHU version by platform")
+set(PLAT_SHARED_LCP                     FALSE    CACHE BOOL    "Whether shared LCP is enabled where LCP cores are mapped to AP cores in 1:N mapping opposed to 1:1")
 set(MCUBOOT_IMAGE_NUMBER                6        CACHE STRING  "Number of images supported by MCUBoot")
 set(RSE_USE_HOST_UART                   OFF      CACHE BOOL    "Whether RSE should use the UART from the host system (opposed to dedicated UART private to RSE)")
 set(RSE_USE_HOST_FLASH                  OFF      CACHE BOOL    "Enable RSE using the host flash.")

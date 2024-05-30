@@ -17,6 +17,11 @@ target_include_directories(platform_region_defs
         .
 )
 
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${PLAT_SHARED_LCP}>:PLAT_SHARED_LCP>
+)
+
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
