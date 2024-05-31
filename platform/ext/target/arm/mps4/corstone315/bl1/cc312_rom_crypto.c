@@ -117,7 +117,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 size_t ciphertext_length,
                                 uint8_t *plaintext)
 {
-    enum kmu_hardware_keyslot_t kmu_key_slot;
+    enum kmu_hardware_keyslot_t kmu_key_slot = 0;
     uint32_t key_buf[32 / sizeof(uint32_t)];
     int32_t rc = 0;
     uint8_t *input_key = (uint8_t *)key_buf;
@@ -146,7 +146,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
     }
 
     err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
-                                  kmu_key_slot, (uint32_t *)input_key,
+                                  (cc3xx_aes_key_id_t)kmu_key_slot, (uint32_t *)input_key,
                                   CC3XX_AES_KEYSIZE_256, (uint32_t *)counter, 16);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
@@ -175,7 +175,7 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
         return rc;
     }
 
-    err = cc3xx_lowlevel_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
+    err = cc3xx_lowlevel_kdf_cmac((cc3xx_aes_key_id_t)kmu_key_slot, (uint32_t *)input_key,
                                   CC3XX_AES_KEYSIZE_256, label, label_length, context,
                                   context_length, (uint32_t *)output_key, output_length);
     if (err != CC3XX_ERR_SUCCESS) {
