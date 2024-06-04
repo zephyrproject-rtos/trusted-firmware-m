@@ -20,3 +20,4 @@ tfm_plat_set_nv_counter
 __ubsan_*
 log_error
 log_error_permissions_check
+_write

@@ -65,3 +65,4 @@ __got_end__
 __ubsan_*
 log_error
 log_error_permissions_check
+_write
