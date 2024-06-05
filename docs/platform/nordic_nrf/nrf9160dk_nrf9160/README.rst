@@ -15,7 +15,7 @@ The following links provide useful information about the nRF9160
 nRF9160 DK website:
    https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK
 
-Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
+Nordic Semiconductor TechDocs: https://docs.nordicsemi.com
 
 
 Building TF-M on nRF9160

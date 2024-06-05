@@ -15,7 +15,7 @@ The following links provide useful information about the nRF9161
 nRF9161 DK website:
    https://www.nordicsemi.com/products/nrf9161
 
-Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
+Nordic Semiconductor TechDocs: https://docs.nordicsemi.com
 
 
 Building TF-M on nRF9161

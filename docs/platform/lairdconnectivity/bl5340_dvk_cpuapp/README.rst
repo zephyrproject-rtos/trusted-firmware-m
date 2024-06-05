@@ -24,7 +24,7 @@ The following links provide useful information about the BL5340
 BL5340 website:
    https://www.lairdconnect.com/wireless-modules/bluetooth-modules/bluetooth-5-modules/bl5340-series-multi-core-bluetooth-52-802154-nfc-modules
 
-Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
+Nordic Semiconductor TechDocs: https://docs.nordicsemi.com
 
 Building TF-M on BL5340 Application MCU
 ---------------------------------------
