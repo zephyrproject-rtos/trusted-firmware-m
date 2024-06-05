@@ -27,9 +27,11 @@ static uint8_t check_gpio_pins(void)
 
 static uint16_t get_gppc_val(void)
 {
-    struct lcm_otp_layout_t *lcm = ((struct lcm_otp_layout_t *)(LCM_BASE_S
-                                                                + LCM_OTP_OFFSET));
-    return (lcm->cm_config_2 >> 8) & 0xFFFF;
+    uint32_t gppc_val;
+
+    lcm_get_gppc(&LCM_DEV_S, &gppc_val);
+
+    return (gppc_val & 0xFFFF);
 }
 
 static void boot_address(struct boot_arm_vector_table *vt)
