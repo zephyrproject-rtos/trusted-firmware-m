@@ -323,5 +323,9 @@ int32_t program_periph_ni_tower_post_ap_bl1_load(void)
         return -1;
     }
 
+    if (ni_tower_apu_enable(&apu_dev) != NI_TOWER_SUCCESS) {
+        return -1;
+    }
+
     return 0;
 }
