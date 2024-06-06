@@ -81,7 +81,7 @@ if(TFM_BL1_SOFTWARE_CRYPTO)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
     add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto)
-    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
     if(NOT TARGET bl1_1_crypto_mbedcrypto)
         message(FATAL_ERROR "Target bl1_1_crypto_mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?

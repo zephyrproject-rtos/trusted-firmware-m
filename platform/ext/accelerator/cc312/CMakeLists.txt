@@ -55,7 +55,7 @@ if(BL2)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
     add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
     target_sources(${CC312_LIB_PREFIX}cc312
         PUBLIC
@@ -207,7 +207,7 @@ if (TFM_PARTITION_CRYPTO)
         set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
         set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
         add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-        set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+        set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
         target_sources(${CC312_LIB_PREFIX}cc312
             PRIVATE
