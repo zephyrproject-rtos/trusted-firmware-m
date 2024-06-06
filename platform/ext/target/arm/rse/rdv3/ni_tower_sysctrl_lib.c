@@ -828,7 +828,7 @@ static const struct ni_tower_apu_reg_cfg_info mcp_axis_apu[] = {
 static const struct ni_tower_apu_reg_cfg_info rsm_axim_apu[] = {
     INIT_APU_REGION(HOST_RSM_SRAM_PHYS_BASE,
                     HOST_RSM_SRAM_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NI_T_SEC_RW),
 };
 
 /*
