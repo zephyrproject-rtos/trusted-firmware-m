@@ -136,7 +136,7 @@ enum lcm_error_t {
  * \brief ARM LCM device configuration structure
  */
 struct lcm_dev_cfg_t {
-    const uint32_t base;                         /*!< LCM base address */
+    const uintptr_t base;                        /*!< LCM base address */
 };
 
 /**
