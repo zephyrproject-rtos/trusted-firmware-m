@@ -13,6 +13,8 @@
 #define FMU_CHECK(node_base) \
                 (*(uint32_t *)((node_base) + FMU_CHECK_OFFSET_ADDRESS))
 
+#define NOC_S3_NULL_COMP_TYPE       (NOC_S3_ASNI)
+#define NOC_S3_NULL_COMP_ID         (0)
 #define NOC_S3_NULL_SUBFEAT_TYPE    (0)
 
 /**
@@ -21,6 +23,7 @@
 enum noc_s3_discovery_ops {
     NOC_S3_DISCOVER_SUBFEATURE,
     NOC_S3_DISCOVER_COMPONENT,
+    NOC_S3_DISCOVER_FMU,
 };
 
 static inline bool noc_s3_type_is_domain(
@@ -174,6 +177,10 @@ static enum noc_s3_err noc_s3_discover(
     if (dev->config_node_granularity == NOC_S3_64KB_CONFIG_NODES) {
         if ((cfg_node->node_type != NOC_S3_CFGNI) &&
             FMU_CHECK(hdr_base) != 0) {
+            if (mode == NOC_S3_DISCOVER_FMU) {
+                *ret_off_addr = cfg_node->node_off_addr;
+                return NOC_S3_SUCCESS;
+            }
             return NOC_S3_ERR_NOT_FOUND;
         }
     }
@@ -297,5 +304,21 @@ enum noc_s3_err noc_s3_fetch_component_offset(
 
     return noc_s3_discover(dev, &root, NOC_S3_DISCOVER_COMPONENT,
                            component_node_type, component_node_id,
+                           NOC_S3_NULL_SUBFEAT_TYPE, ret_off_addr);
+}
+
+enum noc_s3_err noc_s3_fetch_fmu_offset(
+    const struct noc_s3_dev *dev, uint32_t *ret_off_addr)
+{
+    enum noc_s3_err err;
+    struct noc_s3_discovery_node root;
+
+    err = noc_s3_discovery_init(&root);
+    if (err != NOC_S3_SUCCESS) {
+        return err;
+    }
+
+    return noc_s3_discover(dev, &root, NOC_S3_DISCOVER_FMU,
+                           NOC_S3_NULL_COMP_TYPE, NOC_S3_NULL_COMP_ID,
                            NOC_S3_NULL_SUBFEAT_TYPE, ret_off_addr);
 }

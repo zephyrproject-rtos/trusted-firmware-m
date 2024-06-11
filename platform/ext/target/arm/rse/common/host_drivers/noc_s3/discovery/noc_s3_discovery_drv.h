@@ -64,4 +64,16 @@ enum noc_s3_err noc_s3_fetch_component_offset(
     const uint32_t component_node_id,
     uint32_t *ret_off_addr);
 
+/**
+ * \brief Does a discovery flow search and returns central fmu offset address.
+ *
+ * \param[in]   dev                  NoC S3 struct \ref noc_s3_dev.
+ * \param[out]  ret_address          Fetched offset address for the specified
+ *                                   node.
+ *
+ * \return Returns error code as specified in enum \ref noc_s3_err.
+ */
+enum noc_s3_err noc_s3_fetch_fmu_offset(
+    const struct noc_s3_dev *dev, uint32_t *ret_off_addr);
+
 #endif /* __NOC_S3_DISCOVERY_DRV_H__ */
