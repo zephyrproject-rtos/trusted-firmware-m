@@ -6,6 +6,9 @@
  */
 #include "noc_s3_discovery_drv.h"
 #include "noc_s3_discovery_reg.h"
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+#include "util/noc_s3_util.h"
+#endif
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -24,7 +27,59 @@ enum noc_s3_discovery_ops {
     NOC_S3_DISCOVER_SUBFEATURE,
     NOC_S3_DISCOVER_COMPONENT,
     NOC_S3_DISCOVER_FMU,
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    NOC_S3_DISCOVER_PRINT_TREE,
+#endif
 };
+
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+#define NOC_S3_DISCOVER_SUBFEAT_TAB_SIZE  (5)
+#define NOC_S3_DISCOVER_COMP_TAB_SIZE     (4)
+#define NOC_S3_DISCOVER_TAB_SIZE(type)    (noc_s3_type_is_domain(type) ?    \
+                                            (int)type :                     \
+                                            NOC_S3_DISCOVER_COMP_TAB_SIZE)
+#define NOC_S3_NULL_ID      (UINT32_MAX)
+
+#define X(name) [NOC_S3_##name] = #name,
+static const char * const noc_s3_discover_comp_node_string[] = {
+    X(CFGNI)
+    X(VD)
+    X(PD)
+    X(CD)
+    X(ASNI)
+    X(AMNI)
+    X(PMU)
+    X(HSNI)
+    X(HMNI)
+    X(PMNI)
+};
+
+static const char * const noc_s3_discover_subfeat_node_string[] = {
+    X(APU)
+    X(PSAM)
+    X(FCU)
+    X(IDM)
+};
+
+#undef X
+
+static void noc_s3_discover_print_node(
+    const int tab_size, const char *node_label,
+    const uint32_t node_id, const uint32_t node_off_addr)
+{
+    for (int tab = 0; tab < tab_size; ++tab) {
+        NOC_S3_DRV_LOG("    ");
+    }
+
+    NOC_S3_DRV_LOG("%s", node_label);
+
+    if (node_id != NOC_S3_NULL_ID) {
+        NOC_S3_DRV_LOG("[%d]", node_id);
+    }
+
+    NOC_S3_DRV_LOG(" @ 0x%lx\r\n", node_off_addr);
+}
+#endif
 
 static inline bool noc_s3_type_is_domain(
     const enum noc_s3_node_type_value type)
@@ -119,6 +174,13 @@ static enum noc_s3_err noc_s3_discover_subfeature(
                 return NOC_S3_SUCCESS;
             }
             break;
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+        case NOC_S3_DISCOVER_PRINT_TREE:
+            noc_s3_discover_print_node(NOC_S3_DISCOVER_SUBFEAT_TAB_SIZE,
+                noc_s3_discover_subfeat_node_string[s_type], NOC_S3_NULL_ID,
+                component_hdr->subfeature[s_idx].pointer);
+            break;
+#endif
         default:
             return NOC_S3_ERR_INVALID_ARG;
         }
@@ -181,6 +243,12 @@ static enum noc_s3_err noc_s3_discover(
                 *ret_off_addr = cfg_node->node_off_addr;
                 return NOC_S3_SUCCESS;
             }
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+            else if (mode == NOC_S3_DISCOVER_PRINT_TREE) {
+                noc_s3_discover_print_node(NOC_S3_DISCOVER_COMP_TAB_SIZE,
+                    "FMU", NOC_S3_NULL_ID, cfg_node->node_off_addr);
+            }
+#endif
             return NOC_S3_ERR_NOT_FOUND;
         }
     }
@@ -195,6 +263,13 @@ static enum noc_s3_err noc_s3_discover(
             }
         }
         break;
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+        case NOC_S3_DISCOVER_PRINT_TREE:
+            noc_s3_discover_print_node(
+                NOC_S3_DISCOVER_TAB_SIZE(cfg_node->node_type),
+                noc_s3_discover_comp_node_string[cfg_node->node_type],
+                cfg_node->node_id, cfg_node->node_off_addr);
+#endif
     default:
         /* Do nothing */
         break;
@@ -248,11 +323,20 @@ static enum noc_s3_err noc_s3_discover(
             }
         }
     } else if (noc_s3_type_is_component(cfg_node->node_type)) {
-        /* Skip traversing of components which is not requested */
-        if (cfg_node->node_id != component_node_id ||
-            cfg_node->node_type != component_node_type) {
-            return NOC_S3_ERR_NOT_FOUND;
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+        /*
+         * Don't skip any node and traverse completely to print discovery tree.
+         */
+        if (mode != NOC_S3_DISCOVER_PRINT_TREE) {
+#endif
+            /* Skip traversing of components which is not requested */
+            if (cfg_node->node_id != component_node_id ||
+                cfg_node->node_type != component_node_type) {
+                return NOC_S3_ERR_NOT_FOUND;
+            }
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
         }
+#endif
         /* Skip since PMU doesn't have children */
         if (cfg_node->node_type == NOC_S3_PMU) {
             return NOC_S3_ERR_NOT_FOUND;
@@ -322,3 +406,25 @@ enum noc_s3_err noc_s3_fetch_fmu_offset(
                            NOC_S3_NULL_COMP_TYPE, NOC_S3_NULL_COMP_ID,
                            NOC_S3_NULL_SUBFEAT_TYPE, ret_off_addr);
 }
+
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+void noc_s3_print_discovery_tree(const struct noc_s3_dev *dev,
+                                 const char *tree_label)
+{
+    enum noc_s3_err err;
+    struct noc_s3_discovery_node root;
+
+    err = noc_s3_discovery_init(&root);
+    if (err != NOC_S3_SUCCESS) {
+        return err;
+    }
+
+    NOC_S3_DRV_LOG_HEADING("Discovery tree for %s", tree_label);
+    NOC_S3_DRV_LOG("\r\n");
+
+    /* Discard any error */
+    noc_s3_discover(dev, &root, NOC_S3_DISCOVER_PRINT_TREE,
+                    NOC_S3_NULL_COMP_TYPE, NOC_S3_NULL_COMP_ID,
+                    NOC_S3_NULL_SUBFEAT_TYPE, NULL);
+}
+#endif

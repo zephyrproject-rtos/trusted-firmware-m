@@ -76,4 +76,17 @@ enum noc_s3_err noc_s3_fetch_component_offset(
 enum noc_s3_err noc_s3_fetch_fmu_offset(
     const struct noc_s3_dev *dev, uint32_t *ret_off_addr);
 
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+/**
+ * \brief Prints discovery tree for the NOC S3 instance.
+ *
+ * \param[in]   dev                  NoC S3 struct \ref noc_s3_dev.
+ * \param[in]   tree_label           Label string for printing discovery tree.
+ *
+ * \return Returns error code as specified in enum \ref noc_s3_err.
+ */
+void noc_s3_print_discovery_tree(const struct noc_s3_dev *dev,
+                                const char *tree_label);
+#endif
+
 #endif /* __NOC_S3_DISCOVERY_DRV_H__ */
