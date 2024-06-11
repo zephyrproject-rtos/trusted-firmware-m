@@ -13,6 +13,13 @@
 #define FMU_CHECK(node_base) \
                 (*(uint32_t *)((node_base) + FMU_CHECK_OFFSET_ADDRESS))
 
+/**
+ * \brief NoC S3 Discovery operations enumerations
+ */
+enum noc_s3_discovery_ops {
+    NOC_S3_DISCOVER_SUBFEATURE,
+};
+
 static inline bool noc_s3_type_is_domain(
     const enum noc_s3_node_type_value type)
 {
@@ -72,12 +79,14 @@ static enum noc_s3_err noc_s3_discovery_init(struct noc_s3_discovery_node *node)
 /* Performs discovery of subfeatures for a given component node. */
 static enum noc_s3_err noc_s3_discover_subfeature(
     const struct noc_s3_dev *dev,
+    const enum noc_s3_discovery_ops mode,
     const uint32_t component_offset_address,
     const enum noc_s3_subfeature_type_value subfeature_node_type,
     uint32_t *ret_off_addr)
 {
     uint32_t s_idx;
     struct noc_s3_component_cfg_hdr *component_hdr;
+    enum noc_s3_subfeature_type_value s_type;
 
     if (dev == NULL || dev->periphbase == (uintptr_t)NULL) {
         return NOC_S3_ERR_INVALID_ARG;
@@ -91,9 +100,21 @@ static enum noc_s3_err noc_s3_discover_subfeature(
                                                     component_offset_address);
 
     for(s_idx = 0; s_idx < component_hdr->num_subfeatures; ++s_idx) {
-        if (component_hdr->subfeature[s_idx].type == subfeature_node_type) {
-            *ret_off_addr = component_hdr->subfeature[s_idx].pointer;
-            return NOC_S3_SUCCESS;
+        s_type = component_hdr->subfeature[s_idx].type;
+
+        if (!noc_s3_type_is_subfeature(s_type)) {
+            return NOC_S3_ERR_NOT_PERMITTED;
+        }
+
+        switch (mode) {
+        case NOC_S3_DISCOVER_SUBFEATURE:
+            if (s_type == subfeature_node_type) {
+                *ret_off_addr = component_hdr->subfeature[s_idx].pointer;
+                return NOC_S3_SUCCESS;
+            }
+            break;
+        default:
+            return NOC_S3_ERR_INVALID_ARG;
         }
     }
 
@@ -107,6 +128,7 @@ static enum noc_s3_err noc_s3_discover_subfeature(
 static enum noc_s3_err noc_s3_discover(
     const struct noc_s3_dev *dev,
     const struct noc_s3_discovery_node *cfg_node,
+    const enum noc_s3_discovery_ops mode,
     const enum noc_s3_node_type_value component_node_type,
     const uint32_t component_node_id,
     const enum noc_s3_subfeature_type_value subfeature_node_type,
@@ -193,7 +215,7 @@ static enum noc_s3_err noc_s3_discover(
                .node_off_addr = c_off_addr
             };
 
-            err = noc_s3_discover(dev, &node, component_node_type,
+            err = noc_s3_discover(dev, &node, mode, component_node_type,
                                   component_node_id, subfeature_node_type,
                                   ret_off_addr);
             if (err != NOC_S3_ERR_NOT_FOUND) {
@@ -211,7 +233,7 @@ static enum noc_s3_err noc_s3_discover(
             return NOC_S3_ERR_NOT_FOUND;
         }
 
-        return noc_s3_discover_subfeature(dev, cfg_node->node_off_addr,
+        return noc_s3_discover_subfeature(dev, mode, cfg_node->node_off_addr,
                                           subfeature_node_type, ret_off_addr);
     } else {
         return NOC_S3_ERR_INVALID_ARG;
@@ -235,6 +257,8 @@ enum noc_s3_err noc_s3_fetch_subfeature_offset(
         return err;
     }
 
-    return noc_s3_discover(dev, &root, component_node_type, component_node_id,
+
+    return noc_s3_discover(dev, &root, NOC_S3_DISCOVER_SUBFEATURE,
+                           component_node_type, component_node_id,
                            subfeature_node_type, ret_off_addr);
 }
