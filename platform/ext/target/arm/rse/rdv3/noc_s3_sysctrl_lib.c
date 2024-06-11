@@ -1059,6 +1059,10 @@ static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
 {
     enum noc_s3_err err;
 
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    noc_s3_print_discovery_tree(&SYSCTRL_NOC_S3_DEV, "Sysctrl NOC_S3 - AON");
+#endif
+
     /* Populates all address maps into a table array to enable desired PSAMs */
     const struct noc_s3_psam_cfgs psam_table[] = {
         {
@@ -1186,6 +1190,10 @@ static int32_t program_sysctrl_apu_aon(void)
 static int32_t program_sysctrl_psam_systop(void)
 {
     enum noc_s3_err err;
+
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    noc_s3_print_discovery_tree(&SYSCTRL_NOC_S3_DEV, "Sysctrl NOC_S3 - SYSTOP");
+#endif
 
     /* Populates all address maps into a table array to enable desired PSAMs */
     const struct noc_s3_psam_cfgs psam_table[] = {

@@ -210,6 +210,10 @@ static int32_t program_periph_apu(void)
 {
     enum noc_s3_err err;
 
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    noc_s3_print_discovery_tree(&PERIPH_NOC_S3_DEV, "Peripheral NOC_S3");
+#endif
+
     /*
      * Populates all APU entry into a table array to confgiure and enable
      * desired APUs
