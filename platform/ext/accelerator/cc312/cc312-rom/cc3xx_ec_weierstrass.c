@@ -388,6 +388,8 @@ static cc3xx_err_t multipy_point_by_scalar_side_channel_protected(
     cc3xx_lowlevel_ec_free_projective_point(&proj_p);
     cc3xx_lowlevel_ec_free_projective_point(&accumulator);
 
+    cc3xx_lowlevel_pka_unmap_physical_registers();
+
     return err;
 }
 
