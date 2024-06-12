@@ -571,11 +571,6 @@ enum noc_s3_err noc_s3_apu_dev_init(
 {
     enum noc_s3_err err;
     uint32_t off_addr;
-    struct noc_s3_discovery_node root = {
-        .node_type = NOC_S3_CFGNI,
-        .node_id = 0,
-        .node_off_addr = 0x0
-    };
 
     if (noc_s3_dev == NULL || noc_s3_dev->periphbase == (uintptr_t)NULL) {
         return NOC_S3_ERR_INVALID_ARG;
@@ -585,9 +580,9 @@ enum noc_s3_err noc_s3_apu_dev_init(
         return NOC_S3_ERR_INVALID_ARG;
     }
 
-    /* Discover offset address for the APU */
-    err = noc_s3_discover_offset(
-            noc_s3_dev, &root,
+    /* Fetch offset address for the APU */
+    err = noc_s3_fetch_subfeature_offset(
+            noc_s3_dev,
             component->type,
             component->id,
             NOC_S3_APU, &off_addr);
