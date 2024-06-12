@@ -10,6 +10,7 @@
 #include "cc3xx_dev.h"
 #include "cc3xx_engine_state.h"
 #include "cc3xx_stdlib.h"
+#include "cc3xx_rng.h"
 
 #include <string.h>
 #include <assert.h>
