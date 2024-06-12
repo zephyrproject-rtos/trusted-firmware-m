@@ -20,6 +20,7 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
+#include "ns_mailbox_client_id.h"
 #include "tfm_peripherals_def.h"
 #include "psa_manifest/pid.h"
 #include "psa_manifest/sid.h"
@@ -273,8 +274,8 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
             {% set irq_info.signal = irq.name + "_SIGNAL" %}
         {% endif %}
         {% if manifest.ns_agent is sameas true %}
-            {% set irq_info.client_id_base = irq.client_id_base %}
-            {% set irq_info.client_id_limit = irq.client_id_limit %}
+            {% set irq_info.client_id_base = irq.source + "_CLIENT_ID_BASE" %}
+            {% set irq_info.client_id_limit = irq.source + "_CLIENT_ID_LIMIT" %}
         {% endif %}
         {
             .init = {{irq_info.source_symbol + "_init"}},

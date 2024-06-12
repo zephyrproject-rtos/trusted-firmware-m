@@ -79,6 +79,7 @@ target_sources(tfm_spm
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:core/arch/tfm_arch_v6m_v7m.c>
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:core/arch/tfm_arch_v6m_v7m.c>
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_BINARY_DIR}/generated/interface/src/ns_mailbox_client_id.c>
 )
 
 target_include_directories(tfm_spm_defs

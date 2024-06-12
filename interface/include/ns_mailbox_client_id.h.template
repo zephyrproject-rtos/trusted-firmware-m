@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+/***********{{utilities.donotedit_warning}}***********/
+#ifndef __NS_MAILBOX_CLIENT_ID_H__
+#define __NS_MAILBOX_CLIENT_ID_H__
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/***********************************************************************************/
+/* Defines for all the NS mailbox client id address ranges                         */
+/***********************************************************************************/
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% if partition.manifest.irqs %}
+/******** {{partition.manifest.name}} ********/
+            {% for irq in partition.manifest.irqs %}
+#define {{"%-58s"|format(irq.source + "_CLIENT_ID_BASE")}} ({{"%10s"|format(irq.client_id_base)}})
+#define {{"%-58s"|format(irq.source + "_CLIENT_ID_LIMIT")}} ({{"%10s"|format(irq.client_id_limit)}})
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+/*******************************************************************************************/
+/* Define a structure containing all the client id ranges and source information           */
+/*******************************************************************************************/
+struct tfm_ns_mailbox_client_id_info {
+    int32_t source;
+    int32_t client_id_base;
+    int32_t client_id_limit;
+};
+
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% set irq_count = partition.manifest.irqs|count %}
+extern const struct tfm_ns_mailbox_client_id_info ns_mailbox_client_id_info[{{irq_count}}];
+    {% endif %}
+{% endfor %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __NS_MAILBOX_CLIENT_ID_H__ */
