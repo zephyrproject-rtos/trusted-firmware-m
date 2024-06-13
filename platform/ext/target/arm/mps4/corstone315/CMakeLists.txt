@@ -360,22 +360,19 @@ target_sources(bl1_1
 )
 
 if(NOT TFM_BL1_SOFTWARE_CRYPTO)
-
     target_include_directories(platform_bl1_1_interface
         INTERFACE
-            ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
-            ${PLATFORM_DIR}/ext/accelerator/cc312
+            ${CMAKE_CURRENT_SOURCE_DIR}/cc312
     )
+
     # Set which PLATFORM dependency must be used by the CC3XX driver
-    set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
-    add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
+    set(CC3XX_PLATFORM_INTERFACE platform_bl1_1)
+    set(CC3XX_TARGET_PREFIX bl1_)
+    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx cc3xx)
+
     target_link_libraries(platform_bl1_1
-        PRIVATE
-            cc312_rom
-    )
-    target_link_libraries(cc312_rom
-        PRIVATE
-            platform_bl1_1
+        PUBLIC
+            bl1_cc3xx
     )
 endif()
 

@@ -5,40 +5,38 @@
 #
 #-------------------------------------------------------------------------------
 
-set(CC3XX_TARGET_NAME ${CC3XX_TARGET_PREFIX}cc312_rom)
-
 add_library(${CC3XX_TARGET_NAME} STATIC)
 
 if (NOT DEFINED CC3XX_PLATFORM_INTERFACE)
-    message(FATAL "When building cc312-rom, the platform dependency must be specified")
+    message(FATAL "When building cc3xx_lowlevel, the platform dependency must be specified")
 endif()
 
 target_sources(${CC3XX_TARGET_NAME}
     PRIVATE
-        ./cc3xx_lcs.c
-        ./cc3xx_otp.c
-        ./cc3xx_rng.c
-        ./cc3xx_hash.c
-        ./cc3xx_aes.c
-        ./cc3xx_dma.c
-        ./cc3xx_init.c
-        ./cc3xx_engine_state.c
-        ./cc3xx_stdlib.c
-        ./cc3xx_chacha.c
-        ./cc3xx_kdf.c
-        ./cc3xx_pka.c
-        ./cc3xx_poly1305.c
-        ./cc3xx_hmac.c
-        ./cc3xx_drbg_ctr.c
-        ./cc3xx_drbg_hash.c
-        ./cc3xx_drbg_hmac.c
-        ./cc3xx_drbg.c
-        ./cc3xx_ecdsa.c
-        ./cc3xx_ec.c
-        ./cc3xx_ec_curve_data.c
-        ./cc3xx_ec_weierstrass.c
-        ./cc3xx_ec_projective_point.c
-        ./cc3xx_ecdh.c
+        ./src/cc3xx_lcs.c
+        ./src/cc3xx_otp.c
+        ./src/cc3xx_rng.c
+        ./src/cc3xx_hash.c
+        ./src/cc3xx_aes.c
+        ./src/cc3xx_dma.c
+        ./src/cc3xx_init.c
+        ./src/cc3xx_engine_state.c
+        ./src/cc3xx_chacha.c
+        ./src/cc3xx_kdf.c
+        ./src/cc3xx_pka.c
+        ./src/cc3xx_poly1305.c
+        ./src/cc3xx_hmac.c
+        ./src/cc3xx_drbg_ctr.c
+        ./src/cc3xx_drbg_hash.c
+        ./src/cc3xx_drbg_hmac.c
+        ./src/cc3xx_drbg.c
+        ./src/cc3xx_ecdsa.c
+        ./src/cc3xx_ec.c
+        ./src/cc3xx_ec_curve_data.c
+        ./src/cc3xx_ec_weierstrass.c
+        ./src/cc3xx_ec_projective_point.c
+        ./src/cc3xx_ecdh.c
+        ../common/cc3xx_stdlib.c
 )
 
 # This file is the performance-limit for ECDSA, so should be compiled with the
@@ -53,12 +51,13 @@ endif()
 
 target_include_directories(${CC3XX_TARGET_NAME}
     PUBLIC
-        .
+        include
+        ../common
+    PRIVATE
+        src
 )
 
 target_link_libraries(${CC3XX_TARGET_NAME}
     PRIVATE
         ${CC3XX_PLATFORM_INTERFACE}
 )
-
-add_subdirectory(psa_driver_api)

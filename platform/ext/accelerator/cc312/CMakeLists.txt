@@ -127,7 +127,7 @@ endif()
 if (TFM_PARTITION_CRYPTO)
 
     option(CC3XX_RUNTIME_ENABLED
-           "EXPERIMENTAL: This variable controls whether the cc312-rom is being used in runtime FW. \
+           "EXPERIMENTAL: This variable controls whether the cc3xx driver is being used in runtime FW. \
            Enable it only for testing purposes." OFF)
 
     # Control the enablement of the legacy CC-312 driver interface or the PSA
@@ -226,7 +226,7 @@ if (TFM_PARTITION_CRYPTO)
     else()
         if (${CC3XX_RUNTIME_ENABLED})
             set(CC3XX_TARGET_PREFIX crypto_service_)
-            set(CC312_DRIVER_API_TARGET ${CC3XX_TARGET_PREFIX}cc312_rom_psa_driver_api)
+            set(CC312_DRIVER_API_TARGET ${CC3XX_TARGET_PREFIX}cc3xx_psa_driver_api)
         else()
             set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
         endif()
@@ -234,7 +234,7 @@ if (TFM_PARTITION_CRYPTO)
 
     if (NOT ${CC312_LEGACY_DRIVER_API_ENABLED} AND ${CC3XX_RUNTIME_ENABLED})
         set(CC3XX_PLATFORM_INTERFACE platform_s)
-        add_subdirectory(cc312-rom ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc312-rom)
+        add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc3xx)
     endif()
 
     # Adding two targets as link-time dependencies of each other seems bad, but

@@ -124,8 +124,9 @@ if (RSE_BL1_TEST_BINARY)
 endif()
 
 # Set which PLATFORM depedency must be used by the CC3XX driver
-set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
-add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
+set(CC3XX_PLATFORM_INTERFACE platform_bl1_1)
+set(CC3XX_TARGET_PREFIX bl1_)
+add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx cc3xx)
 
 target_include_directories(platform_s
     PUBLIC
@@ -387,7 +388,8 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm
-        ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
+        ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include
+        ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061
         ./bringup_helpers
 )
@@ -402,7 +404,7 @@ target_compile_definitions(platform_bl1_1_interface
 
 target_link_libraries(platform_bl1_1
     PRIVATE
-        cc312_rom
+        bl1_cc3xx
         bl1_1_shared_lib_interface
 )
 
@@ -452,11 +454,6 @@ if (RSE_USE_ROM_LIB_FROM_SRAM)
         bl1_1_shared_symbols_in_sram
     )
 endif()
-
-target_link_libraries(cc312_rom
-    PRIVATE
-        platform_bl1_1
-)
 
 #========================= Platform BL1_2 =====================================#
 

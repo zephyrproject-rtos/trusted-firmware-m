@@ -91,7 +91,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_comms rse_comms)
 
 # Set which PLATFORM depedency must be used by the CC3XX driver
 set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
-add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
+add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx cc3xx)
 
 target_include_directories(platform_s
     PUBLIC
@@ -235,7 +235,7 @@ target_include_directories(platform_bl1_1_interface
 
 target_link_libraries(platform_bl1_1
     PRIVATE
-        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:cc312_rom>
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:cc3xx>
 )
 
 target_sources(platform_bl1_2
@@ -255,7 +255,8 @@ target_compile_definitions(platform_bl1_2
 
 target_include_directories(platform_bl1_2
     PRIVATE
-        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common>
     INTERFACE
         .
         ./Device/Include

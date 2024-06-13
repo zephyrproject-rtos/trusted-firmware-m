@@ -242,6 +242,7 @@ cc3xx_err_t cc3xx_lowlevel_chacha20_update(const uint8_t* in, size_t in_len)
 #if defined(CC3XX_CONFIG_CHACHA_POLY1305_ENABLE)
     size_t block_buf_size_before_update = dma_state.block_buf_size_in_use;
     size_t bytes_outputted_from_dma;
+    uint32_t pad_len;
 #endif /* CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */
 
     if (in_len == 0) {
@@ -254,11 +255,14 @@ cc3xx_err_t cc3xx_lowlevel_chacha20_update(const uint8_t* in, size_t in_len)
      */
     if (chacha_state.mode == CC3XX_CHACHA_MODE_CHACHA_POLY1305) {
         const uint8_t zero_block[POLY1305_BLOCK_SIZE] = {0};
-        if (chacha_state.crypted_len == 0) {
+        pad_len = POLY1305_BLOCK_SIZE - (chacha_state.authed_len % POLY1305_BLOCK_SIZE);
+
+        /* If the pad_len is POLY1305_BLOCK_SIZE, then we're already padded
+         * correctly.
+         */
+        if (chacha_state.crypted_len == 0 && pad_len != POLY1305_BLOCK_SIZE) {
             /* Pad poly1305 between AAD and plaintext */
-            cc3xx_lowlevel_poly1305_update(zero_block, POLY1305_BLOCK_SIZE -
-                                              (chacha_state.authed_len %
-                                               POLY1305_BLOCK_SIZE));
+            cc3xx_lowlevel_poly1305_update(zero_block, pad_len);
         }
 
         chacha_state.crypted_len += in_len;
@@ -367,8 +371,13 @@ cc3xx_err_t cc3xx_lowlevel_chacha20_finish(uint32_t *tag, size_t *size)
         }
         pad_len = POLY1305_BLOCK_SIZE - (pad_len % POLY1305_BLOCK_SIZE);
 
-        /* The len block starts zeroed, so use it for padding */
-        cc3xx_lowlevel_poly1305_update((uint8_t *)len_block, pad_len);
+        /* The len block starts zeroed, so use it for padding. If the pad length
+         * is POLY1305_BLOCK_SIZE then no padding is needed.
+         */
+        if (pad_len != POLY1305_BLOCK_SIZE) {
+            cc3xx_lowlevel_poly1305_update((uint8_t *)len_block, pad_len);
+        }
+
         len_block[0] = chacha_state.authed_len;
         len_block[1] = chacha_state.crypted_len;
 
