@@ -9,3 +9,4 @@ set(CC3XX_TARGET_NAME ${CC3XX_TARGET_PREFIX}cc3xx)
 
 add_subdirectory(low_level_driver)
 add_subdirectory(psa_driver_api)
+add_subdirectory(tests)

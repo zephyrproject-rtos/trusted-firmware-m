@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set(CC3XX_PSA_TARGET_NAME ${CC3XX_TARGET_PREFIX}cc3xx_psa_driver_api)
+set(CC3XX_PSA_TARGET_NAME ${CC3XX_TARGET_NAME}_psa_driver_api)
 
 add_library(${CC3XX_PSA_TARGET_NAME} STATIC EXCLUDE_FROM_ALL)
 
@@ -34,6 +34,6 @@ target_include_directories(${CC3XX_PSA_TARGET_NAME}
 
 target_link_libraries(${CC3XX_PSA_TARGET_NAME}
     PUBLIC
-        ${CC3XX_TARGET_PREFIX}cc3xx
+        ${CC3XX_TARGET_NAME}
         ${CC3XX_PLATFORM_INTERFACE}
 )
