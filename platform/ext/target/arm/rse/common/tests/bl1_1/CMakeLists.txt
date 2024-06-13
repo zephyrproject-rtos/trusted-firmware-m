@@ -20,3 +20,8 @@ target_include_directories(tfm_test_suite_extra_bl1_1
         .
         ..
 )
+
+target_link_libraries(tfm_test_suite_extra_bl1_1
+    PRIVATE
+        bl1_cc3xx_tests
+)

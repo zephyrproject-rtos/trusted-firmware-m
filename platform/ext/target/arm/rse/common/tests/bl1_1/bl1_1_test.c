@@ -7,6 +7,7 @@
 
 #include "rse_test_common.h"
 
+#include "cc3xx_tests.h"
 #include "rse_provisioning_tests.h"
 #include "test_state_transitions.h"
 
@@ -197,6 +198,8 @@ void register_testsuite_extra_bl1_1(struct test_suite_t *p_test_suite)
 
     add_conditional_tests_to_testsuite(provisioning_tests, ARRAY_SIZE(provisioning_tests),
                                        p_test_suite, ARRAY_SIZE(bl1_1_extra_tests));
+
+    add_cc3xx_tests_to_testsuite(p_test_suite, ARRAY_SIZE(bl1_1_extra_tests));
 
     /* This one must be added last in order for the state transitions to work */
     add_conditional_tests_to_testsuite(state_transitions, ARRAY_SIZE(state_transitions),
