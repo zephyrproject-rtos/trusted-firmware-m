@@ -130,8 +130,8 @@ static void rma_erase_all_keys(struct lcm_dev_t *dev)
     uint32_t idx;
     uint32_t otp_overwrite_val = 0xFFFFFFFFu;
 
-    /* Overwrite all secret keys, and rotpk, with all-one words */
-    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, tp_mode_config);
+    /* Overwrite all secret keys with all-one words */
+    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, rotpk);
          idx += sizeof(uint32_t)) {
         otp_write_unchecked(dev, idx, sizeof(otp_overwrite_val), &otp_overwrite_val);
     }
