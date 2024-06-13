@@ -183,6 +183,10 @@ endif()
 set(EXTRA_BL1_1_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_1" CACHE STRING "path to extra BL1_1 testsuite")
 # TODO uncomment this once we have some extra BL1_2 tests, else this causes an error
 # set(EXTRA_BL1_2_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_2" CACHE STRING "path to extra BL1_2 testsuite")
+# TODO remove this conditional once we have some extra secure, else this causes an error
+if (${TEST_CC3XX})
+    set(EXTRA_S_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/secure" CACHE STRING "path to extra secure testsuite")
+endif()
 
 ################################################################################
 
