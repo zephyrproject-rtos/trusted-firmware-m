@@ -202,8 +202,9 @@ The Partition ID can be set to a fixed value or omitted to be auto allocated.
    ==================================== ======================
 
 Please refer to ``<TF-M base folder>/tools/tfm_manifest_list.yaml``,
-``<TF-M test repo>/test/secure_fw/tfm_test_manifest_list.yaml`` and
-``<TF-M base folder>/tools/tfm_psa_ff_test_manifest_list.yaml`` for the detailed
+''<TF-M extras repo>/partitions/\*/\*_manifest_list.yaml'',
+``<TF-M test repo>/tests_reg/test/secure_fw/tfm_test_manifest_list.yaml`` and
+``<TF-M test repo>/tests_psa_arch/spe/tfm_psa_ff_test_manifest_list.yaml`` for the detailed
 PID allocations.
 
 About where to add the definition, please refer to the chapter `Update manifest list`_.
