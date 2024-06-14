@@ -38,20 +38,27 @@ To prepare your building environment execute the following steps:
 
     .. group-tab:: Linux
 
+        Install the required tools:
+
         .. code-block:: bash
 
             sudo apt-get install -y doxygen graphviz default-jre
             mkdir ~/plantuml
             curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
-            export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
 
             # For PDF generation
-            sudo apt-get install -y doxygen-latex
+            sudo apt-get install -y doxygen-latex librsvg2-bin
 
             # Install the required Python modules
             pip3 install --upgrade pip
-            cd trusted-firmware-m
+            cd <TF-M base folder>
             pip3 install -r docs/requirements.txt
+
+        Set the environment variables:
+
+        .. code-block:: bash
+
+            export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
 
     .. group-tab:: Windows
 
@@ -222,4 +229,4 @@ Dependencies
 
 --------------
 
-*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*

@@ -346,7 +346,7 @@ Toolchain used to build NSPE can be different from what is used to build SPE.
 Basic SPE integration
 =====================
 Refer to the
-`example <https://git.trustedfirmware.org/TF-M/tf-m-extras.git/tree/examples/tf-m-example-ns-app>`__
+`example <https://git.trustedfirmware.org/TF-M/tf-m-extras.git/+/refs/heads/main/examples/tf-m-example-ns-app/>`__
 of TF-M applications in **tf-m-extras** repository.
 
 --------------
