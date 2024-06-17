@@ -80,6 +80,8 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
             assert(!(gen_key_sz % sizeof(uint32_t)));
             cc3xx_dpa_hardened_word_copy((uint32_t *)key_buffer, key_buffer_local, gen_key_sz / sizeof(uint32_t));
             *key_buffer_length = gen_key_sz;
+
+            return PSA_SUCCESS;
         }
 #endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC */
 #if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC)
