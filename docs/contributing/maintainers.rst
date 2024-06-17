@@ -134,9 +134,9 @@ Ziad Elhanafy
 NXP Platforms
 ~~~~~~~~~~~~~
 
-Andrej Butok
-    :email: `Andrey.Butok@nxp.com <andrey.butok@nxp.com>`__
-    :github: `butok <https://github.com/butok>`__
+Ruchika Gupta
+    :email: `ruchika.gupta_1@nxp.com <ruchika.gupta_1@nxp.com>`__
+    :github: `ruchi393 <https://github.com/ruchi393>`__
 
 STM Platforms: DISCO_L562QE, NUCLEO_L552ZE_Q
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
