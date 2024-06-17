@@ -22,7 +22,6 @@
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
 
 #include "fatal_error.h"
-#include "cmsis.h"
 
 #include <string.h>
 

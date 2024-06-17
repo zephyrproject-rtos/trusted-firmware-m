@@ -21,6 +21,7 @@
 #include "cc3xx_aes.h"
 #include "cc3xx_poly1305.h"
 #include "cc3xx_chacha.h"
+#include "cc3xx_rng.h"
 
 /* ToDo: This needs to be sorted out at TF-M level
  * To be able to include the PSA style configuration
