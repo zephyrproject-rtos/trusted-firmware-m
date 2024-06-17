@@ -56,7 +56,7 @@ file(GLOB_RECURSE DOXYCFG_DOC_FILES ${CMAKE_SOURCE_DIR}/*.c ${CMAKE_SOURCE_DIR}/
 
 add_custom_command(OUTPUT ${DOXYCFG_OUTPUT_PATH}/html
     OUTPUT ${DOXYCFG_OUTPUT_PATH}/latex
-    OUTPUT ${DOXYCFG_OUTPUT_PATH}/latex/refman.pdf
+    OUTPUT ${DOXYCFG_OUTPUT_PATH}/latex/refman.tex
     COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS ${DOXYCFG_DOC_FILES}
@@ -67,15 +67,15 @@ add_custom_target(tfm_docs_refman_html ALL
 )
 add_dependencies(docs tfm_docs_refman_html)
 
-add_custom_command(OUTPUT "${DOXYCFG_OUTPUT_PATH}/latex/refman.pdf"
-    COMMAND "${PDFLATEX_COMPILER} refman.tex"
-    COMMAND ${CMAKE_COMMAND} -E copy refman.tex ${DOXYCFG_OUTPUT_PATH}/tf-m_reference_manual.pdf
-    WORKING_DIRECTORY ${DOXYCFG_OUTPUT_PATH}/latex/
-    DEPENDS "${DOXYCFG_OUTPUT_PATH}/latex/refman.tex"
+add_custom_command(OUTPUT ${DOXYCFG_OUTPUT_PATH}/latex/refman.pdf
+    COMMAND ${PDFLATEX_COMPILER} refman.tex
+    COMMAND ${CMAKE_COMMAND} -E copy refman.pdf ${DOXYCFG_OUTPUT_PATH}/tf-m_reference_manual.pdf
+    WORKING_DIRECTORY ${DOXYCFG_OUTPUT_PATH}/latex
+    DEPENDS ${DOXYCFG_OUTPUT_PATH}/latex/refman.tex
+    VERBATIM
 )
 add_custom_target(tfm_docs_refman_pdf
     DEPENDS ${DOXYCFG_OUTPUT_PATH}/latex/refman.pdf
-    DEPENDS tfm_docs_refman_html
 )
 add_dependencies(docs tfm_docs_refman_pdf)
 
