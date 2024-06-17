@@ -10,6 +10,8 @@
 #ifndef __TFM_PERIPHERALS_DEF_H__
 #define __TFM_PERIPHERALS_DEF_H__
 
+#include "platform_irq.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
