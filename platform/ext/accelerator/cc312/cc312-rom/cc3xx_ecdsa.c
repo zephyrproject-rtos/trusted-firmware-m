@@ -33,7 +33,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_genkey(cc3xx_ec_curve_id_t curve_id,
     }
 
     if (private_key_len < curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_BUFFER_OVERFLOW);
+        FATAL_ERR(CC3XX_ERR_BUFFER_OVERFLOW);
+        err = CC3XX_ERR_BUFFER_OVERFLOW;
         goto out;
     }
 
@@ -77,17 +78,20 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
     }
 
     if (private_key_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
 
     if (public_key_x_len < curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_BUFFER_OVERFLOW);
+        FATAL_ERR(CC3XX_ERR_BUFFER_OVERFLOW);
+        err = CC3XX_ERR_BUFFER_OVERFLOW;
         goto out;
     }
 
     if (public_key_y_len < curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_BUFFER_OVERFLOW);
+        FATAL_ERR(CC3XX_ERR_BUFFER_OVERFLOW);
+        err = CC3XX_ERR_BUFFER_OVERFLOW;
         goto out;
     }
 
@@ -142,22 +146,26 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
     }
 
     if (public_key_x_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
 
     if (public_key_y_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
 
     if (sig_r_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
     if (sig_s_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
@@ -166,7 +174,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
      */
     cc3xx_lowlevel_pka_get_state(&pka_state, 0, NULL, NULL, NULL);
     if (hash_len > pka_state.reg_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_HASH);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_HASH);
+        err = CC3XX_ERR_ECDSA_INVALID_HASH;
         goto out;
     }
 
@@ -188,38 +197,44 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
                                             public_key_y, public_key_y_len,
                                             &public_key_point);
     if (err != CC3XX_ERR_SUCCESS) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
     cc3xx_lowlevel_pka_write_reg_swap_endian(sig_s_reg, sig_s, sig_s_len);
     /* Check that s is less than N */
     if (!cc3xx_lowlevel_pka_less_than(sig_s_reg, CC3XX_PKA_REG_N)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
     /* Check that s is not 0 */
     if (cc3xx_lowlevel_pka_are_equal_si(sig_s_reg, 0)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
     /* Check that r is less than N */
     cc3xx_lowlevel_pka_write_reg_swap_endian(sig_r_reg, sig_r, sig_r_len);
     if (!cc3xx_lowlevel_pka_less_than(sig_r_reg, CC3XX_PKA_REG_N)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
     /* Check that r is not 0 */
     if (cc3xx_lowlevel_pka_are_equal_si(sig_r_reg, 0)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
     cc3xx_lowlevel_pka_write_reg_swap_endian(hash_reg, hash, hash_len);
     /* Check that hash is not 0 */
     if (cc3xx_lowlevel_pka_are_equal_si(hash_reg, 0)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
     /* If the size of the hash is greater than the group order, reduce the amount of
@@ -248,7 +263,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
                                                       &public_key_point, v_reg,
                                                       &calculated_r_point);
     if (err != CC3XX_ERR_SUCCESS) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
         goto out;
     }
 
@@ -258,7 +274,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
     if (cc3xx_lowlevel_pka_are_equal(sig_r_reg, calculated_r_point.x)) {
         err = CC3XX_ERR_SUCCESS;
     } else {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        FATAL_ERR(CC3XX_ERR_ECDSA_SIGNATURE_INVALID);
+        err = CC3XX_ERR_ECDSA_SIGNATURE_INVALID;
     }
 
 out:
@@ -293,17 +310,20 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
     }
 
     if (private_key_len > curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
 
     if (sig_r_len < curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_BUFFER_OVERFLOW);
+        FATAL_ERR(CC3XX_ERR_BUFFER_OVERFLOW);
+        err = CC3XX_ERR_BUFFER_OVERFLOW;
         goto out;
     }
 
     if (sig_s_len < curve.modulus_size) {
-        FATAL_ERR(err = CC3XX_ERR_BUFFER_OVERFLOW);
+        FATAL_ERR(CC3XX_ERR_BUFFER_OVERFLOW);
+        err = CC3XX_ERR_BUFFER_OVERFLOW;
         goto out;
     }
 
@@ -321,19 +341,22 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
     cc3xx_lowlevel_pka_write_reg_swap_endian(private_key_reg, private_key, private_key_len);
     /* Check that d is less than N */
     if (!cc3xx_lowlevel_pka_less_than(private_key_reg, CC3XX_PKA_REG_N)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
     /* Check that d is not 0 */
     if (cc3xx_lowlevel_pka_are_equal_si(private_key_reg, 0)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_KEY);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
     }
 
     cc3xx_lowlevel_pka_write_reg_swap_endian(hash_reg, hash, hash_len);
     /* Check that hash is not 0 */
     if (cc3xx_lowlevel_pka_are_equal_si(hash_reg, 0)) {
-        FATAL_ERR(err = CC3XX_ERR_ECDSA_INVALID_HASH);
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_HASH);
+        err = CC3XX_ERR_ECDSA_INVALID_HASH;
         goto out;
     }
     /* If the size of the hash is greater than the group order, reduce the amount of

@@ -47,7 +47,8 @@ bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
                                                                     curve->order,
                                                                     &foo);
         if (err != CC3XX_ERR_EC_POINT_IS_INFINITY) {
-            FATAL_ERR(validate_succeeded = false);
+            FATAL_ERR(false);
+            validate_succeeded = false;
         }
     }
 
@@ -352,7 +353,8 @@ static cc3xx_err_t multipy_point_by_scalar_side_channel_protected(
         carry = carry_table[table_select];
 
         if (cc3xx_lowlevel_ec_projective_point_is_infinity(&accumulator)) {
-            FATAL_ERR(err |= CC3XX_ERR_EC_POINT_IS_INFINITY);
+            FATAL_ERR(CC3XX_ERR_EC_POINT_IS_INFINITY);
+            err |= CC3XX_ERR_EC_POINT_IS_INFINITY;
         }
     }
 
@@ -459,7 +461,8 @@ static cc3xx_err_t shamir_multiply_points_by_scalars_and_add(
         }
 
         if (cc3xx_lowlevel_ec_projective_point_is_infinity(&accumulator)) {
-            FATAL_ERR(err |= CC3XX_ERR_EC_POINT_IS_INFINITY);
+            FATAL_ERR(CC3XX_ERR_EC_POINT_IS_INFINITY);
+            err |= CC3XX_ERR_EC_POINT_IS_INFINITY;
         }
     }
 
