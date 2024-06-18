@@ -91,10 +91,10 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
 #endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC */
     } else if (PSA_KEY_TYPE_IS_UNSTRUCTURED(key_type)) {
         return mbedtls_psa_external_get_random(NULL, key_buffer, key_buffer_size, key_buffer_length);
-    } else {
-        (void)key_bits;
-        return PSA_ERROR_INVALID_ARGUMENT;
     }
+
+    (void)key_bits;
+    return PSA_ERROR_INVALID_ARGUMENT;
 }
 
 psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,

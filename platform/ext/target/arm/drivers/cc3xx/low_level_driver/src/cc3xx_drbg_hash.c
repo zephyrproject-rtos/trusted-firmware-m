@@ -213,7 +213,7 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
         memcpy(returned_bits, partial_last_block, out_len_bits % (SHA256_OUTPUT_SIZE * 8));
     }
 
-    return err;
+    return CC3XX_ERR_SUCCESS;
 }
 
 cc3xx_err_t cc3xx_lowlevel_drbg_hash_generate(

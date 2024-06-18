@@ -94,11 +94,8 @@ void cc3xx_lowlevel_chacha20_get_state(struct cc3xx_chacha_state_t *state);
 
  * @param[in]  state            The cc3xx_chacha20_state_t to read the state
  *                              from.
- *
- * @return                       CC3XX_ERR_SUCCESS on success, another
- *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_lowlevel_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
+void cc3xx_lowlevel_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
 
 /**
  * @brief                        Get the amount of bytes that have been output

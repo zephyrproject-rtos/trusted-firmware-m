@@ -190,7 +190,7 @@ void cc3xx_lowlevel_chacha20_get_state(struct cc3xx_chacha_state_t *state)
     state->counter = get_ctr();
 }
 
-cc3xx_err_t cc3xx_lowlevel_chacha20_set_state(const struct cc3xx_chacha_state_t *state)
+void cc3xx_lowlevel_chacha20_set_state(const struct cc3xx_chacha_state_t *state)
 {
     memcpy(&chacha_state, state, sizeof(struct cc3xx_chacha_state_t));
     memcpy(&dma_state, &state->dma_state, sizeof(dma_state));
