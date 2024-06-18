@@ -143,6 +143,9 @@ int32_t tfm_ns_mailbox_hal_notify_peer(void);
 /**
  * \brief Enter critical section of NSPE mailbox.
  *
+ * Is used to lock data shared between cores running secure and non-secure side.
+ * Should not be used to lock non-secure data that are not shared with secure core.
+ *
  * \note The implementation depends on platform specific hardware and use case.
  */
 void tfm_ns_mailbox_hal_enter_critical(void);
@@ -156,6 +159,9 @@ void tfm_ns_mailbox_hal_exit_critical(void);
 
 /**
  * \brief Enter critical section of NSPE mailbox in IRQ handler.
+ *
+ * Is used to lock data shared between cores running secure and non-secure side.
+ * Should not be used to lock non-secure data that are not shared with secure core.
  *
  * \note The implementation depends on platform specific hardware and use case.
  */
