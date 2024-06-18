@@ -22,3 +22,7 @@ endif()
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
 set(TFM_MULTI_CORE_TOPOLOGY             OFF)
+
+if(CC3XX_RUNTIME_ENABLED)
+    set(EXTRA_S_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/secure" CACHE STRING "path to extra secure testsuite")
+endif()
