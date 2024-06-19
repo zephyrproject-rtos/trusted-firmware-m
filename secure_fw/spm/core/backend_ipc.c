@@ -61,7 +61,7 @@ static bool basepri_set_by_ipc_schedule;
 /*
  * Query the state of current thread.
  */
-static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
+static uint32_t query_state(const struct thread_t *p_thrd, uint32_t *p_retval)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *p_pt = NULL;
