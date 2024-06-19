@@ -52,7 +52,7 @@ static uint32_t saved_exc_return;
 typedef psa_status_t (*psa_api_svc_func_t)(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 
 /* The order of the functions must match the SVC number index defined in svc_num.h */
-static psa_api_svc_func_t psa_api_svc_func_table[] = {
+static const psa_api_svc_func_t psa_api_svc_func_table[] = {
     /* Client APIs */
     (psa_api_svc_func_t)tfm_spm_client_psa_framework_version,
     (psa_api_svc_func_t)tfm_spm_client_psa_version,
