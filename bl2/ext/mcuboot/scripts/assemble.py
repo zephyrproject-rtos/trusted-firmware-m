@@ -72,7 +72,7 @@ class Assembly():
                 shutil.copyfileobj(rfd, ofd, 0x10000)
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(allow_abbrev=False)
 
     parser.add_argument('-l', '--layout', required=True,
             help='Location of the file that contains preprocessed macros')
