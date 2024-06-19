@@ -20,7 +20,7 @@ def struct_pack(objects, pad_to=0):
 
     return (bytes(struct.pack(defstring, *objects)))
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--bl2_encryption_key_input_file", help="the key that BL2 was encrypted with", required=True)
 parser.add_argument("--bl2_signing_key_input_file", help="the key that BL2 was signed with", required=False)
 parser.add_argument("--guk_input_file", help="the GUK", required=True)

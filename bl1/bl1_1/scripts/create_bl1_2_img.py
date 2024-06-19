@@ -30,7 +30,7 @@ def struct_pack(objects, pad_to=0):
     return (bytes(struct.pack(defstring, *objects)))
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--input_file", help="the image to process", required=True)
 parser.add_argument("--img_output_file", help="image output file", required=True)
 parser.add_argument("--hash_output_file", help="hash output file", required=True)
