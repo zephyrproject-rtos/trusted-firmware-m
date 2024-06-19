@@ -61,7 +61,7 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
                                        int32_t ns_client_id,
                                        const void *client_data)
 {
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     struct connection_t *p_connection;
     psa_status_t status;
 
@@ -89,7 +89,7 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
 psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle,
                                      int32_t ns_client_id)
 {
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
 
     if ((!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) || (ns_client_id >= 0)) {
         tfm_core_panic();

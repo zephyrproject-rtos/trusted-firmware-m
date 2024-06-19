@@ -173,7 +173,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
                                     const struct service_t *service,
                                     bool ns_caller)
 {
-    struct partition_t *partition = NULL;
+    const struct partition_t *partition = NULL;
     const uint32_t *dep;
     int32_t i;
 
@@ -350,7 +350,7 @@ void spm_init_idle_connection(struct connection_t *p_connection,
 
 int32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    struct partition_t *partition;
+    const struct partition_t *partition;
 
     partition = GET_CURRENT_COMPONENT();
     if (partition && partition->p_ldinf) {
@@ -362,7 +362,7 @@ int32_t tfm_spm_partition_get_running_partition_id(void)
 
 bool tfm_spm_is_ns_caller(void)
 {
-    struct partition_t *partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *partition = GET_CURRENT_COMPONENT();
 
     if (!partition) {
         tfm_core_panic();

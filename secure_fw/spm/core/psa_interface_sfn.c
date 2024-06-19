@@ -37,7 +37,7 @@ uint32_t psa_version(uint32_t sid)
 psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
                                const psa_invec *in_vec, psa_outvec *out_vec)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -111,7 +111,7 @@ void psa_panic(void)
 
 psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -138,7 +138,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 
 void psa_close(psa_handle_t handle)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -268,7 +268,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
                             const struct client_params_t *params,
                             const void *client_data_stateless)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -297,7 +297,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
 psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -324,7 +324,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
 
 psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
