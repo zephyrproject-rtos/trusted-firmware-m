@@ -24,7 +24,7 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
                                     const void *client_data_stateless)
 {
     struct connection_t *p_connection;
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
     psa_status_t status;
 

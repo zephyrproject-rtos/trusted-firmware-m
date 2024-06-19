@@ -28,7 +28,7 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
     uint32_t   ns_access   = 0;
     size_t     ivec_num    = PARAM_UNPACK_IN_LEN(ctrl_param);
     size_t     ovec_num    = PARAM_UNPACK_OUT_LEN(ctrl_param);
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
 
     /* The request type must be zero or positive. */

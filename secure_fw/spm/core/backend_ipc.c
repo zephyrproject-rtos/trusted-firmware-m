@@ -331,7 +331,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_sett
 uint32_t backend_system_run(void)
 {
     uint32_t control;
-    struct partition_t *p_cur_pt;
+    const struct partition_t *p_cur_pt;
     fih_int fih_rc = FIH_FAILURE;
 
     SPM_ASSERT(SPM_THREAD_CONTEXT);
@@ -458,7 +458,8 @@ uint64_t ipc_schedule(uint32_t exc_return)
     fih_int fih_rc = FIH_FAILURE;
     FIH_RET_TYPE(bool) fih_bool;
     AAPCS_DUAL_U32_T ctx_ctrls;
-    struct partition_t *p_part_curr, *p_part_next;
+    const struct partition_t *p_part_curr;
+    struct partition_t *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
     struct thread_t *pth_next;
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;

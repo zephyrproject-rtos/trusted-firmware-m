@@ -42,7 +42,7 @@ static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
 uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
                                       uintptr_t flih_func)
 {
-    struct partition_t *p_curr_sp;
+    const struct partition_t *p_curr_sp;
     uintptr_t sp_base, sp_limit, curr_stack, ctx_stack;
     struct context_ctrl_t flih_ctx_ctrl;
     fih_int fih_rc = FIH_FAILURE;
@@ -98,11 +98,11 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
 uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
                                 struct context_flih_ret_t *p_ctx_flih_ret)
 {
-    struct partition_t *p_prev_sp, *p_owner_sp;
+    const struct partition_t *p_prev_sp, *p_owner_sp;
     FIH_RET_TYPE(bool) fih_bool;
     fih_int fih_rc = FIH_FAILURE;
 
-    p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
+    p_prev_sp = (const struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CURRENT_COMPONENT();
 
     FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,

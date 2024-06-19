@@ -84,7 +84,7 @@ static uint32_t thread_mode_spm_return(uint32_t result)
 {
     fih_int fih_rc = FIH_FAILURE;
     FIH_RET_TYPE(bool) fih_bool;
-    struct partition_t *p_part_next = GET_CURRENT_COMPONENT();
+    const struct partition_t *p_part_next = GET_CURRENT_COMPONENT();
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
 
     FIH_CALL(tfm_hal_boundary_need_switch, fih_bool, spm_boundary, p_part_next->boundary);
@@ -146,7 +146,7 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 {
     fih_int fih_rc = FIH_FAILURE;
     FIH_RET_TYPE(bool) fih_bool;
-    struct partition_t *p_curr_sp;
+    const struct partition_t *p_curr_sp;
     psa_api_svc_func_t svc_func = NULL;
     uint8_t svc_idx = svc_number & TFM_SVC_NUM_INDEX_MSK;
 

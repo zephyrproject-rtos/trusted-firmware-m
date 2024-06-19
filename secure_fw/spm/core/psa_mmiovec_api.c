@@ -17,7 +17,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
                                             uint32_t invec_idx)
 {
     struct connection_t *handle;
-    struct partition_t *partition = NULL;
+    const struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
@@ -147,7 +147,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
                                        uint32_t outvec_idx)
 {
     struct connection_t *handle;
-    struct partition_t *partition = NULL;
+    const struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
