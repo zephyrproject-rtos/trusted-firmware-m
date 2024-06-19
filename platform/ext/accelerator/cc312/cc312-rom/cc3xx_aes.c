@@ -985,6 +985,12 @@ static cc3xx_err_t gcm_finish(uint32_t *tag)
 
     cc3xx_lowlevel_set_engine(CC3XX_ENGINE_AES);
 
+    /* Clear number of remaining bytes. If we enter gcm_finish() when the
+     * engine has never been set for crypted data, the value of aes_remaining_bytes
+     * has never been flushed by a call to AES, hence clear it manually here
+     */
+    P_CC3XX->aes.aes_remaining_bytes = 0x0U;
+
     cc3xx_lowlevel_dma_set_output(calculated_tag, sizeof(calculated_tag));
     cc3xx_lowlevel_dma_buffered_input_data(final_block, AES_GCM_FIELD_POINT_SIZE,
                                   true);
