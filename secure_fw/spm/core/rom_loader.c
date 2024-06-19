@@ -62,8 +62,8 @@ static struct service_t *tfm_allocate_service_assuredly(uint32_t service_count)
 
 struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 {
-    struct partition_load_info_t *p_ptldinf;
-    struct partition_t           *partition;
+    const struct partition_load_info_t *p_ptldinf;
+    struct partition_t                 *partition;
     int32_t client_id_base;
     int32_t client_id_limit;
 
@@ -76,7 +76,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         return NO_MORE_PARTITION;
     }
 
-    p_ptldinf = (struct partition_load_info_t *)ldinf_sa;
+    p_ptldinf = (const struct partition_load_info_t *)ldinf_sa;
 
     if ((UINTPTR_MAX - ldinf_sa < LOAD_INFSZ_BYTES(p_ptldinf)) ||
         (ldinf_sa + LOAD_INFSZ_BYTES(p_ptldinf) > ldinf_ea))   {
