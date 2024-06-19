@@ -664,7 +664,8 @@ def process_stateless_services(partitions):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list',
-                                     epilog='Note that environment variables in template files will be replaced with their values')
+                                     epilog='Note that environment variables in template files will be replaced with their values',
+                                     allow_abbrev=False)
 
     parser.add_argument('-o', '--outdir'
                         , dest='outdir'
