@@ -25,7 +25,7 @@ def struct_pack(objects, pad_to=0):
     return (bytes(struct.pack(defstring, *objects)))
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--provisioning_bundle_axf",
                     help="the input provisioning bundle elf/axf",
                     required=True)

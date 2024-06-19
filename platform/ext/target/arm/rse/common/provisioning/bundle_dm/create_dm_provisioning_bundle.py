@@ -72,7 +72,7 @@ def routing_tables_from_graph(graph, rse_id, rse_amount):
 
     return send_table_bytes, receive_table_bytes
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--provisioning_code", help="the input provisioning code", required=True)
 parser.add_argument("--provisioning_data", help="the input provisioning data", required=True)
 parser.add_argument("--provisioning_values", help="the input provisioning values", required=True)

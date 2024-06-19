@@ -43,7 +43,7 @@ def derive_encryption_key(input_key, provisioning_lcs, tp_mode, krtl_derivation_
         output_key += c.finalize()
     return output_key
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--tp_mode", help="the test or production mode", choices=["TCI", "PCI"], required=True)
 parser.add_argument("--krtl_file", help="the RTL key file", required=True)
 parser.add_argument("--key_select", help="Which key to derive", choices=["cm", "dm"], required=True)
