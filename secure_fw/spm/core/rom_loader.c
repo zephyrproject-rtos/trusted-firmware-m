@@ -128,7 +128,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
     return partition;
 }
 
-uint32_t load_services_assuredly(struct partition_t *p_partition,
+uint32_t load_services_assuredly(const struct partition_t *p_partition,
                                  struct service_head_t *services_listhead,
                                  struct service_t **stateless_services_ref_tbl,
                                  size_t ref_tbl_size)
