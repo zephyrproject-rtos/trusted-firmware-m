@@ -48,3 +48,8 @@ __attribute__((weak))
 void _read(void)
 {
 }
+
+__attribute__((weak))
+void _write(void)
+{
+}
