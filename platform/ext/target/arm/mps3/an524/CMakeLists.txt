@@ -168,8 +168,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/device/include/platform_base_address
                     ${TARGET_PLATFORM_PATH}/native_drivers/ppc_sse200_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/Driver_USART_CMSDK.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common/Driver_USART_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.h

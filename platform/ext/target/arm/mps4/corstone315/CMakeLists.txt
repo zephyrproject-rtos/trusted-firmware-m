@@ -489,10 +489,6 @@ install(DIRECTORY   device
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/arm/drivers
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm)
 
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
 install(FILES       target_cfg.h
                     tfm_peripherals_def.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h

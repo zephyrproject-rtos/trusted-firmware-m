@@ -175,11 +175,6 @@ install(DIRECTORY   Device/Include
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/Device
 )
 
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-
 # copy all files from active platform directory
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/ns/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

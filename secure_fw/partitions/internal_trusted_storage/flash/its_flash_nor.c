@@ -9,7 +9,7 @@
 #include "its_flash_nor.h"
 
 #include "flash_fs/its_flash_fs.h"
-#include "driver/Driver_Flash.h"
+#include "Driver_Flash.h"
 
 /* Valid entries for data item width */
 static const uint32_t data_width_byte[] = {

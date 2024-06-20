@@ -33,4 +33,5 @@ target_include_directories(cmsis
     INTERFACE
     $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
     $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include/m-profile>
+    $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Driver/Include>
 )

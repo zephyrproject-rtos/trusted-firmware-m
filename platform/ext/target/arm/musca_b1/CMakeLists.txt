@@ -215,11 +215,6 @@ target_link_libraries(platform_s
 )
 
 #========================= Files for building NS side platform ================#
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
 install(FILES       Device/Source/startup_musca.c
                     Device/Source/system_core_init.c
                     Device/Source/device_definition.c

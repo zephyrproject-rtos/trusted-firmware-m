@@ -128,8 +128,6 @@ install(DIRECTORY
 
 install(FILES
     ${PLATFORM_DIR}/ext/common/test_interrupt.h
-    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
     ${PLATFORM_DIR}/include/tfm_plat_defs.h
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )

@@ -146,8 +146,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
                     ${TARGET_PLATFORM_PATH}/cmsis_driver_config.h
                     ${TARGET_PLATFORM_PATH}/RTE_Device.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)

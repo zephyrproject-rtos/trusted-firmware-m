@@ -181,8 +181,6 @@ install(FILES       ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/arm
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/bpwm_reg.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/crc_reg.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/dac_reg.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)

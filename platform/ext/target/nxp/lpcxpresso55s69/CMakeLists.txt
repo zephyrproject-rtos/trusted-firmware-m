@@ -235,11 +235,6 @@ install(DIRECTORY   ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
 install(DIRECTORY   ${NXP_HAL_FILE_PATH}/common/Native_Driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
 install(FILES       ${TARGET_PLATFORM_PATH}/project_template/ns/app.h
                     ${TARGET_PLATFORM_PATH}/project_template/ns/board.h
                     ${TARGET_PLATFORM_PATH}/project_template/ns/clock_config.h

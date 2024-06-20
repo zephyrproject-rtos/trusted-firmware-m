@@ -217,12 +217,6 @@ install(FILES       ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
-
 install(FILES       startup.c
                     startup_${target}.c
                     nrfx_glue.c

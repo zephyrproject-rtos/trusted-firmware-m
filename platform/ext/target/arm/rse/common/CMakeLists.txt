@@ -732,10 +732,6 @@ add_custom_command(
 
 #========================= Files for building NS side platform ================#
 
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
 install(FILES       device/source/device_definition.c
                     $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
                     device/source/startup_rse.c
