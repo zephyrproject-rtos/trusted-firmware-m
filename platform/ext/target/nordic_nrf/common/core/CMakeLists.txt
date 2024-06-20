@@ -208,6 +208,20 @@ if(BL2)
     )
 endif()
 
+if(NRF_APPROTECT)
+    target_compile_definitions(tfm_spm
+    PRIVATE
+        NRF_APPROTECT
+    )
+endif()
+
+if(NRF_SECURE_APPROTECT)
+    target_compile_definitions(tfm_spm
+    PRIVATE
+        NRF_SECURE_APPROTECT
+    )
+endif()
+
 #========================= Files for building NS side platform ================#
 
 configure_file(config_nordic_nrf_spe.cmake.in
