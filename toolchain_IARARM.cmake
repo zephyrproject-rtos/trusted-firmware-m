@@ -278,6 +278,10 @@ macro(target_share_symbols target)
     target_link_options(${target}
         PRIVATE
             ${KEEP_SYMBOL_LIST}
+            # This is needed because the symbol file can contain functions
+            # that are not defined in every build configuration.
+            # The Error[Li005] is: no definition for "file".
+            --diag_suppress=li005
     )
 endmacro()
 

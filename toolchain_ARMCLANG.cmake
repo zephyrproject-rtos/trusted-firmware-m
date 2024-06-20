@@ -422,6 +422,12 @@ macro(target_share_symbols target)
     target_link_options(${target}
         PRIVATE
             ${KEEP_SYMBOL_LIST}
+            # This is needed because the symbol file can contain functions
+            # that are not defined in every build configuration.
+            # The L6474E is:
+            # "Symbol referenced by --undefined or --undefined_and_export
+            # switch could not be resolved by a static library."
+            --diag_warning 6474
     )
 
     # Ask armclang to produce a symdefs file that will
