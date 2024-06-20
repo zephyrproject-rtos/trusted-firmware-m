@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "async.h"
 #include "bitops.h"
 #include "config_impl.h"
 #include "config_spm.h"
@@ -49,6 +50,32 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* This API is only used in IPC backend. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+struct connection_t *spm_get_async_replied_handle(struct partition_t *partition)
+{
+    struct connection_t **pr_handle_iter, **prev = NULL, *handle = NULL;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+    /* Remove tail of the list, which is the first item added */
+    CRITICAL_SECTION_ENTER(cs_assert);
+    if (!partition->p_replied) {
+        tfm_core_panic();
+    }
+    UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
+                                partition, p_replied) {
+        prev = pr_handle_iter;
+    }
+    handle = *prev;
+    UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_replied);
+
+    /* Clear the signal if there are no more asynchronous responses waiting */
+    if (!partition->p_replied) {
+        partition->signals_asserted &= ~ASYNC_MSG_REPLY;
+    }
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return handle;
+}
+
 struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                               psa_signal_t signal)
 {
