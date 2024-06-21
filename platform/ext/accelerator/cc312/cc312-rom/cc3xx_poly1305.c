@@ -200,9 +200,9 @@ void cc3xx_lowlevel_poly1305_finish(uint32_t *tag)
         poly_process_block(poly_state.block_buf);
     }
 
-    /* Finally, the tag is a + s */
-    cc3xx_lowlevel_pka_mod_add(poly_state.accumulator_reg,
-                      poly_state.key_s_reg, poly_state.accumulator_reg);
+    /* Finally, the tag is a + s (without a reduction) */
+    cc3xx_lowlevel_pka_add(poly_state.accumulator_reg,
+                           poly_state.key_s_reg, poly_state.accumulator_reg);
 
     /* Read back the first 16 bytes for the accumulator into the tag */
     cc3xx_lowlevel_pka_read_reg(poly_state.accumulator_reg, tag, POLY1305_TAG_LEN);
