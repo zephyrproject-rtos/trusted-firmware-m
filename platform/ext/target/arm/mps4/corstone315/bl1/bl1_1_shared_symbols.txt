@@ -34,3 +34,6 @@ cc3xx_lowlevel_aes_set_data_len
 cc3xx_lowlevel_aes_set_output_buffer
 cc3xx_lowlevel_aes_update
 cc3xx_lowlevel_aes_finish
+_write
+fputc
+putchar
