@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,14 +15,15 @@ add_library(tfm_t_cose_s STATIC EXCLUDE_FROM_ALL)
 
 target_link_libraries(tfm_t_cose_s
     PUBLIC
-        tfm_t_cose_common
         tfm_t_cose_defs
+    PRIVATE
+        tfm_t_cose_common
         psa_interface
         qcbor
         platform_s
 )
 
 target_compile_options(tfm_t_cose_s
-    PUBLIC
+    PRIVATE
         ${COMPILER_CP_FLAG}
 )

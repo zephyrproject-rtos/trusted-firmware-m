@@ -58,6 +58,7 @@ target_link_libraries(tfm_psa_rot_partition_attestation
         tfm_sprt
         tfm_boot_status
         qcbor
+        psa_crypto_config
 )
 
 target_compile_definitions(tfm_psa_rot_partition_attestation
