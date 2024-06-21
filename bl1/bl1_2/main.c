@@ -23,6 +23,11 @@
 #include "tfm_plat_otp.h"
 #include <string.h>
 
+#if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
+#include "bl1_2_suites.h"
+#endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
+
+
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
@@ -273,14 +278,14 @@ int main(void)
     }
     BL1_LOG("[INF] starting TF-M bl1_2\r\n");
 
+#if defined(TEST_BL1_2) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
+    run_bl1_2_testsuite();
+#endif /* defined(TEST_BL1_2) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
+
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-
-#ifdef TEST_BL1_2
-    run_bl1_2_testsuite();
-#endif /* TEST_BL1_2 */
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

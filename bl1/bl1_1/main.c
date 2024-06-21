@@ -20,6 +20,10 @@
 #include "image.h"
 #include "fih.h"
 
+#if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
+#include "bl1_1_suites.h"
+#endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
+
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
@@ -96,9 +100,9 @@ int main(void)
     }
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
 
-#ifdef TEST_BL1_1
+#if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
     run_bl1_1_testsuite();
-#endif /* TEST_BL1_1 */
+#endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
