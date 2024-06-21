@@ -791,6 +791,7 @@ install(FILES       target_cfg.h
                     platform_error_codes.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/common/uart_stdout.h
+                    $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_locality.h>
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 
 install(DIRECTORY   ns/
