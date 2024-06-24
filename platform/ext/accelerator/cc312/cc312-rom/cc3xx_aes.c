@@ -791,7 +791,10 @@ void cc3xx_lowlevel_aes_update_authed_data(const uint8_t* in, size_t in_len)
     case CC3XX_AES_MODE_CCM:
         if (aes_state.authed_length == 0) {
             ccm_calc_iv(true);
-            aes_state.authed_length += ccm_input_auth_length();
+            /* Do not increment aes_state.authed_length in this
+             * case because no authed data has been input
+             */
+            (void)ccm_input_auth_length();
         }
         break;
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) */
