@@ -98,11 +98,12 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
 uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
                                 struct context_flih_ret_t *p_ctx_flih_ret)
 {
-    const struct partition_t *p_prev_sp, *p_owner_sp;
+    const struct partition_t *p_owner_sp;
+    struct partition_t *p_prev_sp;
     FIH_RET_TYPE(bool) fih_bool;
     fih_int fih_rc = FIH_FAILURE;
 
-    p_prev_sp = (const struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
+    p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CURRENT_COMPONENT();
 
     FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
@@ -124,7 +125,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     }
 
     /* Restore current component */
-    SET_CURRENT_COMPONENT((struct partition_t *)p_prev_sp);
+    SET_CURRENT_COMPONENT(p_prev_sp);
 
     arch_update_process_sp(p_ctx_flih_ret->psp, p_ctx_flih_ret->psplim);
 
