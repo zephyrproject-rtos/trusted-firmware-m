@@ -28,6 +28,8 @@
 #define MHU_SCP_SI_CL2_READY_SIGNAL_CHANNEL 5
 #define MHU_SCP_READY_SIGNAL_PAYLOAD 0x1
 
+extern ARM_DRIVER_FLASH AP_FLASH_DEV_NAME;
+
 static int32_t gic_multiple_view_init(void)
 {
     enum atu_error_t atu_err;
@@ -70,6 +72,11 @@ free_atu:
 int32_t boot_platform_post_init(void)
 {
     int32_t result;
+
+    result = AP_FLASH_DEV_NAME.Initialize(NULL);
+    if (result != 0) {
+        return result;
+    }
 
     result = interrupts_bl2_init();
     if (result != 0) {
@@ -391,6 +398,16 @@ static int boot_platform_pre_load_ap_bl2(void)
 
     BOOT_LOG_INF("BL2: Doorbell received from SCP!");
 
+    /* Configure RSE ATU to access AP Secure Flash for AP BL2 */
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    HOST_AP_FLASH_ATU_ID,
+                                    HOST_AP_FLASH_BASE,
+                                    HOST_AP_FLASH_PHY_BASE,
+                                    HOST_AP_FLASH_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
     /* Configure RSE ATU to access RSE header region for AP BL2 */
     atu_err = atu_initialize_region(&ATU_DEV_S,
                                     RSE_ATU_IMG_HDR_LOAD_ID,
@@ -464,6 +481,12 @@ static int boot_platform_post_load_ap_bl2(void)
      * header part in the Shared SRAM before releasing AP BL2 out of reset.
      */
     memset(HOST_AP_BL2_IMG_HDR_BASE_S, 0, BL2_HEADER_SIZE);
+
+    /* Close RSE ATU to access AP Secure Flash for AP BL2 */
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_AP_FLASH_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
 
     /* Close RSE ATU region configured to access RSE header region for AP BL2 */
     atu_err = atu_uninitialize_region(&ATU_DEV_S, RSE_ATU_IMG_HDR_LOAD_ID);

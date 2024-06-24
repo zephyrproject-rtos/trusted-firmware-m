@@ -44,6 +44,7 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
 #endif /* RSE_USE_LOCAL_UART */
 
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
+extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_AP_DEV;
 
 #ifdef __cplusplus
 }

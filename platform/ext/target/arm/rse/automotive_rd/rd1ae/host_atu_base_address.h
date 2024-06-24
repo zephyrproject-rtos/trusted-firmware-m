@@ -46,6 +46,8 @@ enum rse_atu_ids {
     RSE_ATU_NI_TOWER_ID,
     /* ATU region ID for programming GIC-720AE */
     RSE_ATU_GIC_ID,
+    /* ATU region ID for AP secure flash */
+    RSE_ATU_AP_FLASH_ID,
 };
 
 /*
@@ -269,6 +271,12 @@ enum rse_atu_ids {
                                  HOST_SCP_INIT_CTRL_SIZE)
 #define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
 #define HOST_NI_TOWER_ATU_ID    RSE_ATU_NI_TOWER_ID
+
+/* ATU region mapping to access AP secure flash */
+#define HOST_AP_FLASH_BASE      (HOST_NI_TOWER_BASE + HOST_NI_TOWER_SIZE)
+#define HOST_AP_FLASH_SIZE      ALIGN_UP(AP_BOOT_FLASH_SIZE, RSE_ATU_PAGE_SIZE)
+#define HOST_AP_FLASH_PHY_BASE  HOST_AP_MEM_EXP_1_PHYS_BASE
+#define HOST_AP_FLASH_ATU_ID    RSE_ATU_AP_FLASH_ID
 
 /* Safety Island GIC view 0 region logical address start */
 #define HOST_SI_GIC_VIEW_0_BASE_S       (HOST_ACCESS_BASE_S + 0x8000000U)
