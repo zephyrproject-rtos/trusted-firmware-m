@@ -98,13 +98,13 @@ static void process_data(const void* buf, size_t length)
         /* And the length */
         P_CC3XX->dout.dst_lli_word1 = length;
 
-        #ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
+#ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
         /* This function only accepts 32-byte aligned addresses, so do some
          * rounding so we make sure to invalidate the whole output buffer */
         SCB_CleanInvalidateDCache_by_Addr((void *)round_down(dma_state.output_addr, 32),
                                           round_up(dma_state.output_addr + length, 32)
                                           - round_down(dma_state.output_addr, 32));
-        #endif /* CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
+#endif /* CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
 
         dma_state.output_addr += length;
         dma_state.current_bytes_output += length;
