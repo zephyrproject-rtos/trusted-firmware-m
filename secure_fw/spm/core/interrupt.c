@@ -124,7 +124,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     }
 
     /* Restore current component */
-    SET_CURRENT_COMPONENT(p_prev_sp);
+    SET_CURRENT_COMPONENT((struct partition_t *)p_prev_sp);
 
     arch_update_process_sp(p_ctx_flih_ret->psp, p_ctx_flih_ret->psplim);
 
