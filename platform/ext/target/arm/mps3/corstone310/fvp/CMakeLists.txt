@@ -78,7 +78,6 @@ target_include_directories(device_definition
 
 target_include_directories(flash_drivers
     INTERFACE
-        ${PLATFORM_DIR}/ext/driver
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE310_COMMON_DIR}/partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common

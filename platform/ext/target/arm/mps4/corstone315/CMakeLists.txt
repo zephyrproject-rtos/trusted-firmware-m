@@ -275,7 +275,6 @@ add_library(flash_drivers INTERFACE)
 target_include_directories(flash_drivers
     INTERFACE
         cmsis_drivers/config/secure
-        ${PLATFORM_DIR}/ext/driver
         partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
@@ -285,6 +284,11 @@ target_sources(flash_drivers
     INTERFACE
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+)
+
+target_link_libraries(flash_drivers
+    INTERFACE
+        cmsis
 )
 
 include(libflash_drivers.cmake)

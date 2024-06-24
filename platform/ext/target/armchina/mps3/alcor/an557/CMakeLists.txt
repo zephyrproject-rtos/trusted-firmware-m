@@ -34,7 +34,6 @@ target_include_directories(flash_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
-        ${PLATFORM_DIR}/ext/driver
         device/include
         ${ALCOR_COMMON_DIR}/device/config
 )

@@ -178,7 +178,6 @@ add_library(flash_drivers STATIC)
 target_include_directories(flash_drivers
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
-        ${PLATFORM_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/common
         ${PLATFORM_DIR}/include
         Native_Driver

@@ -243,7 +243,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         INTERFACE
             .
             include
-            ext/driver
     )
 
     target_link_libraries(platform_bl1_1_interface

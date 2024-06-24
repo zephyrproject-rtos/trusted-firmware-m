@@ -805,7 +805,6 @@ CMakeLists.txt: installation for the Non-Secure world platform build
             DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
     install(DIRECTORY ${PLATFORM_DIR}/ext/common
-                      ${PLATFORM_DIR}/ext/driver
             DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
 
 .. _config_cmake:

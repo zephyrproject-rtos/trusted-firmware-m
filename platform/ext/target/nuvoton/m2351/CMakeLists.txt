@@ -166,9 +166,6 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/../common/bsp/Include
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/StdDriver/inc
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/bsp/Library/StdDriver)
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/driver
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-
 install(FILES       ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/arm_uart_drv.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/timer_cmsdk.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/uart_cmsdk_drv.h

@@ -71,7 +71,6 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/ext/cmsis/Include
         ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
         cmsis_drivers/config/non_secure
 )

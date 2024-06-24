@@ -26,7 +26,6 @@ target_include_directories(platform_ns
         ${CMAKE_CURRENT_LIST_DIR}/ext/cmsis/Include
         ${CMAKE_CURRENT_LIST_DIR}/ext/cmsis/Include/m-profile
         ${CMAKE_CURRENT_LIST_DIR}/ext/common
-        ${CMAKE_CURRENT_LIST_DIR}/ext/driver
         ${CMAKE_CURRENT_LIST_DIR}/hal/Inc
 )
 
