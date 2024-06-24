@@ -10,6 +10,7 @@
 #include "spm.h"
 #include "tfm_pools.h"
 #include "load/service_defs.h"
+#include "private/assert.h"
 
 #if !(defined CONFIG_TFM_CONN_HANDLE_MAX_NUM) || (CONFIG_TFM_CONN_HANDLE_MAX_NUM == 0)
 #error "CONFIG_TFM_CONN_HANDLE_MAX_NUM must be defined and not zero."

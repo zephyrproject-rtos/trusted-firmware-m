@@ -23,6 +23,7 @@
 #include "psa/service.h"
 #include "spm.h"
 #include "memory_symbols.h"
+#include "private/assert.h"
 
 /* SFN Partition state */
 #define SFN_PARTITION_STATE_NOT_INITED        0

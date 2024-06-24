@@ -40,6 +40,7 @@
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
 #include "tfm_nspm.h"
+#include "private/assert.h"
 
 /* Partition and service runtime data list head/runtime data table */
 static struct service_head_t services_listhead;
