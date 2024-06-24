@@ -10,6 +10,7 @@
 #include "crypto_hw.h"
 #include "device_definition.h"
 #include "fih.h"
+#include "fip_parser.h"
 #include "flash_map/flash_map.h"
 #include "gic_720ae_lib.h"
 #include "host_base_address.h"
@@ -19,6 +20,7 @@
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "rse_expansion_regs.h"
+#include "tfm_plat_defs.h"
 
 #include <string.h>
 
@@ -28,6 +30,8 @@
 #define MHU_SCP_SI_CL2_READY_SIGNAL_CHANNEL 5
 #define MHU_SCP_READY_SIGNAL_PAYLOAD 0x1
 
+extern struct flash_area flash_map[];
+extern const int flash_map_entry_num;
 extern ARM_DRIVER_FLASH AP_FLASH_DEV_NAME;
 
 static int32_t gic_multiple_view_init(void)
@@ -63,6 +67,33 @@ free_atu:
     }
 
     return err;
+}
+
+static int32_t fill_secure_flash_map_with_data(void) {
+    uint64_t tfa_offset = 0;
+    size_t tfa_size = 0;
+    enum tfm_plat_err_t result;
+    uint8_t i, id, flash_id;
+
+    result = fip_get_entry_by_uuid(&AP_FLASH_DEV_NAME,
+                AP_FLASH_FIP_OFFSET, AP_FLASH_FIP_SIZE,
+                UUID_TRUSTED_BOOT_FIRMWARE_BL2, &tfa_offset, &tfa_size);
+    if (result != TFM_PLAT_ERR_SUCCESS) {
+        return 1;
+    }
+
+    flash_id = FLASH_AREA_IMAGE_PRIMARY(RSE_FIRMWARE_AP_BL2_ID);
+
+    for (i = 0; i < flash_map_entry_num; i++) {
+        id = flash_map[i].fa_id;
+
+        if(id == flash_id) {
+            flash_map[i].fa_off = AP_FLASH_FIP_OFFSET + tfa_offset;
+            flash_map[i].fa_size = tfa_size;
+        }
+    }
+
+    return 0;
 }
 
 /*
@@ -453,6 +484,11 @@ static int boot_platform_pre_load_ap_bl2(void)
     atu_err = set_axprot1(&ATU_DEV_S, roba_value, RSE_ATU_IMG_CODE_LOAD_ID);
     if (atu_err != ATU_ERR_NONE) {
         BOOT_LOG_INF("BL2: Unable to modify AxPROT1");
+        return 1;
+    }
+
+    if (fill_secure_flash_map_with_data() != 0) {
+        BOOT_LOG_ERR("BL2: Unable to extract AP BL2 from FIP");
         return 1;
     }
 
