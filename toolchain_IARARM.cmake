@@ -273,6 +273,11 @@ macro(target_share_symbols target)
         ARGS --edit $<TARGET_FILE_DIR:${target}>/iar_steering_file $<TARGET_FILE:${target}> $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 
+    string(FIND "${KEEP_SYMBOL_LIST}" "*" wildcard)
+    if(NOT "${wildcard}" EQUAL "-1")
+        message(FATAL_ERROR "Wildcards are not supported in symbol files.")
+    endif()
+
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --keep=)
     target_link_options(${target}
