@@ -73,7 +73,7 @@ The following environments are supported:
 
         .. note::
 
-            Please download cmake 3.15 or later version from https://cmake.org/download/.
+            Please download CMake version 3.21 or later from https://cmake.org/download/.
 
         4. add CMake path into environment:
 
@@ -87,10 +87,10 @@ The following environments are supported:
 
            Windows 10 x64
 
-        2. install dependecies:
+        2. install dependencies:
 
         - Git client latest version (https://git-scm.com/download/win)
-        - CMake (`native Windows version <https://cmake.org/download/>`__)
+        - CMake version 3.21 or later (`native Windows version <https://cmake.org/download/>`__)
         - GNU make (http://gnuwin32.sourceforge.net/packages/make.htm)
         - Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
           the pip package manager (from Python 3.4 it's included)
@@ -418,7 +418,7 @@ Tool & Dependency overview
 To build the TF-M firmware the following tools are needed:
 
    - C compiler of supported toolchains
-   - CMake version 3.15 or later
+   - CMake version 3.21 or later
    - Git
    - gmake, aka GNU Make
    - Python v3.x

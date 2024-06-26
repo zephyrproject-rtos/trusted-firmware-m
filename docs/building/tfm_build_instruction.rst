@@ -20,7 +20,7 @@ when building NSPE.
     Refer to :doc:`Building Tests </building/tests_build_instruction>` on how to build TF-M
     regression tests and PSA Arch tests to verify TF-M.
 
-TF-M uses `CMake <https://cmake.org/overview/>`__ **v3.15** or higher.
+TF-M uses `CMake <https://cmake.org/overview/>`__ **v3.21** or higher.
 Before starting please make sure you have all required software installed and
 configured as explained in the
 :doc:`TF-M getting started </getting_started/tfm_getting_started>`.

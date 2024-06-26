@@ -14,7 +14,7 @@ Notes for building with IARARM
     Currently the MUSCA_B1 and MUSCA_S1 targets are not supported with IARARM,
     due to lack of testing.
 
-    cmake needs to be version 3.14 or newer.
+    cmake needs to be version 3.21 or newer.
 
     The V8M IAR CMSIS_5 RTX libraries in CMSIS_5 5.5.0 has a problem and has been updated in
     CMSIS_5 5.7.0. The updated libraries are part of the tf-m-tests repo and no special instructions
