@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "host_base_address.h"
 #include "rse_comms_atu.h"
@@ -248,7 +249,7 @@ static enum tfm_plat_err_t sds_region_unmap(uint8_t atu_region)
 
 static void sds_region_init(void)
 {
-    SPM_ASSERT(PLAT_RSE_AP_SDS_SIZE > MIN_REGION_SIZE);
+    assert(PLAT_RSE_AP_SDS_SIZE > MIN_REGION_SIZE);
 
     struct region_descriptor *region_desc =
         (struct region_descriptor *)region_config.mapped_addr;
