@@ -47,7 +47,7 @@ struct uart_pl011_dev_t UART0_PL011_DEV_S = {
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {
     .base = BOOT_FLASH_BASE_S,
 };
-struct cfi_dev_t CFI_DEV_S = {
+static struct cfi_dev_t CFI_DEV_S = {
     .cfg = &CFI_DEV_CFG_S,
 };
 
