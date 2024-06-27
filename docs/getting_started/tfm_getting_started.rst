@@ -5,14 +5,15 @@ First Things First
 ************
 Prerequisite
 ************
-Trusted Firmware M provides a reference implementation of platform security
-architecture  reference implementation aligning with PSA Certified guidelines.
-It is assumed that the reader is familiar with specifications can be found at
-`Platform Security Architecture Resources <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>`__.
+Trusted Firmware M provides a reference implementation of the Platform Security
+Architecture (PSA) specifications, aligning with PSA Certified guidelines.
+It is assumed that the reader is familiar with the specifications that can be
+found
+`here <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>`__.
 
-The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
+The current TF-M implementation on Armv8-M leverages TrustZone for Armv8-M so a
 good understanding of the v8-M architecture is also necessary. A good place to
-get started with ARMv8-M is
+get started with Armv8-M is
 `developer.arm.com <https://developer.arm.com/architectures/cpu-architecture/m-profile>`__.
 
 **************************
