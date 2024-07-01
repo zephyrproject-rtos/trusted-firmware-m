@@ -37,6 +37,7 @@ extern struct platform_data_t tfm_peripheral_dma0_ch0;
 /* AP to RSE MHU receiver interrupt */
 #define MAILBOX_IRQ   CMU_MHU0_Receiver_IRQn    /* AP_MONITOR  */
 #define MAILBOX_IRQ_1 CMU_MHU1_Receiver_IRQn    /* AP_NS */
+#define MAILBOX_IRQ_2 CMU_MHU2_Receiver_IRQn    /* AP_S */
 
 /* Append RSE-specific static MPU regions to the standard ones in
  * tfm_hal_isolation_v8m.c.

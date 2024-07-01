@@ -43,7 +43,7 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
 }
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
-static struct irq_t mbox_irq_info[2] = {0};
+static struct irq_t mbox_irq_info[3] = {0};
 
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
@@ -74,6 +74,22 @@ void CMU_MHU1_Receiver_Handler(void)
     spm_handle_interrupt(mbox_irq_info[1].p_pt, mbox_irq_info[1].p_ildi);
 }
 #endif /* MHU_AP_NS_TO_RSE */
+
+#ifdef MHU_AP_S_TO_RSE
+/* Platform specific inter-processor communication interrupt handler. */
+void CMU_MHU2_Receiver_Handler(void)
+{
+    (void)tfm_multi_core_hal_receive(&MHU_AP_S_TO_RSE_DEV,
+                                     &MHU_RSE_TO_AP_S_DEV,
+                                     mbox_irq_info[2].p_ildi->source);
+
+    /*
+     * SPM will send a MAILBOX_INTERRUPT_SIGNAL to the corresponding partition
+     * indicating that a message has arrived and can be processed.
+     */
+    spm_handle_interrupt(mbox_irq_info[2].p_pt, mbox_irq_info[2].p_ildi);
+}
+#endif /* MHU_AP_S_TO_RSE */
 
 enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
                                        const struct irq_load_info_t *p_ildi)
@@ -131,6 +147,41 @@ enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
     return TFM_HAL_ERROR_NOT_SUPPORTED;
 }
 #endif /* MHU_AP_NS_TO_RSE */
+
+#ifdef MHU_AP_S_TO_RSE
+enum tfm_hal_status_t mailbox_irq_2_init(void *p_pt,
+                                         const struct irq_load_info_t *p_ildi)
+{
+    mbox_irq_info[2].p_pt = p_pt;
+    mbox_irq_info[2].p_ildi = p_ildi;
+
+    /* Set MHU interrupt priority to the same as PendSV (the lowest)
+     * TODO: Consider advantages/disadvantages of setting it one higher
+     */
+    NVIC_SetPriority(CMU_MHU2_Receiver_IRQn, NVIC_GetPriority(PendSV_IRQn));
+
+    /* CMU_MHU2 is a secure peripheral, so its IRQs have to target S state */
+    NVIC_ClearTargetState(CMU_MHU2_Receiver_IRQn);
+    NVIC_DisableIRQ(CMU_MHU2_Receiver_IRQn);
+
+    if (tfm_multi_core_register_client_id_range(&MHU_RSE_TO_AP_S_DEV,
+                                                p_ildi->source)
+        != SPM_SUCCESS) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    return TFM_HAL_SUCCESS;
+}
+#else /* MHU_AP_S_TO_RSE */
+enum tfm_hal_status_t mailbox_irq_2_init(void *p_pt,
+                                         const struct irq_load_info_t *p_ildi)
+{
+    (void)p_pt;
+    (void)p_ildi;
+
+    return TFM_HAL_ERROR_NOT_SUPPORTED;
+}
+#endif /* MHU_AP_S_TO_RSE */
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
 
 static struct irq_t dma0_ch0_irq = {0};

@@ -21,7 +21,7 @@
 #define SIZE_DEF_BL2_IMAGE          (0x20000) /* 128 KB */
 
 /* Secure Firmware */
-#define SIZE_DEF_S_IMAGE            (0x60000) /* 384 KB */
+#define SIZE_DEF_S_IMAGE            (0x40000) /* 256 KB */
 
 /* Non-Secure Firmware */
 #define SIZE_DEF_NS_IMAGE           (0x60000) /* 384 KB */

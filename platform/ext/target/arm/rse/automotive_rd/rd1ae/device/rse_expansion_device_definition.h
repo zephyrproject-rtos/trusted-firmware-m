@@ -34,6 +34,8 @@ extern "C" {
 /* Message Handling Units (MHU) */
 extern struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV;
 extern struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV;
+extern struct mhu_v3_x_dev_t MHU_AP_S_TO_RSE_DEV;
+extern struct mhu_v3_x_dev_t MHU_RSE_TO_AP_S_DEV;
 extern struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV;
 extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
 

@@ -59,6 +59,20 @@ static enum tfm_plat_err_t initialize_mhu(void)
     }
 #endif /* MHU_RSE_TO_AP_NS */
 
+#ifdef MHU_RSE_TO_AP_S
+    err = mhu_init_sender(&MHU_RSE_TO_AP_S_DEV);
+    if (err != MHU_ERR_NONE) {
+        SPMLOG_ERRMSGVAL("[COMMS] RSE to AP_S MHU driver init failed: ", err);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    err = mhu_init_receiver(&MHU_AP_S_TO_RSE_DEV);
+    if (err != MHU_ERR_NONE) {
+        SPMLOG_ERRMSGVAL("[COMMS] AP_S to RSE MHU driver init failed: ", err);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+#endif /* MHU_RSE_TO_AP_S */
+
     SPMLOG_DBGMSG("[COMMS] MHU driver initialized successfully.\r\n");
     return TFM_PLAT_ERR_SUCCESS;
 }

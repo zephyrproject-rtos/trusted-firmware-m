@@ -25,4 +25,8 @@
 #ifndef __HOST_DEVICE_CFG_H__
 #define __HOST_DEVICE_CFG_H__
 
+/* MHU */
+#define MHU_AP_S_TO_RSE
+#define MHU_RSE_TO_AP_S
+
 #endif /* __HOST_DEVICE_CFG_H__ */

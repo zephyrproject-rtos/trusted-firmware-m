@@ -90,6 +90,18 @@ struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV = {
     .subversion = 0
 };
 
+struct mhu_v3_x_dev_t MHU_AP_S_TO_RSE_DEV = {
+    .base = MHU2_RECEIVER_BASE_S,
+    .frame = MHU_V3_X_MBX_FRAME,
+    .subversion = 0
+};
+
+struct mhu_v3_x_dev_t MHU_RSE_TO_AP_S_DEV = {
+    .base = MHU2_SENDER_BASE_S,
+    .frame = MHU_V3_X_PBX_FRAME,
+    .subversion = 0
+};
+
 struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV = {
     .base = MHU4_RECEIVER_BASE_S,
     .frame = MHU_V3_X_MBX_FRAME,
