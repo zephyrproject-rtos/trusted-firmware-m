@@ -39,7 +39,7 @@
     },
     {
       "description": "Protected Storage Partition",
-      "manifest": "platform/ext/target/arm/rse/automotive_rd/rd1ae/manifest/tfm_protected_storage.yaml",
+      "manifest": "secure_fw/partitions/protected_storage/tfm_protected_storage.yaml",
       "output_path": "secure_fw/partitions/protected_storage",
       "conditional": "TFM_PARTITION_PROTECTED_STORAGE",
       "version_major": 0,
@@ -52,8 +52,22 @@
       }
     },
     {
+      "description": "Internal Trusted Storage Partition",
+      "manifest": "secure_fw/partitions/internal_trusted_storage/tfm_internal_trusted_storage.yaml",
+      "output_path": "secure_fw/partitions/internal_trusted_storage",
+      "conditional": "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 257,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_its.*"
+         ]
+      }
+    },
+    {
       "description": "TFM Crypto Service",
-      "manifest": "platform/ext/target/arm/rse/automotive_rd/rd1ae/manifest/tfm_crypto.yaml",
+      "manifest": "secure_fw/partitions/crypto/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
       "conditional": "TFM_PARTITION_CRYPTO",
       "version_major": 0,
