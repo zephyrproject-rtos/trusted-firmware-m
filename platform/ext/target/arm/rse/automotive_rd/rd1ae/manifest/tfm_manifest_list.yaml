@@ -39,7 +39,7 @@
     },
     {
       "description": "TFM Crypto Service",
-      "manifest": "platform/ext/target/arm/rse/common/manifest/tfm_crypto.yaml",
+      "manifest": "platform/ext/target/arm/rse/automotive_rd/rd1ae/manifest/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
       "conditional": "TFM_PARTITION_CRYPTO",
       "version_major": 0,
