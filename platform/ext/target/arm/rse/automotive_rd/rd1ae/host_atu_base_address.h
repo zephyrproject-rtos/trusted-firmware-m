@@ -285,4 +285,10 @@ enum rse_atu_ids {
 /* Safety Island GIC region ATU size */
 #define HOST_SI_GIC_VIEW_SIZE           0x400000U
 
+/* ATU region mapping to access Protected Storage */
+#define HOST_ACCESS_PS_BASE_S      (HOST_ACCESS_BASE_NS + RSE_FLASH_IMG_SIZE)
+#define HOST_ACCESS_PS_BASE_OFFSET RSE_FLASH_IMG_SIZE
+#define HOST_FLASH0_PS_BASE        (0x8000060000000ULL + RSE_FLASH_IMG_SIZE)
+#define HOST_FLASH0_PS_SIZE        RSE_FLASH_PS_SIZE
+
 #endif  /* __HOST_ATU_BASE_ADDRESS_H__ */

@@ -38,6 +38,20 @@
       "non_ffm_attributes": ['ns_agent']
     },
     {
+      "description": "Protected Storage Partition",
+      "manifest": "platform/ext/target/arm/rse/automotive_rd/rd1ae/manifest/tfm_protected_storage.yaml",
+      "output_path": "secure_fw/partitions/protected_storage",
+      "conditional": "TFM_PARTITION_PROTECTED_STORAGE",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 256,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_ps.*"
+         ],
+      }
+    },
+    {
       "description": "TFM Crypto Service",
       "manifest": "platform/ext/target/arm/rse/automotive_rd/rd1ae/manifest/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
