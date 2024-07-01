@@ -116,7 +116,7 @@ LTS content
 On every TF-M release the following items are backported from the **release**
 branch to active LTS branches:
 
-- Critical bugs
+- Critical bugs, registered and tracked in :doc:`/contributing/issue_tracking`
 - Security vulnerability fixes
 - A new platform port with code changes restricted to the relevant platform folder only.
 
