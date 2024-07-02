@@ -236,8 +236,12 @@ config MCUBOOT_ENC_KEY_LEN
     default 128
 
 config MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH
-    string "Mbedtls config file to use with MCUboot"
+    string "Mbed TLS config file to use with MCUboot"
     default "$(TFM_SOURCE_DIR)/bl2/ext/mcuboot/config/mcuboot-mbedtls-cfg.h"
+
+config MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH
+    string "Mbed TLS PSA Crypto config file to use with MCUboot"
+    default "$(TFM_SOURCE_DIR)/bl2/ext/mcuboot/config/mcuboot_crypto_config.h"
 
 choice
     prompt "MCUBoot Log Level"

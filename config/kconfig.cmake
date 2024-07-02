@@ -171,7 +171,7 @@ if(NOT EXISTS ${PLATFORM_KCONFIG} AND NOT EXISTS ${DOTCONFIG_FILE})
     set(PLATFORM_KCONFIG_OPTIONS "")
     set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
 
-    convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/preload.cmake PLATFORM_KCONFIG_OPTIONS)
+    convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/cpuarch.cmake PLATFORM_KCONFIG_OPTIONS)
     file(WRITE ${PLATFORM_KCONFIG} ${PLATFORM_KCONFIG_OPTIONS})
 
     if(EXISTS ${TARGET_PLATFORM_PATH}/config.cmake)
