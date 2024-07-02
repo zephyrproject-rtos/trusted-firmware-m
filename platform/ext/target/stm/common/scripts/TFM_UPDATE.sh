@@ -60,7 +60,7 @@ if [ "$slot2" == $l5 ]; then
 external_loader="-el $cubedir/ExternalLoader/MX25LM51245G_STM32L562E-DK.stldr"
 fi
 connect_no_reset="-c port=SWD "$sn_option" mode=UR $external_loader"
-connect="-c port=SWD "$sn_option" mode=UR --hardRst $external_loader"
+connect="-c port=SWD "$sn_option" mode=UR $external_loader"
 
 echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
