@@ -988,12 +988,6 @@ static cc3xx_err_t gcm_finish(uint32_t *tag)
 
     cc3xx_lowlevel_set_engine(CC3XX_ENGINE_AES);
 
-    /* Clear number of remaining bytes. If we enter gcm_finish() when the
-     * engine has never been set for crypted data, the value of aes_remaining_bytes
-     * has never been flushed by a call to AES, hence clear it manually here
-     */
-    P_CC3XX->aes.aes_remaining_bytes = 0x0U;
-
     cc3xx_lowlevel_dma_set_output(calculated_tag, sizeof(calculated_tag));
     cc3xx_lowlevel_dma_buffered_input_data(final_block, AES_GCM_FIELD_POINT_SIZE,
                                   true);
@@ -1026,19 +1020,22 @@ static cc3xx_err_t cmac_finish(uint32_t *tag)
 static cc3xx_err_t ccm_finish(uint32_t *tag)
 {
     uint32_t calculated_tag[AES_IV_LEN / sizeof(uint32_t)];
+    volatile uint32_t *calculated_tag_iv_register = P_CC3XX->aes.aes_iv_0;
 
     /* If tunnelling is disabled, CCM mode is CBC_MAC with the special IV
      * calculations. Depending on whether tunnelling modes is enabled or not,
      * the IV that has the final value is different.
      */
 #ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
-    calculated_tag[0] = P_CC3XX->aes.aes_iv_1[0];
-    calculated_tag[1] = P_CC3XX->aes.aes_iv_1[1];
-    calculated_tag[2] = P_CC3XX->aes.aes_iv_1[2];
-    calculated_tag[3] = P_CC3XX->aes.aes_iv_1[3];
-#else
-    get_iv(calculated_tag);
+    if (aes_state.crypted_length != 0) {
+        calculated_tag_iv_register = P_CC3XX->aes.aes_iv_1;
+    }
 #endif /* CC3XX_CONFIG_AES_TUNNELLING_ENABLE */
+
+    calculated_tag[0] = calculated_tag_iv_register[0];
+    calculated_tag[1] = calculated_tag_iv_register[1];
+    calculated_tag[2] = calculated_tag_iv_register[2];
+    calculated_tag[3] = calculated_tag_iv_register[3];
 
     /* Finally, encrypt the IV value with the original counter 0 value. */
     set_ctr(aes_state.counter_0);
@@ -1059,39 +1056,55 @@ cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size)
     /* Check alignment */
     assert(((uintptr_t)tag & 0b11) == 0);
 
+    /* Check how much data is in the DMA block buffer, and set
+     * aes_remaining_bytes accordingly.
+     */
+    P_CC3XX->aes.aes_remaining_bytes = dma_state.block_buf_size_in_use;
+
     /* The DMA buffer doesn't save the engine state when the block buffer was
      * created, so we need to configure the engine to the right state before the
      * final flush.
      */
     if (aes_state.crypted_length == 0 && aes_state.authed_length != 0) {
         configure_engine_for_authed_data(&write_output);
+
+        /* Most AEAD-only operations require a pad-flush, except CMAC */
+        switch (aes_state.mode) {
+        default:
+            cc3xx_lowlevel_dma_flush_buffer(true);
+            break;
+    #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
+        case CC3XX_AES_MODE_CMAC:
+    #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
+            cc3xx_lowlevel_dma_flush_buffer(false);
+            break;
+        }
     } else if (aes_state.crypted_length != 0) {
         configure_engine_for_crypted_data(&write_output);
-    }
 
-    /* Check how much data is in the DMA block buffer, and set
-     * aes_remaining_bytes accordingly.
-     */
-    P_CC3XX->aes.aes_remaining_bytes = dma_state.block_buf_size_in_use;
-
-    /* Set remaining data to the amount of data in the DMA buffer */
-
-    /* ECB and CBC modes require padding since they can't have non-block-sized
-     * ciphertexts. Other modes don't need padding.
-     */
-    switch (aes_state.mode) {
+        /* ECB and CBC modes require padding since they can't have non-block-sized
+         * ciphertexts. Other modes don't need padding.
+         */
+        switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_ECB_ENABLE
-    case CC3XX_AES_MODE_ECB:
+        case CC3XX_AES_MODE_ECB:
 #endif /* CC3XX_CONFIG_AES_ECB_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CBC_ENABLE
-    case CC3XX_AES_MODE_CBC:
+        case CC3XX_AES_MODE_CBC:
 #endif /* CC3XX_CONFIG_AES_CBC_ENABLE */
-        cc3xx_lowlevel_dma_flush_buffer(true);
-        break;
-    default:
-        cc3xx_lowlevel_dma_flush_buffer(false);
-        break;
+            cc3xx_lowlevel_dma_flush_buffer(true);
+            break;
+        default:
+            cc3xx_lowlevel_dma_flush_buffer(false);
+            break;
+        }
     }
+
+    /* At this point all the bytes have been input into the actual AES
+     * operation, so we can unset aes_remaining_bytes in case a finish step
+     * requires running a secondary AES operation.
+     */
+    P_CC3XX->aes.aes_remaining_bytes = 0x0U;
 
     /* Get the size before any tag is produced */
     if (size != NULL) {
