@@ -14,6 +14,8 @@
 enum rse_supported_chip_ids {
     RSE_CHIP_ID_0 = 0,
     RSE_CHIP_ID_1,
+    RSE_CHIP_ID_2,
+    RSE_CHIP_ID_3,
     RSE_MAX_SUPPORTED_CHIPS,
 };
 
