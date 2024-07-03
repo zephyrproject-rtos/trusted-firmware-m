@@ -137,7 +137,8 @@ else()
     message(FATAL_ERROR "Invalid TP mode ${RSE_TP_MODE}")
 endif()
 
-set(RSE_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
+# FIXME Enable this once the FVP is fixed
+set(RSE_ENCRYPTED_OTP_KEYS              OFF        CACHE BOOL "Whether keys in OTP are encrypted")
 set(RSE_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
 
 set(RSE_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSE OTP words can be programmed bit by bit, or whole words must be programmed at once")
