@@ -487,7 +487,7 @@ if(RSE_SUPPORT_ROM_LIB_RELOCATION)
     target_compile_options(platform_bl1_2
         PUBLIC
             # Prevent BL1_2 from using r9
-            -ffixed-reg=r9
+            -ffixed-r9
             # Inlining causes gcc to generate reads and writes to r9. This is
             # probably a bug, but work around it by not inlining functions.
             -fno-inline
