@@ -8,6 +8,7 @@ Previously known as Runtime Security Subsystem (RSS).
     :maxdepth: 1
 
     RSE introduction <readme.rst>
+    RSE integration guide <rse_integration_guide.rst>
     RSE communication design <rse_comms.rst>
     RSE hardware key management <rse_key_management.rst>
     RSE provisioning <rse_provisioning.rst>
