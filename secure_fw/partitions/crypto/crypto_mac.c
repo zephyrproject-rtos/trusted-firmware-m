@@ -71,6 +71,9 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
     if ((sid == TFM_CRYPTO_MAC_SIGN_SETUP_SID) ||
         (sid == TFM_CRYPTO_MAC_VERIFY_SETUP_SID)) {
         p_handle = out_vec[0].base;
+        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(uint32_t)) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
         *p_handle = iov->op_handle;
         status = tfm_crypto_operation_alloc(TFM_CRYPTO_MAC_OPERATION,
                                             out_vec[0].base,
@@ -89,6 +92,9 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
              * override the original handle value in client, after lookup fails.
              */
             p_handle = out_vec[0].base;
+            if (out_vec[0].base == NULL || out_vec[0].len < sizeof(uint32_t)) {
+                return PSA_ERROR_PROGRAMMER_ERROR;
+            }
             *p_handle = iov->op_handle;
         }
     }
