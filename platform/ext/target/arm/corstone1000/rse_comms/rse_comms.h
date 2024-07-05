@@ -15,8 +15,13 @@
 extern "C" {
 #endif
 
-/* size suits to fit the largest message too (EFI variables) */
-#define RSE_COMMS_PAYLOAD_MAX_SIZE (0x2100)
+/*
+ * The size suits to fit the largest message too (EFI variables)
+ * This size is defined by the Host's software stack.
+ * The size was chosen by monitoring the messages that are coming
+ * from the Trusted Services SE Proxy partition.
+ */
+#define RSE_COMMS_PAYLOAD_MAX_SIZE (0x43C0)
 
 /*
  * Allocated for each client request.
