@@ -24,7 +24,7 @@
   "manifest_list": [
     {
       "description": "Non-Secure Mailbox Agent",
-      "manifest": "platform/ext/target/arm/rse/rdfremont/manifest/ns_agent_mailbox.yaml",
+      "manifest": "platform/ext/target/arm/rse/rdv3/manifest/ns_agent_mailbox.yaml",
       "output_path": "secure_fw/partitions/ns_agent_mailbox",
       "conditional": "TFM_PARTITION_NS_AGENT_MAILBOX",
       "version_major": 0,

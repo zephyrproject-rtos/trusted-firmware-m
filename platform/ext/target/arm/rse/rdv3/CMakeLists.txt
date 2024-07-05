@@ -10,10 +10,10 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../common common)
 
-# TFM_PLATFORM_VARIANT value for supported RD-Fremont platform variants:
-# - '0' for RD-Fremont platform
-# - '1' for RD-Fremont-Cfg1 platform
-# - '2' for RD-Fremont-Cfg2 platform
+# TFM_PLATFORM_VARIANT value for supported RD-V3 platform variants:
+# - '0' for RD-V3 platform
+# - '1' for RD-V3-Cfg1 platform
+# - '2' for RD-V3-Cfg2 platform
 
 if (TFM_PLATFORM_VARIANT STREQUAL "0")
       target_compile_definitions(platform_common_interface
@@ -26,9 +26,9 @@ elseif (TFM_PLATFORM_VARIANT STREQUAL "2")
                                  INTERFACE PLATFORM_VARIANT=2)
 else()
       message(FATAL_ERROR "Please set TFM_PLATFORM_VARIANT to \n"
-                                "'0' for RD-Fremont\n"
-                                "'1' for RD-Fremont-Cfg1\n"
-                                "'2' for RD-Fremont-Cfg2\n")
+                                "'0' for RD-V3\n"
+                                "'1' for RD-V3-Cfg1\n"
+                                "'2' for RD-V3-Cfg2\n")
 endif()
 
 #========================= Platform Region Defs ===============================#
