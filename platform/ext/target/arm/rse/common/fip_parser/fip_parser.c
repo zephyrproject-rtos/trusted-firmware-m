@@ -13,12 +13,11 @@
 
 #include <string.h>
 
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
-
-enum tfm_plat_err_t fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_size,
+enum tfm_plat_err_t fip_get_entry_by_uuid(const ARM_DRIVER_FLASH *flash_dev,
+                                          uint32_t fip_offset, uint32_t atu_slot_size,
                                           uuid_t uuid, uint64_t *offset, size_t *size)
 {
-    ARM_FLASH_CAPABILITIES DriverCapabilities = FLASH_DEV_NAME.GetCapabilities();
+    ARM_FLASH_CAPABILITIES DriverCapabilities = flash_dev->GetCapabilities();
     /* Valid entries for data item width */
     uint32_t data_width_byte[] = {
         sizeof(uint8_t),
@@ -35,8 +34,8 @@ enum tfm_plat_err_t fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_s
     /* The NULL UUID is all-zeroes */
     memset(&null_uuid, 0, sizeof(null_uuid));
 
-    rc = FLASH_DEV_NAME.ReadData(fip_base - FLASH_BASE_ADDRESS, &toc_header,
-                                 sizeof(toc_header) / data_width);
+    rc = flash_dev->ReadData(fip_offset, &toc_header,
+                             sizeof(toc_header) / data_width);
     if (rc != sizeof(toc_header) / data_width) {
         return TFM_PLAT_ERR_FIP_TOC_HEADER_INVALID_READ;
     }
@@ -53,8 +52,8 @@ enum tfm_plat_err_t fip_get_entry_by_uuid(uint32_t fip_base, uint32_t atu_slot_s
             return TFM_PLAT_ERR_FIP_TOC_ENTRY_OVERFLOW;
         }
 
-        rc = FLASH_DEV_NAME.ReadData(fip_base + idx - FLASH_BASE_ADDRESS,
-                                     &toc_entry, sizeof(toc_entry) / data_width);
+        rc = flash_dev->ReadData(fip_offset + idx, &toc_entry,
+                                 sizeof(toc_entry) / data_width);
         if (rc != sizeof(toc_entry) / data_width) {
             return TFM_PLAT_ERR_FIP_TOC_ENTRY_INVALID_READ;
         }

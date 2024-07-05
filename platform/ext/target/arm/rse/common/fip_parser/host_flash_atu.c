@@ -24,6 +24,9 @@
 #define RSE_ATU_REGION_OUTPUT_IMAGE_SLOT   5
 #define RSE_ATU_REGION_OUTPUT_HEADER_SLOT  6
 
+/* Flash device names must be specified by target */
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+
 static inline uint32_t round_down(uint32_t num, uint32_t boundary)
 {
     return num - (num % boundary);
@@ -98,9 +101,10 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
         return plat_err;
     }
 
-    plat_err = fip_get_entry_by_uuid(HOST_FLASH0_TEMP_BASE_S + alignment_offset,
-                                     atu_slot_size - alignment_offset,
-                                     image_uuid, &region_offset, &region_size);
+    plat_err = fip_get_entry_by_uuid(&FLASH_DEV_NAME,
+                HOST_FLASH0_TEMP_BASE_S - FLASH_BASE_ADDRESS + alignment_offset,
+                atu_slot_size - alignment_offset,
+                image_uuid, &region_offset, &region_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
