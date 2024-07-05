@@ -112,6 +112,11 @@ static psa_status_t tfm_crypto_get_scratch_owner(int32_t *id)
 
 static psa_status_t tfm_crypto_alloc_scratch(size_t requested_size, void **buf)
 {
+    /* Prevent ALIGN() from overflowing */
+    if (requested_size > SIZE_MAX - (TFM_CRYPTO_IOVEC_ALIGNMENT - 1)) {
+        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    }
+
     /* Ensure alloc_index remains aligned to the required iovec alignment */
     requested_size = ALIGN(requested_size, TFM_CRYPTO_IOVEC_ALIGNMENT);
 
