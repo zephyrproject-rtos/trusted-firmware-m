@@ -87,6 +87,7 @@ set(TFM_HALT_ON_FATAL_ERRORS            OFF         CACHE BOOL      "On fatal er
 set(TFM_LOG_ERR_FILE_AND_LINE           OFF         CACHE BOOL      "Log file name and line numbers of fatal and non-fatal errors")
 
 set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal errors in the secure firmware, halt instead of rebooting.")
+set(CONFIG_TFM_BACKTRACE_ON_CORE_PANIC  OFF         CACHE BOOL       "On fatal errors in secure firmware, log backtrace and then halt")
 
 set(CONFIG_TFM_STACK_WATERMARKS         OFF         CACHE BOOL      "Whether to pre-fill partition stacks with a set value to help determine stack usage")
 
