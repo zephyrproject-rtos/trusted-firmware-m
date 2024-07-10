@@ -446,21 +446,14 @@ endif()
 
 if (RSE_USE_ROM_LIB_FROM_SRAM)
     add_custom_target(bl1_1_shared_symbols_in_sram
-        DEPENDS bl1_1
-        SOURCES ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
+        COMMAND ${CMAKE_OBJCOPY}
+            ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+            --change-section-address .text\*+0x20010000
+            ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
     )
 
-    add_custom_command(
-        OUTPUT ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
-        DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
-        COMMAND ${CMAKE_OBJCOPY} ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_OUTPUT_FILE_SUFFIX}
-                --change-section-address .text\*+0x20010000
-                ${CMAKE_BINARY_DIR}/bin/bl1_1${CODE_SHARING_INPUT_FILE_SUFFIX}
-    )
-
-    add_dependencies(bl1_2
-        bl1_1_shared_symbols_in_sram
-    )
+    add_dependencies(bl1_1_shared_symbols_in_sram bl1_1 bl1_1_shared_symbols)
+    add_dependencies(bl1_2 bl1_1_shared_symbols_in_sram)
 endif()
 
 target_sources(bl1_1_shared_lib
