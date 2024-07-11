@@ -92,7 +92,15 @@ target_compile_definitions(rse_bl1_tests
 # The provisioning code should link the ROM lib from ROM, not from SRAM. This
 # variable set only applies in this file scope
 set(CODE_SHARING_INPUT_FILE_SUFFIX ${CODE_SHARING_OUTPUT_FILE_SUFFIX})
-target_link_shared_code(rse_bl1_tests
-    bl1_1
-    bl1_2
-)
+
+if (TEST_BL1_1)
+    target_link_shared_code(rse_bl1_tests
+        bl1_1
+    )
+endif()
+
+if (TEST_BL1_2)
+    target_link_shared_code(rse_bl1_tests
+        bl1_2
+    )
+endif()
