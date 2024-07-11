@@ -409,13 +409,23 @@ macro(target_share_symbols target)
     endforeach()
 
 
-    # strip all the symbols except those proveded as arguments. Long inline
+    # strip all the symbols except those provided as arguments. Long inline
     # python scripts aren't ideal, but this is both portable and possibly easier
     # to maintain than trying to filter files at build time in cmake.
-    add_custom_command(TARGET ${target}
-        POST_BUILD
+    add_custom_target(${target}_shared_symbols
         VERBATIM
-        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX} ${KEEP_SYMBOL_LIST})
+        COMMAND python3
+            -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();"
+            $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+            ${KEEP_SYMBOL_LIST}
+    )
+
+    # Ensure ${target} is build before $<TARGET_FILE:${target}> is used to generate ${target}_shared_symbols
+    add_dependencies(${target}_shared_symbols ${target})
+    # Allow the global clean target to rm the ${target}_shared_symbols created
+    set_target_properties(${target}_shared_symbols PROPERTIES
+        ADDITIONAL_CLEAN_FILES $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+    )
 
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --undefined=)
@@ -430,7 +440,7 @@ macro(target_share_symbols target)
             --diag_warning 6474
     )
 
-    # Ask armclang to produce a symdefs file that will
+    # Ask armclang to produce a symdefs file
     target_link_options(${target}
         PRIVATE
             --symdefs=$<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
@@ -448,7 +458,11 @@ macro(target_link_shared_code target)
             endif()
         endif()
 
-        add_dependencies(${target} ${symbol_provider})
+        # Ensure ${symbol_provider}_shared_symbols is built before ${target}
+        add_dependencies(${target} ${symbol_provider}_shared_symbols)
+        # ${symbol_provider}_shared_symbols - a custom target is always considered out-of-date
+        # To only link when necessary, depend on ${symbol_provider} instead
+        set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${symbol_provider}>)
         target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
