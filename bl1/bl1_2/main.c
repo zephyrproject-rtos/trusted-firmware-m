@@ -148,6 +148,9 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     FIH_RET(fih_rc);
 }
 
+#ifndef TEST_BL1_2
+static
+#endif
 fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
@@ -176,12 +179,13 @@ fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
     FIH_RET(FIH_SUCCESS);
 }
 
-fih_int copy_and_decrypt_image(uint32_t image_id)
+#ifndef TEST_BL1_2
+static
+#endif
+fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
 {
     int rc;
     struct bl1_2_image_t *image_to_decrypt;
-    struct bl1_2_image_t *image_after_decrypt =
-        (struct bl1_2_image_t *)BL2_IMAGE_START;
     uint8_t key_buf[32];
     uint8_t label[] = "BL2_DECRYPTION_KEY";
 
@@ -197,9 +201,8 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     /* Copy everything that isn't encrypted, to prevent TOCTOU attacks and
      * simplify logic.
      */
-    memcpy(image_after_decrypt, image_to_decrypt,
-           sizeof(struct bl1_2_image_t) -
-           sizeof(image_after_decrypt->protected_values.encrypted_data));
+    memcpy(image, image_to_decrypt, sizeof(struct bl1_2_image_t) -
+           sizeof(image->protected_values.encrypted_data));
 #else
     /* If the flash isn't memory-mapped, defer to the flash driver to copy the
      * entire block in to SRAM. We'll then do the decrypt in-place.
@@ -212,29 +215,29 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
      * values to a sensible range. In this case, we choose 1024 as the bound as
      * it is the same as the max amount of signatures as a H=10 LMS key.
      */
-    if (image_after_decrypt->protected_values.security_counter >= 1024) {
+    if (image->protected_values.security_counter >= 1024) {
         FIH_RET(FIH_FAILURE);
     }
 
     /* The image security counter is used as a KDF input */
     rc = bl1_derive_key(TFM_BL1_KEY_BL2_ENCRYPTION, label, sizeof(label),
-                        (uint8_t *)&image_after_decrypt->protected_values.security_counter,
-                        sizeof(image_after_decrypt->protected_values.security_counter),
+                        (uint8_t *)&image->protected_values.security_counter,
+                        sizeof(image->protected_values.security_counter),
                         key_buf, sizeof(key_buf));
     if (rc) {
         FIH_RET(fih_int_encode_zero_equality(rc));
     }
 
     rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, key_buf,
-                                 image_after_decrypt->header.ctr_iv,
+                                 image->header.ctr_iv,
                                  (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
-                                 sizeof(image_after_decrypt->protected_values.encrypted_data),
-                                 (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
+                                 sizeof(image->protected_values.encrypted_data),
+                                 (uint8_t *)&image->protected_values.encrypted_data);
     if (rc) {
         FIH_RET(fih_int_encode_zero_equality(rc));
     }
 
-    if (image_after_decrypt->protected_values.encrypted_data.decrypt_magic
+    if (image->protected_values.encrypted_data.decrypt_magic
             != BL1_2_IMAGE_DECRYPT_MAGIC_EXPECTED) {
         FIH_RET(FIH_FAILURE);
     }
@@ -245,14 +248,13 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
 static fih_int bl1_2_validate_image(uint32_t image_id)
 {
     fih_int fih_rc = FIH_FAILURE;
-    struct bl1_2_image_t *image;
+    struct bl1_2_image_t *image = (struct bl1_2_image_t *)BL2_IMAGE_START;
 
-    FIH_CALL(copy_and_decrypt_image, fih_rc, image_id);
+    FIH_CALL(copy_and_decrypt_image, fih_rc, image_id, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL2 image failed to decrypt\r\n");
         FIH_RET(fih_rc);
     }
-    image = (struct bl1_2_image_t *)BL2_IMAGE_START;
 
     BL1_LOG("[INF] BL2 image decrypted successfully\r\n");
 

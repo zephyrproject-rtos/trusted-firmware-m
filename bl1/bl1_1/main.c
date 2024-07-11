@@ -61,6 +61,9 @@ static void collect_boot_measurement(void)
 }
 #endif /* TFM_MEASURED_BOOT_API */
 
+#ifndef TEST_BL1_1
+static
+#endif
 fih_int bl1_1_validate_image_at_addr(const uint8_t *image)
 {
     enum tfm_plat_err_t plat_err;
