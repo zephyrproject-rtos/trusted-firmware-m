@@ -16,8 +16,7 @@
 
 /* Enum for id of each doorbell channel of the scp to rse MHU */
 enum mhu_scp_rse_doorbell_channel {
-    MHU_SCP_RSE_RESERVED_CHANNEL_ID = 0,
-    MHU_SCP_RSE_SYSTOP_ON_CHANNEL_ID = 1,
+    MHU_SCP_RSE_SYSTOP_ON_CHANNEL_ID = 0,
     MHU_SCP_RSE_CHANNEL_COUNT,
 };
 
