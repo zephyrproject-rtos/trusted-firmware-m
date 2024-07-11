@@ -68,7 +68,6 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     uint32_t bl1_2_len = sizeof(data.bl1_2_image);
     uint8_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT) generated_key_buf[32];
     int32_t int_err;
-    enum integrity_checker_error_t ic_err;
 
     BL1_LOG("[INF] Provisioning GUK\r\n");
     err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
