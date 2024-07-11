@@ -81,7 +81,9 @@ enum sysctrl_xSNI_ids {
     /* Request from RSE and SCP targeting LCP address space */
     SYSCTRL_RSE_SCP_ASNI_ID,
     /* Request from SCP ATU */
-    SYSCTRL_SCP_ASNI_ID
+    SYSCTRL_SCP_ASNI_ID,
+    /* Request from SI */
+    SYSCTRL_SI_ASNI_ID,
 };
 
 /* Interface ID of xMNI components - requester interfaces */
@@ -102,6 +104,8 @@ enum sysctrl_xMNI_ids {
     SYSCTRL_RSE_MCP_AMNI_ID,
     /* Targets SCP address space */
     SYSCTRL_RSE_SCP_AMNI_ID,
+    /* Targets SI address space */
+    SYSCTRL_SI_AMNI_ID,
     /* Targets CMN GPV registers */
     SYSCTRL_CMN_PMNI_ID,
     /* Targets System RAS agent in SCB */
@@ -111,7 +115,7 @@ enum sysctrl_xMNI_ids {
     /* Targets SYSCTRL SMMU registers */
     SYSCTRL_TCU_PMNI_ID,
     /* Targets the System Control NoC S3 registers (default target) */
-    SYSCTRL_CONFIG_SPACE_ID = 0xF
+    SYSCTRL_CONFIG_SPACE_ID = 0xF,
 };
 
 /* APU IDs of the initiator for filter access */
