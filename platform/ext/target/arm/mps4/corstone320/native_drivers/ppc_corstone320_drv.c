@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "ppc_corstone315_drv.h"
-#include "ppc_corstone315_reg_map.h"
+#include "ppc_corstone320_drv.h"
+#include "ppc_corstone320_reg_map.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -108,7 +108,7 @@ struct mps4_corstone3xx_nsacfg_block_t {
     volatile uint32_t cidr3;           /* 0xFFC (R/ ) Component ID 3 */
 };
 
-enum ppc_corstone315_error_t ppc_corstone315_init(struct ppc_corstone315_dev_t* dev)
+enum ppc_corstone320_error_t ppc_corstone320_init(struct ppc_corstone320_dev_t* dev)
 {
     struct mps4_corstone3xx_sacfg_block_t* p_sacfg =
                          (struct mps4_corstone3xx_sacfg_block_t*)dev->cfg->sacfg_base;
@@ -117,7 +117,7 @@ enum ppc_corstone315_error_t ppc_corstone315_init(struct ppc_corstone315_dev_t* 
 
     switch(dev->cfg->ppc_name) {
         /* Case for MAIN0 */
-        case PPC_CORSTONE315_MAIN0:
+        case PPC_CORSTONE320_MAIN0:
             dev->data->sacfg_ns_ppc   = &p_sacfg->mainnsppc0;
             dev->data->sacfg_sp_ppc   = &p_sacfg->mainspppc0;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->mainnspppc0;
@@ -125,25 +125,25 @@ enum ppc_corstone315_error_t ppc_corstone315_init(struct ppc_corstone315_dev_t* 
             break;
 
         /* Case for MAIN EXPX */
-        case PPC_CORSTONE315_MAIN_EXP0:
+        case PPC_CORSTONE320_MAIN_EXP0:
             dev->data->sacfg_ns_ppc   = &p_sacfg-> mainnsppcexp0;
             dev->data->sacfg_sp_ppc   = &p_sacfg-> mainspppcexp0;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->mainnspppcexp0;
             dev->data->int_bit_mask    = MAIN_PPCEXP0_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_MAIN_EXP1:
+        case PPC_CORSTONE320_MAIN_EXP1:
             dev->data->sacfg_ns_ppc   = &p_sacfg->mainnsppcexp1;
             dev->data->sacfg_sp_ppc   = &p_sacfg->mainspppcexp1;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->mainnspppcexp1;
             dev->data->int_bit_mask    = MAIN_PPCEXP1_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_MAIN_EXP2:
+        case PPC_CORSTONE320_MAIN_EXP2:
             dev->data->sacfg_ns_ppc   = &p_sacfg->mainnsppcexp2;
             dev->data->sacfg_sp_ppc   = &p_sacfg->mainspppcexp2;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->mainnspppcexp2;
             dev->data->int_bit_mask    = MAIN_PPCEXP2_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_MAIN_EXP3:
+        case PPC_CORSTONE320_MAIN_EXP3:
             dev->data->sacfg_ns_ppc   = &p_sacfg->mainnsppcexp3;
             dev->data->sacfg_sp_ppc   = &p_sacfg->mainspppcexp3;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->mainnspppcexp3;
@@ -151,13 +151,13 @@ enum ppc_corstone315_error_t ppc_corstone315_init(struct ppc_corstone315_dev_t* 
             break;
 
         /* Case for PERIPHX */
-        case PPC_CORSTONE315_PERIPH0:
+        case PPC_CORSTONE320_PERIPH0:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppc0;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppc0;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppc0;
             dev->data->int_bit_mask    = PERIPH_PPC0_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_PERIPH1:
+        case PPC_CORSTONE320_PERIPH1:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppc1;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppc1;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppc1;
@@ -165,77 +165,77 @@ enum ppc_corstone315_error_t ppc_corstone315_init(struct ppc_corstone315_dev_t* 
             break;
 
         /* Case for PERIPH EXPX */
-        case PPC_CORSTONE315_PERIPH_EXP0:
+        case PPC_CORSTONE320_PERIPH_EXP0:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppcexp0;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppcexp0;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppcexp0;
             dev->data->int_bit_mask    = PERIPH_PPCEXP0_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_PERIPH_EXP1:
+        case PPC_CORSTONE320_PERIPH_EXP1:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppcexp1;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppcexp1;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppcexp1;
             dev->data->int_bit_mask    = PERIPH_PPCEXP1_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_PERIPH_EXP2:
+        case PPC_CORSTONE320_PERIPH_EXP2:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppcexp2;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppcexp2;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppcexp2;
             dev->data->int_bit_mask    = PERIPH_PPCEXP2_INT_POS_MASK;
             break;
-        case PPC_CORSTONE315_PERIPH_EXP3:
+        case PPC_CORSTONE320_PERIPH_EXP3:
             dev->data->sacfg_ns_ppc   = &p_sacfg->periphnsppcexp3;
             dev->data->sacfg_sp_ppc   = &p_sacfg->periphspppcexp3;
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppcexp3;
             dev->data->int_bit_mask    = PERIPH_PPCEXP3_INT_POS_MASK;
             break;
-        case CORSTONE315_PPC_MAX_NUM:
+        case CORSTONE320_PPC_MAX_NUM:
         default:
-            return PPC_CORSTONE315_ERR_INVALID_PARAM;
+            return PPC_CORSTONE320_ERR_INVALID_PARAM;
         }
 
     dev->data->is_initialized = true;
 
-    return PPC_CORSTONE315_ERR_NONE;
+    return PPC_CORSTONE320_ERR_NONE;
 }
 
-enum ppc_corstone315_error_t
-ppc_corstone315_config_privilege(struct ppc_corstone315_dev_t* dev, uint32_t mask,
-                            enum ppc_corstone315_sec_attr_t sec_attr,
-                            enum ppc_corstone315_priv_attr_t priv_attr)
+enum ppc_corstone320_error_t
+ppc_corstone320_config_privilege(struct ppc_corstone320_dev_t* dev, uint32_t mask,
+                            enum ppc_corstone320_sec_attr_t sec_attr,
+                            enum ppc_corstone320_priv_attr_t priv_attr)
 {
     if(dev->data->is_initialized != true) {
-        return PPC_CORSTONE315_ERR_NOT_INIT;
+        return PPC_CORSTONE320_ERR_NOT_INIT;
     }
 
-    if(sec_attr == PPC_CORSTONE315_SECURE_ACCESS) {
+    if(sec_attr == PPC_CORSTONE320_SECURE_ACCESS) {
 #if (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U))
         /* Uses secure unprivileged access address (SACFG) to set privilege
          * attribute
          */
-        if(priv_attr == PPC_CORSTONE315_PRIV_ONLY_ACCESS) {
+        if(priv_attr == PPC_CORSTONE320_PRIV_ONLY_ACCESS) {
             *(dev->data->sacfg_sp_ppc) &= ~mask;
         } else {
             *(dev->data->sacfg_sp_ppc) |= mask;
         }
 #else
         /* Configuring security from Non-Secure application is not permitted. */
-        return PPC_CORSTONE315_ERR_NOT_PERMITTED;
+        return PPC_CORSTONE320_ERR_NOT_PERMITTED;
 #endif
     } else {
         /* Uses non-secure unprivileged access address (NSACFG) to set
          * privilege attribute */
-        if(priv_attr == PPC_CORSTONE315_PRIV_ONLY_ACCESS) {
+        if(priv_attr == PPC_CORSTONE320_PRIV_ONLY_ACCESS) {
             *(dev->data->nsacfg_nsp_ppc) &= ~mask;
         } else {
             *(dev->data->nsacfg_nsp_ppc) |= mask;
         }
     }
 
-    return PPC_CORSTONE315_ERR_NONE;
+    return PPC_CORSTONE320_ERR_NONE;
 }
 
-bool ppc_corstone315_is_periph_priv_only(struct ppc_corstone315_dev_t* dev,
+bool ppc_corstone320_is_periph_priv_only(struct ppc_corstone320_dev_t* dev,
                                     uint32_t mask)
 {
     if(dev->data->is_initialized != true) {
@@ -262,24 +262,24 @@ bool ppc_corstone315_is_periph_priv_only(struct ppc_corstone315_dev_t* dev,
 /* Secure only functions */
 #if (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U))
 
-enum ppc_corstone315_error_t
-ppc_corstone315_config_security(struct ppc_corstone315_dev_t* dev, uint32_t mask,
-                           enum ppc_corstone315_sec_attr_t sec_attr)
+enum ppc_corstone320_error_t
+ppc_corstone320_config_security(struct ppc_corstone320_dev_t* dev, uint32_t mask,
+                           enum ppc_corstone320_sec_attr_t sec_attr)
 {
     if(dev->data->is_initialized != true) {
-        return PPC_CORSTONE315_ERR_NOT_INIT;
+        return PPC_CORSTONE320_ERR_NOT_INIT;
     }
 
-    if(sec_attr == PPC_CORSTONE315_SECURE_ACCESS) {
+    if(sec_attr == PPC_CORSTONE320_SECURE_ACCESS) {
         *(dev->data->sacfg_ns_ppc) &= ~mask;
     } else {
         *(dev->data->sacfg_ns_ppc) |= mask;
     }
 
-    return PPC_CORSTONE315_ERR_NONE;
+    return PPC_CORSTONE320_ERR_NONE;
 }
 
-bool ppc_corstone315_is_periph_secure(struct ppc_corstone315_dev_t* dev,
+bool ppc_corstone320_is_periph_secure(struct ppc_corstone320_dev_t* dev,
                                  uint32_t mask)
 {
     if(dev->data->is_initialized != true) {
@@ -290,21 +290,21 @@ bool ppc_corstone315_is_periph_secure(struct ppc_corstone315_dev_t* dev,
     return ((*(dev->data->sacfg_ns_ppc) & mask) == 0);
 }
 
-enum ppc_corstone315_error_t ppc_corstone315_irq_enable(struct ppc_corstone315_dev_t* dev)
+enum ppc_corstone320_error_t ppc_corstone320_irq_enable(struct ppc_corstone320_dev_t* dev)
 {
     struct mps4_corstone3xx_sacfg_block_t* p_sacfg =
                          (struct mps4_corstone3xx_sacfg_block_t*)dev->cfg->sacfg_base;
 
     if(dev->data->is_initialized != true) {
-        return PPC_CORSTONE315_ERR_NOT_INIT;
+        return PPC_CORSTONE320_ERR_NOT_INIT;
     }
 
     p_sacfg->secppcinten |= dev->data->int_bit_mask;
 
-    return PPC_CORSTONE315_ERR_NONE;
+    return PPC_CORSTONE320_ERR_NONE;
 }
 
-void ppc_corstone315_irq_disable(struct ppc_corstone315_dev_t* dev)
+void ppc_corstone320_irq_disable(struct ppc_corstone320_dev_t* dev)
 {
     struct mps4_corstone3xx_sacfg_block_t* p_sacfg =
                          (struct mps4_corstone3xx_sacfg_block_t*)dev->cfg->sacfg_base;
@@ -314,7 +314,7 @@ void ppc_corstone315_irq_disable(struct ppc_corstone315_dev_t* dev)
     }
 }
 
-void ppc_corstone315_clear_irq(struct ppc_corstone315_dev_t* dev)
+void ppc_corstone320_clear_irq(struct ppc_corstone320_dev_t* dev)
 {
     struct mps4_corstone3xx_sacfg_block_t* p_sacfg =
                          (struct mps4_corstone3xx_sacfg_block_t*)dev->cfg->sacfg_base;
@@ -324,7 +324,7 @@ void ppc_corstone315_clear_irq(struct ppc_corstone315_dev_t* dev)
     }
 }
 
-bool ppc_corstone315_irq_state(struct ppc_corstone315_dev_t* dev)
+bool ppc_corstone320_irq_state(struct ppc_corstone320_dev_t* dev)
 {
     struct mps4_corstone3xx_sacfg_block_t* p_sacfg =
                          (struct mps4_corstone3xx_sacfg_block_t*)dev->cfg->sacfg_base;

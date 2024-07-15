@@ -15,13 +15,13 @@
  */
 
 /**
- * \file ppc_corstone315_reg_map.h
+ * \file ppc_corstone320_reg_map.h
  * \brief Register map for PPC.
  *
  */
 
-#ifndef __PPC_CORSTONE315_REG_MAP_H__
-#define __PPC_CORSTONE315_REG_MAP_H__
+#ifndef __PPC_CORSTONE320_REG_MAP_H__
+#define __PPC_CORSTONE320_REG_MAP_H__
 
 #include <stdint.h>
 
@@ -153,4 +153,4 @@ struct mps4_corstone3xx_sacfg_block_t {
 }
 #endif
 
-#endif /* __PPC_CORSTONE315_REG_MAP_H__ */
+#endif /* __PPC_CORSTONE320_REG_MAP_H__ */

@@ -5,6 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set(MPS4_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
+include(${MPS4_COMMON_DIR}/config.cmake)
 
-include(${MPS4_COMMON_DIR}/cpuarch.cmake)
+# Ethos-U NPU configurations
+set(ETHOSU_ARCH                       "U85")

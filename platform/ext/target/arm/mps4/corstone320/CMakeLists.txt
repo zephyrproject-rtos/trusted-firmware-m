@@ -32,14 +32,14 @@ target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_PPC.c
         device/source/platform_s_device_definition.c
-        native_drivers/ppc_corstone315_drv.c
-        ${ETHOS_DRIVER_PATH}/src/ethosu_device_u55_u65.c
+        native_drivers/ppc_corstone320_drv.c
+        ${ETHOS_DRIVER_PATH}/src/ethosu_device_u85.c
 )
 
 target_compile_definitions(platform_s
     PRIVATE
         # Needed for DMA-350 library
-        CMSIS_device_header=<corstone315.h>
+        CMSIS_device_header=<corstone320.h>
 )
 
 #========================= Platform BL2 =======================================#

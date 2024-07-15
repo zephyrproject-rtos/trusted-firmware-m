@@ -40,160 +40,160 @@ struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS = {
     &(UART0_CMSDK_DEV_DATA_NS)
 };
 
-/* Corstone-315 PPC driver structures */
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_MAIN0_CFG_S = {
+/* Corstone-320 PPC driver structures */
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_MAIN0_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_MAIN0};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_MAIN0_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_MAIN0};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_MAIN0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_MAIN0_DEV_S = {
-    &PPC_CORSTONE315_MAIN0_CFG_S,
-    &PPC_CORSTONE315_MAIN0_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_MAIN0_DEV_S = {
+    &PPC_CORSTONE320_MAIN0_CFG_S,
+    &PPC_CORSTONE320_MAIN0_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_MAIN_EXP0_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_MAIN_EXP0_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_MAIN_EXP0};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_MAIN_EXP0_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_MAIN_EXP0};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_MAIN_EXP0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_MAIN_EXP0_DEV_S = {
-    &PPC_CORSTONE315_MAIN_EXP0_CFG_S,
-    &PPC_CORSTONE315_MAIN_EXP0_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_MAIN_EXP0_DEV_S = {
+    &PPC_CORSTONE320_MAIN_EXP0_CFG_S,
+    &PPC_CORSTONE320_MAIN_EXP0_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_MAIN_EXP1_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_MAIN_EXP1_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_MAIN_EXP1};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_MAIN_EXP1_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_MAIN_EXP1};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_MAIN_EXP1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_MAIN_EXP1_DEV_S = {
-    &PPC_CORSTONE315_MAIN_EXP1_CFG_S,
-    &PPC_CORSTONE315_MAIN_EXP1_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_MAIN_EXP1_DEV_S = {
+    &PPC_CORSTONE320_MAIN_EXP1_CFG_S,
+    &PPC_CORSTONE320_MAIN_EXP1_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_MAIN_EXP2_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_MAIN_EXP2_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_MAIN_EXP2};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_MAIN_EXP2_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_MAIN_EXP2};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_MAIN_EXP2_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_MAIN_EXP2_DEV_S = {
-    &PPC_CORSTONE315_MAIN_EXP2_CFG_S,
-    &PPC_CORSTONE315_MAIN_EXP2_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_MAIN_EXP2_DEV_S = {
+    &PPC_CORSTONE320_MAIN_EXP2_CFG_S,
+    &PPC_CORSTONE320_MAIN_EXP2_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_MAIN_EXP3_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_MAIN_EXP3_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_MAIN_EXP3};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_MAIN_EXP3_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_MAIN_EXP3};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_MAIN_EXP3_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_MAIN_EXP3_DEV_S = {
-    &PPC_CORSTONE315_MAIN_EXP3_CFG_S,
-    &PPC_CORSTONE315_MAIN_EXP3_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_MAIN_EXP3_DEV_S = {
+    &PPC_CORSTONE320_MAIN_EXP3_CFG_S,
+    &PPC_CORSTONE320_MAIN_EXP3_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH0_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH0_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH0};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH0_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH0};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH0_DEV_S = {
-    &PPC_CORSTONE315_PERIPH0_CFG_S,
-    &PPC_CORSTONE315_PERIPH0_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH0_DEV_S = {
+    &PPC_CORSTONE320_PERIPH0_CFG_S,
+    &PPC_CORSTONE320_PERIPH0_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH1_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH1_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH1};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH1_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH1};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH1_DEV_S = {
-    &PPC_CORSTONE315_PERIPH1_CFG_S,
-    &PPC_CORSTONE315_PERIPH1_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH1_DEV_S = {
+    &PPC_CORSTONE320_PERIPH1_CFG_S,
+    &PPC_CORSTONE320_PERIPH1_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH_EXP0_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH_EXP0_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH_EXP0};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH_EXP0_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH_EXP0};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH_EXP0_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH_EXP0_DEV_S = {
-    &PPC_CORSTONE315_PERIPH_EXP0_CFG_S,
-    &PPC_CORSTONE315_PERIPH_EXP0_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH_EXP0_DEV_S = {
+    &PPC_CORSTONE320_PERIPH_EXP0_CFG_S,
+    &PPC_CORSTONE320_PERIPH_EXP0_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH_EXP1_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH_EXP1_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH_EXP1};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH_EXP1_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH_EXP1};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH_EXP1_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH_EXP1_DEV_S = {
-    &PPC_CORSTONE315_PERIPH_EXP1_CFG_S,
-    &PPC_CORSTONE315_PERIPH_EXP1_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH_EXP1_DEV_S = {
+    &PPC_CORSTONE320_PERIPH_EXP1_CFG_S,
+    &PPC_CORSTONE320_PERIPH_EXP1_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH_EXP2_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH_EXP2_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH_EXP2};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH_EXP2_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH_EXP2};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH_EXP2_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH_EXP2_DEV_S = {
-    &PPC_CORSTONE315_PERIPH_EXP2_CFG_S,
-    &PPC_CORSTONE315_PERIPH_EXP2_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH_EXP2_DEV_S = {
+    &PPC_CORSTONE320_PERIPH_EXP2_CFG_S,
+    &PPC_CORSTONE320_PERIPH_EXP2_DATA_S };
 
-static struct ppc_corstone315_dev_cfg_t PPC_CORSTONE315_PERIPH_EXP3_CFG_S = {
+static struct ppc_corstone320_dev_cfg_t PPC_CORSTONE320_PERIPH_EXP3_CFG_S = {
     .sacfg_base  = MPS4_CORSTONE3XX_SACFG_BASE_S,
     .nsacfg_base = MPS4_CORSTONE3XX_NSACFG_BASE_NS,
-    .ppc_name = PPC_CORSTONE315_PERIPH_EXP3};
-static struct ppc_corstone315_dev_data_t PPC_CORSTONE315_PERIPH_EXP3_DATA_S = {
+    .ppc_name = PPC_CORSTONE320_PERIPH_EXP3};
+static struct ppc_corstone320_dev_data_t PPC_CORSTONE320_PERIPH_EXP3_DATA_S = {
     .sacfg_ns_ppc  = 0,
     .sacfg_sp_ppc  = 0,
     .nsacfg_nsp_ppc = 0,
     .int_bit_mask = 0,
     .is_initialized = false };
-struct ppc_corstone315_dev_t PPC_CORSTONE315_PERIPH_EXP3_DEV_S = {
-    &PPC_CORSTONE315_PERIPH_EXP3_CFG_S,
-    &PPC_CORSTONE315_PERIPH_EXP3_DATA_S };
+struct ppc_corstone320_dev_t PPC_CORSTONE320_PERIPH_EXP3_DEV_S = {
+    &PPC_CORSTONE320_PERIPH_EXP3_CFG_S,
+    &PPC_CORSTONE320_PERIPH_EXP3_DATA_S };
 
 /* System counters */
 #if SYSCOUNTER_ARMV8_M_DEFAULT_SCALE0_INT > \

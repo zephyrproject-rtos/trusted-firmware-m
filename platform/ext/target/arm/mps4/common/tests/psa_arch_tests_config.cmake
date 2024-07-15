@@ -5,6 +5,5 @@
 #
 #-------------------------------------------------------------------------------
 
-set(MPS4_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
-
-include(${MPS4_COMMON_DIR}/cpuarch.cmake)
+# Note: The PSA API Test repository doesn't have config for Corstone-3xx yet.
+set(PSA_API_TEST_TARGET          ""    CACHE STRING  "PSA_API_TARGET name")
