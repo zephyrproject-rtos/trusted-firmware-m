@@ -192,7 +192,7 @@
 
 #define FLASH_PS_AREA_OFFSET            (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
-#define FLASH_PS_AREA_SIZE              (16 * SECURE_FLASH_SECTOR_SIZE)
+#define FLASH_PS_AREA_SIZE              (96 * SECURE_FLASH_SECTOR_SIZE)
 
 /* OTP_definitions */
 #define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_PS_AREA_OFFSET + \
