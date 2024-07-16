@@ -61,7 +61,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdh(cc3xx_ec_curve_id_t curve_id,
     cc3xx_lowlevel_pka_write_reg_swap_endian(public_key_point.x, public_key_x, curve.modulus_size);
     cc3xx_lowlevel_pka_write_reg_swap_endian(public_key_point.y, public_key_y, curve.modulus_size);
 
-    err = cc3xx_lowlevel_ec_multipy_point_by_scalar(&curve, &public_key_point, private_key_reg,
+    err = cc3xx_lowlevel_ec_multiply_point_by_scalar(&curve, &public_key_point, private_key_reg,
                                            &shared_key_point);
 
     /* SEC1 paragraph 3.3.1: Output the x coordinate only as the shared secret */

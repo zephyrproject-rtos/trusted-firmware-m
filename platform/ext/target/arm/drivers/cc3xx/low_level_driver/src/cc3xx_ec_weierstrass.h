@@ -96,7 +96,7 @@ void cc3xx_lowlevel_ec_weierstrass_negate_point(cc3xx_ec_point_affine *p,
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
+cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p,
                                              cc3xx_pka_reg_id_t scalar,

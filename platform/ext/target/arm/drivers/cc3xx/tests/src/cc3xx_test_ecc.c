@@ -314,7 +314,7 @@ int cc3xx_test_ecc_exp_point(cc3xx_ec_point_exp_test_data_t *data)
 
     result = cc3xx_lowlevel_ec_allocate_point();
 
-    err = cc3xx_lowlevel_ec_multipy_point_by_scalar(&curve, &p0, s, &result);
+    err = cc3xx_lowlevel_ec_multiply_point_by_scalar(&curve, &p0, s, &result);
     cc3xx_test_assert(err == CC3XX_ERR_SUCCESS);
 
     cc3xx_lowlevel_pka_read_reg_swap_endian(result.x, result_x, sizeof(result_x));

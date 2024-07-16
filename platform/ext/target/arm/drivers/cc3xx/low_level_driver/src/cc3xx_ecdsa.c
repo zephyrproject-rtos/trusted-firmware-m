@@ -100,7 +100,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
 
     cc3xx_lowlevel_pka_write_reg_swap_endian(private_key_reg, private_key, private_key_len);
 
-    err = cc3xx_lowlevel_ec_multipy_point_by_scalar(&curve, &curve.generator, private_key_reg,
+    err = cc3xx_lowlevel_ec_multiply_point_by_scalar(&curve, &curve.generator, private_key_reg,
                                            &public_key_point);
 
     cc3xx_lowlevel_pka_read_reg_swap_endian(public_key_point.x, public_key_x, curve.modulus_size);
@@ -376,7 +376,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
             goto out;
         }
 
-        cc3xx_lowlevel_ec_multipy_point_by_scalar(&curve, &curve.generator, k_reg,
+        cc3xx_lowlevel_ec_multiply_point_by_scalar(&curve, &curve.generator, k_reg,
                                          &temp_point);
         cc3xx_lowlevel_pka_copy(temp_point.x, sig_r_reg);
         cc3xx_lowlevel_pka_reduce(sig_r_reg);

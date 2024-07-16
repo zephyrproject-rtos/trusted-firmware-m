@@ -43,9 +43,9 @@ bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
          * that that nP != infinity in the corresponding projective to affine
          * conversion. The result of the multiplication isn't used.
          */
-        err = cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(curve, p,
-                                                                    curve->order,
-                                                                    &foo);
+        err = cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(curve, p,
+                                                                     curve->order,
+                                                                     &foo);
         if (err != CC3XX_ERR_EC_POINT_IS_INFINITY) {
             FATAL_ERR(false);
             validate_succeeded = false;
@@ -263,7 +263,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_add_points(cc3xx_ec_curve_t *curve,
     return err;
 }
 
-static cc3xx_err_t multipy_point_by_scalar_side_channel_protected(
+static cc3xx_err_t multiply_point_by_scalar_side_channel_protected(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p,
                                              cc3xx_pka_reg_id_t scalar,
@@ -478,7 +478,7 @@ static cc3xx_err_t shamir_multiply_points_by_scalars_and_add(
     return err;
 }
 
-cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
+cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p,
                                              cc3xx_pka_reg_id_t scalar,
@@ -500,7 +500,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(
     cc3xx_lowlevel_pka_free_reg(zero_reg);
     return err;
 #else
-    return multipy_point_by_scalar_side_channel_protected(curve, p, scalar, res);
+    return multiply_point_by_scalar_side_channel_protected(curve, p, scalar, res);
 #endif
 }
 
@@ -520,10 +520,10 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_shamir_multiply_points_by_scalars_and_
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
     cc3xx_ec_point_affine temp_point = cc3xx_lowlevel_ec_allocate_point();
 
-    err |= multipy_point_by_scalar_side_channel_protected(curve, p1, scalar1,
-                                                          &temp_point);
-    err |= multipy_point_by_scalar_side_channel_protected(curve, p2, scalar2,
-                                                          res);
+    err |= multiply_point_by_scalar_side_channel_protected(curve, p1, scalar1,
+                                                           &temp_point);
+    err |= multiply_point_by_scalar_side_channel_protected(curve, p2, scalar2,
+                                                           res);
     err |= cc3xx_lowlevel_ec_add_points(curve, &temp_point, res, res);
 
     cc3xx_lowlevel_ec_free_point(&temp_point);

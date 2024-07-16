@@ -422,10 +422,10 @@ static bool split_scalar(cc3xx_ec_curve_t *curve, cc3xx_pka_reg_id_t scalar,
 }
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
-cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
-                                                      cc3xx_ec_point_affine *p,
-                                                      cc3xx_pka_reg_id_t scalar,
-                                                      cc3xx_ec_point_affine *res)
+cc3xx_err_t cc3xx_lowlevel_ec_multiply_point_by_scalar(cc3xx_ec_curve_t *curve,
+                                                       cc3xx_ec_point_affine *p,
+                                                       cc3xx_pka_reg_id_t scalar,
+                                                       cc3xx_ec_point_affine *res)
 {
     cc3xx_pka_reg_id_t padded_scalar = cc3xx_lowlevel_pka_allocate_reg();
     cc3xx_pka_reg_id_t scalar_to_input = padded_scalar;
@@ -460,9 +460,9 @@ cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
     switch(curve->type) {
 #ifdef CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
     case CC3XX_EC_CURVE_TYPE_WEIERSTRASS:
-        err |= cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(curve, p,
-                                                                     scalar_to_input,
-                                                                     res);
+        err |= cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(curve, p,
+                                                                      scalar_to_input,
+                                                                      res);
         break;
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
     default:
@@ -473,13 +473,13 @@ cc3xx_err_t cc3xx_lowlevel_ec_multipy_point_by_scalar(cc3xx_ec_curve_t *curve,
     switch(curve->type) {
 #ifdef CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
     case CC3XX_EC_CURVE_TYPE_WEIERSTRASS:
-        err |= cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(curve, res,
-                                                                     split_scalar_random,
-                                                                     res);
+        err |= cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(curve, res,
+                                                                      split_scalar_random,
+                                                                      res);
 
-        err |= cc3xx_lowlevel_ec_weierstrass_multipy_point_by_scalar(curve, p,
-                                                                     split_scalar_remainder,
-                                                                     &temp_point);
+        err |= cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(curve, p,
+                                                                      split_scalar_remainder,
+                                                                      &temp_point);
 
         err |= cc3xx_lowlevel_ec_weierstrass_add_points(curve, res, &temp_point,
                                                         res);
