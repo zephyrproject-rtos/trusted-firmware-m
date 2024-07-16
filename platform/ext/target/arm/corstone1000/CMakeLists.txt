@@ -44,10 +44,13 @@ target_compile_definitions(platform_region_defs
         # The RAM MPU Region block sizes are calculated manually. The RAM has to be covered
         # with the MPU regions. These regions also have to be the power of 2 and
         # the start addresses have to be aligned to these sizes. The sizes can be calculated
-        # from the S_DATA_START and S_DATA_SIZE defines.
-        RAM_MPU_REGION_BLOCK_1_SIZE=0x4000
+        # from the S_DATA_START and S_DATA_SIZE defines the following way:
+        # S_DATA_SIZE = RAM_MPU_REGION_BLOCK_1_SIZE + RAM_MPU_REGION_BLOCK_2_SIZE
+        # And the following constraints have to be taken:
+        # S_DATA_START % RAM_MPU_REGION_BLOCK_1_SIZE = 0
+        # (S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE) % RAM_MPU_REGION_BLOCK_2_SIZE = 0
+        RAM_MPU_REGION_BLOCK_1_SIZE=0x10000
         RAM_MPU_REGION_BLOCK_2_SIZE=0x20000
-
 )
 #========================= Platform common defs ===============================#
 

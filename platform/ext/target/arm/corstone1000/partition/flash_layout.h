@@ -92,7 +92,7 @@
 #define FLASH_DEV_NAME_BL1              FLASH_DEV_NAME
 
 /* Static Configurations of the Flash */
-#define SE_BL2_PARTITION_SIZE           (0x18000)    /* 96 KB */
+#define SE_BL2_PARTITION_SIZE           (0x24000)    /* 144 KB */
 #define SE_BL2_BANK_0_OFFSET            (0x9000)  /* 72nd LBA */
 #define SE_BL2_BANK_1_OFFSET            (0x1002000)  /* 32784th LBA */
 
@@ -137,7 +137,7 @@
 
 /* Bank configurations */
 #define BANK_PARTITION_SIZE             (0xFE0000)   /* 15.875 MB */
-#define TFM_PARTITION_SIZE              (0x5C000)    /* 368 KB */
+#define TFM_PARTITION_SIZE              (0x50000)    /* 320 KB */
 
 /************************************************************/
 /* Bank : Images flash offsets are with respect to the bank */
