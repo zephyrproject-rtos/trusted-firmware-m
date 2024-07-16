@@ -340,7 +340,6 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
-    enum lcm_error_t err;
 
     lcm_get_fatal_error(dev, &fatal_err);
 
@@ -850,7 +849,6 @@ __attribute__((noinline))
 enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
                               uint32_t len, uint8_t *buf)
 {
-    enum lcm_error_t err;
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     uint32_t *p_buf_word = (uint32_t *)buf;
     uint32_t validation_word;
