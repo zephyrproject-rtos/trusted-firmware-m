@@ -42,22 +42,22 @@ Supported Features
 - PSA Crypto layer for mcuboot/BL2
 
 ******
-CQ2'24
+CQ3'24
 ******
 - Supporting multiple clients (Hybrid Platforms) i.e. TF-M supporting multiple on
   core and off core clients on heterogeneous (e.g. Cortex-A + Cortex-M platforms)
   Mailbox API etc.
-- Mbed TLS 3.6-LTS integration
-- TF-M v2.1.0 Long Term Stable (LTS) Release
+- MISRA testing/documentation
+- TF-M v2.1.0 LTS Updates
+- PSA Crypto Core Layer enhancements
 - Remote Test Infrastructure
-- Arm v8.1-M Architecture Enablement - PAC/BTI
 
 ******
 Future
 ******
+- Update to Mbed TLS3.6.1
 - Implement support for multiple clients (Hybrid Platforms) contd.
 - Build System Enhancements - Simplify build scripts
-- MISRA testing/documentation
 - TF-M Performance - Further Benchmarking and Optimization
 - Scheduler - Multiple Secure Context Implementation
 - PSA FWU Service Enhancements
