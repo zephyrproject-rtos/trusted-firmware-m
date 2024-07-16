@@ -22,10 +22,6 @@
 #include "tfm_plat_nv_counters.h"
 #include "mpu_armv8m_drv.h"
 #include "tfm_hal_device_header.h"
-#ifdef CRYPTO_HW_ACCELERATOR
-#include "fih.h"
-#include "cc3xx_drv.h"
-#endif /* CRYPTO_HW_ACCELERATOR */
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
@@ -137,12 +133,6 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     if (result) {
         while(1){}
     }
-#ifdef CRYPTO_HW_ACCELERATOR
-    result = cc3xx_lowlevel_uninit();
-    if (result) {
-        while (1);
-    }
-#endif /* CRYPTO_HW_ACCELERATOR */
 
     result = FLASH_DEV_NAME_BL1.Uninitialize();
     if (result != ARM_DRIVER_OK) {

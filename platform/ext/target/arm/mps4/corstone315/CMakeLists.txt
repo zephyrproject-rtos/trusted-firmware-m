@@ -124,7 +124,6 @@ target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
         $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
-        CRYPTO_NV_SEED=${CRYPTO_NV_SEED}
 )
 
 target_compile_definitions(platform_s
@@ -200,7 +199,6 @@ if(BL2)
     target_compile_definitions(platform_bl2
         PUBLIC
             $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
-            CRYPTO_NV_SEED=${CRYPTO_NV_SEED}
     )
 
     target_compile_options(platform_bl2
@@ -260,13 +258,6 @@ target_include_directories(platform_region_defs
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-if(CRYPTO_HW_ACCELERATOR)
-    target_include_directories(platform_region_defs
-        INTERFACE
-            cc312
-    )
-endif()
-
 #========================= Flash driver library ===============================#
 add_library(flash_drivers_s STATIC)
 add_library(flash_drivers_bl2 STATIC)
@@ -310,7 +301,6 @@ target_compile_definitions(bl1_1
     PRIVATE
         MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
-        CRYPTO_NV_SEED=${CRYPTO_NV_SEED}
 )
 
 target_compile_options(bl1_1
@@ -330,7 +320,6 @@ target_sources(platform_bl1_1
         ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/watchdog/arm_watchdog_drv.c
-        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312/cc3xx_aes_external_key_loader.c>
 )
 
 target_include_directories(platform_bl1_1
@@ -359,28 +348,6 @@ target_sources(bl1_1
         device/source/startup_corstone315.c
 )
 
-if(NOT TFM_BL1_SOFTWARE_CRYPTO)
-    target_include_directories(platform_bl1_1_interface
-        INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}/cc312
-    )
-
-    # Set which PLATFORM dependency must be used by the CC3XX driver
-    set(CC3XX_PLATFORM_INTERFACE platform_bl1_1)
-    set(CC3XX_TARGET_PREFIX bl1_)
-    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx cc3xx)
-
-    target_link_libraries(platform_bl1_1
-        PUBLIC
-            bl1_cc3xx
-    )
-endif()
-
-target_sources(bl1_1_shared_lib
-    PRIVATE
-        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
-)
 #========================= Platform BL1_2 =====================================#
 
 target_add_scatter_file(bl1_2
@@ -393,7 +360,6 @@ target_compile_definitions(bl1_2
     PRIVATE
         MBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h"
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
-        CRYPTO_NV_SEED=${CRYPTO_NV_SEED}
 )
 
 target_compile_options(bl1_2_scatter
@@ -494,11 +460,6 @@ install(FILES       target_cfg.h
                     tfm_peripherals_def.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-
-if(CRYPTO_HW_ACCELERATOR)
-    install(FILES       ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
-            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-endif()
 
 install(FILES       cpuarch.cmake
                     config.cmake

@@ -25,15 +25,6 @@ tfm_plat_read_nv_counter
 tfm_plat_set_nv_counter
 log_error
 log_error_permissions_check
-cc3xx_lowlevel_uninit
-cc3xx_lowlevel_rng_get_random
-cc3xx_lowlevel_aes_init
-cc3xx_lowlevel_aes_update_authed_data
-cc3xx_lowlevel_aes_set_tag_len
-cc3xx_lowlevel_aes_set_data_len
-cc3xx_lowlevel_aes_set_output_buffer
-cc3xx_lowlevel_aes_update
-cc3xx_lowlevel_aes_finish
 _write
 fputc
 putchar
