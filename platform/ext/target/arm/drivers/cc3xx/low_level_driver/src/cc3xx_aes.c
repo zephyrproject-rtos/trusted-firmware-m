@@ -869,8 +869,8 @@ cc3xx_err_t cc3xx_lowlevel_aes_update(const uint8_t* in, size_t in_len)
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
     case CC3XX_AES_MODE_CMAC:
-#endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
         return CC3XX_ERR_SUCCESS;
+#endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
     default:
         break;
     }
@@ -1073,11 +1073,11 @@ cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size)
         default:
             cc3xx_lowlevel_dma_flush_buffer(true);
             break;
-    #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
+#ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
         case CC3XX_AES_MODE_CMAC:
-    #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
             cc3xx_lowlevel_dma_flush_buffer(false);
             break;
+#endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
         }
     } else if (aes_state.crypted_length != 0) {
         configure_engine_for_crypted_data(&write_output);
@@ -1088,12 +1088,14 @@ cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size)
         switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_ECB_ENABLE
         case CC3XX_AES_MODE_ECB:
+            cc3xx_lowlevel_dma_flush_buffer(true);
+            break;
 #endif /* CC3XX_CONFIG_AES_ECB_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CBC_ENABLE
         case CC3XX_AES_MODE_CBC:
-#endif /* CC3XX_CONFIG_AES_CBC_ENABLE */
             cc3xx_lowlevel_dma_flush_buffer(true);
             break;
+#endif /* CC3XX_CONFIG_AES_CBC_ENABLE */
         default:
             cc3xx_lowlevel_dma_flush_buffer(false);
             break;
