@@ -123,19 +123,9 @@ psa_status_t cc3xx_get_random(cc3xx_random_context_t *context,
     return PSA_SUCCESS;
 }
 
-/* As of mbed TLS 3.5, there is no support in the Core for the random entry points,
- * so the integration happens through the definition of MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
- * as the function that mbed TLS uses to retrieve random numbers from an external
- * generator. Note that we don't rely on redefining the type
- * mbedtls_psa_external_random_context_t available to the PSA Crypto core to make
- * keep integration simple, as there is no real gain in doing that.
- */
-psa_status_t mbedtls_psa_external_get_random(
-    mbedtls_psa_external_random_context_t *context,
-    uint8_t *output, size_t output_size, size_t *output_length)
+psa_status_t cc3xx_internal_get_random(uint8_t *output, size_t output_size, size_t *output_length)
 {
     psa_status_t status;
-    (void)context; /* The driver keeps the state internal for simplicity */
 
     CC3XX_ASSERT(output != NULL);
     CC3XX_ASSERT(output_length != NULL);
@@ -149,8 +139,25 @@ psa_status_t mbedtls_psa_external_get_random(
         }
     }
 
-    status = cc3xx_get_random(&cc3xx_psa_random_state.ctx,
-                              output, output_size, output_length);
-    return status;
+    return cc3xx_get_random(&cc3xx_psa_random_state.ctx,
+                            output, output_size, output_length);
 }
+
+#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
+/* As of mbed TLS 3.5, there is no support in the Core for the random entry points,
+ * so the integration happens through the definition of MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
+ * as the function that mbed TLS uses to retrieve random numbers from an external
+ * generator. Note that we don't rely on redefining the type
+ * mbedtls_psa_external_random_context_t available to the PSA Crypto core to make
+ * keep integration simple, as there is no real gain in doing that.
+ */
+psa_status_t mbedtls_psa_external_get_random(
+    mbedtls_psa_external_random_context_t *context,
+    uint8_t *output, size_t output_size, size_t *output_length)
+{
+    (void)context; /* The driver keeps the state internal for simplicity */
+
+    return cc3xx_internal_get_random(output, output_size, output_length);
+}
+#endif /* MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG */
 /** @} */ // end of psa_random

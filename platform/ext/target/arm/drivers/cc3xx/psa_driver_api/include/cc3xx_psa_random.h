@@ -77,6 +77,21 @@ psa_status_t cc3xx_get_random(
     size_t output_size,
     size_t *output_length);
 
+/**
+ * @brief Internal function to generate a random number. This is not a driver entry
+ *        point and it is mainly meant to be called by other driver modules or by
+ *        the mbedtls_psa_external_get_random() function to integrated with Mbed TLS
+ *
+ * @note  The context is kept internally by the cc3xx_psa_random module, hence the
+ *        addition of the `internal` name to the function
+ *
+ * @param[out]    output        Buffer containing the random data collected
+ * @param[in]     output_size   Size in bytes of the buffer to fill
+ * @param[out]    output_length Number of bytes effectively returned in \ref buffer
+ * @return psa_status_t
+ */
+psa_status_t cc3xx_internal_get_random(uint8_t *output, size_t output_size, size_t *output_length);
+
 #ifdef __cplusplus
 }
 #endif
