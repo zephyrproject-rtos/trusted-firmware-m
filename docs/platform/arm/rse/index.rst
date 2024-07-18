@@ -18,7 +18,7 @@ Previously known as Runtime Security Subsystem (RSS).
 
 RSE also includes the following extra partitions:
 
-- :doc:`Authenticated Debug Access Control (ADAC) <TF-M-Extras:partitions/adac/index>`
+- :doc:`Authenticated Debug Access Control (ADAC) <TF-M-Extras:partitions/adac_impl_for_rse>`
 - :doc:`Measured boot partition <TF-M-Extras:partitions/measured_boot_integration_guide>`
 - :doc:`Delegated attestation partition<TF-M-Extras:partitions/delegated_attestation/delegated_attest_integration_guide>`
 - :doc:`DICE Protection Environment partition <TF-M-Extras:partitions/dice_protection_environment/dice_protection_environment>`
