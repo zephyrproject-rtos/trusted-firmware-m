@@ -137,7 +137,7 @@
 
 /* Bank configurations */
 #define BANK_PARTITION_SIZE             (0xFE0000)   /* 15.875 MB */
-#define TFM_PARTITION_SIZE              (0x50000)    /* 320 KB */
+#define TFM_PARTITION_SIZE              (0x50000)    /* 320 KiB */
 
 /************************************************************/
 /* Bank : Images flash offsets are with respect to the bank */
