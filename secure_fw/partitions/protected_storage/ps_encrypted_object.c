@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "cmsis_compiler.h"
 #include "crypto/ps_crypto_interface.h"
 #include "psa/internal_trusted_storage.h"
 #include "ps_object_defs.h"
@@ -36,24 +37,39 @@
  */
 #define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_LEN_BYTES)
 
+__PACKED_STRUCT auth_data_t {
+    uint32_t fid;
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    uint32_t key_gen_nr;
+#endif
+};
+
 /**
  * \brief Performs authenticated decryption on object data, with the header as
  *        the associated data.
  *
- * \param[in]  fid       File ID
- * \param[in]  cur_size  Size of the object data to decrypt
- * \param[in,out] obj    Pointer to the object structure to authenticate and
- *                       fill in with the decrypted data. The tag of the object
- *                       is the one stored in the object table for the given
- *                       File ID.
+ * \param[in]     fid      File ID
+ * \param[in]     cur_size Size of the object data to decrypt
+ * \param[in,out] obj      Pointer to the object structure to authenticate and
+ *                         fill in with the decrypted data. The tag of the object
+ *                         is the one stored in the object table for the given
+ *                         File ID.
+ * \param[out]    p_blocks Pointer to a counter of decryption blocks used.
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
 static psa_status_t ps_object_auth_decrypt(uint32_t fid,
                                            uint32_t cur_size,
-                                           struct ps_object_t *obj)
+                                           struct ps_object_t *obj,
+                                           uint32_t *p_blocks)
 {
     psa_status_t err;
+    const struct auth_data_t auth_data = {
+        .fid = fid,
+#if PS_AES_KEY_USAGE_LIMIT != 0
+        .key_gen_nr = obj->header.crypto.ref.key_gen_nr
+#endif
+    };
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
@@ -62,9 +78,12 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
      * not as a part of the object's data stored in the FS.
      */
 
+    /* Assume that we used the key even if the crypto operation fails */
+    *p_blocks = ps_crypto_to_blocks(cur_size);
+
     err = ps_crypto_auth_and_decrypt(&obj->header.crypto,
-                                     (const uint8_t *)&fid,
-                                     sizeof(fid),
+                                     (const uint8_t *)&auth_data,
+                                     sizeof(auth_data),
                                      p_obj_data,
                                      cur_size,
                                      p_obj_data,
@@ -93,6 +112,12 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
                                            struct ps_object_t *obj)
 {
     psa_status_t err;
+    const struct auth_data_t auth_data = {
+        .fid = fid,
+#if PS_AES_KEY_USAGE_LIMIT != 0
+        .key_gen_nr = obj->header.crypto.ref.key_gen_nr
+#endif
+    };
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
@@ -108,8 +133,8 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
      */
 
     err = ps_crypto_encrypt_and_tag(&obj->header.crypto,
-                                    (const uint8_t *)&fid,
-                                    sizeof(fid),
+                                    (const uint8_t *)&auth_data,
+                                    sizeof(auth_data),
                                     p_obj_data,
                                     cur_size,
                                     (uint8_t *)&obj->header.info,
@@ -122,7 +147,9 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
     return PSA_SUCCESS;
 }
 
-psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
+psa_status_t ps_encrypted_object_read(uint32_t fid,
+                                      struct ps_object_t *obj,
+                                      uint32_t *p_blocks)
 {
     psa_status_t err;
     uint32_t decrypt_size;
@@ -148,12 +175,19 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
     decrypt_size = data_length - STORED_HEADER_DATA_SIZE;
 
     /* Decrypt the object data */
-    err = ps_object_auth_decrypt(fid, decrypt_size, obj);
+    err = ps_object_auth_decrypt(fid, decrypt_size, obj, p_blocks);
     if (err != PSA_SUCCESS) {
         return err;
     }
 
     return PSA_SUCCESS;
+}
+
+uint32_t ps_encrypted_object_blocks(uint32_t size)
+{
+    uint32_t wrt_size = PS_ENCRYPT_SIZE(size);
+
+    return ps_crypto_to_blocks(wrt_size);
 }
 
 psa_status_t ps_encrypted_object_write(uint32_t fid, struct ps_object_t *obj)

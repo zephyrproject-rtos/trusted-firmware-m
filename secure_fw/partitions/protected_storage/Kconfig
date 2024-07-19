@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,4 +31,15 @@ config PS_CRYPTO_AEAD_ALG
       flag is set to PSA_ALG_GCM or PSA_ALG_CCM, PS_ROLLBACK_PROTECTION must be
       enabled to protect against IV rollback.
 
+config PS_AES_KEY_USAGE_LIMIT
+    string "Number of blocks to use a key for before changing it. 0 for no limit"
+    depends on PS_ENCRYPTION
+    default "0"
+    help
+      If this value is non-zero, PS will not use any given key to encrypt/decrypt
+      more than the specified number of blocks.
+
+      Note: If this is set too low, it will limit the maximum size of objects that
+      can be stored in PS, because the system will reject object that are too large
+      to be encrypted and then decrypted again without hitting this limit.
 endif

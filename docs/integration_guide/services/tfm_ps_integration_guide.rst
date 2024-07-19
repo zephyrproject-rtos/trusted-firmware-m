@@ -371,6 +371,13 @@ definitions is:
 - ``PS_ROLLBACK_PROTECTION``- this flag allows to enable/disable
   rollback protection in protected storage service. This flag takes effect only
   if the target has non-volatile counters and ``PS_ENCRYPTION`` flag is on.
+- ``PS_AES_KEY_USAGE_LIMIT`` - setting this to a value other than zero limits
+  the number of AES blocks that will be encrypted/decrypted using any one key.
+  When the limit is reached for a given object, a new key will be derived and
+  the data will be encrypted with the new key before being stored.
+  Note that setting this limit too low may reduce the maximum asset size
+  because PS will reject objects that are too large to be encrypted and
+  decrypted without hitting this limit.
 - ``PS_RAM_FS``- setting this flag to ``ON`` enables the use of RAM instead of
   the persistent storage device to store the FS in the Protected Storage
   service. This flag is ``OFF`` by default. The PS regression tests write/erase

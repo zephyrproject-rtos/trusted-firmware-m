@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,9 +24,12 @@ extern "C" {
  * \brief Object table information structure.
  */
 struct ps_obj_table_info_t {
-    uint32_t fid;      /*!< File ID in the file system */
+    uint32_t fid;        /*!< File ID in the file system */
 #ifdef PS_ENCRYPTION
-    uint8_t *tag;      /*!< Pointer to the MAC value of AEAD object */
+    uint8_t *tag;        /*!< Pointer to the MAC value of AEAD object */
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    uint32_t num_blocks; /*!< blocks encrypted/decrypted with current key */
+#endif
 #else
     uint32_t version;  /*!< Object version */
 #endif
@@ -77,6 +82,22 @@ psa_status_t ps_object_table_obj_exist(psa_storage_uid_t uid,
  *         specified in \ref psa_status_t
  */
 psa_status_t ps_object_table_get_free_fid(uint32_t fid_num, uint32_t *p_fid);
+
+#if PS_AES_KEY_USAGE_LIMIT != 0
+/**
+ * \brief Get the generation number to use for key generation
+ *
+ * \return Returns the current key generation
+ */
+uint32_t ps_object_table_current_gen(void);
+
+/**
+ * \brief Set the generation number to use for key generation
+ *
+ * \param [in] new_gen  The new key generation
+ */
+void ps_object_table_set_gen(uint32_t new_gen);
+#endif
 
 /**
  * \brief Sets object table information in the object table and stores it

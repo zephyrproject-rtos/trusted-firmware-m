@@ -32,7 +32,11 @@
     PSA_ALG_AEAD_WITH_SHORTENED_TAG(PS_CRYPTO_AEAD_ALG, PS_TAG_LEN_BYTES)
 
 /* Length of the label used to derive a crypto key */
+#if PS_AES_KEY_USAGE_LIMIT == 0
 #define LABEL_LEN (sizeof(int32_t) + sizeof(psa_storage_uid_t))
+#else
+#define LABEL_LEN (sizeof(int32_t) + sizeof(psa_storage_uid_t) + sizeof(uint32_t))
+#endif
 
 /*
  * \brief Check whether the PS AEAD algorithm is a valid one
@@ -50,9 +54,15 @@ static void fill_key_label(const union ps_crypto_t *crypto,
 {
     psa_storage_uid_t uid = crypto->ref.uid;
     int32_t client_id = crypto->ref.client_id;
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    uint32_t gen = crypto->ref.key_gen_nr;
+#endif
 
     memcpy(label, &client_id, sizeof(client_id));
     memcpy(label + sizeof(client_id), &uid, sizeof(uid));
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    memcpy(label + sizeof(client_id) + sizeof(uid), &gen, sizeof(gen));
+#endif
 }
 
 static psa_status_t ps_crypto_setkey(psa_key_id_t *ps_key,
@@ -132,6 +142,13 @@ psa_status_t ps_crypto_init(void)
     (void)ps_crypto_aead_alg;
 #endif
     return PSA_SUCCESS;
+}
+
+uint32_t ps_crypto_to_blocks(size_t in_len)
+{
+    /* add one additional block to account for the finish operation */
+    return 1 + (in_len + PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES) - 1)
+                / PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES);
 }
 
 void ps_crypto_set_iv(const union ps_crypto_t *crypto)

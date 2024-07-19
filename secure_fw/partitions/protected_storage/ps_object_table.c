@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +20,7 @@
 #include "psa/internal_trusted_storage.h"
 #include "ps_utils.h"
 #include "tfm_ps_defs.h"
+#include "utilities.h"
 
 /* FIXME: Duplicated from flash info */
 #define PS_FLASH_DEFAULT_VAL 0xFFU
@@ -37,6 +40,9 @@
 struct ps_obj_table_entry_t {
 #ifdef PS_ENCRYPTION
     uint8_t tag[PS_TAG_LEN_BYTES];  /*!< MAC value of AEAD object */
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    uint32_t num_blocks;            /*!< blocks encrypted/decrypted with current key */
+#endif
 #else
     uint32_t version;               /*!< File version */
 #endif
@@ -173,6 +179,10 @@ struct ps_crypto_assoc_data_t {
 #define PS_CRYPTO_ASSOCIATED_DATA_LEN (PS_OBJ_TABLE_SIZE - \
                                        PS_NON_AUTH_OBJ_TABLE_SIZE)
 #endif /* PS_ROLLBACK_PROTECTION */
+
+#if PS_AES_KEY_USAGE_LIMIT != 0
+#define PS_INITIAL_GEN_NUM 0
+#endif
 
 /* The ps_object_table_init function uses the static memory allocated for
  * the object data manipulation, in ps_object_table.c (g_ps_object), to load a
@@ -847,6 +857,9 @@ psa_status_t ps_object_table_create(void)
 #ifdef PS_ENCRYPTION
     p_table->crypto.ref.client_id = PS_OBJ_TABLE_CLIENT_ID;
     p_table->crypto.ref.uid = PS_OBJ_TABLE_UID;
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    p_table->crypto.ref.key_gen_nr = PS_INITIAL_GEN_NUM;
+#endif
 #endif
 
     /* Invert the other in the context as ps_object_table_save_table will
@@ -963,6 +976,35 @@ psa_status_t ps_object_table_get_free_fid(uint32_t fid_num,
     return PSA_SUCCESS;
 }
 
+uint32_t ps_object_table_current_gen(void)
+{
+#if PS_AES_KEY_USAGE_LIMIT == 0
+    /* This function should never be called in this config */
+    tfm_core_panic();
+#else
+    struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
+
+    return p_table->crypto.ref.key_gen_nr;
+#endif
+}
+
+void ps_object_table_set_gen(uint32_t new_gen)
+{
+#if PS_AES_KEY_USAGE_LIMIT == 0
+    /* This function should never be called in this config */
+    tfm_core_panic();
+#else
+    struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
+
+    /* Sanity check the parameter */
+    /* Note that this will also catch running out of generations */
+    if (new_gen <= p_table->crypto.ref.key_gen_nr) {
+        tfm_core_panic();
+    }
+    p_table->crypto.ref.key_gen_nr = new_gen;
+#endif
+}
+
 psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
                                               int32_t client_id,
                                 const struct ps_obj_table_info_t *obj_tbl_info)
@@ -1001,6 +1043,9 @@ psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
 #ifdef PS_ENCRYPTION
     (void)memcpy(p_table->obj_db[idx].tag, obj_tbl_info->tag,
                  PS_TAG_LEN_BYTES);
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    p_table->obj_db[idx].num_blocks = obj_tbl_info->num_blocks;
+#endif
 #else
     p_table->obj_db[idx].version = obj_tbl_info->version;
 #endif
@@ -1037,6 +1082,9 @@ psa_status_t ps_object_table_get_obj_tbl_info(psa_storage_uid_t uid,
 #ifdef PS_ENCRYPTION
     (void)memcpy(obj_tbl_info->tag, p_table->obj_db[idx].tag,
                  PS_TAG_LEN_BYTES);
+#if PS_AES_KEY_USAGE_LIMIT != 0
+    obj_tbl_info->num_blocks = p_table->obj_db[idx].num_blocks;
+#endif
 #else
     obj_tbl_info->version = p_table->obj_db[idx].version;
 #endif

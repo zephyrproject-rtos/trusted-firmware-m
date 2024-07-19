@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,6 +32,9 @@ union ps_crypto_t {
         psa_storage_uid_t uid;         /*!< UID for key label */
         int32_t client_id;             /*!< Owner client ID for key label */
         uint8_t iv[PS_IV_LEN_BYTES];   /*!< IV value of AEAD object */
+#if PS_AES_KEY_USAGE_LIMIT != 0
+        uint32_t key_gen_nr;           /*!< Key generation number */
+#endif /* PS_AES_KEY_USAGE_LIMIT != 0 */
     } ref;
 };
 
@@ -39,6 +44,15 @@ union ps_crypto_t {
  * \return Returns values as described in \ref psa_status_t
  */
 psa_status_t ps_crypto_init(void);
+
+/**
+ * \brief Convert lengths to block count
+ *
+ * \param[in]     in_len    Length of the input data
+ *
+ * \return Returns number of blocks encrypted/decrypted
+ */
+uint32_t ps_crypto_to_blocks(size_t in_len);
 
 /**
  * \brief Encrypts and tags the given plaintext data.
