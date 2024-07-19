@@ -111,7 +111,8 @@ static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
 
 static psa_status_t tfm_its_crypt_data(int32_t client_id,
                                 uint8_t **input,
-                                size_t input_size)
+                                size_t input_size,
+                                size_t offset)
 {
     psa_status_t status;
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
@@ -119,6 +120,11 @@ static psa_status_t tfm_its_crypt_data(int32_t client_id,
 #else
     {
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
+        if (offset != 0) {
+            /* If the data will be encrypted the whole file needs to be written */
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
         status = tfm_its_crypt_file(&g_file_info,
                                     g_fid,
                                     sizeof(g_fid),
@@ -392,11 +398,7 @@ static psa_status_t tfm_its_write_data_to_fs(const int32_t client_id,
     psa_status_t status;
     uint8_t *buffer_ptr = data;
 #ifdef ITS_ENCRYPTION /* ITS_ENCRYPTION */
-    /* If the data will be encrypted the whole file needs to be written */
-    if (offset != 0) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-    status = tfm_its_crypt_data(client_id, &buffer_ptr, data_size);
+    status = tfm_its_crypt_data(client_id, &buffer_ptr, data_size, offset);
     if (status != PSA_SUCCESS) {
         return status;
     }
