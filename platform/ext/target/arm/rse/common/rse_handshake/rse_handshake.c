@@ -308,9 +308,8 @@ static enum tfm_plat_err_t calculate_session_key_client(uint32_t rse_id)
     }
 
     /* Finally construct the session key */
-    plat_err = rse_derive_session_key((uint8_t *)&msg.body.session_key_reply.session_key_ivs,
-                                      SESSION_KEY_IV_SIZE * RSE_AMOUNT,
-                                      RSE_KMU_SLOT_SESSION_KEY_0);
+    plat_err = rse_setup_session_key((uint8_t *)&msg.body.session_key_reply.session_key_ivs,
+                                      SESSION_KEY_IV_SIZE * RSE_AMOUNT);
 
     return plat_err;
 }
@@ -438,8 +437,7 @@ static enum tfm_plat_err_t calculate_session_key_server()
     }
 
     /* Finally derive our own key */
-    plat_err = rse_derive_session_key((uint8_t *)session_key_ivs, sizeof(session_key_ivs),
-                                      RSE_KMU_SLOT_SESSION_KEY_0);
+    plat_err = rse_setup_session_key((uint8_t *)session_key_ivs, sizeof(session_key_ivs));
 
     return plat_err;
 }
