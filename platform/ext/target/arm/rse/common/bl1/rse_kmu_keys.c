@@ -264,7 +264,7 @@ enum tfm_plat_err_t rse_setup_dak_seed(void)
 
     return setup_key_from_derivation(KMU_HW_SLOT_GUK, NULL, dak_seed_label,
                                      sizeof(dak_seed_label),
-                                     RSE_KMU_SLOT_CPAK_SEED,
+                                     RSE_KMU_SLOT_DAK_SEED,
                                      &aes_key0_export_config, NULL, false,
                                      boot_state_config);
 }
