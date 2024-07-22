@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2024, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -40,7 +40,7 @@
       "non_ffm_attributes": ['ns_agent']
     },
     {
-      "description": "TFM Crypto Service",
+      "description": "TFM Crypto Partition",
       "manifest": "platform/ext/target/arm/rse/common/manifest/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
       "conditional": "TFM_PARTITION_CRYPTO",
@@ -49,12 +49,14 @@
       "pid": 259,
       "linker_pattern": {
         "library_list": [
-           "*tfm_*partition_crypto.*"
+           "*tfm_*partition_crypto.*",
+           "*mbedcrypto.*",
+           "*mbedtls*acceleration.*",
          ]
       }
     },
     {
-      "description": "TFM Platform Service",
+      "description": "TFM Platform Partition",
       "manifest": "secure_fw/partitions/platform/tfm_platform.yaml",
       "output_path": "secure_fw/partitions/platform",
       "conditional": "TFM_PARTITION_PLATFORM",
@@ -68,7 +70,7 @@
       }
     },
     {
-      "description": "TFM Initial Attestation Service",
+      "description": "TFM Initial Attestation Partition",
       "manifest": "platform/ext/target/arm/rse/common/manifest/tfm_initial_attestation.yaml",
       "output_path": "secure_fw/partitions/initial_attestation",
       "conditional": "TFM_PARTITION_INITIAL_ATTESTATION",
