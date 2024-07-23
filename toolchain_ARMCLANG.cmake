@@ -332,6 +332,7 @@ macro(target_add_scatter_file target)
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
+            KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
 
@@ -351,6 +352,11 @@ macro(target_add_scatter_file target)
         PRIVATE
             -E
             -xc
+    )
+
+    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
+    add_dependencies(${target}_scatter
+        manifest_tool
     )
 endmacro()
 

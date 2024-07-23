@@ -199,6 +199,11 @@ macro(target_add_scatter_file target)
         PRIVATE
             --preprocess=sn $<TARGET_OBJECTS:${target}_scatter>
     )
+
+    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
+    add_dependencies(${target}_scatter
+        manifest_tool
+    )
 endmacro()
 
 macro(add_convert_to_bin_target target)
