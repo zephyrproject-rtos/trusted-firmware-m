@@ -132,6 +132,7 @@ set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer
 ############################ Partitions ########################################
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
+set(PS_SUPPORT_FORMAT_TRANSITION        OFF         CACHE BOOL      "Enable reading the older format of Protected Storage data")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")

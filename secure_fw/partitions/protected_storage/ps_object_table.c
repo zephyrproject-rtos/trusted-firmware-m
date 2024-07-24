@@ -383,6 +383,12 @@ static void ps_object_table_authenticate(uint8_t table_idx,
 
     err = ps_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                  PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+    if (err != PSA_SUCCESS) {
+        err = ps_crypto_authenticate_transition(crypto, (const uint8_t *)&assoc_data,
+                                                PS_CRYPTO_ASSOCIATED_DATA_LEN);
+    }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
     if (err == PSA_SUCCESS) {
         init_ctx->table_state[table_idx] = PS_OBJ_TABLE_NVC_1_VALID;
         return;
@@ -398,6 +404,12 @@ static void ps_object_table_authenticate(uint8_t table_idx,
 
     err = ps_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                  PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+    if (err != PSA_SUCCESS) {
+        err = ps_crypto_authenticate_transition(crypto, (const uint8_t *)&assoc_data,
+                                                PS_CRYPTO_ASSOCIATED_DATA_LEN);
+    }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
     if (err != PSA_SUCCESS) {
         init_ctx->table_state[table_idx] = PS_OBJ_TABLE_INVALID;
     } else {
@@ -504,6 +516,13 @@ __STATIC_INLINE void ps_object_table_authenticate_ctx_tables(
         err = ps_crypto_authenticate(crypto,
                                      PS_CRYPTO_ASSOCIATED_DATA(crypto),
                                      PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+        if (err != PSA_SUCCESS) {
+            err = ps_crypto_authenticate_transition(crypto,
+                                                    PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                                                    PS_CRYPTO_ASSOCIATED_DATA_LEN);
+        }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
         if (err != PSA_SUCCESS) {
             init_ctx->table_state[PS_OBJ_TABLE_IDX_0] = PS_OBJ_TABLE_INVALID;
         }
@@ -516,6 +535,13 @@ __STATIC_INLINE void ps_object_table_authenticate_ctx_tables(
         err = ps_crypto_authenticate(crypto,
                                      PS_CRYPTO_ASSOCIATED_DATA(crypto),
                                      PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+        if (err != PSA_SUCCESS) {
+            err = ps_crypto_authenticate_transition(crypto,
+                                                    PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                                                    PS_CRYPTO_ASSOCIATED_DATA_LEN);
+        }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
         if (err != PSA_SUCCESS) {
             init_ctx->table_state[PS_OBJ_TABLE_IDX_1] = PS_OBJ_TABLE_INVALID;
         }

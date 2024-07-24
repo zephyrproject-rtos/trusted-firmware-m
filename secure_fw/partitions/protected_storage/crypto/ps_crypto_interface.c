@@ -343,3 +343,40 @@ psa_status_t ps_crypto_authenticate(const union ps_crypto_t *crypto,
 
     return PSA_SUCCESS;
 }
+
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+psa_status_t ps_crypto_authenticate_transition(const union ps_crypto_t *crypto,
+                                               const uint8_t *add,
+                                               uint32_t add_len)
+{
+    psa_status_t status;
+    size_t out_len;
+    /* Fixed object table label used in older version of PS */
+    uint8_t ps_table_key_label[] = "table_key_label";
+    psa_key_id_t ps_key;
+
+    /* Set object table key */
+    status = ps_crypto_setkey(&ps_key, ps_table_key_label, sizeof(ps_table_key_label));
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_aead_decrypt(ps_key, PS_CRYPTO_ALG,
+                              crypto->ref.iv, PS_IV_LEN_BYTES,
+                              add, add_len,
+                              crypto->ref.tag, PS_TAG_LEN_BYTES,
+                              0, 0, &out_len);
+    if (status != PSA_SUCCESS || out_len != 0) {
+        (void)psa_destroy_key(ps_key);
+        return PSA_ERROR_INVALID_SIGNATURE;
+    }
+
+    /* Destroy the transient key */
+    status = psa_destroy_key(ps_key);
+    if (status != PSA_SUCCESS) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
+    return PSA_SUCCESS;
+}
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */

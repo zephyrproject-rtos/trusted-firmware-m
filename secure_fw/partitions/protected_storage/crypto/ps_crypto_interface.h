@@ -128,6 +128,25 @@ void ps_crypto_set_iv(const union ps_crypto_t *crypto);
  */
 psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto);
 
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+/**
+ * \brief Authenticate old format data against the tag.
+ *
+ * This function will attempt to authenticate using the old
+ * non-volatile format. The intent is that it can be used
+ * to transition between formats.
+ *
+ * \param[in] crypto   Pointer to the crypto union
+ * \param[in] add      Pointer to the data to authenticate
+ * \param[in] add_len  Length of the data to authenticate
+ *
+ * \return Returns values as described in \ref psa_status_t
+ */
+psa_status_t ps_crypto_authenticate_transition(const union ps_crypto_t *crypto,
+                                               const uint8_t *add,
+                                               uint32_t add_len);
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
+
 #ifdef __cplusplus
 }
 #endif
