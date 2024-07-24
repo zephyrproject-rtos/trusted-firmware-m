@@ -32,17 +32,6 @@
                              PS_TAG_LEN_BYTES : PS_IV_LEN_BYTES)
 #define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_IV_LEN_MAX)
 
-static psa_status_t fill_key_label(struct ps_object_t *obj, uint8_t *label)
-{
-    psa_storage_uid_t uid = obj->header.crypto.ref.uid;
-    int32_t client_id = obj->header.crypto.ref.client_id;
-
-    memcpy(label, &client_id, sizeof(client_id));
-    memcpy(label + sizeof(client_id), &uid, sizeof(uid));
-
-    return PSA_SUCCESS;
-}
-
 /**
  * \brief Performs authenticated decryption on object data, with the header as
  *        the associated data.
@@ -63,17 +52,6 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
-
-    err = fill_key_label(obj, label);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    err = ps_crypto_setkey(label, sizeof(label));
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
 
     /* Use File ID as a part of the associated data to authenticate
      * the object in the FS. The tag will be stored in the object table and
@@ -89,11 +67,10 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
                                      sizeof(*obj) - sizeof(obj->header.crypto),
                                      &out_len);
     if (err != PSA_SUCCESS || out_len != cur_size) {
-        (void)ps_crypto_destroykey();
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    return ps_crypto_destroykey();
+    return PSA_SUCCESS;
 }
 
 /**
@@ -114,17 +91,6 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
-
-    err = fill_key_label(obj, label);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    err = ps_crypto_setkey(label, sizeof(label));
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
 
     /* Get a new IV for each encryption */
     err = ps_crypto_get_iv(&obj->header.crypto);
@@ -146,11 +112,10 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
                                     PS_CRYPTO_BUF_LEN,
                                     &out_len);
     if (err != PSA_SUCCESS || out_len != cur_size) {
-        (void)ps_crypto_destroykey();
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    return ps_crypto_destroykey();
+    return PSA_SUCCESS;
 }
 
 psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
