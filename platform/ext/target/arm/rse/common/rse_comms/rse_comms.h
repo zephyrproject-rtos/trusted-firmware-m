@@ -10,14 +10,12 @@
 
 #include "psa/client.h"
 #include "cmsis_compiler.h"
+#include "config_tfm.h"
 #include "rse_comms_atu.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
- /* size suits to get_attest_token() */
-#define RSE_COMMS_PAYLOAD_MAX_SIZE (0x40 + 0x800)
 
 /*
  * Allocated for each client request.
