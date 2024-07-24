@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-#define PS_KEY_LEN_BYTES  16
 #define PS_TAG_LEN_BYTES  16
 #define PS_IV_LEN_BYTES   12
 

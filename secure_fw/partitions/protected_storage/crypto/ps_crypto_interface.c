@@ -14,6 +14,8 @@
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 
+#define PS_KEY_LEN_BYTES  16
+
 #ifndef PS_CRYPTO_AEAD_ALG
 #define PS_CRYPTO_AEAD_ALG PSA_ALG_GCM
 #endif
