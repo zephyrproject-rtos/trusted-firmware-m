@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -31,6 +31,21 @@
         "description": "isolation l1/l2 linker script",
         "template": "platform/ext/common/iar/tfm_common_s.icf.template",
         "output": "platform/ext/common/iar/tfm_common_s.icf"
-    }
+    },
+    {
+        "description": "isolation l1-l3 scatter file",
+        "template": "platform/ext/common/armclang/tfm_isolation_s.sct.template",
+        "output": "platform/ext/common/armclang/tfm_isolation_s.sct"
+    },
+    {
+        "description": "isolation l1-l3 linker script",
+        "template": "platform/ext/common/gcc/tfm_isolation_s.ld.template",
+        "output": "platform/ext/common/gcc/tfm_isolation_s.ld"
+    },
+    {
+        "description": "isolation l1-l3 linker script",
+        "template": "platform/ext/common/iar/tfm_isolation_s.icf.template",
+        "output": "platform/ext/common/iar/tfm_isolation_s.icf"
+    },
   ]
 }

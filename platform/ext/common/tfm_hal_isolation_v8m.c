@@ -8,15 +8,9 @@
  *
  */
 
-/*
- * The current implementation in this file only supports isolation
- * level 1 and level 2.
- */
-
 #include <arm_cmse.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdbool.h>
 #include "array.h"
 #include "tfm_hal_device_header.h"
@@ -28,31 +22,63 @@
 #include "tfm_peripherals_def.h"
 #include "load/spm_load_api.h"
 
-#define PROT_BOUNDARY_VAL \
-    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
 /* Boundary handle binding macros. */
 #define HANDLE_ATTR_PRIV_POS            1U
 #define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
 #define HANDLE_ATTR_NS_POS              0U
 #define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
 
-#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-static uint32_t n_configured_regions = 0;
+#if TFM_ISOLATION_LEVEL == 3
+#define HANDLE_ATTR_SPM_POS             2U
+#define HANDLE_ATTR_SPM_MASK            (1UL << HANDLE_ATTR_SPM_POS)
+#define HANDLE_PER_ATTR_BITS            4U
+#define HANDLE_ATTR_RW_POS              (1UL << (HANDLE_PER_ATTR_BITS - 1))
+#define HANDLE_ATTR_INDEX_MASK          (HANDLE_ATTR_RW_POS - 1)
+#define HANDLE_INDEX_BITS               8U
+#define HANDLE_INDEX_MASK               (((1UL << HANDLE_INDEX_BITS) - 1) << 24)
+#define HANDLE_ENCODE_INDEX(attr, idx)                 \
+    do {                                               \
+        (attr) |= (((idx) << 24) & HANDLE_INDEX_MASK); \
+        (idx)++;                                       \
+    } while (0)
 
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-REGION_DECLARE(Image$$, ER_VENEER, $$Base);
-REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef CONFIG_TFM_PARTITION_META
+#define PROT_BOUNDARY_VAL \
+    (((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK) | \
+     ((1U << HANDLE_ATTR_SPM_POS) & HANDLE_ATTR_SPM_MASK))
+
+/* Isolation level 3 needs to reserve at least one MPU region for private data asset. */
+#define MIN_NR_PRIVATE_DATA_REGION  1U
+
+static uint32_t idx_boundary_handle = 0;
+
+#else /* TFM_ISOLATION_LEVEL == 3 */
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
+/* Isolation level 1&2 do not need to reserve MPU region for private data asset. */
+#define MIN_NR_PRIVATE_DATA_REGION  0U
+#endif /* TFM_ISOLATION_LEVEL == 3 */
+
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+static uint32_t n_static_regions;
+
+REGION_DECLARE(Image$$, PT_UNPRIV_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_UNPRIV_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_END, $$Base);
+#if TFM_ISOLATION_LEVEL != 3
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_END, $$Base);
+#elif defined(CONFIG_TFM_PARTITION_META)
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
-#endif /* CONFIG_TFM_PARTITION_META */
+#endif
+REGION_DECLARE(Image$$, PT_PSA_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_DATA_END, $$Base);
 
 #define ARM_MPU_NON_TRANSIENT        ( 1U )
 #define ARM_MPU_TRANSIENT            ( 0U )
@@ -78,92 +104,128 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 {
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 const ARM_MPU_Region_t mpu_region_attributes[] = {
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-    /* Veneer region
-     * Region Number 0, Non-shareable, Read-Only, Non-Privileged, Executable,
-     * Privilege Executable - if PXN available, Attribute set: 0
+    /* If PXN is enabled, for higher isolation levels mark ARoT code as PXN.
+     * Otherwise, combine unpriv and ARoT code into a single unprivileged MPU
+     * region that permits privileged execution.
+     */
+#if defined(TFM_PXN_ENABLE) && (TFM_ISOLATION_LEVEL > 1)
+    /* Unprivileged code region (including veneers if TZ is enabled)
+     * Non-shareable, Read-Only, Unprivileged, Executable,
+     * Privileged Executable, Attribute set: 0
      */
     {
-        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_UNPRIV_CODE_START, $$Base),
                      ARM_MPU_SH_NON,
                      ARM_MPU_READ_ONLY,
                      ARM_MPU_UNPRIVILEGED,
                      ARM_MPU_EXECUTE_OK),
-        #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_UNPRIV_CODE_END, $$Base) - 1,
                          ARM_MPU_PRIVILEGE_EXECUTE_OK,
                          0)
-        #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
-                     0)
-        #endif
     },
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-    /* TFM Core unprivileged code region
-     * Region Number 1, Non-shareable, Read-Only, Non-Privileged, Executable,
-     * Privilege Executable - if PXN available, Attribute set: 0
+    /* Application RoT code region
+     * Non-shareable, Read-Only, Unprivileged, Executable,
+     * Privileged Execute Never, Attribute set: 0
      */
     {
-        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_START, $$Base),
                      ARM_MPU_SH_NON,
                      ARM_MPU_READ_ONLY,
                      ARM_MPU_UNPRIVILEGED,
                      ARM_MPU_EXECUTE_OK),
-        #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
-                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
-                         0)
-        #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
-                     0)
-        #endif
-    },
-    /* RO region
-     * Region Number 2, Non-shareable, Read-Only, Non-Privileged, Executable,
-     * PXN depends on isolation level, Attribute set: 0
-     */
-    {
-        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-                     ARM_MPU_SH_NON,
-                     ARM_MPU_READ_ONLY,
-                     ARM_MPU_UNPRIVILEGED,
-                     ARM_MPU_EXECUTE_OK),
-        #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
-            #if TFM_ISOLATION_LEVEL == 1
-                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
-            #else
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_END, $$Base) - 1,
                          ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
-            #endif
+                         0)
+    },
+#else /* TFM_PXN_ENABLE && TFM_ISOLATION_LEVEL > 1 */
+    /* Combined unprivileged/ARoT code region
+     * Non-shareable, Read-Only, Unprivileged, Executable,
+     * Privileged Executable - if PXN available, Attribute set: 0
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_UNPRIV_CODE_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_OK),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_END, $$Base) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
                          0)
         #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_END, $$Base) - 1,
                      0)
         #endif
     },
-    /* RW, ZI and stack as one region
-     * Region Number 3, Non-shareable, Read-Write, Non-Privileged, Execute Never
-     * Attribute set: 1, Privilege Execute Never - if PXN available
+#endif /* TFM_PXN_ENABLE && TFM_ISOLATION_LEVEL > 1 */
+    /* PSA RoT code region
+     * Non-shareable, Read-Only, Privileged, Executable,
+     * Privileged Executable - if PXN available, Attribute set: 0
      */
     {
-        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_CODE_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_PRIVILEGED,
+                     ARM_MPU_EXECUTE_OK),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_CODE_END, $$Base) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
+                         0)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_CODE_END, $$Base) - 1,
+                     0)
+        #endif
+    },
+    /* RO data region
+     * Non-shareable, Read-Only, Unprivileged, Execute Never,
+     * Privileged Execute Never - if PXN available, Attribute set: 0
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_RO_DATA_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_NEVER),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_RO_DATA_END, $$Base) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                         0)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, PT_RO_DATA_END, $$Base) - 1,
+                     0)
+        #endif
+    },
+    /* For isolation levels below 3, configure all App RoT data (which includes
+     * the metadata pointer region) as unprivileged. For isolation level 3, only
+     * the metadata pointer region is configured unprivileged and App RoT
+     * partition data regions are dynamically configured during partition
+     * scheduling.
+     */
+#if TFM_ISOLATION_LEVEL != 3
+    /* Application RoT data region
+     * Non-shareable, Read-Write, Unprivileged, Execute Never
+     * Privileged Execute Never - if PXN available, Attribute set: 1
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_START, $$Base),
                      ARM_MPU_SH_NON,
                      ARM_MPU_READ_WRITE,
                      ARM_MPU_UNPRIVILEGED,
                      ARM_MPU_EXECUTE_NEVER),
         #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_END, $$Base) - 1,
                          ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
                          1)
         #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_END, $$Base) - 1,
                      1)
         #endif
     },
-#ifdef CONFIG_TFM_PARTITION_META
+#elif defined(CONFIG_TFM_PARTITION_META)
     /* TFM partition metadata pointer region
-     * Region Number 4, Non-shareable, Read-Write, Non-Privileged, Execute Never
-     * Attribute set: 1, Privilege Execute Never - if PXN available
+     * Non-shareable, Read-Write, Unprivileged, Execute Never
+     * Privileged Execute Never - if PXN available, Attribute set: 1
      */
     {
         ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
@@ -181,6 +243,25 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
         #endif
     },
 #endif
+    /* PSA RoT data region
+     * Non-shareable, Read-Write, Privileged, Execute Never
+     * Privileged Execute Never - if PXN available, Attribute set: 1
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_DATA_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_WRITE,
+                     ARM_MPU_PRIVILEGED,
+                     ARM_MPU_EXECUTE_NEVER),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_DATA_END, $$Base) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                         1)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_DATA_END, $$Base) - 1,
+                     1)
+        #endif
+    },
     /* Individual platforms may add further static MPU regions by defining
      * PLATFORM_STATIC_MPU_REGIONS in their tfm_peripherals_def.h header.
      */
@@ -188,8 +269,8 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
     PLATFORM_STATIC_MPU_REGIONS
 #endif
 };
-    ARM_MPU_Region_t localcfg;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
     if (mpc_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
@@ -201,26 +282,23 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
 
     /* Set up static isolation boundaries inside SPE */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-    int32_t i;
+    uint32_t i;
+    const uint32_t mpu_region_num =
+        (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
 
-    uint32_t mpu_region_num =
-        (MPU ->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+    n_static_regions = ARRAY_SIZE(mpu_region_attributes);
 
-    if (mpu_region_num < ARRAY_SIZE(mpu_region_attributes)) {
+    if (n_static_regions + MIN_NR_PRIVATE_DATA_REGION > mpu_region_num) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
     /* Turn off MPU during configuration */
-    if ((MPU->CTRL & MPU_CTRL_ENABLE_Msk)) {
+    if (MPU->CTRL & MPU_CTRL_ENABLE_Msk) {
         ARM_MPU_Disable();
-    }
-    /* Disable all regions */
-    for (i = 0; i < mpu_region_num; i++) {
-        ARM_MPU_ClrRegion(i);
     }
 
     /* Configure attribute registers
-     * Attr0 : Normal memory, Inner/Outer Cacheable, Write-Trough Read-Allocate
+     * Attr0 : Normal memory, Inner/Outer Cacheable, Write-Through Read-Allocate
      */
     ARM_MPU_SetMemAttr(0,
                    ARM_MPU_ATTR(ARM_MPU_ATTR_MEMORY_(ARM_MPU_NON_TRANSIENT,
@@ -248,12 +326,14 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
 
     /* Configure regions */
     /* Note: CMSIS MPU API clears the lower 5 address bits without check */
-    for (i = 0; i < ARRAY_SIZE(mpu_region_attributes); i++) {
-        localcfg.RBAR = mpu_region_attributes[i].RBAR;
-        localcfg.RLAR = mpu_region_attributes[i].RLAR;
-        ARM_MPU_SetRegion(i, localcfg.RBAR, localcfg.RLAR);
+    for (i = 0; i < n_static_regions; i++) {
+        ARM_MPU_SetRegion(i, mpu_region_attributes[i].RBAR,
+                          mpu_region_attributes[i].RLAR);
     }
-    n_configured_regions = i;
+    /* Disable unused regions */
+    while (i < mpu_region_num) {
+        ARM_MPU_ClrRegion(i++);
+    }
 
     /* Enable MPU with the above configurations. Allow default memory map for
      * privileged software and enable MPU during HardFault and NMI handlers.
@@ -275,24 +355,54 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
  * partitions to know if boundary update is necessary. If update is required,
  * SPM passes the handle to platform to do platform settings and update
  * isolation boundaries.
+ *
+ * The handle should be unique under isolation level 3. The implementation
+ * encodes an index at the highest 8 bits to assure handle uniqueness. While
+ * under isolation level 1/2, handles may not be unique.
+ *
+ * The encoding format assignment:
+ * - For isolation level 3
+ *      BIT | 31        24 | 23         20 | ... | 7           4 | 3       0 |
+ *          | Unique Index | Region Attr 5 | ... | Region Attr 1 | Base Attr |
+ *
+ *      In which the "Region Attr i" is:
+ *      BIT |       3      | 2        0 |
+ *          | 1: RW, 0: RO | MMIO Index |
+ *
+ *      In which the "Base Attr" is:
+ *      BIT |               1                |                           0                     |
+ *          | 1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
+ *
+ * - For isolation level 1/2
+ *      BIT | 31     2 |              1                |                           0                     |
+ *          | Reserved |1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
+ *
+ * NOTE: This is a reference implementation for Armv8-M, and has some
+ * limitations:
+ * 1. The maximum number of allowed MMIO regions is 5 per partition.
+ * 2. The valid range of values for MMIO Index is 1 to 7.
+ * 3. Highest 8 bits are for index. It supports 256 unique handles at most.
+ * 4. Only named MMIO regions are supported. Numbered MMIO regions are ignored.
  */
 enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
-    uint32_t i, j;
     bool privileged;
     bool ns_agent_tz;
     uint32_t partition_attrs = 0;
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    uint32_t i, j;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
-    const uintptr_t* mmio_list;
+    const uintptr_t *mmio_list;
     size_t mmio_list_length;
-
 #if TFM_ISOLATION_LEVEL == 2
     ARM_MPU_Region_t local_mpu_region;
     uint32_t mpu_region_num;
-#endif
+#endif /* TFM_ISOLATION_LEVEL == 2 */
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
+
     if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
@@ -304,16 +414,16 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 #endif
 
     ns_agent_tz = IS_NS_AGENT_TZ(p_ldinf);
+
+    /*
+     * Validate that the named MMIO of the partition is allowed by the platform.
+     * Otherwise, skip validation.
+     */
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     get_partition_named_mmio_list(&mmio_list, &mmio_list_length);
 
-    /*
-     * Validate if the named MMIO of partition is allowed by the platform.
-     * Otherwise, skip validation.
-     *
-     * NOTE: Need to add validation of numbered MMIO if platform requires.
-     */
     for (i = 0; i < p_ldinf->nassets; i++) {
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             continue;
@@ -353,7 +463,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
                 (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
 
             /* There is a limited number of available MPU regions in v8M */
-            if (mpu_region_num <= n_configured_regions) {
+            if (mpu_region_num <= n_static_regions) {
                 return TFM_HAL_ERROR_GENERIC;
             }
             if ((plat_data_ptr->periph_start & ~MPU_RBAR_BASE_Msk) != 0) {
@@ -364,9 +474,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
             }
 
             /* Turn off MPU during configuration */
-            if (MPU->CTRL & MPU_CTRL_ENABLE_Msk) {
-                ARM_MPU_Disable();
-            }
+            ARM_MPU_Disable();
 
             /* Assemble region base and limit address register contents. */
             local_mpu_region.RBAR = ARM_MPU_RBAR(plat_data_ptr->periph_start,
@@ -384,20 +492,41 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
                                                  2);
             #endif
 
-            /* Configure device mpu region */
-            ARM_MPU_SetRegion(n_configured_regions,
+            /* Configure device MPU region */
+            ARM_MPU_SetRegion(n_static_regions++,
                               local_mpu_region.RBAR,
                               local_mpu_region.RLAR);
-
-            n_configured_regions++;
 
             /* Enable MPU with the new region added */
             ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
         }
-#endif
+#elif TFM_ISOLATION_LEVEL == 3
+        /* MMIO Index is limited to 3 bits */
+        if (((j + 1) & HANDLE_ATTR_INDEX_MASK) != j + 1) {
+            return TFM_HAL_ERROR_GENERIC;
+        }
+        /* Encode MMIO attributes into the "partition_attrs". */
+        partition_attrs |= j + 1;
+        if (p_asset[i].attr & ASSET_ATTR_READ_WRITE) {
+            partition_attrs |= HANDLE_ATTR_RW_POS;
+        }
+        partition_attrs <<= HANDLE_PER_ATTR_BITS;
+#endif /* TFM_ISOLATION_LEVEL */
     }
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
 
-    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+#if TFM_ISOLATION_LEVEL == 3
+    /*
+     * Highest 8 bits are reserved for index, if they are non-zero, MMIO numbers
+     * must have exceeded the limit of 5.
+     */
+    if (partition_attrs & HANDLE_INDEX_MASK) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+    HANDLE_ENCODE_INDEX(partition_attrs, idx_boundary_handle);
+#endif /* TFM_ISOLATION_LEVEL == 3 */
+
+    partition_attrs |= ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                         HANDLE_ATTR_PRIV_MASK;
     partition_attrs |= ((uint32_t)ns_agent_tz << HANDLE_ATTR_NS_POS) &
                         HANDLE_ATTR_NS_MASK;
@@ -411,14 +540,147 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
                              uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    bool privileged = !!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK);
+    uint32_t local_handle = (uint32_t)boundary;
+    bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
+#if TFM_ISOLATION_LEVEL == 3
+    bool is_spm = !!(local_handle & HANDLE_ATTR_SPM_MASK);
+    ARM_MPU_Region_t local_mpu_region;
+    const uint32_t mpu_region_num =
+        (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+    uint32_t i;
+    const struct asset_desc_t *rt_mem;
+    enum tfm_hal_status_t status = TFM_HAL_SUCCESS;
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    uint32_t mmio_index;
+    struct platform_data_t *plat_data_ptr;
+    const uintptr_t *mmio_list;
+    size_t mmio_list_length;
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
+#endif /* TFM_ISOLATION_LEVEL == 3 */
 
     /* Privileged level is required to be set always */
     ctrl.w = __get_CONTROL();
     ctrl.b.nPRIV = privileged ? 0 : 1;
     __set_CONTROL(ctrl.w);
 
+#if TFM_ISOLATION_LEVEL == 3
+    if (is_spm) {
+        return TFM_HAL_SUCCESS;
+    }
+
+    if (!p_ldinf) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+
+    /* Update regions, for unprivileged partitions only */
+    if (privileged) {
+        return TFM_HAL_SUCCESS;
+    }
+
+    /* Turn off MPU during configuration */
+    ARM_MPU_Disable();
+
+    /* Setup runtime memory first */
+    rt_mem = LOAD_INFO_ASSET(p_ldinf);
+    /*
+     * NOTE: This implementation relies on the partition load info template
+     * ordering the runtime memory asset(s) before the MMIO assets. If more
+     * memory assets or numbered MMIO assets with memory regions are added then
+     * it needs to be revisited.
+     */
+    for (i = 0;
+         i < p_ldinf->nassets && !(rt_mem[i].attr & ASSET_ATTR_MMIO);
+         i++) {
+        if ((n_static_regions + i >= mpu_region_num) ||
+            ((rt_mem[i].mem.start & ~MPU_RBAR_BASE_Msk) != 0) ||
+            (((rt_mem[i].mem.limit - 1) & ~MPU_RLAR_LIMIT_Msk) != 0x1F)) {
+            status = TFM_HAL_ERROR_GENERIC;
+            goto out;
+        }
+        /* Assemble region base and limit address register contents. */
+        local_mpu_region.RBAR = ARM_MPU_RBAR(rt_mem[i].mem.start,
+                                             ARM_MPU_SH_NON,
+                                             ARM_MPU_READ_WRITE,
+                                             ARM_MPU_UNPRIVILEGED,
+                                             ARM_MPU_EXECUTE_NEVER);
+        /* Attr1 contains required attribute set for data regions */
+        #ifdef TFM_PXN_ENABLE
+        local_mpu_region.RLAR = ARM_MPU_RLAR_PXN(rt_mem[i].mem.limit - 1,
+                                                 ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                                                 1);
+        #else
+        local_mpu_region.RLAR = ARM_MPU_RLAR(rt_mem[i].mem.limit - 1,
+                                             1);
+        #endif
+
+        /* Configure device MPU region */
+        ARM_MPU_SetRegion(n_static_regions + i,
+                          local_mpu_region.RBAR,
+                          local_mpu_region.RLAR);
+    }
+
+    i += n_static_regions;
+
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    /* Named MMIO part */
+    local_handle &= ~HANDLE_INDEX_MASK;
+    local_handle >>= HANDLE_PER_ATTR_BITS;
+    mmio_index = local_handle & HANDLE_ATTR_INDEX_MASK;
+
+    get_partition_named_mmio_list(&mmio_list, &mmio_list_length);
+
+    while (mmio_index) {
+        if ((i >= mpu_region_num) || (mmio_index > mmio_list_length)) {
+            status = TFM_HAL_ERROR_GENERIC;
+            goto out;
+        }
+
+        plat_data_ptr = (struct platform_data_t *)mmio_list[mmio_index - 1];
+
+        if (((plat_data_ptr->periph_start & ~MPU_RBAR_BASE_Msk) != 0) ||
+            ((plat_data_ptr->periph_limit & ~MPU_RLAR_LIMIT_Msk) != 0x1F)) {
+            status = TFM_HAL_ERROR_GENERIC;
+            goto out;
+        }
+
+        /* Assemble region base and limit address register contents. */
+        local_mpu_region.RBAR = ARM_MPU_RBAR(plat_data_ptr->periph_start,
+                                             ARM_MPU_SH_NON,
+                                             (local_handle & HANDLE_ATTR_RW_POS) ?
+                                             ARM_MPU_READ_WRITE : ARM_MPU_READ_ONLY,
+                                             ARM_MPU_UNPRIVILEGED,
+                                             ARM_MPU_EXECUTE_NEVER);
+        /* Attr2 contains required attribute set for device regions */
+        #ifdef TFM_PXN_ENABLE
+        local_mpu_region.RLAR = ARM_MPU_RLAR_PXN(plat_data_ptr->periph_limit,
+                                                 ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                                                 2);
+        #else
+        local_mpu_region.RLAR = ARM_MPU_RLAR(plat_data_ptr->periph_limit,
+                                             2);
+        #endif
+
+        /* Configure device MPU region */
+        ARM_MPU_SetRegion(i++, local_mpu_region.RBAR, local_mpu_region.RLAR);
+
+        local_handle >>= HANDLE_PER_ATTR_BITS;
+        mmio_index = local_handle & HANDLE_ATTR_INDEX_MASK;
+    }
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
+
+    /* Disable unused regions */
+    while (i < mpu_region_num) {
+        ARM_MPU_ClrRegion(i++);
+    }
+
+out:
+    /* Enable MPU with the new regions added */
+    ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
+
+    return status;
+#else /* TFM_ISOLATION_LEVEL == 3 */
     return TFM_HAL_SUCCESS;
+#endif /* TFM_ISOLATION_LEVEL == 3 */
 }
 
 enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
