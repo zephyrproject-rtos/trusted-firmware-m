@@ -20,18 +20,6 @@
 
 struct cc3xx_dma_state_t dma_state;
 
-#ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
-static inline uint32_t round_down(uint32_t num, uint32_t boundary)
-{
-    return num - (num % boundary);
-}
-
-static inline uint32_t round_up(uint32_t num, uint32_t boundary)
-{
-    return (num + boundary - 1) - ((num + boundary - 1) % boundary);
-}
-#endif /* CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
-
 #ifdef CC3XX_CONFIG_DMA_REMAP_ENABLE
 static cc3xx_dma_remap_region_t remap_regions[CC3XX_CONFIG_DMA_REMAP_REGION_AM] = {0};
 
@@ -99,11 +87,14 @@ static void process_data(const void* buf, size_t length)
         P_CC3XX->dout.dst_lli_word1 = length;
 
 #ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
-        /* This function only accepts 32-byte aligned addresses, so do some
-         * rounding so we make sure to invalidate the whole output buffer */
-        SCB_CleanInvalidateDCache_by_Addr((void *)round_down(dma_state.output_addr, 32),
-                                          round_up(dma_state.output_addr + length, 32)
-                                          - round_down(dma_state.output_addr, 32));
+        /* Flush the output data. Note that this is only enough to avoid cache
+         * issues if the CPU is is a busy-wait loop while the access completes.
+         * If the DMA is used asynchronously via an interrupt and the CPU
+         * continues running while the DMA is operating, it will be necessary to
+         * set up an MPU covering the input and output regions so they can be
+         * marked as SHAREABLE (which is not currently implemented).
+         */
+        SCB_CleanInvalidateDCache_by_Addr((volatile void *)dma_state.output_addr, length);
 #endif /* CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
 
         dma_state.output_addr += length;
@@ -111,11 +102,14 @@ static void process_data(const void* buf, size_t length)
     }
 
 #ifdef CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE
-    /* This function only accepts 32-byte aligned addresses, so do some
-     * rounding so we make sure to invalidate the whole input buffer */
-    SCB_CleanInvalidateDCache_by_Addr((void *)round_down(remapped_buf, 32),
-                                      round_up(remapped_buf + length, 32)
-                                      - round_down(remapped_buf, 32));
+    /* Flush the input data. Note that this is only enough to avoid cache
+     * issues if the CPU is is a busy-wait loop while the access completes.
+     * If the DMA is used asynchronously via an interrupt and the CPU
+     * continues running while the DMA is operating, it will be necessary to
+     * set up an MPU covering the input and output regions so they can be
+     * marked as SHAREABLE (which is not currently implemented).
+     */
+    SCB_CleanInvalidateDCache_by_Addr((volatile void *)remapped_buf, length);
 #endif /* CC3XX_CONFIG_DMA_CACHE_FLUSH_ENABLE */
 
     /* Set the data source */
