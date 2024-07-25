@@ -31,8 +31,8 @@
 #define SPI_IS_VALID(spi)           ((spi) >= 32 && (spi) < 992)
 #define SPI_IS_VALID_EXT(spi)       ((spi) >= 4096 && (spi) < 5120)
 
-static int assign_pe_to_view(struct gic_mv_dev_t *dev, uint32_t mpid,
-                             uint8_t view)
+static int assign_pe_to_view(struct gic_mv_dev_t *dev,
+                             uint32_t mpid, uint8_t view)
 {
     uint32_t val;
     uint32_t rdist_id;
@@ -59,8 +59,8 @@ static int assign_pe_to_view(struct gic_mv_dev_t *dev, uint32_t mpid,
     return 0;
 }
 
-static int assign_spi_to_view(struct gic_mv_dev_t *dev, uint16_t spi,
-                              uint8_t view)
+static int assign_spi_to_view(struct gic_mv_dev_t *dev,
+                              uint16_t spi, uint8_t view)
 {
     uint32_t val, offset;
     uint32_t nreg, nbit;
@@ -77,8 +77,7 @@ static int assign_spi_to_view(struct gic_mv_dev_t *dev, uint16_t spi,
         nreg = SPI_TO_IVIEWRnE_IDX(spi);
         offset = GICD_IVIEWnRE + 4 * nreg;
     } else {
-        BOOT_LOG_ERR("GIC: Error assigning invalid SPI:5d to View:%d", spi,
-                     view);
+        BOOT_LOG_ERR("GIC: Error assigning invalid SPI:5d to View:%d", spi, view);
         return -1;
     }
     nbit = SPI_TO_IVIEWRn_BIT(spi);
@@ -93,7 +92,8 @@ static int assign_spi_to_view(struct gic_mv_dev_t *dev, uint16_t spi,
 }
 
 int gic_multiple_view_config_pe(struct gic_mv_dev_t *dev,
-                                struct gic_mv_p2v_map *pe_map, uint32_t num)
+                                struct gic_mv_p2v_map *pe_map,
+                                uint32_t num)
 {
     int ret;
     uint32_t idx;
@@ -108,7 +108,8 @@ int gic_multiple_view_config_pe(struct gic_mv_dev_t *dev,
 }
 
 int gic_multiple_view_config_spi(struct gic_mv_dev_t *dev,
-                                 struct gic_mv_i2v_map *spi_map, uint32_t num)
+                                 struct gic_mv_i2v_map *spi_map,
+                                 uint32_t num)
 {
     int ret;
     uint32_t idx, val;
@@ -134,8 +135,44 @@ int gic_multiple_view_config_spi(struct gic_mv_dev_t *dev,
     return 0;
 }
 
+static void gicr_wait_group_not_in_transit(struct gic_mv_dev_t *dev, uint8_t rdist_id)
+{
+    uint32_t pwrr;
+
+    do {
+        pwrr = GICR_READ_REG(dev, rdist_id, GICR_PWRR);
+
+    /* Check group not transitioning: RDGPD == RDGPO */
+    } while (((pwrr & GICR_PWRR_RDGPD) >> GICR_PWRR_RDGPD_SHIFT) !=
+             ((pwrr & GICR_PWRR_RDGPO) >> GICR_PWRR_RDGPO_SHIFT));
+}
+
+static int gic_rdist_pwr_on(struct gic_mv_dev_t *dev, uint8_t rdist_id)
+{
+    /* Check if redistributor needs power management */
+    if (GICR_READ_REG(dev, rdist_id, GICR_IIDR) < GICR_IIDR_ARM_GIC_720AE)
+        return -1;
+
+    do {
+        /* Wait until group not transitioning */
+        gicr_wait_group_not_in_transit(dev, rdist_id);
+
+        /* Power on redistributor */
+        GICR_WRITE_REG(dev, rdist_id, GICR_PWRR, GICR_PWRR_ON);
+
+        /*
+         * Wait until the power on state is reflected.
+         * If RDPD == 0 then powered on.
+         */
+    } while ((GICR_READ_REG(dev, rdist_id, GICR_PWRR) & GICR_PWRR_RDPD)
+             != GICR_PWRR_ON);
+
+    return 0;
+}
+
 int gic_multiple_view_device_probe(struct gic_mv_dev_t *dev,
-                                   uintptr_t base_addr, uint16_t view_num,
+                                   uintptr_t base_addr,
+                                   uint16_t view_num,
                                    uint16_t rdist_num)
 {
     uint32_t val;
@@ -165,6 +202,13 @@ int gic_multiple_view_device_probe(struct gic_mv_dev_t *dev,
     }
 
     BOOT_LOG_INF("GIC: Multiple Views Support detected!");
+
+    if (gic_rdist_pwr_on(dev, GICR_CLUS0_ID) ||
+        gic_rdist_pwr_on(dev, GICR_CLUS1_ID) ||
+        gic_rdist_pwr_on(dev, GICR_CLUS2_ID)) {
+        BOOT_LOG_ERR("GIC: Could not power on redistributor!");
+        return -1;
+    }
 
     return 0;
 }

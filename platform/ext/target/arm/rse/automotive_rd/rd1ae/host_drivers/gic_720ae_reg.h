@@ -35,11 +35,29 @@
 #define GICD_CFGID_HI_MV     (1U << 21)
 
 /* Register offset of GICR */
+#define GICR_IIDR           0x0004
 #define GICR_TYPER          0x0008
+#define GICR_PWRR           0x0024
 #define GICR_VIEWR          0x002C
 #define GICR_PIDR2          GICD_PIDR2
 
+/* GICR_IIDR GIC model encoding */
+#define GICR_IIDR_ARM_GIC_720AE  0x0200043b
+
+/* GICR_PWRR fields */
+#define GICR_PWRR_RDPD_SHIFT     0
+#define GICR_PWRR_RDGPD_SHIFT    2
+#define GICR_PWRR_RDGPO_SHIFT    3
+#define GICR_PWRR_RDPD           (1U << GICR_PWRR_RDPD_SHIFT)
+#define GICR_PWRR_RDGPD          (1U << GICR_PWRR_RDGPD_SHIFT)
+#define GICR_PWRR_RDGPO          (1U << GICR_PWRR_RDGPO_SHIFT)
+#define GICR_PWRR_ON             (0U << GICR_PWRR_RDPD_SHIFT)
+
 #define GICR_VIEWR_MASK     0x3
+
+#define GICR_CLUS0_ID       0x0
+#define GICR_CLUS1_ID       0x1
+#define GICR_CLUS2_ID       0x3
 
 /* Bit to check the last Redistrubitor on this socket */
 #define GICR_TYPER_LAST     (1U << 4)
