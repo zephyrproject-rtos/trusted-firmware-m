@@ -260,7 +260,7 @@ Reset_Handler:
     bl    SystemInit
 #endif
 
-    bl    main
+    bl    _start
 
     /* Should never get here */
     b   .
