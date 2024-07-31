@@ -254,7 +254,7 @@ struct kmu_key_export_config_t {
  * \brief ARM KMU device configuration structure
  */
 struct kmu_dev_cfg_t {
-    const uint32_t base;                         /*!< KMU base address */
+    const uintptr_t base;                        /*!< KMU base address */
 };
 
 /**
