@@ -194,7 +194,7 @@ int32_t boot_platform_post_init(void)
         }
 
         result = tfm_to_psa_adac_corstone1000_secure_debug(secure_debug_rotpk, 32);
-        BOOT_LOG_INF("%s: dipda_secure_debug is a %s.\r\n", __func__,
+        BOOT_LOG_INF("%s: Corstone-1000 Secure Debug is a %s.\r\n", __func__,
                 (result == 0) ? "success" : "failure");
 
     }
