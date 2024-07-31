@@ -73,7 +73,7 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
 
     node->magic = POOL_MAGIC_ALLOCATED;
 
-    return &(((struct tfm_pool_chunk_t *)node)->data);
+    return &(node->data);
 }
 
 void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
