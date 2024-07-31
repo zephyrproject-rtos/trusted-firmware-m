@@ -21,6 +21,7 @@ target_include_directories(platform_region_defs
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
 # The Armv6-M MPU requires that the MPU regions be aligned to the region sizes.
@@ -408,11 +409,22 @@ if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
             PLATFORM_PSA_ADAC_SECURE_DEBUG
     )
 
+    target_link_libraries(platform_bl2
+        PRIVATE
+            trusted-firmware-m-psa-adac
+    )
+
     target_link_libraries(trusted-firmware-m-psa-adac
         PRIVATE
-            platform_bl2
+            psa_adac_cc312
+    )
+
+    target_link_libraries(psa_adac_psa_crypto
+        PRIVATE
+            bl2_mbedcrypto_config
     )
 endif()
+
 
 find_package(Python3)
 
