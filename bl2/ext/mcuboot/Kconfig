@@ -46,7 +46,7 @@ config MCUBOOT_USE_PSA_CRYPTO
     bool "Enable cryptography through PSA Crypto APIs"
     default n
 
-choice
+choice MCUBOOT_HW_KEY_CHOICE
     prompt "Hardware key options for signature verification"
     optional
 
@@ -65,7 +65,7 @@ config MCUBOOT_BUILTIN_KEY
       are used instead to select a builtin key for signature verification.
 endchoice
 
-choice
+choice MCUBOOT_UPGRADE_STRATEGY_CHOICE
     prompt "Upgrade strategy for images"
     default MCUBOOT_UPGRADE_STRATEGY_OVERWRITE_ONLY
 
@@ -105,7 +105,7 @@ config BL2_TRAILER_SIZE
     hex "BL2 Trailer size"
     default 0x400
 
-choice
+choice MCUBOOT_ALIGN_VAL_CHOICE
     prompt "Align option for mcuboot and build image with imgtool"
     config MCUBOOT_ALIGN_VAL_1
         bool "1"
@@ -154,7 +154,7 @@ config MCUBOOT_ENCRYPT_RSA
     bool "Use RSA for encrypted image upgrade support"
     default n
 
-choice
+choice MCUBOOT_FIH_PROFILE_CHOICE
     prompt "Fault injection hardening profile"
     default MCUBOOT_FIH_PROFILE_OFF
 
@@ -243,7 +243,7 @@ config MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH
     string "Mbed TLS PSA Crypto config file to use with MCUboot"
     default "$(TFM_SOURCE_DIR)/bl2/ext/mcuboot/config/mcuboot_crypto_config.h"
 
-choice
+choice MCUBOOT_LOG_LEVEL_CHOICE
     prompt "MCUBoot Log Level"
     default MCUBOOT_LOG_LEVEL_INFO
 
