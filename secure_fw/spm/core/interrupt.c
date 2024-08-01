@@ -30,7 +30,7 @@ extern uintptr_t spm_boundary;
 extern void tfm_flih_func_return(psa_flih_result_t result);
 
 __attribute__((naked))
-static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
+static psa_flih_result_t tfm_flih_deprivileged_handling(struct partition_t *p_pt,
                                                         uintptr_t fn_flih,
                                                         void *curr_component)
 {
@@ -157,10 +157,10 @@ const struct irq_load_info_t *get_irq_info_for_signal(
     return NULL;
 }
 
-void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
+void spm_handle_interrupt(struct partition_t *p_pt,
+                          const struct irq_load_info_t *p_ildi)
 {
     psa_flih_result_t flih_result;
-    struct partition_t *p_part;
     psa_status_t ret;
     FIH_RET_TYPE(bool) fih_bool;
 
@@ -168,9 +168,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         tfm_core_panic();
     }
 
-    p_part = (struct partition_t *)p_pt;
-
-    if (p_ildi->pid != p_part->p_ldinf->pid) {
+    if (p_ildi->pid != p_pt->p_ldinf->pid) {
         tfm_core_panic();
     }
 
@@ -185,12 +183,12 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         (void)fih_bool;
 #else
         FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
-                 spm_boundary, p_part->boundary);
+                 spm_boundary, p_pt->boundary);
         if (fih_eq(fih_bool, fih_int_encode(false))) {
             flih_result = p_ildi->flih_func();
         } else {
             flih_result = tfm_flih_deprivileged_handling(
-                                                p_part,
+                                                p_pt,
                                                 (uintptr_t)p_ildi->flih_func,
                                                 GET_CURRENT_COMPONENT());
         }

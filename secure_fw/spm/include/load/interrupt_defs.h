@@ -32,7 +32,7 @@ struct irq_load_info_t {
 
 /* IRQ runtime data */
 struct irq_t {
-    void                         *p_pt;       /* The owner Partition     */
+    struct partition_t           *p_pt;       /* The owner Partition     */
     const struct irq_load_info_t *p_ildi;     /* The interrupt load info */
 };
 
