@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "cmsis.h"
 #include "cmsis_compiler.h"
 
 #include "async.h"
@@ -26,6 +27,17 @@
 #include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
 #include "ffm/mailbox_agent_api.h"
+
+
+/* If there's no dcache at all, the SCB cache functions won't exist */
+/* If the mailbox is uncached on the S side, no need to flush and invalidate */
+#if !defined(__DCACHE_PRESENT) || (__DCACHE_PRESENT == 0U) || (MAILBOX_IS_UNCACHED_S == 1)
+#define MAILBOX_CLEAN_CACHE(addr, size) __DSB()
+#define MAILBOX_INVALIDATE_CACHE(addr, size) do {} while (0)
+#else
+#define MAILBOX_CLEAN_CACHE(addr, size) SCB_CleanDCache_by_Addr((addr), (size))
+#define MAILBOX_INVALIDATE_CACHE(addr, size) SCB_InvalidateDCache_by_Addr((addr), (size))
+#endif
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
@@ -70,6 +82,7 @@ __STATIC_INLINE bool get_spe_queue_empty_status(uint8_t idx)
 __STATIC_INLINE mailbox_queue_status_t get_nspe_queue_pend_status(
                                     const struct mailbox_status_t *ns_status)
 {
+    MAILBOX_INVALIDATE_CACHE(ns_status, sizeof(*ns_status));
     return ns_status->pend_slots;
 }
 
@@ -77,14 +90,18 @@ __STATIC_INLINE void set_nspe_queue_replied_status(
                                             struct mailbox_status_t *ns_status,
                                             mailbox_queue_status_t mask)
 {
+    MAILBOX_INVALIDATE_CACHE(ns_status, sizeof(*ns_status));
     ns_status->replied_slots |= mask;
+    MAILBOX_CLEAN_CACHE(ns_status, sizeof(*ns_status));
 }
 
 __STATIC_INLINE void clear_nspe_queue_pend_status(
                                             struct mailbox_status_t *ns_status,
                                             mailbox_queue_status_t mask)
 {
+    MAILBOX_INVALIDATE_CACHE(ns_status, sizeof(*ns_status));
     ns_status->pend_slots &= ~mask;
+    MAILBOX_CLEAN_CACHE(ns_status, sizeof(*ns_status));
 }
 
 __STATIC_INLINE int32_t get_spe_mailbox_msg_handle(uint8_t idx,
@@ -155,6 +172,7 @@ static void mailbox_direct_reply(uint8_t idx, uint32_t result)
     reply_ptr = get_nspe_reply_addr(idx);
     spm_memcpy(&reply_ptr->return_val, &ret_result,
                sizeof(reply_ptr->return_val));
+    MAILBOX_CLEAN_CACHE(reply_ptr, sizeof(*reply_ptr));
 
     mailbox_clean_queue_slot(idx);
 
@@ -343,6 +361,7 @@ int32_t tfm_mailbox_handle_msg(void)
         spe_mailbox_queue.queue[idx].ns_slot_idx = idx;
 
         msg_ptr = &spe_mailbox_queue.queue[idx].msg;
+        MAILBOX_INVALIDATE_CACHE(&spe_mailbox_queue.ns_slots[idx].msg, sizeof(*msg_ptr));
         spm_memcpy(msg_ptr, &spe_mailbox_queue.ns_slots[idx].msg, sizeof(*msg_ptr));
 
         if (check_mailbox_msg(msg_ptr) != MAILBOX_SUCCESS) {
