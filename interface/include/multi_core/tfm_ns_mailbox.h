@@ -50,11 +50,11 @@ struct ns_mailbox_slot_t {
 
 /* NSPE mailbox queue */
 struct ns_mailbox_queue_t {
-    struct mailbox_status_t status;
+    struct mailbox_status_t status MAILBOX_ALIGN;
     struct mailbox_slot_t slots[NUM_MAILBOX_QUEUE_SLOT];
 
     /* Following data are not shared with secure */
-    struct ns_mailbox_slot_t slots_ns[NUM_MAILBOX_QUEUE_SLOT];
+    struct ns_mailbox_slot_t slots_ns[NUM_MAILBOX_QUEUE_SLOT] MAILBOX_ALIGN;
 
     mailbox_queue_status_t   empty_slots;       /* Bitmask of empty slots */
 

@@ -246,6 +246,16 @@
 #define NS_AGENT_MAILBOX_STACK_SIZE            0x800
 #endif
 
+/* Whether the mailbox itself is in memory that is uncached in the SPE */
+#ifndef MAILBOX_IS_UNCACHED_S
+#define MAILBOX_IS_UNCACHED_S                  1
+#endif
+
+/* Whether the mailbox itself is in memory that is uncached in the NSPE */
+#ifndef MAILBOX_IS_UNCACHED_NS
+#define MAILBOX_IS_UNCACHED_NS                 1
+#endif
+
 /* SPM Configs */
 
 #ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
