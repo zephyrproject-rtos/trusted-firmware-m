@@ -361,7 +361,6 @@ static enum tfm_plat_err_t derive_using_krtl_or_zero_key(const uint8_t *label,
     enum kmu_error_t kmu_err;
     enum lcm_tp_mode_t tp_mode;
     enum lcm_bool_t sp_enabled;
-    enum lcm_error_t lcm_err;
     enum rse_kmu_slot_id_t input_slot;
     uint32_t *key_buf;
 

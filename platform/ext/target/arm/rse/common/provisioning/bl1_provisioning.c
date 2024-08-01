@@ -208,7 +208,6 @@ enum tfm_plat_err_t provision_psa_rot(const volatile struct rse_provisioning_bun
                                       size_t data_output_size)
 {
     enum tfm_plat_err_t plat_err;
-    cc3xx_err_t cc_err;
 
     gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_STARTS);
 

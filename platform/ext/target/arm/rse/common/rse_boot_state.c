@@ -17,7 +17,6 @@ int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
                        size_t *state_size, boot_state_include_mask mask)
 {
     int rc;
-    enum lcm_error_t lcm_err;
     cc3xx_err_t err;
 
     enum plat_otp_lcs_t lcs;
