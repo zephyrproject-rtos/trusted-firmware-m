@@ -63,7 +63,7 @@ Target of Evaluation
 
 A typical TF-M system diagram from a high-level overview is shown below. TF-M is
 running in the Secure Processing Environment (SPE) and NS software is running in
-Non-secure Processing Environment (NSPE). For more details, please refer to
+Non-Secure Processing Environment (NSPE). For more details, please refer to
 Platform Security Architecture Firmware Framework for M (FF-M) [FF-M]_ and
 FF-M 1.1 Extensions [FF-M-1.1-Extensions]_.
 
@@ -737,10 +737,10 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | If RoT services request SPM to read and write NS data.     |
-  |               | TF-M SPM follows [FF-M]_ to copy the NS input data into    |
-  |               | SPE memory region owned by the RoT service, before the RoT |
-  |               | service processes the data.                                |
+  | Mitigation    | If RoT services request SPM to read and write NS data, SPM |
+  |               | follows [FF-M]_ to copy the NS input data into SPE memory  |
+  |               | region owned by the RoT service, before the RoT service    |
+  |               | processes the data.                                        |
   |               | Therefore, the NS input data is protected during the RoT   |
   |               | service execution from being tampered.                     |
   |               |                                                            |
@@ -794,7 +794,7 @@ send response data back to NS memory.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | If RoT services request SPM to read and write NS data.     |
+  |               | If RoT services request SPM to read and write NS data,     |
   |               | SPM will validate the target addresses and can detect the  |
   |               | invalid addresses to mitigate this threat.                 |
   |               |                                                            |
@@ -837,7 +837,7 @@ send response data back to NS memory.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | If RoT services request SPM to read and write NS data.     |
+  |               | If RoT services request SPM to read and write NS data,     |
   |               | SPM will validate the target addresses and can detect the  |
   |               | invalid addresses to mitigate this threat.                 |
   |               |                                                            |
@@ -993,7 +993,7 @@ This section identifies threats on ``DF6`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M saves NPSE context in general purpose register R4~R11 |
+  | Mitigation    | TF-M saves NSPE context in general purpose register R4~R11 |
   |               | into secure stack during secure interrupt entry.           |
   |               | After secure interrupt handling completes, TF-M unstacks   |
   |               | NSPE context from secure stack to overwrite secure context |
@@ -1136,9 +1136,9 @@ Version control
   | v1.3    | Update for validity of dual-cpu model Armv8-M    | TF-M v2.1.0   |
   +---------+--------------------------------------------------+---------------+
 
-*********
-Reference
-*********
+**********
+References
+**********
 
 .. [Security-Incident-Process] `Security Incident Handling Process <https://trusted-firmware-docs.readthedocs.io/en/latest/security_center/incident_handling_process.html>`_
 
