@@ -109,10 +109,8 @@
 #define FWU_PRIVATE_METADATA_REPLICA_2_OFFSET   (FWU_PRIVATE_METADATA_REPLICA_1_OFFSET + \
                                                  FWU_METADATA_FLASH_SECTOR_SIZE)
 
-#define BANK_0_PARTITION_OFFSET         (SE_BL2_BANK_0_OFFSET + \
-                                         SE_BL2_PARTITION_SIZE)
-#define BANK_1_PARTITION_OFFSET         (SE_BL2_BANK_1_OFFSET + \
-                                         SE_BL2_PARTITION_SIZE)
+#define BANK_0_PARTITION_OFFSET         (SE_BL2_BANK_0_OFFSET)
+#define BANK_1_PARTITION_OFFSET         (SE_BL2_BANK_1_OFFSET)
 
 /* BL1: mcuboot flashmap configurations */
 #define FLASH_AREA_8_ID                 (1)
