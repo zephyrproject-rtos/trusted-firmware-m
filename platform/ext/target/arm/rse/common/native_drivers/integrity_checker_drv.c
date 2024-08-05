@@ -198,11 +198,11 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
     iccval |= 1 << 4;
 
     /* Configure input data. Size is in words */
-    p_integrity_checker->icda = remap_addr(dev, (uint32_t)data);
+    p_integrity_checker->icda = remap_addr(dev, (uintptr_t)data);
     p_integrity_checker->icdl = size / INTEGRITY_CHECKER_REQUIRED_ALIGNMENT;
 
     /* Set output address */
-    p_integrity_checker->iccva = remap_addr(dev, (uint32_t)value_ptr);
+    p_integrity_checker->iccva = remap_addr(dev, (uintptr_t)value_ptr);
 
     /* Start integrity checker */
     iccval |= 1;
@@ -278,11 +278,11 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
     iccval |= (mode & 0b111) << 1;
 
     /* Configure input data. Size is in words */
-    p_integrity_checker->icda = remap_addr(dev, (uint32_t)data);
+    p_integrity_checker->icda = remap_addr(dev, (uintptr_t)data);
     p_integrity_checker->icdl = size / INTEGRITY_CHECKER_REQUIRED_ALIGNMENT;
 
     /* Set compare address */
-    p_integrity_checker->iceva = remap_addr(dev, (uint32_t)value_ptr);
+    p_integrity_checker->iceva = remap_addr(dev, (uintptr_t)value_ptr);
 
     /* Start integrity checker */
     iccval |= 1;
