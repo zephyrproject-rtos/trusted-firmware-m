@@ -106,7 +106,13 @@
 #define BL1_1_DATA_LIMIT    (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
 
 #define BL1_2_CODE_START    (BL1_1_DATA_START + BL1_1_DATA_SIZE)
-#define BL1_2_CODE_SIZE     (0x0000198C)     /* 6 KiB */
+
+/* The BL1_2_CODE just fits inside this region. The BL1_2 code is provisioned into
+ * the OTP so more space shouldn't be assigned to this because we can run out of OTP
+ * memory if the OTP layout is changed for some reason. That could cause runtime
+ * errors
+ */
+#define BL1_2_CODE_SIZE     (0x0000170C)     /* 5900 bytes */
 #define BL1_2_CODE_LIMIT    (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
 
 #define BL1_2_DATA_START    (BL1_2_CODE_START+BL1_2_CODE_SIZE)
