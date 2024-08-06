@@ -101,9 +101,9 @@ David Hazi
 Corstone1000
 ^^^^^^^^^^^^
 
-Xueliang Zhong
-    :email: `Xueliang.Zhong@arm.com <xueliang.zhong@arm.com>`__
-    :github: `xueliang-zhong <https://github.com/xueliang-zhong-arm>`__
+Hugues Kamba Mpiana
+    :email: `Hugues.KambaMpiana@arm.com <hugues.kambampiana@arm.com>`__
+    :github: `hugueskamba <https://github.com/hugueskamba>`__
 
 Emekcan Aras
     :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
