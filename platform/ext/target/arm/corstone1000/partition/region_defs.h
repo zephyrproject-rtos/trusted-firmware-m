@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -88,9 +88,8 @@
 #define BL2_CODE_SIZE     (IMAGE_BL2_CODE_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
-#define BL2_DATA_START    (BOOT_TFM_SHARED_DATA_BASE + \
-                           BOOT_TFM_SHARED_DATA_SIZE)
-#define BL2_DATA_SIZE     (BL2_CODE_START - BL2_HEADER_SIZE - BL2_DATA_START)
+#define BL2_DATA_START    (S_DATA_START)
+#define BL2_DATA_SIZE     (S_DATA_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 /* SE BL1 regions */
@@ -114,7 +113,7 @@
 #define BL1_2_DATA_SIZE     (0x8000)     /* 32 KiB*/
 #define BL1_2_DATA_LIMIT    (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 
-#define BOOT_TFM_SHARED_DATA_BASE (S_DATA_PRIV_START)
+#define BOOT_TFM_SHARED_DATA_BASE (S_DATA_START)
 
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
