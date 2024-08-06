@@ -16,6 +16,22 @@
 #include "tfm_hal_device_header.h"
 #include <string.h>
 
+#ifdef MCUBOOT_SIGN_EC384
+#define PUB_KEY_HASH_SIZE (48)
+#define PUB_KEY_SIZE      (100) /* Size must be aligned to 4 Bytes */
+#else
+#define PUB_KEY_HASH_SIZE (32)
+#define PUB_KEY_SIZE      (68)  /* Size must be aligned to 4 Bytes */
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define PROV_ROTPK_DATA_SIZE    PUB_KEY_SIZE
+#else
+#define PROV_ROTPK_DATA_SIZE    PUB_KEY_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
+
+#define MAX_IMAGE_NUM (4)   /* This also sets the number of the BL2 ROTPKs */
+
 /* Define some offsets from the CC312 base address, to access particular
  * registers and memory regions
  */
@@ -226,7 +242,7 @@ __PACKED_STRUCT plat_otp_layout_t {
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
-        uint8_t bl2_rotpk[4][32];
+        uint8_t bl2_rotpk[MAX_IMAGE_NUM][PROV_ROTPK_DATA_SIZE];
         uint8_t bl2_nv_counter[4][64];
 
 #ifdef BL1
