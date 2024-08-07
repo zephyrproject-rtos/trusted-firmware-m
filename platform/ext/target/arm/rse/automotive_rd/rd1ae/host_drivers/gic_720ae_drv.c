@@ -25,10 +25,10 @@
     ((dev)->gicr_base + (dev)->rdist_sz * (cpu) + (ofs))) = (uint32_t)(val)
 
 /* Definitions to calculate SPI register index and bit offset. */
-#define SPI_TO_IVIEWRn_IDX(spi)     (((spi) - 32) >> 4)
+#define SPI_TO_IVIEWRn_IDX(spi)     ((spi) >> 4)
 #define SPI_TO_IVIEWRnE_IDX(spi)    (((spi) - 4096) >> 4)
 #define SPI_TO_IVIEWRn_BIT(spi)     (((spi) % 16) << 1)
-#define SPI_IS_VALID(spi)           ((spi) >= 32 && (spi) < 1020)
+#define SPI_IS_VALID(spi)           ((spi) >= 32 && (spi) < 992)
 #define SPI_IS_VALID_EXT(spi)       ((spi) >= 4096 && (spi) < 5120)
 
 static int assign_pe_to_view(struct gic_mv_dev_t *dev, uint32_t mpid,
