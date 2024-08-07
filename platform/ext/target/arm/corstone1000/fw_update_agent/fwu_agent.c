@@ -269,8 +269,6 @@ static enum fwu_agent_error_t private_metadata_write(
 
 static enum fwu_agent_error_t metadata_validate(struct fwu_metadata *p_metadata)
 {
-    int ret;
-
     FWU_LOG_MSG("%s: enter:\n\r", __func__);
 
     if (!p_metadata) {

@@ -585,8 +585,6 @@ static void setup_host_firewall(void)
 int32_t boot_platform_init(void)
 {
     int32_t result;
-    uint32_t image_offset;
-
 
     result = corstone1000_watchdog_init();
     if (result != ARM_DRIVER_OK) {

@@ -5,8 +5,8 @@
  *
  */
 
+#include <string.h>
 #include "s_io_storage_test.h"
-
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "io_block.h"

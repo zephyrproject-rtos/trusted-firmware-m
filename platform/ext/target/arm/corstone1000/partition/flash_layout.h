@@ -165,11 +165,6 @@
 #define FLASH_AREA_4_ID                 (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_5_ID                 (FLASH_AREA_4_ID + 1)
 
-#define BL1_FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                                          255 )
-#define BL1_FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
-                                                          255 )
-
 #define BL1_FLASH_AREA_IMAGE_SCRATCH        255
 
 /* Macros needed to imgtool.py, used when creating TF-M signed image */
