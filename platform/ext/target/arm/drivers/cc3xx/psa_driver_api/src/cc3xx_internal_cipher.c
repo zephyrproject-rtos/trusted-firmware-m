@@ -64,25 +64,39 @@ static psa_status_t cc3xx_internal_aes_setup(
     }
 
     switch (alg) {
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
     case PSA_ALG_CBC_NO_PADDING:
+        mode = CC3XX_AES_MODE_CBC;
+        break;
+#endif
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
         mode = CC3XX_AES_MODE_CBC;
         break;
+#endif
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
         mode = CC3XX_AES_MODE_ECB;
         break;
+#endif
+#if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
         mode = CC3XX_AES_MODE_CTR;
         break;
+#endif
     default:
         /* Check if this is an AEAD mode if it does not match any Cipher */
         switch (default_alg) {
+#if defined(PSA_WANT_ALG_GCM)
         case PSA_ALG_GCM:
             mode = CC3XX_AES_MODE_GCM;
             break;
+#endif
+#if defined(PSA_WANT_ALG_CCM)
         case PSA_ALG_CCM:
             mode = CC3XX_AES_MODE_CCM;
             break;
+#endif
         default:
             return PSA_ERROR_INVALID_ARGUMENT;
         }
@@ -129,12 +143,15 @@ static psa_status_t cc3xx_internal_chacha_setup(
     }
 
     switch (alg) {
+#if defined(PSA_WANT_ALG_STREAM_CIPHER)
     case PSA_ALG_STREAM_CIPHER:
         mode = CC3XX_CHACHA_MODE_CHACHA;
         break;
+#endif
     default:
         /* Check if this is an AEAD mode if it does not match any Cipher */
         switch (default_alg) {
+#if defined(PSA_WANT_ALG_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
 #if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
             /* For CC3XX_CONFIG_ENABLE_STREAM_CIPHER, the low level driver
@@ -146,6 +163,7 @@ static psa_status_t cc3xx_internal_chacha_setup(
             mode = CC3XX_CHACHA_MODE_CHACHA_POLY1305;
 #endif /* defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) */
             break;
+#endif /* defined(PSA_WANT_ALG_CHACHA20_POLY1305) */
         default:
             return PSA_ERROR_INVALID_ARGUMENT;
         }
@@ -401,13 +419,17 @@ psa_status_t cc3xx_internal_cipher_setup_complete(
                 return cc3xx_to_psa_err(err);
             }
 
-            if (operation->aes.mode == CC3XX_AES_MODE_GCM || operation->aes.mode == CC3XX_AES_MODE_CCM) {
-                cc3xx_lowlevel_aes_set_tag_len(PSA_AEAD_TAG_LENGTH(operation->key_type, operation->key_bits, operation->alg));
-            }
+            cc3xx_lowlevel_aes_set_tag_len(PSA_AEAD_TAG_LENGTH(operation->key_type, operation->key_bits, operation->alg));
 
+#if defined(PSA_WANT_ALG_CCM)
+            /* The fields below, i.e. aes_to_crypt_len and aes_to_auth_len are defined only
+             * if CCM is enabled in the low level driver. Enabling the low level driver for
+             * CCM is then a pre-requisite for having PSA_WANT_ALG_CCM in the PSA config
+             */
             if (operation->aes.mode == CC3XX_AES_MODE_CCM) {
                 cc3xx_lowlevel_aes_set_data_len(operation->aes.aes_to_crypt_len, operation->aes.aes_to_auth_len);
             }
+#endif /* PSA_WANT_ALG_CCM */
             break;
 #endif /* PSA_WANT_KEY_TYPE_AES */
         default:
