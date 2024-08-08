@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,6 +30,9 @@
 /* The PSA algorithm used by this implementation */
 #define PS_CRYPTO_ALG \
     PSA_ALG_AEAD_WITH_SHORTENED_TAG(PS_CRYPTO_AEAD_ALG, PS_TAG_LEN_BYTES)
+
+/* Length of the label used to derive a crypto key */
+#define LABEL_LEN (sizeof(int32_t) + sizeof(psa_storage_uid_t))
 
 /*
  * \brief Check whether the PS AEAD algorithm is a valid one
@@ -199,7 +204,7 @@ psa_status_t ps_crypto_encrypt_and_tag(union ps_crypto_t *crypto,
 {
     psa_status_t status;
     psa_key_id_t ps_key;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
+    uint8_t label[LABEL_LEN];
 
     fill_key_label(crypto, label);
 
@@ -242,7 +247,7 @@ psa_status_t ps_crypto_auth_and_decrypt(const union ps_crypto_t *crypto,
 {
     psa_status_t status;
     psa_key_id_t ps_key;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
+    uint8_t label[LABEL_LEN];
 
     fill_key_label(crypto, label);
 
@@ -281,7 +286,7 @@ psa_status_t ps_crypto_generate_auth_tag(union ps_crypto_t *crypto,
     psa_status_t status;
     size_t out_len;
     psa_key_id_t ps_key;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
+    uint8_t label[LABEL_LEN];
 
     fill_key_label(crypto, label);
 
@@ -316,7 +321,7 @@ psa_status_t ps_crypto_authenticate(const union ps_crypto_t *crypto,
     psa_status_t status;
     size_t out_len;
     psa_key_id_t ps_key;
-    uint8_t label[sizeof(int32_t) + sizeof(psa_storage_uid_t)];
+    uint8_t label[LABEL_LEN];
 
     fill_key_label(crypto, label);
 
