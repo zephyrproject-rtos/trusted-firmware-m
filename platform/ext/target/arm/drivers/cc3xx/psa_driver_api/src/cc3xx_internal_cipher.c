@@ -114,8 +114,13 @@ static psa_status_t cc3xx_internal_aes_setup(
                 CC3XX_AES_DIRECTION_ENCRYPT : CC3XX_AES_DIRECTION_DECRYPT;
     state->key_size = key_size;
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     cc3xx_dpa_hardened_word_copy(state->key_buf, (uint32_t *)key_buffer,
                                  key_buffer_size / sizeof(uint32_t));
+#else
+    memcpy(state->key_buf, key_buffer, key_buffer_size);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+
     return PSA_SUCCESS;
 }
 #endif /* PSA_WANT_KEY_TYPE_AES */
@@ -180,8 +185,13 @@ static psa_status_t cc3xx_internal_chacha_setup(
     state->direction = (dir == PSA_CRYPTO_DRIVER_ENCRYPT) ?
                 CC3XX_CHACHA_DIRECTION_ENCRYPT : CC3XX_CHACHA_DIRECTION_DECRYPT;
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     cc3xx_dpa_hardened_word_copy(state->key, (uint32_t *)key_buffer,
                                 key_buffer_size / sizeof(uint32_t));
+#else
+    memcpy(state->key, key_buffer, key_buffer_size);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+
     return PSA_SUCCESS;
 }
 
@@ -218,8 +228,13 @@ static psa_status_t cc3xx_internal_chacha20_poly1305_gen_otk(
         return cc3xx_to_psa_err(err);
     }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     cc3xx_dpa_hardened_word_copy(poly_key_r, &keystream[0], POLY1305_KEY_SIZE / sizeof(uint32_t));
     cc3xx_dpa_hardened_word_copy(poly_key_s, &keystream[POLY1305_KEY_SIZE / sizeof(uint32_t)], POLY1305_KEY_SIZE / sizeof(uint32_t));
+#else
+    memcpy(poly_key_r, &keystream[0], POLY1305_KEY_SIZE);
+    memcpy(poly_key_s, &keystream[POLY1305_KEY_SIZE / sizeof(uint32_t)], POLY1305_KEY_SIZE);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
     cc3xx_lowlevel_chacha20_uninit();
 
@@ -339,8 +354,12 @@ psa_status_t cc3xx_internal_cipher_setup_set_iv(
 
         operation->chacha.counter = initial_counter;
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(operation->chacha.iv, (uint32_t *)iv,
                                      sizeof(operation->chacha.iv) / sizeof(uint32_t));
+#else
+        memcpy(operation->chacha.iv, iv, sizeof(operation->chacha.iv));
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
         operation->iv_length = sizeof(operation->chacha.iv);
         return PSA_SUCCESS;
@@ -349,8 +368,13 @@ psa_status_t cc3xx_internal_cipher_setup_set_iv(
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(operation->aes.iv, (uint32_t *)iv,
                                      iv_length / sizeof(uint32_t));
+#else
+        memcpy(operation->aes.iv, iv, iv_length);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+
         /* Copy unaligned bytes */
         if (iv_length % sizeof(uint32_t)) {
             size_t words_copied = iv_length / sizeof(uint32_t);

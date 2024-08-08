@@ -83,10 +83,14 @@ psa_status_t cc3xx_key_agreement(
         memcpy(pub_key_x_local, &publ_key[1], pub_key_x_sz);
         memcpy(pub_key_y_local, &publ_key[1 + pub_key_x_sz], pub_key_y_sz);
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(
             priv_key_local,
             (const uint32_t *)priv_key,
             sizeof(priv_key_local) / sizeof(uint32_t));
+#else
+        memcpy(priv_key_local, priv_key, priv_key_local);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
         err = cc3xx_lowlevel_ecdh(curve_id, priv_key_local, priv_key_size,
                     pub_key_x_local, pub_key_x_sz,
@@ -102,8 +106,12 @@ psa_status_t cc3xx_key_agreement(
         if (output_size < shared_secret_sz) {
             status = PSA_ERROR_BUFFER_TOO_SMALL;
         } else {
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
             cc3xx_dpa_hardened_word_copy(
                 (uint32_t *)output, shared_secret_local, shared_secret_sz / sizeof(uint32_t));
+#else
+            memcpy(output, shared_secret_local, shared_secret_sz);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
             *output_length = shared_secret_sz;
             status = PSA_SUCCESS;
         }

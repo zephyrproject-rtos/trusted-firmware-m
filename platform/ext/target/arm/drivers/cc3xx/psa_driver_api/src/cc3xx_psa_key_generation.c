@@ -79,7 +79,11 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
 
             /* Copy the generated key back in the output buffer */
             assert(!(gen_key_sz % sizeof(uint32_t)));
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
             cc3xx_dpa_hardened_word_copy((uint32_t *)key_buffer, key_buffer_local, gen_key_sz / sizeof(uint32_t));
+#else
+            memcpy(key_buffer, key_buffer_local, gen_key_sz);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
             *key_buffer_length = gen_key_sz;
 
             return PSA_SUCCESS;
@@ -146,10 +150,14 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
         uint32_t key_buffer_local[
             CEIL_ALLOC_SZ(PSA_KEY_EXPORT_ECC_KEY_PAIR_MAX_SIZE(key_bits), sizeof(uint32_t))];
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(
             key_buffer_local,
             (const uint32_t *)key_buffer,
             sizeof(key_buffer_local) / sizeof(uint32_t));
+#else
+        memcpy(key_buffer_local, key_buffer, key_buffer_local);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
         err = cc3xx_lowlevel_ecdsa_getpub(
             curve_id, key_buffer_local, key_buffer_size,

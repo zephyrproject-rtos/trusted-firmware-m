@@ -943,7 +943,11 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
             are_different |= tag[permutation_buf[idx]] ^ calculated_tag[permutation_buf[idx]];
         }
     } else {
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy(tag, calculated_tag, tag_word_size);
+#else
+        memcpy(tag, calculated_tag, tag_word_size * 4);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
     }
 
     if (are_different) {

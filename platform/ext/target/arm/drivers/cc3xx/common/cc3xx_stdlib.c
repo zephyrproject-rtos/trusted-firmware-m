@@ -26,6 +26,8 @@ void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count)
     }
 }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
+
 #ifndef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
 void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
                                   volatile const uint32_t *src, size_t word_count)
@@ -50,3 +52,5 @@ void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
     dpa_hardened_word_copy(dst, src, word_count);
 }
 #endif /* CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY */
+
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */

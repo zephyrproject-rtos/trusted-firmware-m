@@ -80,7 +80,11 @@ static psa_status_t ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
         }
     }
 
+#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     cc3xx_dpa_hardened_word_copy(key_buf, (uint32_t *)key, key_length / sizeof(uint32_t));
+#else
+    memcpy(key_buf, key, key_length);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
     err = cc3xx_lowlevel_ecdsa_sign(curve_id,
             key_buf, key_length,
