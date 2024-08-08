@@ -91,7 +91,13 @@ extern "C" {
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_CHACHA20
 #endif
 
-#ifdef PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC
+#if defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY) ||      \
+    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC) ||  \
+    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT) || \
+    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)
+    /* Mbed TLS core does not support partially accelerating
+     * so we must make sure they are all marked accelerated
+     */
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_PUBLIC_KEY
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_BASIC
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_IMPORT
@@ -108,6 +114,21 @@ extern "C" {
 
 #ifdef PSA_WANT_ALG_ECDSA
 #define MBEDTLS_PSA_ACCEL_ALG_ECDSA
+#ifdef PSA_WANT_ECC_SECP_R1_192
+#define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
+#endif
+#ifdef PSA_WANT_ECC_SECP_R1_224
+#define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_224
+#endif
+#ifdef PSA_WANT_ECC_SECP_R1_256
+#define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_256
+#endif
+#ifdef PSA_WANT_ECC_SECP_R1_384
+#define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_384
+#endif
+#ifdef PSA_WANT_ECC_SECP_R1_521
+#define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_521
+#endif
 #endif
 
 #ifdef PSA_WANT_ALG_DETERMINISTIC_ECDSA
