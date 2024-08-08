@@ -177,25 +177,41 @@ out_chacha20:
         cc3xx_aes_keysize_t key_size;
         cc3xx_aes_mode_t mode;
 
-        key_size = (key_buffer_size == 16) ? CC3XX_AES_KEYSIZE_128 :
-                   (key_buffer_size == 24) ? CC3XX_AES_KEYSIZE_192 :
-                   (key_buffer_size == 32) ? CC3XX_AES_KEYSIZE_256 : -1;
-
-        if (key_size == -1) {
+        switch (key_buffer_size) {
+        case 16:
+            key_size = CC3XX_AES_KEYSIZE_128;
+            break;
+        case 24:
+            key_size = CC3XX_AES_KEYSIZE_192;
+            break;
+        case 32:
+            key_size = CC3XX_AES_KEYSIZE_256;
+            break;
+        default:
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
         switch (alg) {
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
         case PSA_ALG_CBC_NO_PADDING:
+            mode = CC3XX_AES_MODE_CBC;
+            break;
+#endif
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
         case PSA_ALG_CBC_PKCS7:
             mode = CC3XX_AES_MODE_CBC;
             break;
+#endif
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
         case PSA_ALG_ECB_NO_PADDING:
             mode = CC3XX_AES_MODE_ECB;
             break;
+#endif
+#if defined(PSA_WANT_ALG_CTR)
         case PSA_ALG_CTR:
             mode = CC3XX_AES_MODE_CTR;
             break;
+#endif
         default:
             return PSA_ERROR_INVALID_ARGUMENT;
         }
