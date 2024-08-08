@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,8 +30,6 @@
 /* FIXME: add the tag length to the crypto buffer size to account for the tag
  * being appended to the ciphertext by the crypto layer.
  */
-#define PS_TAG_IV_LEN_MAX   ((PS_TAG_LEN_BYTES > PS_IV_LEN_BYTES) ? \
-                             PS_TAG_LEN_BYTES : PS_IV_LEN_BYTES)
 #define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_IV_LEN_MAX)
 
 /**
