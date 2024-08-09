@@ -13,13 +13,10 @@
 
 #include "tfm_plat_nv_counters.h"
 
-#include <limits.h>
-#include "Driver_Flash.h"
-#include "flash_layout.h"
-#include "tfm_plat_otp.h"
-#include "cmsis_compiler.h"
 #include "device_definition.h"
+#include "tfm_plat_otp.h"
 
+#include <limits.h>
 #include <string.h>
 
 #define OTP_COUNTER_MAX_SIZE    (16u * sizeof(uint32_t))
@@ -31,6 +28,7 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+#ifdef RSE_BIT_PROGRAMMABLE_OTP
 #ifdef INTEGRITY_CHECKER_S
 static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
                                            uint32_t *zero_bits)
@@ -70,7 +68,6 @@ static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
 }
 #endif /* INTEGRITY_CHECKER_DEV_S */
 
-#ifdef RSE_BIT_PROGRAMMABLE_OTP
 static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
                                             uint8_t *val)
 {
@@ -98,7 +95,6 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
     }
 
     count = (counter_size * 8) - count;
-
     memcpy(val, &count, NV_COUNTER_SIZE);
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -237,7 +233,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
     counter_size = counter_size > OTP_COUNTER_MAX_SIZE ? OTP_COUNTER_MAX_SIZE
                                                        : counter_size;
 
-    if (val > counter_size) {
+    if (val > (counter_size / sizeof(uint32_t))) {
         return TFM_PLAT_ERR_SET_OTP_COUNTER_MAX_VALUE;
     }
 
@@ -245,7 +241,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
         counter_value[idx] = OTP_COUNTER_MAGIC;
     }
 
-    err = tfm_plat_otp_write(id, sizeof(counter_value),
+    err = tfm_plat_otp_write(id, counter_size,
                              (uint8_t *)counter_value);
 
     return err;
@@ -302,10 +298,6 @@ enum tfm_plat_err_t tfm_plat_increment_nv_counter(
                                    (uint8_t *)&security_cnt);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
-    }
-
-    if (security_cnt == UINT32_MAX) {
-        return TFM_PLAT_ERR_ICREMENT_NV_COUNTER_MAX_VALUE;
     }
 
     return tfm_plat_set_nv_counter(counter_id, security_cnt + 1u);
