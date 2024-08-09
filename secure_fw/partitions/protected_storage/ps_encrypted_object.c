@@ -27,10 +27,10 @@
 /* FIXME: Do partial encrypt/decrypt to reduce the size of internal buffer */
 #define PS_MAX_ENCRYPTED_OBJ_SIZE PS_ENCRYPT_SIZE(PS_MAX_OBJECT_DATA_SIZE)
 
-/* FIXME: add the tag length to the crypto buffer size to account for the tag
+/* Add the tag length to the crypto buffer size to account for the tag
  * being appended to the ciphertext by the crypto layer.
  */
-#define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_IV_LEN_MAX)
+#define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_LEN_BYTES)
 
 /**
  * \brief Performs authenticated decryption on object data, with the header as
@@ -125,8 +125,7 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
     size_t data_length;
 
     /* Read the encrypted object from the persistent area. The data stored via
-     * ITS interface of this `fid` is the encrypted object together with the
-     * `IV`.
+     * ITS interface of this `fid` is the IV together with the encrypted object.
      * In the psa_its_get, the buffer size is not checked. Check the buffer size
      * here.
      */
@@ -138,10 +137,9 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
         return err;
     }
 
-    /* Get the decrypt size. IV is also stored by ITS service. It is at the end
+    /* Get the decrypt size. IV is also stored by ITS service. It is at the start
      * of the read out data. Toolchains may add padding byte after iv array in
-     * crypto.ref structure. Separate the copies of header.info and iv array to
-     * skip the padding byte.
+     * crypto.ref structure.
      */
     decrypt_size = data_length - sizeof(obj->header.crypto.ref.iv);
 
@@ -168,13 +166,13 @@ psa_status_t ps_encrypted_object_write(uint32_t fid, struct ps_object_t *obj)
     }
 
     /* The IV will also be stored. The encrypted data is stored in ps_crypto_buf
-     * now. Append the value of the 'iv' to the end of the encrypted data.
+     * now.
      * Toolchains may add padding byte after iv array in crypto.ref structure.
-     * The padding byte shall not be written into the storage area.
+     * The padding byte will be written into the storage area.
      */
     wrt_size += sizeof(obj->header.crypto.ref.iv);
 
-    /* Write the encrypted object to the persistent area. The tag values is not
+    /* Write the encrypted object to the persistent area. The tag is not
      * copied as it is stored in the object table.
      */
     return psa_its_set(fid, wrt_size, (const void *)obj->header.crypto.ref.iv,

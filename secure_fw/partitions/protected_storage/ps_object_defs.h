@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -47,9 +49,11 @@ struct ps_obj_header_t {
 #define PS_MAX_OBJECT_DATA_SIZE  PS_MAX_ASSET_SIZE
 
 #ifdef PS_ENCRYPTION
-#define PS_TAG_IV_LEN_MAX   ((PS_TAG_LEN_BYTES > PS_IV_LEN_BYTES) ? \
-                             PS_TAG_LEN_BYTES : PS_IV_LEN_BYTES)
+#define PS_OBJECT_BUF_SIZE (PS_MAX_OBJECT_DATA_SIZE + PS_TAG_LEN_BYTES)
+#else
+#define PS_OBJECT_BUF_SIZE PS_MAX_OBJECT_DATA_SIZE
 #endif
+
 
 /*!
  * \struct ps_object_t
@@ -58,11 +62,8 @@ struct ps_obj_header_t {
  *        object header and the object data.
  */
 struct ps_object_t {
-    struct ps_obj_header_t header;         /*!< Object header */
-    uint8_t data[PS_MAX_OBJECT_DATA_SIZE]; /*!< Object data */
-#ifdef PS_ENCRYPTION
-    uint8_t tag_iv[PS_TAG_IV_LEN_MAX];
-#endif
+    struct ps_obj_header_t header;    /*!< Object header */
+    uint8_t data[PS_OBJECT_BUF_SIZE]; /*!< Object data (and tag if encrypted) */
 };
 
 
