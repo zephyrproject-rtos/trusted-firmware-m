@@ -17,9 +17,13 @@
 #include "ps_object_defs.h"
 #include "ps_utils.h"
 
+/* Size (in bytes) of the additional data that gets stored with the object data, including any padding */
+#define STORED_HEADER_DATA_SIZE (offsetof(struct ps_object_t, header.info) \
+                                 - offsetof(struct ps_object_t, header.crypto.ref.iv))
+
 /* Gets the size of data to encrypt */
 #define PS_ENCRYPT_SIZE(plaintext_size) \
-    ((plaintext_size) + PS_OBJECT_HEADER_SIZE - sizeof(union ps_crypto_t))
+    ((plaintext_size) + offsetof(struct ps_object_t, data) - offsetof(struct ps_object_t, header.info))
 
 #define PS_OBJECT_START_POSITION  0
 
@@ -64,7 +68,7 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
                                      p_obj_data,
                                      cur_size,
                                      p_obj_data,
-                                     sizeof(*obj) - sizeof(obj->header.crypto),
+                                     sizeof(*obj) - offsetof(struct ps_object_t, header.info),
                                      &out_len);
     if (err != PSA_SUCCESS || out_len != cur_size) {
         return PSA_ERROR_GENERIC_ERROR;
@@ -130,7 +134,7 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
      * here.
      */
     err = psa_its_get(fid, PS_OBJECT_START_POSITION,
-                      PS_MAX_ENCRYPTED_OBJ_SIZE + PS_IV_LEN_BYTES,
+                      PS_MAX_ENCRYPTED_OBJ_SIZE + STORED_HEADER_DATA_SIZE,
                       (void *)obj->header.crypto.ref.iv,
                       &data_length);
     if (err != PSA_SUCCESS) {
@@ -141,7 +145,7 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
      * of the read out data. Toolchains may add padding byte after iv array in
      * crypto.ref structure.
      */
-    decrypt_size = data_length - sizeof(obj->header.crypto.ref.iv);
+    decrypt_size = data_length - STORED_HEADER_DATA_SIZE;
 
     /* Decrypt the object data */
     err = ps_object_auth_decrypt(fid, decrypt_size, obj);
@@ -170,7 +174,7 @@ psa_status_t ps_encrypted_object_write(uint32_t fid, struct ps_object_t *obj)
      * Toolchains may add padding byte after iv array in crypto.ref structure.
      * The padding byte will be written into the storage area.
      */
-    wrt_size += sizeof(obj->header.crypto.ref.iv);
+    wrt_size += STORED_HEADER_DATA_SIZE;
 
     /* Write the encrypted object to the persistent area. The tag is not
      * copied as it is stored in the object table.
