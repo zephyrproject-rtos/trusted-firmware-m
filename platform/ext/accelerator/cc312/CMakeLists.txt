@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -21,6 +21,15 @@ target_include_directories(psa_crypto_library_config
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+# CC log level is controlled indirectly through the SP log level. When SP log is
+# disabled we can assume that the CC log should also be turned off. Otherwise,
+# enable only if debugging information may be needed.
+if(${TFM_PARTITION_LOG_LEVEL} STREQUAL TFM_PARTITION_LOG_LEVEL_SILENCE)
+    set(CC_LOG_ENABLED OFF)
+else()
+    set(CC_LOG_ENABLED $<CONFIG:Debug,relwithdebinfo>)
+endif()
 
 ################################ BL2 ###########################################
 
@@ -132,7 +141,7 @@ if (TFM_PARTITION_CRYPTO)
         target_sources(crypto_service_crypto_hw
             PRIVATE
                 cc312.c
-                $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+                $<$<BOOL:${CC_LOG_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
         )
 
         target_include_directories(crypto_service_crypto_hw
@@ -158,7 +167,7 @@ if (TFM_PARTITION_CRYPTO)
 
         target_sources(${CC312_LIB_PREFIX}cc312
             PRIVATE
-                $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+                $<$<BOOL:${CC_LOG_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
         )
 
         target_compile_options(${CC312_LIB_PREFIX}cc312

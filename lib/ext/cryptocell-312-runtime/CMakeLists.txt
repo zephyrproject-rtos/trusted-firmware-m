@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -42,10 +42,11 @@ target_compile_definitions(${CC312_LIB_TARGET}
         CC_SUPPORT_PKA_64_16
     INTERFACE
         USE_MBEDTLS_CRYPTOCELL
-        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
+        CC_PAL_MAX_LOG_LEVEL=$<IF:$<BOOL:${CC_LOG_ENABLED}>,3,-1>
     PUBLIC
         CC_IOT
 )
+
 target_link_libraries(${CC312_LIB_TARGET}
     PRIVATE
         ${CC312_PAL_TARGET}
@@ -61,7 +62,7 @@ target_compile_definitions(${CC312_PAL_TARGET}
     PUBLIC
         CC_IOT
     INTERFACE
-        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
+        CC_PAL_MAX_LOG_LEVEL=$<IF:$<BOOL:${CC_LOG_ENABLED}>,3,-1>
 )
 
 target_link_libraries(${CC312_PAL_TARGET}
