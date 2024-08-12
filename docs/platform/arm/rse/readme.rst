@@ -54,7 +54,7 @@ sign images in the required format. To sign a host image using the development
 key distributed with TF-M, use the following command::
 
     imgtool sign \
-        -k <TF-M base directory>/bl2/ext/mcuboot/root-RSA-3072.pem \
+        -k <TF-M base directory>/bl2/ext/mcuboot/root-EC-P256.pem \
         --public-key-format full \
         --max-align 8 \
         --align 1 \
@@ -76,13 +76,17 @@ previous image. The RSE ATU should be configured to map these logical addresses
 to the physical addresses in the host system that the images need to be loaded
 to.
 
+The development key ``root-EC-P256.pem`` corresponds to the default BL2
+signature scheme of ECDSA-P256 used by RSE.
+
 For more information on the ``imgtool`` parameters, see the MCUBoot
 `imgtool documentation <https://docs.mcuboot.com/imgtool.html>`_.
 
 .. warning::
 
-    The TF-M development key must never be used in production. To generate a
-    production key, follow the imgtool documentation.
+    The TF-M development key must never be used in production. See the
+    :doc:`RSE integration guide </platform/arm/rse/rse_integration_guide>` for
+    more information about key management.
 
 Running the code
 ----------------

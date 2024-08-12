@@ -175,15 +175,18 @@ BL2 bootloader keys
 ===================
 
 The BL2 bootloader requires asymmetric keypairs to verify signed RSE NSPE, RSE
-SPE and other PE BL1 images.
+SPE and other PE BL1 images. By default, the RSE platform configures BL2 to use
+ECDSA with the P256 curve as the signature scheme, but it can be changed using
+the ``MCUBOOT_SIGNATURE_TYPE`` build option. This guide assumes ECDSA-P256 is
+used.
 
-Generate a keypair using the `imgtool <https://pypi.org/project/imgtool/>`_
+Generate an ECDSA-P256 key using the `imgtool <https://pypi.org/project/imgtool/>`_
 ``keygen`` command::
 
-    imgtool keygen -k keyname.pem -t rsa-3072
+    imgtool keygen -k keyname.pem -t ecdsa-p256
 
 This will generate a private key ``keyname.pem``, which can be used to replace
-the development key in ``bl2/ext/mcuboot/root-RSA-3072.pem``. Build TF-M with
+the development key in ``bl2/ext/mcuboot/root-EC-P256.pem``. Build TF-M with
 the parameter ``MCUBOOT_KEY_S=path/to/keyname.pem`` to set the key to sign the
 RSE SPE and ``MCUBOOT_KEY_NS=path/to/keyname.pem`` for the NSPE. The keys for
 signing the SPE and NSPE may be the same or different depending on whether the
@@ -207,13 +210,12 @@ build, use the ``imgtool sign`` command::
         <binary infile> \
         <signed binary outfile>
 
-The public key can be extracted from the private key file using the ``imgtool
-getpub`` command::
+The public key can then be extracted from the private key file using the
+``imgtool getpub`` command::
 
-    imgtool getpub -o keyname.pub -k keyname.pem -e raw
+    imgtool getpub -o keyname.pub -k keyname.pem -e lang-c
 
-The SHA-256 hashes of the public keys must be added to the provisioning values
-(see below).
+The public keys must be added to the provisioning values (see below).
 
 Provisioning values
 ===================
@@ -238,7 +240,13 @@ must be replaced with files containing the real provisioning values.
 The GUK must be included in the CM provisioning data.
 
 The BL1 public key and encryption key must be included in the DM provisioning
-data, along with the hash of the BL2 public key for each BL2 image.
+data.
+
+The BL2 public key for each BL2 image must be included in the DM provisioning
+values if the default configuration of ``MCUBOOT_BUILTIN_KEY=ON`` and
+``MCUBOOT_HW_KEY=OFF`` is used. If the BL2 config is changed to
+``MCUBOOT_BUILTIN_KEY=OFF`` and ``MCUBOOT_HW_KEY=ON``, then the SHA-256 hashes
+of the public keys must be provisioned instead.
 
 --------------
 
