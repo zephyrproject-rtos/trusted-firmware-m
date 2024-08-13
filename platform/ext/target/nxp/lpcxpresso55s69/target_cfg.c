@@ -22,6 +22,7 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "utilities.h"
+#include "private/assert.h" /* temporarily included - to be removed */
 #include "tfm_spm_log.h"
 
 extern const struct memory_region_limits memory_regions;

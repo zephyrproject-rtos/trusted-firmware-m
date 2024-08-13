@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "cmsis_compiler.h"
 #include "utilities.h"
+#include "private/assert.h"
 
 #if !TFM_MULTI_CORE_TOPOLOGY
 #error "Armv6-M/Armv7-M can only support multi-core TF-M now."

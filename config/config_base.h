@@ -207,6 +207,11 @@
 #define TFM_ITS_AUTH_TAG_LENGTH                16
 #endif
 
+/* The size of the key used when authentication/encryption of ITS files is enabled */
+#ifndef TFM_ITS_KEY_LENGTH
+#define TFM_ITS_KEY_LENGTH                16
+#endif
+
 /* The size of the nonce used when ITS file encryption is enabled */
 #ifndef TFM_ITS_ENC_NONCE_LENGTH
 #define TFM_ITS_ENC_NONCE_LENGTH               12

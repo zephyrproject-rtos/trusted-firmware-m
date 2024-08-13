@@ -11,6 +11,9 @@
 /* Use stored NV seed to provide entropy */
 #define CRYPTO_NV_SEED                         0
 
+/* Use external RNG to provide entropy */
+#define CRYPTO_EXT_RNG                         1
+
 /* Set the initial attestation token profile */
 #undef ATTEST_TOKEN_PROFILE_PSA_IOT_1
 #undef ATTEST_TOKEN_PROFILE_PSA_2_0_0

@@ -24,6 +24,7 @@
 #include "tfm_nspm.h"
 #include "ffm/backend.h"
 #include "utilities.h"
+#include "private/assert.h"
 #include "memory_symbols.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"

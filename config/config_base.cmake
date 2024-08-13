@@ -115,6 +115,7 @@ set(PLATFORM_DEFAULT_OTP_WRITEABLE      ON          CACHE BOOL      "Use OTP mem
 set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
 set(PLATFORM_DEFAULT_SYSTEM_RESET_HALT  ON          CACHE BOOL      "Use default system reset/halt implementation")
 set(PLATFORM_DEFAULT_IMAGE_SIGNING      ON          CACHE BOOL      "Use default image signing implementation")
+set(PLATFORM_DEFAULT_PROV_LINKER_SCRIPT ON          CACHE BOOL      "Use default provisioning linker script")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
 

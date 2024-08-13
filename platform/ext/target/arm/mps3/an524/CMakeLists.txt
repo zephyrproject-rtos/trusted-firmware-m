@@ -138,10 +138,11 @@ target_compile_definitions(platform_region_defs
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
 )
 
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
-    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
+    add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
 endif()
 
 #========================= Files for building NS side platform ================#

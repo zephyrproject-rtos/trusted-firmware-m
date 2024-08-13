@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,12 +11,12 @@
 #include "config_tfm.h"
 
 /* Check invalid configs. */
-#if CRYPTO_NV_SEED && defined(CRYPTO_HW_ACCELERATOR)
-#error "Invalid config: CRYPTO_NV_SEED AND CRYPTO_HW_ACCELERATOR!"
+#if CRYPTO_NV_SEED && CRYPTO_EXT_RNG
+#error "Invalid config: CRYPTO_NV_SEED AND CRYPTO_EXT_RNG!"
 #endif
 
-#if (!CRYPTO_NV_SEED) && (!defined(CRYPTO_HW_ACCELERATOR))
-#error "Invalid config: NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR!"
+#if (!CRYPTO_NV_SEED) && (!CRYPTO_EXT_RNG)
+#error "Invalid config: NOT CRYPTO_NV_SEED AND NOT CRYPTO_EXT_RNG!"
 #endif
 
 #endif /* __CONFIG_PARTITION_CRYPTO_H__ */

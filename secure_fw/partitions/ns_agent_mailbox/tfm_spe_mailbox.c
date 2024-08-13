@@ -17,6 +17,7 @@
 #include "internal_status_code.h"
 #include "psa/error.h"
 #include "utilities.h"
+#include "private/assert.h"
 #include "tfm_arch.h"
 #include "thread.h"
 #include "tfm_psa_call_pack.h"
