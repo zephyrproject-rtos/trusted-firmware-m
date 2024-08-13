@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,7 +25,7 @@ struct tfm_hal_its_auth_crypt_ctx {
     uint8_t *deriv_label;    /* The derivation label for AEAD */
     size_t deriv_label_size; /* Size of the deriv_label in bytes */
     uint8_t *aad;            /* The additional authenticated data for AEAD */
-    size_t add_size;         /* Size of the add in bytes */
+    size_t aad_size;         /* Size of the aad in bytes */
     uint8_t *nonce;          /* The nonce for AEAD */
     size_t nonce_size;       /* Size of the nonce in bytes */
 };

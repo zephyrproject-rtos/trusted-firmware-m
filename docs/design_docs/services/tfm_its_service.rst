@@ -337,6 +337,15 @@ The key used to perform the AEAD operation must be derived from a long-term
 key-derivation key and the file id, which is used as a derivation label.
 The long-term key-derivation key must be managed by the target platform.
 
+There is a generic implementation of the abovementioned functions under
+``platform/ext/common/template/tfm_hal_its_encryption.c`` using PSA crypto calls
+similar to Protected Storage solution. When used, the default NV seed template
+under ``platform/ext/common/template/crypto_nv_seed.c`` must be disabled, as it
+relies on ITS. If there is a need for NV seed usage, an ITS independent
+implementation is required. If NV seed is not necessary, it can be turned off by
+setting ``CRYPTO_NV_SEED=0``.
+
+
 --------------
 
-*Copyright (c) 2019-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2024, Arm Limited. All rights reserved.*

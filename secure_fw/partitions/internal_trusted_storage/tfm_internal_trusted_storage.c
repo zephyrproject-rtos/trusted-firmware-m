@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -45,8 +45,13 @@ static struct its_flash_fs_file_info_t g_file_info;
  * Note: size must be aligned to the max flash program unit to meet the
  * alignment requirement of the filesystem.
  */
+#ifndef ITS_ENCRYPTION
 static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
                                           ITS_FLASH_MAX_ALIGNMENT)];
+#else
+static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE,
+                                              ITS_FLASH_MAX_ALIGNMENT)];
+#endif
 #endif
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
@@ -85,11 +90,12 @@ static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
 }
 
 #ifdef ITS_ENCRYPTION
-/* Buffer to store the encrypted asset data before it is stored in the
- * filesystem.
+/* Buffer to store the encrypted asset data and the authentication tag before it
+ * is stored in the filesystem.
  */
-static uint8_t enc_asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
-                                              ITS_FLASH_MAX_ALIGNMENT)];
+static uint8_t __ALIGNED(4) enc_asset_data[ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE +
+                                           TFM_ITS_AUTH_TAG_LENGTH,
+                                           ITS_FLASH_MAX_ALIGNMENT)];
 
 static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
 {
@@ -102,8 +108,8 @@ static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
         /* When encryption is enabled the whole file needs to fit in the
          * global buffer.
          */
-        if (buffer_size > sizeof(enc_asset_data)) {
-            return PSA_ERROR_BUFFER_TOO_SMALL;
+        if (buffer_size > ITS_MAX_ASSET_SIZE) {
+            return PSA_ERROR_INVALID_ARGUMENT;
         }
     }
     return PSA_SUCCESS;
@@ -111,7 +117,8 @@ static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
 
 static psa_status_t tfm_its_crypt_data(int32_t client_id,
                                 uint8_t **input,
-                                size_t input_size)
+                                size_t input_size,
+                                size_t offset)
 {
     psa_status_t status;
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
@@ -119,6 +126,11 @@ static psa_status_t tfm_its_crypt_data(int32_t client_id,
 #else
     {
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
+        if (offset != 0) {
+            /* If the data will be encrypted the whole file needs to be written */
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
         status = tfm_its_crypt_file(&g_file_info,
                                     g_fid,
                                     sizeof(g_fid),
@@ -392,11 +404,7 @@ static psa_status_t tfm_its_write_data_to_fs(const int32_t client_id,
     psa_status_t status;
     uint8_t *buffer_ptr = data;
 #ifdef ITS_ENCRYPTION /* ITS_ENCRYPTION */
-    /* If the data will be encrypted the whole file needs to be written */
-    if (offset != 0) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-    status = tfm_its_crypt_data(client_id, &buffer_ptr, data_size);
+    status = tfm_its_crypt_data(client_id, &buffer_ptr, data_size, offset);
     if (status != PSA_SUCCESS) {
         return status;
     }

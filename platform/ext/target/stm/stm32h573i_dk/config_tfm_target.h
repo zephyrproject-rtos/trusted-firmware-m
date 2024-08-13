@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,5 +11,8 @@
 /* Use stored NV seed to provide entropy */
 #undef CRYPTO_NV_SEED
 #define CRYPTO_NV_SEED                         0
+
+/* Use external RNG to provide entropy */
+#define CRYPTO_EXT_RNG                         1
 
 #endif /* __CONFIG_TFM_TARGET_H__ */

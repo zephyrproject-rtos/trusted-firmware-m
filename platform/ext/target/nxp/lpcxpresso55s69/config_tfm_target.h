@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  * Copyright 2022 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -12,6 +12,7 @@
 /* Using of stored NV seed to provide entropy is disabled, when CRYPTO_HW_ACCELERATOR is defined.  */
 #ifdef CRYPTO_HW_ACCELERATOR
 #define CRYPTO_NV_SEED       0
+#define CRYPTO_EXT_RNG       1
 #endif
 
 /* The maximum asset size to be stored in the Protected Storage area. */

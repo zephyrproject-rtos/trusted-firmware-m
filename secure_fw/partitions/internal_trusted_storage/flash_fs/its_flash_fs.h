@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -181,9 +181,9 @@ struct its_flash_fs_file_info_t {
     uint32_t flags;       /*!< Flags set when the file was created */
 #ifdef ITS_ENCRYPTION
     /*!< Additional authenticated data */
-    uint8_t add[ITS_FILE_ID_SIZE + ITS_DATA_SIZE_FIELD_SIZE + ITS_FLAG_SIZE];
-    uint8_t nonce[12];/*!< Nonce/IV for encrypted files */
-    uint8_t tag[16];   /*!< Authentication tag */
+    uint8_t aad[ITS_FILE_ID_SIZE + ITS_DATA_SIZE_FIELD_SIZE + ITS_FLAG_SIZE];
+    uint8_t nonce[TFM_ITS_ENC_NONCE_LENGTH]; /*!< Nonce/IV for encrypted files */
+    uint8_t tag[TFM_ITS_AUTH_TAG_LENGTH];    /*!< Authentication tag */
 #endif
 };
 

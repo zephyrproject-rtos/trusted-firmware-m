@@ -11,14 +11,14 @@ find_package(Python3)
 add_executable(provisioning_bundle)
 
 if(${TFM_DUMMY_PROVISIONING})
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake)
+    include(${CMAKE_SOURCE_DIR}/platform/ext/common/provisioning_bundle/provisioning_config.cmake)
 else()
     include("${PROVISIONING_KEYS_CONFIG}" OPTIONAL RESULT_VARIABLE PROVISIONING_KEYS_CONFIG_PATH)
     if(NOT PROVISIONING_KEYS_CONFIG_PATH)
         message(WARNING "The PROVISIONING_KEYS_CONFIG is not set. If the keys are not passed via the command line then \
                         random numbers will be used for HUK/IAK etc. \
                         To create and use a PROVISIONING_KEYS_CONFIG file, \
-                        see the example in: tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake")
+                        see the example in: tf-m/platform/ext/common/provisioning_bundle/provisioning_config.cmake")
     endif()
 endif()
 
@@ -28,11 +28,13 @@ set_target_properties(provisioning_bundle
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-target_add_scatter_file(provisioning_bundle
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ld>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.icf>
-)
+if(${PLATFORM_DEFAULT_PROV_LINKER_SCRIPT})
+    target_add_scatter_file(provisioning_bundle
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.icf>
+    )
+endif()
 
 target_link_options(provisioning_bundle
     PRIVATE
@@ -75,23 +77,23 @@ target_compile_definitions(provisioning_bundle
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
-add_custom_target(encrypted_provisioning_bundle
+add_custom_target(provisioning_bundle_bin
     ALL
-    SOURCES encrypted_provisioning_bundle.bin
+    SOURCES provisioning_bundle.bin
 )
 
-add_custom_command(OUTPUT encrypted_provisioning_bundle.bin
+add_custom_command(OUTPUT provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
     DEPENDS provisioning_bundle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
                     --provisioning_bundle_axf ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.axf
-                    --bundle_output_file encrypted_provisioning_bundle.bin
+                    --bundle_output_file provisioning_bundle.bin
                     --code_pad_size ${PROVISIONING_CODE_PADDED_SIZE}
                     --data_pad_size ${PROVISIONING_DATA_PADDED_SIZE}
                     --values_pad_size ${PROVISIONING_VALUES_PADDED_SIZE}
                     --magic "0xC0DEFEED"
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_provisioning_bundle.bin
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.bin
 )
 
 target_sources(platform_s
@@ -124,6 +126,7 @@ add_custom_command(OUTPUT provisioning_data.c
         ${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c
         --bl2_rot_priv_key_0=${MCUBOOT_KEY_S}
         --bl2_rot_priv_key_1=${MCUBOOT_KEY_NS}
+        --bl2_mcuboot_hw_key=${MCUBOOT_HW_KEY}
         --template_path=${CMAKE_CURRENT_SOURCE_DIR}
         --secure_debug_pk=${SECURE_DEBUG_PK}
         --huk=${HUK}

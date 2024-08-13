@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #include "string.h"
 #include "provisioning_bundle.h"
 
-static const volatile struct provisioning_bundle *encrypted_bundle =
+static const volatile struct provisioning_bundle *bundle =
 (const struct provisioning_bundle *)PROVISIONING_BUNDLE_START;
 
 static enum tfm_plat_err_t provision_assembly_and_test(void);
@@ -72,8 +72,8 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     if (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
 
         BOOT_LOG_INF("Waiting for provisioning bundle");
-        while (encrypted_bundle->magic != BUNDLE_MAGIC ||
-               encrypted_bundle->magic2 != BUNDLE_MAGIC) {
+        while (bundle->magic != BUNDLE_MAGIC ||
+               bundle->magic2 != BUNDLE_MAGIC) {
         }
 
         err = provision_assembly_and_test();
@@ -91,13 +91,13 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
 
     /* TODO replace this with decrypt and auth */
     memcpy((void*)PROVISIONING_BUNDLE_CODE_START,
-           (void *)encrypted_bundle->code,
+           (void *)bundle->code,
            PROVISIONING_BUNDLE_CODE_SIZE);
     memcpy((void*)PROVISIONING_BUNDLE_DATA_START,
-           (void *)&encrypted_bundle->data,
+           (void *)&bundle->data,
            PROVISIONING_BUNDLE_DATA_SIZE);
     memcpy((void*)PROVISIONING_BUNDLE_VALUES_START,
-           (void *)&encrypted_bundle->values,
+           (void *)&bundle->values,
            PROVISIONING_BUNDLE_VALUES_SIZE);
 
     BOOT_LOG_INF("Running provisioning bundle");

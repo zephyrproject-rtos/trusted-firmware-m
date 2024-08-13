@@ -13,6 +13,7 @@
 #include "cmsis_compiler.h"
 #include "tfm_core_trustzone.h"
 #include "utilities.h"
+#include "private/assert.h"
 
 #define EXC_RETURN_RES1                         (0x1FFFFUL << 7)
 
