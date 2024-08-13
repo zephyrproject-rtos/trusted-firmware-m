@@ -39,6 +39,7 @@ target_link_libraries(bl1_1_shared_lib
     PUBLIC
         bl1_1_shared_lib_interface
         tfm_fih
+        tfm_log
     PRIVATE
         platform_bl1_1
         $<$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>:bl1_1_crypto_mbedcrypto>

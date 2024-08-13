@@ -15,7 +15,7 @@
 #endif /* TFM_MEASURED_BOOT_API */
 #include "psa/crypto.h"
 #include "region_defs.h"
-#include "log.h"
+#include "tfm_log.h"
 #include "util.h"
 #include "image.h"
 #include "fih.h"
@@ -56,7 +56,7 @@ static void collect_boot_measurement(void)
      */
     if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL1_2, computed_bl1_2_hash,
                                BL1_2_HASH_SIZE, &bl1_2_metadata, true)) {
-        BL1_LOG("[WRN] Failed to store boot measurement of BL1_2\r\n");
+        WARN("Failed to store boot measurement of BL1_2\n");
     }
 }
 #endif /* TFM_MEASURED_BOOT_API */
@@ -101,7 +101,8 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-    BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
+
+    INFO("Starting TF-M BL1_1\n");
 
 #if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
     run_bl1_1_testsuite();
@@ -109,7 +110,7 @@ int main(void)
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
-            BL1_LOG("[ERR] BL1 provisioning failed\r\n");
+            ERROR("BL1 provisioning failed\n");
             FIH_PANIC;
         }
     }
@@ -136,7 +137,7 @@ int main(void)
         FIH_CALL(bl1_1_validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");
+            ERROR("BL1_2 image failed to validate\n");
 
             recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
             if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
@@ -154,7 +155,7 @@ int main(void)
     collect_boot_measurement();
 #endif /* TFM_MEASURED_BOOT_API */
 
-    BL1_LOG("[INF] Jumping to BL1_2\r\n");
+    INFO("Jumping to BL1_2\n");
     /* Jump to BL1_2 */
     boot_platform_quit((struct boot_arm_vector_table *)BL1_2_CODE_START);
 

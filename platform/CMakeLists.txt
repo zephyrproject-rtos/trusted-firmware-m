@@ -258,6 +258,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         INTERFACE
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
             $<$<BOOL:${TFM_BL1_LOGGING}>:TFM_BL1_LOGGING>
+            LOG_LEVEL=${TFM_BL1_LOG_LEVEL}
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
             $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION=1>
             $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
@@ -297,6 +298,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             platform_region_defs
         PRIVATE
             tfm_fih
+            tfm_log
             tfm_fih_headers
             tfm_boot_status
     )
