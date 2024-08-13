@@ -371,6 +371,10 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
     dev = (struct mhu_v3_x_dev_t *)mhu_receiver_dev;
     chan = 0;
 
+    if (dev == NULL || dev->base == 0) {
+        return MHU_ERR_RECEIVE_DATA_INVALID_ARG;
+    }
+
     mhu_err = validate_buffer_params((uintptr_t)receive_buffer, *size);
     if (mhu_err != MHU_ERR_NONE) {
         return mhu_err;
