@@ -65,24 +65,33 @@ __STATIC_INLINE void ps_init_empty_object(
 }
 
 /**
- * \brief Removes the old object table and object from the file system.
+ * \brief Update the object table for the specified object with the content
+ *        of g_obj_tbl_info. Also removes the old object table.
  *
- * \param[in] old_fid  Old file ID to remove.
+ * \param[in] uid         Unique identifier for the data
+ * \param[in] client_id   Identifier of the asset's owner (client)
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-static psa_status_t ps_remove_old_data(uint32_t old_fid)
+static psa_status_t ps_update_table(psa_storage_uid_t uid, int32_t client_id)
 {
     psa_status_t err;
 
-    /* Delete old object table from the persistent area */
-    err = ps_object_table_delete_old_table();
-    if (err != PSA_SUCCESS) {
-        return err;
+    /* Update the table with the new internal ID, etc for the object, and
+     * store it in the persistent area.
+     */
+    err = ps_object_table_set_obj_tbl_info(uid, client_id, &g_obj_tbl_info);
+    if (err == PSA_SUCCESS) {
+        /* Delete old object table from the persistent area */
+        err = ps_object_table_delete_old_table();
+    } else {
+        /* Remove object as object table is not persistent and propagate
+         * object table manipulation error.
+         */
+        (void)psa_its_remove(g_obj_tbl_info.fid);
     }
 
-    /* Delete old file from the persistent area */
-    return psa_its_remove(old_fid);
+    return err;
 }
 
 #ifndef PS_ENCRYPTION
@@ -318,25 +327,14 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
         goto clear_data_and_return;
     }
 
-    /* Update the table with the new internal ID and version for the object, and
-     * store it in the persistent area.
-     */
-    err = ps_object_table_set_obj_tbl_info(uid, client_id, &g_obj_tbl_info);
+    err = ps_update_table(uid, client_id);
     if (err != PSA_SUCCESS) {
-        /* Remove new object as object table is not persistent and propagate
-         * object table manipulation error.
-         */
-        (void)psa_its_remove(g_obj_tbl_info.fid);
-
         goto clear_data_and_return;
     }
 
-    if (old_fid == PS_INVALID_FID) {
-        /* Delete old object table from the persistent area */
-        err = ps_object_table_delete_old_table();
-    } else {
-        /* Remove old object and delete old object table */
-        err = ps_remove_old_data(old_fid);
+    if (old_fid != PS_INVALID_FID) {
+        /* Remove old object */
+        err = psa_its_remove(old_fid);
     }
 
 clear_data_and_return:
@@ -430,21 +428,15 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
         goto clear_data_and_return;
     }
 
-    /* Update the table with the new internal ID and version for the object, and
-     * store it in the persistent area.
-     */
-    err = ps_object_table_set_obj_tbl_info(uid, client_id, &g_obj_tbl_info);
+    err = ps_update_table(uid, client_id);
     if (err != PSA_SUCCESS) {
-        /* Remove new object as object table is not persistent and propagate
-         * object table manipulation error.
-         */
-        (void)psa_its_remove(g_obj_tbl_info.fid);
-
         goto clear_data_and_return;
     }
 
-    /* Remove old object table and object */
-    err = ps_remove_old_data(old_fid);
+    if (old_fid != PS_INVALID_FID) {
+        /* Remove old object */
+        err = psa_its_remove(old_fid);
+    }
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
@@ -529,8 +521,14 @@ psa_status_t ps_object_delete(psa_storage_uid_t uid, int32_t client_id)
         goto clear_data_and_return;
     }
 
-    /* Remove old object table and file */
-    err = ps_remove_old_data(g_obj_tbl_info.fid);
+    /* Delete old object table from the persistent area */
+    err = ps_object_table_delete_old_table();
+    if (err != PSA_SUCCESS) {
+        goto clear_data_and_return;
+    }
+
+    /* Delete old file from the persistent area */
+    err = psa_its_remove(g_obj_tbl_info.fid);
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
