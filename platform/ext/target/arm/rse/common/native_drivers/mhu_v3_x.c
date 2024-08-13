@@ -367,7 +367,7 @@ enum mhu_v3_x_error_t mhu_v3_x_driver_init(struct mhu_v3_x_dev_t *dev)
 
     /* Read the MHU Architecture Minor Revision */
     dev->subversion =
-        ((aidr & MHU_ARCH_MINOR_REV_MASK) >> MHU_ARCH_MINOR_REV_MASK);
+        ((aidr & MHU_ARCH_MINOR_REV_MASK) >> MHU_ARCH_MINOR_REV_OFF);
 
     /* Return error if the MHU minor revision is not 0 */
     if (dev->subversion != MHU_MINOR_REV_3_0) {
@@ -662,6 +662,10 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_disable(
 {
     enum mhu_v3_x_error_t status;
 
+    if (dev == NULL) {
+        return MHU_V_3_X_ERR_INTERRUPT_DISABLE_INVALID_PARAM;
+    }
+
     /* Check if driver has been initialized */
     if (!(dev->is_initialized)) {
         status = mhu_v3_x_driver_init(dev);
@@ -687,6 +691,10 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
 {
     enum mhu_v3_x_error_t status;
 
+    if (dev == NULL) {
+        return MHU_V_3_X_ERR_INTERRUPT_CLEAR_INVALID_PARAM;
+    }
+
     /* Check if driver has been initialized */
     if (!(dev->is_initialized)) {
         status = mhu_v3_x_driver_init(dev);
@@ -697,7 +705,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
 
     /* Only doorbell channel is supported */
     if (ch_type != MHU_V3_X_CHANNEL_TYPE_DBCH) {
-        return MHU_V_3_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED;
+        return MHU_V_3_X_ERR_INTERRUPT_CLEAR_UNSUPPORTED;
     }
 
     /*

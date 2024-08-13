@@ -86,6 +86,8 @@ enum mhu_v3_x_error_t {
     MHU_V_3_X_ERR_INTERRUPT_ENABLE_INVALID_PARAM,
     /* Operation not supported in channel_interrupt_enable function */
     MHU_V_3_X_ERR_INTERRUPT_ENABLE_UNSUPPORTED,
+    /* Invalid input param in channel_interrupt_disable function */
+    MHU_V_3_X_ERR_INTERRUPT_DISABLE_INVALID_PARAM,
     /* Operation not supported in channel_interrupt_disable function */
     MHU_V_3_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED,
     /* Invalid input param in channel_interrupt_clear function */
