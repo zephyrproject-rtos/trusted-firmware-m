@@ -8,6 +8,11 @@
 #ifndef __DEVICE_DEFINITION_H__
 #define __DEVICE_DEFINITION_H__
 
+#ifdef KMU_S
+#include "kmu_drv.h"
+extern struct kmu_dev_t KMU_DEV_S;
+#endif
+
 #ifdef LCM_S
 #include "lcm_drv.h"
 extern struct lcm_dev_t LCM_DEV_S;

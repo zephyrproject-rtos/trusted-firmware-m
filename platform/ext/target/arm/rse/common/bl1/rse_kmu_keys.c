@@ -448,6 +448,9 @@ enum tfm_plat_err_t rse_setup_runtime_secure_image_encryption_key(void)
     plat_err = setup_key_from_otp(RSE_KMU_SLOT_SECURE_ENCRYPTION_KEY,
                                   PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
                                   &sic_dr0_export_config, NULL, false);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
 
     kmu_err = kmu_set_key_locked(&KMU_DEV_S, RSE_KMU_SLOT_SECURE_ENCRYPTION_KEY);
     if (kmu_err != KMU_ERROR_NONE) {
@@ -468,6 +471,9 @@ enum tfm_plat_err_t rse_setup_runtime_non_secure_image_encryption_key(void)
     plat_err = setup_key_from_otp(RSE_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
                                   PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
                                   &sic_dr1_export_config, NULL, false);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
 
     kmu_err = kmu_set_key_locked(&KMU_DEV_S, RSE_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY);
     if (kmu_err != KMU_ERROR_NONE) {
