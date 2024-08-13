@@ -124,6 +124,7 @@ add_custom_command(OUTPUT provisioning_data.c
         ${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c
         --bl2_rot_priv_key_0=${MCUBOOT_KEY_S}
         --bl2_rot_priv_key_1=${MCUBOOT_KEY_NS}
+        --bl2_mcuboot_hw_key=${MCUBOOT_HW_KEY}
         --template_path=${CMAKE_CURRENT_SOURCE_DIR}
         --secure_debug_pk=${SECURE_DEBUG_PK}
         --huk=${HUK}

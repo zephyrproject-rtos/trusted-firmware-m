@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +17,20 @@ extern "C" {
 #endif
 
 #define BUNDLE_MAGIC 0xC0DEFEED
+
+#ifdef MCUBOOT_SIGN_EC384
+#define PUB_KEY_HASH_SIZE (48)
+#define PUB_KEY_SIZE      (100) /* Size must be aligned to 4 Bytes */
+#else
+#define PUB_KEY_HASH_SIZE (32)
+#define PUB_KEY_SIZE      (68)  /* Size must be aligned to 4 Bytes */
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define PROV_ROTPK_DATA_SIZE    PUB_KEY_SIZE
+#else
+#define PROV_ROTPK_DATA_SIZE    PUB_KEY_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
 
 __PACKED_STRUCT tfm_assembly_and_test_provisioning_data_t {
     uint8_t huk[32];
@@ -40,13 +54,13 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
 };
 
 __PACKED_STRUCT bl2_assembly_and_test_provisioning_data_t {
-    uint8_t bl2_rotpk_0[32];
-    uint8_t bl2_rotpk_1[32];
+    uint8_t bl2_rotpk_0[PROV_ROTPK_DATA_SIZE];
+    uint8_t bl2_rotpk_1[PROV_ROTPK_DATA_SIZE];
 #if (MCUBOOT_IMAGE_NUMBER > 2)
-    uint8_t bl2_rotpk_2[32];
+    uint8_t bl2_rotpk_2[PROV_ROTPK_DATA_SIZE];
 #endif
 #if (MCUBOOT_IMAGE_NUMBER > 3)
-    uint8_t bl2_rotpk_3[32];
+    uint8_t bl2_rotpk_3[PROV_ROTPK_DATA_SIZE];
 #endif
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
