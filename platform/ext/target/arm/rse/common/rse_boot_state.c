@@ -16,9 +16,9 @@ extern uint8_t computed_bl1_2_hash[];
 int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
                        size_t *state_size, boot_state_include_mask mask)
 {
-    int rc;
     cc3xx_err_t err;
 
+    enum tfm_plat_err_t plat_err;
     enum plat_otp_lcs_t lcs;
     enum lcm_tp_mode_t tp_mode;
     uint32_t reprovisioning_bits;
@@ -42,9 +42,9 @@ int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
     }
 
     if (mask & RSE_BOOT_STATE_INCLUDE_LCS) {
-        rc = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
-        if (rc) {
-            return rc;
+        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            return -2;
         }
 
         err = cc3xx_lowlevel_hash_update((uint8_t *)&lcs, sizeof(lcs));
@@ -54,11 +54,11 @@ int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
     }
 
     if (mask & RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS) {
-        rc = tfm_plat_otp_read(PLAT_OTP_ID_REPROVISIONING_BITS,
+        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_REPROVISIONING_BITS,
                                sizeof(reprovisioning_bits),
                                (uint8_t *)&reprovisioning_bits);
-        if (rc) {
-            return rc;
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            return -2;
         }
 
         err = cc3xx_lowlevel_hash_update((uint8_t *)&reprovisioning_bits, sizeof(reprovisioning_bits));
