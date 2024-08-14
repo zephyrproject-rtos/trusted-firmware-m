@@ -33,6 +33,11 @@ you enable FP support on your platforms.
     configurations described below.
 
 .. Note::
+    CONFIG_TFM_DISABLE_CP10CP11 can be set to ON to disable CP10/CP11 coprocessors
+    in cases when it's expected that FPU must not be used neither by secure
+    nor by non-secure images.
+
+.. Note::
     FPU test issue has not been fixed yet on Musca-S1 [7]_. When running FPU
     tests on Musca-S1, secure thread fails to trigger secure interrupt. FPU test
     is disabled by default on Musca-S1 until the issue is fixed.

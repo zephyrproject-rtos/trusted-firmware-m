@@ -16,6 +16,13 @@ menu "FPU/MVE"
         help
           Enable lazy stacking
 
+    config CONFIG_TFM_DISABLE_CP10CP11
+        bool "Disable CP10/CP11 coprocessors"
+        default n
+        depends on !CONFIG_TFM_ENABLE_CP10CP11
+        help
+          This disables the coprocessors CP10-CP11.
+
     config CONFIG_TFM_ENABLE_CP10CP11
         bool
         default n

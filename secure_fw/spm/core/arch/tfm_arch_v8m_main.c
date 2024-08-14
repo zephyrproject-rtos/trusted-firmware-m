@@ -294,7 +294,21 @@ void tfm_arch_config_extensions(void)
      * in the NSPE. This configuration is left to NS privileged software.
      */
     SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
-#endif
+#elif defined(CONFIG_TFM_DISABLE_CP10CP11)
+    /*
+     * Disable privileged and unprivileged access to the FP Extension for SPE and
+     * NSPE located on the same core.
+     */
+    SCB->CPACR    &= ~((3U << 10U*2U)     /* disable CP10 full access for SPE */
+                     | (3U << 11U*2U));   /* disable CP11 full access for SPE */
+    SCB_NS->CPACR &= ~((3U << 10U*2U)     /* disable CP10 full access for NSPE */
+                     | (3U << 11U*2U));   /* disable CP11 full access for NSPE */
+    __DSB();
+    __ISB();
+
+    /* Disable Non-secure access to the Floating-point Extension. */
+    SCB->NSACR &= ~(SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk);
+#endif /* defined(CONFIG_TFM_ENABLE_CP10CP11) */
 
 #if (CONFIG_TFM_FLOAT_ABI >= 1)
 

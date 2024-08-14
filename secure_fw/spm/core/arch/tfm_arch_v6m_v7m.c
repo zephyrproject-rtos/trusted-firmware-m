@@ -248,13 +248,20 @@ void tfm_arch_config_extensions(void)
     /* There are no coprocessors in Armv6-M implementations */
 #ifndef __ARM_ARCH_6M__
 #if defined(CONFIG_TFM_ENABLE_CP10CP11)
-    /* Enable privileged and unprivilged access to the floating-point
+    /* Enable privileged and unprivileged access to the floating-point
      * coprocessor.
      */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
+#elif defined(CONFIG_TFM_DISABLE_CP10CP11)
+    /* Disable privileged and unprivileged access to the floating-point
+     * coprocessor.
+     */
+    SCB->CPACR &= ~((3U << 10U*2U)   /* disable CP10 full access */
+                  | (3U << 11U*2U)); /* disable CP11 full access */
+#endif /* defined(CONFIG_TFM_ENABLE_CP10CP11) */
+#endif
+
     __DSB();
     __ISB();
-#endif
-#endif
 }
