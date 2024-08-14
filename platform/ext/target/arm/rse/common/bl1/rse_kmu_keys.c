@@ -56,11 +56,14 @@ static const struct kmu_key_export_config_t sic_dr1_export_config = {
 };
 
 static const struct kmu_key_export_config_t cc3xx_pka_sram_key_config = {
-    CC3XX_BASE_S + 0x4FD0, /* CC3XX keystore mux */
+    CC3XX_BASE_S + 0xFD0, /* CC3XX keystore mux. This address is reused from the
+                           * CC3XX register map and redirected to the PKA SRAM
+                           * keystore.
+                           */
     0, /* No delay */
     0x01, /* Increment by 4 bytes with each write */
     KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 8 writes (total 128 bits) */
+    KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 4 writes (total 128 bits) */
     true,  /* refresh the masking */
     false, /* Don't disable the masking */
 };
