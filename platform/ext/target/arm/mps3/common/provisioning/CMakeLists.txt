@@ -75,23 +75,23 @@ target_compile_definitions(provisioning_bundle
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h"
 )
 
-add_custom_target(encrypted_provisioning_bundle
+add_custom_target(provisioning_bundle_bin
     ALL
-    SOURCES encrypted_provisioning_bundle.bin
+    SOURCES provisioning_bundle.bin
 )
 
-add_custom_command(OUTPUT encrypted_provisioning_bundle.bin
+add_custom_command(OUTPUT provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
     DEPENDS provisioning_bundle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
                     --provisioning_bundle_axf ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.axf
-                    --bundle_output_file encrypted_provisioning_bundle.bin
+                    --bundle_output_file provisioning_bundle.bin
                     --code_pad_size ${PROVISIONING_CODE_PADDED_SIZE}
                     --data_pad_size ${PROVISIONING_DATA_PADDED_SIZE}
                     --values_pad_size ${PROVISIONING_VALUES_PADDED_SIZE}
                     --magic "0xC0DEFEED"
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_provisioning_bundle.bin
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.bin
 )
 
 target_sources(platform_s

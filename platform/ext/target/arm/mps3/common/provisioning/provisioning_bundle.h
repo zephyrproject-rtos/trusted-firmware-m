@@ -77,7 +77,7 @@ __PACKED_STRUCT provisioning_data_t {
 struct __attribute__((__packed__)) provisioning_bundle {
     /* This section is authenticated */
     uint32_t magic;
-    /* This section is encrypted */
+
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
         const struct provisioning_data_t values;
