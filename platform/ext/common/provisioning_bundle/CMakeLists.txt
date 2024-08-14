@@ -11,14 +11,14 @@ find_package(Python3)
 add_executable(provisioning_bundle)
 
 if(${TFM_DUMMY_PROVISIONING})
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake)
+    include(${CMAKE_SOURCE_DIR}/platform/ext/common/provisioning_bundle/provisioning_config.cmake)
 else()
     include("${PROVISIONING_KEYS_CONFIG}" OPTIONAL RESULT_VARIABLE PROVISIONING_KEYS_CONFIG_PATH)
     if(NOT PROVISIONING_KEYS_CONFIG_PATH)
         message(WARNING "The PROVISIONING_KEYS_CONFIG is not set. If the keys are not passed via the command line then \
                         random numbers will be used for HUK/IAK etc. \
                         To create and use a PROVISIONING_KEYS_CONFIG file, \
-                        see the example in: tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake")
+                        see the example in: tf-m/platform/ext/common/provisioning_bundle/provisioning_config.cmake")
     endif()
 endif()
 
