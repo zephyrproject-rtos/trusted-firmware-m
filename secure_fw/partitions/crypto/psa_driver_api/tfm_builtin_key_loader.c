@@ -19,7 +19,7 @@
 #define TFM_BUILTIN_MAX_KEYS (TFM_BUILTIN_KEY_SLOT_MAX)
 #endif /* TFM_BUILTIN_MAX_KEYS */
 
-#define NUMBER_OF_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
+#define NUMBER_OF_ELEMENTS_OF(x) (sizeof(x)/sizeof(*(x)))
 
 /*!
  * \brief A structure which describes a builtin key slot
