@@ -42,6 +42,9 @@ tfm_toolchain_reload_compiler()
 
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)
+add_subdirectory(lib/tfm_log)
+add_subdirectory(lib/tfm_log_unpriv)
+add_subdirectory(lib/tfm_vprintf)
 add_subdirectory(tools)
 add_subdirectory(secure_fw)
 
