@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2025, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -74,6 +74,7 @@ target_include_directories(platform_bl2
 target_compile_definitions(platform_bl2
     PRIVATE
         $<$<BOOL:${TC_NO_RELEASE_RESET}>:TC_NO_RELEASE_RESET>
+        $<$<BOOL:${TC_RELEASE_RESET_USE_SCP_CPUWAIT}>:TC_RELEASE_RESET_USE_SCP_CPUWAIT>
 )
 
 #========================= Platform BL1 =======================================#

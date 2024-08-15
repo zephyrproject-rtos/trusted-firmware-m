@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -204,6 +204,41 @@ int boot_platform_pre_load(uint32_t image_id)
     return 0;
 }
 
+static int tc_scp_release_reset(void)
+{
+    struct rse_sysctrl_t *sysctrl;
+
+#ifdef TC_RELEASE_RESET_USE_SCP_CPUWAIT
+    int err;
+
+    err = atu_initialize_region(&ATU_DEV_S,
+                                TEMPORARY_ATU_MAPPING_REGION_ID,
+                                TEMPORARY_ATU_MAPPING_BASE,
+                                SCP_SYSTEM_CONTROL_REGS_PHYS_BASE,
+                                SCP_SYSTEM_CONTROL_REGS_SIZE);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
+
+    /* SCP SSE-310 System Control Block same as RSE System Control
+     * Registers */
+    sysctrl = (struct rse_sysctrl_t *)(TEMPORARY_ATU_MAPPING_BASE +
+        SCP_SYSTEM_CONTROL_BLOCK_OFFSET);
+    sysctrl->cpuwait = 0;
+
+    err = atu_uninitialize_region(&ATU_DEV_S,
+                                TEMPORARY_ATU_MAPPING_REGION_ID);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
+#else
+    sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
+    sysctrl->gretreg &= ~(1U << 0);
+#endif /* TC_RELEASE_RESET_USE_SCP_CPUWAIT */
+
+    return 0;
+}
+
 int boot_platform_post_load(uint32_t image_id)
 {
     int err;
@@ -218,11 +253,10 @@ int boot_platform_post_load(uint32_t image_id)
     if (image_id == RSE_BL2_IMAGE_SCP) {
         memset((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
 
-        struct rse_sysctrl_t *sysctrl =
-                                     (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
-
-        /* Release SCP CPU from wait */
-        RELEASE_SCP_CPU(sysctrl->gretreg);
+        err = tc_scp_release_reset();
+        if (err) {
+            return err;
+        }
 
         /* Wait for SCP to finish its startup */
         BOOT_LOG_INF("Waiting for SCP BL1 started event");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2025 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,5 @@
 
 #ifndef RSE_PLATFORM_DEFS_H
 #define RSE_PLATFORM_DEFS_H
-
-/*
- * Macro to release SCP CPU from the wait
- */
-#define RELEASE_SCP_CPU(reg) (reg &= ~(1U << 0))
 
 #endif /* RSE_PLATFORM_DEFS_H */

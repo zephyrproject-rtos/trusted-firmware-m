@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2025, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,6 +13,8 @@ set(RSE_USE_HOST_UART                   OFF        CACHE BOOL     "Whether RSE s
 set(RSE_USE_LOCAL_UART                  ON         CACHE BOOL     "Whether RSE should setup to use the UART local to the RSE subsystem")
 
 set(TFM_ATTESTATION_SCHEME      "DPE"       CACHE STRING    "Attestation scheme to use [OFF, PSA, CCA, DPE]")
+
+set(TC_RELEASE_RESET_USE_SCP_CPUWAIT    ON         CACHE BOOL "Whether to release the SCP from reset using SCP CPUWAIT register")
 
 # Once all options are set, set common options as fallback
 
