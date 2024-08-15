@@ -18,6 +18,7 @@
 #include <tfm_platform_user_memory_ranges.h>
 
 #include <hal/nrf_gpio.h>
+#include <nrfx_nvmc.h>
 
 #include "handle_attr.h"
 
@@ -61,6 +62,29 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 
 		if (args->addr >= start &&
 		    args->addr + args->len <= start + size) {
+#ifdef NRF_UICR_S_BASE
+			if (start >= NRF_UICR_S_BASE &&
+			    start < (NRF_UICR_S_BASE + sizeof(NRF_UICR_Type))) {
+				/* Range is inside UICR. Some nRF platforms need special handling */
+				uint32_t *src = (uint32_t *)args->addr;
+				uint32_t *dst = (uint32_t *)args->destination;
+				uint32_t uicr_end = NRF_UICR_S_BASE + sizeof(NRF_UICR_Type);
+
+				if (!IS_ALIGNED(src, sizeof(uint32_t)) ||
+				    (args->len % sizeof(uint32_t)) != 0 ||
+				    (args->addr + args->len) > uicr_end) {
+					return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+				}
+
+				while (args->len) {
+					*dst++ = nrfx_nvmc_uicr_word_read(src++);
+					args->len -= sizeof(uint32_t);
+				}
+				out->result = 0;
+				err = TFM_PLATFORM_ERR_SUCCESS;
+				break;
+			}
+#endif
 			memcpy(args->destination,
 			       (const void *)args->addr,
 			       args->len);
