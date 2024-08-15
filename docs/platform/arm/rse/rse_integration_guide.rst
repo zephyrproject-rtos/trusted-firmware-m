@@ -242,11 +242,12 @@ The GUK must be included in the CM provisioning data.
 The BL1 public key and encryption key must be included in the DM provisioning
 data.
 
-The BL2 public key for each BL2 image must be included in the DM provisioning
-values if the default configuration of ``MCUBOOT_BUILTIN_KEY=ON`` and
-``MCUBOOT_HW_KEY=OFF`` is used. If the BL2 config is changed to
+If the BL2 default config is used, i.e.
 ``MCUBOOT_BUILTIN_KEY=OFF`` and ``MCUBOOT_HW_KEY=ON``, then the SHA-256 hashes
-of the public keys must be provisioned instead.
+of the public keys must be provisioned. Otherwise, a platform might decide to
+enable direct usage of builtin keys, i.e. ``MCUBOOT_BUILTIN_KEY=ON`` and
+``MCUBOOT_HW_KEY=OFF``: In this case, the whole BL2 public key for each image
+must be included in the DM provisioning bundle.
 
 --------------
 
