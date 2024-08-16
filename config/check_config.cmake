@@ -42,7 +42,6 @@ tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST
 
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND MCUBOOT_GENERATE_SIGNING_KEYPAIR)
 
-tfm_invalid_config((NOT MCUBOOT_HW_KEY) AND (MCUBOOT_GENERATE_SIGNING_KEYPAIR))
 tfm_invalid_config(MCUBOOT_HW_KEY AND MCUBOOT_BUILTIN_KEY)
 
 ####################### Code sharing ###########################################
