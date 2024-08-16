@@ -280,7 +280,7 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
         fid_am_reserved = 2;
         ps_init_empty_object(create_flags, size, &g_ps_object);
     } else {
-        goto clear_data_and_return;
+        return err;
     }
 
     /* Update the object data */
