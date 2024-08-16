@@ -173,6 +173,54 @@ __STATIC_INLINE int32_t check_mailbox_msg(const struct mailbox_msg_t *msg)
     return MAILBOX_SUCCESS;
 }
 
+static int local_copy_vects(const struct psa_client_params_t *params,
+                            uint32_t idx,
+                            uint32_t *control)
+{
+    size_t in_len, out_len;
+
+    if ((params->psa_call_params.out_vec == NULL) ||
+        (params->psa_call_params.in_vec == NULL)) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    in_len = params->psa_call_params.in_len;
+    out_len = params->psa_call_params.out_len;
+
+    if ((in_len > PSA_MAX_IOVEC) ||
+        (out_len > PSA_MAX_IOVEC) ||
+        ((in_len + out_len) > PSA_MAX_IOVEC)) {
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    for (unsigned int i = 0; i < PSA_MAX_IOVEC; i++) {
+        if (i < params->psa_call_params.in_len) {
+            vectors[idx].in_vec[i] = params->psa_call_params.in_vec[i];
+        } else {
+            vectors[idx].in_vec[i].base = 0;
+            vectors[idx].in_vec[i].len = 0;
+        }
+    }
+
+    for (unsigned int i = 0; i < PSA_MAX_IOVEC; i++) {
+        if (i < params->psa_call_params.out_len) {
+            vectors[idx].out_vec[i] = params->psa_call_params.out_vec[i];
+        } else {
+            vectors[idx].out_vec[i].base = 0;
+            vectors[idx].out_vec[i].len = 0;
+        }
+    }
+
+    *control = PARAM_SET_NS_INVEC(*control);
+    *control = PARAM_SET_NS_OUTVEC(*control);
+
+    vectors[idx].out_len = params->psa_call_params.out_len;
+    vectors[idx].original_out_vec = params->psa_call_params.out_vec;
+
+    vectors[idx].in_use = true;
+    return MAILBOX_SUCCESS;
+}
+
 /* Passes the request from the mailbox message into SPM.
  * idx indicates the slot used to use for any immediate reply.
  * If it queues the reply immediately, updates reply_slots accordingly.
@@ -190,6 +238,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     mailbox_msg_handle_t *mb_msg_handle =
         &spe_mailbox_queue.queue[idx].msg_handle;
+    int ret;
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     /* Assume asynchronous. Set to synchronous when an error happens. */
@@ -213,32 +262,12 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_CALL:
-        /* TODO check vector validity before use */
-        /* Make local copy of invecs and outvecs */
-        vectors[idx].in_use = true;
-        vectors[idx].out_len = params->psa_call_params.out_len;
-        vectors[idx].original_out_vec = params->psa_call_params.out_vec;
-        for (int i = 0; i < PSA_MAX_IOVEC; i++) {
-            if (i < params->psa_call_params.in_len) {
-                vectors[idx].in_vec[i] = params->psa_call_params.in_vec[i];
-            } else {
-                vectors[idx].in_vec[i].base = 0;
-                vectors[idx].in_vec[i].len = 0;
-            }
+        ret = local_copy_vects(params, idx, &control);
+        if (ret != MAILBOX_SUCCESS) {
+            sync = true;
+            psa_ret = PSA_ERROR_INVALID_ARGUMENT;
+            break;
         }
-
-        control = PARAM_SET_NS_INVEC(control);
-
-        for (int i = 0; i < PSA_MAX_IOVEC; i++) {
-            if (i < params->psa_call_params.out_len) {
-                vectors[idx].out_vec[i] = params->psa_call_params.out_vec[i];
-            } else {
-                vectors[idx].out_vec[i].base = 0;
-                vectors[idx].out_vec[i].len = 0;
-            }
-        }
-
-        control = PARAM_SET_NS_OUTVEC(control);
 
         if (tfm_multi_core_hal_client_id_translate(CLIENT_ID_OWNER_MAGIC,
                                                    msg_ptr->client_id,
