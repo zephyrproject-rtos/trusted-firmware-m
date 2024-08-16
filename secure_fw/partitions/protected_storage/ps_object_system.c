@@ -33,6 +33,8 @@ static struct ps_obj_table_info_t g_obj_tbl_info;
 /**
  * \brief Initialize g_ps_object based on the input parameters and empty data.
  *
+ * \param[in]  uid           Unique identifier for the data
+ * \param[in]  client_id     Identifier of the asset's owner (client)
  * \param[in]  create_flags  Object create flags
  * \param[in]  size          Object size
  * \param[out] obj           Object to initialize
@@ -40,6 +42,8 @@ static struct ps_obj_table_info_t g_obj_tbl_info;
  */
 __attribute__ ((always_inline))
 __STATIC_INLINE void ps_init_empty_object(
+                                        psa_storage_uid_t uid,
+                                        int32_t client_id,
                                         psa_storage_create_flags_t create_flags,
                                         uint32_t size,
                                         struct ps_object_t *obj)
@@ -47,7 +51,10 @@ __STATIC_INLINE void ps_init_empty_object(
     /* Set all object data to 0 */
     (void)memset(obj, PS_DEFAULT_EMPTY_BUFF_VAL, PS_MAX_OBJECT_SIZE);
 
-#ifndef PS_ENCRYPTION
+#ifdef PS_ENCRYPTION
+    obj->header.crypto.ref.uid = uid;
+    obj->header.crypto.ref.client_id = client_id;
+#else
     /* Initialize object version */
     obj->header.version = 0;
 #endif
@@ -278,7 +285,7 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
          * arguments and empty content. Requests 2 FIDs to prevent exhaustion.
          */
         fid_am_reserved = 2;
-        ps_init_empty_object(create_flags, size, &g_ps_object);
+        ps_init_empty_object(uid, client_id, create_flags, size, &g_ps_object);
     } else {
         return err;
     }
@@ -300,9 +307,6 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
     }
 
 #ifdef PS_ENCRYPTION
-    g_ps_object.header.crypto.ref.uid = uid;
-    g_ps_object.header.crypto.ref.client_id = client_id;
-
     err = ps_encrypted_object_write(g_obj_tbl_info.fid, &g_ps_object);
 #else
     wrt_size = PS_OBJECT_SIZE(g_ps_object.header.info.current_size);
@@ -415,9 +419,6 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
     }
 
 #ifdef PS_ENCRYPTION
-    g_ps_object.header.crypto.ref.uid = uid;
-    g_ps_object.header.crypto.ref.client_id = client_id;
-
     err = ps_encrypted_object_write(g_obj_tbl_info.fid, &g_ps_object);
 #else
     wrt_size = PS_OBJECT_SIZE(g_ps_object.header.info.current_size);
