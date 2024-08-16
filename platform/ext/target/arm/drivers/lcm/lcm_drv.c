@@ -110,7 +110,7 @@ struct _lcm_reg_map_t {
 };
 
 static int is_pointer_word_aligned(void *ptr) {
-    return !((uint32_t)ptr & (sizeof(uint32_t) - 1));
+    return !((uintptr_t)ptr & (sizeof(uint32_t) - 1));
 }
 
 static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
