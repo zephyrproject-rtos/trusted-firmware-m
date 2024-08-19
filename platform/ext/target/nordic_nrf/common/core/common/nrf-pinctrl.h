@@ -6,18 +6,7 @@
 #ifndef NRF_INCLUDE_NRF_PINCTRL_H
 #define NRF_INCLUDE_NRF_PINCTRL_H
 
-/*
- * The whole nRF pin configuration information is encoded in a 32-bit bitfield
- * organized as follows:
- *
- * - 31..16: Pin function.
- * - 15:     Reserved.
- * - 14:     Pin inversion mode.
- * - 13:     Pin low power mode.
- * - 12..9:  Pin output drive configuration.
- * - 8..7:   Pin pull configuration.
- * - 6..0:   Pin number (combination of port and pin).
- */
+/* NOTE: Keep in sync with Zephyr's nrf-pinctrl.h */
 
 /**
  * @name nRF pin configuration bit field positions and masks.
@@ -25,29 +14,13 @@
  */
 
 /** Position of the function field. */
-#define NRF_FUN_POS 16U
+#define NRF_FUN_POS 17U
 /** Mask for the function field. */
-#define NRF_FUN_MSK 0xFFFFU
-/** Position of the invert field. */
-#define NRF_INVERT_POS 14U
-/** Mask for the invert field. */
-#define NRF_INVERT_MSK 0x1U
-/** Position of the low power field. */
-#define NRF_LP_POS 13U
-/** Mask for the low power field. */
-#define NRF_LP_MSK 0x1U
-/** Position of the drive configuration field. */
-#define NRF_DRIVE_POS 9U
-/** Mask for the drive configuration field. */
-#define NRF_DRIVE_MSK 0xFU
-/** Position of the pull configuration field. */
-#define NRF_PULL_POS 7U
-/** Mask for the pull configuration field. */
-#define NRF_PULL_MSK 0x3U
+#define NRF_FUN_MSK 0x7FFFU
 /** Position of the pin field. */
 #define NRF_PIN_POS 0U
 /** Mask for the pin field. */
-#define NRF_PIN_MSK 0x7FU
+#define NRF_PIN_MSK 0x1FFU
 
 /** @} */
 
