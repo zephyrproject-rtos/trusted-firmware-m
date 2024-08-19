@@ -14,9 +14,9 @@
  */
 
 /** Position of the function field. */
-#define NRF_FUN_POS 17U
+#define NRF_FUN_POS 18U
 /** Mask for the function field. */
-#define NRF_FUN_MSK 0x7FFFU
+#define NRF_FUN_MSK 0x3FFFU
 /** Position of the pin field. */
 #define NRF_PIN_POS 0U
 /** Mask for the pin field. */
