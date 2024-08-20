@@ -16,8 +16,8 @@ line arguments. Required arguments are noted below.
 The following instructions build multi-core TF-M with regression test suites
 in Isolation Level 1.
 
-In common STM (platform\ext\target\stm\common\build_stm)
-There's scripts that help user to build TF-M project on all STM platform
+In common STM (``platform\ext\target\stm\common\build_stm``)
+There are scripts that help users to build the TF-M project on all STM platforms
 
 .. code-block:: bash
 

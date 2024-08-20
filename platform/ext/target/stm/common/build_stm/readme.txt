@@ -1,5 +1,5 @@
-STM_PLATFROM
-^^^^^^^^^^^^^^^
+STM_PLATFORM
+^^^^^^^^^^^^
 
 Configuration and Build
 """""""""""""""""""""""
