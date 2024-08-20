@@ -23,16 +23,8 @@
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
-#endif /* CONFIG_TFM_PARTITION_META */
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_END, $$Base);
 
 static enum tfm_hal_status_t configure_mpu(uint32_t rnr, uint32_t base,
                           uint32_t limit, uint32_t is_xn_exec, uint32_t ap_permissions)
@@ -85,7 +77,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
      * will decide the attributes.
      *
      * The default attributes are set to XN_EXEC_OK and AP_RO_PRIV_UNPRIV for the
-     * whole SRAM so the PSA_ROT_LINKER_CODE, TFM_UNPRIV_CODE and APP_ROT_LINKER_CODE
+     * whole SRAM so the PT_UNPRIV_CODE, PT_APP_ROT_CODE and PT_PSA_ROT_CODE
      * don't have to be aligned and memory space can be saved.
      * This region has the lowest RNR so the next regions can overwrite these
      * attributes if it's needed.
@@ -120,38 +112,24 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
         return ret;
     }
 
-    /* RW, ZI and stack as one region */
-    base = (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
-    limit = (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base);
+    /*
+     * Application-RoT data region containing the metadata pointer and partition
+     * RW data, ZI data and stacks.
+     */
+    base = (uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_START, $$Base);
+    limit = (uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_END, $$Base);
 
     /* The section size can be bigger than the alignment size, else the code would
      * not fit into the memory. Because of this, the sections can use multiple MPU
      * regions. */
     do {
-        ret = configure_mpu(rnr++, base, base + TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT,
+        ret = configure_mpu(rnr++, base, base + TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT,
                                 XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
         if (ret != TFM_HAL_SUCCESS) {
             return ret;
         }
-        base += TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT;
+        base += TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT;
     } while (base < limit);
-
-
-#ifdef CONFIG_TFM_PARTITION_META
-    /* TFM partition metadata pointer region */
-    base = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-    limit = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
-
-    do {
-        ret = configure_mpu(rnr++, base, base + TFM_LINKER_SP_META_PTR_ALIGNMENT,
-                                XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
-        if (ret != TFM_HAL_SUCCESS) {
-            return ret;
-        }
-        base += TFM_LINKER_SP_META_PTR_ALIGNMENT;
-    } while (base < limit);
-
-#endif
 
     arm_mpu_enable();
 

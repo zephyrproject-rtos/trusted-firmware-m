@@ -203,7 +203,7 @@ define block TFM_SP_META_PTR_END with alignment = TFM_LINKER_SP_META_PTR_ALIGNME
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
 /* Position tag: Start of Application RoT partition's private data */
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT, size = 0 { };
+define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = TFM_LINKER_PT_AROT_PART_PRIVATE_DATA_ALIGNMENT, size = 0 { };
 
 define block ER_{{partition.manifest.name}}_RWZI {
     {% if partition.attr.linker_pattern.library_list %}
@@ -221,7 +221,7 @@ define block ER_{{partition.manifest.name}}_RWZI {
 };
 
 /* Position tag: End of Application RoT partition's private data */
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT, size = 0 { };
+define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = TFM_LINKER_PT_AROT_PART_PRIVATE_DATA_ALIGNMENT, size = 0 { };
     {% endif %}
 {% endfor %}
 
@@ -257,7 +257,7 @@ define block STACKSEAL with size = STACKSEAL_SIZE { };
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
 /* Position tag: Start of PSA RoT partition's private data */
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = TFM_LINKER_PT_PSA_ROT_DATA_ALIGNMENT, size = 0 { };
+define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = TFM_LINKER_PT_PROT_PART_PRIVATE_DATA_ALIGNMENT, size = 0 { };
 
 define block ER_{{partition.manifest.name}}_RWZI {
     {% if partition.attr.linker_pattern.library_list %}
@@ -275,7 +275,7 @@ define block ER_{{partition.manifest.name}}_RWZI {
 };
 
 /* Position tag: End of PSA RoT partition's private data */
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = TFM_LINKER_PT_PSA_ROT_DATA_ALIGNMENT, size = 0 { };
+define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = TFM_LINKER_PT_PROT_PART_PRIVATE_DATA_ALIGNMENT, size = 0 { };
     {% endif %}
 {% endfor %}
 
@@ -368,17 +368,15 @@ define block DATA with fixed order {
      * alignment that MPU region base address must align with the MPU region
      * size.
      * As a result, on Armv6-M/v7-M cores, to save memory resource and MPU
-     * regions, unprivileged data sections and privileged data sections are
-     * separated and gathered in unprivileged/privileged data area respectively.
-     * Keep BL2 shared data at the beginning of the secure data area on Armv8-M
-     * cores, while move the area to the beginning of privileged data region on
-     * Armv6-M/v7-M cores.
+     * regions, unprivileged data sections and privileged data sections can be
+     * separated and gathered in unprivileged/privileged data area respectively
+     * by defining S_DATA_PRIV_START. If so, the BL2 shared data area is moved
+     * to the beginning of the privileged data area, otherwise it is kept at the
+     * beginning of the secure data area.
      */
-#if ((defined(__ARM8M_MAINLINE__) && (__CORE__ == __ARM8M_MAINLINE__)) || \
-     (defined(__ARM8M_BASELINE__) && (__CORE__ == __ARM8M_BASELINE__)) || \
-     (defined(__ARM8EM_MAINLINE__) && (__CORE__ == __ARM8EM_MAINLINE__)))
+#ifndef S_DATA_PRIV_START
     block TFM_SHARED_DATA,
-#endif
+#endif /* !S_DATA_PRIV_START */
 
     block PT_APP_ROT_DATA_START,
 #ifdef CONFIG_TFM_PARTITION_META
@@ -394,22 +392,16 @@ define block DATA with fixed order {
 {% endfor %}
     block PT_APP_ROT_DATA_END,
 
-#if ((defined(__ARM6M__) && (__CORE__ == __ARM6M__)) || \
-     (defined(__ARM7M__) && (__CORE__ == __ARM7M__)) || \
-     (defined(__ARM7EM__) && (__CORE__ == __ARM7EM__)))
 #ifdef S_DATA_PRIV_START
 };
 define block PRIV_DATA with fixed order {
     block TFM_SECURE_PRIV_DATA_BOUNDARY,
-#endif
     /*
      * Move BL2 shared area to the beginning of privileged data area on
      * Armv6-M/v7-M platforms.
      */
     block TFM_SHARED_DATA,
-#endif /* (defined(__ARM6M__) && (__CORE__ == __ARM6M__)) || \
-        * (defined(__ARM7M__) && (__CORE__ == __ARM7M__)) || \
-        * (defined(__ARM7EM__) && (__CORE__ == __ARM7EM__)) */
+#endif /* S_DATA_PRIV_START */
 
     block PT_PSA_ROT_DATA_START,
     block ARM_LIB_STACK,

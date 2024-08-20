@@ -55,9 +55,7 @@
 
 #define S_DATA_START            (SRAM_BASE + TFM_PARTITION_SIZE)
 #define S_DATA_SIZE             (SRAM_SIZE - TFM_PARTITION_SIZE)
-#define S_UNPRIV_DATA_SIZE      (0x4000)
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
-#define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 
 /* Shared memory region */
 #define INTER_PROCESSOR_SE_SHARED_MEMORY_START_ADDR 0xA8000000
@@ -89,7 +87,7 @@
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
 #define BL2_DATA_START    (S_DATA_START)
-#define BL2_DATA_SIZE     (S_DATA_SIZE)
+#define BL2_DATA_SIZE     (BL2_IMAGE_START - BL2_DATA_START)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 /* SE BL1 regions */
@@ -124,4 +122,3 @@
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
 
 #endif /* __REGION_DEFS_H__ */
-

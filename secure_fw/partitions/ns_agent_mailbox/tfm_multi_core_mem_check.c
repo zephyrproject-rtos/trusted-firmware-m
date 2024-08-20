@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -54,16 +54,12 @@ void tfm_get_mem_region_security_attr(const void *p, size_t s,
 }
 
 #if TFM_ISOLATION_LEVEL == 2
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
-#ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
-#endif /* CONFIG_TFM_PARTITION_META */
-REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
+REGION_DECLARE(Image$$, PT_UNPRIV_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_END, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_END, $$Base);
 #endif
 
 void tfm_get_secure_mem_region_attr(const void *p, size_t s,
@@ -98,9 +94,13 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
     p_attr->is_mpu_enabled = false;
     p_attr->is_valid = true;
 
-    /* TFM Core unprivileged code region */
-    base = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1;
+    /*
+     * Combined unprivileged shared code and Application-RoT partition code
+     * regions, which have the same attributes as the privileged execute-never
+     * (PXN) feature is not present.
+     */
+    base = (uintptr_t)&REGION_NAME(Image$$, PT_UNPRIV_CODE_START, $$Base);
+    limit = (uintptr_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_END, $$Base) - 1;
     if (check_address_range(p, s, base, limit) == SPM_SUCCESS) {
         p_attr->is_priv_rd_allow = true;
         p_attr->is_priv_wr_allow = false;
@@ -110,35 +110,24 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
         return;
     }
 
-#ifdef CONFIG_TFM_PARTITION_META
-    /* TFM partition metadata pointer region */
-    base = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1;
+    /* RO-data region that is unprivileged, read-only and execute-never */
+    base = (uintptr_t)&REGION_NAME(Image$$, PT_RO_DATA_START, $$Base);
+    limit = (uintptr_t)&REGION_NAME(Image$$, PT_RO_DATA_END, $$Base) - 1;
     if (check_address_range(p, s, base, limit) == SPM_SUCCESS) {
         p_attr->is_priv_rd_allow = true;
-        p_attr->is_priv_wr_allow = true;
+        p_attr->is_priv_wr_allow = false;
         p_attr->is_unpriv_rd_allow = true;
-        p_attr->is_unpriv_wr_allow = true;
+        p_attr->is_unpriv_wr_allow = false;
         p_attr->is_xn = true;
         return;
     }
-#endif
 
-    /* APP RoT partition RO region */
-    base = (uintptr_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
-    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1;
-    if (check_address_range(p, s, base, limit) == SPM_SUCCESS) {
-        p_attr->is_priv_rd_allow = true;
-        p_attr->is_priv_wr_allow = false;
-        p_attr->is_unpriv_rd_allow = true;
-        p_attr->is_unpriv_wr_allow = false;
-        p_attr->is_xn = false;
-        return;
-    }
-
-    /* RW, ZI and stack as one region */
-    base = (uintptr_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
-    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1;
+    /*
+     * Application-RoT data region containing the metadata pointer and partition
+     * RW data, ZI data and stacks.
+     */
+    base = (uintptr_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_START, $$Base);
+    limit = (uintptr_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_END, $$Base) - 1;
     if (check_address_range(p, s, base, limit) == SPM_SUCCESS) {
         p_attr->is_priv_rd_allow = true;
         p_attr->is_priv_wr_allow = true;

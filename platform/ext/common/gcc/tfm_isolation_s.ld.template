@@ -344,14 +344,13 @@ SECTIONS
      * alignment that MPU region base address must align with the MPU region
      * size.
      * As a result, on Armv6-M/v7-M cores, to save memory resource and MPU
-     * regions, unprivileged data sections and privileged data sections are
-     * separated and gathered in unprivileged/privileged data area respectively.
-     * Keep BL2 shared data at the beginning of the secure data area on Armv8-M
-     * cores, while move the area to the beginning of privileged data region on
-     * Armv6-M/v7-M cores.
+     * regions, unprivileged data sections and privileged data sections can be
+     * separated and gathered in unprivileged/privileged data area respectively
+     * by defining S_DATA_PRIV_START. If so, the BL2 shared data area is moved
+     * to the beginning of the privileged data area, otherwise it is kept at the
+     * beginning of the secure data area.
      */
-#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) || \
-    defined(__ARM_ARCH_8_1M_MAIN__)
+#ifndef S_DATA_PRIV_START
 #ifdef CODE_SHARING
     /* The code sharing between bootloader and runtime requires to share the
      * global variables.
@@ -367,8 +366,7 @@ SECTIONS
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
     } > RAM
-#endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) || \
-        * defined(__ARM_ARCH_8_1M_MAIN__) */
+#endif /* !S_DATA_PRIV_START */
 
     /* Position tag: Start of Application RoT data (unprivileged) */
     . = ALIGN(TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT);
@@ -390,7 +388,7 @@ SECTIONS
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
 
     /* Position tag: Start of Application RoT partition's private data */
-    . = ALIGN(TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT);
+    . = ALIGN(TFM_LINKER_PT_AROT_PART_PRIVATE_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
     .ER_{{partition.manifest.name}}_DATA . :
@@ -429,7 +427,7 @@ SECTIONS
     } > RAM
 
     /* Position tag: End of Application RoT partition's private data */
-    . = ALIGN(TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT);
+    . = ALIGN(TFM_LINKER_PT_AROT_PART_PRIVATE_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
     {% endif %}
@@ -439,15 +437,12 @@ SECTIONS
     . = ALIGN(TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT);
     Image$$PT_APP_ROT_DATA_END$$Base = .;
 
-#if defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
-    defined(__ARM_ARCH_7EM__)
 #ifdef S_DATA_PRIV_START
     /**** Privileged data area base address specified by Armv6-M/v7-M platform */
     .tfm_secure_priv_data_boundary :
     {
         . = ABSOLUTE(S_DATA_PRIV_START) ;
     } > RAM
-#endif
 
     /*
      * Move BL2 shared area to the beginning of privileged data area on
@@ -458,8 +453,7 @@ SECTIONS
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
     } > RAM
-#endif /* defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
-        * defined(__ARM_ARCH_7EM__) */
+#endif /* S_DATA_PRIV_START */
 
     /* Position tag: Start of PSA RoT data (privileged) */
     . = ALIGN(TFM_LINKER_PT_PSA_ROT_DATA_ALIGNMENT);
@@ -499,7 +493,7 @@ SECTIONS
     {% if partition.manifest.type == 'PSA-ROT' %}
 
     /* Position tag: Start of PSA RoT partition's private data */
-    . = ALIGN(TFM_LINKER_PT_PSA_ROT_DATA_ALIGNMENT);
+    . = ALIGN(TFM_LINKER_PT_PROT_PART_PRIVATE_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
     .ER_{{partition.manifest.name}}_DATA . :
@@ -538,7 +532,7 @@ SECTIONS
     } > RAM
 
     /* Position tag: End of PSA RoT partition's private data */
-    . = ALIGN(TFM_LINKER_PT_PSA_ROT_DATA_ALIGNMENT);
+    . = ALIGN(TFM_LINKER_PT_PROT_PART_PRIVATE_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
     {% endif %}

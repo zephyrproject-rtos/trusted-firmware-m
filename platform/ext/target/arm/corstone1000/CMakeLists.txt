@@ -32,14 +32,13 @@ target_compile_definitions(platform_region_defs
 # size to save memory. In that case, multiple MPU region has to be configured to cover it.
 #
 # To save memory, the attributes are set to XN_EXEC_OK and AP_RO_PRIV_UNPRIV for
-# the SRAM so the PSA_ROT_LINKER_CODE, TFM_UNPRIV_CODE and APP_ROT_LINKER_CODE don't have to
+# the SRAM so the PT_UNPRIV_CODE, PT_APP_ROT_CODE and PT_PSA_ROT_CODE don't have to
 # be aligned. The higher-priority regions will overwrite these attributes if needed.
 # The RAM is also located in the SRAM so it has to be configured to overwrite these default
 # attributes.
 target_compile_definitions(platform_region_defs
     INTERFACE
-        TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT=0x2000
-        TFM_LINKER_SP_META_PTR_ALIGNMENT=0x100
+        TFM_LINKER_PT_APP_ROT_DATA_ALIGNMENT=0x2000
 
         # The RAM MPU Region block sizes are calculated manually. The RAM has to be covered
         # with the MPU regions. These regions also have to be the power of 2 and
@@ -60,7 +59,7 @@ target_sources(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_s.ld>
 )
 
 target_sources(bl2
