@@ -8,7 +8,11 @@
 #include "cc3xx_stdlib.h"
 
 #include "cc3xx_rng.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
 #include <assert.h>
 #include <stdbool.h>

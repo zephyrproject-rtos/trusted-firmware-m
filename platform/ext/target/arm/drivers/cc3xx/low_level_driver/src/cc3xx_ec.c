@@ -11,7 +11,11 @@
 #include "cc3xx_error.h"
 #include "cc3xx_ec_curve_data.h"
 #include "cc3xx_ec_projective_point.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 #include "cc3xx_rng.h"

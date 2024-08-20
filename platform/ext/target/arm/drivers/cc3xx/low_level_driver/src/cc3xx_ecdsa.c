@@ -9,7 +9,11 @@
 #include "cc3xx_ecdsa.h"
 
 #include "cc3xx_ec.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
 #include <stdint.h>
 #include <stddef.h>

@@ -27,7 +27,11 @@
 #include "cc3xx_aes.h"
 #include "cc3xx_chacha.h"
 #include "cc3xx_poly1305.h"
+#ifndef CC3XX_PSA_API_CONFIG_FILE
 #include "cc3xx_psa_api_config.h"
+#else
+#include CC3XX_PSA_API_CONFIG_FILE
+#endif
 #include "cc3xx_rng.h"
 
 #if defined(PSA_WANT_KEY_TYPE_AES)

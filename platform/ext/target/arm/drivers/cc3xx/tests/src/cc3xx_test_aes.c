@@ -7,7 +7,11 @@
 
 #include "cc3xx_test_aes.h"
 #include "test_lowlevel_aes.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
 #include "cc3xx_test_utils.h"
 

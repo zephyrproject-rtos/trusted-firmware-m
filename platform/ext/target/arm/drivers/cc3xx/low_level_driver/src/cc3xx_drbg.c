@@ -6,7 +6,11 @@
  */
 #include <assert.h>
 #include "cc3xx_drbg.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
 cc3xx_err_t cc3xx_lowlevel_drbg_init(
     cc3xx_drbg_id_t id,

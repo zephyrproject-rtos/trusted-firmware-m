@@ -12,8 +12,13 @@
  */
 
 #include "cc3xx_misc.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 
+/* Check lowlevel config defines to see if a curve translation function is required */
 #if defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) || \
     defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) || \
     defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) || \

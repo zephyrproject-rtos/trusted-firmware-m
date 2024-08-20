@@ -19,7 +19,11 @@
 #include "cc3xx_stdlib.h"
 #include "cc3xx_misc.h"
 #include "cc3xx_aes.h"
+#ifndef CC3XX_PSA_API_CONFIG_FILE
 #include "cc3xx_psa_api_config.h"
+#else
+#include CC3XX_PSA_API_CONFIG_FILE
+#endif
 
 /* ToDo: This needs to be sorted out at TF-M level
  * To be able to include the PSA style configuration

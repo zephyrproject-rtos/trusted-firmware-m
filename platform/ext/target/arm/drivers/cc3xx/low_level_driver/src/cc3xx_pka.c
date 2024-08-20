@@ -8,7 +8,11 @@
 #include "cc3xx_pka.h"
 
 #include "cc3xx_dev.h"
+#ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
 #include "cc3xx_rng.h"
 #include "cc3xx_endian_helpers.h"
 

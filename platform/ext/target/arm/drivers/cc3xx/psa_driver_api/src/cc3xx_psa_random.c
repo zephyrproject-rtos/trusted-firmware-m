@@ -11,7 +11,11 @@
  * random generation capability as described by the PSA Cryptoprocessor Driver
  * interface specification.
  */
+#ifndef CC3XX_PSA_API_CONFIG_FILE
 #include "cc3xx_psa_api_config.h"
+#else
+#include CC3XX_PSA_API_CONFIG_FILE
+#endif
 
 #include "cc3xx_psa_random.h"
 #include "cc3xx_misc.h"
