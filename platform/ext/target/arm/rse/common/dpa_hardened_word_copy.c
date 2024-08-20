@@ -4,14 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+#include <assert.h>
 
 #include "dpa_hardened_word_copy.h"
 
 #include "device_definition.h"
 #include "cc3xx_rng.h"
-#include "cc3xx_config.h"
-
-#include <assert.h>
 
 /**
  * \brief This is a requirement for the maximum number of words that can
