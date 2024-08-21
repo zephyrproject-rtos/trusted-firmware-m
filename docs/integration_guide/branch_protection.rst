@@ -83,6 +83,14 @@ The build system performs checks to ensure that support is available and
 terminates the build process if the required conditions are not met.
 
 
+Limitations
+===========
+
+Currently PACBTI is supported only for Arm Compiler.
+Even though GNUARM supports PACBTI, some features are missing that prevent all
+the component integration to successfully work together.
+It may be possible in the future to extend support for other compilers.
+
 --------------
 
 For further details on PACBTI features refer to:

@@ -126,32 +126,10 @@ add_compile_options(
 
 #
 # Pointer Authentication Code and Branch Target Identification (PACBTI) Options
+# Not currently supported for GNUARM.
 #
-if (${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_NONE)
-    set(BRANCH_PROTECTION_OPTIONS "none")
-elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_STANDARD)
-    set(BRANCH_PROTECTION_OPTIONS "standard")
-elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET)
-    set(BRANCH_PROTECTION_OPTIONS "pac-ret")
-elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET_LEAF)
-    set(BRANCH_PROTECTION_OPTIONS "pac-ret+leaf")
-elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_BTI)
-    set(BRANCH_PROTECTION_OPTIONS "bti")
-endif()
-
 if(NOT ${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_DISABLED)
-    if(GCC_VERSION VERSION_LESS "12.2")
-        message(FATAL_ERROR "Your compiler does not support BRANCH_PROTECTION")
-    else()
-        if((TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85") AND
-            (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main"))
-            message(NOTICE "BRANCH_PROTECTION enabled with: ${BRANCH_PROTECTION_OPTIONS}")
-
-            add_compile_options(-mbranch-protection=${BRANCH_PROTECTION_OPTIONS})
-        else()
-            message(FATAL_ERROR "Your architecture does not support BRANCH_PROTECTION")
-        endif()
-    endif()
+    message(FATAL_ERROR "BRANCH_PROTECTION NOT supported for GNU-ARM")
 endif()
 
 add_link_options(
