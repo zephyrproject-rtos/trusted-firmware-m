@@ -100,6 +100,8 @@ int main(void)
 
     fih_int fih_rc = FIH_FAILURE;
 
+    tfm_arch_config_branch_protection();
+
     /* set Main Stack Pointer limit */
     tfm_arch_set_msplim(SPM_BOOT_STACK_TOP);
 
