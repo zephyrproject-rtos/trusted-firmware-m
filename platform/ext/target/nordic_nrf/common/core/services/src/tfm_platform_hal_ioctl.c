@@ -18,7 +18,9 @@
 #include <tfm_platform_user_memory_ranges.h>
 
 #include <hal/nrf_gpio.h>
+#ifdef NRF91_SERIES
 #include <nrfx_nvmc.h>
+#endif
 
 #include "handle_attr.h"
 
@@ -62,7 +64,7 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 
 		if (args->addr >= start &&
 		    args->addr + args->len <= start + size) {
-#ifdef NRF_UICR_S_BASE
+#ifdef NRF91_SERIES
 			if (start >= NRF_UICR_S_BASE &&
 			    start < (NRF_UICR_S_BASE + sizeof(NRF_UICR_Type))) {
 				/* Range is inside UICR. Some nRF platforms need special handling */
