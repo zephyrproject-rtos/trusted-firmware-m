@@ -39,6 +39,7 @@ target_link_libraries(tfm_sprt
         tfm_spm_defs
         tfm_config
         platform_s
+        tfm_vprintf
     PRIVATE
         tfm_spm
         psa_crypto_config

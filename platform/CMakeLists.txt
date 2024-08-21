@@ -101,6 +101,9 @@ target_link_libraries(platform_s
         tfm_fih_headers
         cmsis_stack_override
         cmsis
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:tfm_log_unpriv>
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:tfm_log>
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:tfm_backtrace>
     PRIVATE
         tfm_config
         tfm_spm_defs # For tfm_spm_log.h
@@ -116,6 +119,9 @@ target_compile_definitions(platform_s
     PUBLIC
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
         $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:TFM_SPM_LOG_RAW_ENABLED>
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:CONFIG_TFM_BACKTRACE_ON_CORE_PANIC>
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:LOG_LEVEL=LOG_LEVEL_ERROR>
+        $<$<BOOL:${CONFIG_TFM_BACKTRACE_ON_CORE_PANIC}>:LOG_LEVEL_UNPRIV=LOG_LEVEL_ERROR>
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION=1>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>

@@ -12,6 +12,11 @@
 #include "sprt_partition_metadata_indicator.h"
 #include "runtime_defs.h"
 
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+#include "tfm_log_unpriv.h"
+#include "backtrace.h"
+#endif
+
 uint32_t psa_framework_version(void)
 {
     return PART_METADATA()->psa_fns->psa_framework_version();
@@ -65,6 +70,9 @@ void psa_reply(psa_handle_t msg_handle, psa_status_t retval)
 
 void psa_panic(void)
 {
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+    tfm_dump_backtrace(__func__, tfm_log_unpriv);
+#endif
     PART_METADATA()->psa_fns->psa_panic();
 }
 

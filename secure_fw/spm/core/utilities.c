@@ -13,9 +13,18 @@
 #include "utilities.h"
 #include "tfm_hal_platform.h"
 
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+#include "tfm_log.h"
+#include "backtrace.h"
+#endif
+
 void tfm_core_panic(void)
 {
     (void)fih_delay();
+
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+    tfm_dump_backtrace(__func__, tfm_log);
+#endif
 
 #ifdef CONFIG_TFM_HALT_ON_CORE_PANIC
 

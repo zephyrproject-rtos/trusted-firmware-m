@@ -14,6 +14,11 @@
 #include "ffm/psa_api.h"
 #include "psa/client.h"
 
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+#include "tfm_log.h"
+#include "backtrace.h"
+#endif
+
 uint32_t psa_framework_version(void)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -102,6 +107,10 @@ void psa_panic(void)
         /* PSA APIs must be called from Thread mode */
         tfm_core_panic();
     }
+
+#ifdef CONFIG_TFM_BACKTRACE_ON_CORE_PANIC
+    tfm_dump_backtrace(__func__, tfm_log);
+#endif
 
     tfm_spm_partition_psa_panic();
 }
