@@ -103,7 +103,7 @@ static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
          * global buffer.
          */
         if (buffer_size > sizeof(enc_asset_data)) {
-            return PSA_ERROR_BUFFER_TOO_SMALL;
+            return PSA_ERROR_INVALID_ARGUMENT;
         }
     }
     return PSA_SUCCESS;
