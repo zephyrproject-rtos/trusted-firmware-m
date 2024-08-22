@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -99,6 +99,26 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
         return ret;
     }
 
+    /* Set the RAM attributes. It is needed because the first region overlaps the whole
+     * SRAM and it has to be overridden.
+     * The RAM_MPU_REGION_BLOCK_1_SIZE and RAM_MPU_REGION_BLOCK_2_SIZE are calculated manually
+     * and added to the platform_region_defs compile definitions.
+     */
+    base = S_DATA_START;
+    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
+    ret = configure_mpu(rnr++, base, limit,
+                            XN_EXEC_NOT_OK, AP_RW_PRIV_ONLY);
+    if (ret != TFM_HAL_SUCCESS) {
+        return ret;
+    }
+
+    base = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
+    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE + RAM_MPU_REGION_BLOCK_2_SIZE;
+    ret = configure_mpu(rnr++, base, limit,
+                            XN_EXEC_NOT_OK, AP_RW_PRIV_ONLY);
+    if (ret != TFM_HAL_SUCCESS) {
+        return ret;
+    }
 
     /* RW, ZI and stack as one region */
     base = (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -132,27 +152,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     } while (base < limit);
 
 #endif
-
-    /* Set the RAM attributes. It is needed because the first region overlaps the whole
-     * SRAM and it has to be overridden.
-     * The RAM_MPU_REGION_BLOCK_1_SIZE and RAM_MPU_REGION_BLOCK_2_SIZE are calculated manually
-     * and added to the platform_region_defs compile definitions.
-     */
-    base = S_DATA_START;
-    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
-    ret = configure_mpu(rnr++, base, limit,
-                            XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
-    if (ret != TFM_HAL_SUCCESS) {
-        return ret;
-    }
-
-    base = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE;
-    limit = S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE + RAM_MPU_REGION_BLOCK_2_SIZE;
-    ret = configure_mpu(rnr++, base, limit,
-                            XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
-    if (ret != TFM_HAL_SUCCESS) {
-        return ret;
-    }
 
     arm_mpu_enable();
 
