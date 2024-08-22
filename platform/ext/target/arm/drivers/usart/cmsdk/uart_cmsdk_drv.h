@@ -47,7 +47,7 @@ extern "C" {
 
 /* ARM UART device configuration structure */
 struct uart_cmsdk_dev_cfg_t {
-    const uint32_t base;              /*!< UART base address */
+    const uintptr_t base;             /*!< UART base address */
     const uint32_t default_baudrate;  /*!< Default baudrate */
 };
 

@@ -23,4 +23,9 @@ extern struct lcm_dev_t LCM_DEV_S;
 extern pl061_regblk_t *const GPIO0_DEV_S;
 #endif
 
+#ifdef UART0_CMSDK_NS
+#include "uart_cmsdk_drv.h"
+extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
+#endif
+
 #endif  /* __DEVICE_DEFINITION_H__ */
