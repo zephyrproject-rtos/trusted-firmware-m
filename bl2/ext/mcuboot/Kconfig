@@ -137,6 +137,7 @@ config MCUBOOT_CONFIRM_IMAGE
 config MCUBOOT_DIRECT_XIP_REVERT
     bool "Enable the revert mechanism in direct-xip mode"
     default y
+    depends on MCUBOOT_UPGRADE_STRATEGY_DIRECT_XIP
 
 config MCUBOOT_HW_ROLLBACK_PROT
     bool "Enable security counter validation against non-volatile HW counters"
