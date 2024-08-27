@@ -161,12 +161,13 @@ static void mailbox_direct_reply(uint8_t idx, uint32_t result)
     uint32_t ret_result = result;
 
     /* Copy outvec lengths back if necessary */
-    if (vectors[idx].in_use) {
+    if ((vectors[idx].in_use) && (result == PSA_SUCCESS)) {
         for (int i = 0; i < vectors[idx].out_len; i++) {
             vectors[idx].original_out_vec[i].len = vectors[idx].out_vec[i].len;
         }
-        vectors[idx].in_use = false;
     }
+
+    vectors[idx].in_use = false;
 
     /* Get reply address */
     reply_ptr = get_nspe_reply_addr(idx);
