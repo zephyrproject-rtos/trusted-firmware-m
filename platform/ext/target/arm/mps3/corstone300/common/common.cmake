@@ -240,7 +240,7 @@ target_compile_definitions(platform_region_defs
 )
 
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
-add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
+    add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
 endif()
 
 #========================= Files for building NS side platform ================#

@@ -28,11 +28,13 @@ set_target_properties(provisioning_bundle
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-target_add_scatter_file(provisioning_bundle
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ld>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.icf>
-)
+if(${PLATFORM_DEFAULT_PROV_LINKER_SCRIPT})
+    target_add_scatter_file(provisioning_bundle
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.icf>
+    )
+endif()
 
 target_link_options(provisioning_bundle
     PRIVATE
