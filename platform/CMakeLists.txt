@@ -352,6 +352,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         PRIVATE
             tfm_fih
             tfm_fih_headers
+            tfm_log
             tfm_boot_status
             platform_region_defs
             bl1_1_shared_lib_interface

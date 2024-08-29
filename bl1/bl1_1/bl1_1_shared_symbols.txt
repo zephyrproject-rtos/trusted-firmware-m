@@ -21,3 +21,5 @@ __ubsan_*
 log_error
 log_error_permissions_check
 _write
+tfm_vprintf
+tfm_log

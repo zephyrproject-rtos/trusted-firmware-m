@@ -28,3 +28,5 @@ log_error_permissions_check
 _write
 fputc
 putchar
+tfm_vprintf
+tfm_log

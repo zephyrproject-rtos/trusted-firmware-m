@@ -15,7 +15,7 @@
 #include "uart_stdout.h"
 #include "fih.h"
 #include "util.h"
-#include "log.h"
+#include "tfm_log.h"
 #include "image.h"
 #include "region_defs.h"
 #include "pq_crypto.h"
@@ -66,14 +66,14 @@ static void collect_boot_measurement(const struct bl1_2_image_t *image)
     if (pq_crypto_get_pub_key_hash(TFM_BL1_KEY_ROTPK_0, bl2_metadata.signer_id,
                                    sizeof(bl2_metadata.signer_id),
                                    &bl2_metadata.signer_id_size)) {
-        BL1_LOG("[WRN] Signer ID missing in measurement of BL2\r\n");
+        WARN("Signer ID missing in measurement of BL2\n");
     }
 #endif
 
     /* Save the boot measurement of the BL2 image. */
     if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL2, computed_bl2_hash,
                                BL2_HASH_SIZE, &bl2_metadata, true)) {
-        BL1_LOG("[WRN] Failed to store boot measurement of BL2\r\n");
+        WARN("Failed to store boot measurement of BL2\n");
     }
 }
 #endif /* TFM_MEASURED_BOOT_API */
@@ -158,12 +158,12 @@ fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
 
     FIH_CALL(is_image_signature_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] BL2 image signature failed to validate\r\n");
+        ERROR("BL2 image signature failed to validate\n");
         FIH_RET(fih_rc);
     }
     FIH_CALL(is_image_security_counter_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] BL2 image security_counter failed to validate\r\n");
+        ERROR("BL2 image security_counter failed to validate\n");
         FIH_RET(fih_rc);
     }
 
@@ -172,7 +172,7 @@ fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
                                        image->protected_values.security_counter);
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] NV counter update failed\r\n");
+        ERROR("NV counter update failed\n");
         FIH_RET(fih_rc);
     }
 
@@ -252,19 +252,19 @@ static fih_int bl1_2_validate_image(uint32_t image_id)
 
     FIH_CALL(copy_and_decrypt_image, fih_rc, image_id, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] BL2 image failed to decrypt\r\n");
+        ERROR("BL2 image failed to decrypt\n");
         FIH_RET(fih_rc);
     }
 
-    BL1_LOG("[INF] BL2 image decrypted successfully\r\n");
+    INFO("BL2 image decrypted successfully\n");
 
     FIH_CALL(bl1_2_validate_image_at_addr, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BL1_LOG("[ERR] BL2 image failed to validate\r\n");
+        ERROR("BL2 image failed to validate\n");
         FIH_RET(fih_rc);
     }
 
-    BL1_LOG("[INF] BL2 image validated successfully\r\n");
+    INFO("BL2 image validated successfully\n");
 
     FIH_RET(FIH_SUCCESS);
 }
@@ -278,7 +278,7 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-    BL1_LOG("[INF] starting TF-M bl1_2\r\n");
+    INFO("starting TF-M bl1_2\n");
 
 #if defined(TEST_BL1_2) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
     run_bl1_2_testsuite();
@@ -295,11 +295,11 @@ int main(void)
     }
 
     do {
-        BL1_LOG("[INF] Attempting to boot image 0\r\n");
+        INFO("Attempting to boot image 0\n");
         FIH_CALL(bl1_2_validate_image, fih_rc, 0);
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            BL1_LOG("[INF] Attempting to boot image 1\r\n");
+            INFO("Attempting to boot image 1\n");
             FIH_CALL(bl1_2_validate_image, fih_rc, 1);
         }
 
@@ -323,7 +323,7 @@ int main(void)
     collect_boot_measurement((const struct bl1_2_image_t *)BL2_IMAGE_START);
 #endif /* TFM_MEASURED_BOOT_API */
 
-    BL1_LOG("[INF] Jumping to BL2\r\n");
+    INFO("Jumping to BL2\n");
     boot_platform_quit((struct boot_arm_vector_table *)BL2_CODE_START);
 
     FIH_PANIC;
