@@ -7,7 +7,7 @@
 
 #include "tfm_plat_provisioning.h"
 
-#include "log.h"
+#include "tfm_log.h"
 #include "corstone315_provisioning_bundle.h"
 #include "tfm_plat_otp.h"
 #include "platform_s_device_definition.h"
@@ -51,7 +51,7 @@ static enum tfm_plat_err_t enable_sp_mode(void)
     lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
 
     if (sp_enabled != LCM_TRUE) {
-        BL1_LOG("[INF] Enabling secure provisioning mode, system will now reset.\r\n");
+        INFO("Enabling secure provisioning mode, system will now reset.\n");
         lcm_set_sp_enabled(&LCM_DEV_S);
     }
 
@@ -76,7 +76,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
            (void *)&cm_bundle->values,
            PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
 
-    BL1_LOG("[INF] Running CM provisioning bundle\r\n");
+    INFO("Running CM provisioning bundle\n");
     err = ((enum tfm_plat_err_t (*)(void))(PROVISIONING_BUNDLE_CODE_START | 0b1))();
 
     memset((void *)PROVISIONING_BUNDLE_CODE_START, 0,
@@ -104,7 +104,7 @@ static enum tfm_plat_err_t provision_psa_rot(void)
            (void *)&dm_bundle->values,
            PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
 
-    BL1_LOG("[INF] Running DM provisioning bundle\r\n");
+    INFO("Running DM provisioning bundle\n");
     err = ((enum tfm_plat_err_t (*)(void))(PROVISIONING_BUNDLE_CODE_START | 0b1))();
 
     memset((void *)PROVISIONING_BUNDLE_CODE_START, 0,
@@ -127,7 +127,7 @@ static enum tfm_plat_err_t set_tp_mode(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    BL1_LOG("[INF] TP mode set complete, system will now reset.\r\n");
+    INFO("TP mode set complete, system will now reset.\n");
     tfm_hal_system_reset();
 
     /* Should not reach this point */
@@ -141,7 +141,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     enum lcm_lcs_t lcs;
     enum lcm_tp_mode_t tp_mode;
 
-    BL1_LOG("[INF] Beginning provisioning\r\n");
+    INFO("Beginning provisioning\n");
 
     lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN) {
@@ -159,7 +159,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     }
 
     if (lcs == LCM_LCS_CM) {
-        BL1_LOG("[INF] Waiting for CM provisioning bundle\r\n");
+        INFO("Waiting for CM provisioning bundle\n");
         while (cm_bundle->magic != CM_BUNDLE_MAGIC ||
                cm_bundle->magic2 != CM_BUNDLE_MAGIC) {
         }
@@ -176,7 +176,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     }
     if (lcs == LCM_LCS_DM) {
 
-        BL1_LOG("[INF] Waiting for DM provisioning bundle\r\n");
+        INFO("Waiting for DM provisioning bundle\n");
         while (dm_bundle->magic != DM_BUNDLE_MAGIC ||
                dm_bundle->magic2 != DM_BUNDLE_MAGIC) {
         }
