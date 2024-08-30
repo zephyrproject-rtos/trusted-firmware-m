@@ -12,7 +12,7 @@
 #include "tfm_attest_hal.h"
 #include "crypto.h"
 #include "region_defs.h"
-#include "log.h"
+#include "tfm_log.h"
 #include "fwu_agent.h"
 
 #include <string.h>
@@ -117,18 +117,18 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
         return err;
     }
 
-    BL1_LOG("[INF] Beginning BL1 provisioning\r\n");
+    INFO("Beginning BL1 provisioning\n");
 
 #ifdef TFM_DUMMY_PROVISIONING
-    BL1_LOG("\033[1;31m[WRN]");
-    BL1_LOG("TFM_DUMMY_PROVISIONING is not suitable for production! ");
-    BL1_LOG("This device is \033[1;1mNOT SECURE");
-    BL1_LOG("\033[0m\r\n");
+    WARN("\033[1;31m"
+        "TFM_DUMMY_PROVISIONING is not suitable for production! "
+        "This device is \033[1;1mNOT SECURE"
+        "\033[0m\n");
 #endif /* TFM_DUMMY_PROVISIONING */
 
     if (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
         if (bl1_assembly_and_test_prov_data->magic != ASSEMBLY_AND_TEST_PROV_DATA_MAGIC) {
-            BL1_LOG("[ERR] No valid ASSEMBLY_AND_TEST provisioning data found\r\n");
+            ERROR("No valid ASSEMBLY_AND_TEST provisioning data found\n");
             return TFM_PLAT_ERR_INVALID_INPUT;
         }
 
