@@ -22,6 +22,7 @@
 #include "tfm_plat_nv_counters.h"
 #include "mpu_armv8m_drv.h"
 #include "tfm_hal_device_header.h"
+#include "tfm_log.h"
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
@@ -61,9 +62,9 @@ int32_t boot_platform_init(void)
     }
 
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     result = FLASH_DEV_NAME_BL1.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
@@ -139,9 +140,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
         while (1){}
     }
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 

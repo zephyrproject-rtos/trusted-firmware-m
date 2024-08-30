@@ -20,7 +20,7 @@
 #include "fwu_agent.h"
 #include "uart_stdout.h"
 #include "region_defs.h"
-#include "log.h"
+#include "tfm_log.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "cc3xx_drv.h"
@@ -598,9 +598,9 @@ int32_t boot_platform_init(void)
         setup_host_firewall();
 #endif
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 
 #ifdef CRYPTO_HW_ACCELERATOR
@@ -623,9 +623,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 
     result = corstone1000_watchdog_reset_timer();

@@ -16,11 +16,6 @@ config MCUBOOT_LOG_LEVEL
     default "OFF"
 endif
 
-if BL1 && PLATFORM_DEFAULT_BL1
-config TFM_BL1_LOGGING
-    default n
-endif
-
 choice SPM_LOG_LEVEL
     default SPM_LOG_LEVEL_SILENCE
 endchoice

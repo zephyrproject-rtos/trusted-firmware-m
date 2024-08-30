@@ -20,6 +20,7 @@
 #include <string.h>
 #include "sam_reg_map.h"
 #include "trng.h"
+#include "tfm_log.h"
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
@@ -49,9 +50,9 @@ int32_t boot_platform_init(void)
             (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
     __set_MSPLIM(msp_stack_bottom);
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     /* Enable system reset */
     struct corstone315_sysctrl_t *sysctrl =
@@ -102,9 +103,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     static struct boot_arm_vector_table *vt_cpy;
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 

@@ -20,7 +20,7 @@
 #include "fwu_agent.h"
 #include "uart_stdout.h"
 #include "region_defs.h"
-#include "log.h"
+#include "tfm_log.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "cc3xx_dev.h"
@@ -50,9 +50,9 @@ uint32_t bl1_image_get_flash_offset(uint32_t image_id)
 
 int32_t boot_platform_init(void)
 {
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
     return 0;
 }
 
@@ -87,9 +87,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     result = FLASH_DEV_NAME.Uninitialize();
     if (result != ARM_DRIVER_OK) {

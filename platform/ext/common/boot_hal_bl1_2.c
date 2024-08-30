@@ -15,6 +15,7 @@
 #include "region_defs.h"
 #include "uart_stdout.h"
 #include "fih.h"
+#include "tfm_log.h"
 
 #ifdef TFM_MEASURED_BOOT_API
 #include "region_defs.h"
@@ -151,9 +152,9 @@ __WEAK int32_t boot_platform_init(void)
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     if (FLASH_DEV_NAME_BL1.Initialize(NULL) != ARM_DRIVER_OK) {
@@ -184,9 +185,9 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     vt_cpy = vt;
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \

@@ -18,6 +18,7 @@
 #include "trng.h"
 #include "kmu_drv.h"
 #include "platform_regs.h"
+#include "tfm_log.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "fih.h"
 #include "cc3xx_drv.h"
@@ -239,9 +240,9 @@ int32_t boot_platform_init(void)
         return result;
     }
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
@@ -403,9 +404,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
         while (1){}
     }
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 

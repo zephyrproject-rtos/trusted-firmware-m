@@ -31,6 +31,7 @@
 #include "rse_otp_emulation.h"
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 #include "trng.h"
+#include "tfm_log.h"
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -100,14 +101,14 @@ int32_t boot_platform_init(void)
     }
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     plat_err = init_atu_regions();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
 
     stdio_init();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 #ifdef CRYPTO_HW_ACCELERATOR
     cc3xx_dma_remap_region_t remap_regions[] = {
@@ -180,9 +181,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
-#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+#if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
-#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+#endif /* (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 

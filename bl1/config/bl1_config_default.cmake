@@ -13,7 +13,6 @@ set(TFM_BL2_SIGNING_KEY_PATH            ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl1_dummy_
 
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON          CACHE BOOL      "Whether BL1 can directly access flash content")
 
-set(TFM_BL1_LOGGING                     ON          CACHE BOOL      "Whether BL1 will log to uart")
 set(TFM_BL1_LOG_LEVEL                   LOG_LEVEL_INFO CACHE STRING "The level of BL1 logging to uart")
 set(TFM_BL1_DEFAULT_OTP                 ON          CACHE BOOL      "Whether BL1_1 will use default OTP memory")
 set(TFM_BL1_DEFAULT_PROVISIONING        ON          CACHE BOOL      "Whether BL1_1 will use default provisioning")
