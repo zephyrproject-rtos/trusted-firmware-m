@@ -99,44 +99,24 @@ static bool spu_region_is_flash_region_in_address_range(uint8_t region_id, uint3
 }
 #endif
 
-#if defined(REGION_PCD_SRAM_ADDRESS)
-static bool spu_region_is_sram_region_in_address_range(uint8_t region_id, uint32_t start_address, uint32_t end_address)
-{
-    size_t start_id = (start_address - DEVICE_SRAM_BASE_ADDRESS) / SRAM_SECURE_ATTRIBUTION_REGION_SIZE;
-    size_t end_id = (end_address - DEVICE_SRAM_BASE_ADDRESS) / SRAM_SECURE_ATTRIBUTION_REGION_SIZE;
-    return region_id >= start_id && region_id <= end_id;
-}
-#endif
-
 static bool spu_region_is_bootloader_region(NRF_SPU_Type * p_reg, uint8_t region_id)
 {
     bool is_bootloader = false;
 
 #ifdef REGION_MCUBOOT_ADDRESS
-    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_MCUBOOT_ADDRESS, REGION_MCUBOOT_END_ADDRESS);
+    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_MCUBOOT_ADDRESS, REGION_MCUBOOT_LIMIT);
 #endif
 #ifdef REGION_B0_ADDRESS
-    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_B0_ADDRESS, REGION_B0_END_ADDRESS);
+    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_B0_ADDRESS, REGION_B0_LIMIT);
 #endif
 #ifdef REGION_S0_ADDRESS
-    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_S0_ADDRESS, REGION_S0_END_ADDRESS);
+    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_S0_ADDRESS, REGION_S0_LIMIT);
 #endif
 #ifdef REGION_S1_ADDRESS
-    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_S1_ADDRESS, REGION_S1_END_ADDRESS);
+    is_bootloader = is_bootloader || spu_region_is_flash_region_in_address_range(region_id, REGION_S1_ADDRESS, REGION_S1_LIMIT);
 #endif
 
     return is_bootloader;
-}
-
-static bool spu_region_is_pcd_region(NRF_SPU_Type * p_reg, uint8_t region_id)
-{
-    bool is_pcd = false;
-
-#ifdef PM_PCD_SRAM_ADDRESS
-    is_pcd = is_pcd || spu_region_is_sram_region_in_address_range(region_id, PM_PCD_SRAM_ADDRESS, PM_PCD_SRAM_END_ADDRESS);
-#endif
-
-    return is_pcd;
 }
 
 void spu_regions_reset_unlocked_secure(void)
@@ -153,14 +133,12 @@ void spu_regions_reset_unlocked_secure(void)
     }
 
     for (size_t i = 0; i < NUM_SRAM_SECURE_ATTRIBUTION_REGIONS ; i++) {
-        if (!spu_region_is_pcd_region(NRF_SPU, i)) {
-            nrf_spu_ramregion_set(NRF_SPU, i,
-                SPU_SECURE_ATTR_SECURE,
-                NRF_SPU_MEM_PERM_READ
-                | NRF_SPU_MEM_PERM_WRITE
-                | NRF_SPU_MEM_PERM_EXECUTE,
-                SPU_LOCK_CONF_UNLOCKED);
-        }
+        nrf_spu_ramregion_set(NRF_SPU, i,
+            SPU_SECURE_ATTR_SECURE,
+            NRF_SPU_MEM_PERM_READ
+            | NRF_SPU_MEM_PERM_WRITE
+            | NRF_SPU_MEM_PERM_EXECUTE,
+            SPU_LOCK_CONF_UNLOCKED);
     }
 }
 

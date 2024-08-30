@@ -786,6 +786,18 @@ enum tfm_plat_err_t spu_init_cfg(void)
 			     SPU_SECURE_ATTR_NONSECURE, perm, SPU_LOCK_CONF_LOCKED);
 #endif /* NRF_NS_STORAGE_PARTITION_START */
 
+#ifdef REGION_PCD_SRAM_ADDRESS
+    /* Netcore needs PCD memory area to be non-secure. */
+    perm = 0;
+    perm |= NRF_SPU_MEM_PERM_READ;
+    if (tfm_plat_provisioning_is_required()) {
+        perm |= NRF_SPU_MEM_PERM_WRITE;
+    }
+
+    spu_regions_sram_config(REGION_PCD_SRAM_ADDRESS, REGION_PCD_SRAM_LIMIT,
+                SPU_SECURE_ATTR_NONSECURE, perm, SPU_LOCK_CONF_LOCKED);
+#endif
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
