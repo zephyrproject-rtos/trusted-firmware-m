@@ -7,7 +7,7 @@
 
 #include "tfm_plat_provisioning.h"
 
-#include "log.h"
+#include "tfm_log.h"
 #include "rse_provisioning_bundle.h"
 #include "tfm_plat_otp.h"
 #include "device_definition.h"
@@ -96,7 +96,7 @@ enum tfm_plat_err_t validate_and_unpack_encrypted_bundle(const volatile struct r
                                      (uint32_t *)bundle->iv,
                                      sizeof(bundle->iv));
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        BL1_LOG("[ERR] CC3XX setup failed\r\n");
+        ERROR("CC3XX setup failed\n");
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
         return cc_err;
     }
@@ -120,7 +120,7 @@ enum tfm_plat_err_t validate_and_unpack_encrypted_bundle(const volatile struct r
 
     cc_err = cc3xx_lowlevel_aes_finish((uint32_t *)bundle->tag, NULL);
     if (cc_err != CC3XX_ERR_SUCCESS) {
-        BL1_LOG("[ERR] CM bundle decryption failed\r\n");
+        ERROR(" bundle decryption failed\n");
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
         return cc_err;
     }
@@ -168,7 +168,7 @@ enum tfm_plat_err_t provision_assembly_and_test(const volatile struct rse_provis
     plat_err = setup_provisioning_key(true);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
-        BL1_LOG("[ERR] CM provisioning key derivation failed\r\n");
+        ERROR("CM provisioning key derivation failed\n");
         return plat_err;
     }
 
@@ -178,12 +178,12 @@ enum tfm_plat_err_t provision_assembly_and_test(const volatile struct rse_provis
                                          values_output, values_output_size,
                                          data_output, data_output_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        BL1_LOG("[ERR] CM bundle decryption failed\r\n");
+        ERROR("CM bundle decryption failed\n");
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
         return plat_err;
     }
 
-    BL1_LOG("[INF] Running CM provisioning bundle\r\n");
+    INFO("Running CM provisioning bundle\n");
     plat_err = ((enum tfm_plat_err_t (*)(void))((uintptr_t)code_output | 0b1))();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
@@ -214,7 +214,7 @@ enum tfm_plat_err_t provision_psa_rot(const volatile struct rse_provisioning_bun
     plat_err = setup_provisioning_key(false);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
-        BL1_LOG("[ERR] DM provisioning key derivation failed\r\n");
+        ERROR("DM provisioning key derivation failed\n");
         return plat_err;
     }
 
@@ -224,12 +224,12 @@ enum tfm_plat_err_t provision_psa_rot(const volatile struct rse_provisioning_bun
                                          values_output, values_output_size,
                                          data_output, data_output_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        BL1_LOG("[ERR] DM bundle decryption failed\r\n");
+        ERROR("DM bundle decryption failed\n");
         gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
         return plat_err;
     }
 
-    BL1_LOG("[INF] Running DM provisioning bundle\r\n");
+    INFO("Running DM provisioning bundle\n");
     plat_err = ((enum tfm_plat_err_t (*)(void))((uintptr_t)code_output | 0b1))();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
@@ -263,7 +263,7 @@ enum tfm_plat_err_t set_tp_mode(void)
         return lcm_err;
     }
 
-    BL1_LOG("[INF] TP mode set complete, RSE will now reset.\r\n");
+    INFO("TP mode set complete, RSE will now reset.\n");
     tfm_hal_system_reset();
 }
 
@@ -274,7 +274,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     enum lcm_lcs_t lcs;
     enum lcm_tp_mode_t tp_mode;
 
-    BL1_LOG("[INF] Beginning RSE provisioning\r\n");
+    INFO("Beginning RSE provisioning\n");
 
     lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN) {
@@ -293,12 +293,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     if (lcs == LCM_LCS_CM) {
         gpio_set(RSE_GPIO_STATE_CM_IDLE);
 
-        BL1_LOG("[INF] Waiting for CM provisioning bundle\r\n");
+        INFO("Waiting for CM provisioning bundle\n");
         while (cm_encrypted_bundle->magic != CM_BUNDLE_MAGIC ||
                cm_encrypted_bundle->magic2 != CM_BUNDLE_MAGIC) {
         }
 
-        BL1_LOG("[INF] Enabling secure provisioning mode, RSE will now reset.\r\n");
+        INFO("Enabling secure provisioning mode, RSE will now reset.\n");
         plat_err = tfm_plat_otp_secure_provisioning_start();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             return plat_err;
@@ -312,12 +312,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
                                                (uint8_t *)PROVISIONING_BUNDLE_DATA_START,
                                                PROVISIONING_BUNDLE_DATA_SIZE);
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            BL1_LOG("[ERR] CM provisioning failed\r\n");
+            ERROR("CM provisioning failed\n");
             return plat_err;
         }
 
         gpio_set(RSE_GPIO_STATE_CM_SECURE_PROVISIONING_FINISHED_SUCCESSFULLY);
-        BL1_LOG("[INF] CM provisioning succeeded\r\n");
+        INFO("CM provisioning succeeded\n");
 
         plat_err = tfm_plat_otp_secure_provisioning_finish();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -333,12 +333,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     if (lcs == LCM_LCS_DM) {
         gpio_set(RSE_GPIO_STATE_DM_IDLE);
 
-        BL1_LOG("[INF] Waiting for DM provisioning bundle\r\n");
+        INFO("Waiting for DM provisioning bundle\n");
         while (dm_encrypted_bundle->magic != DM_BUNDLE_MAGIC ||
                dm_encrypted_bundle->magic2 != DM_BUNDLE_MAGIC) {
         }
 
-        BL1_LOG("[INF] Enabling secure provisioning mode, RSE will now reset.\r\n");
+        INFO("Enabling secure provisioning mode, RSE will now reset.\n");
         plat_err = tfm_plat_otp_secure_provisioning_start();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             return plat_err;
@@ -352,12 +352,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
                                      (uint8_t *)PROVISIONING_BUNDLE_DATA_START,
                                      PROVISIONING_BUNDLE_DATA_SIZE);
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            BL1_LOG("[ERR] DM provisioning failed\r\n");
+            ERROR("DM provisioning failed\n");
             return plat_err;
         }
 
         gpio_set(RSE_GPIO_STATE_DM_SECURE_PROVISIONING_FINISHED_SUCCESSFULLY);
-        BL1_LOG("[INF] DM provisioning succeeded\r\n");
+        INFO("DM provisioning succeeded\n");
 
         plat_err = tfm_plat_otp_secure_provisioning_finish();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
