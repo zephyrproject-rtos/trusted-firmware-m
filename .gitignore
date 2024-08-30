@@ -20,3 +20,7 @@ localrepos.cmake
 *.pyc
 
 .clang-format
+.DS_Store
+
+# Python venv
+venv

@@ -48,10 +48,7 @@ static enum tfm_plat_err_t enable_sp_mode(void)
     enum lcm_bool_t sp_enabled;
     enum lcm_error_t lcm_err;
 
-    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
 
     if (sp_enabled != LCM_TRUE) {
         BL1_LOG("[INF] Enabling secure provisioning mode, system will now reset.\r\n");
@@ -146,10 +143,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
     BL1_LOG("[INF] Beginning provisioning\r\n");
 
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN) {
         err = set_tp_mode();
         if (err != TFM_PLAT_ERR_SUCCESS) {

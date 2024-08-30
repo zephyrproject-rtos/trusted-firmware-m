@@ -34,6 +34,7 @@ target_compile_definitions(tfm_config
         $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_GCM>:PS_CRYPTO_AEAD_ALG_GCM>
         $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_CCM>:PS_CRYPTO_AEAD_ALG_CCM>
         $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
+        $<$<BOOL:${PS_SUPPORT_FORMAT_TRANSITION}>:PS_SUPPORT_FORMAT_TRANSITION>
 )
 
 target_include_directories(secure_fw
@@ -60,6 +61,7 @@ set_target_properties(tfm_s
     PROPERTIES
         SUFFIX ".axf"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ADDITIONAL_CLEAN_FILES "${CMAKE_BINARY_DIR}/generated;${CMAKE_BINARY_DIR}/bin/tfm_s.map"
 )
 
 target_compile_options(tfm_s

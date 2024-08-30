@@ -122,6 +122,7 @@ static int32_t mailbox_tx_client_call_msg(const struct ns_mailbox_req_t *req,
     msg_ptr->call_type = req->call_type;
     memcpy(&msg_ptr->params, req->params_ptr, sizeof(msg_ptr->params));
     msg_ptr->client_id = req->client_id;
+    MAILBOX_CLEAN_CACHE(msg_ptr, sizeof(*msg_ptr));
 
     /* Prepare the reply structure */
     reply_ptr = &mailbox_queue_ptr->queue[idx].reply;
@@ -149,10 +150,13 @@ static int32_t mailbox_tx_client_call_msg(const struct ns_mailbox_req_t *req,
 
 static inline void ns_mailbox_set_reply_isr(uint8_t idx)
 {
-    int32_t *reply_ptr = mailbox_queue_ptr->queue[idx].reply.reply;
+    struct ns_mailbox_slot_t *slot = &mailbox_queue_ptr->queue[idx];
+    int32_t *reply_ptr = slot->reply.reply;
 
     if (reply_ptr) {
-        *reply_ptr = mailbox_queue_ptr->queue[idx].reply.return_val;
+        MAILBOX_INVALIDATE_CACHE(&slot->reply.return_val,
+                                 sizeof(slot->reply.return_val));
+        *reply_ptr = slot->reply.return_val;
     }
 }
 

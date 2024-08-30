@@ -35,13 +35,17 @@ set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWA
 # platforms requiring specific flash alignmnent
 set_property(CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS "1;2;4;8;16;32")
 
-set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
 set(MCUBOOT_BOOTSTRAP                   OFF         CACHE BOOL      "Support initial state with empty primary slot and images installed from secondary slots")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
 set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 set(MCUBOOT_USE_PSA_CRYPTO              OFF         CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto APIs")
+if(${MCUBOOT_UPGRADE_STRATEGY} STREQUAL DIRECT_XIP)
+    set(MCUBOOT_DIRECT_XIP_REVERT       ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
+else()
+    set(MCUBOOT_DIRECT_XIP_REVERT       OFF         CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
+endif()
 
 # Note - If SIGNATURE_TYPE is changed, the entries for KEY_S
 # and KEY_NS will either have to be updated manually or removed from the cache.

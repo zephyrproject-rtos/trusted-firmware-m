@@ -93,7 +93,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 
     result = FLASH_DEV_NAME.Uninitialize();
     if (result != ARM_DRIVER_OK) {
-        return 1;
+        while (1);
     }
 
     result = corstone1000_watchdog_reset_timer();

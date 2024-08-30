@@ -52,7 +52,7 @@ static inline uint32_t its_init_scratch_dblock(
      * is the scratch metadata block. Otherwise, the initial position of scratch
      * data block is immediately after the metadata blocks.
      */
-    return fs_ctx->cfg->num_blocks == 2 ? 1 : 2;
+    return (fs_ctx->cfg->num_blocks == 2) ? 1 : 2;
 }
 
 /**
@@ -70,7 +70,7 @@ static inline uint32_t its_init_dblock_start(struct its_flash_fs_ctx_t *fs_ctx)
      * Otherwise, one metadata block and two scratch blocks are reserved. One
      * scratch block for metadata operations and the other for data operations.
      */
-    return fs_ctx->cfg->num_blocks == 2 ? 0 : 3;
+    return (fs_ctx->cfg->num_blocks == 2) ? 0 : 3;
 }
 
 /**
@@ -87,8 +87,8 @@ static uint32_t its_num_dedicated_dblocks(struct its_flash_fs_ctx_t *fs_ctx)
      * Otherwise, the number of blocks dedicated just for data is the number of
      * blocks available beyond the initial datablock start index.
      */
-     return fs_ctx->cfg->num_blocks == 2 ? 0 :
-            fs_ctx->cfg->num_blocks - its_init_dblock_start(fs_ctx);
+     return (fs_ctx->cfg->num_blocks == 2) ? 0 :
+            (fs_ctx->cfg->num_blocks - its_init_dblock_start(fs_ctx));
 }
 
 /**
@@ -306,8 +306,8 @@ static psa_status_t its_mblock_validate_block_meta(
         return PSA_ERROR_DATA_CORRUPT;
     }
 
-    if (block_meta->phy_id == ITS_METADATA_BLOCK0 ||
-        block_meta->phy_id == ITS_METADATA_BLOCK1) {
+    if ((block_meta->phy_id == ITS_METADATA_BLOCK0) ||
+        (block_meta->phy_id == ITS_METADATA_BLOCK1)) {
 
         /* For metadata + data block, data index must start after the
          * metadata area.
@@ -353,8 +353,8 @@ static psa_status_t its_mblock_validate_block_meta_comp(
         return PSA_ERROR_DATA_CORRUPT;
     }
 
-    if (block_meta->phy_id == ITS_METADATA_BLOCK0 ||
-        block_meta->phy_id == ITS_METADATA_BLOCK1) {
+    if ((block_meta->phy_id == ITS_METADATA_BLOCK0) ||
+        (block_meta->phy_id == ITS_METADATA_BLOCK1)) {
 
         /* For metadata + data block, data index must start after the
          * metadata area.
@@ -394,7 +394,7 @@ static psa_status_t its_mblock_calculate_metadata_xor(
                                    ITS_FILE_METADATA_SIZE)];
     uint8_t xor_value_temp = 0;
 
-    if ((block_id != ITS_METADATA_BLOCK0 && block_id != ITS_METADATA_BLOCK1) ||
+    if (((block_id != ITS_METADATA_BLOCK0) && (block_id != ITS_METADATA_BLOCK1)) ||
        (xor_value == NULL)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }

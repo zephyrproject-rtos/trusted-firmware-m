@@ -125,6 +125,19 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
 FIH_RET_TYPE(bool) tfm_hal_boundary_need_switch(uintptr_t boundary_from,
                                                 uintptr_t boundary_to);
 
+#if CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1
+/**
+ * \brief This API let the platform to finish static isolation after all partitions
+ * have been bound.
+ *
+ * It's called by SPM right before starting scheduler.
+ *
+ * \return TFM_HAL_SUCCESS          - Booting has been successful.
+ *         TFM_HAL_ERROR_GENERIC    - Error occurred.
+ */
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_post_partition_init_hook(void);
+#endif /* CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1 */
+
 #ifdef __cplusplus
 }
 #endif

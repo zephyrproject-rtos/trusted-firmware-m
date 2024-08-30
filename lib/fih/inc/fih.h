@@ -455,7 +455,7 @@ typedef int32_t fih_int;
 
 #define fih_int_encode(x)     (x)
 
-#define fih_int_encode_zero_equality(x) ((x) == 0 ? 0 : 1)
+#define fih_int_encode_zero_equality(x) (x)
 
 #define fih_eq(x, y)          ((x) == (y))
 

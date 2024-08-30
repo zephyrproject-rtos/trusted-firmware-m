@@ -22,9 +22,9 @@ target_sources(tfm_s
         ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an519.c
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -132,9 +132,6 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/cmsis_core
                     ${TARGET_PLATFORM_PATH}/retarget
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/driver
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-
 install(FILES       ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.h
                     ${TARGET_PLATFORM_PATH}/native_drivers/timer_cmsdk/timer_cmsdk.h
                     ${TARGET_PLATFORM_PATH}/native_drivers/mpc_sie200_drv.h
@@ -146,8 +143,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
                     ${TARGET_PLATFORM_PATH}/cmsis_driver_config.h
                     ${TARGET_PLATFORM_PATH}/RTE_Device.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)

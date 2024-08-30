@@ -25,6 +25,7 @@ tfm_invalid_config(TFM_BL1_2_IN_OTP AND TFM_BL1_2_IN_FLASH)
 
 get_property(MCUBOOT_STRATEGY_LIST CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
 tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST) AND NOT USE_KCONFIG_TOOL)
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY STREQUAL "DIRECT_XIP" AND MCUBOOT_DIRECT_XIP_REVERT))
 
 # Maximum number of MCUBoot images supported by TF-M NV counters and ROTPKs
 tfm_invalid_config(MCUBOOT_IMAGE_NUMBER GREATER 9)
@@ -42,7 +43,6 @@ tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST
 
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND MCUBOOT_GENERATE_SIGNING_KEYPAIR)
 
-tfm_invalid_config((NOT MCUBOOT_HW_KEY) AND (MCUBOOT_GENERATE_SIGNING_KEYPAIR))
 tfm_invalid_config(MCUBOOT_HW_KEY AND MCUBOOT_BUILTIN_KEY)
 
 ####################### Code sharing ###########################################
@@ -71,6 +71,7 @@ tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 # PS only uses the platform partition when PS_ROLLBACK_PROTECTION is ON, but
 # the dependency in the manifest file means the dependency is unconditional
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFORM)
+tfm_invalid_config(PS_SUPPORT_FORMAT_TRANSITION AND NOT PS_ENCRYPTION)
 
 ########################## FIH #################################################
 

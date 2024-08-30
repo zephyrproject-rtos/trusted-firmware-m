@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,17 @@
 #define __UART_CMSDK_DRV_H__
 
 #include <stdint.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if TFM_UNIQUE_ERROR_CODES == 1
+#include "error_codes_mapping.h"
+#else
+#define UART_CMSDK_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
 
 /* ARM UART device configuration structure */
 struct uart_cmsdk_dev_cfg_t {
@@ -61,11 +68,22 @@ struct uart_cmsdk_dev_t {
 
 /* ARM UART enumeration types */
 enum uart_cmsdk_error_t {
-    UART_CMSDK_ERR_NONE = 0,      /*!< No error */
-    UART_CMSDK_ERR_INVALID_ARG,   /*!< Error invalid input argument */
-    UART_CMSDK_ERR_INVALID_BAUD,  /*!< Invalid baudrate */
-    UART_CMSDK_ERR_NOT_INIT,      /*!< Error UART not initialized */
-    UART_CMSDK_ERR_NOT_READY,     /*!< Error UART not ready */
+    /* No error */
+    UART_CMSDK_ERR_NONE = 0x0,
+    /* UART not initialized */
+    UART_CMSDK_ERR_NOT_INIT = UART_CMSDK_ERROR_BASE,
+    /* Invalid input argument in uart_cmsdk_init */
+    UART_CMSDK_ERR_INIT_INVALID_ARG,
+    /* Invalid baudrate */
+    UART_CMSDK_ERR_INVALID_BAUD,
+    /* Invalid input argument in uart_cmsdk_set_clock */
+    UART_CMSDK_ERR_SET_CLOCK_INVALID_ARG,
+    /* UART read not ready */
+    UART_CMSDK_ERR_READ_NOT_READY,
+    /* UART write not ready */
+    UART_CMSDK_ERR_WRITE_NOT_READY,
+    /* Following entry is to ensure the error code size */
+    UART_CMSDK_ERR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 enum uart_cmsdk_irq_t {

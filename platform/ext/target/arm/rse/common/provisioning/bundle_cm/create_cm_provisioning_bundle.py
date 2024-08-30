@@ -16,7 +16,7 @@ from provisioning_common_utils import *
 def count_zero_bits(x):
     return (bin(int.from_bytes(x, 'big')).count('0')).to_bytes(4, 'little')
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--provisioning_code", help="the input provisioning code", required=True)
 parser.add_argument("--provisioning_data", help="the input provisioning data", required=True)
 parser.add_argument("--provisioning_values", help="the input provisioning values", required=True)

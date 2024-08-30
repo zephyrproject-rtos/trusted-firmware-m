@@ -171,6 +171,11 @@ add_custom_target(
     DEPENDS ${CMAKE_BINARY_DIR}/generated
 )
 
+set_target_properties(
+    manifest_tool PROPERTIES
+    ADDITIONAL_CLEAN_FILES ${CMAKE_BINARY_DIR}/generated
+)
+
 # The files need to be generated before cmake will allow them to be used as
 # sources. Due to issue with custom_command scoping the easiest way to do this
 # is to run the script at cmake-time.

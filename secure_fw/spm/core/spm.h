@@ -97,8 +97,9 @@ struct connection_t {
     uint32_t iovec_status;                   /* MM-IOVEC status                */
 #endif
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    struct connection_t *p_handles;          /* Handle(s) link                 */
-    uintptr_t reply_value;                   /* Result of this operation, if aynchronous */
+    struct connection_t *p_reqs;             /* Request handle(s) link         */
+    struct connection_t *p_replied;          /* Replied Handle(s) link         */
+    uintptr_t replied_value;                 /* Result of this operation       */
 #endif
 };
 
@@ -112,12 +113,12 @@ struct partition_t {
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     const struct runtime_metadata_t    *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
-    struct thread_t                    thrd;            /* IPC model */
-    uintptr_t                          reply_value;
+    struct thread_t                    thrd;       /* IPC model */
+    struct connection_t                *p_replied; /* Handle(s) to record replied connections */
 #else
-    uint32_t                           state;           /* SFN model */
+    uint32_t                           state;      /* SFN model */
 #endif
-    struct connection_t                *p_handles;
+    struct connection_t                *p_reqs;    /* Handle(s) to record request connections to service. */
     struct partition_t                 *next;
 };
 
@@ -148,6 +149,14 @@ void spm_free_connection(struct connection_t *p_connection);
 /******************** Partition management functions *************************/
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+
+/*
+ * Get the replied handles in the asynchnorous reply mode. The first handle to
+ * be replied is at the tail of list. Take the handle one by one and clean the
+ * asynchronous signal after all handles are operated.
+ */
+struct connection_t *spm_get_async_replied_handle(struct partition_t *partition);
+
 /*
  * Lookup and grab the last spotted handles containing the message
  * by the given signal. Only ONE signal bit can be accepted in 'signal',

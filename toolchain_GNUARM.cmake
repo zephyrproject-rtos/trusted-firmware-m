@@ -126,6 +126,14 @@ add_compile_options(
     $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
 )
 
+#
+# Pointer Authentication Code and Branch Target Identification (PACBTI) Options
+# Not currently supported for GNUARM.
+#
+if(NOT ${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_DISABLED)
+    message(FATAL_ERROR "BRANCH_PROTECTION NOT supported for GNU-ARM")
+endif()
+
 add_link_options(
     --entry=Reset_Handler
     -specs=nano.specs
@@ -230,7 +238,7 @@ macro(target_add_scatter_file target)
         ${target}_scatter
     )
 
-    set_target_properties(${target} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
 
     target_link_libraries(${target}_scatter
         platform_region_defs
@@ -248,6 +256,11 @@ macro(target_add_scatter_file target)
     target_compile_definitions(${target}_scatter
         PRIVATE
             $<$<NOT:$<BOOL:${CONFIG_GNU_LINKER_READONLY_ATTRIBUTE}>>:READONLY=>
+    )
+
+    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
+    add_dependencies(${target}_scatter
+        manifest_tool
     )
 endmacro()
 
@@ -316,11 +329,19 @@ macro(target_share_symbols target)
 
     list(TRANSFORM STRIP_SYMBOL_KEEP_LIST PREPEND  --keep-symbol=)
     # strip all the symbols except those proveded as arguments
-    add_custom_command(
-        TARGET ${target}
-        POST_BUILD
+    add_custom_target(${target}_shared_symbols
         COMMAND ${CMAKE_OBJCOPY}
-        ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+            $<TARGET_FILE:${target}>
+            --wildcard ${STRIP_SYMBOL_KEEP_LIST}
+            --strip-all
+            $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+    )
+
+    # Ensure ${target} is built before $<TARGET_FILE:${target}> is used to generate ${target}_shared_symbols
+    add_dependencies(${target}_shared_symbols ${target})
+    # Allow the global clean target to rm the ${target}_shared_symbols created
+    set_target_properties(${target}_shared_symbols PROPERTIES
+        ADDITIONAL_CLEAN_FILES $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
 endmacro()
 
@@ -333,7 +354,11 @@ macro(target_link_shared_code target)
             endif()
         endif()
 
-        add_dependencies(${target} ${symbol_provider})
+        # Ensure ${symbol_provider}_shared_symbols is built before ${target}
+        add_dependencies(${target} ${symbol_provider}_shared_symbols)
+        # ${symbol_provider}_shared_symbols - a custom target is always considered out-of-date
+        # To only link when necessary, depend on ${symbol_provider} instead
+        set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${symbol_provider}>)
         target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()

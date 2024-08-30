@@ -17,10 +17,19 @@
 #include "sam_drv.h"
 
 #ifdef MCUBOOT_SIGN_EC384
+/* The sizes are in 4 byte words */
 #define BL2_ROTPK_HASH_SIZE (12)
+#define BL2_ROTPK_SIZE      (25)
 #else
 #define BL2_ROTPK_HASH_SIZE (8)
-#endif
+#define BL2_ROTPK_SIZE      (17)
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_SIZE
+#else
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
 
 #define OTP_OFFSET(x)       (offsetof(struct lcm_otp_layout_t, x))
 #define OTP_SIZE(x)         (sizeof(((struct lcm_otp_layout_t *)0)->x))
@@ -55,7 +64,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
             __PACKED_STRUCT {
                 uint32_t bl1_rotpk_0[14];
 
-                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][BL2_ROTPK_HASH_SIZE];
+                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][PROV_ROTPK_DATA_SIZE];
 
                 uint32_t iak_len;
                 uint32_t iak_type;
@@ -426,7 +435,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
         return plat_err;
     }
 
-    cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
+    cc3xx_secure_erase_buffer((uint8_t *)tmp_buf, sizeof(tmp_buf) / sizeof(uint32_t));
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -588,10 +597,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
-    if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+    lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if (otp_size < OTP_OFFSET(user_data) +
                    sizeof(struct plat_user_area_layout_t)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;

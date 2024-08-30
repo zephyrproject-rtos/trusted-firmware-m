@@ -50,8 +50,8 @@ static platform_image_source_t platform_image_source[] = {
 int32_t plat_io_storage_init(void)
 {
     int rc = -1;
-    uintptr_t flash_dev_handle = NULL;
-    uintptr_t flash_handle = NULL;
+    uintptr_t flash_dev_handle = (uintptr_t)NULL;
+    uintptr_t flash_handle = (uintptr_t)NULL;
 
     rc = register_io_dev_flash((const io_dev_connector_t **) &flash_dev_con);
     if (rc != 0) {

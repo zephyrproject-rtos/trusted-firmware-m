@@ -24,7 +24,7 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
                                     const void *client_data_stateless)
 {
     struct connection_t *p_connection;
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
     psa_status_t status;
 
@@ -49,7 +49,10 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
     /* Set Mailbox client data in connection handle for message reply. */
     p_connection->client_data = client_data_stateless;
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
@@ -58,7 +61,7 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
                                        int32_t ns_client_id,
                                        const void *client_data)
 {
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     struct connection_t *p_connection;
     psa_status_t status;
 
@@ -77,13 +80,16 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
     /* Set Mailbox client data in connection handle for message reply. */
     p_connection->client_data = client_data;
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }
 
 psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle,
                                      int32_t ns_client_id)
 {
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
 
     if ((!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) || (ns_client_id >= 0)) {
         tfm_core_panic();

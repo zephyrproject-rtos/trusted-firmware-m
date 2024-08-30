@@ -100,26 +100,26 @@ void spu_regions_flash_config_non_secure_callable(uint32_t start_addr, uint32_t 
  *
  *  Configure a device peripheral to be accessible from Secure domain only.
  *
- * \param periph_id ID number of a particular peripheral.
+ * \param periph_base_address Base address of a particular peripheral.
  * \param periph_lock Variable indicating whether to lock peripheral security
  *
  * \note
  * - peripheral shall not be a Non-Secure only peripheral
  * - DMA transactions are configured as Secure
  */
-void spu_peripheral_config_secure(const uint8_t periph_id, bool periph_lock);
+void spu_peripheral_config_secure(const uint32_t periph_base_address, bool periph_lock);
 
 /**
  * Configure a device peripheral to be accessible from Non-Secure domain.
  *
- * \param periph_id ID number of a particular peripheral.
+ * \param periph_base_address Base address of a particular peripheral.
  * \param periph_lock Variable indicating whether to lock peripheral security
  *
  * \note
  * - peripheral shall not be a Secure-only peripheral
  * - DMA transactions are configured as Non-Secure
  */
-void spu_peripheral_config_non_secure(const uint8_t periph_id, bool periph_lock);
+void spu_peripheral_config_non_secure(const uint32_t periph_base_address, bool periph_lock);
 
 /**
  * Configure DPPI channels to be accessible from Non-Secure domain.
@@ -147,6 +147,19 @@ static inline void spu_gpio_config_non_secure(uint8_t port_number, uint32_t gpio
     bool lock_conf)
 {
     nrf_spu_gpio_config_set(NRF_SPU, port_number, gpio_mask, lock_conf);
+}
+
+/**
+ * Return the SPU instance that can be used to configure the
+ * peripheral at the given base address.
+ */
+static inline NRF_SPU_Type * spu_instance_from_peripheral_addr(uint32_t peripheral_addr)
+{
+	/* See the SPU chapter in the IPS for how this is calculated */
+
+	uint32_t apb_bus_number = peripheral_addr & 0x00FC0000;
+
+	return (NRF_SPU_Type *)(0x50000000 | apb_bus_number);
 }
 
 /**

@@ -151,8 +151,8 @@ int tfm_plat_provisioning_is_required(void)
         return err;
     }
 
-    return lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST
-        || lcs == PLAT_OTP_LCS_PSA_ROT_PROVISIONING;
+    return (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST)
+        || (lcs == PLAT_OTP_LCS_PSA_ROT_PROVISIONING);
 }
 
 enum tfm_plat_err_t provision_assembly_and_test(void)
@@ -243,7 +243,7 @@ enum tfm_plat_err_t provision_psa_rot(void)
     err = tfm_plat_otp_write(PLAT_OTP_ID_ENTROPY_SEED,
                              sizeof(psa_rot_prov_data.entropy_seed),
                              psa_rot_prov_data.entropy_seed);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if ((err != TFM_PLAT_ERR_SUCCESS) && (err != TFM_PLAT_ERR_UNSUPPORTED)) {
         return err;
     }
 

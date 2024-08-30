@@ -44,10 +44,13 @@ target_compile_definitions(platform_region_defs
         # The RAM MPU Region block sizes are calculated manually. The RAM has to be covered
         # with the MPU regions. These regions also have to be the power of 2 and
         # the start addresses have to be aligned to these sizes. The sizes can be calculated
-        # from the S_DATA_START and S_DATA_SIZE defines.
-        RAM_MPU_REGION_BLOCK_1_SIZE=0x4000
+        # from the S_DATA_START and S_DATA_SIZE defines the following way:
+        # S_DATA_SIZE = RAM_MPU_REGION_BLOCK_1_SIZE + RAM_MPU_REGION_BLOCK_2_SIZE
+        # And the following constraints have to be taken:
+        # S_DATA_START % RAM_MPU_REGION_BLOCK_1_SIZE = 0
+        # (S_DATA_START + RAM_MPU_REGION_BLOCK_1_SIZE) % RAM_MPU_REGION_BLOCK_2_SIZE = 0
+        RAM_MPU_REGION_BLOCK_1_SIZE=0x10000
         RAM_MPU_REGION_BLOCK_2_SIZE=0x20000
-
 )
 #========================= Platform common defs ===============================#
 
@@ -57,7 +60,7 @@ target_sources(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
 )
 
 target_sources(bl2
@@ -91,7 +94,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rse_comms rse_comms)
 
 # Set which PLATFORM depedency must be used by the CC3XX driver
 set(CC3XX_PLATFORM_INTERFACE platform_bl1_1_interface)
-add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
+add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx cc3xx)
 
 target_include_directories(platform_s
     PUBLIC
@@ -235,7 +238,7 @@ target_include_directories(platform_bl1_1_interface
 
 target_link_libraries(platform_bl1_1
     PRIVATE
-        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:cc312_rom>
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:cc3xx>
 )
 
 target_sources(platform_bl1_2
@@ -255,7 +258,8 @@ target_compile_definitions(platform_bl1_2
 
 target_include_directories(platform_bl1_2
     PRIVATE
-        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common>
     INTERFACE
         .
         ./Device/Include
@@ -381,6 +385,12 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
         tfm_hal_multi_core.c
 )
 
+if (PLATFORM_IS_FVP)
+target_compile_definitions(tfm_psa_rot_partition_ns_agent_mailbox
+    PUBLIC
+       $<$<BOOL:${ENABLE_MULTICORE}>:CORSTONE1000_FVP_MULTICORE>
+)
+endif()
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm

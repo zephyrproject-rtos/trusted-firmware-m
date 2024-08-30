@@ -18,6 +18,7 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
+#include "load/ns_client_id_tz.h"
 /* Note that region_defs.h must be included before tfm_s_linker_alignments.h
  * to let platform overwrite default alignment values.
  */
@@ -70,8 +71,8 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
         .stack_size                 = TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED,
         .heap_size                  = 0,
-        .client_id_base             = -0x3c00ffff,
-        .client_id_limit            = -0x3c000000,
+        .client_id_base             = TZ_NS_CLIENT_ID_BASE,
+        .client_id_limit            = TZ_NS_CLIENT_ID_LIMIT,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
 #if TFM_ISOLATION_LEVEL == 3

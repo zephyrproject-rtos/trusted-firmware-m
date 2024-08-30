@@ -125,9 +125,6 @@ install(FILES       rse_memory_sizes.h
 install(DIRECTORY   ns/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(FILES       cpuarch.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config/subplatform/)
-
 install(FILES       tests/tfm_tests_ns_config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/tests
         RENAME      tfm_tests_config.cmake)

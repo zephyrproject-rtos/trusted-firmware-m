@@ -42,7 +42,8 @@ const struct irq_load_info_t *get_irq_info_for_signal(
  *  The input parameters are maintained by platforms and they must be init-ed
  *  in the interrupt init functions.
  */
-void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi);
+void spm_handle_interrupt(struct partition_t *p_pt,
+                          const struct irq_load_info_t *p_ildi);
 
 /*
  * Prepare execution context for deprivileged FLIH functions

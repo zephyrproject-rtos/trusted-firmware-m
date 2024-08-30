@@ -200,6 +200,8 @@ Protected Storage
 +---------------------------------------+-----------+-----------------+
 |PS_ENCRYPTION                          | Build     |   ON            |
 +---------------------------------------+-----------+-----------------+
+|PS_SUPPORT_FORMAT_TRANSITION           | Build     |   OFF           |
++---------------------------------------+-----------+-----------------+
 |PS_CRYPTO_AEAD_ALG                     | Build     |   PSA_ALG_GCM   |
 +---------------------------------------+-----------+-----------------+
 |PS_CREATE_FLASH_LAYOUT                 | Component |   1             |
@@ -264,6 +266,10 @@ NS Agent Mailbox Secure Partition
 +=====================================+===========+============+
 |NS_AGENT_MAILBOX_STACK_SIZE          | Component |   0x800    |
 +-------------------------------------+-----------+------------+
+|MAILBOX_IS_UNCACHED_S                | Component |   1        |
++-------------------------------------+-----------+------------+
+|MAILBOX_IS_UNCACHED_NS               | Component |   1        |
++-------------------------------------+-----------+------------+
 
 
 Secure Partition Manager
@@ -279,6 +285,8 @@ Secure Partition Manager
 +----------------------------------------+-----------+-------------+
 |TFM_SPM_LOG_LEVEL                       | Build     |   1         |
 +----------------------------------------+-----------+-------------+
+|CONFIG_TFM_STACK_WATERMARKS             | Build     |   OFF       |
++----------------------------------------+-----------+-------------+
 |CONFIG_TFM_CONN_HANDLE_MAX_NUM          | Component |   8         |
 +----------------------------------------+-----------+-------------+
 |CONFIG_TFM_DOORBELL_API                 | Component |   0         |
@@ -289,5 +297,5 @@ Secure Partition Manager
 --------------
 
 *Copyright (c) 2022,2024, Arm Limited. All rights reserved.*
-*Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+*Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

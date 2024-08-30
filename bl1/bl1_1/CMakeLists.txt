@@ -47,16 +47,21 @@ target_link_libraries(bl1_1
         bl1_1_lib
         bl1_1_shared_lib
         platform_bl1_1
-        $<$<BOOL:${TEST_BL1_1}>:bl1_1_tests>
+        $<$<AND:$<BOOL:${TEST_BL1_1}>,$<BOOL:${PLATFORM_DEFAULT_BL1_1_TESTS}>>:bl1_1_tests>
 )
 
 target_compile_definitions(bl1_1
     PRIVATE
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
+        $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
 )
 
-target_share_symbols(bl1_1 ${BL1_SHARED_SYMBOLS_PATH})
+if (BL1_1_SHARED_SYMBOLS_PATH)
+    target_share_symbols(bl1_1
+        ${BL1_1_SHARED_SYMBOLS_PATH}
+    )
+endif()
 
 ################################################################################
 

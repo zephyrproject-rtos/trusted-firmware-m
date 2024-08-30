@@ -59,7 +59,6 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/include
         ${PLATFORM_DIR}/ext/cmsis/Include
         ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
-        ${PLATFORM_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/common
         services/include
 )
@@ -80,4 +79,3 @@ target_compile_definitions(platform_ns
   # we need to skip this configuration.
   NRF_SKIP_GLITCHDETECTOR_DISABLE
 )
-

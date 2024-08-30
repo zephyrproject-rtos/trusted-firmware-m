@@ -92,6 +92,7 @@ add_custom_command(OUTPUT dm_provisioning_data.c
         --template_path=${CMAKE_CURRENT_SOURCE_DIR}
         --bl1_rotpk_0=${BL1_ROTPK_0}
         --bl2_encryption_key_path=${TFM_BL2_ENCRYPTION_KEY_PATH}
+        --bl2_mcuboot_hw_key=${MCUBOOT_HW_KEY}
         --bl2_rot_priv_key_0=${MCUBOOT_KEY_S}
         --bl2_rot_priv_key_1=${MCUBOOT_KEY_NS}
         --implementation_id=${IMPLEMENTATION_ID}

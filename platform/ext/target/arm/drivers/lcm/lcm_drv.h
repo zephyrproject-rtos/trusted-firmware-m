@@ -24,10 +24,17 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if TFM_UNIQUE_ERROR_CODES == 1
+#include "error_codes_mapping.h"
+#else
+#define LCM_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
 
 #define LCM_DCU_WIDTH_IN_BYTES (16)
 #define LCM_OTP_OFFSET 0x1000
@@ -88,29 +95,48 @@ enum lcm_bool_t {
  * \brief ARM LCM error enumeration types
  */
 enum lcm_error_t {
-    LCM_ERROR_NONE = (0x0u),
-    LCM_ERROR_INVALID_KEY,
-    LCM_ERROR_INVALID_ALIGNMENT,
-    LCM_ERROR_INVALID_LENGTH,
-    LCM_ERROR_INVALID_OFFSET,
-    LCM_ERROR_INVALID_WRITE,
-    LCM_ERROR_INVALID_TRANSITION,
-    LCM_ERROR_INVALID_LCS,
-    LCM_ERROR_INVALID_TP_MODE,
-    LCM_ERROR_INVALID_POINTER,
-    LCM_ERROR_INTERNAL_ERROR,
-    LCM_ERROR_WRITE_VERIFY_FAIL,
-    LCM_ERROR_READ_VERIFY_FAIL,
-    LCM_ERR_INVALID_ZERO_COUNT,
-    LCM_ERR_DCU_MASK_MISMATCH,
-    LCM_ERROR_FATAL_ERR,
+    LCM_ERROR_NONE = 0x0u,
+    LCM_ERROR_INIT_INVALID_KEY = LCM_ERROR_BASE,
+    LCM_ERROR_SET_TP_MODE_INVALID_LCS,
+    LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION,
+    LCM_ERROR_SET_TP_MODE_INTERNAL_ERROR,
+    LCM_ERROR_SET_TP_MODE_FATAL_ERROR,
+    LCM_ERROR_SET_SP_ENABLED_FATAL_ERROR,
+    LCM_ERROR_GET_LCS_FATAL_ERROR,
+    LCM_ERROR_GET_LCS_INVALID_LCS,
+    LCM_ERROR_CM_TO_DM_WRITE_VERIFY_FAIL,
+    LCM_ERROR_DM_TO_SE_WRITE_VERIFY_FAIL,
+    LCM_ERROR_SET_LCS_INVALID_TP_MODE,
+    LCM_ERROR_SET_LCS_FATAL_ERROR,
+    LCM_ERROR_SET_LCS_INVALID_TRANSITION,
+    LCM_ERROR_SET_LCS_INVALID_LCS,
+    LCM_ERROR_SET_LCS_INTERNAL_ERROR,
+    LCM_ERROR_ZERO_COUNT_INVALID,
+    LCM_ERROR_OTP_WRITE_INVALID_ALIGNMENT,
+    LCM_ERROR_OTP_WRITE_INVALID_OFFSET,
+    LCM_ERROR_OTP_WRITE_INVALID_LENGTH,
+    LCM_ERROR_OTP_WRITE_INVALID_WRITE,
+    LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL,
+    LCM_ERROR_OTP_READ_INVALID_ALIGNMENT,
+    LCM_ERROR_OTP_READ_INVALID_OFFSET,
+    LCM_ERROR_OTP_READ_INVALID_LENGTH,
+    LCM_ERROR_OTP_READ_READ_VERIFY_FAIL,
+    LCM_ERROR_DCU_GET_ENABLED_INVALID_ALIGNMENT,
+    LCM_ERROR_DCU_CHECK_MASK_MISMATCH,
+    LCM_ERROR_DCU_SET_ENABLED_INVALID_ALIGNMENT,
+    LCM_ERROR_DCU_SET_ENABLED_WRITE_VERIFY_FAIL,
+    LCM_ERROR_DCU_GET_LOCKED_INVALID_ALIGNMENT,
+    LCM_ERROR_DCU_SET_LOCKED_INVALID_ALIGNMENT,
+    LCM_ERROR_DCU_GET_SP_DISABLE_MASK_INVALID_ALIGNMENT,
+    LCM_ERROR_DCU_GET_DISABLE_MASK_INVALID_ALIGNMENT,
+    LCM_ERROR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**
  * \brief ARM LCM device configuration structure
  */
 struct lcm_dev_cfg_t {
-    const uint32_t base;                         /*!< LCM base address */
+    const uintptr_t base;                        /*!< LCM base address */
 };
 
 /**
@@ -135,10 +161,8 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev);
  *
  * \param[in]  dev     The LCM device structure.
  * \param[out] mode    The TP mode the device is currently in.
- *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
+void lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
 /**
  * \brief This function sets the TP mode
  *
@@ -155,9 +179,8 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
  * \param[in]  dev         The LCM device structure.
  * \param[out] enabled     Whether secure provisioning mode is enabled.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
+void lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
 /**
  * \brief This function enables secure provisioning mode.
  *
@@ -176,9 +199,8 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev);
  * \param[in]  dev     The LCM device structure.
  * \param[out] error   Whether fatal error mode is enabled.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error);
+void lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error);
 /**
  * \brief This function enables fatal error mode.
  *
@@ -187,9 +209,8 @@ enum lcm_error_t lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *err
  * \note This function will cause the LCM to be inoperable until the device is
  *       reset.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_set_fatal_error(struct lcm_dev_t *dev);
+void lcm_set_fatal_error(struct lcm_dev_t *dev);
 
 /**
  * \brief This function gets the General purpose persistent configuration.
@@ -197,9 +218,8 @@ enum lcm_error_t lcm_set_fatal_error(struct lcm_dev_t *dev);
  * \param[in]  dev     The LCM device structure.
  * \param[out] gppc    The value of the gppc.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
+void lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
 
 /**
  * \brief This function gets the size of the OTP managed by the LCM.
@@ -207,9 +227,8 @@ enum lcm_error_t lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc);
  * \param[in]  dev     The LCM device structure.
  * \param[out] size    The size (in bytes) of the OTP.
  *
- * \return Returns error code as specified in \ref lcm_error_t
  */
-enum lcm_error_t lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size);
+void lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size);
 
 /**
  * \brief This function gets Lifecycle State the LCM is currently in.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,29 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if TFM_UNIQUE_ERROR_CODES == 1
+#include "error_codes_mapping.h"
+#else
+#define ATU_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
+
 /**
  * \brief Arm ATU error enumeration types
  */
 enum atu_error_t {
-    ATU_ERR_NONE,
-    ATU_ERR_INVALID_REGION,
-    ATU_ERR_INVALID_ADDRESS,
-    ATU_ERR_INVALID_ARG,
+    ATU_ERR_NONE = 0x0u,
+    ATU_ERR_INVALID_REGION = ATU_ERROR_BASE,
+    ATU_ERR_INVALID_LOGICAL_ADDRESS,
+    ATU_ERR_INIT_REGION_INVALID_ADDRESS,
+    ATU_ERR_INIT_REGION_INVALID_ARG,
+    ATU_ERR_UNINIT_REGION_INVALID_ARG,
+    ATU_ERR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**
@@ -53,7 +63,7 @@ enum atu_roba_t {
  * \brief Arm ATU device configuration structure
  */
 struct atu_dev_cfg_t {
-    const uint32_t base;                         /*!< ATU base address */
+    const uintptr_t base;                         /*!< ATU base address */
 };
 
 /**

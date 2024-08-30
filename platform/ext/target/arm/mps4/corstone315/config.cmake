@@ -51,7 +51,12 @@ set(PLATFORM_DEFAULT_ATTEST_HAL         OFF             CACHE BOOL     "Use defa
 set(PLATFORM_DEFAULT_NV_COUNTERS        OFF             CACHE BOOL     "Use default nv counter implementation.")
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS     ON              CACHE BOOL     "Platform supports nvm counters for PS in OTP")
 
-set(BL1_SHARED_SYMBOLS_PATH         ${TARGET_PLATFORM_PATH}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
+set(BL1_1_SHARED_SYMBOLS_PATH       ${TARGET_PLATFORM_PATH}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
 set(RTL_KEY_PATH                    ${TARGET_PLATFORM_PATH}/provisioning/tci_krtl.bin    CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
 
 set(TP_MODE                         0x111155AA CACHE STRING "Whether system is in Test or Production mode")
+
+set(MCUBOOT_USE_PSA_CRYPTO            ON               CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto APIs")
+set(MCUBOOT_SIGNATURE_TYPE            "EC-P256"        CACHE STRING    "Algorithm to use for signature validation [RSA-2048, RSA-3072, EC-P256, EC-P384]")
+set(MCUBOOT_HW_KEY                    OFF              CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
+set(MCUBOOT_BUILTIN_KEY               ON               CACHE BOOL      "Use builtin key(s) for validation, no public key data is embedded into the image metadata")

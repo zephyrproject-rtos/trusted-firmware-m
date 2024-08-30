@@ -20,7 +20,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description=\
             'TF-M Kconfig tool generates CMake configurations and header file \
              component configurations. Terminal UI and GUI can help quickly \
-             configurate TF-M build options.')
+             configurate TF-M build options.',
+             allow_abbrev=False)
 
     parser.add_argument(
         '-k', '--kconfig-file',

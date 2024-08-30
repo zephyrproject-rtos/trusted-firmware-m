@@ -80,7 +80,6 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_USART.c
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
-        host_drivers/mscp_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         ni_tower_periph_lib.c
         ni_tower_sysctrl_lib.c
@@ -108,8 +107,6 @@ target_include_directories(platform_bl2
 target_compile_definitions(platform_bl2
     PRIVATE
         PLAT_LCP_COUNT=${PLAT_LCP_COUNT}
-        PLATFORM_HOST_HAS_SCP
-        PLATFORM_HOST_HAS_MCP
 )
 
 #========================= Platform BL1_1 =====================================#
@@ -171,10 +168,6 @@ install(DIRECTORY   device
 
 install(DIRECTORY   ns/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES       cpuarch.cmake
-                    config.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config/subplatform/)
 
 install(FILES       tests/tfm_tests_ns_config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/tests

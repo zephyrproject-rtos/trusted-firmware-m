@@ -13,6 +13,7 @@
 #include "cmsis_compiler.h"
 #include "config_tfm.h"
 #include "crypto/ps_crypto_interface.h"
+#include "psa_manifest/pid.h"
 #include "nv_counters/ps_nv_counters.h"
 #include "psa/internal_trusted_storage.h"
 #include "ps_utils.h"
@@ -73,10 +74,11 @@ struct ps_obj_table_t {
 };
 
 #ifdef PS_ENCRYPTION
-/* Even tho ps_table_key_label is read only it is left as non constant variable
- * to ensure that it is protected as part of PS partition data.
- */
-static uint8_t ps_table_key_label[] = "table_key_label";
+/* Constants used to derive key for the object table */
+/* Avoid potential clashes with objects */
+#define PS_OBJ_TABLE_CLIENT_ID TFM_SP_PS
+/* This one is an arbitrary 64-bit number */
+#define PS_OBJ_TABLE_UID       0x4ee143e1df40bd00
 #endif
 
 /* Object table indexes */
@@ -381,6 +383,12 @@ static void ps_object_table_authenticate(uint8_t table_idx,
 
     err = ps_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                  PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+    if (err != PSA_SUCCESS) {
+        err = ps_crypto_authenticate_transition(crypto, (const uint8_t *)&assoc_data,
+                                                PS_CRYPTO_ASSOCIATED_DATA_LEN);
+    }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
     if (err == PSA_SUCCESS) {
         init_ctx->table_state[table_idx] = PS_OBJ_TABLE_NVC_1_VALID;
         return;
@@ -396,6 +404,12 @@ static void ps_object_table_authenticate(uint8_t table_idx,
 
     err = ps_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                  PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+    if (err != PSA_SUCCESS) {
+        err = ps_crypto_authenticate_transition(crypto, (const uint8_t *)&assoc_data,
+                                                PS_CRYPTO_ASSOCIATED_DATA_LEN);
+    }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
     if (err != PSA_SUCCESS) {
         init_ctx->table_state[table_idx] = PS_OBJ_TABLE_INVALID;
     } else {
@@ -502,6 +516,13 @@ __STATIC_INLINE void ps_object_table_authenticate_ctx_tables(
         err = ps_crypto_authenticate(crypto,
                                      PS_CRYPTO_ASSOCIATED_DATA(crypto),
                                      PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+        if (err != PSA_SUCCESS) {
+            err = ps_crypto_authenticate_transition(crypto,
+                                                    PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                                                    PS_CRYPTO_ASSOCIATED_DATA_LEN);
+        }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
         if (err != PSA_SUCCESS) {
             init_ctx->table_state[PS_OBJ_TABLE_IDX_0] = PS_OBJ_TABLE_INVALID;
         }
@@ -514,6 +535,13 @@ __STATIC_INLINE void ps_object_table_authenticate_ctx_tables(
         err = ps_crypto_authenticate(crypto,
                                      PS_CRYPTO_ASSOCIATED_DATA(crypto),
                                      PS_CRYPTO_ASSOCIATED_DATA_LEN);
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+        if (err != PSA_SUCCESS) {
+            err = ps_crypto_authenticate_transition(crypto,
+                                                    PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                                                    PS_CRYPTO_ASSOCIATED_DATA_LEN);
+        }
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
         if (err != PSA_SUCCESS) {
             init_ctx->table_state[PS_OBJ_TABLE_IDX_1] = PS_OBJ_TABLE_INVALID;
         }
@@ -561,12 +589,6 @@ static psa_status_t ps_object_table_save_table(
 #endif /* PS_ROLLBACK_PROTECTION */
 
 #ifdef PS_ENCRYPTION
-    /* Set object table key */
-    err = ps_crypto_setkey(ps_table_key_label, sizeof(ps_table_key_label));
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
 #if PS_ROLLBACK_PROTECTION
     /* Generate authentication tag from the current table content and PS
      * NV counter 1.
@@ -576,13 +598,6 @@ static psa_status_t ps_object_table_save_table(
     /* Generate authentication tag from the current table content */
     err = ps_object_table_generate_auth_tag(obj_table);
 #endif /* PS_ROLLBACK_PROTECTION */
-
-    if (err != PSA_SUCCESS) {
-        (void)ps_crypto_destroykey();
-        return err;
-    }
-
-    err = ps_crypto_destroykey();
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -829,6 +844,11 @@ psa_status_t ps_object_table_create(void)
     (void)memset(&ps_obj_table_ctx, PS_DEFAULT_EMPTY_BUFF_VAL,
                  sizeof(struct ps_obj_table_ctx_t));
 
+#ifdef PS_ENCRYPTION
+    p_table->crypto.ref.client_id = PS_OBJ_TABLE_CLIENT_ID;
+    p_table->crypto.ref.uid = PS_OBJ_TABLE_UID;
+#endif
+
     /* Invert the other in the context as ps_object_table_save_table will
      * use the scratch index to create and store the current table.
      */
@@ -859,32 +879,19 @@ psa_status_t ps_object_table_init(uint8_t *obj_data)
     ps_object_table_fs_read_table(&init_ctx);
 
 #ifdef PS_ENCRYPTION
-    err = ps_crypto_init();
-    if (err != PSA_SUCCESS) {
-        return err;
+    for (uint32_t i = 0; i < PS_NUM_OBJ_TABLES; i++) {
+        init_ctx.p_table[i]->crypto.ref.client_id = PS_OBJ_TABLE_CLIENT_ID;
+        init_ctx.p_table[i]->crypto.ref.uid = PS_OBJ_TABLE_UID;
     }
-
-    /* Set object table key */
-    err = ps_crypto_setkey(ps_table_key_label, sizeof(ps_table_key_label));
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
 #if PS_ROLLBACK_PROTECTION
     /* Authenticate table */
     err = ps_object_table_nvc_authenticate(&init_ctx);
     if (err != PSA_SUCCESS) {
-        (void)ps_crypto_destroykey();
         return err;
     }
 #else
     ps_object_table_authenticate_ctx_tables(&init_ctx);
 #endif /* PS_ROLLBACK_PROTECTION */
-
-    err = ps_crypto_destroykey();
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
 #endif /* PS_ENCRYPTION */
 
     /* Check tables version */

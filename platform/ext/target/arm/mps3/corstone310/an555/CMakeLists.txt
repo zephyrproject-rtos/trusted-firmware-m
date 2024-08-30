@@ -25,7 +25,6 @@ target_sources(flash_drivers_bl2
 
 target_include_directories(flash_drivers
     INTERFACE
-        ${PLATFORM_DIR}/ext/driver
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b

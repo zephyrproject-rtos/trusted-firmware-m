@@ -338,7 +338,7 @@ enum mhu_v3_x_error_t mhu_v3_x_driver_init(struct mhu_v3_x_dev_t *dev)
     union _mhu_v3_x_frame_t *p_mhu;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_INIT_INVALID_PARAM;
     }
 
     /* Return if already initialized */
@@ -362,7 +362,7 @@ enum mhu_v3_x_error_t mhu_v3_x_driver_init(struct mhu_v3_x_dev_t *dev)
     /* Return error if the MHU major revision is not 3 */
     if (mhu_major_rev != MHU_MAJOR_REV_V3) {
         /* Unsupported MHU version */
-        return MHU_V_3_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_3_X_ERR_INIT_UNSUPPORTED_VERSION;
     }
 
     /* Read the MHU Architecture Minor Revision */
@@ -372,7 +372,7 @@ enum mhu_v3_x_error_t mhu_v3_x_driver_init(struct mhu_v3_x_dev_t *dev)
     /* Return error if the MHU minor revision is not 0 */
     if (dev->subversion != MHU_MINOR_REV_3_0) {
         /* Unsupported subversion */
-        return MHU_V_3_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_3_X_ERR_INIT_UNSUPPORTED_VERSION;
     }
 
     /* Initialize the Postbox/Mailbox to remain in operational state */
@@ -394,14 +394,14 @@ enum mhu_v3_x_error_t mhu_v3_x_get_num_channel_implemented(
     union _mhu_v3_x_frame_t *p_mhu;
 
     if ((dev == NULL) || (num_ch == NULL)) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_GET_NUM_CHANNEL_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
 
     /* Only doorbell channel is supported */
     if (ch_type != MHU_V3_X_CHANNEL_TYPE_DBCH) {
-        return MHU_V_3_X_ERR_UNSUPPORTED;
+        return MHU_V_3_X_ERR_GET_NUM_CHANNEL_UNSUPPORTED;
     }
 
     /* Read the number of channels implemented in the MHU */
@@ -422,7 +422,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_clear(struct mhu_v3_x_dev_t *dev,
     enum mhu_v3_x_error_t status;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_CLEAR_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -435,7 +435,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_clear(struct mhu_v3_x_dev_t *dev,
 
     /* Only MBX can clear the Doorbell channel */
     if(dev->frame != MHU_V3_X_MBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_CLEAR_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
@@ -456,7 +456,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_write(struct mhu_v3_x_dev_t *dev,
     enum mhu_v3_x_error_t status;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_WRITE_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -469,7 +469,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_write(struct mhu_v3_x_dev_t *dev,
 
     /* Only PBX can set the Doorbell channel value */
     if (dev->frame != MHU_V3_X_PBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_WRITE_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
@@ -490,7 +490,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_read(struct mhu_v3_x_dev_t *dev,
     enum mhu_v3_x_error_t status;
 
     if ((dev == NULL) || (value == NULL)) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_READ_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -530,7 +530,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_set(
     enum mhu_v3_x_error_t status;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_SET_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -543,7 +543,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_set(
 
     /* Doorbell channel mask not applicable for PBX */
     if(dev->frame != MHU_V3_X_MBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_SET_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
@@ -565,7 +565,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_clear(
     enum mhu_v3_x_error_t status;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_CLEAR_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -578,7 +578,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_clear(
 
     /* Doorbell channel mask not applicable for PBX */
     if(dev->frame != MHU_V3_X_MBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_CLEAR_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
@@ -600,7 +600,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_get(
     enum mhu_v3_x_error_t status;
 
     if ((dev == NULL) || (mask_status == NULL)) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_GET_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -613,7 +613,7 @@ enum mhu_v3_x_error_t mhu_v3_x_doorbell_mask_get(
 
     /* Doorbell channel mask not applicable for PBX */
     if(dev->frame != MHU_V3_X_MBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_DOORBELL_MASK_GET_INVALID_PARAM;
     }
 
     p_mhu = (union _mhu_v3_x_frame_t *)dev->base;
@@ -634,7 +634,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_enable(
     enum mhu_v3_x_error_t status;
 
     if (dev == NULL) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_INTERRUPT_ENABLE_INVALID_PARAM;
     }
 
     /* Check if driver has been initialized */
@@ -647,7 +647,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_enable(
 
     /* Only doorbell channel is supported */
     if (ch_type != MHU_V3_X_CHANNEL_TYPE_DBCH) {
-        return MHU_V_3_X_ERR_UNSUPPORTED;
+        return MHU_V_3_X_ERR_INTERRUPT_ENABLE_UNSUPPORTED;
     }
 
     /* Enable the doorbell channel interrupt */
@@ -672,7 +672,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_disable(
 
     /* Only doorbell channel is supported */
     if (ch_type != MHU_V3_X_CHANNEL_TYPE_DBCH) {
-        return MHU_V_3_X_ERR_UNSUPPORTED;
+        return MHU_V_3_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED;
     }
 
     /* Disable the doorbell channel interrupt */
@@ -697,7 +697,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
 
     /* Only doorbell channel is supported */
     if (ch_type != MHU_V3_X_CHANNEL_TYPE_DBCH) {
-        return MHU_V_3_X_ERR_UNSUPPORTED;
+        return MHU_V_3_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED;
     }
 
     /*
@@ -705,7 +705,7 @@ enum mhu_v3_x_error_t mhu_v3_x_channel_interrupt_clear(
      * cleared manually.
      */
     if(dev->frame != MHU_V3_X_PBX_FRAME) {
-        return MHU_V_3_X_ERR_INVALID_PARAM;
+        return MHU_V_3_X_ERR_INTERRUPT_CLEAR_INVALID_PARAM;
     }
 
     /* Clear the postbox doorbell channel transfer acknowledge event */

@@ -50,16 +50,23 @@ target_link_libraries(bl1_2
         bl1_2_lib
         platform_bl1_1_interface
         platform_bl1_2
-        $<$<BOOL:${TEST_BL1_2}>:bl1_2_tests>
+        $<$<AND:$<BOOL:${TEST_BL1_2}>,$<BOOL:${PLATFORM_DEFAULT_BL1_2_TESTS}>>:bl1_2_tests>
 )
 
 target_compile_definitions(bl1_2
     PRIVATE
         $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
+        $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
         $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:TFM_BL1_PQ_CRYPTO>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
 )
+
+if (BL1_2_SHARED_SYMBOLS_PATH)
+    target_share_symbols(bl1_2
+        ${BL1_2_SHARED_SYMBOLS_PATH}
+    )
+endif()
 
 target_link_shared_code(bl1_2
     bl1_1

@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "async.h"
 #include "bitops.h"
 #include "config_impl.h"
 #include "config_spm.h"
@@ -49,6 +50,32 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* This API is only used in IPC backend. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+struct connection_t *spm_get_async_replied_handle(struct partition_t *partition)
+{
+    struct connection_t **pr_handle_iter, **prev = NULL, *handle = NULL;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+    /* Remove tail of the list, which is the first item added */
+    CRITICAL_SECTION_ENTER(cs_assert);
+    if (!partition->p_replied) {
+        tfm_core_panic();
+    }
+    UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
+                                partition, p_replied) {
+        prev = pr_handle_iter;
+    }
+    handle = *prev;
+    UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_replied);
+
+    /* Clear the signal if there are no more asynchronous responses waiting */
+    if (!partition->p_replied) {
+        partition->signals_asserted &= ~ASYNC_MSG_REPLY;
+    }
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return handle;
+}
+
 struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                               psa_signal_t signal)
 {
@@ -61,7 +88,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     /* Return the last found message which applies a FIFO mechanism. */
     UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, p_handle_iter,
-                                p_ptn, p_handles) {
+                                p_ptn, p_reqs) {
         if (p_handle_iter->service->p_ldinf->signal == signal) {
             last_found_handle_holder = pr_handle_iter;
             nr_found_msgs++;
@@ -70,7 +97,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     if (last_found_handle_holder) {
         p_handle_iter = *last_found_handle_holder;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_handles);
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_reqs);
 
         if (nr_found_msgs == 1) {
             p_ptn->signals_asserted &= ~signal;
@@ -147,7 +174,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
                                     const struct service_t *service,
                                     bool ns_caller)
 {
-    struct partition_t *partition = NULL;
+    const struct partition_t *partition = NULL;
     const uint32_t *dep;
     int32_t i;
 
@@ -185,7 +212,6 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
     struct connection_t *connection;
     const struct service_t *service;
     uint32_t sid, version, index;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
 
     SPM_ASSERT(p_connection);
@@ -220,9 +246,13 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        CRITICAL_SECTION_ENTER(cs_assert);
+        /*
+         * Current SPM doesn't support multiple context management. There is only one
+         * instance in SPM to call the connection pool allocation. It is no need to be
+         * protected.
+         * Protection should be established after the context management is implemented.
+         */
         connection = spm_allocate_connection();
-        CRITICAL_SECTION_LEAVE(cs_assert);
         if (!connection) {
             return PSA_ERROR_CONNECTION_BUSY;
         }
@@ -321,7 +351,7 @@ void spm_init_idle_connection(struct connection_t *p_connection,
 
 int32_t tfm_spm_partition_get_running_partition_id(void)
 {
-    struct partition_t *partition;
+    const struct partition_t *partition;
 
     partition = GET_CURRENT_COMPONENT();
     if (partition && partition->p_ldinf) {
@@ -333,7 +363,7 @@ int32_t tfm_spm_partition_get_running_partition_id(void)
 
 bool tfm_spm_is_ns_caller(void)
 {
-    struct partition_t *partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *partition = GET_CURRENT_COMPONENT();
 
     if (!partition) {
         tfm_core_panic();
@@ -368,8 +398,8 @@ uint32_t tfm_spm_init(void)
 
     spm_init_connection_space();
 
-    UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
-    UNI_LISI_INIT_NODE(&services_listhead, next);
+    UNI_LIST_INIT_NODE(PARTITION_LIST_ADDR, next);
+    UNI_LIST_INIT_NODE(&services_listhead, next);
 
     /* Init the nonsecure context. */
     tfm_nspm_ctx_init();
@@ -397,6 +427,17 @@ uint32_t tfm_spm_init(void)
 
         backend_init_comp_assuredly(partition, service_setting);
     }
+
+#if CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1
+    /*
+     * Platform can use CONFIG_TFM_POST_PARTITION_INIT_HOOK option to add extra initialization
+     * steps after static initialization of partitions' isolation has been completed.
+     */
+    FIH_CALL(tfm_hal_post_partition_init_hook, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+        tfm_core_panic();
+    }
+#endif /* CONFIG_TFM_POST_PARTITION_INIT_HOOK == 1 */
 
     return backend_system_run();
 }

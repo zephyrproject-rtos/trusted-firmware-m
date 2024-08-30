@@ -38,7 +38,7 @@ static uint8_t block[TFM_FWU_BUF_SIZE] __aligned(4);
 static psa_status_t tfm_fwu_start(const psa_msg_t *msg)
 {
     psa_fwu_component_t component;
-#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1 || TFM_CONFIG_FWU_MAX_MANIFEST_SIZE == 0
+#if (PSA_FRAMEWORK_HAS_MM_IOVEC == 1) || (TFM_CONFIG_FWU_MAX_MANIFEST_SIZE == 0)
     uint8_t *manifest = NULL;
 #else
     uint8_t manifest_data[TFM_CONFIG_FWU_MAX_MANIFEST_SIZE];
@@ -115,8 +115,8 @@ static psa_status_t tfm_fwu_write(const psa_msg_t *msg)
     }
     block_size = msg->in_size[2];
 
-    if (msg->in_size[0] != sizeof(component) ||
-        msg->in_size[1] != sizeof(image_offset)) {
+    if ((msg->in_size[0] != sizeof(component)) ||
+        (msg->in_size[1] != sizeof(image_offset))) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -129,7 +129,7 @@ static psa_status_t tfm_fwu_write(const psa_msg_t *msg)
 
     /* Check the component state. */
     if (!fwu_ctx[component].in_use ||
-        fwu_ctx[component].component_state != PSA_FWU_WRITING) {
+        (fwu_ctx[component].component_state != PSA_FWU_WRITING)) {
         return PSA_ERROR_BAD_STATE;
     }
 #if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
@@ -142,7 +142,7 @@ static psa_status_t tfm_fwu_write(const psa_msg_t *msg)
     }
 #else
     while (block_size > 0) {
-        write_size = sizeof(block) <= block_size ?
+        write_size = (sizeof(block) <= block_size) ?
                      sizeof(block) : block_size;
         num = psa_read(msg->handle, 2, block, write_size);
         if (num != write_size) {
@@ -178,7 +178,7 @@ static psa_status_t tfm_fwu_finish(const psa_msg_t *msg)
 
     /* Check the component state. */
     if (!fwu_ctx[component].in_use ||
-        fwu_ctx[component].component_state != PSA_FWU_WRITING) {
+        (fwu_ctx[component].component_state != PSA_FWU_WRITING)) {
         return PSA_ERROR_BAD_STATE;
     }
 
@@ -202,8 +202,8 @@ static psa_status_t tfm_fwu_install(void)
      */
     COMPONENTS_ITER(component) {
         if (fwu_ctx[component].in_use) {
-            if (fwu_ctx[component].component_state == PSA_FWU_STAGED ||
-                fwu_ctx[component].component_state == PSA_FWU_REJECTED) {
+            if ((fwu_ctx[component].component_state == PSA_FWU_STAGED) ||
+                (fwu_ctx[component].component_state == PSA_FWU_REJECTED)) {
                 return PSA_ERROR_BAD_STATE;
             } else if (fwu_ctx[component].component_state == PSA_FWU_CANDIDATE) {
                 candidates[candidate_number++] = component;
@@ -242,7 +242,7 @@ static psa_status_t tfm_fwu_install(void)
 #else
             fwu_ctx[component].component_state = PSA_FWU_UPDATED;
 #endif
-        } else if (status != PSA_SUCCESS_REBOOT && status != PSA_SUCCESS_RESTART) {
+        } else if ((status != PSA_SUCCESS_REBOOT) && (status != PSA_SUCCESS_RESTART)) {
             /* Switch to FAILED state on other errors. */
             fwu_ctx[component].component_state = PSA_FWU_FAILED;
             fwu_ctx[component].error = status;
@@ -261,8 +261,8 @@ static psa_status_t tfm_fwu_query(const psa_msg_t *msg)
     bool query_impl_info = false, query_state = true;
 
     /* Check input parameters. */
-    if (msg->in_size[0] != sizeof(component) ||
-        msg->out_size[0] != sizeof(psa_fwu_component_info_t)) {
+    if ((msg->in_size[0] != sizeof(component)) ||
+        (msg->out_size[0] != sizeof(psa_fwu_component_info_t))) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
     psa_read(msg->handle, 0, &component, sizeof(component));
@@ -279,8 +279,8 @@ static psa_status_t tfm_fwu_query(const psa_msg_t *msg)
          */
         if (fwu_ctx[component].component_state == PSA_FWU_CANDIDATE) {
             query_impl_info = true;
-        } else if (fwu_ctx[component].component_state == PSA_FWU_REJECTED ||
-                   fwu_ctx[component].component_state == PSA_FWU_FAILED) {
+        } else if ((fwu_ctx[component].component_state == PSA_FWU_REJECTED) ||
+                   (fwu_ctx[component].component_state == PSA_FWU_FAILED)) {
             info.error = fwu_ctx[component].error;
         }
     }
@@ -416,7 +416,7 @@ psa_status_t tfm_fwu_reject(const psa_msg_t *msg)
              * of affected components changes to FAILED and PSA_SUCCESS
              * is returned.
              */
-            if (status == PSA_SUCCESS_REBOOT || status == PSA_SUCCESS_RESTART) {
+            if ((status == PSA_SUCCESS_REBOOT) || (status == PSA_SUCCESS_RESTART)) {
                 fwu_ctx[component].component_state = PSA_FWU_REJECTED;
                 fwu_ctx[component].error = error;
             } else if (status == PSA_SUCCESS) {

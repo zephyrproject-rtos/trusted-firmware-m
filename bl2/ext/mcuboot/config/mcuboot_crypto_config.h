@@ -40,15 +40,31 @@
 #ifndef MCUBOOT_CRYPTO_CONFIG_H
 #define MCUBOOT_CRYPTO_CONFIG_H
 
-/* ToDo: Need to extend this to cover defines required for EC with P256/P384 and P256M */
-
-#define PSA_WANT_ALG_SHA_256                    1
+/* Hashing algorithms */
 #if defined(MCUBOOT_SIGN_EC384)
 #define PSA_WANT_ALG_SHA_384                    1
+#else
+#define PSA_WANT_ALG_SHA_256                    1
 #endif
+
+/* Signature verification algorithms */
+#if defined(MCUBOOT_SIGN_RSA)
 #define PSA_WANT_ALG_RSA_PSS                    1
+#else
 #define PSA_WANT_ALG_ECDSA                      1
+/* Curves supported for ECDSA */
+#if defined(MCUBOOT_SIGN_EC384)
+#define PSA_WANT_ECC_SECP_R1_384                1
+#else
 #define PSA_WANT_ECC_SECP_R1_256                1
+#endif
+#endif
+
+/* Key types supported */
+#if defined(MCUBOOT_SIGN_RSA)
 #define PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY        1
+#else
 #define PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY        1
+#endif
+
 #endif /* MCUBOOT_CRYPTO_CONFIG_H */

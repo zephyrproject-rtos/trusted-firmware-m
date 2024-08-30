@@ -187,6 +187,71 @@ static psa_status_t tfm_crypto_init_iovecs(const psa_msg_t *msg,
 }
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 
+static psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
+                                              size_t in_len,
+                                              psa_outvec out_vec[],
+                                              size_t out_len)
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    int32_t caller_id = 0;
+    struct tfm_crypto_key_id_s encoded_key = TFM_CRYPTO_KEY_ID_S_INIT;
+    bool is_key_required = false;
+    enum tfm_crypto_group_id_t group_id;
+
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    group_id = TFM_CRYPTO_GET_GROUP_ID(iov->function_id);
+
+    is_key_required = !((group_id == TFM_CRYPTO_GROUP_ID_HASH) ||
+                        (group_id == TFM_CRYPTO_GROUP_ID_RANDOM));
+
+    if (is_key_required) {
+        status = tfm_crypto_get_caller_id(&caller_id);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+        /* The caller_id being set in the owner field is the partition ID
+         * of the calling partition
+         */
+        encoded_key.key_id = iov->key_id;
+        encoded_key.owner = caller_id;
+    }
+
+    /* Dispatch to each sub-module based on the Group ID */
+    switch (group_id) {
+    case TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT:
+        return tfm_crypto_key_management_interface(in_vec, out_vec,
+                                                   &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_HASH:
+        return tfm_crypto_hash_interface(in_vec, out_vec);
+    case TFM_CRYPTO_GROUP_ID_MAC:
+        return tfm_crypto_mac_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_CIPHER:
+        return tfm_crypto_cipher_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_AEAD:
+        return tfm_crypto_aead_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_ASYM_SIGN:
+        return tfm_crypto_asymmetric_sign_interface(in_vec, out_vec,
+                                                    &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT:
+        return tfm_crypto_asymmetric_encrypt_interface(in_vec, out_vec,
+                                                       &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_KEY_DERIVATION:
+        return tfm_crypto_key_derivation_interface(in_vec, out_vec,
+                                                   &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_RANDOM:
+        return tfm_crypto_random_interface(in_vec, out_vec);
+    default:
+        LOG_ERRFMT("[ERR][Crypto] Unsupported request!\r\n");
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
 static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 {
     psa_status_t status = PSA_SUCCESS;
@@ -298,6 +363,18 @@ static psa_status_t tfm_crypto_module_init(void)
     return tfm_crypto_init_alloc();
 }
 
+/*!
+ * \defgroup init This group implements the partition initilisation
+ *                function to be called during TF-M boot, and the SFN
+ *                servicing call to be called when a SFN request needs
+ *                to be handled by the SPM. When built in IPC mode, the
+ *                SPM directly provides a scheduling handler that deals
+ *                with messages and calls the SFN entry point below just
+ *                when needed, i.e. no need for a dedicated message handler
+ *                needs to be implemented here
+ */
+
+/*!@{*/
 psa_status_t tfm_crypto_init(void)
 {
     psa_status_t status;
@@ -329,68 +406,4 @@ psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
-
-psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
-                                       size_t in_len,
-                                       psa_outvec out_vec[],
-                                       size_t out_len)
-{
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    int32_t caller_id = 0;
-    struct tfm_crypto_key_id_s encoded_key = TFM_CRYPTO_KEY_ID_S_INIT;
-    bool is_key_required = false;
-    enum tfm_crypto_group_id_t group_id;
-
-    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    group_id = TFM_CRYPTO_GET_GROUP_ID(iov->function_id);
-
-    is_key_required = !((group_id == TFM_CRYPTO_GROUP_ID_HASH) ||
-                        (group_id == TFM_CRYPTO_GROUP_ID_RANDOM));
-
-    if (is_key_required) {
-        status = tfm_crypto_get_caller_id(&caller_id);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-        /* The caller_id being set in the owner field is the partition ID
-         * of the calling partition
-         */
-        encoded_key.key_id = iov->key_id;
-        encoded_key.owner = caller_id;
-    }
-
-    /* Dispatch to each sub-module based on the Group ID */
-    switch (group_id) {
-    case TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT:
-        return tfm_crypto_key_management_interface(in_vec, out_vec,
-                                                   &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_HASH:
-        return tfm_crypto_hash_interface(in_vec, out_vec);
-    case TFM_CRYPTO_GROUP_ID_MAC:
-        return tfm_crypto_mac_interface(in_vec, out_vec, &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_CIPHER:
-        return tfm_crypto_cipher_interface(in_vec, out_vec, &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_AEAD:
-        return tfm_crypto_aead_interface(in_vec, out_vec, &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_ASYM_SIGN:
-        return tfm_crypto_asymmetric_sign_interface(in_vec, out_vec,
-                                                    &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT:
-        return tfm_crypto_asymmetric_encrypt_interface(in_vec, out_vec,
-                                                       &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_KEY_DERIVATION:
-        return tfm_crypto_key_derivation_interface(in_vec, out_vec,
-                                                   &encoded_key);
-    case TFM_CRYPTO_GROUP_ID_RANDOM:
-        return tfm_crypto_random_interface(in_vec, out_vec);
-    default:
-        LOG_ERRFMT("[ERR][Crypto] Unsupported request!\r\n");
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    return PSA_ERROR_NOT_SUPPORTED;
-}
+/*!@}*/

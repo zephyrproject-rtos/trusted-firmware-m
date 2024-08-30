@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-#define PS_KEY_LEN_BYTES  16
 #define PS_TAG_LEN_BYTES  16
 #define PS_IV_LEN_BYTES   12
 
@@ -40,23 +39,6 @@ union ps_crypto_t {
  * \return Returns values as described in \ref psa_status_t
  */
 psa_status_t ps_crypto_init(void);
-
-/**
- * \brief Sets the key to use for crypto operations for the current client.
- *
- * \param[in]     key_label       Pointer to the key label
- * \param[in]     key_label_len   Length of the key label
- *
- * \return Returns values as described in \ref psa_status_t
- */
-psa_status_t ps_crypto_setkey(const uint8_t *key_label, size_t key_label_len);
-
-/**
- * \brief Destroys the transient key used for crypto operations.
- *
- * \return Returns values as described in \ref psa_status_t
- */
-psa_status_t ps_crypto_destroykey(void);
 
 /**
  * \brief Encrypts and tags the given plaintext data.
@@ -145,6 +127,25 @@ void ps_crypto_set_iv(const union ps_crypto_t *crypto);
  * \return Returns values as described in \ref psa_status_t
  */
 psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto);
+
+#ifdef PS_SUPPORT_FORMAT_TRANSITION
+/**
+ * \brief Authenticate old format data against the tag.
+ *
+ * This function will attempt to authenticate using the old
+ * non-volatile format. The intent is that it can be used
+ * to transition between formats.
+ *
+ * \param[in] crypto   Pointer to the crypto union
+ * \param[in] add      Pointer to the data to authenticate
+ * \param[in] add_len  Length of the data to authenticate
+ *
+ * \return Returns values as described in \ref psa_status_t
+ */
+psa_status_t ps_crypto_authenticate_transition(const union ps_crypto_t *crypto,
+                                               const uint8_t *add,
+                                               uint32_t add_len);
+#endif /* PS_SUPPORT_FORMAT_TRANSITION */
 
 #ifdef __cplusplus
 }

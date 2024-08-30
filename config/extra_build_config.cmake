@@ -21,6 +21,8 @@ if (NOT TFM_EXTRA_GENERATED_FILE_LIST_PATH)
     set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""    CACHE PATH     "List of Paths to extra generated file list. Appended to stardard TFM generated file list.")
 endif()
 
+list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${CMAKE_SOURCE_DIR}/platform/ext/common/generated_file_list.yaml)
+
 ############################### Extra partitions ###############################
 if (NOT TFM_EXTRA_MANIFEST_LIST_FILES)
     set(TFM_EXTRA_MANIFEST_LIST_FILES       ""    CACHE FILEPATH "List of Extra manifest list file(s), used to list extra Secure Partition manifests.")

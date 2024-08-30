@@ -22,7 +22,7 @@ The following links provide useful information about the nRF5340
 nRF5340 DK website:
    https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-DK
 
-Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
+Nordic Semiconductor TechDocs: https://docs.nordicsemi.com
 
 
 Building TF-M on nRF5340 Application MCU

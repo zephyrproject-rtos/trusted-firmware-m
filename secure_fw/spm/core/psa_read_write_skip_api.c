@@ -17,7 +17,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
 {
     size_t bytes, remaining;
     struct connection_t *handle = NULL;
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
@@ -71,7 +71,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    bytes = num_bytes < remaining ? num_bytes : remaining;
+    bytes = (num_bytes < remaining) ? num_bytes : remaining;
 
     spm_memcpy(buffer, (char *)handle->invec_base[invec_idx] +
                                handle->invec_accessed[invec_idx], bytes);
@@ -146,7 +146,7 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
                                          const void *buffer, size_t num_bytes)
 {
     struct connection_t *handle = NULL;
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
@@ -175,7 +175,7 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
      * It is a fatal error if the call attempts to write data past the end of
      * the client output vector
      */
-    if (num_bytes > handle->msg.out_size[outvec_idx] - handle->outvec_written[outvec_idx]) {
+    if (num_bytes > (handle->msg.out_size[outvec_idx] - handle->outvec_written[outvec_idx])) {
         tfm_core_panic();
     }
 

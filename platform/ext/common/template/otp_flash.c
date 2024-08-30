@@ -36,7 +36,7 @@ static enum tfm_plat_err_t write_to_output(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    copy_size = out_len < value_size ? out_len : value_size;
+    copy_size = (out_len < value_size) ? out_len : value_size;
 
     err = read_otp_nv_counters_flash(offset, out, copy_size);
     if (err != TFM_PLAT_ERR_SUCCESS) {

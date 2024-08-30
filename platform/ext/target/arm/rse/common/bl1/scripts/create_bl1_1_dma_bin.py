@@ -14,7 +14,7 @@ from yaml.loader import SafeLoader
 # logging setup
 logging.basicConfig(level=logging.WARNING, format='%(name)s - %(levelname)s - %(message)s')
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--input_file", help="DMA programs high level yaml file", required=True)
 parser.add_argument("--output_dir", help="Output directory", required=True)
 args = parser.parse_args()

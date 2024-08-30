@@ -6,17 +6,18 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "tfm_hal_device_header.h"
 #include "region.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
+#include "flash_common.h"
 #include "flash_layout.h"
 #include "fih.h"
 #include "bootutil/bootutil_log.h"
 #include "fip_parser.h"
 #include "flash_map/flash_map.h"
 #include "watchdog.h"
-#include <string.h>
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
 #include "fwu_agent.h"
@@ -34,9 +35,10 @@
 #include "partition.h"
 #include "platform.h"
 
-static const uint8_t * const tfm_part_names[] = {"tfm_primary", "tfm_secondary"};
-static const uint8_t * const fip_part_names[] = {"FIP_A", "FIP_B"};
-
+static const char* const tfm_part_names[] = {"tfm_primary", "tfm_secondary"};
+#ifndef TFM_S_REG_TEST
+static const char* const fip_part_names[] = {"FIP_A", "FIP_B"};
+#endif /* !TFM_S_REG_TEST */
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -54,7 +56,7 @@ static bool fill_flash_map_with_tfm_data(uint8_t boot_index) {
                      boot_index, ARRAY_SIZE(tfm_part_names));
         return false;
     }
-    partition_entry_t *tfm_entry =
+    const partition_entry_t *tfm_entry =
         get_partition_entry(tfm_part_names[boot_index]);
     if (tfm_entry == NULL) {
         BOOT_LOG_ERR("Could not find partition %s", tfm_part_names[boot_index]);
@@ -65,9 +67,10 @@ static bool fill_flash_map_with_tfm_data(uint8_t boot_index) {
     return true;
 }
 
+#ifndef TFM_S_REG_TEST
 static bool fill_flash_map_with_fip_data(uint8_t boot_index) {
     uint32_t tfa_offset = 0;
-    size_t tfa_size = 0;
+    uint32_t tfa_size = 0;
     uint32_t fip_offset = 0;
     size_t fip_size = 0;
     int result;
@@ -77,7 +80,7 @@ static bool fill_flash_map_with_fip_data(uint8_t boot_index) {
                      boot_index, ARRAY_SIZE(fip_part_names));
         return false;
     }
-    partition_entry_t *fip_entry =
+    const partition_entry_t *fip_entry =
         get_partition_entry(fip_part_names[boot_index]);
     if (fip_entry == NULL) {
         BOOT_LOG_ERR("Could not find partition %s", fip_part_names[boot_index]);
@@ -105,6 +108,7 @@ static bool fill_flash_map_with_fip_data(uint8_t boot_index) {
 
     return true;
 }
+#endif /* !TFM_S_REG_TEST */
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
 int psa_adac_to_tfm_apply_permissions(uint8_t permissions_mask[16])
@@ -129,8 +133,7 @@ int psa_adac_to_tfm_apply_permissions(uint8_t permissions_mask[16])
 }
 
 uint8_t secure_debug_rotpk[32];
-
-#endif
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 int32_t boot_platform_init(void)
 {
@@ -167,7 +170,6 @@ int32_t boot_platform_init(void)
 int32_t boot_platform_post_init(void)
 {
     int32_t result;
-    uint32_t bank_offset;
     enum tfm_plat_err_t plat_err;
 
 #ifdef CRYPTO_HW_ACCELERATOR

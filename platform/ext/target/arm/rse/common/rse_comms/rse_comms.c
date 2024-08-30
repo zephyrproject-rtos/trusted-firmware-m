@@ -32,7 +32,9 @@ static psa_status_t message_dispatch(struct client_request_t *req)
         .p_outvecs = req->out_vec,
     };
 
-    SPMLOG_DBGMSG("[RSE-COMMS] Dispatching message\r\n");
+    SPMLOG_DBGMSG("[RSE-COMMS] Received message\r\n");
+    SPMLOG_DBGMSGVAL("protocol_ver=", req->protocol_ver);
+    SPMLOG_DBGMSGVAL("seq_num=", req->seq_num);
     SPMLOG_DBGMSGVAL("handle=", req->handle);
     SPMLOG_DBGMSGVAL("type=", req->type);
     SPMLOG_DBGMSGVAL("in_len=", req->in_len);

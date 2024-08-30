@@ -15,9 +15,13 @@ if (RSE_XIP)
 endif()
 
 set(RSE_USE_HOST_UART                   ON         CACHE BOOL     "Whether RSE should setup to use the UART from the host system")
+set(RSE_USE_LOCAL_UART                  OFF        CACHE BOOL     "Whether RSE should setup to use the UART local to the RSE subsystem")
 set(RSE_HAS_EXPANSION_PERIPHERALS       OFF        CACHE BOOL     "Whether RSE has sub-platform specific peripherals in the expansion layer")
 
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
+set(CC312_LEGACY_DRIVER_API_ENABLED     OFF        CACHE BOOL     "Whether the legacy mbedtls accelerator API is used")
+set(CC3XX_RUNTIME_ENABLED               ON         CACHE BOOL     "Whether the CC3XX driver is used at runtime")
+
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        OFF        CACHE BOOL     "Use default crypto keys implementation.")
 set(PLATFORM_DEFAULT_PROVISIONING       OFF        CACHE BOOL     "Use default provisioning implementation")
@@ -29,6 +33,7 @@ set(PLATFORM_DEFAULT_SYSTEM_RESET_HALT  OFF        CACHE BOOL     "Use default s
 set(PLATFORM_HAS_BOOT_DMA               ON         CACHE BOOL     "Enable dma support for memory transactions for bootloader")
 set(PLATFORM_BOOT_DMA_MIN_SIZE_REQ      0x40       CACHE STRING   "Minimum transaction size (in bytes) required to enable dma support for bootloader")
 set(PLATFORM_SVC_HANDLERS               ON         CACHE BOOL     "Platform supports custom SVC handlers")
+set(PLATFORM_ERROR_CODES                ON         CACHE BOOL     "Whether to use platform-specific error codes.")
 
 set(BL1                                 ON         CACHE BOOL     "Whether to build BL1")
 set(PLATFORM_DEFAULT_BL1                ON         CACHE STRING   "Whether to use default BL1 or platform-specific one")
@@ -54,12 +59,12 @@ set(TFM_PARTITION_PROTECTED_STORAGE     OFF        CACHE BOOL     "Enable Protec
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF     CACHE BOOL     "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_PLATFORM              ON         CACHE BOOL     "Enable Platform partition")
 set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algorithm used by Measured boot services")
-set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to configure feature support")
 
 set(TFM_ATTESTATION_SCHEME              "PSA"      CACHE STRING   "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 
-set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD" CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
-set(TFM_EXTRAS_REPO_VERSION             "4b8a6d6"  CACHE STRING  "The version of tf-m-extras to use")
+set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD"  CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
+set(TFM_EXTRAS_REPO_VERSION             "c0e81a470" CACHE STRING  "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation;dice_protection_environment" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
@@ -120,9 +125,10 @@ set(TFM_MULTI_CORE_TOPOLOGY             ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
 
+set(RSE_MHU_SCP_DEVICE                  2          CACHE STRING  "MHU device index to use for communications with the SCP")
+
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
-set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
 set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
 
 if (RSE_TP_MODE STREQUAL "TCI")
@@ -133,7 +139,8 @@ else()
     message(FATAL_ERROR "Invalid TP mode ${RSE_TP_MODE}")
 endif()
 
-set(RSE_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")
+# FIXME Enable this once the FVP is fixed
+set(RSE_ENCRYPTED_OTP_KEYS              OFF        CACHE BOOL "Whether keys in OTP are encrypted")
 set(RSE_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encryption is enabled")
 
 set(RSE_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSE OTP words can be programmed bit by bit, or whole words must be programmed at once")
@@ -147,6 +154,44 @@ set(RSE_SUPPORT_ROM_LIB_RELOCATION      OFF        CACHE BOOL "Whether shared RO
 set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
 
 set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
+
+set(RSE_DEFAULT_CLOCK_CONFIG            ON         CACHE BOOL "Use default RSE clock config implementation")
+
+if (TEST_BL1_1 OR TEST_BL1_2)
+    set(RSE_BL1_TEST_BINARY                 ON         CACHE BOOL "Create and run a separate BL1 test binary")
+    set(RSE_TEST_BINARY_IN_ROM              ON         CACHE BOOL "Whether the RSE BL1 test binary is stored in ROM")
+endif()
+
+if (RSE_BL1_TEST_BINARY)
+    set(PLATFORM_DEFAULT_BL1_1_TESTS    OFF        CACHE BOOL "Whether to use platform-specific BL1_1 testsuite")
+    set(PLATFORM_DEFAULT_BL1_2_TESTS    OFF        CACHE BOOL "Whether to use platform-specific BL1_2 testsuite")
+    set(BL1_1_PLATFORM_SPECIFIC_LINK_LIBRARIES rse_bl1_tests_platform)
+    set(BL1_2_PLATFORM_SPECIFIC_LINK_LIBRARIES rse_bl1_tests_platform)
+endif()
+
+set(TEMP_BL1_1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt)
+if (TEST_BL1_1 AND RSE_BL1_TEST_BINARY)
+    list(APPEND TEMP_BL1_1_SHARED_SYMBOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable/bl1_1_tests_shared_symbols.txt)
+endif()
+
+set(BL1_1_SHARED_SYMBOLS_PATH             ${TEMP_BL1_1_SHARED_SYMBOLS_PATH} CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
+
+if (TEST_BL1_2 AND RSE_BL1_TEST_BINARY)
+    set(BL1_2_SHARED_SYMBOLS_PATH ${CMAKE_CURRENT_LIST_DIR}/tests/rse_test_executable/bl1_2_tests_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_2 that can be referenced from tests")
+endif()
+
+set(EXTRA_BL1_1_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_1" CACHE STRING "path to extra BL1_1 testsuite")
+# TODO uncomment this once we have some extra BL1_2 tests, else this causes an error
+# set(EXTRA_BL1_2_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/bl1_2" CACHE STRING "path to extra BL1_2 testsuite")
+# TODO remove this conditional once we have some extra secure, else this causes an error
+if (${TEST_CC3XX})
+    set(EXTRA_S_TEST_SUITE_PATH         "${CMAKE_CURRENT_LIST_DIR}/tests/secure" CACHE STRING "path to extra secure testsuite")
+endif()
+
+set(MCUBOOT_USE_PSA_CRYPTO            ON               CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto APIs")
+set(MCUBOOT_SIGNATURE_TYPE            "EC-P256"        CACHE STRING    "Algorithm to use for signature validation [RSA-2048, RSA-3072, EC-P256, EC-P384]")
+set(MCUBOOT_HW_KEY                    ON               CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
+set(MCUBOOT_BUILTIN_KEY               OFF              CACHE BOOL      "Use builtin key(s) for validation, no public key data is embedded into the image metadata")
 
 ################################################################################
 

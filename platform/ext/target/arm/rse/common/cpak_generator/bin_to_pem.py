@@ -8,7 +8,7 @@
 import argparse
 import ecdsa
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--input_key_file", help="the input key in binary format", required=True)
 parser.add_argument("--output_key_file", help="the file to output the pem key to", required=True)
 args = parser.parse_args()

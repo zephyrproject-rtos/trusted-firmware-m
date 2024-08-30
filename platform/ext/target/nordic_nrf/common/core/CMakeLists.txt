@@ -39,7 +39,7 @@ include(hal_nordic.cmake)
 # Specify the location of platform specific build dependencies.
 
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
 )
 
 target_sources(tfm_s
@@ -208,6 +208,20 @@ if(BL2)
     )
 endif()
 
+if(NRF_APPROTECT)
+    target_compile_definitions(tfm_spm
+    PRIVATE
+        NRF_APPROTECT
+    )
+endif()
+
+if(NRF_SECURE_APPROTECT)
+    target_compile_definitions(tfm_spm
+    PRIVATE
+        NRF_SECURE_APPROTECT
+    )
+endif()
+
 #========================= Files for building NS side platform ================#
 
 configure_file(config_nordic_nrf_spe.cmake.in
@@ -216,12 +230,6 @@ configure_file(config_nordic_nrf_spe.cmake.in
 install(FILES       ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
-
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
-
 
 install(FILES       startup.c
                     startup_${target}.c

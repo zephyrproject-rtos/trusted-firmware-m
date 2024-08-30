@@ -17,7 +17,7 @@
 
 psa_status_t tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {
-    struct partition_t *partition;
+    const struct partition_t *partition;
     const struct irq_load_info_t *irq_info;
 
     partition = GET_CURRENT_COMPONENT();
@@ -34,7 +34,7 @@ psa_status_t tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 
 psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 {
-    struct partition_t *partition;
+    const struct partition_t *partition;
     const struct irq_load_info_t *irq_info;
 
     partition = GET_CURRENT_COMPONENT();

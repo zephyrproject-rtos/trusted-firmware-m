@@ -154,7 +154,7 @@ The MPS3 board tested is HBI0309C.
 .. note::
 
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
-   be placed on the ``0x10022400`` address by copying ``encrypted_provisioning_bundle.bin`` and
+   be placed on the ``0x10022400`` address by copying ``provisioning_bundle.bin`` and
    renaming it to ``prv.bin``, then extending the images.txt with::
 
     IMAGE2UPDATE: AUTO
@@ -220,7 +220,7 @@ The MPS3 board tested is HBI0309C.
 .. note::
 
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
-   be placed on the ``0x10022400`` address by copying ``encrypted_provisioning_bundle.bin`` and
+   be placed on the ``0x10022400`` address by copying ``provisioning_bundle.bin`` and
    renaming it to ``prv.bin``, then extending the images.txt with::
 
     IMAGE2UPDATE: AUTO
@@ -268,9 +268,9 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
    be placed on the ``0x10022000`` address with::
 
-   $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 --data "<path-to-build-directory>/encrypted_provisioning_bundle.bin"@0x10022000
+   $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 --data "<path-to-build-directory>/provisioning_bundle.bin"@0x10022000
 
 
 -------------
 
-*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*

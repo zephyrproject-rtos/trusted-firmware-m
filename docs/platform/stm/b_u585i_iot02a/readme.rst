@@ -16,6 +16,9 @@ line arguments. Required arguments are noted below.
 The following instructions build multi-core TF-M with regression test suites
 in Isolation Level 1.
 
+In common STM (``platform\ext\target\stm\common\build_stm``)
+There are scripts that help users to build the TF-M project on all STM platforms
+
 .. code-block:: bash
 
 
@@ -23,7 +26,7 @@ in Isolation Level 1.
     cd <trusted-firmware-m folder>
 
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    git checkout <recommended tf-m-tests commit>
+    git checkout <recommended tf-m-tests commit> (..\trusted-firmware-m\lib\ext\tf-m-tests\version.txt)
 
     mkdir build_s && cd build_s
 
@@ -52,7 +55,7 @@ the attestation service in Isolation Level 1 on Linux.
     cd <trusted-firmware-m folder>
 
     git clone https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    git checkout <recommended tf-m-tests commit>
+    git checkout <recommended tf-m-tests commit> (..\trusted-firmware-m\lib\ext\tf-m-tests\version.txt)
 
     mkdir build_s && cd build_s
 

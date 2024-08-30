@@ -110,7 +110,7 @@ def encrypt_binary_blob(blob, counter_val, encrypt_key):
     cipher = Cipher(algorithms.AES(encrypt_key), modes.CTR(counter_val))
     return cipher.encryptor().update(blob)
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--input_file", help="the image to process", required=True)
 parser.add_argument("--img_version", help="version of the image", required=True)
 parser.add_argument("--img_security_counter", help="Secuity counter value for the image", required=True)

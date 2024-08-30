@@ -11,6 +11,8 @@
 #include "stddef.h"
 #include "uuid.h"
 
+#include "tfm_plat_defs.h"
+
 #define PARTITION_TYPE_GPT     0xee
 #define EFI_NAMELEN_MAX        36
 #define GPT_HEADER_OFFSET      PLAT_PARTITION_BLOCK_SIZE
@@ -58,10 +60,10 @@ typedef struct gpt_header {
  *                           outside the mapped region.
  * \param[out] header        Pointer to a gpt_header_t struct that will be
  *                           filled with the header data.
- * \return                   0 if operation completed successfully, another
- *                           value on error.
+ * \return                   TFM_PLAT_ERR_SUCCESS if operation completed
+ *                           successfully, another value on error.
  */
-int gpt_get_header(uint32_t table_base, size_t atu_slot_size,
+enum tfm_plat_err_t gpt_get_header(uint32_t table_base, size_t atu_slot_size,
                    gpt_header_t *header);
 
 /**
@@ -85,10 +87,10 @@ int gpt_get_header(uint32_t table_base, size_t atu_slot_size,
  *                              reads outside the mapped region.
  * \param[out] entry            Pointer to a gpt_entry_t struct that will be
  *                              filled with the list entry data.
- * \return                      0 if operation completed successfully, another
- *                              value on error.
+ * \return                      TFM_PLAT_ERR_SUCCESS if operation completed
+ *                              successfully, another value on error.
  */
-int gpt_get_list_entry_by_name(uint32_t list_base, uint32_t list_num_entries,
+enum tfm_plat_err_t gpt_get_list_entry_by_name(uint32_t list_base, uint32_t list_num_entries,
                                size_t list_entry_size, uint8_t *name,
                                size_t name_size, size_t atu_slot_size,
                                gpt_entry_t *entry);

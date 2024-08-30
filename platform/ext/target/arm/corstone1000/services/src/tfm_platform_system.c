@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,9 +28,6 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
 
         case IOCTL_CORSTONE1000_FWU_FLASH_IMAGES:
             result = corstone1000_fwu_flash_image();
-            if (!result) {
-                NVIC_SystemReset();
-            }
             break;
 
         case IOCTL_CORSTONE1000_FWU_HOST_ACK:

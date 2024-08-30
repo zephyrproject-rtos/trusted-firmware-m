@@ -31,17 +31,27 @@ os.environ['LC_ALL'] = 'C.UTF-8'
 os.environ['LANG'] = 'C.UTF-8'
 
 
-def get_key_hash_c_array(key_file):
+def get_key_hash_c_array(key_file, mcuboot_hw_key):
     key = imgtool.main.load_key(key_file)
-    digest = Hash(SHA256())
-    digest.update(key.get_public_bytes())
-    return hex_to_c_array(digest.finalize())
+    key_bytes = []
+    if mcuboot_hw_key == "ON":
+        digest = Hash(SHA256())
+        digest.update(key.get_public_bytes())
+        key_bytes = digest.finalize()
+    else:
+        # If the full key is used then use only the raw key
+        # bit string (subjectPublicKey). The offset of the
+        # bit string is 26, so drop the first 26 bytes.
+        key_bytes = key.get_public_bytes()[26:]
+
+    return hex_to_c_array(key_bytes)
 
 
 @click.argument('outfile')
 @click.option('--template_path', metavar='filename', required=True)
 @click.option('--bl1_rotpk_0', metavar='key', required=True)
 @click.option('--bl2_encryption_key_path', metavar='filename', required=True)
+@click.option('--bl2_mcuboot_hw_key', metavar='string', required=True)
 @click.option('--bl2_rot_priv_key_0', metavar='filename', required=True)
 @click.option('--bl2_rot_priv_key_1', metavar='filename', required=False)
 @click.option('--bl2_rot_priv_key_2', metavar='filename', required=False)
@@ -63,6 +73,7 @@ def generate_provisioning_data_c(outfile,
                                  template_path,
                                  bl1_rotpk_0,
                                  bl2_encryption_key_path,
+                                 bl2_mcuboot_hw_key,
                                  bl2_rot_priv_key_0,
                                  bl2_rot_priv_key_1,
                                  bl2_rot_priv_key_2,
@@ -86,19 +97,23 @@ def generate_provisioning_data_c(outfile,
 
     bl2_rot_pub_key_0_hash = ""
     if bool(bl2_rot_priv_key_0) is True:
-        bl2_rot_pub_key_0_hash = get_key_hash_c_array(bl2_rot_priv_key_0)
+        bl2_rot_pub_key_0_hash = get_key_hash_c_array(
+            bl2_rot_priv_key_0, bl2_mcuboot_hw_key)
 
     bl2_rot_pub_key_1_hash = ""
     if bool(bl2_rot_priv_key_1) is True:
-        bl2_rot_pub_key_1_hash = get_key_hash_c_array(bl2_rot_priv_key_1)
+        bl2_rot_pub_key_1_hash = get_key_hash_c_array(
+            bl2_rot_priv_key_1, bl2_mcuboot_hw_key)
 
     bl2_rot_pub_key_2_hash = ""
     if bool(bl2_rot_priv_key_2) is True:
-        bl2_rot_pub_key_2_hash = get_key_hash_c_array(bl2_rot_priv_key_2)
+        bl2_rot_pub_key_2_hash = get_key_hash_c_array(
+            bl2_rot_priv_key_2, bl2_mcuboot_hw_key)
 
     bl2_rot_pub_key_3_hash = ""
     if bool(bl2_rot_priv_key_3) is True:
-        bl2_rot_pub_key_3_hash = get_key_hash_c_array(bl2_rot_priv_key_3)
+        bl2_rot_pub_key_3_hash = get_key_hash_c_array(
+            bl2_rot_priv_key_3, bl2_mcuboot_hw_key)
 
     if bool(implementation_id) is False:
         implementation_id = hex_to_c_array(os.urandom(32))

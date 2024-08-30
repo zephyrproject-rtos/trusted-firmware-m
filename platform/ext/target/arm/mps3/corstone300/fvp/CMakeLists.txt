@@ -15,7 +15,6 @@ add_library(flash_drivers_bl2 STATIC)
 
 target_include_directories(flash_drivers
     INTERFACE
-        ${PLATFORM_DIR}/ext/driver
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/secure
         ${CMAKE_CURRENT_SOURCE_DIR}/partition
         ${CORSTONE300_COMMON_DIR}/partition

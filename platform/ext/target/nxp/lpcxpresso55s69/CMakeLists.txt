@@ -44,9 +44,9 @@ target_sources(tfm_s
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -234,11 +234,6 @@ install(DIRECTORY   ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
 
 install(DIRECTORY   ${NXP_HAL_FILE_PATH}/common/Native_Driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 install(FILES       ${TARGET_PLATFORM_PATH}/project_template/ns/app.h
                     ${TARGET_PLATFORM_PATH}/project_template/ns/board.h

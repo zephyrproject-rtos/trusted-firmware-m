@@ -33,7 +33,7 @@ def chunk_bytes(x, n):
 def round_up(x, boundary):
     return ((x + (boundary - 1)) // boundary) * boundary
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--input_image", help="the image to create table from", required=True)
 parser.add_argument("--encrypt_key_file", help="Key to encrypt image with", required=False)
 parser.add_argument("--image_version", help="Version of the image", required=True)

@@ -15,9 +15,9 @@ target_sources(tfm_s
         device/source/startup_corstone315.c
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -249,6 +249,7 @@ target_compile_definitions(platform_region_defs
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
 )
 
@@ -266,7 +267,6 @@ add_library(flash_drivers INTERFACE)
 target_include_directories(flash_drivers
     INTERFACE
         cmsis_drivers/config/secure
-        ${PLATFORM_DIR}/ext/driver
         partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
@@ -276,6 +276,11 @@ target_sources(flash_drivers
     INTERFACE
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+)
+
+target_link_libraries(flash_drivers
+    INTERFACE
+        cmsis
 )
 
 include(libflash_drivers.cmake)
@@ -451,10 +456,6 @@ install(DIRECTORY   device
 
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/arm/drivers
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm)
-
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 install(FILES       target_cfg.h
                     tfm_peripherals_def.h

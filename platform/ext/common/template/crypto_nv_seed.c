@@ -48,7 +48,7 @@ int tfm_plat_crypto_nv_seed_read(unsigned char *buf, size_t buf_len)
 
     status = psa_its_get(uid, 0, buf_len, buf, &data_length);
 
-    if (status == PSA_SUCCESS && data_length == buf_len) {
+    if ((status == PSA_SUCCESS) && (data_length == buf_len)) {
         return TFM_CRYPTO_NV_SEED_SUCCESS;
     } else {
         return TFM_CRYPTO_NV_SEED_FAILED;

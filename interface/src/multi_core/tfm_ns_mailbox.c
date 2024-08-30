@@ -53,13 +53,19 @@ static inline void clear_queue_slot_woken(uint8_t idx)
 static inline void clear_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        MAILBOX_INVALIDATE_CACHE(&mailbox_queue_ptr->status,
+                                 sizeof(mailbox_queue_ptr->status));
         mailbox_queue_ptr->status.replied_slots &= ~(1UL << idx);
+        MAILBOX_CLEAN_CACHE(&mailbox_queue_ptr->status,
+                            sizeof(mailbox_queue_ptr->status));
     }
 }
 
 static inline bool is_queue_slot_replied(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        MAILBOX_INVALIDATE_CACHE(&mailbox_queue_ptr->status,
+                                 sizeof(mailbox_queue_ptr->status));
         return mailbox_queue_ptr->status.replied_slots & (1UL << idx);
     }
 
@@ -74,21 +80,20 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
 
     tfm_ns_mailbox_os_spin_lock();
     status = queue->empty_slots;
-    tfm_ns_mailbox_os_spin_unlock();
 
     if (!status) {
         /* No empty slot */
+        tfm_ns_mailbox_os_spin_unlock();
         return NUM_MAILBOX_QUEUE_SLOT;
     }
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
         if (status & (1 << idx)) {
+            clear_queue_slot_empty(queue, idx);
             break;
         }
     }
 
-    tfm_ns_mailbox_os_spin_lock();
-    clear_queue_slot_empty(queue, idx);
     tfm_ns_mailbox_os_spin_unlock();
 
     return idx;
@@ -125,6 +130,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
     msg_ptr->call_type = call_type;
     memcpy(&msg_ptr->params, params, sizeof(msg_ptr->params));
     msg_ptr->client_id = client_id;
+    MAILBOX_CLEAN_CACHE(msg_ptr, sizeof(*msg_ptr));
 
     /*
      * Fetch the current task handle. The task will be woken up according the
@@ -146,7 +152,10 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
 
 static int32_t mailbox_rx_client_reply(uint8_t idx, int32_t *reply)
 {
-    *reply = mailbox_queue_ptr->slots[idx].reply.return_val;
+    struct mailbox_slot_t *slot = &mailbox_queue_ptr->slots[idx];
+
+    MAILBOX_INVALIDATE_CACHE(&slot->reply, sizeof(slot->reply));
+    *reply = slot->reply.return_val;
 
     /* Clear up the owner field */
     set_msg_owner(idx, NULL);
@@ -234,9 +243,9 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
         }
 
         /* Set woken-up flag */
-        tfm_ns_mailbox_hal_enter_critical_isr();
+        tfm_ns_mailbox_os_spin_lock();
         set_queue_slot_woken(idx);
-        tfm_ns_mailbox_hal_exit_critical_isr();
+        tfm_ns_mailbox_os_spin_unlock();
 
         tfm_ns_mailbox_os_wake_task_isr(
                                      mailbox_queue_ptr->slots_ns[idx].owner);

@@ -25,6 +25,7 @@ set_target_properties(bl2
     PROPERTIES
         SUFFIX ".axf"
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        ADDITIONAL_CLEAN_FILES "${CMAKE_BINARY_DIR}/generated;${CMAKE_BINARY_DIR}/bin/bl2.map"
 )
 
 target_include_directories(bl2
@@ -94,9 +95,9 @@ target_compile_definitions(bl2_mbedcrypto_config
         $<$<STREQUAL:${SIG_TYPE},EC>:MCUBOOT_SIGN_EC${SIG_LEN}>
         MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
         MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${MCUBOOT_PSA_CRYPTO_CONFIG_FILEPATH}"
-        # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
-        $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
         $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
+        # Specific option required on thin_psa_crypto_core.c
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:BLX_BUILTIN_KEY_LOADER>
 )
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
@@ -118,7 +119,7 @@ set(MBEDTLS_TARGET_PREFIX bl2_)
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto EXCLUDE_FROM_ALL)
-set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
 if(NOT TARGET ${MBEDTLS_TARGET_PREFIX}mbedcrypto)
     message(FATAL_ERROR "Target ${MBEDTLS_TARGET_PREFIX}mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?

@@ -246,6 +246,16 @@
 #define NS_AGENT_MAILBOX_STACK_SIZE            0x800
 #endif
 
+/* Whether the mailbox itself is in memory that is uncached in the SPE */
+#ifndef MAILBOX_IS_UNCACHED_S
+#define MAILBOX_IS_UNCACHED_S                  1
+#endif
+
+/* Whether the mailbox itself is in memory that is uncached in the NSPE */
+#ifndef MAILBOX_IS_UNCACHED_NS
+#define MAILBOX_IS_UNCACHED_NS                 1
+#endif
+
 /* SPM Configs */
 
 #ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
@@ -270,9 +280,24 @@
 #define CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT 0
 #endif
 
+/*
+ * tfm_hal_post_partition_init_hook is called if this option is enabled.
+ * It's called by SPM right before starting scheduler.
+ */
+#ifndef CONFIG_TFM_POST_PARTITION_INIT_HOOK
+#define CONFIG_TFM_POST_PARTITION_INIT_HOOK     0
+#endif
+
 /* Enable OTP/NV_COUNTERS emulation in RAM */
 #ifndef OTP_NV_COUNTERS_RAM_EMULATION
 #define OTP_NV_COUNTERS_RAM_EMULATION           0
+#endif
+
+/* Error Codes Configs */
+
+/* Enable unique error codes */
+#ifndef TFM_UNIQUE_ERROR_CODES
+#define TFM_UNIQUE_ERROR_CODES 0
 #endif
 
 #endif /* __CONFIG_BASE_H__ */

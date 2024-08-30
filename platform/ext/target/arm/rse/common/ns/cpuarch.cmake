@@ -5,5 +5,5 @@
 #
 #-------------------------------------------------------------------------------
 
-# This is just a wrapper to sort out path issues
-include(${CMAKE_CURRENT_LIST_DIR}/config/subplatform/cpuarch.cmake)
+# Use common config for NS
+include(${CMAKE_CURRENT_LIST_DIR}/config/common/cpuarch.cmake)

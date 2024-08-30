@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "cmsis.h"
+
 #include "tfm_mailbox.h"
 
 #ifdef __cplusplus
@@ -23,6 +25,16 @@ extern "C" {
 
 #if !defined(TFM_MULTI_CORE_NS_OS) && (NUM_MAILBOX_QUEUE_SLOT > 1)
 #pragma message("Note: NUM_MAILBOX_QUEUE_SLOT is set to more than 1 in NS bare metal environment")
+#endif
+
+/* If there's no dcache at all, the SCB cache functions won't exist */
+/* If the mailbox is uncached on the NS side, no need to flush and invalidate */
+#if !defined(__DCACHE_PRESENT) || (__DCACHE_PRESENT == 0U) || (MAILBOX_IS_UNCACHED_NS == 1)
+#define MAILBOX_CLEAN_CACHE(addr, size) __DSB()
+#define MAILBOX_INVALIDATE_CACHE(addr, size) do {} while (0)
+#else
+#define MAILBOX_CLEAN_CACHE(addr, size) SCB_CleanDCache_by_Addr((addr), (size))
+#define MAILBOX_INVALIDATE_CACHE(addr, size) SCB_InvalidateDCache_by_Addr((addr), (size))
 #endif
 
 /*
@@ -50,11 +62,11 @@ struct ns_mailbox_slot_t {
 
 /* NSPE mailbox queue */
 struct ns_mailbox_queue_t {
-    struct mailbox_status_t status;
+    struct mailbox_status_t status MAILBOX_ALIGN;
     struct mailbox_slot_t slots[NUM_MAILBOX_QUEUE_SLOT];
 
     /* Following data are not shared with secure */
-    struct ns_mailbox_slot_t slots_ns[NUM_MAILBOX_QUEUE_SLOT];
+    struct ns_mailbox_slot_t slots_ns[NUM_MAILBOX_QUEUE_SLOT] MAILBOX_ALIGN;
 
     mailbox_queue_status_t   empty_slots;       /* Bitmask of empty slots */
 
@@ -143,6 +155,9 @@ int32_t tfm_ns_mailbox_hal_notify_peer(void);
 /**
  * \brief Enter critical section of NSPE mailbox.
  *
+ * Is used to lock data shared between cores running secure and non-secure side.
+ * Should not be used to lock non-secure data that are not shared with secure core.
+ *
  * \note The implementation depends on platform specific hardware and use case.
  */
 void tfm_ns_mailbox_hal_enter_critical(void);
@@ -156,6 +171,9 @@ void tfm_ns_mailbox_hal_exit_critical(void);
 
 /**
  * \brief Enter critical section of NSPE mailbox in IRQ handler.
+ *
+ * Is used to lock data shared between cores running secure and non-secure side.
+ * Should not be used to lock non-secure data that are not shared with secure core.
  *
  * \note The implementation depends on platform specific hardware and use case.
  */
@@ -350,16 +368,25 @@ static inline void set_queue_slot_pend(struct ns_mailbox_queue_t *queue_ptr,
                                        uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
+        MAILBOX_INVALIDATE_CACHE(&queue_ptr->status,
+                                 sizeof(queue_ptr->status));
         queue_ptr->status.pend_slots |= (1UL << idx);
+        MAILBOX_CLEAN_CACHE(&queue_ptr->status,
+                            sizeof(queue_ptr->status));
     }
 }
 
 static inline mailbox_queue_status_t clear_queue_slot_all_replied(
                                            struct ns_mailbox_queue_t *queue_ptr)
 {
-    mailbox_queue_status_t status = queue_ptr->status.replied_slots;
+    mailbox_queue_status_t status;
 
+    MAILBOX_INVALIDATE_CACHE(&queue_ptr->status,
+                             sizeof(queue_ptr->status));
+    status = queue_ptr->status.replied_slots;
     queue_ptr->status.replied_slots = 0;
+    MAILBOX_CLEAN_CACHE(&queue_ptr->status,
+                        sizeof(queue_ptr->status));
     return status;
 }
 

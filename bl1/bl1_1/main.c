@@ -20,6 +20,10 @@
 #include "image.h"
 #include "fih.h"
 
+#if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
+#include "bl1_1_suites.h"
+#endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
+
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
@@ -57,7 +61,10 @@ static void collect_boot_measurement(void)
 }
 #endif /* TFM_MEASURED_BOOT_API */
 
-fih_int validate_image_at_addr(const uint8_t *image)
+#ifndef TEST_BL1_1
+static
+#endif
+fih_int bl1_1_validate_image_at_addr(const uint8_t *image)
 {
     enum tfm_plat_err_t plat_err;
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
@@ -66,20 +73,20 @@ fih_int validate_image_at_addr(const uint8_t *image)
     FIH_CALL(bl1_sha256_compute, fih_rc, image, BL1_2_CODE_SIZE,
                                          computed_bl1_2_hash);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_2_IMAGE_HASH, BL1_2_HASH_SIZE,
                                  stored_bl1_2_hash);
     fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_CALL(bl_fih_memeql, fih_rc, computed_bl1_2_hash,
                                     stored_bl1_2_hash, BL1_2_HASH_SIZE);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+        FIH_RET(fih_rc);
     }
 
     FIH_RET(FIH_SUCCESS);
@@ -87,7 +94,6 @@ fih_int validate_image_at_addr(const uint8_t *image)
 
 int main(void)
 {
-    int rc;
     fih_int fih_rc = FIH_FAILURE;
     fih_int recovery_succeeded = FIH_FAILURE;
 
@@ -96,6 +102,10 @@ int main(void)
         FIH_PANIC;
     }
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
+
+#if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
+    run_bl1_1_testsuite();
+#endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
@@ -111,10 +121,6 @@ int main(void)
         FIH_PANIC;
     }
 
-#ifdef TEST_BL1_1
-    run_bl1_1_testsuite();
-#endif /* TEST_BL1_1 */
-
     fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
@@ -127,7 +133,7 @@ int main(void)
             FIH_PANIC;
         }
 
-        FIH_CALL(validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
+        FIH_CALL(bl1_1_validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
 
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");

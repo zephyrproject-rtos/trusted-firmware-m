@@ -55,7 +55,7 @@ int flash_area_get_sectors(int idx, uint32_t *cnt, struct flash_sector *ret)
 
     rem_len = fa->fa_size;
     *cnt = 0;
-    while (rem_len > 0 && *cnt < max_cnt) {
+    while ((rem_len > 0) && (*cnt < max_cnt)) {
         if (rem_len < FLASH_AREA_IMAGE_SECTOR_SIZE) {
             BOOT_LOG_ERR("area %d size 0x%x not divisible by sector size 0x%x",
                          idx, fa->fa_size, FLASH_AREA_IMAGE_SECTOR_SIZE);

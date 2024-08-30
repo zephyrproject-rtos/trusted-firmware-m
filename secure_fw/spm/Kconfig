@@ -16,7 +16,7 @@ config TFM_ISOLATION_LEVEL
       IPC backend can support all 3 levels.
       Isolation level 3 requires platform support.
 
-choice
+choice CONFIG_TFM_SPM_BACKEND_CHOICE
     prompt "SPM Backend"
 
     config CONFIG_TFM_SPM_BACKEND_SFN
@@ -37,7 +37,7 @@ config CONFIG_TFM_SPM_BACKEND
     default "SFN" if CONFIG_TFM_SPM_BACKEND_SFN
     default ""
 
-choice
+choice TFM_FIH_PROFILE_CHOICE
     prompt "FIH Profile"
     default TFM_FIH_PROFILE_OFF
     help

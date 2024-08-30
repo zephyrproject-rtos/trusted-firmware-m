@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 #ifdef HALT_ON_FATAL_ERROR
-#define ERROR_HALT() while(1);
+#define ERROR_HALT() while(1) { __asm volatile ("wfi"); }
 #else
 #define ERROR_HALT()
 #endif /* HALT_ON_FATAL_ERROR */
@@ -34,8 +34,8 @@ void log_error(char *file, uint32_t line, uint32_t err, void *sp, bool is_fatal)
     uint32_t foo; \
     if (log_error_permissions_check(x, true)) { \
         log_error(ERR_FILE, ERR_LINE, x, &foo, true); \
+        ERROR_HALT(); \
     } \
-    ERROR_HALT(); \
 } while(0);
 #else
 #define FATAL_ERR(x) ERROR_HALT();

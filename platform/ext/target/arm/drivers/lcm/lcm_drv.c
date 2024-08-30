@@ -113,25 +113,28 @@ static int is_pointer_word_aligned(void *ptr) {
     return !((uint32_t)ptr & (sizeof(uint32_t) - 1));
 }
 
-static enum lcm_error_t rma_erase_all_keys(struct lcm_dev_t *dev)
+static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
+                                uint32_t len, uint32_t *p_buf_word)
 {
-    enum lcm_error_t err;
+    uint32_t idx;
+    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+
+    /* Perform the actual write */
+    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
+        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
+    }
+}
+
+static void rma_erase_all_keys(struct lcm_dev_t *dev)
+{
     uint32_t idx;
     uint32_t otp_overwrite_val = 0xFFFFFFFFu;
 
-    /* Overwrite all secret keys, and rotpk, with all-one words */
-    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, tp_mode_config);
+    /* Overwrite all secret keys with all-one words */
+    for (idx = 0; idx < offsetof(struct lcm_otp_layout_t, rotpk);
          idx += sizeof(uint32_t)) {
-        err = lcm_otp_write(dev, idx, sizeof(otp_overwrite_val),
-                            (uint8_t *)&otp_overwrite_val);
-        /* The HW keys are writable in RMA state, but not readable */
-        if (err != LCM_ERROR_NONE && err != LCM_ERROR_WRITE_VERIFY_FAIL) {
-            FATAL_ERR(err);
-            return err;
-        }
+        otp_write_unchecked(dev, idx, sizeof(otp_overwrite_val), &otp_overwrite_val);
     }
-
-    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
@@ -147,26 +150,21 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
 
     if (lcs == LCM_LCS_SE) {
         if (p_lcm->key_err) {
-            FATAL_ERR(LCM_ERROR_INVALID_KEY);
-            return LCM_ERROR_INVALID_KEY;
+            FATAL_ERR(LCM_ERROR_INIT_INVALID_KEY);
+            return LCM_ERROR_INIT_INVALID_KEY;
         }
     } else if (lcs == LCM_LCS_RMA) {
-        err = rma_erase_all_keys(dev);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
+        rma_erase_all_keys(dev);
     }
 
     return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode)
+void lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     *mode = (enum lcm_tp_mode_t)p_lcm->tp_mode;
-
-    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
@@ -184,18 +182,15 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
     }
 
     if (lcs != LCM_LCS_CM) {
-        FATAL_ERR(LCM_ERROR_INVALID_LCS);
-        return LCM_ERROR_INVALID_LCS;
+        FATAL_ERR(LCM_ERROR_SET_TP_MODE_INVALID_LCS);
+        return LCM_ERROR_SET_TP_MODE_INVALID_LCS;
     }
 
-    err = lcm_get_tp_mode(dev, &curr_mode);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_tp_mode(dev, &curr_mode);
 
     if(curr_mode != LCM_TP_MODE_VIRGIN) {
-        FATAL_ERR(LCM_ERROR_INVALID_TRANSITION);
-        return LCM_ERROR_INVALID_TRANSITION;
+        FATAL_ERR(LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION);
+        return LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION;
     }
 
     switch(mode) {
@@ -208,8 +203,8 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
         mode_reg_value = 0xFFFF0000u;
         break;
     default:
-        FATAL_ERR(LCM_ERROR_INVALID_TRANSITION);
-        return LCM_ERROR_INVALID_TRANSITION;
+        FATAL_ERR(LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION);
+        return LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION;
     }
 
     err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, tp_mode_config),
@@ -225,33 +220,27 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
     }
 
     if (readback_reg_value != mode_reg_value) {
-        FATAL_ERR(LCM_ERROR_INTERNAL_ERROR);
-        return LCM_ERROR_INTERNAL_ERROR;
+        FATAL_ERR(LCM_ERROR_SET_TP_MODE_INTERNAL_ERROR);
+        return LCM_ERROR_SET_TP_MODE_INTERNAL_ERROR;
     }
 
-    err = lcm_get_fatal_error(dev, &fatal_err);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
-
+    lcm_get_fatal_error(dev, &fatal_err);
     if (fatal_err == LCM_TRUE) {
-        FATAL_ERR(LCM_ERROR_FATAL_ERR);
-        return LCM_ERROR_FATAL_ERR;
+        FATAL_ERR(LCM_ERROR_SET_TP_MODE_FATAL_ERROR);
+        return LCM_ERROR_SET_TP_MODE_FATAL_ERROR;
     }
 
     return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled)
+void lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     *enabled = (enum lcm_bool_t)p_lcm->sp_enable;
-
-    return LCM_ERROR_NONE;
 }
 
-static inline enum lcm_error_t mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
+static inline void mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     size_t idx;
@@ -273,16 +262,21 @@ static inline enum lcm_error_t mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
 
         p_lcm->dcu_en[idx] = dcu_val;
     }
-
-    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
-    enum lcm_error_t err;
     uint32_t idx;
+    enum lcm_tp_mode_t tp_mode;
+
+    lcm_get_tp_mode(dev, &tp_mode);
+
+    if (!((tp_mode == LCM_TP_MODE_PCI) || (tp_mode == LCM_TP_MODE_TCI))) {
+        FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TP_MODE);
+        return LCM_ERROR_SET_LCS_INVALID_TP_MODE;
+    }
 
     mask_dcus_for_sp_enable(dev);
 
@@ -303,77 +297,62 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
 
     while(p_lcm->sp_enable != LCM_TRUE) {}
 
-    err = lcm_get_fatal_error(dev, &fatal_err);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_fatal_error(dev, &fatal_err);
 
     if (fatal_err == LCM_TRUE) {
-        FATAL_ERR(LCM_ERROR_FATAL_ERR);
-        return LCM_ERROR_FATAL_ERR;
+        FATAL_ERR(LCM_ERROR_SET_SP_ENABLED_FATAL_ERROR);
+        return LCM_ERROR_SET_SP_ENABLED_FATAL_ERROR;
     }
 
     return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error)
+void lcm_get_fatal_error(struct lcm_dev_t *dev, enum lcm_bool_t *error)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     *error = (enum lcm_bool_t)p_lcm->fatal_err;
-
-    return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_set_fatal_error(struct lcm_dev_t *dev)
+void lcm_set_fatal_error(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     /* High hamming-weight magic constant used to trigger fatal error state */
     p_lcm->fatal_err = 0xFA7A1EEEu;
-
-    return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc)
+void lcm_get_gppc(struct lcm_dev_t *dev, uint32_t *gppc)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     *gppc = p_lcm->gppc;
-
-    return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size)
+void lcm_get_otp_size(struct lcm_dev_t *dev, uint32_t *size)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
 
     *size = p_lcm->otp_size_in_bytes;
-
-    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
-    enum lcm_error_t err;
 
-    err = lcm_get_fatal_error(dev, &fatal_err);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_fatal_error(dev, &fatal_err);
 
     if (fatal_err == LCM_TRUE) {
-        FATAL_ERR(LCM_ERROR_FATAL_ERR);
-        return LCM_ERROR_FATAL_ERR;
+        FATAL_ERR(LCM_ERROR_GET_LCS_FATAL_ERROR);
+        return LCM_ERROR_GET_LCS_FATAL_ERROR;
     }
 
 
     *lcs = (enum lcm_lcs_t)p_lcm->lcs_value;
 
     if (*lcs == LCM_LCS_INVALID) {
-        return LCM_ERROR_INVALID_LCS;
+        return LCM_ERROR_GET_LCS_INVALID_LCS;
     }
 
     return LCM_ERROR_NONE;
@@ -390,12 +369,12 @@ static enum lcm_error_t count_zero_bits(const uint32_t *addr, uint32_t len,
                                              addr, len, zero_bits, sizeof(uint32_t),
                                              NULL);
 
-    if (ic_err == INTEGRITY_CHECKER_ERROR_NONE) {
-        return LCM_ERROR_NONE;
-    } else {
-        FATAL_ERR(LCM_ERROR_INTERNAL_ERROR);
-        return LCM_ERROR_INTERNAL_ERROR;
+    if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
+        FATAL_ERR(ic_err);
+        return ic_err;
     }
+
+    return LCM_ERROR_NONE;
 }
 #else
 static enum lcm_error_t count_zero_bits(const uint32_t *addr, uint32_t len,
@@ -427,18 +406,6 @@ static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
 
     return count_zero_bits((uint32_t *)(((uint8_t *)p_lcm->raw_otp) + offset),
                            len, zero_bits);
-}
-
-static void otp_write_unchecked(struct lcm_dev_t *dev, uint32_t offset,
-                                uint32_t len, uint32_t *p_buf_word)
-{
-    uint32_t idx;
-    struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
-
-    /* Perform the actual write */
-    for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
-        p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx] = p_buf_word[idx];
-    }
 }
 
 static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
@@ -514,7 +481,7 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
     }
 
     if (config_val != 0) {
-        return LCM_ERROR_WRITE_VERIFY_FAIL;
+        return LCM_ERROR_CM_TO_DM_WRITE_VERIFY_FAIL;
     }
 
     config_val = 0;
@@ -581,7 +548,7 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
     /* This OTP field doesn't read-back as written, but that isn't an error */
     err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, dm_config),
                         sizeof(uint32_t), (uint8_t *)&config_val);
-    if (!(err == LCM_ERROR_NONE || err == LCM_ERROR_WRITE_VERIFY_FAIL)) {
+    if (!(err == LCM_ERROR_NONE || err == LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL)) {
         FATAL_ERR(err);
         return err;
     }
@@ -596,8 +563,8 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
     }
 
     if (config_val != 0) {
-        FATAL_ERR(LCM_ERROR_WRITE_VERIFY_FAIL);
-        return LCM_ERROR_WRITE_VERIFY_FAIL;
+        FATAL_ERR(LCM_ERROR_DM_TO_SE_WRITE_VERIFY_FAIL);
+        return LCM_ERROR_DM_TO_SE_WRITE_VERIFY_FAIL;
     }
 
     return LCM_ERROR_NONE;
@@ -642,19 +609,13 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
         return LCM_ERROR_NONE;
     }
 
-    err = lcm_get_tp_mode(dev, &tp_mode);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_tp_mode(dev, &tp_mode);
     if (!(tp_mode == LCM_TP_MODE_PCI || tp_mode == LCM_TP_MODE_TCI)) {
-        FATAL_ERR(LCM_ERROR_INVALID_TP_MODE);
-        return LCM_ERROR_INVALID_TP_MODE;
+        FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TP_MODE);
+        return LCM_ERROR_SET_LCS_INVALID_TP_MODE;
     }
 
-    err = lcm_get_sp_enabled(dev, &sp_enable);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_sp_enabled(dev, &sp_enable);
     if (sp_enable != LCM_TRUE) {
         err = lcm_set_sp_enabled(dev);
         if (err != LCM_ERROR_NONE) {
@@ -663,38 +624,32 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
     }
 
     do {
-        err = lcm_get_sp_enabled(dev, &sp_enable);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
-        err = lcm_get_fatal_error(dev, &fatal_err);
-        if (err != LCM_ERROR_NONE) {
-            return err;
-        }
+        lcm_get_sp_enabled(dev, &sp_enable);
+        lcm_get_fatal_error(dev, &fatal_err);
     } while (sp_enable == LCM_FALSE && fatal_err == LCM_FALSE);
 
     if (fatal_err == LCM_TRUE) {
-        FATAL_ERR(LCM_ERROR_FATAL_ERR);
-        return LCM_ERROR_FATAL_ERR;
+        FATAL_ERR(LCM_ERROR_SET_LCS_FATAL_ERROR);
+        return LCM_ERROR_SET_LCS_FATAL_ERROR;
     }
 
     switch (lcs) {
     case LCM_LCS_CM:
         /* There's no possible valid transition back to CM */
-        FATAL_ERR(LCM_ERROR_INVALID_TRANSITION);
-        return LCM_ERROR_INVALID_TRANSITION;
+        FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TRANSITION);
+        return LCM_ERROR_SET_LCS_INVALID_TRANSITION;
     case LCM_LCS_DM:
         if (curr_lcs != LCM_LCS_CM) {
-            FATAL_ERR(LCM_ERROR_INVALID_TRANSITION);
-            return LCM_ERROR_INVALID_TRANSITION;
+            FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TRANSITION);
+            return LCM_ERROR_SET_LCS_INVALID_TRANSITION;
         }
 
         return cm_to_dm(dev, gppc_val);
 
     case LCM_LCS_SE:
         if (curr_lcs != LCM_LCS_DM) {
-            FATAL_ERR(LCM_ERROR_INVALID_TRANSITION);
-            return LCM_ERROR_INVALID_TRANSITION;
+            FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TRANSITION);
+            return LCM_ERROR_SET_LCS_INVALID_TRANSITION;
         }
 
         return dm_to_se(dev);
@@ -703,13 +658,13 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
         return any_to_rma(dev);
 
     case LCM_LCS_INVALID:
-        FATAL_ERR(LCM_ERROR_INVALID_LCS);
-        return LCM_ERROR_INVALID_LCS;
+        FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_LCS);
+        return LCM_ERROR_SET_LCS_INVALID_LCS;
     }
 
     /* Should never get here */
-    FATAL_ERR(LCM_ERROR_INTERNAL_ERROR);
-    return LCM_ERROR_INTERNAL_ERROR;
+    FATAL_ERR(LCM_ERROR_SET_LCS_INTERNAL_ERROR);
+    return LCM_ERROR_SET_LCS_INTERNAL_ERROR;
 }
 
 static const struct lcm_hw_slot_zero_count_mapping {
@@ -812,7 +767,7 @@ static enum lcm_error_t write_zero_count_if_needed(struct lcm_dev_t *dev,
     assert((zero_bits & ~((1 << mapping->bit_size) - 1)) == 0);
 
     if (zero_bits & ~((1 << mapping->bit_size) - 1)) {
-        return LCM_ERR_INVALID_ZERO_COUNT;
+        return LCM_ERROR_ZERO_COUNT_INVALID;
     }
 
     err = lcm_otp_read(dev, mapping->zero_count_offset, sizeof(otp_word),
@@ -844,28 +799,25 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_buf_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_OTP_WRITE_INVALID_ALIGNMENT);
+        return LCM_ERROR_OTP_WRITE_INVALID_ALIGNMENT;
     }
 
     if (offset & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(LCM_ERROR_INVALID_OFFSET);
-        return LCM_ERROR_INVALID_OFFSET;
+        FATAL_ERR(LCM_ERROR_OTP_WRITE_INVALID_OFFSET);
+        return LCM_ERROR_OTP_WRITE_INVALID_OFFSET;
     }
 
     if (len & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(LCM_ERROR_INVALID_LENGTH);
-        return LCM_ERROR_INVALID_LENGTH;
+        FATAL_ERR(LCM_ERROR_OTP_WRITE_INVALID_LENGTH);
+        return LCM_ERROR_OTP_WRITE_INVALID_LENGTH;
     }
 
-    err = lcm_get_otp_size(dev, &otp_size);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_otp_size(dev, &otp_size);
 
     if (otp_size < (offset + len)) {
-        FATAL_ERR(LCM_ERROR_INVALID_OFFSET);
-        return LCM_ERROR_INVALID_OFFSET;
+        FATAL_ERR(LCM_ERROR_OTP_WRITE_INVALID_OFFSET);
+        return LCM_ERROR_OTP_WRITE_INVALID_OFFSET;
     }
 
     /* Write the zero count if needed */
@@ -880,8 +832,8 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
     /* Verify the write is correct */
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         if (p_buf_word[idx] != p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx]) {
-            NONFATAL_ERR(LCM_ERROR_WRITE_VERIFY_FAIL);
-            return LCM_ERROR_WRITE_VERIFY_FAIL;
+            NONFATAL_ERR(LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL);
+            return LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL;
         }
     }
 
@@ -897,7 +849,6 @@ __attribute__((noinline))
 enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
                               uint32_t len, uint8_t *buf)
 {
-    enum lcm_error_t err;
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     uint32_t *p_buf_word = (uint32_t *)buf;
     uint32_t validation_word;
@@ -905,28 +856,25 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_buf_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_OTP_READ_INVALID_ALIGNMENT);
+        return LCM_ERROR_OTP_READ_INVALID_ALIGNMENT;
     }
 
     if (offset & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(LCM_ERROR_INVALID_OFFSET);
-        return LCM_ERROR_INVALID_OFFSET;
+        FATAL_ERR(LCM_ERROR_OTP_READ_INVALID_OFFSET);
+        return LCM_ERROR_OTP_READ_INVALID_OFFSET;
     }
 
     if (len & (sizeof(uint32_t) - 1)) {
-        FATAL_ERR(LCM_ERROR_INVALID_LENGTH);
-        return LCM_ERROR_INVALID_LENGTH;
+        FATAL_ERR(LCM_ERROR_OTP_READ_INVALID_LENGTH);
+        return LCM_ERROR_OTP_READ_INVALID_LENGTH;
     }
 
-    err = lcm_get_otp_size(dev, &otp_size);
-    if (err != LCM_ERROR_NONE) {
-        return err;
-    }
+    lcm_get_otp_size(dev, &otp_size);
 
     if (otp_size < (offset + len)) {
-        FATAL_ERR(LCM_ERROR_INVALID_OFFSET);
-        return LCM_ERROR_INVALID_OFFSET;
+        FATAL_ERR(LCM_ERROR_OTP_READ_INVALID_OFFSET);
+        return LCM_ERROR_OTP_READ_INVALID_OFFSET;
     }
 
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
@@ -941,8 +889,8 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
         if (offset >= sizeof(struct lcm_otp_layout_t)) {
             validation_word = p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx];
             if (validation_word != p_buf_word[idx]) {
-                FATAL_ERR(LCM_ERROR_READ_VERIFY_FAIL);
-                return LCM_ERROR_READ_VERIFY_FAIL;
+                FATAL_ERR(LCM_ERROR_OTP_READ_READ_VERIFY_FAIL);
+                return LCM_ERROR_OTP_READ_READ_VERIFY_FAIL;
             }
         }
     }
@@ -957,8 +905,8 @@ enum lcm_error_t lcm_dcu_get_enabled(struct lcm_dev_t *dev, uint8_t *val)
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_GET_ENABLED_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_GET_ENABLED_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
@@ -975,7 +923,7 @@ static enum lcm_error_t check_dcu_mask(struct lcm_dev_t *dev, uint32_t *val)
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
         if (val[idx] & ~p_lcm->dcu_disable_mask[idx]) {
-            return LCM_ERR_DCU_MASK_MISMATCH;
+            return LCM_ERROR_DCU_CHECK_MASK_MISMATCH;
         }
     }
 
@@ -990,8 +938,8 @@ enum lcm_error_t lcm_dcu_set_enabled(struct lcm_dev_t *dev, uint8_t *val)
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_SET_ENABLED_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_SET_ENABLED_INVALID_ALIGNMENT;
     }
 
     err = check_dcu_mask(dev, p_val_word);
@@ -1005,8 +953,8 @@ enum lcm_error_t lcm_dcu_set_enabled(struct lcm_dev_t *dev, uint8_t *val)
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
         if (p_lcm->dcu_en[idx] != p_val_word[idx]) {
-            FATAL_ERR(LCM_ERROR_WRITE_VERIFY_FAIL);
-            return LCM_ERROR_WRITE_VERIFY_FAIL;
+            FATAL_ERR(LCM_ERROR_DCU_SET_ENABLED_WRITE_VERIFY_FAIL);
+            return LCM_ERROR_DCU_SET_ENABLED_WRITE_VERIFY_FAIL;
         }
     }
 
@@ -1020,8 +968,8 @@ enum lcm_error_t lcm_dcu_get_locked(struct lcm_dev_t *dev, uint8_t *val)
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_GET_LOCKED_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_GET_LOCKED_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
@@ -1038,8 +986,8 @@ enum lcm_error_t lcm_dcu_set_locked(struct lcm_dev_t *dev, uint8_t *val)
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_SET_LOCKED_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_SET_LOCKED_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
@@ -1056,8 +1004,8 @@ enum lcm_error_t lcm_dcu_get_sp_disable_mask(struct lcm_dev_t *dev, uint8_t *val
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_GET_SP_DISABLE_MASK_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_GET_SP_DISABLE_MASK_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {
@@ -1074,8 +1022,8 @@ enum lcm_error_t lcm_dcu_get_disable_mask(struct lcm_dev_t *dev, uint8_t *val)
     uint32_t idx;
 
     if (!is_pointer_word_aligned(p_val_word)) {
-        FATAL_ERR(LCM_ERROR_INVALID_ALIGNMENT);
-        return LCM_ERROR_INVALID_ALIGNMENT;
+        FATAL_ERR(LCM_ERROR_DCU_GET_DISABLE_MASK_INVALID_ALIGNMENT);
+        return LCM_ERROR_DCU_GET_DISABLE_MASK_INVALID_ALIGNMENT;
     }
 
     for (idx = 0; idx < LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t); idx++) {

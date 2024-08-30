@@ -31,31 +31,6 @@
  */
 #define IS_ALIGNED(val, align) (val == ALIGN_UP(val, align))
 
-/* MHUv3 driver error to MHUv3 wrapper error mapping */
-static enum mhu_error_t error_mapping_to_mhu_error_t(
-    enum mhu_v3_x_error_t err)
-{
-    switch (err) {
-    case MHU_V_3_X_ERR_NONE:
-        return MHU_ERR_NONE;
-
-    case MHU_V_3_X_ERR_NOT_INIT:
-        return MHU_ERR_NOT_INIT;
-
-    case MHU_V_3_X_ERR_UNSUPPORTED_VERSION:
-        return MHU_ERR_UNSUPPORTED_VERSION;
-
-    case MHU_V_3_X_ERR_UNSUPPORTED:
-        return MHU_ERR_UNSUPPORTED;
-
-    case MHU_V_3_X_ERR_INVALID_PARAM:
-        return MHU_ERR_INVALID_ARG;
-
-    default:
-        return MHU_ERR_GENERAL;
-    }
-}
-
 enum mhu_error_t signal_and_wait_for_clear(
        void* mhu_sender_dev, uint32_t value)
 {
@@ -67,38 +42,38 @@ enum mhu_error_t signal_and_wait_for_clear(
     dev = (struct mhu_v3_x_dev_t *)mhu_sender_dev;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_SIGNAL_WAIT_CLEAR_INVALID_ARG;
     }
 
     err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
             &num_channels);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Wait for any pending acknowledgement from transmitter side */
     do {
         err = mhu_v3_x_doorbell_read(dev, num_channels - 1, &read_val);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     } while ((read_val & value) == value);
 
     /* Use the last channel to nofity that a transfer is ready */
     err = mhu_v3_x_doorbell_write(dev, num_channels - 1, value);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Wait until receiver side acknowledges the transfer */
     do {
         err = mhu_v3_x_doorbell_read(dev, num_channels - 1, &read_val);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     } while ((read_val & value) == value);
 
-    return error_mapping_to_mhu_error_t(MHU_V_3_X_ERR_NONE);
+    return err;
 }
 
 enum mhu_error_t wait_for_signal_and_clear (
@@ -112,30 +87,30 @@ enum mhu_error_t wait_for_signal_and_clear (
     dev = (struct mhu_v3_x_dev_t *)mhu_receiver_dev;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_WAIT_SIGNAL_CLEAR_INVALID_ARG;
     }
 
     err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
             &num_channels);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Wait on status register for transmitter side to send data */
     do {
         err = mhu_v3_x_doorbell_read(dev, num_channels - 1, &read_val);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     } while ((read_val & value) != value);
 
     /* Acknowledge the transfer and clear the doorbell register */
     err = mhu_v3_x_doorbell_clear(dev, num_channels - 1, value);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
-    return error_mapping_to_mhu_error_t(MHU_V_3_X_ERR_NONE);
+    return MHU_ERR_NONE;
 }
 
 enum mhu_error_t clear_and_wait_for_signal (
@@ -149,20 +124,20 @@ enum mhu_error_t clear_and_wait_for_signal (
     dev = (struct mhu_v3_x_dev_t *)mhu_receiver_dev;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_CLEAR_WAIT_SIGNAL_INVALID_ARG;
     }
 
     err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
             &num_channels);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Clear all channels */
     for (int i = 0; i < num_channels; ++i) {
         err = mhu_v3_x_doorbell_clear(dev, i, UINT32_MAX);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     }
 
@@ -170,18 +145,18 @@ enum mhu_error_t clear_and_wait_for_signal (
     do {
         err = mhu_v3_x_doorbell_read(dev, num_channels - 1, &read_val);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     } while (read_val != value);
 
-    return error_mapping_to_mhu_error_t(MHU_V_3_X_ERR_NONE);
+    return err;
 }
 
 static enum mhu_error_t validate_buffer_params(uintptr_t buf_addr,
                                                size_t buf_size)
 {
     if ((buf_addr == 0) || (!IS_ALIGNED(buf_addr, 4))) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_VALIDATE_BUFFER_PARAMS_INVALID_ARG;
     }
 
     return MHU_ERR_NONE;
@@ -197,23 +172,23 @@ enum mhu_error_t mhu_init_sender(void *mhu_sender_dev)
     dev = (struct mhu_v3_x_dev_t *)mhu_sender_dev;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_INIT_SENDER_INVALID_ARG;
     }
 
     /* Initialize MHUv3 */
     err = mhu_v3_x_driver_init(dev);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Read the number of doorbell channels implemented in the MHU */
     err = mhu_v3_x_get_num_channel_implemented(
         dev, MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     } else if (num_ch < 2) {
         /* This wrapper requires at least two channels to be implemented */
-        return MHU_ERR_UNSUPPORTED;
+        return MHU_ERR_INIT_SENDER_UNSUPPORTED;
     }
 
     /*
@@ -228,7 +203,7 @@ enum mhu_error_t mhu_init_sender(void *mhu_sender_dev)
         err = mhu_v3_x_channel_interrupt_disable(
             dev, ch, MHU_V3_X_CHANNEL_TYPE_DBCH);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     }
 
@@ -245,37 +220,37 @@ enum mhu_error_t mhu_init_receiver(void *mhu_receiver_dev)
     dev = (struct mhu_v3_x_dev_t *)mhu_receiver_dev;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_INIT_RECEIVER_INVALID_ARG;
     }
 
     /* Initialize MHUv3 */
     err = mhu_v3_x_driver_init(dev);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /* Read the number of doorbell channels implemented in the MHU */
     err = mhu_v3_x_get_num_channel_implemented(
         dev, MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     } else if (num_ch < 2) {
         /* This wrapper requires at least two channels to be implemented */
-        return MHU_ERR_UNSUPPORTED;
+        return MHU_ERR_INIT_RECEIVER_UNSUPPORTED;
     }
 
     /* Mask all channels except the notifying channel */
     for (ch = 0; ch < (num_ch - 1); ++ch) {
         err = mhu_v3_x_doorbell_mask_set(dev, ch, UINT32_MAX);
         if (err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(err);
+            return err;
         }
     }
 
     /* Unmask doorbell notification channel interrupt */
     err = mhu_v3_x_doorbell_mask_clear(dev, (num_ch - 1), UINT32_MAX);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     /*
@@ -285,7 +260,7 @@ enum mhu_error_t mhu_init_receiver(void *mhu_receiver_dev)
     err = mhu_v3_x_channel_interrupt_enable(dev, (num_ch - 1),
                                                 MHU_V3_X_CHANNEL_TYPE_DBCH);
     if (err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(err);
+        return err;
     }
 
     return MHU_ERR_NONE;
@@ -309,7 +284,7 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev, const uint8_t *send_buffer,
     chan = 0;
 
     if (dev == NULL || dev->base == 0) {
-        return MHU_ERR_INVALID_ARG;
+        return MHU_ERR_SEND_DATA_INVALID_ARG;
     }
 
     mhu_err = validate_buffer_params((uintptr_t)send_buffer, size);
@@ -320,13 +295,13 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev, const uint8_t *send_buffer,
     mhu_v3_err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
             &num_channels);
     if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(mhu_v3_err);
+        return mhu_v3_err;
     }
 
     /* First send over the size of the actual message. */
     mhu_v3_err = mhu_v3_x_doorbell_write(dev, chan, (uint32_t)size);
     if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(mhu_v3_err);
+        return mhu_v3_err;
     }
     chan++;
 
@@ -334,7 +309,7 @@ enum mhu_error_t mhu_send_data(void *mhu_sender_dev, const uint8_t *send_buffer,
     for (size_t i = 0; i < size; i += 4) {
         mhu_v3_err = mhu_v3_x_doorbell_write(dev, chan, *buffer++);
         if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(mhu_v3_err);
+            return mhu_v3_err;
         }
         if (++chan == (num_channels - 1)) {
             /* Using the last channel for notifications */
@@ -367,18 +342,18 @@ enum mhu_error_t mhu_wait_data(void *mhu_receiver_dev)
     mhu_v3_err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
                                                &num_channels);
     if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(mhu_v3_err);
+        return mhu_v3_err;
     }
 
     /* Wait for transmitter side to send data */
     do {
         mhu_v3_err = mhu_v3_x_doorbell_read(dev, num_channels - 1, &read_val);
         if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(mhu_v3_err);
+            return mhu_v3_err;
         }
     } while (read_val != MHU_NOTIFY_VALUE);
 
-    return error_mapping_to_mhu_error_t(mhu_v3_err);
+    return mhu_v3_err;
 }
 
 
@@ -404,27 +379,27 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
     mhu_v3_err = mhu_v3_x_get_num_channel_implemented(dev, MHU_V3_X_CHANNEL_TYPE_DBCH,
             &num_channels);
     if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(mhu_v3_err);
+        return mhu_v3_err;
     }
 
     /* The first word is the length of the actual message. */
     mhu_v3_err = mhu_v3_x_doorbell_read(dev, chan, &msg_len);
     if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-        return error_mapping_to_mhu_error_t(mhu_v3_err);
+        return mhu_v3_err;
     }
     chan++;
 
     if (*size < msg_len) {
         /* Message buffer too small */
         *size = msg_len;
-        return MHU_ERR_BUFFER_TOO_SMALL;
+        return MHU_ERR_RECEIVE_DATA_BUFFER_TOO_SMALL;
     }
 
     buffer = (uint32_t *)receive_buffer;
     for (size_t i = 0; i < msg_len; i += 4) {
         mhu_v3_err = mhu_v3_x_doorbell_read(dev, chan, buffer++);
         if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(mhu_v3_err);
+            return mhu_v3_err;
         }
 
         /* Only wait for next transfer if there is still missing data. */
@@ -442,7 +417,7 @@ enum mhu_error_t mhu_receive_data(void *mhu_receiver_dev,
     for (int i = 0; i < num_channels; ++i) {
         mhu_v3_err = mhu_v3_x_doorbell_clear(dev, i, UINT32_MAX);
         if (mhu_v3_err != MHU_V_3_X_ERR_NONE) {
-            return error_mapping_to_mhu_error_t(mhu_v3_err);
+            return mhu_v3_err;
         }
     }
 

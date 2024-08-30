@@ -21,12 +21,32 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "cmsis_compiler.h"
 #include "psa/client.h"
 #include "tfm_mailbox_config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+/*
+ * If the mailbox itself can be cached (in either the SPE or NSPE, or both),
+ * we want to add some padding to avoid any cache line conflicts.
+ * Platforms can set both MAILBOX_IS_UNCACHED_S and MAILBOX_IS_UNCACHED_NS to 1
+ * to shrink the mailbox struct a bit if it cannot be cached.
+ */
+#if (MAILBOX_IS_UNCACHED_S == 1) && (MAILBOX_IS_UNCACHED_NS == 1)
+/* Let the compiler pick the alignment */
+#define MAILBOX_ALIGN
+#else
+#if !defined(MAILBOX_CACHE_LINE_SIZE)
+/* 32 bytes is a common dcache line size on Armv8-M */
+#define MAILBOX_CACHE_LINE_SIZE 32
+#endif
+#define MAILBOX_ALIGN  __ALIGNED(MAILBOX_CACHE_LINE_SIZE)
+#endif
+
 
 /* PSA client call type value */
 #define MAILBOX_PSA_FRAMEWORK_VERSION       (0x1)
@@ -103,13 +123,13 @@ struct mailbox_reply_t {
  * This structure is an ABI between SPE and NSPE mailbox instances.
  * So, it must not include data that are not used by SPE like information about NS threads
  * or that depends on NSPE build settings.
- * TODO: It's good to align each slot structure according to the cache row,
- * so it will be easier to clean and invalidate slot during transfer between cores.
  */
 struct mailbox_slot_t {
-    struct mailbox_msg_t   msg;
-    struct mailbox_reply_t reply;
-};
+    /* In the array, msg must not share a cache line with the preceding reply */
+    struct mailbox_msg_t   msg    MAILBOX_ALIGN;
+    /* reply.return_val must not share a cache line with msg */
+    struct mailbox_reply_t reply  MAILBOX_ALIGN;
+} MAILBOX_ALIGN;
 
 typedef uint32_t   mailbox_queue_status_t;
 
@@ -117,8 +137,8 @@ typedef uint32_t   mailbox_queue_status_t;
  * NSPE mailbox status shared between TF-M and mailbox client.
  * This structure is separated from slots to allow flexible allocation of slots.
  * So, it's safe to change number of slots on non-secure side without rebuild of TF-M.
- * TODO: It's good to align structure according to the cache row,
- * so it will be easier to clean and invalidate slot during transfer between cores.
+ * Access to mailbox status should be guarded by critical section between cores.
+ * Thus there is no need to allocate a separate cache line for each flag.
  */
 struct mailbox_status_t {
     mailbox_queue_status_t   pend_slots;        /* Bitmask of slots pending
@@ -128,12 +148,15 @@ struct mailbox_status_t {
                                                  * containing PSA client call
                                                  * return result
                                                  */
-};
+} MAILBOX_ALIGN;
 
-/* Data used to send information to mailbox partition about mailbox queue allocated by non-secure image */
+/*
+ * Data used to send information to mailbox partition about mailbox queue allocated by non-secure image.
+ * It's expected that data in this structure is not modified by the secure side.
+ */
 struct mailbox_init_t {
     /* Shared data with fixed size */
-    struct mailbox_status_t *status;
+    struct mailbox_status_t *status MAILBOX_ALIGN;
 
     /* Number of slots allocated by NS. */
     uint32_t slot_count;

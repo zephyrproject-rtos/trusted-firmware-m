@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,5 +45,11 @@
 /* CFI Controller */
 #define CFI_S
 
+/* Total number of host cores */
+#if CORSTONE1000_FVP_MULTICORE
+#define PLATFORM_HOST_MAX_CORE_COUNT 4
+#else
+#define PLATFORM_HOST_MAX_CORE_COUNT 1
+#endif
 
 #endif  /* __DEVICE_CFG_H__ */

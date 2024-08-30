@@ -9,7 +9,7 @@
 #include "its_flash_nor.h"
 
 #include "flash_fs/its_flash_fs.h"
-#include "driver/Driver_Flash.h"
+#include "Driver_Flash.h"
 
 /* Valid entries for data item width */
 static const uint32_t data_width_byte[] = {
@@ -80,7 +80,7 @@ static psa_status_t flash_read_unaligned(
         }
 
         /* Record how many target data have been read. */
-        read_length = ((addr - aligned_addr + size >= data_width) ?
+        read_length = (((addr - aligned_addr + size) >= data_width) ?
          (data_width - (addr - aligned_addr)) : size);
 
         /* Copy the read data. */

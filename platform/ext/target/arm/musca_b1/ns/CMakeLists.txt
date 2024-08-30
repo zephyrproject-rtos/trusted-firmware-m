@@ -27,7 +27,6 @@ target_include_directories(platform_ns
         ext/cmsis/Include
         ext/cmsis/Include/m-profile
         ext/common
-        ext/driver
         Native_Driver
         Device/Include
         Device/Config

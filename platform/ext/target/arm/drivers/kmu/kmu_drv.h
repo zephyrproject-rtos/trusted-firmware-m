@@ -25,10 +25,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if TFM_UNIQUE_ERROR_CODES == 1
+#include "error_codes_mapping.h"
+#else
+#define KMU_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
 
 /* Must be at least 16 */
 #define KMU_PRBG_SEED_LEN (32)
@@ -180,18 +187,23 @@ extern "C" {
  * \brief ARM KMU error enumeration types
  */
 enum kmu_error_t {
-    KMU_ERROR_NONE = (0x0u),
-    KMU_ERROR_INVALID_ALIGNMENT,
-    KMU_ERROR_INVALID_LENGTH,
-    KMU_ERROR_INVALID_SLOT,
-    KMU_ERROR_INVALID_EXPORT_ADDR,
+    KMU_ERROR_NONE = 0x0u,
+    KMU_ERROR_INVALID_SLOT = KMU_ERROR_BASE,
+    KMU_ERROR_INIT_INVALID_ALIGNMENT,
     KMU_ERROR_SLOT_LOCKED,
-    KMU_ERROR_SLOT_NOT_LOCKED,
+    KMU_ERROR_SLOT_INTERNAL_ERROR,
     KMU_ERROR_SLOT_INVALIDATED,
-    KMU_ERROR_SLOT_ALREADY_WRITTEN,
-    KMU_ERROR_NOT_READY,
-    KMU_ERROR_INTERNAL_ERROR,
+    KMU_ERROR_SET_KEY_INVALID_ALIGNMENT,
+    KMU_ERROR_SET_KEY_INVALID_LENGTH,
+    KMU_ERROR_SET_KEY_SLOT_ALREADY_WRITTEN,
+    KMU_ERROR_GET_KEY_INVALID_ALIGNMENT,
+    KMU_ERROR_GET_KEY_INVALID_LENGTH,
+    KMU_ERROR_EXPORT_KEY_SLOT_NOT_LOCKED,
+    KMU_ERROR_EXPORT_KEY_INVALID_LENGTH,
+    KMU_ERROR_EXPORT_KEY_INVALID_ADDR,
+    KMU_ERROR_EXPORT_KEY_INTERNAL_ERROR,
     KMU_ERROR_INVALID_DELAY_LENGTH,
+    KMU_ERROR_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 enum kmu_hardware_keyslot_t {
@@ -278,8 +290,6 @@ enum kmu_error_t kmu_get_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *buf,
 enum kmu_error_t kmu_get_key_buffer_ptr(struct kmu_dev_t *dev, uint32_t slot,
                                         volatile uint32_t **key_slot,
                                         size_t *slot_size);
-
-enum kmu_error_t kmu_reset_slot(struct kmu_dev_t *dev, uint32_t slot);
 
 enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot);
 

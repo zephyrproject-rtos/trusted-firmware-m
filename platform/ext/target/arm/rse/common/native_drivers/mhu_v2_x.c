@@ -146,7 +146,7 @@ enum mhu_v2_x_error_t mhu_v2_x_driver_init(struct mhu_v2_x_dev_t *dev,
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if (dev->is_initialized) {
-        return MHU_V_2_X_ERR_ALREADY_INIT;
+        return MHU_V_2_X_ERR_NONE;
     }
 
     if (rev == MHU_REV_READ_FROM_HW) {
@@ -160,7 +160,7 @@ enum mhu_v2_x_error_t mhu_v2_x_driver_init(struct mhu_v2_x_dev_t *dev,
         /* Get bits 7:4 to read major revision */
         if ( ((AIDR >> 4) & 0b1111) != MHU_MAJOR_REV_V2) {
             /* Unsupported MHU version */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INIT_UNSUPPORTED_VERSION;
         } /* No need to save major version, driver only supports MHUv2 */
 
         /* Get bits 3:0 to read minor revision */
@@ -169,7 +169,7 @@ enum mhu_v2_x_error_t mhu_v2_x_driver_init(struct mhu_v2_x_dev_t *dev,
         if (dev->subversion != MHU_MINOR_REV_2_0 &&
             dev->subversion != MHU_MINOR_REV_2_1) {
             /* Unsupported subversion */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INIT_UNSUPPORTED_VERSION;
         }
     } else {
         /* Revisions were provided by caller */
@@ -179,7 +179,7 @@ enum mhu_v2_x_error_t mhu_v2_x_driver_init(struct mhu_v2_x_dev_t *dev,
             dev->subversion = MHU_MINOR_REV_2_1;
         } else {
             /* Unsupported subversion */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INIT_UNSUPPORTED_VERSION;
         }/* No need to save major version, driver only supports MHUv2 */
     }
 
@@ -193,7 +193,7 @@ uint32_t mhu_v2_x_get_num_channel_implemented(const struct mhu_v2_x_dev_t *dev)
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_GET_NUM_CHANNEL_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
@@ -209,14 +209,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_send(const struct mhu_v2_x_dev_t *dev,
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_SEND_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
         (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_set = val;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_SEND_INVALID_ARG;
     }
 }
 
@@ -226,14 +226,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_poll(const struct mhu_v2_x_dev_t *dev,
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_POLL_MHU_NOT_INIT;
     }
 
     if (dev->frame == MHU_V2_X_SENDER_FRAME) {
         *value = (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_st;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_POLL_INVALID_ARG;
     }
 }
 
@@ -243,14 +243,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_clear(const struct mhu_v2_x_dev_t *dev,
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_CLEAR_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_RECEIVER_FRAME) {
         (RECV_FRAME(p_mhu))->rec_ch_window[channel].ch_clr = UINT32_MAX;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_CLEAR_INVALID_ARG;
     }
 }
 
@@ -260,14 +260,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_receive(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_RECEIVE_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_RECEIVER_FRAME) {
         *value = (RECV_FRAME(p_mhu))->rec_ch_window[channel].ch_st;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_RECEIVE_INVALID_ARG;
     }
 }
 
@@ -277,14 +277,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_mask_set(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_MASK_SET_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_RECEIVER_FRAME) {
         (RECV_FRAME(p_mhu))->rec_ch_window[channel].ch_msk_set = mask;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_MASK_SET_INVALID_ARG;
     }
 }
 
@@ -294,14 +294,14 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_mask_clear(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_MASK_CLEAR_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_RECEIVER_FRAME) {
         (RECV_FRAME(p_mhu))->rec_ch_window[channel].ch_msk_clr = mask;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_MASK_CLEAR_INVALID_ARG;
     }
 }
 
@@ -311,18 +311,18 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_interrupt_enable(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_INT_ENABLE_MHU_NOT_INIT;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_1) {
-        return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_2_X_ERR_CHANNEL_INT_ENABLE_UNSUPPORTED_VERSION;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
         (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_int_en = ENABLE;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_INT_ENABLE_INVALID_ARG;
     }
 }
 
@@ -332,18 +332,18 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_interrupt_disable(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_INT_DISABLE_MHU_NOT_INIT;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_1) {
-        return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_2_X_ERR_CHANNEL_INT_DISABLE_UNSUPPORTED_VERSION;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
         (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_int_en = DISABLE;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_INT_DISABLE_INVALID_ARG;
     }
 }
 
@@ -353,18 +353,18 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_interrupt_clear(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CHANNEL_INT_CLEAR_MHU_NOT_INIT;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_1) {
-        return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_2_X_ERR_CHANNEL_INT_CLEAR_UNSUPPORTED_VERSION;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
         (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_int_clr = CLEAR_INTR;
         return MHU_V_2_X_ERR_NONE;
     } else {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CHANNEL_INT_CLEAR_INVALID_ARG;
     }
 }
 
@@ -374,11 +374,11 @@ enum mhu_v2_x_error_t mhu_v2_x_initiate_transfer(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_INIT_TRANSFER_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_INIT_TRANSFER_INVALID_ARG;
     }
 
     (SEND_FRAME(p_mhu))->access_request = ENABLE;
@@ -396,11 +396,11 @@ enum mhu_v2_x_error_t mhu_v2_x_close_transfer(const struct mhu_v2_x_dev_t *dev)
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_CLOSE_TRANSFER_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_CLOSE_TRANSFER_INVALID_ARG;
     }
 
     (SEND_FRAME(p_mhu))->access_request = DISABLE;
@@ -414,11 +414,11 @@ enum mhu_v2_x_error_t mhu_v2_x_get_access_request(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_GET_ACESS_REQUEST_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_GET_ACESS_REQUEST_INVALID_ARG;
     }
 
     *val = (SEND_FRAME(p_mhu))->access_request;
@@ -432,11 +432,11 @@ enum mhu_v2_x_error_t mhu_v2_x_set_access_request(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_SET_ACESS_REQUEST_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_SET_ACESS_REQUEST_INVALID_ARG;
     }
 
     (SEND_FRAME(p_mhu))->access_request = ENABLE;
@@ -450,11 +450,11 @@ enum mhu_v2_x_error_t mhu_v2_x_reset_access_request(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_RESET_ACESS_REQUEST_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_RESET_ACESS_REQUEST_INVALID_ARG;
     }
 
     (SEND_FRAME(p_mhu))->access_request = DISABLE;
@@ -468,11 +468,11 @@ enum mhu_v2_x_error_t mhu_v2_x_get_access_ready(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_GET_ACESS_READY_MHU_NOT_INIT;
     }
 
     if(dev->frame != MHU_V2_X_SENDER_FRAME) {
-        return MHU_V_2_X_ERR_INVALID_ARG;
+        return MHU_V_2_X_ERR_GET_ACESS_READY_INVALID_ARG;
     }
 
     *val = (SEND_FRAME(p_mhu))->access_ready;
@@ -485,7 +485,7 @@ uint32_t mhu_v2_x_get_interrupt_status(const struct mhu_v2_x_dev_t *dev)
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_GET_INTERRUPT_STATUS_MHU_NOT_INIT;
     }
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
@@ -501,18 +501,18 @@ enum mhu_v2_x_error_t mhu_v2_x_interrupt_enable(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_INTERRUPT_ENABLE_INVALID_ARG;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_0) {
         if (mask & MHU_2_1_INTR_CHCOMB_MASK) {
             /* Combined channel IRQ is not present in v2.0 */
-            return MHU_V_2_X_ERR_INVALID_ARG;
+            return MHU_V_2_X_ERR_INTERRUPT_ENABLE_INVALID_ARG;
         }
 
         if (dev->frame == MHU_V2_X_RECEIVER_FRAME) {
             /* Only sender frame has these registers */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INTERRUPT_ENABLE_UNSUPPORTED_VERSION;
         }
     }
 
@@ -531,18 +531,18 @@ enum mhu_v2_x_error_t mhu_v2_x_interrupt_disable(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_INTERRUPT_DISABLE_MHU_NOT_INIT;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_0) {
         if (mask & MHU_2_1_INTR_CHCOMB_MASK) {
             /* Combined channel IRQ is not present in v2.0 */
-            return MHU_V_2_X_ERR_INVALID_ARG;
+            return MHU_V_2_X_ERR_INTERRUPT_DISABLE_INVALID_ARG;
         }
 
         if (dev->frame == MHU_V2_X_RECEIVER_FRAME) {
             /* Only sender frame has these registers */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INTERRUPT_DISABLE_UNSUPPORTED_VERSION;
         }
     }
 
@@ -561,18 +561,18 @@ enum mhu_v2_x_error_t mhu_v2_x_interrupt_clear(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_INTERRUPT_CLEAR_MHU_NOT_INIT;
     }
 
     if (dev->subversion == MHU_MINOR_REV_2_0) {
         if (mask & MHU_2_1_INTR_CHCOMB_MASK) {
             /* Combined channel IRQ is not present in v2.0 */
-            return MHU_V_2_X_ERR_INVALID_ARG;
+            return MHU_V_2_X_ERR_INTERRUPT_CLEAR_INVALID_ARG;
         }
 
         if (dev->frame == MHU_V2_X_RECEIVER_FRAME) {
             /* Only sender frame has these registers */
-            return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+            return MHU_V_2_X_ERR_INTERRUPT_CLEAR_UNSUPPORTED_VERSION;
         }
     }
 
@@ -592,12 +592,12 @@ enum mhu_v2_x_error_t mhu_v2_1_get_ch_interrupt_num(
     union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
 
     if ( !(dev->is_initialized) ) {
-        return MHU_V_2_X_ERR_NOT_INIT;
+        return MHU_V_2_X_ERR_INTERRUPT_CHANNEL_NUM_MHU_NOT_INIT;
     }
 
     if (dev->subversion != MHU_MINOR_REV_2_1) {
         /* Feature is only supported in MHU v2.1 */
-        return MHU_V_2_X_ERR_UNSUPPORTED_VERSION;
+        return MHU_V_2_X_ERR_INTERRUPT_CHANNEL_NUM_UNSUPPORTED_VERSION;
     }
 
     for(i = 0; i < _MHU_V2_1_MAX_CHCOMB_INT; i++) {
@@ -616,5 +616,5 @@ enum mhu_v2_x_error_t mhu_v2_1_get_ch_interrupt_num(
         }
     }
 
-    return MHU_V_2_X_ERR_GENERAL;
+    return MHU_V_2_X_ERR_INTERRUPT_CHANNEL_NUM_GENERAL;
 }

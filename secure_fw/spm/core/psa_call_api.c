@@ -28,7 +28,7 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
     uint32_t   ns_access   = 0;
     size_t     ivec_num    = PARAM_UNPACK_IN_LEN(ctrl_param);
     size_t     ovec_num    = PARAM_UNPACK_OUT_LEN(ctrl_param);
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
 
     /* The request type must be zero or positive. */
@@ -44,8 +44,8 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
 
     /* Process IO vectors */
     /* in_len + out_len SHOULD <= PSA_MAX_IOVEC */
-    if ((ivec_num > SIZE_MAX - ovec_num) ||
-        (ivec_num + ovec_num > PSA_MAX_IOVEC)) {
+    if ((ivec_num > (SIZE_MAX - ovec_num)) ||
+        ((ivec_num + ovec_num) > PSA_MAX_IOVEC)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -88,12 +88,12 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
      * double-fetch inconsistency.
      * Overflow is checked in tfm_hal_memory_check functions.
      */
-    for (i = 0; i + 1 < ivec_num; i++) {
+    for (i = 0; (i + 1) < ivec_num; i++) {
         for (j = i + 1; j < ivec_num; j++) {
-            if (!((char *) ivecs_local[j].base + ivecs_local[j].len <=
-                  (char *) ivecs_local[i].base ||
-                  (char *) ivecs_local[j].base >=
-                  (char *) ivecs_local[i].base + ivecs_local[i].len)) {
+            if (!((((char *) ivecs_local[j].base + ivecs_local[j].len) <=
+                  (char *) ivecs_local[i].base) ||
+                  ((char *) ivecs_local[j].base >=
+                  ((char *) ivecs_local[i].base + ivecs_local[i].len)))) {
                 return PSA_ERROR_PROGRAMMER_ERROR;
             }
         }
@@ -125,7 +125,7 @@ psa_status_t spm_associate_call_params(struct connection_t *p_connection,
         p_connection->invec_accessed[i] = 0;
     }
 
-    if (ns_access == TFM_HAL_ACCESS_NS &&
+    if ((ns_access == TFM_HAL_ACCESS_NS) &&
         !PARAM_IS_NS_VEC(ctrl_param)   &&
         !PARAM_IS_NS_OUTVEC(ctrl_param)) {
         ns_access = 0;
@@ -178,5 +178,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         return status;
     }
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }

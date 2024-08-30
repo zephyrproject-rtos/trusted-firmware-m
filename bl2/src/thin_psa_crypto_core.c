@@ -11,14 +11,18 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "common.h"
+/* This module includes the driver_wrappers which assumes that private access to the
+ * fields of implementation structures is enabled through the following defined macro
+ */
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+
 #include "psa/crypto.h"
 #include "psa_crypto_driver_wrappers.h"
 #include "psa_crypto_driver_wrappers_no_static.h"
-#ifdef MCUBOOT_BUILTIN_KEY
+#if defined(BLX_BUILTIN_KEY_LOADER)
 #include "tfm_plat_crypto_keys.h"
 #include "tfm_plat_otp.h"
-#endif /* MCUBOOT_BUILTIN_KEY */
+#endif /* BLX_BUILTIN_KEY_LOADER */
 
 /* For mbedtls_psa_ecdsa_verify_hash() */
 #include "psa_crypto_ecp.h"
@@ -27,45 +31,46 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ecp.h"
 
-/* Definitions required for the MCUBOOT_BUILTIN_KEY case */
-#if defined(MCUBOOT_BUILTIN_KEY)
-#define MCUBOOT_BUILTIN_KEY_ID_MIN   (0x1)
-#define MCUBOOT_BUILTIN_KEY_ID_MAX   (MCUBOOT_IMAGE_NUMBER)
-#if defined(MCUBOOT_SIGN_EC256)
-#define PUBKEY_DATA_SIZE             (65)
-#define PUBKEY_BUF_SIZE              (68) /* Must be aligned to 4 Bytes */
-#elif defined(MCUBOOT_SIGN_EC384)
-#define PUBKEY_DATA_SIZE             (97)
-#define PUBKEY_BUF_SIZE              (100) /* Must be aligned to 4 Bytes */
-#endif /* MCUBOOT_SIGN_EC256 */
-#endif /* MCUBOOT_BUILTIN_KEY */
+/**
+ * \brief Aligns a value x up to an alignment a.
+ */
+#define ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
 
 /**
- * @note MCUboot uses the keys by importing them after parsing and then using
- *       them right away in the following call, so it makes sense to avoid a copy
- *       of data and just directly use the pointer to key material from the
- *       caller. The psa_import_key() call does not cross any security boundary.
+ * @note The assumption is that key import will happen just
+ *       before the key is used during bootloading stages,
+ *       hence the key management system is simplified to
+ *       just hold a pointer to the key
  */
+
+#if defined(BLX_BUILTIN_KEY_LOADER)
+/**
+ * @brief Static local buffer that holds enough data for the key material
+ *        provisioned bundle to be retrieved from the platform.
+ *
+ * @note  The buffer is aligned on 4-byte words to match the requirements on the
+ *        alignment for the underlying OTP memory
+ */
+#if PSA_WANT_ECC_SECP_R1_384 == 1
+static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 384), 4)];
+#elif PSA_WANT_ECC_SECP_R1_256 == 1
+static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 256), 4)];
+#endif
+#endif /* BLX_BUILTIN_KEY_LOADER */
 
 /**
  * @brief A structure describing the contents of a thin key slot, which
  *        holds key material and metadata following a psa_import_key() call
  */
 struct thin_key_slot_s {
-    const uint8_t *buf;        /*!< Pointer to the buffer holding the key material */
+    uint8_t *buf;              /*!< Pointer to the buffer holding the key material */
     size_t len;                /*!< Size in bytes of the \a buf buffer */
     psa_key_attributes_t attr; /*!< Attributes of the key */
+#if !defined(BLX_BUILTIN_KEY_LOADER)
     psa_key_id_t key_id;       /*!< Key ID assigned to the key */
     bool is_valid;             /*!< Boolean value, true if the key material is valid */
+#endif
 };
-
-#if defined(MCUBOOT_BUILTIN_KEY)
-/**
- * @brief Static local buffer that holds enough data for the key material
- *        provisioned bundle to be retrieved from the platform
- */
-static uint8_t g_pubkey_data[PUBKEY_BUF_SIZE];
-#endif /* MCUBOOT_BUILTIN_KEY */
 
 /**
  * @brief This static global variable holds the key slot. The thin PSA Crypto core
@@ -73,20 +78,17 @@ static uint8_t g_pubkey_data[PUBKEY_BUF_SIZE];
  *        new key will just cause the existing key to be forgotten
  */
 static struct thin_key_slot_s g_key_slot =  {
-#if !defined(MCUBOOT_BUILTIN_KEY)
+#if !defined(BLX_BUILTIN_KEY_LOADER)
     .buf = NULL,
     .len = 0,
     .attr = PSA_KEY_ATTRIBUTES_INIT,
     .key_id = PSA_KEY_ID_NULL,
     .is_valid = false,
 #else
-    .buf  = g_pubkey_data,
+    .buf  = (uint8_t *)g_pubkey_data,
     .len  = sizeof(g_pubkey_data),
     .attr = PSA_KEY_ATTRIBUTES_INIT,
-    /* .key_id   - not used
-     * .is_valid - not used
-     */
-#endif /* !MCUBOOT_BUILTIN_KEY */
+#endif /* !BLX_BUILTIN_KEY_LOADER */
 };
 
 /**
@@ -95,36 +97,56 @@ static struct thin_key_slot_s g_key_slot =  {
  */
 static mbedtls_psa_external_random_context_t *g_ctx = NULL;
 
-#if defined(MCUBOOT_BUILTIN_KEY)
-static psa_status_t get_builtin_public_key(psa_key_id_t key_id,
-                                           psa_algorithm_t alg)
+#if defined(BLX_BUILTIN_KEY_LOADER)
+static psa_status_t get_builtin_key(psa_key_id_t key_id)
 {
-    enum tfm_plat_err_t plat_err;
 
-    /* Decrease key ID by MCUBOOT_BUILTIN_KEY_ID_MIN as zero (PSA_KEY_ID_NULL)
-     * is reserved and considered invalid.
-     */
-    plat_err = tfm_plat_otp_read(
-            (PLAT_OTP_ID_BL2_ROTPK_0 + (key_id - MCUBOOT_BUILTIN_KEY_ID_MIN)),
-            PUBKEY_BUF_SIZE,
-            g_pubkey_data);
-    if (plat_err == TFM_PLAT_ERR_SUCCESS) {
-        g_key_slot.len = PUBKEY_DATA_SIZE;
-    } else {
-        return PSA_ERROR_GENERIC_ERROR;
+    const tfm_plat_builtin_key_descriptor_t *desc_table = NULL;
+    size_t number_of_keys = tfm_plat_builtin_key_get_desc_table_ptr(&desc_table);
+    size_t idx;
+
+    for (idx = 0; idx < number_of_keys; idx++) {
+        if (desc_table[idx].key_id == key_id) {
+            psa_key_bits_t key_bits;
+            psa_algorithm_t alg;
+            psa_key_type_t key_type;
+            enum tfm_plat_err_t plat_err;
+
+            /* Load key */
+            plat_err = desc_table[idx].loader_key_func(
+                g_key_slot.buf, sizeof(g_pubkey_data), &g_key_slot.len,
+                &key_bits, &alg, &key_type);
+            if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+                return PSA_ERROR_GENERIC_ERROR;
+            }
+
+            /* Set metadata */
+            psa_set_key_algorithm(&g_key_slot.attr, alg);
+            psa_set_key_type(&g_key_slot.attr, key_type);
+            psa_set_key_bits(&g_key_slot.attr, key_bits);
+            break;
+        }
     }
 
-    psa_set_key_usage_flags(&g_key_slot.attr, PSA_KEY_USAGE_VERIFY_HASH);
-    psa_set_key_algorithm(&g_key_slot.attr, alg);
-    psa_set_key_type(&g_key_slot.attr,
-                     PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1));
-    psa_set_key_bits(&g_key_slot.attr,
-                     PSA_BYTES_TO_BITS((g_key_slot.len - 1)/2));
+    if (idx == number_of_keys) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    /* Set policy */
+    const tfm_plat_builtin_key_policy_t *policy_table = NULL;
+    (void)tfm_plat_builtin_key_get_policy_table_ptr(&policy_table);
+    psa_set_key_usage_flags(&g_key_slot.attr, policy_table[idx].usage);
 
     return PSA_SUCCESS;
 }
-#endif /* MCUBOOT_BUILTIN_KEY */
+#endif /* BLX_BUILTIN_KEY_LOADER */
 
+/*!
+ * \defgroup thin_psa_crypto Set of functions implementing a thin PSA Crypto core
+ *                           with the bare minimum set of APIs required for
+ *                           bootloading use cases.
+ */
+/*!@{*/
 psa_status_t psa_crypto_init(void)
 {
     psa_status_t status = psa_driver_wrapper_init();
@@ -210,11 +232,11 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
     return status;
 }
 
-#if !defined(MCUBOOT_BUILTIN_KEY)
+#if !defined(BLX_BUILTIN_KEY_LOADER)
 /**
- * The key management subsystem is simplified to support only the BL2 required
- * use case for signature verification either with RSA or ECDSA. MCUboot key
- * bundles can be encoded in the SubjectPublicKeyInfo format (RFC 5480):
+ * The key management subsystem is simplified to support only the key encodings
+ * as expected by MCUboot. MCUboot key bundles can be encoded in the
+ * SubjectPublicKeyInfo format (RFC 5480):
  *
  * SubjectPublicKeyInfo  ::= SEQUENCE  {
  *     algorithm            AlgorithmIdentifier,
@@ -244,7 +266,7 @@ psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
                             size_t data_length,
                             psa_key_id_t *key)
 {
-#if defined(MCUBOOT_SIGN_RSA)
+#if PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY == 1
     /* This is either a 2048, 3072 or 4096 bit RSA key, hence the TLV must place
      * the length at index (6,7) with a leading 0x00. The leading 0x00 is due to
      * the fact that the MSB will always be set for RSA keys where the length is
@@ -253,7 +275,7 @@ psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
     const size_t bits =
         PSA_BYTES_TO_BITS((((uint16_t)data[6]) << 8) | (uint16_t)data[7]) - 8;
 
-#elif defined(MCUBOOT_SIGN_EC256) || defined(MCUBOOT_SIGN_EC384)
+#elif PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY == 1
     /* The public key is expected in uncompressed format, i.e. 0x04 X Y
      * for 256 or 384 bit lengths, and the driver wrappers expect to receive
      * it in that format
@@ -262,7 +284,7 @@ psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
     const size_t bits = PSA_BYTES_TO_BITS((data_length - 1)/2);
 #endif
 
-    g_key_slot.buf = data;
+    g_key_slot.buf = (uint8_t *)data;
     g_key_slot.len = data_length;
 
     memcpy(&g_key_slot.attr, attributes, sizeof(psa_key_attributes_t));
@@ -283,11 +305,11 @@ psa_status_t psa_get_key_attributes(psa_key_id_t key,
     memcpy(attributes, &g_key_slot.attr, sizeof(psa_key_attributes_t));
     return PSA_SUCCESS;
 }
-#endif /* !MCUBOOT_BUILTIN_KEY */
+#endif /* !BLX_BUILTIN_KEY_LOADER */
 
 psa_status_t psa_destroy_key(psa_key_id_t key)
 {
-#if !defined(MCUBOOT_BUILTIN_KEY)
+#if !defined(BLX_BUILTIN_KEY_LOADER)
     assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
 
     g_key_slot.buf = NULL;
@@ -299,11 +321,11 @@ psa_status_t psa_destroy_key(psa_key_id_t key)
      * just use the next key_id. This allows to keep track of potential
      * clients trying to reuse a deleted key ID
      */
-#else /* !MCUBOOT_BUILTIN_KEY */
+#else
     memset(g_pubkey_data, 0, sizeof(g_pubkey_data));
     g_key_slot.len = 0;
     g_key_slot.attr = psa_key_attributes_init();
-#endif /* !MCUBOOT_BUILTIN_KEY */
+#endif /* !BLX_BUILTIN_KEY_LOADER */
 
     return PSA_SUCCESS;
 }
@@ -318,17 +340,14 @@ psa_status_t psa_verify_hash(psa_key_id_t key,
 {
     psa_status_t status;
 
-#if !defined(MCUBOOT_BUILTIN_KEY)
+#if !defined(BLX_BUILTIN_KEY_LOADER)
     assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
 #else
-    assert((key >= MCUBOOT_BUILTIN_KEY_ID_MIN) &&
-           (key <= MCUBOOT_BUILTIN_KEY_ID_MAX));
-
-    status = get_builtin_public_key(key, alg);
+    status = get_builtin_key(key);
     if (status != PSA_SUCCESS) {
         return status;
     }
-#endif /* !MCUBOOT_BUILTIN_KEY */
+#endif /* !BLX_BUILTIN_KEY_LOADER */
 
     status = psa_driver_wrapper_verify_hash(
                 &g_key_slot.attr,
@@ -402,7 +421,7 @@ psa_status_t psa_verify_hash_builtin(
     psa_algorithm_t alg, const uint8_t *hash, size_t hash_length,
     const uint8_t *signature, size_t signature_length)
 {
-#if defined(MCUBOOT_SIGN_RSA)
+#if PSA_WANT_ALG_RSA_PSS == 1
     if (PSA_KEY_TYPE_IS_RSA(psa_get_key_type(attributes))) {
         if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
             PSA_ALG_IS_RSA_PSS(alg)) {
@@ -417,7 +436,7 @@ psa_status_t psa_verify_hash_builtin(
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     }
-#elif defined(MCUBOOT_SIGN_EC256) || defined(MCUBOOT_SIGN_EC384)
+#elif PSA_WANT_ALG_ECDSA == 1
     if (PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes))) {
         if (PSA_ALG_IS_ECDSA(alg)) {
 #if defined(MBEDTLS_PSA_BUILTIN_ALG_ECDSA) || \
@@ -532,11 +551,18 @@ psa_status_t psa_driver_wrapper_export_public_key(
     const uint8_t *key_buffer, size_t key_buffer_size,
     uint8_t *data, size_t data_size, size_t *data_length)
 {
+    /* The verification handles only public keys, and this is called from P256M verify */
     assert(PSA_KEY_TYPE_IS_PUBLIC_KEY(psa_get_key_type(attributes)));
-    assert(key_buffer_size <= data_size);
 
+#if PSA_WANT_ALG_ECDSA == 1
+    assert(PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes)));
+    assert(key_buffer_size <= data_size);
     memcpy(data, key_buffer, key_buffer_size);
     *data_length = key_buffer_size;
+#else
+    assert(0); /* Should never be reached */
+#endif /* PSA_WANT_ALG_ECDSA */
 
     return PSA_SUCCESS;
 }
+/*!@}*/

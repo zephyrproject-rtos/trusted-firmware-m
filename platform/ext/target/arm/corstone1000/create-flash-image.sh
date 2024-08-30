@@ -1,6 +1,6 @@
 #!/bin/bash
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -65,6 +65,8 @@ FWU_METADATA_TYPE_UUID="8A7A84A0-8387-40F6-AB41-A8B9A5A60D23"
 PRIVATE_METADATA_TYPE_UUID="ECB55DC3-8AB7-4A84-AB56-EB0A9974DB42"
 SE_BL2_TYPE_UUID="64BD8ADB-02C0-4819-8688-03AB4CAB0ED9"
 TFM_TYPE_UUID="D763C27F-07F6-4FF0-B2F3-060CB465CD4E"
+SE_BL2_PARTITION_SIZE="+144k"
+TFM_S_PARTITION_SIZE="+320K"
 
 # Create the image
 rm -f $IMAGE
@@ -81,10 +83,10 @@ sgdisk  --mbrtogpt \
         --new=3:48:+4K --typecode=3:$FWU_METADATA_TYPE_UUID --partition-guid=3:$(uuidgen) --change-name=3:'Bkup-FWU-Metadata' \
         --new=4:56:+4K --typecode=4:$PRIVATE_METADATA_TYPE_UUID --partition-guid=4:$(uuidgen) --change-name=4:'private_metadata_replica_1' \
         --new=5:64:+4k --typecode=5:$PRIVATE_METADATA_TYPE_UUID --partition-guid=5:$(uuidgen) --change-name=5:'private_metadata_replica_2' \
-        --new=6:72:+100k --typecode=6:$SE_BL2_TYPE_UUID --partition-guid=6:$(uuidgen) --change-name=6:'bl2_primary' \
-        --new=7:272:+368K --typecode=7:$TFM_TYPE_UUID --partition-guid=7:$(uuidgen) --change-name=7:'tfm_primary' \
-        --new=8:32784:+100k --typecode=8:$SE_BL2_TYPE_UUID --partition-guid=8:$(uuidgen) --change-name=8:'bl2_secondary' \
-        --new=9:32984:+368K --typecode=9:$TFM_TYPE_UUID --partition-guid=9:$(uuidgen) --change-name=9:'tfm_secondary' \
+        --new=6:72:$SE_BL2_PARTITION_SIZE --typecode=6:$SE_BL2_TYPE_UUID --partition-guid=6:$(uuidgen) --change-name=6:'bl2_primary' \
+        --new=7:360:$TFM_S_PARTITION_SIZE --typecode=7:$TFM_TYPE_UUID --partition-guid=7:$(uuidgen) --change-name=7:'tfm_primary' \
+        --new=8:32784:$SE_BL2_PARTITION_SIZE --typecode=8:$SE_BL2_TYPE_UUID --partition-guid=8:$(uuidgen) --change-name=8:'bl2_secondary' \
+        --new=9:33072:$TFM_S_PARTITION_SIZE --typecode=9:$TFM_TYPE_UUID --partition-guid=9:$(uuidgen) --change-name=9:'tfm_secondary' \
         --new=10:65496:65501  --partition-guid=10:$(uuidgen) --change-name=10:'reserved_2' \
         $IMAGE
 
@@ -93,7 +95,7 @@ sgdisk  --mbrtogpt \
 # Write partitions
 # conv=notrunc avoids truncation to keep the geometry of the image.
 dd if=$BIN_DIR/bl2_signed.bin of=${IMAGE}  seek=72 conv=notrunc
-dd if=$BIN_DIR/tfm_s_signed.bin of=${IMAGE} seek=272 conv=notrunc
+dd if=$BIN_DIR/tfm_s_signed.bin of=${IMAGE} seek=360 conv=notrunc
 
 # Print the gpt table
 sgdisk -p $IMAGE

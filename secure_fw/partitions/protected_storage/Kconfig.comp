@@ -38,6 +38,13 @@ config PS_RAM_FS
       persistent storage area is platform specific (eFlash, MRAM, etc.) and it
       is described in corresponding flash_layout.h
 
+config PS_SUPPORT_FORMAT_TRANSITION
+    bool "Format transition"
+    default n
+    depends on PS_ENCRYPTION
+    help
+      Enables reading PS data written with the older code.
+
 config PS_ROLLBACK_PROTECTION
     bool "Rollback protection"
     default y

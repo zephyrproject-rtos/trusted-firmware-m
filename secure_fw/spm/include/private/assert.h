@@ -9,7 +9,6 @@
 
 #include <string.h>
 #include "tfm_spm_log.h"
-#include <assert.h>
 
 #ifndef NDEBUG
 #define SPM_ASSERT(cond)                                \

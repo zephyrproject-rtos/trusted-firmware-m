@@ -11,8 +11,8 @@ include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
 # Default configuration of CMSIS repository
-set(CMSIS_PATH     "DOWNLOAD"  CACHE PATH      "Path to cmsis (or DOWNLOAD to fetch automatically")
-set(CMSIS_TAG      "d0c460c169"    CACHE STRING    "The version of cmsis to use")
+set(CMSIS_PATH     "DOWNLOAD"       CACHE PATH      "Path to cmsis (or DOWNLOAD to fetch automatically")
+set(CMSIS_TAG      "v6.1.0"         CACHE STRING    "The version of cmsis to use")
 
 fetch_remote_library(
     LIB_NAME                cmsis
@@ -33,4 +33,5 @@ target_include_directories(cmsis
     INTERFACE
     $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
     $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include/m-profile>
+    $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Driver/Include>
 )

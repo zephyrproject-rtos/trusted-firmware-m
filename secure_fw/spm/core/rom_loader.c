@@ -62,8 +62,8 @@ static struct service_t *tfm_allocate_service_assuredly(uint32_t service_count)
 
 struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 {
-    struct partition_load_info_t *p_ptldinf;
-    struct partition_t           *partition;
+    const struct partition_load_info_t *p_ptldinf;
+    struct partition_t                 *partition;
     int32_t client_id_base;
     int32_t client_id_limit;
 
@@ -71,15 +71,15 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
-    if ((UINTPTR_MAX - ldinf_sa < sizeof(struct partition_load_info_t)) ||
-        (ldinf_sa + sizeof(struct partition_load_info_t) >= ldinf_ea)) {
+    if (((UINTPTR_MAX - ldinf_sa) < sizeof(struct partition_load_info_t)) ||
+        ((ldinf_sa + sizeof(struct partition_load_info_t)) >= ldinf_ea)) {
         return NO_MORE_PARTITION;
     }
 
-    p_ptldinf = (struct partition_load_info_t *)ldinf_sa;
+    p_ptldinf = (const struct partition_load_info_t *)ldinf_sa;
 
-    if ((UINTPTR_MAX - ldinf_sa < LOAD_INFSZ_BYTES(p_ptldinf)) ||
-        (ldinf_sa + LOAD_INFSZ_BYTES(p_ptldinf) > ldinf_ea))   {
+    if (((UINTPTR_MAX - ldinf_sa) < (LOAD_INFSZ_BYTES(p_ptldinf))) ||
+        ((ldinf_sa + (LOAD_INFSZ_BYTES(p_ptldinf))) > ldinf_ea))   {
         tfm_core_panic();
     }
 
@@ -150,7 +150,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
      * The loop won't go in the NULL case.
      */
     services = tfm_allocate_service_assuredly(p_ptldinf->nservices);
-    for (i = 0; i < p_ptldinf->nservices && services; i++) {
+    for (i = 0; (i < p_ptldinf->nservices) && services; i++) {
         services[i].p_ldinf = &p_servldinf[i];
         services[i].partition = p_partition;
         services[i].next = NULL;
@@ -163,7 +163,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
             if ((stateless_services_ref_tbl == NULL) ||
                 (ref_tbl_size == 0) ||
                 (ref_tbl_size !=
-                 STATIC_HANDLE_NUM_LIMIT * sizeof(struct service_t *))) {
+                 (STATIC_HANDLE_NUM_LIMIT * sizeof(struct service_t *)))) {
                 tfm_core_panic();
             }
 
@@ -184,7 +184,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
 
 void load_irqs_assuredly(struct partition_t *p_partition)
 {
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
     const struct irq_load_info_t *p_irq_info;
     const struct partition_load_info_t *p_ldinf;
     uint32_t i;

@@ -152,7 +152,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uintptr_t tlv_end, offset;
     size_t next_tlv_offset;
 #endif /* BOOT_DATA_AVAILABLE */
-    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
 
     FIH_CALL(tfm_hal_memory_check, fih_rc,

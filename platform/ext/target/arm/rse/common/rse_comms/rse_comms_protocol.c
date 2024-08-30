@@ -7,7 +7,6 @@
 
 #include "rse_comms_protocol.h"
 
-#include "tfm_spm_log.h"
 #include <string.h>
 
 enum tfm_plat_err_t rse_protocol_deserialize_msg(
@@ -25,13 +24,11 @@ enum tfm_plat_err_t rse_protocol_deserialize_msg(
     switch (msg->header.protocol_ver) {
 #ifdef RSE_COMMS_PROTOCOL_EMBED_ENABLED
     case RSE_COMMS_PROTOCOL_EMBED:
-        SPMLOG_DBGMSG("[COMMS] Deserializing as embed message\r\n");
         return rse_protocol_embed_deserialize_msg(req, &msg->msg.embed,
             msg_len - sizeof(struct serialized_rse_comms_header_t));
 #endif /* RSE_COMMS_PROTOCOL_EMBED_ENABLED */
 #ifdef RSE_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
     case RSE_COMMS_PROTOCOL_POINTER_ACCESS:
-        SPMLOG_DBGMSG("[COMMS] Deserializing as pointer_access message\r\n");
         return rse_protocol_pointer_access_deserialize_msg(req, &msg->msg.pointer_access,
                                                msg_len - sizeof(struct serialized_rse_comms_header_t));
 #endif

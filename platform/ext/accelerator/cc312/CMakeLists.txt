@@ -55,7 +55,7 @@ if(BL2)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
     add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+    set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
     target_sources(${CC312_LIB_PREFIX}cc312
         PUBLIC
@@ -127,7 +127,7 @@ endif()
 if (TFM_PARTITION_CRYPTO)
 
     option(CC3XX_RUNTIME_ENABLED
-           "EXPERIMENTAL: This variable controls whether the cc312-rom is being used in runtime FW. \
+           "EXPERIMENTAL: This variable controls whether the cc3xx driver is being used in runtime FW. \
            Enable it only for testing purposes." OFF)
 
     # Control the enablement of the legacy CC-312 driver interface or the PSA
@@ -207,7 +207,7 @@ if (TFM_PARTITION_CRYPTO)
         set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
         set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
         add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
-        set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+        set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
         target_sources(${CC312_LIB_PREFIX}cc312
             PRIVATE
@@ -225,15 +225,17 @@ if (TFM_PARTITION_CRYPTO)
         set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
     else()
         if (${CC3XX_RUNTIME_ENABLED})
-            set(CC312_DRIVER_API_TARGET cc312_rom_psa_driver_api)
+            set(CC3XX_TARGET_PREFIX crypto_service_)
+            set(CC312_DRIVER_API_TARGET ${CC3XX_TARGET_PREFIX}cc3xx_psa_driver_api)
         else()
             set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
         endif()
     endif()
 
     if (NOT ${CC312_LEGACY_DRIVER_API_ENABLED} AND ${CC3XX_RUNTIME_ENABLED})
+        set(CC3XX_TARGET_PREFIX crypto_service_)
         set(CC3XX_PLATFORM_INTERFACE platform_s)
-        add_subdirectory(cc312-rom)
+        add_subdirectory(${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx ${CMAKE_CURRENT_BINARY_DIR}/${CC3XX_TARGET_PREFIX}cc3xx)
     endif()
 
     # Adding two targets as link-time dependencies of each other seems bad, but
@@ -255,7 +257,7 @@ if (TFM_PARTITION_CRYPTO)
             CRYPTO_HW_ACCELERATOR
             MBEDTLS_ECDH_LEGACY_CONTEXT
             $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:LEGACY_DRIVER_API_ENABLED>
-            $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
+            $<$<BOOL:${CC3XX_RUNTIME_ENABLED}>:CC3XX_RUNTIME_ENABLED>
             $<$<NOT:$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>>:PSA_CRYPTO_DRIVER_CC3XX>
     )
 

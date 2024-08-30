@@ -41,7 +41,7 @@ set(MBEDCRYPTO_VERSION                  "mbedtls-3.6.0" CACHE STRING "The versio
 set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/Mbed-TLS/mbedtls.git" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "v2.1.0"    CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "6071ceb"    CACHE STRING    "The version of MCUboot to use")
 
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
 set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
@@ -90,6 +90,8 @@ set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal e
 
 set(CONFIG_TFM_STACK_WATERMARKS         OFF         CACHE BOOL      "Whether to pre-fill partition stacks with a set value to help determine stack usage")
 
+set(CONFIG_TFM_BRANCH_PROTECTION_FEAT   BRANCH_PROTECTION_DISABLED   CACHE STRING    "Set default branch protection usage to disabled")
+
 ############################ Platform ##########################################
 
 set(NUM_MAILBOX_QUEUE_SLOT              1           CACHE BOOL      "Number of mailbox queue slots")
@@ -103,9 +105,12 @@ set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
 set(TFM_NS_NV_COUNTER_AMOUNT            0           CACHE STRING    "How many NS NV counters are enabled")
 
-set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
+set(PLATFORM_ERROR_CODES                OFF         CACHE BOOL      "Whether to use platform-specific error codes.")
 
+set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
 set(PLATFORM_DEFAULT_ATTEST_HAL         ON          CACHE BOOL      "Use default attest hal implementation.")
+set(PLATFORM_DEFAULT_ITS_HAL            ON          CACHE BOOL      "Use default ITS HAL implementation.")
+set(PLATFORM_DEFAULT_PS_HAL             ON          CACHE BOOL      "Use default Protected Storage HAL implementation.")
 set(PLATFORM_DEFAULT_NV_COUNTERS        ON          CACHE BOOL      "Use default nv counter implementation.")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        ON          CACHE BOOL      "Use default crypto keys implementation.")
 set(PLATFORM_DEFAULT_ROTPK              ON          CACHE BOOL      "Use default root of trust public key.")
@@ -129,6 +134,7 @@ set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer
 ############################ Partitions ########################################
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
+set(PS_SUPPORT_FORMAT_TRANSITION        OFF         CACHE BOOL      "Enable reading the older format of Protected Storage data")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
@@ -156,7 +162,7 @@ the command line. E.g. '-DTFM_MBEDCRYPTO_CONFIG_PATH:STRING=some_file_which_is_g
 This can be useful if the config file is generated and placed inside a directory already added \
 to the include path of mbedtls.")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
-set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ""    CACHE PATH      "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ""    CACHE PATH      "Config to append to standard Mbed Crypto config, used by platforms to configure feature support")
 
 ########################## TF-M performance ####################################
 

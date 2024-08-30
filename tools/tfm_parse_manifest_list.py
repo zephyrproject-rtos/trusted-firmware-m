@@ -34,10 +34,25 @@ TFM_PID_BASE = 256
 # variable for checking for duplicated sid
 sid_list = []
 
-# Summary of manifest attributes defined by FFM for use in the Secure Partition manifest file.
-ffm_manifest_attributes = ['psa_framework_version', 'name', 'type', 'priority', 'model', 'entry_point', \
-'stack_size', 'description', 'entry_init', 'heap_size', 'mmio_regions', 'services', 'irqs', 'dependencies',\
-'client_id_base', 'client_id_limit']
+# Manifest attributes defined by FF-M
+ffm_manifest_attributes = \
+    ['psa_framework_version', 'name', 'type', 'priority', 'model', 'entry_point', 'stack_size', \
+     'description', 'entry_init', 'heap_size', 'mmio_regions', 'services', 'irqs', 'dependencies',\
+     # TF-M extension of PSA attributes for mailbox client support.
+     'client_id_base', 'client_id_limit']
+
+# Manifest attributes defined by FF-M within "service" attribute
+ffm_manifest_services_attributes = \
+    ['name', 'sid', 'non_secure_clients', 'description', 'version', 'version_policy', \
+     'connection_based', 'stateless_handle', 'mm_iovec']
+
+# Manifest attributes defined by FF-M within "mmio_regions" attribute
+ffm_manifest_mmio_regions_attributes = ['name', 'base', 'size', 'permission']
+
+# Manifest attributes defined by FF-M within "irqs" attribute
+ffm_manifest_irqs_attributes = ['source', 'signal', 'name', 'handling', 'description',\
+     # TF-M extension of PSA attributes for mailbox client support.
+     'client_id_base', 'client_id_limit']
 
 class TemplateLoader(BaseLoader):
     """
@@ -224,17 +239,58 @@ def validate_dependency_chain(partition,
 
 def manifest_attribute_check(manifest, manifest_item):
     """
-    Check whether Non-FF-M compliant attributes are explicitly registered in manifest lists.
+    Check whether there is any invalid attribute in manifests.
+    Non-FF-M compliant attributes are allowed provided that they are explicitly registered in
+    manifest lists. And they are only allowed in the top-level attributes.
+
+    Note:
+    This method only checks the existence of invalid attributes.
+    It does not validate the values.
+    Those are done in manifest_validation().
+
+    The main purposes of this method are:
+    1. Make sure developers are aware of using Non-FF-M attributes.
+    2. Detect typos on optional attributes.
 
     Inputs:
         - manifest:        next manifest to be checked
         - manifest_item:   the manifest items in manifest lists
     """
+
+    # Top-level attributes check
     allowed_attributes = ffm_manifest_attributes + manifest_item.get('non_ffm_attributes', [])
     for keyword in manifest.keys():
         if keyword not in allowed_attributes:
-            logging.error('The Non-FFM attribute {} is used by {} without registration.'.format(keyword, manifest['name']))
+            logging.error('The Non-FFM attribute "{}" is used by "{}" without registration.'
+                          .format(keyword, manifest['name']))
             exit(1)
+
+    # "services" attribute check
+    services = manifest.get('services', [])
+    for srv in services:
+        for attr in srv.keys():
+            if attr not in ffm_manifest_services_attributes:
+                logging.error('Invalid attribute "{}" used by "{}" in "services".'
+                              .format(attr, manifest['name']))
+                exit(1)
+
+    # "mmio_regions" attribute check
+    mmio_regions = manifest.get('mmio_regions', [])
+    for reg in mmio_regions:
+        for attr in reg.keys():
+            if attr not in ffm_manifest_mmio_regions_attributes:
+                logging.error('Invalid attribute "{}" used by "{}" in "mmio_regions".'
+                              .format(attr, manifest['name']))
+                exit(1)
+
+    # "irqs" attribute check
+    irqs = manifest.get('irqs', [])
+    for irq in irqs:
+        for attr in irq.keys():
+            if attr not in ffm_manifest_irqs_attributes:
+                logging.error('Invalid attribute "{}" used by "{}" in "irqs".'
+                              .format(attr, manifest['name']))
+                exit(1)
 
 def process_partition_manifests(manifest_lists, configs):
     """
@@ -310,7 +366,7 @@ def process_partition_manifests(manifest_lists, configs):
                 dict['manifest'] = manifest_path
                 all_manifests.append(dict)
 
-    logging.info("------------ Display partition configuration - start ------------")
+    logging.info("----------- Secure Partitions ------------------------")
 
     # Parse the manifests
     for i, manifest_item in enumerate(all_manifests):
@@ -435,7 +491,7 @@ def process_partition_manifests(manifest_lists, configs):
                                'output_dir': output_dir,
                                'numbered_priority': numbered_priority})
 
-    logging.info("------------ Display partition configuration - end ------------")
+    logging.info("------------------------------------------------------")
 
     check_circular_dependency(partition_list, service_partition_map)
 
@@ -664,7 +720,8 @@ def process_stateless_services(partitions):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list',
-                                     epilog='Note that environment variables in template files will be replaced with their values')
+                                     epilog='Note that environment variables in template files will be replaced with their values',
+                                     allow_abbrev=False)
 
     parser.add_argument('-o', '--outdir'
                         , dest='outdir'

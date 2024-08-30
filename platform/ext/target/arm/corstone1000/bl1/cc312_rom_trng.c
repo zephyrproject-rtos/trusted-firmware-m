@@ -18,11 +18,13 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
         return -1;
     }
 
-    return cc3xx_lowlevel_rng_get_random(output, output_size);
+    return cc3xx_lowlevel_rng_get_random(output, output_size,
+                                         CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
 }
 
 unsigned char fih_delay_random_uchar(void) {
     uint32_t out = 0;
-    cc3xx_lowlevel_rng_get_random_uint(256, &out);
+    cc3xx_lowlevel_rng_get_random_uint(256, &out,
+                                       CC3XX_RNG_FAST);
     return (unsigned char)out;
 }

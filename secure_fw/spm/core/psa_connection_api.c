@@ -8,7 +8,6 @@
  *
  */
 
-#include "critical_section.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "load/service_defs.h"
@@ -31,7 +30,10 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         return status;
     }
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }
 
 psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connection,
@@ -39,7 +41,6 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
 {
     const struct service_t *service;
     struct connection_t *connection;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = (client_id < 0) ? true : false;
 
     /*
@@ -75,10 +76,13 @@ psa_status_t spm_psa_connect_client_id_associated(struct connection_t **p_connec
     /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
+     *
+     * Current SPM doesn't support multiple context management. There is only one
+     * instance in SPM to call the connection pool allocation. It is no need to be
+     * protected.
+     * Protection should be established after the context management is implemented.
      */
-    CRITICAL_SECTION_ENTER(cs_assert);
     connection = spm_allocate_connection();
-    CRITICAL_SECTION_LEAVE(cs_assert);
     if (!connection) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
@@ -123,7 +127,11 @@ psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t cli
 
     p_connection->msg.type = PSA_IPC_DISCONNECT;
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_TO_FREE;
+
+    return status;
 }
 
 psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)

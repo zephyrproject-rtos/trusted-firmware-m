@@ -97,7 +97,7 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
             }
 
             /* Record how many target data have been read. */
-            read_length = ((addr - aligned_addr + size >= data_width) ?
+            read_length = (((addr - aligned_addr + size) >= data_width) ?
                                 (data_width - (addr - aligned_addr)) : size);
             /* Copy the read data. */
             memcpy(buff, temp_buffer + addr - aligned_addr, read_length);

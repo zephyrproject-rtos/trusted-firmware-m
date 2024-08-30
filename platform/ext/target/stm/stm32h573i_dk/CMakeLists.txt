@@ -66,7 +66,6 @@ install(DIRECTORY   ${STM_COMMON_DIR}/hal/accelerator/
         FILES_MATCHING PATTERN "*.h")
 
 install(DIRECTORY   ${PLATFORM_DIR}/ext/common
-                    ${PLATFORM_DIR}/ext/driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
 
 # Install test configs

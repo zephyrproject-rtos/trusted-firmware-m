@@ -55,7 +55,7 @@ def intparse(text):
     return int(text, 0)
 
 def args():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     subs = parser.add_subparsers(help='subcommand help', dest='subcmd')
 
 

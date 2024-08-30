@@ -42,7 +42,8 @@ from cysecuretools.execute.programmer.pyocd_wrapper import ResetType
 
 
 def myargs(argv):
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser(add_help=False,
+                                     allow_abbrev=False)
     parser.add_argument('-h', '--help',
                         dest='show_help',
                         action='help',

@@ -37,7 +37,7 @@ uint32_t psa_version(uint32_t sid)
 psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
                                const psa_invec *in_vec, psa_outvec *out_vec)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -52,7 +52,7 @@ psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -111,7 +111,7 @@ void psa_panic(void)
 
 psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -126,7 +126,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -138,7 +138,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 
 void psa_close(psa_handle_t handle)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -153,7 +153,7 @@ void psa_close(psa_handle_t handle)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            PSA_SUCCESS);
     } else {
         /* Execution is returned from SPM */
@@ -163,7 +163,7 @@ void psa_close(psa_handle_t handle)
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -268,7 +268,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
                             const struct client_params_t *params,
                             const void *client_data_stateless)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -283,7 +283,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -297,7 +297,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
 psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -312,7 +312,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -324,7 +324,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
 
 psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
 {
-    struct partition_t *p_client, *p_target;
+    const struct partition_t *p_client, *p_target;
     psa_status_t stat;
 
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
@@ -339,7 +339,7 @@ psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            PSA_SUCCESS);
     } else {
         /* Execution is returned from SPM */

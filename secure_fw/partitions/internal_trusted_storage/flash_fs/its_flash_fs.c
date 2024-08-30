@@ -116,7 +116,7 @@ static psa_status_t its_flash_fs_validate_config(
     if (cfg->num_blocks == 2) {
         /* Metadata and data are stored in the same physical block */
         if (cfg->max_file_size >
-                        cfg->block_size - its_flash_fs_all_metadata_size(cfg)) {
+                        (cfg->block_size - its_flash_fs_all_metadata_size(cfg))) {
             ret = PSA_ERROR_INVALID_ARGUMENT;
         }
     }
@@ -324,7 +324,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
         }
 
         /* Update the file's current size if required */
-        if (offset + data_size > file_meta.cur_size) {
+        if ((offset + data_size) > file_meta.cur_size) {
             /* Update the file metadata */
             file_meta.cur_size = offset + data_size;
         }
@@ -370,7 +370,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Copy the file metadata entries between the two indexes, if necessary */
-    if (old_idx != ITS_METADATA_INVALID_INDEX && old_idx != new_idx) {
+    if ((old_idx != ITS_METADATA_INVALID_INDEX) && (old_idx != new_idx)) {
         err = its_flash_fs_mblock_cp_file_meta(fs_ctx, idx + 1,
                                                ITS_UTILS_MAX(new_idx, old_idx));
         if (err != PSA_SUCCESS) {
@@ -413,7 +413,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
      * completed, will leave the old file in the filesystem, so it is always
      * necessary to check for files to be deleted at initialisation time.
      */
-    if (old_idx != ITS_METADATA_INVALID_INDEX && old_idx != new_idx) {
+    if ((old_idx != ITS_METADATA_INVALID_INDEX) && (old_idx != new_idx)) {
         err = its_flash_fs_delete_idx(fs_ctx, old_idx);
     }
 
@@ -537,7 +537,7 @@ static psa_status_t its_flash_fs_delete_idx(struct its_flash_fs_ctx_t *fs_ctx,
      * The file metadata and block metadata has been updated into the scratch
      * metadata block, copy the file data to the scratch block.
      */
-    if ((del_file_max_size != 0 && del_file_lblock != ITS_LOGICAL_DBLOCK0) ||
+    if (((del_file_max_size != 0) && (del_file_lblock != ITS_LOGICAL_DBLOCK0)) ||
         (del_file_max_size == 0)) {
         err = its_flash_fs_mblock_migrate_lb0_data_to_scratch(fs_ctx);
         if (err != PSA_SUCCESS) {

@@ -14,6 +14,7 @@
 #include "config_spm.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "ffm/psa_api.h"
 #include "fih.h"
 #include "runtime_defs.h"
@@ -22,6 +23,7 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_nspm.h"
+#include "tfm_rpc.h"
 #include "ffm/backend.h"
 #include "utilities.h"
 #include "private/assert.h"
@@ -60,7 +62,7 @@ static bool basepri_set_by_ipc_schedule;
 /*
  * Query the state of current thread.
  */
-static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
+static uint32_t query_state(const struct thread_t *p_thrd, uint32_t *p_retval)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *p_pt = NULL;
@@ -95,7 +97,17 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
         if ((retval_signals ==  ASYNC_MSG_REPLY) &&
             ((p_pt->signals_allowed & ASYNC_MSG_REPLY) != ASYNC_MSG_REPLY)) {
             p_pt->signals_asserted &= ~ASYNC_MSG_REPLY;
-            *p_retval = (uint32_t)p_pt->reply_value;
+
+            /*
+             * For FF-M Secure Partition, the reply is synchronous and only one
+             * replied handle node should be mounted. Take the reply value from
+             * the node and delete it then.
+             */
+            *p_retval = (uint32_t)p_pt->p_replied->replied_value;
+            if (p_pt->p_replied->status == TFM_HANDLE_STATUS_TO_FREE) {
+                spm_free_connection(p_pt->p_replied);
+            }
+            p_pt->p_replied = NULL;
         } else {
             *p_retval = retval_signals;
         }
@@ -192,16 +204,16 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
     p_owner = p_connection->service->partition;
     signal = p_connection->service->p_ldinf->signal;
 
-    UNI_LIST_INSERT_AFTER(p_owner, p_connection, p_handles);
+    UNI_LIST_INSERT_AFTER(p_owner, p_connection, p_reqs);
 
     /* Messages put. Update signals */
     ret = backend_assert_signal(p_owner, signal);
 
     /*
-     * If it is a NS request via RPC, it is unnecessary to block current
-     * thread.
+     * If it is a request from NS Mailbox Agent, it is NOT necessary to block
+     * the current thread.
      */
-    if (tfm_spm_is_rpc_msg(p_connection)) {
+    if (IS_NS_AGENT_MAILBOX(p_connection->p_client->p_ldinf)) {
         ret = PSA_SUCCESS;
     } else {
         signal = backend_wait_signals(p_connection->p_client, ASYNC_MSG_REPLY);
@@ -210,8 +222,6 @@ psa_status_t backend_messaging(struct connection_t *p_connection)
         }
     }
 
-    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
-
     return ret;
 }
 
@@ -219,21 +229,19 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     struct partition_t *client = handle->p_client;
 
-    if (tfm_spm_is_rpc_msg(handle)) {
-        /*
-         * Add to the list of outstanding responses.
-         * Note that we use the partition's p_handles pointer.
-         * This assumes that partitions using the agent API will process all requests
-         * asynchronously and will not also provide services of their own.
-         */
-        handle->reply_value = (uintptr_t)status;
-        handle->msg.rhandle = handle;
-        UNI_LIST_INSERT_AFTER(client, handle, p_handles);
-        return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
-    } else {
-        handle->p_client->reply_value = (uintptr_t)status;
-        return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
-    }
+    /* Prepare the replied handle. */
+    handle->replied_value = (uintptr_t)status;
+
+    /* Mount the replied handle. There are two mode for replying.
+     *
+     *  - For synchronous reply, only one node is mounted.
+     *  - For asynchronous reply, the first moundted is at the tail of the list
+     *    and will be first replied.
+     *    - Currently, this is used for mailbox multi-core technology.
+     */
+    UNI_LIST_INSERT_AFTER(client, handle, p_replied);
+
+    return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
 }
 
 extern void common_sfn_thread(void *param);
@@ -257,7 +265,8 @@ static thrd_fn_t partition_init(struct partition_t *p_pt,
         p_pt->signals_allowed |= ASYNC_MSG_REPLY;
     }
 
-    UNI_LISI_INIT_NODE(p_pt, p_handles);
+    UNI_LIST_INIT_NODE(p_pt, p_reqs);
+    UNI_LIST_INIT_NODE(p_pt, p_replied);
 
     if (IS_IPC_MODEL(p_pt->p_ldinf)) {
         /* IPC Partition */
@@ -302,7 +311,10 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
 #endif
 
 typedef thrd_fn_t (*comp_init_fn_t)(struct partition_t *, uint32_t, uint32_t *);
-comp_init_fn_t comp_init_fns[] = {partition_init, ns_agent_tz_init};
+static const comp_init_fn_t comp_init_fns[] = {
+    partition_init,
+    ns_agent_tz_init,
+};
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_setting)
@@ -331,7 +343,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_sett
 uint32_t backend_system_run(void)
 {
     uint32_t control;
-    struct partition_t *p_cur_pt;
+    const struct partition_t *p_cur_pt;
     fih_int fih_rc = FIH_FAILURE;
 
     SPM_ASSERT(SPM_THREAD_CONTEXT);
@@ -343,6 +355,7 @@ uint32_t backend_system_run(void)
      * Hence SPM needs to have a dedicated stack when Trustzone is not enabled,
      * and this stack needs to be sealed before upcoming usage.
      */
+    watermark_spm_stack();
     ARCH_CTXCTRL_ALLOCATE_STACK(SPM_THREAD_CONTEXT, sizeof(uint64_t));
     arch_seal_thread_stack(ARCH_CTXCTRL_ALLOCATED_PTR(SPM_THREAD_CONTEXT));
 #endif
@@ -445,8 +458,8 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     sched_attempted = arch_release_sched_lock();
 
     /* Interrupt is masked, PendSV will not happen immediately. */
-    if (result == STATUS_NEED_SCHEDULE ||
-        sched_attempted == SCHEDULER_ATTEMPTED) {
+    if ((result == STATUS_NEED_SCHEDULE) ||
+        (sched_attempted == SCHEDULER_ATTEMPTED)) {
         arch_attempt_schedule();
     }
 
@@ -458,7 +471,8 @@ uint64_t ipc_schedule(uint32_t exc_return)
     fih_int fih_rc = FIH_FAILURE;
     FIH_RET_TYPE(bool) fih_bool;
     AAPCS_DUAL_U32_T ctx_ctrls;
-    struct partition_t *p_part_curr, *p_part_next;
+    const struct partition_t *p_part_curr;
+    struct partition_t *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
     struct thread_t *pth_next;
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
@@ -496,7 +510,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
     p_part_curr = GET_CURRENT_COMPONENT();
     p_part_next = GET_THRD_OWNER(pth_next);
 
-    if (pth_next != NULL && p_part_curr != p_part_next) {
+    if ((pth_next != NULL) && (p_part_curr != p_part_next)) {
         /* Check if there is enough room on stack to save more context */
         if ((p_curr_ctx->sp_limit +
                 sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
@@ -547,6 +561,33 @@ uint64_t ipc_schedule(uint32_t exc_return)
         tfm_core_panic();
     }
     p_partition_metadata = (uintptr_t)(p_part_next->p_metadata);
+
+#ifdef TFM_FIH_PROFILE_ON
+    /*
+     * ctx_ctrl is set from struct thread_t's p_context_ctrl, and p_part_curr
+     * and p_part_next are calculated from the thread pointer.
+     * struct partition_t's ctx_ctrl is pointed to by struct thread_t's p_context_ctrl,
+     * but the optimiser doesn't know that when building this code.
+     * Use that information to check that the context, thread, and partition
+     * are all consistent
+     */
+    if (ctx_ctrls.u32_regs.r0 != (uint32_t)&p_part_curr->ctx_ctrl) {
+        tfm_core_panic();
+    }
+
+    if (ctx_ctrls.u32_regs.r1 != (uint32_t)&p_part_next->ctx_ctrl) {
+        tfm_core_panic();
+    }
+
+    if (&p_part_next->thrd != CURRENT_THREAD) {
+        tfm_core_panic();
+    }
+
+    /* also double-check the metadata */
+    if ((uintptr_t)GET_CTX_OWNER(ctx_ctrls.u32_regs.r1)->p_metadata != p_partition_metadata) {
+        tfm_core_panic();
+    }
+#endif
 
     CRITICAL_SECTION_LEAVE(cs);
 

@@ -73,7 +73,7 @@ const ARM_DRIVER_FLASH *flash_driver[] = {
 #endif
 #endif /* (MCUBOOT_IMAGE_NUMBER == 2) */
 #if defined(MCUBOOT_SWAP_USING_SCRATCH) && \
-    defined(FLASH_DEV_NAME_SCRATCH) && FLASH_DEV_NAME_SCRATCH != FLASH_DEV_NAME
+    defined(FLASH_DEV_NAME_SCRATCH) && (FLASH_DEV_NAME_SCRATCH != FLASH_DEV_NAME)
     &FLASH_DEV_NAME_SCRATCH
 #endif
 };

@@ -13,9 +13,9 @@ set(TFM_EXTRAS_REPO_VERSION                    ""  CACHE STRING "The version of 
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS           ""  CACHE STRING "List of extra secure partition directory name(s)")
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST        ""  CACHE STRING "List of extra secure partition manifests")
 
-set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH  ""  CACHE PATH   "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH  ""  CACHE PATH   "Config to append to standard Mbed Crypto config, used by platforms to configure feature support")
 
-set(TFM_MANIFEST_LIST                          "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MANIFEST_LIST                          "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
 
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS            ON  CACHE BOOL   "Platform supports nvm counters for PS in OTP")
 

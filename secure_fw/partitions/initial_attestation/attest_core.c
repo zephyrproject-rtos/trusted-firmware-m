@@ -556,7 +556,7 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
     }
 
     if (PSA_KEY_TYPE_IS_ECC(key_type) &&
-        PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1) {
+        (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1)) {
         switch (psa_get_key_bits(&attr)) {
         case 256:
             *cose_algorithm_id = T_COSE_ALGORITHM_ES256;

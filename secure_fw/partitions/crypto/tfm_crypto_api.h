@@ -92,23 +92,6 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle);
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          uint32_t handle,
                                          void **ctx);
-
-/**
- * \brief This function acts as interface from the framework dispatching
- *        calls to the set of functions that implement the PSA Crypto APIs.
- *        It is based on the Uniform Signatures prototype.
- *
- * \param[in]  in_vec   Array of invec parameters
- * \param[in]  in_len   Length of the valid entries in in_vec
- * \param[out] out_vec  Array of outvec parameters
- * \param[in]  out_len  Length of the valid entries in out_vec
- *
- * \return Return values as described in \ref psa_status_t
- */
-psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
-                                       size_t in_len,
-                                       psa_outvec out_vec[],
-                                       size_t out_len);
 /**
  * \brief This function acts as interface for the Key management module
  *

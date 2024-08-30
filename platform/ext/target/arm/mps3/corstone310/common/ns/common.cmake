@@ -69,7 +69,6 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/ext/cmsis/Include/m-profile
         ${CORSTONE310_COMMON_DIR}/partition
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
 )

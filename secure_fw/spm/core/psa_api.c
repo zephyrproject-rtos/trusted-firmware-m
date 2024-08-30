@@ -32,8 +32,8 @@
 
 void spm_handle_programmer_errors(psa_status_t status)
 {
-    if (status == PSA_ERROR_PROGRAMMER_ERROR ||
-        status == PSA_ERROR_CONNECTION_REFUSED) {
+    if ((status == PSA_ERROR_PROGRAMMER_ERROR) ||
+        (status == PSA_ERROR_CONNECTION_REFUSED)) {
         if (!tfm_spm_is_ns_caller()) {
             tfm_core_panic();
         }
@@ -67,8 +67,8 @@ uint32_t tfm_spm_get_lifecycle_state(void)
 
 /* PSA Partition API function body */
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
-    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_SPM_BACKEND_IPC == 1) \
+    || (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)
 {
@@ -91,7 +91,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
      * signals.
      */
     if ((partition->signals_allowed) &&
-        (partition->signals_allowed & signal_mask) == 0) {
+        ((partition->signals_allowed & signal_mask) == 0)) {
         tfm_core_panic();
     }
 
@@ -158,26 +158,9 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
     }
 
     if (signal == ASYNC_MSG_REPLY) {
-        struct connection_t **pr_handle_iter, **prev = NULL;
-        struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-
-        /* Remove tail of the list, which is the first item added */
-        CRITICAL_SECTION_ENTER(cs_assert);
-        if (!partition->p_handles) {
-            tfm_core_panic();
-        }
-        UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
-                                    partition, p_handles) {
-            prev = pr_handle_iter;
-        }
-        handle = *prev;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_handles);
-        ret = handle->reply_value;
-        /* Clear the signal if there are no more asynchronous responses waiting */
-        if (!partition->p_handles) {
-            partition->signals_asserted &= ~ASYNC_MSG_REPLY;
-        }
-        CRITICAL_SECTION_LEAVE(cs_assert);
+        handle = spm_get_async_replied_handle(partition);
+        ret = handle->replied_value;
+        msg->rhandle = handle;
     } else {
         /*
          * Get message by signal from partition. It is a fatal error if getting
@@ -189,9 +172,9 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
         } else {
             return PSA_ERROR_DOES_NOT_EXIST;
         }
-    }
 
-    spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
+        spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
+    }
 
     return ret;
 }
@@ -204,6 +187,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     struct connection_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    bool delete_connection = false;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_msg_handle_to_connection(msg_handle);
@@ -233,7 +217,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
             ret = PSA_ERROR_CONNECTION_REFUSED;
-            handle->status = TFM_HANDLE_STATUS_TO_FREE;
+            delete_connection = true;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
             ret = PSA_ERROR_CONNECTION_BUSY;
@@ -243,7 +227,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
-        handle->status = TFM_HANDLE_STATUS_TO_FREE;
+        delete_connection = true;
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -258,7 +242,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
              * Any output vectors that are still mapped will report that
              * zero bytes have been written.
              */
-            for (int i = OUTVEC_IDX_BASE; i < PSA_MAX_IOVEC * 2; i++) {
+            for (int i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
                 if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
                     handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
                 }
@@ -275,6 +259,9 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
                 handle->status = TFM_HANDLE_STATUS_TO_FREE;
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+                delete_connection = true;
+#endif /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
             }
         } else {
             tfm_core_panic();
@@ -305,19 +292,22 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * until the response has been collected by the agent.
      */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    if (tfm_spm_is_rpc_msg(handle)) {
+    if (IS_NS_AGENT_MAILBOX(handle->p_client->p_ldinf)) {
         return ret;
     }
 #endif
 
+    if (handle->status != TFM_HANDLE_STATUS_TO_FREE) {
+        handle->status = TFM_HANDLE_STATUS_IDLE;
+    }
     /*
      * When the asynchronous agent API is not used or when in SFN model, free
      * the connection handle immediately.
      */
-    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
-        spm_free_connection(handle);
-    } else {
+    if (delete_connection) {
         handle->status = TFM_HANDLE_STATUS_IDLE;
+
+        spm_free_connection(handle);
     }
 
     return ret;

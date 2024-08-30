@@ -283,8 +283,8 @@ int tfm_plat_provisioning_is_required(void)
         return err;
     }
 
-    return lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST
-        || lcs == PLAT_OTP_LCS_PSA_ROT_PROVISIONING;
+    return (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST)
+        || (lcs == PLAT_OTP_LCS_PSA_ROT_PROVISIONING);
 }
 
 enum tfm_plat_err_t provision_assembly_and_test(void)
@@ -294,13 +294,13 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_0,
                              sizeof(bl2_assembly_and_test_prov_data.bl2_rotpk_0),
                              bl2_assembly_and_test_prov_data.bl2_rotpk_0);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if ((err != TFM_PLAT_ERR_SUCCESS) && (err != TFM_PLAT_ERR_UNSUPPORTED)) {
         return err;
     }
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_1,
                              sizeof(bl2_assembly_and_test_prov_data.bl2_rotpk_1),
                              bl2_assembly_and_test_prov_data.bl2_rotpk_1);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if ((err != TFM_PLAT_ERR_SUCCESS) && (err != TFM_PLAT_ERR_UNSUPPORTED)) {
         return err;
     }
 #if (MCUBOOT_IMAGE_NUMBER > 2)

@@ -37,29 +37,31 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
-static int32_t init_atu_regions(void)
+static enum tfm_plat_err_t init_atu_regions(void)
 {
-    enum atu_error_t err;
-
 #ifdef RSE_USE_HOST_UART
+    enum atu_error_t atu_err;
+
     /* Initialize UART region */
-    err = atu_initialize_region(&ATU_DEV_S,
-                                get_supported_region_count(&ATU_DEV_S) - 1,
-                                HOST_UART0_BASE_NS, HOST_UART_BASE,
-                                HOST_UART_SIZE);
-    if (err != ATU_ERR_NONE) {
-        return 1;
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    get_supported_region_count(&ATU_DEV_S) - 1,
+                                    HOST_UART0_BASE_NS, HOST_UART_BASE,
+                                    HOST_UART_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return atu_err;
     }
 #endif /* RSE_USE_HOST_UART */
 
-    return 0;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
 {
-    int32_t result;
+    int32_t err;
     enum tfm_plat_err_t plat_err;
+    enum kmu_error_t kmu_err;
+    cc3xx_err_t cc_err;
     uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
     uint32_t idx;
 #ifdef RSE_ENABLE_BRINGUP_HELPERS
@@ -79,15 +81,11 @@ int32_t boot_platform_init(void)
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return 1;
+        return plat_err;
     }
 
 #ifdef RSE_ENABLE_BRINGUP_HELPERS
-    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (lcm_err != LCM_ERROR_NONE) {
-        return 2;
-    }
-
+    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
     if (tp_mode == LCM_TP_MODE_VIRGIN || tp_mode == LCM_TP_MODE_TCI) {
         rse_run_bringup_helpers_if_requested();
     }
@@ -95,17 +93,17 @@ int32_t boot_platform_init(void)
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
     if (rse_otp_emulation_is_enabled()) {
-        result = FLASH_DEV_NAME.Initialize(NULL);
-        if (result != ARM_DRIVER_OK) {
-            return 1;
+        err = FLASH_DEV_NAME.Initialize(NULL);
+        if (err != ARM_DRIVER_OK) {
+            return err;
         }
     }
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
-    result = init_atu_regions();
-    if (result) {
-        return result;
+    plat_err = init_atu_regions();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
     }
 
     stdio_init();
@@ -119,9 +117,9 @@ int32_t boot_platform_init(void)
         {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
     };
 
-    result = cc3xx_lowlevel_init();
-    if (result != CC3XX_ERR_SUCCESS) {
-        return 1;
+    cc_err = cc3xx_lowlevel_init();
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return cc_err;
     }
 
     for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
@@ -132,14 +130,14 @@ int32_t boot_platform_init(void)
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     /* Init KMU */
-    result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
-    if (result != 0) {
-        return result;
+    err = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
-    result = kmu_init(&KMU_DEV_S, prbg_seed);
-    if (result != KMU_ERROR_NONE) {
-        return result;
+    kmu_err = kmu_init(&KMU_DEV_S, prbg_seed);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return kmu_err;
     }
 
     /* Clear boot data area */
@@ -169,12 +167,14 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
      * no effect on them.
      */
     static struct boot_arm_vector_table *vt_cpy;
-    int32_t result;
+#ifdef RSE_BRINGUP_OTP_EMULATION
+    int32_t err;
+#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #ifdef RSE_BRINGUP_OTP_EMULATION
     if (rse_otp_emulation_is_enabled()) {
-        result = FLASH_DEV_NAME.Uninitialize();
-        if (result != ARM_DRIVER_OK) {
+        err = FLASH_DEV_NAME.Uninitialize();
+        if (err != ARM_DRIVER_OK) {
             while (1){}
         }
     }

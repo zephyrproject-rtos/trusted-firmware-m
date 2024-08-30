@@ -27,12 +27,12 @@ psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     struct tfm_pool_chunk_t *pchunk;
     size_t i;
 
-    if (!pool || num == 0) {
+    if (!pool || (num == 0)) {
         return SPM_ERROR_BAD_PARAMETERS;
     }
 
     /* Ensure buffer is large enough */
-    if (poolsz != ((chunksz + sizeof(struct tfm_pool_chunk_t)) * num +
+    if (poolsz != (((chunksz + sizeof(struct tfm_pool_chunk_t)) * num) +
         sizeof(struct tfm_pool_instance_t))) {
         return SPM_ERROR_BAD_PARAMETERS;
     }
@@ -41,7 +41,7 @@ psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     spm_memset(pool, 0, poolsz);
 
     /* Chain pool chunks */
-    UNI_LISI_INIT_NODE(pool, next);
+    UNI_LIST_INIT_NODE(pool, next);
 
     pchunk = (struct tfm_pool_chunk_t *)pool->chunks;
     for (i = 0; i < num; i++) {
@@ -73,7 +73,7 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
 
     node->magic = POOL_MAGIC_ALLOCATED;
 
-    return &(((struct tfm_pool_chunk_t *)node)->data);
+    return &(node->data);
 }
 
 void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
@@ -103,7 +103,7 @@ bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
     struct tfm_pool_chunk_t *pchunk;
 
     /* Check that the message was allocated from the pool. */
-    if ((uintptr_t)data < chunks_start || chunks_offset >= pool->pool_sz) {
+    if (((uintptr_t)data < chunks_start) || (chunks_offset >= pool->pool_sz)) {
         return false;
     }
 

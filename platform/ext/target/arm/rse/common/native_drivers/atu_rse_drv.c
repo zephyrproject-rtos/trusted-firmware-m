@@ -129,13 +129,24 @@ struct _atu_reg_map_t {
                 /*!< Offset: 0xFFC (R/ ) Component ID 3 */
 };
 
+static inline enum atu_error_t check_supported_region(struct atu_dev_t* dev, uint8_t region)
+{
+    if(region >= get_supported_region_count(dev))
+        return ATU_ERR_INVALID_REGION;
+
+    return ATU_ERR_NONE;
+}
+
 static enum atu_error_t _set_bus_attribute(struct atu_dev_t* dev,
                     enum atu_roba_t val, uint8_t region, uint8_t shift)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     p_atu->aturoba[region] = ((p_atu->aturoba[region] & ~(0x3u << shift)) |
                               (val << shift));
@@ -160,9 +171,12 @@ uint8_t get_supported_region_count(struct atu_dev_t* dev)
 enum atu_error_t enable_atu_region(struct atu_dev_t* dev, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     p_atu->atuc |= (1u << region);
 
@@ -172,9 +186,12 @@ enum atu_error_t enable_atu_region(struct atu_dev_t* dev, uint8_t region)
 enum atu_error_t disable_atu_region(struct atu_dev_t* dev, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     p_atu->atuc &= ~(1u << region);
 
@@ -213,11 +230,14 @@ enum atu_error_t set_start_logical_address(struct atu_dev_t* dev,
                     uint32_t address, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
     uint8_t ps = ATU_GET_ATUPS(p_atu);
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     /* The value stored in this field is the start logical address
      * right shifted by the value of the PS */
@@ -230,15 +250,18 @@ enum atu_error_t set_end_logical_address(struct atu_dev_t* dev,
                     uint32_t address, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
     uint8_t ps = ATU_GET_ATUPS(p_atu);
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     /* The end page should be greater than or equal to the start page */
     if((address >> ps) < p_atu->atursla[region])
-        return ATU_ERR_INVALID_ADDRESS;
+        return ATU_ERR_INVALID_LOGICAL_ADDRESS;
 
     /* The value stored in this field is the start logical address
      * right shifted by the value of the PS */
@@ -251,9 +274,12 @@ enum atu_error_t set_add_value(struct atu_dev_t* dev,
                     uint64_t offset_address, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     p_atu->aturav_l[region] = (uint32_t)(offset_address);
 
@@ -314,9 +340,12 @@ enum atu_error_t set_gp_value(struct atu_dev_t* dev,
                     uint8_t val, uint8_t region)
 {
     struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+    enum atu_error_t err;
 
-    if(region >= get_supported_region_count(dev))
-        return ATU_ERR_INVALID_REGION;
+    err = check_supported_region(dev, region);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
 
     p_atu->aturgp[region] = (uint32_t)val;
 
@@ -335,20 +364,25 @@ enum atu_error_t atu_initialize_region(struct atu_dev_t *dev, uint8_t region,
                                        uint32_t size)
 {
     enum atu_error_t err;
-    struct _atu_reg_map_t* p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
-
-    uint32_t end_log_addr = log_addr + size - 1;
-    uint8_t ps = ATU_GET_ATUPS(p_atu);
-    uint64_t add_value = (phys_addr - log_addr) >> ps;
+    struct _atu_reg_map_t* p_atu;
+    uint8_t ps;
+    uint32_t end_log_addr;
+    uint64_t add_value;
 
     if (dev == NULL) {
         /* Invalid parameters */
-        return ATU_ERR_INVALID_ARG;
+        return ATU_ERR_INIT_REGION_INVALID_ARG;
     }
+
+    p_atu = (struct _atu_reg_map_t*)dev->cfg->base;
+
+    ps = ATU_GET_ATUPS(p_atu);
+    end_log_addr = log_addr + size - 1;
+    add_value = (phys_addr - log_addr) >> ps;
 
     if ((phys_addr & ((1 << ps) - 1)) != 0 || (log_addr & ((1 << ps) - 1)) != 0
          || (size & ((1 << ps) - 1)) != 0) {
-        return ATU_ERR_INVALID_ADDRESS;
+        return ATU_ERR_INIT_REGION_INVALID_ADDRESS;
     }
 
     err = set_start_logical_address(dev, log_addr, region);
@@ -380,7 +414,7 @@ enum atu_error_t atu_uninitialize_region(struct atu_dev_t *dev, uint8_t region)
 
     if (dev == NULL) {
         /* Invalid parameters */
-        return ATU_ERR_INVALID_ARG;
+        return ATU_ERR_UNINIT_REGION_INVALID_ARG;
     }
 
     err = disable_atu_region(dev, region);

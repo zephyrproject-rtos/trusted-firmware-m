@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2024 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,6 +331,14 @@ struct cpu0_secctrl_t {
     volatile uint32_t cidr3;          /* 0xFFC (R/ ) Component ID 3 */
 };
 
+/* CPUSECCFG bit position masks */
+#define CPUSECCFG_LOCKSVTAIRCR_POS_MASK  (1UL << 0)
+#define CPUSECCFG_LOCKSAU_POS_MASK       (1UL << 1)
+#define CPUSECCFG_LOCKSMPU_POS_MASK      (1UL << 2)
+#define CPUSECCFG_LOCKTCM_POS_MASK       (1UL << 3)
+#define CPUSECCFG_LOCKITGU_POS_MASK      (1UL << 4)
+#define CPUSECCFG_LOCKDTGU_POS_MASK      (1UL << 5)
+
 struct rse_sysinfo_t {
     volatile uint32_t soc_identity;   /* 0x000 (R/ ) SoC Identity Register */
     volatile uint32_t sys_config0;    /* 0x004 (R/ ) System Hardware
@@ -416,6 +424,15 @@ struct rse_sysctrl_t {
     volatile uint32_t cidr2;             /* 0xFF8 (R/ ) Component ID 2 */
     volatile uint32_t cidr3;             /* 0xFFC (R/ ) Component ID 3 */
 };
+
+#define CLK_CFG1_SYSCLKCFG_POS         0
+#define CLK_CFG1_SYSCLKCFG_MASK        (0xFUL << CLK_CFG1_SYSCLKCFG_POS)
+#define CLK_CFG1_AONCLKCFG_POS         4
+#define CLK_CFG1_AONCLKCFG_MASK        (0xFUL << CLK_CFG1_AONCLKCFG_POS)
+#define CLK_CFG1_SYSCLKCFGSTATUS_POS   16
+#define CLK_CFG1_SYSCLKCFGSTATUS_MASK  (0xFUL << CLK_CFG1_SYSCLKCFGSTATUS_POS)
+#define CLK_CFG1_AONCLKCFGSTATUS_POS   20
+#define CLK_CFG1_AONCLKCFGSTATUS_MASK  (0xFUL << CLK_CFG1_AONCLKCFGSTATUS_POS)
 
 struct rse_ewic_t {
     volatile uint32_t ewic_cr;        /* 0x000 (R/W) EWIC Control */

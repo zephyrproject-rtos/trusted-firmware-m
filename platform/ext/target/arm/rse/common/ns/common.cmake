@@ -15,6 +15,7 @@ target_sources(platform_ns
     PRIVATE
         device/source/device_definition.c
         device/source/startup_rse.c
+        device/source/rse_clocks.c
         device/source/system_core_init.c
         uart_stdout.c
 )
@@ -31,7 +32,6 @@ target_include_directories(platform_ns
         ext/cmsis/Include
         ext/cmsis/Include/m-profile
         ext/common
-        ext/driver
         device/config
 )
 
@@ -49,9 +49,13 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_GPT_SUPPORT}>:RSE_GPT_SUPPORT>
         $<$<BOOL:${RSE_HAS_EXPANSION_PERIPHERALS}>:RSE_HAS_EXPANSION_PERIPHERALS>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
+        $<$<BOOL:${PLATFORM_ERROR_CODES}>:PLATFORM_ERROR_CODES>
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
         $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
+        $<$<BOOL:${PLAT_MHU_VERSION}>:PLAT_MHU_VERSION=${PLAT_MHU_VERSION}>
+        $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
+        TFM_UNIQUE_ERROR_CODES=1
 )
 
 # Include region_defs.h and flash_layout.h

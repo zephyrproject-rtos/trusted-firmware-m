@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -91,24 +91,33 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
     find_package(Python3)
     if(MCUBOOT_GENERATE_SIGNING_KEYPAIR)
         string(REGEX MATCH "[0-9]*$" SIG_LEN ${MCUBOOT_SIGNATURE_TYPE})
+        string(REGEX MATCH "^[A-Z]*" SIG_TYPE ${MCUBOOT_SIGNATURE_TYPE})
         add_custom_target(generated_private_key
             SOURCES
                 generated_private_key_s.pem
                 generated_private_key_ns.pem
         )
 
+        # The imgtool.py has different name styles for the keys
+        # so we have to use that.
+        if(${SIG_TYPE} STREQUAL RSA)
+            set(MCUBOOT_KEY_TYPE_NAME rsa-${SIG_LEN})
+        elseif(${SIG_TYPE} STREQUAL EC)
+            set(MCUBOOT_KEY_TYPE_NAME ecdsa-p${SIG_LEN})
+        endif()
+
         add_custom_command(OUTPUT generated_private_key_s.pem
             COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
                 keygen
                 -k generated_private_key_s.pem
-                -t rsa-${SIG_LEN}
+                -t ${MCUBOOT_KEY_TYPE_NAME}
             COMMAND ${CMAKE_COMMAND} -E copy generated_private_key_s.pem $<TARGET_FILE_DIR:bl2>
         )
         add_custom_command(OUTPUT generated_private_key_ns.pem
             COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
                 keygen
                 -k generated_private_key_ns.pem
-                -t rsa-${SIG_LEN}
+                -t ${MCUBOOT_KEY_TYPE_NAME}
             COMMAND ${CMAKE_COMMAND} -E copy generated_private_key_ns.pem $<TARGET_FILE_DIR:bl2>
         )
         set(MCUBOOT_KEY_S $<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem CACHE FILEPATH "" FORCE)

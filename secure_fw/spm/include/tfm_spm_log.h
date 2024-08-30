@@ -29,8 +29,8 @@
 #error "TFM_SPM_LOG_LEVEL not defined!"
 #endif
 
-#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_DEBUG || \
-     TFM_SPM_LOG_LEVEL < TFM_SPM_LOG_LEVEL_SILENCE)
+#if ((TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_DEBUG) || \
+     (TFM_SPM_LOG_LEVEL < TFM_SPM_LOG_LEVEL_SILENCE))
 #error "Incorrect TFM_SPM_LOG_LEVEL value!"
 #endif
 

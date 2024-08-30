@@ -180,4 +180,28 @@ __STATIC_INLINE void arch_update_process_sp(uint32_t bottom,
     __ISB();
 }
 
+/**
+ * \brief Set branch protection PACBTI for v8.1M Main Extension.
+ */
+__STATIC_INLINE void tfm_arch_config_branch_protection(void)
+{
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1) && (BRANCH_PROTECTION_CONTROL > 0)
+    CONTROL_Type ctrl;
+
+    ctrl.w = __get_CONTROL();
+
+#if (BRANCH_PROTECTION_CONTROL == 1) || (BRANCH_PROTECTION_CONTROL == 2)
+    ctrl.b.UPAC_EN = 1;
+    ctrl.b.PAC_EN = 1;
+#endif /* BRANCH_PROTECTION_CONTROL == 1, 2 */
+
+#if (BRANCH_PROTECTION_CONTROL == 1) || (BRANCH_PROTECTION_CONTROL == 3)
+    ctrl.b.UBTI_EN = 1;
+    ctrl.b.BTI_EN = 1;
+#endif /* BRANCH_PROTECTION_CONTROL == 1, 3 */
+
+    __set_CONTROL(ctrl.w);
+#endif /* BRANCH_PROTECTION_CONTROL > 0 */
+}
+
 #endif

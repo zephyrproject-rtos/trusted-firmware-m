@@ -23,9 +23,9 @@ target_sources(tfm_s
         ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_m2351.c
 )
 target_add_scatter_file(tfm_s
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -166,9 +166,6 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/../common/bsp/Include
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/StdDriver/inc
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/bsp/Library/StdDriver)
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/driver
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
-
 install(FILES       ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/arm_uart_drv.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/timer_cmsdk.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/uart_cmsdk_drv.h
@@ -179,8 +176,6 @@ install(FILES       ${PLATFORM_DIR}/ext/target/nuvoton/common/native_drivers/arm
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/bpwm_reg.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/crc_reg.h
                     ${PLATFORM_DIR}/ext/target/nuvoton/common/bsp/Include/dac_reg.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)

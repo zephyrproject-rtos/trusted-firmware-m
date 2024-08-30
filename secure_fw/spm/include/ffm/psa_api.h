@@ -265,8 +265,8 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
 
 /* PSA Partition API function body, for privileged use only. */
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
-    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_SPM_BACKEND_IPC == 1) \
+    || (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 /**
  * \brief Function body of \ref psa_wait.
  *
@@ -452,7 +452,7 @@ psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rh
 #define tfm_spm_partition_psa_set_rhandle       NULL
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#if (CONFIG_TFM_FLIH_API == 1) || (CONFIG_TFM_SLIH_API == 1)
 /**
  * \brief Function body of \ref psa_irq_enable.
  *

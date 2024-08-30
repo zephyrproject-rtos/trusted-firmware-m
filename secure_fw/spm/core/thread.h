@@ -51,7 +51,7 @@ struct thread_t {
 };
 
 /* Query thread state function type */
-typedef uint32_t (*thrd_query_state_t)(struct thread_t *p_thrd,
+typedef uint32_t (*thrd_query_state_t)(const struct thread_t *p_thrd,
                                        uint32_t *p_retval);
 /*
  * Definition for the current thread and its access helper preprocessor.

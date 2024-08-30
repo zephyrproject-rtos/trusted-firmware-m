@@ -35,12 +35,22 @@ System boot
 ***********
 
 - The SoC reset brings Secure Enclave (SE), that is Cortex-M0+, out of rest.
-- SE executes the BL1 ROM code based on mcuboot.
-- BL1 load, verifies and transfer execution to BL2 which is again based on mcuboot.
-- BL2 loads and verifies TF-M and host's initial boot loader image.
-- BL2 transfer the execution to the TF-M.
+- SE executes the BL1_1 ROM code which handles the hardware initialization. On
+  the first boot, it handles the provisioning and the hashes of the keys used
+  for image verification are saved in the OTP memory. The BL1_2 binary is also
+  saved in the OTP.
+- BL1_1 loads BL1_2 from OTP, verifies and transfers the execution to it.
+- BL1_2 loads, verifies and transfers the execution to BL2 which is based on
+  MCUBoot.
+- BL2 loads and verifies TF-M and the host's initial boot loader image.
+- BL2 transfers the execution to the TF-M.
 - During TF-M initialization, the host is taken out of rest.
-- Hashes of the keys used for image verification are stored in the OTP memory.
+
+.. note::
+
+  In the current implementation the provisioning bundle, that is used by the BL1_1,
+  is also stored in ROM.
+
 
 *****
 Build
@@ -53,34 +63,80 @@ The platform binaries are build using Yocto. Below is the user guide:
 
 `Arm Corstone-1000 User Guide`_
 
+
+Building TF-M
+-------------
+
+Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
+
+
+Build instructions for the FVP
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE``
+
+Build instructions for the FPGA
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/corstone1000``
+
 Secure Test
 ===========
 
 This section can be used to test the secure enclave software independently from
-the host. The below configuration builds the secure enclave binaries with CI test
+the host. The below configuration builds the secure enclave binaries with regression test
 frame integrated. On boot, secure enclave softwares stack is brought up, and
-CI tests starts executing at the end of the initialization process. In the
+regression tests starts executing at the end of the initialization process. In the
 below configuration, host software support is disabled, and meant only
 to test/verify the secure enclave softwares.
+
+Follow the instructions in :doc:`Building instructions </building/tests_build_instruction>`.
+
+In the case of Corstone-1000 the build and run commands are the following.
 
 FVP
 ---
 
 - Download Corstone-1000 FVP from : `Arm Ecosystem FVPs`_
 - Install FVP by running the shell script.
-- Running of the binary will boot secure enclave software stack and at the end all CI test
-  from tf-m-test along with platform specific tests are executed.
+- Running of the binary will boot secure enclave software stack and then the enabled
+  regression tests from tf-m-tests are executed. (See `Enabled tests`_)
 
 .. code-block:: bash
 
-    cd <tf-m-root>/
-    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
-    cmake --build build -- install
-    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
-    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
-    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+    cd <tf-m-tests-root>/tests_reg
+    cmake -S spe -B build_spe -DTFM_PLATFORM=arm/corstone1000 \
+        -DCONFIG_TFM_SOURCE_PATH=<tf-m-root> \
+        -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake \
+        -DTEST_S=ON   \
+        -DCMAKE_BUILD_TYPE=Debug  \
+        -DTEST_PSA_API=OFF  \
+        -DTEST_S_PS=OFF  \
+        -DTEST_S_ITS=OFF  \
+        -DTEST_S_IPC=OFF  \
+        -DPLATFORM_IS_FVP=True
+    cmake --build build_spe -- install
+    dd conv=notrunc bs=1 if=build_spe/bin/bl1_1.bin of=build_spe/bin/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build_spe/bin/bl1_provisioning_bundle.bin of=build_spe/bin/bl1.bin seek=40960
+    ./<tf-m-root>/platform/ext/target/arm/corstone1000/create-flash-image.sh build_spe/bin cs1000.bin
 
-    <path-to-FVP-installation>/models/Linux64_GCC-9.3/FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="build/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=build/install/outputs/cs1000.bin@0x68000000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
+    <path-to-FVP-installation>/models/Linux64_GCC-9.3/FVP_Corstone-1000 \
+          -C se.trustedBootROMloader.fname="build_spe/bin/bl1.bin"  \
+          -C board.flashloader0.fname="none"  \
+          -C board.xnvm_size=64  \
+          -C se.trustedSRAM_config=6  \
+          -C se.BootROM_config="3"  \
+          -C board.smsc_91c111.enabled=0  \
+          -C board.hostbridge.userNetworking=true \
+          --data board.flash0=build_spe/bin/cs1000.bin@0x68000000  \
+          -C diagnostics=4  \
+          -C disable_visualisation=true  \
+          -C board.se_flash_size=8192  \
+          -C se.secenc_terminal.start_telnet=1  \
+          -C se.cryptocell.USER_OTP_FILTERING_DISABLE=1
+
+.. note::
+
+   The nvm_image.bin has to be deleted in-between the FVP runs in order to start
+   from a clean state.
 
 FPGA
 ----
@@ -91,25 +147,32 @@ FPGA
 
 .. code-block:: bash
 
-    cd <tf-m-root>/
-    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
-    cmake --build build -- install
-    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
-    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
-    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
-    cp build/install/outputs/bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
-    cp build/install/outputs/cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    cd <tf-m-tests-root>/tests_reg
+    cmake -S spe -B build_spe -DTFM_PLATFORM=arm/corstone1000 \
+        -DCONFIG_TFM_SOURCE_PATH=<tf-m-root> \
+        -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake \
+        -DTEST_S=ON   \
+        -DCMAKE_BUILD_TYPE=Debug  \
+        -DTEST_PSA_API=OFF  \
+        -DTEST_S_PS=OFF  \
+        -DTEST_S_ITS=OFF  \
+        -DTEST_S_IPC=OFF
+    cmake --build build_spe -- install
+    dd conv=notrunc bs=1 if=build_spe/bin/bl1_1.bin of=build_spe/bin/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build_spe/bin/bl1_provisioning_bundle.bin of=build_spe/bin/bl1.bin seek=40960
+    ./<tf-m-root>/platform/ext/target/arm/corstone1000/create-flash-image.sh build_spe/bin cs1000.bin
+    cp build_spe/bin/bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    cp build_spe/bin/cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
 
-FPGA build can not compile all the CI tests into a single build as it exceeds
-the available RAM size. So there is a need to select few tests but not all.
-The above configuration disable build of -DTEST_S_PS and -DTEST_S_PLATFORM.
-Other test configurations are:
+.. note::
 
-- -DTEST_S_ATTESTATION=ON/OFF
-- -DTEST_S_CRYPTO=ON/OFF
-- -DTEST_S_ITS=ON/OFF
-- -DTEST_S_PS=ON/OFF
-- -DTEST_S_PLATFORM=ON/OFF
+   .. _Enabled tests:
+
+   Some of the regression tests have to be disabled as adding all of them would
+   exceed the available RAM size. So there is a need to select few tests but
+   not all. Other test configurations can be found in the
+   :doc:`Test Configuration </configuration/test_configuration>`.
+
 
 *Copyright (c) 2021-2024, Arm Limited. All rights reserved.*
 

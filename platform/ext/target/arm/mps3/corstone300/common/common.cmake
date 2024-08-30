@@ -23,9 +23,9 @@ target_sources(tfm_s
     ${CORSTONE300_COMMON_DIR}/device/source/startup_corstone300.c
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -236,10 +236,11 @@ target_compile_definitions(platform_region_defs
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
 )
 
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
-add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
+add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
 endif()
 
 #========================= Files for building NS side platform ================#
@@ -265,10 +266,6 @@ install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/device
 
 install(DIRECTORY   ${PLATFORM_DIR}/ext/target/arm/drivers
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm)
-
-install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 install(FILES       ${CORSTONE300_COMMON_DIR}/target_cfg.h
                     ${CORSTONE300_COMMON_DIR}/tfm_peripherals_def.h

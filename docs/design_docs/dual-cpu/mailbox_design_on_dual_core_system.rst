@@ -975,7 +975,7 @@ critical section of NSPE mailbox queue.
 ``tfm_ns_mailbox_hal_enter_critical()`` implementation is platform specific.
 
 ``tfm_ns_mailbox_hal_enter_critical()`` should not be called in any interrupt
-service routine.
+service routine. Use only to lock data that are shared with secure side.
 
 ``tfm_ns_mailbox_hal_exit_critical()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1010,6 +1010,7 @@ IRQ handler.
 NSPE mailbox invokes ``tfm_ns_mailbox_hal_enter_critical_isr()`` before entering
 critical section of NSPE mailbox queue in an IRQ handler.
 ``tfm_ns_mailbox_hal_enter_critical_isr()`` implementation is platform specific.
+Use only to lock data that are shared with secure side.
 
 ``tfm_ns_mailbox_hal_exit_critical_isr()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

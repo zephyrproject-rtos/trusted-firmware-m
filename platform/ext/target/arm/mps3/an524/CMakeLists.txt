@@ -24,9 +24,9 @@ target_sources(tfm_s
 )
 
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(BL2)
@@ -138,10 +138,11 @@ target_compile_definitions(platform_region_defs
         PROVISIONING_CODE_PADDED_SIZE=${PROVISIONING_CODE_PADDED_SIZE}
         PROVISIONING_VALUES_PADDED_SIZE=${PROVISIONING_VALUES_PADDED_SIZE}
         PROVISIONING_DATA_PADDED_SIZE=${PROVISIONING_DATA_PADDED_SIZE}
+        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:MCUBOOT_BUILTIN_KEY>
 )
 
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
-    add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
+    add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
 endif()
 
 #========================= Files for building NS side platform ================#
@@ -168,8 +169,6 @@ install(FILES       ${TARGET_PLATFORM_PATH}/device/include/platform_base_address
                     ${TARGET_PLATFORM_PATH}/native_drivers/ppc_sse200_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/Driver_USART_CMSDK.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common/Driver_USART_Common.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.h

@@ -19,6 +19,7 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 fih_int bl1_read_bl1_2_image(uint8_t *image)
 {
+    int data_read;
     fih_int fih_rc;
     enum tfm_plat_err_t plat_err;
     uint32_t bl1_2_len;
@@ -31,13 +32,19 @@ fih_int bl1_read_bl1_2_image(uint8_t *image)
     }
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_2_IMAGE, bl1_2_len, image);
-    if (plat_err == TFM_PLAT_ERR_UNSUPPORTED) {
+    if (plat_err == TFM_PLAT_ERR_OTP_EMULATION_UNSUPPORTED) {
         /* If this returns unsupported, then the OTP emulation isn't large
          * enough to contain the BL1_2 image.
          */
-        fih_rc = fih_int_encode(FLASH_DEV_NAME.ReadData(BL1_2_IMAGE_FLASH_OFFSET,
-                                                        image,
-                                                        bl1_2_len));
+        data_read = FLASH_DEV_NAME_BL1.ReadData(BL1_2_IMAGE_FLASH_OFFSET,
+                                                image,
+                                                bl1_2_len);
+        if (data_read != bl1_2_len) {
+            fih_rc = fih_int_encode(TFM_PLAT_ERR_READ_BL1_2_IMAGE_FLASH_INVALID_READ);
+        }
+        else {
+            fih_rc = FIH_SUCCESS;
+        }
     } else {
         fih_rc = fih_int_encode_zero_equality(plat_err);
     }

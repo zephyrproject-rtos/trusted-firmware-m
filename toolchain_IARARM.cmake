@@ -6,7 +6,7 @@
 #
 #-------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.21)
 cmake_policy(SET CMP0115 NEW)
 
 SET(CMAKE_SYSTEM_NAME Generic)
@@ -187,7 +187,7 @@ macro(target_add_scatter_file target)
         ${target}_scatter
     )
 
-    set_target_properties(${target} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
 
     target_link_libraries(${target}_scatter
         platform_region_defs
@@ -198,6 +198,11 @@ macro(target_add_scatter_file target)
     target_compile_options(${target}_scatter
         PRIVATE
             --preprocess=sn $<TARGET_OBJECTS:${target}_scatter>
+    )
+
+    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
+    add_dependencies(${target}_scatter
+        manifest_tool
     )
 endmacro()
 
@@ -266,18 +271,34 @@ macro(target_share_symbols target)
     string(REPLACE ";" "" IAR_STEERING_FILE ${IAR_STEERING_FILE})
     file( GENERATE OUTPUT "$<TARGET_FILE_DIR:${target}>/iar_steering_file" CONTENT "${IAR_STEERING_FILE}")
 
-    add_custom_command(
-        TARGET ${target}
-        POST_BUILD
+    add_custom_target(${target}_shared_symbols
         COMMAND ${CMAKE_IAR_SYMEXPORT}
-        ARGS --edit $<TARGET_FILE_DIR:${target}>/iar_steering_file $<TARGET_FILE:${target}> $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+            --edit
+            $<TARGET_FILE_DIR:${target}>/iar_steering_file
+            $<TARGET_FILE:${target}>
+            $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
     )
+    # Ensure ${target} is built before $<TARGET_FILE:${target}> is used to generate ${target}_shared_symbols
+    add_dependencies(${target}_shared_symbols ${target})
+    # Allow the global clean target to rm the ${target}_shared_symbols created
+    set_target_properties(${target}_shared_symbols PROPERTIES
+        ADDITIONAL_CLEAN_FILES $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+    )
+
+    string(FIND "${KEEP_SYMBOL_LIST}" "*" wildcard)
+    if(NOT "${wildcard}" EQUAL "-1")
+        message(FATAL_ERROR "Wildcards are not supported in symbol files.")
+    endif()
 
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --keep=)
     target_link_options(${target}
         PRIVATE
             ${KEEP_SYMBOL_LIST}
+            # This is needed because the symbol file can contain functions
+            # that are not defined in every build configuration.
+            # The Error[Li005] is: no definition for "file".
+            --diag_suppress=li005
     )
 endmacro()
 
@@ -292,7 +313,11 @@ macro(target_link_shared_code target)
             endif()
         endif()
 
-        add_dependencies(${target} ${symbol_provider})
+        # Ensure ${symbol_provider}_shared_symbols is built before ${target}
+        add_dependencies(${target} ${symbol_provider}_shared_symbols)
+        # ${symbol_provider}_shared_symbols - a custom target is always considered out-of-date
+        # To only link when necessary, depend on ${symbol_provider} instead
+        set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${symbol_provider}>)
         target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()

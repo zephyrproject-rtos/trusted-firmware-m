@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -113,8 +113,6 @@ add_library(crypto_service_mbedcrypto_config INTERFACE)
 target_compile_definitions(crypto_service_mbedcrypto_config
     INTERFACE
         $<$<BOOL:${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}>:MBEDTLS_USER_CONFIG_FILE="${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}">
-        # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
-        $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>:PLATFORM_DEFAULT_NV_SEED>
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
         $<$<BOOL:${CRYPTO_TFM_BUILTIN_KEYS_DRIVER}>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY_LOADER>
@@ -142,10 +140,24 @@ set(MBEDTLS_TARGET_PREFIX crypto_service_)
 # Check if the p256m driver is enabled in the config file, as that will require a
 # dedicated target to be linked in. Note that 0 means SUCCESS here, 1 means FAILURE
 set(MBEDTLS_P256M_NOT_FOUND 1)
-execute_process(COMMAND
-    ${Python3_EXECUTABLE}
-    ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
-    RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+if(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH)
+    execute_process(COMMAND
+        ${Python3_EXECUTABLE}
+        ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+        RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+    if (${MBEDTLS_P256M_NOT_FOUND} EQUAL 1)
+        execute_process(COMMAND
+            ${Python3_EXECUTABLE}
+            ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+            RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+    endif()
+
+else()
+    execute_process(COMMAND
+        ${Python3_EXECUTABLE}
+        ${MBEDCRYPTO_PATH}/scripts/config.py -f "${TFM_MBEDCRYPTO_CONFIG_PATH}" get MBEDTLS_PSA_P256M_DRIVER_ENABLED
+        RESULT_VARIABLE MBEDTLS_P256M_NOT_FOUND)
+endif()
 
 if (${MBEDTLS_P256M_NOT_FOUND} EQUAL 0)
     message(STATUS "[Crypto service] Using P256M software driver in PSA Crypto backend")
@@ -161,7 +173,7 @@ endif()
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto EXCLUDE_FROM_ALL)
-set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE})
 
 if(NOT TARGET ${MBEDTLS_TARGET_PREFIX}mbedcrypto)
     message(FATAL_ERROR "[Crypto service] Target ${MBEDTLS_TARGET_PREFIX}mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?

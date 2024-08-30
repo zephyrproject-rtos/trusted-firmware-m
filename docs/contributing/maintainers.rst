@@ -101,9 +101,9 @@ David Hazi
 Corstone1000
 ^^^^^^^^^^^^
 
-Xueliang Zhong
-    :email: `Xueliang.Zhong@arm.com <xueliang.zhong@arm.com>`__
-    :github: `xueliang-zhong <https://github.com/xueliang-zhong-arm>`__
+Hugues Kamba Mpiana
+    :email: `Hugues.KambaMpiana@arm.com <hugues.kambampiana@arm.com>`__
+    :github: `hugueskamba <https://github.com/hugueskamba>`__
 
 Emekcan Aras
     :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
@@ -116,12 +116,27 @@ Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
     :github: `jf549 <https://github.com/jf549>`__
 
+Arm Automotive RD
+"""""""""""""""""
+
+Diego Sueiro
+    :email: `diego.sueiro@arm.com <diego.sueiro@arm.com>`__
+    :github: `diego-sueiro <https://github.com/diego-sueiro>`__
+
+Peter Hoyes
+    :email: `peter.hoyes@arm.com <peter.hoyes@arm.com>`__
+    :github: `hoyes <https://github.com/hoyes>`__
+
+Ziad Elhanafy
+   :email: `ziad.elhanafy@arm.com <ziad.elhanafy@arm.com>`__
+   :github: `ZiadElhanafy <https://github.com/ZiadElhanafy>`__
+
 NXP Platforms
 ~~~~~~~~~~~~~
 
-Andrej Butok
-    :email: `Andrey.Butok@nxp.com <andrey.butok@nxp.com>`__
-    :github: `butok <https://github.com/butok>`__
+Ruchika Gupta
+    :email: `ruchika.gupta_1@nxp.com <ruchika.gupta_1@nxp.com>`__
+    :github: `ruchi393 <https://github.com/ruchi393>`__
 
 STM Platforms: DISCO_L562QE, NUCLEO_L552ZE_Q
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

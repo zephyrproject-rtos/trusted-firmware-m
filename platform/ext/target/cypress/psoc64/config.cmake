@@ -42,6 +42,3 @@ add_compile_definitions(CY_IPC_DEFAULT_CFG_DISABLE)
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            OFF)
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
-
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON)

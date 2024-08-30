@@ -169,4 +169,12 @@ __STATIC_INLINE void arch_update_process_sp(uint32_t bottom,
     __ISB();
 }
 
+/**
+ * \brief Empty implementation for branch protection.
+ *        PACBTI applies for v8.1M Main Extension onwards.
+ */
+__STATIC_INLINE void tfm_arch_config_branch_protection(void)
+{
+}
+
 #endif /* __TFM_ARCH_V6M_V7M_H__ */

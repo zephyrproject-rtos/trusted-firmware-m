@@ -17,9 +17,17 @@ extern "C" {
 
 #ifdef MCUBOOT_SIGN_EC384
 #define BL2_ROTPK_HASH_SIZE     (48)
+#define BL2_ROTPK_KEY_SIZE      (100) /* Size must be aligned to 4 Bytes */
 #else
 #define BL2_ROTPK_HASH_SIZE     (32)
-#endif
+#define BL2_ROTPK_KEY_SIZE      (68)  /* Size must be aligned to 4 Bytes */
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_BUILTIN_KEY
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_KEY_SIZE
+#else
+#define PROV_ROTPK_DATA_SIZE    BL2_ROTPK_HASH_SIZE
+#endif /* MCUBOOT_BUILTIN_KEY */
 
 #define CM_BUNDLE_MAGIC 0xC0DEFEED
 #define DM_BUNDLE_MAGIC 0xBEEFFEED
@@ -54,7 +62,7 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
         struct __attribute__((__packed__)) dm_provisioning_data {
             uint8_t bl1_rotpk_0[56];
             uint8_t bl2_encryption_key[32];
-            uint8_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][BL2_ROTPK_HASH_SIZE];
+            uint8_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][PROV_ROTPK_DATA_SIZE];
 
             uint8_t implementation_id[32];
             uint8_t verification_service_url[32];

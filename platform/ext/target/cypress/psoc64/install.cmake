@@ -61,10 +61,6 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/Native_Driver/generated_source
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/CMSIS_Driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-file(GLOB ext_driver_header "${PLATFORM_DIR}/ext/driver/*.h")
-install(FILES       ${ext_driver_header}
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
 install(FILES       ${TARGET_PLATFORM_PATH}/target_cfg.h
                     ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
@@ -78,4 +74,8 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/libs
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

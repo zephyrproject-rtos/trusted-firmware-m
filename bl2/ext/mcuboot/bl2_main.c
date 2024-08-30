@@ -40,6 +40,11 @@
 /* A few macros for stringification */
 #define str(X) #X
 #define xstr(X) str(X)
+#if defined(MCUBOOT_BUILTIN_KEY)
+static const char *key_type_str = ", using builtin keys";
+#else
+static const char *key_type_str = "";
+#endif
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 /* Avoids the semihosting issue */
@@ -85,7 +90,7 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
     stdio_uninit();
 #endif
 
@@ -107,7 +112,7 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
     stdio_init();
 #endif
 
@@ -157,7 +162,7 @@ int main(void)
         BOOT_LOG_ERR("PSA Crypto init failed with error code %d", status);
         FIH_PANIC;
     }
-    BOOT_LOG_INF("PSA Crypto init done, sig_type: %s", xstr(MCUBOOT_SIGNATURE_TYPE));
+    BOOT_LOG_INF("PSA Crypto init done, sig_type: %s%s", xstr(MCUBOOT_SIGNATURE_TYPE), key_type_str);
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 #ifdef TEST_BL2
@@ -204,6 +209,9 @@ int main(void)
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
                  rsp.br_image_off);
+    BOOT_LOG_INF("Image version: v%d.%d.%d", rsp.br_hdr->ih_ver.iv_major,
+                                                    rsp.br_hdr->ih_ver.iv_minor,
+                                                    rsp.br_hdr->ih_ver.iv_revision);
     BOOT_LOG_INF("Jumping to the first image slot");
     do_boot(&rsp);
 

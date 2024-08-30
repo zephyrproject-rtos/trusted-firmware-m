@@ -11,9 +11,12 @@
 cmake_minimum_required(VERSION 3.21)
 
 if(PSA_FRAMEWORK_HAS_MM_IOVEC)
-    message(NOTICE "**** MM-IOVEC is enabled for memory and runtime optimizations for larger buffers, ****\n"
-                   "**** but reduces mitigation for common security vulnerabilities. ****\n"
-                   "**** Check FF-M 1.1 https://developer.arm.com/documentation/aes0039/latest for more details. ****")
+    message(NOTICE "\n"
+                   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                   "  MM-IOVEC is enabled for memory and runtime optimizations for larger buffers,\n"
+                   "  but reduces mitigation for common security vulnerabilities. Check FF-M v1.1\n"
+                   "  https://developer.arm.com/documentation/aes0039/latest   for more details.\n"
+                   "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
 endif()
 
 add_library(tfm_spm STATIC)
@@ -76,6 +79,7 @@ target_sources(tfm_spm
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:core/arch/tfm_arch_v6m_v7m.c>
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:core/arch/tfm_arch_v6m_v7m.c>
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_BINARY_DIR}/generated/interface/src/ns_mailbox_client_id.c>
 )
 
 target_include_directories(tfm_spm_defs
@@ -111,6 +115,11 @@ target_compile_definitions(tfm_spm
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},soft>:CONFIG_TFM_FLOAT_ABI=0>
         $<$<BOOL:${CONFIG_TFM_STACK_WATERMARKS}>:CONFIG_TFM_STACK_WATERMARKS>
+        $<$<STREQUAL:${CONFIG_TFM_BRANCH_PROTECTION_FEAT},BRANCH_PROTECTION_NONE>:BRANCH_PROTECTION_CONTROL=0>
+        $<$<STREQUAL:${CONFIG_TFM_BRANCH_PROTECTION_FEAT},BRANCH_PROTECTION_STANDARD>:BRANCH_PROTECTION_CONTROL=1>
+        $<$<STREQUAL:${CONFIG_TFM_BRANCH_PROTECTION_FEAT},BRANCH_PROTECTION_PACRET>:BRANCH_PROTECTION_CONTROL=2>
+        $<$<STREQUAL:${CONFIG_TFM_BRANCH_PROTECTION_FEAT},BRANCH_PROTECTION_PACRET_LEAF>:BRANCH_PROTECTION_CONTROL=2>
+        $<$<STREQUAL:${CONFIG_TFM_BRANCH_PROTECTION_FEAT},BRANCH_PROTECTION_BTI>:BRANCH_PROTECTION_CONTROL=3>
 )
 
 target_compile_options(tfm_spm

@@ -65,7 +65,6 @@ target_include_directories(cmsis_includes
         ${ALCOR_COMMON_DIR}/partition
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/common
         ${ALCOR_COMMON_DIR}
 )

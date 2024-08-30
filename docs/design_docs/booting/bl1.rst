@@ -185,16 +185,9 @@ implementation that is used by BL1 is ~3KiB in size, which is considerably
 smaller than the corresponding RSA implementation which is at least 6.5K. This
 simplicity of implementation is useful to avoid bugs.
 
-BL1 will use MbedTLS as the source for its implementation of LMS.
-
-.. Note::
-   As of the time of writing, the LMS code is still in the process of being
-   merged into MbedTLS, so BL1 currently does not support asymmetric
-   verification of the next boot stage. Currently, the next boot stage is
-   hash-locked, so cannot be upgraded.
-
-   The Github pull request for LMS can be found `here
-   <https://github.com/ARMmbed/mbedtls/pull/4826>`_
+BL1_2 uses the Mbed TLS implementation of LMS. More information about it is
+available in the `Mbed TLS documentation
+<https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/lms_8h/>`_
 
 *********************
 BL1 boot measurements
@@ -288,4 +281,4 @@ subdivided into BL1_1 and BL1_2 tests.
 
 --------------
 
-*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2024, Arm Limited. All rights reserved.*

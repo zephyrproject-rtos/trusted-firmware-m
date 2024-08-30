@@ -56,14 +56,14 @@ static int _tfm_dec_num_output(struct formatted_buffer_t *pb,
     uint32_t number = (uint32_t)num;
     uint32_t k = 0;
 
-    if (sign == 'd' && num < 0) {
+    if ((sign == 'd') && (num < 0)) {
         _tfm_flush_formatted_buffer(pb, '-');
         count++;
         number = -num;
     }
 
     do {
-        num_buff[k++] = '0' + number % 10;
+        num_buff[k++] = '0' + (number % 10);
         number /= 10;
     } while (number);
 

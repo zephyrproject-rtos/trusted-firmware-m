@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2022-2024, Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,17 +23,45 @@
 
 #define STACK_WATERMARK_VAL 0xdeadbeef
 
-void watermark_stack(struct partition_t *p_pt)
+void watermark_spm_stack(void)
+{
+    uint32_t addr = SPM_THREAD_CONTEXT->sp_limit;
+
+    while (addr < SPM_THREAD_CONTEXT->sp_base) {
+        *(uint32_t *)addr = STACK_WATERMARK_VAL;
+        addr += sizeof(uint32_t);
+    }
+}
+
+void watermark_stack(const struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
-    for (int i = 0; i < p_pldi->stack_size / 4; i++) {
+    for (int i = 0; i < p_pldi->stack_size / sizeof(uint32_t); i++) {
         *((uint32_t *)LOAD_ALLOCED_STACK_ADDR(p_pldi) + i) = STACK_WATERMARK_VAL;
     }
 }
 
+#ifndef CONFIG_TFM_USE_TRUSTZONE
+/* Returns the number of bytes of stack that have been used by SPM */
+static uint32_t used_spm_stack(void)
+{
+    const uint32_t *p;
+
+    for (p = (uint32_t *)(SPM_THREAD_CONTEXT->sp_limit);
+         p < (uint32_t *)(SPM_THREAD_CONTEXT->sp_base);
+         p++) {
+        if (*p != STACK_WATERMARK_VAL) {
+            break;
+        }
+    }
+
+    return SPM_THREAD_CONTEXT->sp_base - (uint32_t)p;
+}
+#endif
+
 /* Returns the number of bytes of stack that have been used by the specified partition */
-static uint32_t used_stack(struct partition_t *p_pt)
+static uint32_t used_stack(const struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     uint32_t unused_words = 0;
@@ -45,14 +75,20 @@ static uint32_t used_stack(struct partition_t *p_pt)
         unused_words++;
     }
 
-    return p_pldi->stack_size - (unused_words * 4);
+    return p_pldi->stack_size - (unused_words * sizeof(uint32_t));
 }
 
 void dump_used_stacks(void)
 {
-    struct partition_t *p_pt;
+    const struct partition_t *p_pt;
 
     SPMLOG("Used stack sizes report\r\n");
+#ifndef CONFIG_TFM_USE_TRUSTZONE
+    /* SPM has a dedicated stack in this case */
+    SPMLOG("  SPM\r\n");
+    SPMLOG_VAL("    Stack bytes: ", CONFIG_TFM_SPM_THREAD_STACK_SIZE);
+    SPMLOG_VAL("    Stack bytes used: ", used_spm_stack());
+#endif
     UNI_LIST_FOREACH(p_pt, PARTITION_LIST_ADDR, next) {
         SPMLOG_VAL("  Partition id: ", p_pt->p_ldinf->pid);
         SPMLOG_VAL("    Stack bytes: ", p_pt->p_ldinf->stack_size);

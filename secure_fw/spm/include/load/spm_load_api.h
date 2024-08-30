@@ -25,26 +25,26 @@
 #define LOAD_INFO_EXT_LENGTH                        (2)
 /* Argument "pldinf" must be a "struct partition_load_info_t *". */
 #define LOAD_INFSZ_BYTES(pldinf)                                       \
-    (sizeof(*(pldinf)) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t) +    \
-     (pldinf)->ndeps * sizeof(uint32_t) +                              \
-     (pldinf)->nservices * sizeof(struct service_load_info_t) +        \
-     (pldinf)->nassets * sizeof(struct asset_desc_t) +                 \
-     (pldinf)->nirqs * sizeof(struct irq_load_info_t))
+    (sizeof(*(pldinf)) + (LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t)) +    \
+     ((pldinf)->ndeps * sizeof(uint32_t)) +                              \
+     ((pldinf)->nservices * sizeof(struct service_load_info_t)) +        \
+     ((pldinf)->nassets * sizeof(struct asset_desc_t)) +                 \
+     ((pldinf)->nirqs * sizeof(struct irq_load_info_t)))
 
 /* 'Allocate' stack based on load info */
 #define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)(pldinf + 1)))
 
 #define LOAD_INFO_DEPS(pldinf)                                         \
-    ((const uint32_t *)((uintptr_t)(pldinf + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t)))
+    ((const uint32_t *)((uintptr_t)(pldinf + 1) + ((LOAD_INFO_EXT_LENGTH) * sizeof(uintptr_t))))
 #define LOAD_INFO_SERVICE(pldinf)                                      \
     ((const struct service_load_info_t *)((uintptr_t)LOAD_INFO_DEPS(pldinf) + \
-     (pldinf)->ndeps * sizeof(uint32_t)))
+     ((pldinf)->ndeps * sizeof(uint32_t))))
 #define LOAD_INFO_ASSET(pldinf)                                        \
     ((const struct asset_desc_t *)((uintptr_t)LOAD_INFO_SERVICE(pldinf) + \
-     (pldinf)->nservices * sizeof(struct service_load_info_t)))
+     ((pldinf)->nservices * sizeof(struct service_load_info_t))))
 #define LOAD_INFO_IRQ(pldinf)                                          \
     ((const struct irq_load_info_t *)((uintptr_t)LOAD_INFO_ASSET(pldinf) + \
-     (pldinf)->nassets * sizeof(struct asset_desc_t)))
+     ((pldinf)->nassets * sizeof(struct asset_desc_t))))
 
 /* Runtime partition struct list head node type */
 struct partition_head_t {

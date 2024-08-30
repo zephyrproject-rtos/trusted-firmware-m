@@ -267,6 +267,40 @@ macro(tfm_toolchain_reload_compiler)
     endif()
 
     set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
+
+    #
+    # Pointer Authentication Code and Branch Target Identification (PACBTI) Options
+    #
+    if (${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_NONE)
+        set(BRANCH_PROTECTION_OPTIONS "none")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_STANDARD)
+        set(BRANCH_PROTECTION_OPTIONS "standard")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET)
+        set(BRANCH_PROTECTION_OPTIONS "pac-ret")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET_LEAF)
+        set(BRANCH_PROTECTION_OPTIONS "pac-ret+leaf")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_BTI)
+        set(BRANCH_PROTECTION_OPTIONS "bti")
+    endif()
+
+    if(NOT ${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_DISABLED)
+        if(CMAKE_C_COMPILER_VERSION VERSION_LESS 6.18)
+            message(FATAL_ERROR "Your compiler does not support BRANCH_PROTECTION")
+        else()
+            if((TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85") AND
+                (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main"))
+                message(NOTICE "BRANCH_PROTECTION enabled with: ${BRANCH_PROTECTION_OPTIONS}")
+
+                string(APPEND CMAKE_C_FLAGS " -mbranch-protection=${BRANCH_PROTECTION_OPTIONS}")
+                string(APPEND CMAKE_CXX_FLAGS " -mbranch-protection=${BRANCH_PROTECTION_OPTIONS}")
+
+                add_link_options(--library_security=pacbti-m)
+            else()
+                message(FATAL_ERROR "Your architecture does not support BRANCH_PROTECTION")
+            endif()
+        endif()
+    endif()
+
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
@@ -298,6 +332,7 @@ macro(target_add_scatter_file target)
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
+            KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
 
@@ -305,7 +340,7 @@ macro(target_add_scatter_file target)
         ${target}_scatter
     )
 
-    set_target_properties(${target} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
+    set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
 
     target_link_libraries(${target}_scatter
         platform_region_defs
@@ -317,6 +352,11 @@ macro(target_add_scatter_file target)
         PRIVATE
             -E
             -xc
+    )
+
+    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
+    add_dependencies(${target}_scatter
+        manifest_tool
     )
 endmacro()
 
@@ -375,22 +415,38 @@ macro(target_share_symbols target)
     endforeach()
 
 
-    # strip all the symbols except those proveded as arguments. Long inline
+    # strip all the symbols except those provided as arguments. Long inline
     # python scripts aren't ideal, but this is both portable and possibly easier
     # to maintain than trying to filter files at build time in cmake.
-    add_custom_command(TARGET ${target}
-        POST_BUILD
+    add_custom_target(${target}_shared_symbols
         VERBATIM
-        COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX} ${KEEP_SYMBOL_LIST})
+        COMMAND python3
+            -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();"
+            $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+            ${KEEP_SYMBOL_LIST}
+    )
+
+    # Ensure ${target} is build before $<TARGET_FILE:${target}> is used to generate ${target}_shared_symbols
+    add_dependencies(${target}_shared_symbols ${target})
+    # Allow the global clean target to rm the ${target}_shared_symbols created
+    set_target_properties(${target}_shared_symbols PROPERTIES
+        ADDITIONAL_CLEAN_FILES $<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
+    )
 
     # Force the target to not remove the symbols if they're unused.
     list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --undefined=)
     target_link_options(${target}
         PRIVATE
             ${KEEP_SYMBOL_LIST}
+            # This is needed because the symbol file can contain functions
+            # that are not defined in every build configuration.
+            # The L6474E is:
+            # "Symbol referenced by --undefined or --undefined_and_export
+            # switch could not be resolved by a static library."
+            --diag_warning 6474
     )
 
-    # Ask armclang to produce a symdefs file that will
+    # Ask armclang to produce a symdefs file
     target_link_options(${target}
         PRIVATE
             --symdefs=$<TARGET_FILE_DIR:${target}>/${target}${CODE_SHARING_OUTPUT_FILE_SUFFIX}
@@ -408,7 +464,11 @@ macro(target_link_shared_code target)
             endif()
         endif()
 
-        add_dependencies(${target} ${symbol_provider})
+        # Ensure ${symbol_provider}_shared_symbols is built before ${target}
+        add_dependencies(${target} ${symbol_provider}_shared_symbols)
+        # ${symbol_provider}_shared_symbols - a custom target is always considered out-of-date
+        # To only link when necessary, depend on ${symbol_provider} instead
+        set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${symbol_provider}>)
         target_link_options(${target} PRIVATE LINKER:$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
