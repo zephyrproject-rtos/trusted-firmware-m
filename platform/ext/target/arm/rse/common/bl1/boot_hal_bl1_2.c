@@ -261,7 +261,9 @@ int32_t boot_platform_init(void)
 
 int32_t boot_platform_post_init(void)
 {
+#if (RSE_AMOUNT > 1) || defined(PLATFORM_PSA_ADAC_SECURE_DEBUG)
     int32_t rc;
+#endif
     enum tfm_plat_err_t plat_err;
     enum kmu_error_t kmu_err;
 
