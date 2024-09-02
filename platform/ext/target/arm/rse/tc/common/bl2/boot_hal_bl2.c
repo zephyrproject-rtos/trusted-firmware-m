@@ -80,6 +80,34 @@ static int mhu_init_sender_generic(void)
     return 0;
 }
 
+#ifdef RSE_USE_SDS_LIB
+static int clear_ap_sds_region(void)
+{
+    enum atu_error_t err;
+
+    err = atu_initialize_region(&ATU_DEV_S,
+                                TEMPORARY_ATU_MAPPING_REGION_ID,
+                                TEMPORARY_ATU_MAPPING_BASE,
+                                PLAT_RSE_AP_SDS_ATU_MAPPING_BASE,
+                                PLAT_RSE_AP_SDS_ATU_MAPPING_SIZE);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
+
+    memset((void *)(TEMPORARY_ATU_MAPPING_BASE +
+            (PLAT_RSE_AP_SDS_BASE - PLAT_RSE_AP_SDS_ATU_MAPPING_BASE)),
+            0, PLAT_RSE_AP_SDS_SIZE);
+
+    err = atu_uninitialize_region(&ATU_DEV_S,
+                                TEMPORARY_ATU_MAPPING_REGION_ID);
+    if (err != ATU_ERR_NONE) {
+        return err;
+    }
+
+    return 0;
+}
+#endif
+
 int32_t boot_platform_post_init(void)
 {
 #if PLAT_MHU_VERSION == 2
@@ -131,6 +159,13 @@ int32_t boot_platform_post_init(void)
         return result;
     }
 #endif /* RSE_XIP */
+
+#ifdef RSE_USE_SDS_LIB
+    result = clear_ap_sds_region();
+    if (result) {
+        return result;
+    }
+#endif /* RSE_USE_SDS_LIB */
 
     return 0;
 }

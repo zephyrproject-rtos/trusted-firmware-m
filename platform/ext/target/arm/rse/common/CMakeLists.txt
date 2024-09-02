@@ -338,6 +338,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:PLATFORM_HAS_SMMU_V3>
         $<$<BOOL:${PLATFORM_HOST_HAS_MCP}>:PLATFORM_HOST_HAS_MCP>
         $<$<BOOL:${PLATFORM_HOST_HAS_SCP}>:PLATFORM_HOST_HAS_SCP>
+        $<$<BOOL:${RSE_USE_SDS_LIB}>:RSE_USE_SDS_LIB>
 )
 
 target_compile_options(platform_bl2

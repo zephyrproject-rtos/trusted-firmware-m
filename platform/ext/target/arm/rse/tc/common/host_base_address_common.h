@@ -22,6 +22,13 @@
 #ifndef __HOST_BASE_ADDRESS_COMMON_H__
 #define __HOST_BASE_ADDRESS_COMMON_H__
 
+#include "platform_base_address.h"
+
+#define ALIGN_UP(num, align)    (((num) + ((align) - 1)) & ~((align) - 1))
+#define ALIGN_DOWN(num, align)  ((num) & ~((align) - 1))
+
+#define RSE_ATU_PAGE_SIZE (0x2000U) /* 8KB */
+
 /* Host addresses */
 #define AP_BOOT_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
 #define AP_BOOT_SRAM_SIZE   0x80000U     /* 512KB */
@@ -40,7 +47,13 @@
 #define PLAT_RSE_AP_SDS_BASE  (AP_SHARED_RAM_BASE \
                                + PLAT_SCP_AP_SDS_SIZE \
                                + PLAT_SCP_SCMI_S_PAYLOAD_SIZE)
+#define PLAT_RSE_AP_SDS_ATU_MAPPING_BASE (ALIGN_DOWN(PLAT_RSE_AP_SDS_BASE, \
+                                                RSE_ATU_PAGE_SIZE))
 #define PLAT_RSE_AP_SDS_SIZE  (64U)
+#define PLAT_RSE_AP_SDS_ATU_MAPPING_SIZE ((ALIGN_UP(PLAT_RSE_AP_SDS_BASE +    \
+                                                        PLAT_RSE_AP_SDS_SIZE, \
+                                                    RSE_ATU_PAGE_SIZE)) -     \
+                                          PLAT_RSE_AP_SDS_ATU_MAPPING_BASE)
 
 /* Temporary ATU mapping location. Placed directly after the last address
  * currently used for logical mapping in the RSE */
