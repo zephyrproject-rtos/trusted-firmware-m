@@ -172,7 +172,6 @@ target_sources(platform_s
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_locality.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c
         $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds.c>
-        $<$<BOOL:${RSE_USE_SDS_LIB}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/sds_svc.c>
         native_drivers/atu_rse_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_ch_drv.c
@@ -261,6 +260,7 @@ target_sources(platform_bl2
     PRIVATE
         tfm_hal_platform_reset.c
         device/source/device_definition.c
+        $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/apu/ni_tower_apu_drv.c>
         $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/discovery/ni_tower_discovery_drv.c>
@@ -350,6 +350,7 @@ target_sources(platform_bl1_1
     PRIVATE
         ./bl1/boot_hal_bl1_1.c
         ./device/source/device_definition.c
+        $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         ./device/source/system_core_init.c
         ./native_drivers/atu_rse_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/kmu/kmu_drv.c

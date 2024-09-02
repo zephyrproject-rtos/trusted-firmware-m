@@ -29,6 +29,15 @@ psa_key_id_t dpe_plat_get_root_attest_key_id(void)
     return TFM_BUILTIN_KEY_ID_IAK;
 }
 
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_DPE", "APP-ROT") __attribute__((naked))
+static enum tfm_plat_err_t request_sds_struct_add(const struct sds_structure_desc *struct_desc)
+{
+    /* Platform SVC handlers can be added for secure world in TF-M */
+    __asm("SVC %0\n"
+          "BX LR\n"
+          : : "I" (TFM_SVC_PLATFORM_SDS_STRUCT_ADD));
+}
+
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_DPE", "APP-ROT")
 int dpe_plat_share_context_with_ap(int ctx_handle)
 {

@@ -13,6 +13,9 @@
 #ifdef RSE_USE_SDS_LIB
 #include "sds.h"
 #endif /* RSE_USE_SDS_LIB */
+#ifdef TFM_PARTITION_DPE
+#include "platform_locality.h"
+#endif /* TFM_PARTITION_DPE */
 
 int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                                 uint32_t lr)
