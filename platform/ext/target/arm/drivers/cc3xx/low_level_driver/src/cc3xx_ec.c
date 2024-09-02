@@ -58,8 +58,10 @@ static bool validate_point(cc3xx_ec_curve_t *curve,
     }
 
     switch (curve->type) {
+#ifdef CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
     case CC3XX_EC_CURVE_TYPE_WEIERSTRASS:
         return cc3xx_lowlevel_ec_weierstrass_validate_point(curve, p);
+#endif /* CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
     default:
         return false;
     }
