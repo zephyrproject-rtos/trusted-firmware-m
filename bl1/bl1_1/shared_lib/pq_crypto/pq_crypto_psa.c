@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +10,12 @@
 #include "mbedtls/lms.h"
 #include "otp.h"
 #include "psa/crypto.h"
+
+/* Unused function defined to prevent Armclang missing symbol error */
+psa_status_t psa_generate_random(uint8_t *output, size_t output_size)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
 
 psa_status_t psa_hash_setup(
     psa_hash_operation_t *operation,
