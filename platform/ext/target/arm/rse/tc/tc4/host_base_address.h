@@ -22,27 +22,9 @@
 #ifndef __HOST_BASE_ADDRESS_H__
 #define __HOST_BASE_ADDRESS_H__
 
-/* Host addresses */
-#define AP_BOOT_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
-#define AP_BOOT_SRAM_SIZE   0x80000U     /* 512KB */
+#include "host_base_address_common.h"
 
 #define SCP_BOOT_SRAM_BASE  0x1000000000000 /* SCP initial boot SRAM base address */
 #define SCP_BOOT_SRAM_SIZE  0x20000U        /* 128KB */
-
-#define HOST_UART_BASE     0x7FF80000UL /* Host UART base address */
-#define HOST_UART_SIZE     0x2000U      /* 8KB */
-
-#define HOST_FLASH0_BASE   0x08000000UL /* Host flash base address */
-#define HOST_FLASH0_SIZE   0x4000000    /* 64 MiB */
-
-#define AP_TRUSTED_SRAM_BASE  0x4000000UL /* AP trusted SRAM base address */
-#define AP_SHARED_RAM_BASE    AP_TRUSTED_SRAM_BASE
-
-#define PLAT_SCP_AP_SDS_SIZE          0xDC0U  /* 3520 bytes */
-#define PLAT_SCP_SCMI_S_PAYLOAD_SIZE  0x100U  /*  256 bytes */
-#define PLAT_RSE_AP_SDS_BASE  (AP_SHARED_RAM_BASE \
-                               + PLAT_SCP_AP_SDS_SIZE \
-                               + PLAT_SCP_SCMI_S_PAYLOAD_SIZE)
-#define PLAT_RSE_AP_SDS_SIZE  (64U)
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */

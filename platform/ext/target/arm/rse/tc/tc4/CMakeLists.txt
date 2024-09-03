@@ -15,6 +15,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../common common)
 target_include_directories(platform_region_defs
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${TC_COMMON_SOURCE_DIR}
 )
 
 #========================= Platform_s =========================================#
@@ -129,6 +130,7 @@ install(DIRECTORY   device
 install(FILES       rse_memory_sizes.h
                     flash_layout.h
                     host_base_address.h
+                    ${TC_COMMON_SOURCE_DIR}/host_base_address_common.h
                     rse_platform_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition)
 
