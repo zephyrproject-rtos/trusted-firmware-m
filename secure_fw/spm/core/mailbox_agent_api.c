@@ -43,6 +43,9 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
 
     status = spm_associate_call_params(p_connection, control, params->p_invecs, params->p_outvecs);
     if (status != PSA_SUCCESS) {
+        if (IS_STATIC_HANDLE(handle)) {
+            spm_free_connection(p_connection);
+        }
         return status;
     }
 
