@@ -212,9 +212,10 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
     struct connection_t *connection;
     const struct service_t *service;
     uint32_t sid, version, index;
-    bool ns_caller = tfm_spm_is_ns_caller();
+    int32_t psa_ret;
+    bool ns_caller;
 
-    SPM_ASSERT(p_connection);
+    SPM_ASSERT(p_connection != NULL);
 
     /* It is a PROGRAMMER ERROR if the handle is a null handle. */
     if (handle == PSA_NULL_HANDLE) {
@@ -226,17 +227,19 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
         index = GET_INDEX_FROM_STATIC_HANDLE(handle);
 
         service = stateless_services_ref_tbl[index];
-        if (!service) {
+        if (service == NULL) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         sid = service->p_ldinf->sid;
+        ns_caller = tfm_spm_is_ns_caller();
 
         /*
          * It is a PROGRAMMER ERROR if the caller is not authorized to access
          * the RoT Service.
          */
-        if (tfm_spm_check_authorization(sid, service, ns_caller) != PSA_SUCCESS) {
+        psa_ret = tfm_spm_check_authorization(sid, service, ns_caller);
+        if (psa_ret != PSA_SUCCESS) {
             return PSA_ERROR_CONNECTION_REFUSED;
         }
 
@@ -247,13 +250,14 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
         }
 
         /*
-         * Current SPM doesn't support multiple context management. There is only one
-         * instance in SPM to call the connection pool allocation. It is no need to be
-         * protected.
-         * Protection should be established after the context management is implemented.
+         * Current SPM doesn't support multiple context management. There is
+         * only one instance in SPM to call the connection pool allocation.
+         * There is no need to be protected.
+         * Protection should be established after the context management is
+         * implemented.
          */
         connection = spm_allocate_connection();
-        if (!connection) {
+        if (connection == NULL) {
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
@@ -261,7 +265,7 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         connection = handle_to_connection(handle);
-        if (!connection) {
+        if (connection == NULL) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -282,7 +286,7 @@ psa_status_t spm_get_idle_connection(struct connection_t **p_connection,
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        if (!(connection->service)) {
+        if (connection->service == NULL) {
             /* FixMe: Need to implement a mechanism to resolve this failure. */
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
