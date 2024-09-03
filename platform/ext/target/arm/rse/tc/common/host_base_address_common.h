@@ -42,4 +42,13 @@
                                + PLAT_SCP_SCMI_S_PAYLOAD_SIZE)
 #define PLAT_RSE_AP_SDS_SIZE  (64U)
 
+/* Temporary ATU mapping location. Placed directly after the last address
+ * currently used for logical mapping in the RSE */
+#define TEMPORARY_ATU_MAPPING_BASE (HOST_ACCESS_BASE_S + 5 * HOST_IMAGE_MAX_SIZE)
+
+/* There is currently no single location where the ATU regions
+ * are defined, so choose an arbitrary region which isn't
+ * currently being used elsewhere in RSE */
+#define TEMPORARY_ATU_MAPPING_REGION_ID (10)
+
 #endif /* __HOST_BASE_ADDRESS_COMMON_H__ */
