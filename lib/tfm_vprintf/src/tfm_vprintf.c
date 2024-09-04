@@ -103,18 +103,17 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
     bool zero_padding = false;
 
     while ((c = *fmt++) != '\0') {
-        if (c == '%') {
-            zero_padding = false;
-            num_padding = 0;
-            formatting = true;
-            continue;
-        }
-
         if (!formatting) {
-            if (c == '\n') {
-                output_char(output_func, priv, '\r');
+            if (c == '%') {
+                zero_padding = false;
+                num_padding = 0;
+                formatting = true;
+            } else {
+                if (c == '\n') {
+                    output_char(output_func, priv, '\r');
+                }
+                output_char(output_func, priv, c);
             }
-            output_char(output_func, priv, c);
             continue;
         }
 
