@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "Driver_MPC.h"
 #include "Driver_PPC.h"
 #include "platform_description.h"
@@ -369,7 +369,7 @@ void sau_and_idau_cfg(void)
 
 /*------------------- Memory configuration functions -------------------------*/
 
-int32_t mpc_init_cfg(void)
+enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
@@ -380,13 +380,13 @@ int32_t mpc_init_cfg(void)
 
     ret = EFLASH_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = EFLASH_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                   memory_regions.non_secure_partition_limit,
                                   ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* SRAM MPC device needs to be initialialized so that the interrupt can be
@@ -394,51 +394,51 @@ int32_t mpc_init_cfg(void)
      */
     ret = Driver_CODE_SRAM_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = mpc_data_region0->Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = mpc_data_region0->ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
                                    MPC_ISRAM0_RANGE_LIMIT_S,
                                    ARM_MPC_ATTR_SECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = mpc_data_region1->Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = mpc_data_region1->ConfigRegion(MPC_ISRAM1_RANGE_BASE_S,
                                    MPC_ISRAM1_RANGE_LIMIT_S,
                                    ARM_MPC_ATTR_SECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = mpc_data_region2->Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = mpc_data_region2->ConfigRegion(MPC_ISRAM2_RANGE_BASE_NS,
                                    MPC_ISRAM2_RANGE_LIMIT_NS,
                                    ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = mpc_data_region3->Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = mpc_data_region3->ConfigRegion(MPC_ISRAM3_RANGE_BASE_NS,
                                    MPC_ISRAM3_RANGE_LIMIT_NS,
                                    ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Add barriers to assure the MPC configuration is done before continue
@@ -447,7 +447,7 @@ int32_t mpc_init_cfg(void)
     __DSB();
     __ISB();
 
-    return ARM_DRIVER_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 void mpc_revert_non_secure_to_secure_cfg(void)
@@ -476,7 +476,7 @@ void mpc_revert_non_secure_to_secure_cfg(void)
 
 /*---------------------- PPC configuration functions -------------------------*/
 
-int32_t ppc_init_cfg(void)
+enum tfm_plat_err_t ppc_init_cfg(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     int32_t ret = ARM_DRIVER_OK;
@@ -486,7 +486,7 @@ int32_t ppc_init_cfg(void)
      */
     ret = Driver_AHB_PPCEXP0.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Grant non-secure access to peripherals in the APB PPC0
@@ -494,37 +494,37 @@ int32_t ppc_init_cfg(void)
      */
     ret = Driver_APB_PPC0.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_DTIMER_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_MHU0_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_MHU1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* No peripherals are configured on APB PPC1, but device needs to be
@@ -532,7 +532,7 @@ int32_t ppc_init_cfg(void)
      */
     ret = Driver_APB_PPC1.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* No peripherals are configured on APB PPC EXP0, but device needs to be
@@ -540,91 +540,91 @@ int32_t ppc_init_cfg(void)
      */
     ret = Driver_APB_PPCEXP0.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Grant non-secure access for APB peripherals on EXP1 */
     ret = Driver_APB_PPCEXP1.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM0_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM1_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PWM2_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2S_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_UART0_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_UART1_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_AND_NONPRIV);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2C0_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_I2C1_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_SPI_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_GPTIMER_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_RTC_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_PVT_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_APB_PPCEXP1.ConfigPeriph(MUSCA_B1_SDIO_APB_PPC_POS,
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Configure the response to a security violation as a
@@ -632,10 +632,10 @@ int32_t ppc_init_cfg(void)
      */
     spctrl->secrespcfg |= 1U;
 
-    return ARM_DRIVER_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
+void ppc_configure_to_non_secure(ppc_bank_t bank, uint32_t pos)
 {
     /* Setting NS flag for peripheral to enable NS access */
     ARM_DRIVER_PPC *ppc_driver;
@@ -651,7 +651,7 @@ void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
     }
 }
 
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
+void ppc_configure_to_secure(ppc_bank_t bank, uint32_t pos)
 {
     /* Clear NS flag for peripheral to prevent NS access */
     ARM_DRIVER_PPC *ppc_driver;
@@ -667,7 +667,7 @@ void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
     }
 }
 
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_en_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
     ARM_DRIVER_PPC *ppc_driver;
 
@@ -682,7 +682,7 @@ void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
     }
 }
 
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
     ARM_DRIVER_PPC *ppc_driver;
 

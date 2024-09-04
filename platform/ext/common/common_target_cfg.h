@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -93,6 +93,8 @@ void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos);
 /**
  * \brief Enables the fault handlers BusFault, UsageFault,
  *        MemManageFault and SecureFault.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t enable_fault_handlers(void);
 

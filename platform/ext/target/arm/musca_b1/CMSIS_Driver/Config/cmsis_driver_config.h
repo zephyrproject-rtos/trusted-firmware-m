@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include "device_definition.h"
 #include "platform_description.h"
 #include "RTE_Device.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 
 #define UART0_DEV           UART0_PL011_DEV_NS
 #define UART1_DEV           UART1_PL011_DEV_NS

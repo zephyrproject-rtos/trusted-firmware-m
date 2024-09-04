@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "tfm_hal_device_header.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"

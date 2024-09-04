@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -10,8 +10,6 @@
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
 set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the general purpose LEDs on the platform board")
-
-list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${CMAKE_CURRENT_LIST_DIR}/generated_file_list.yaml)
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x800 CACHE STRING "Trailer size")

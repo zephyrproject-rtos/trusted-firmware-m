@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -10,6 +10,7 @@
 #define __TFM_PERIPHERALS_DEF_H__
 
 #include "platform_irq.h"
+#include "common_target_cfg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,8 +26,6 @@ extern "C" {
 #define TFM_TIMER1_IRQ           (TIMER1_IRQn)
 #define FF_TEST_UART_IRQ         (UART1_Tx_IRQn)
 #define FF_TEST_UART_IRQ_Handler UARTTX1_Handler
-
-struct platform_data_t;
 
 extern struct platform_data_t tfm_peripheral_std_uart;
 extern struct platform_data_t tfm_peripheral_timer0;

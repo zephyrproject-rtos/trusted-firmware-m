@@ -28,15 +28,11 @@ target_sources(tfm_s
         Device/Source/startup_musca.c
 )
 
-# Use a common scatter file for Isolation L1 and L2, a dedicated one for Isolation L3
-# IAR is not supported for L3
+# Use the common scatter file for Isolation L1 to L3
 target_add_scatter_file(tfm_s
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
-    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_l3.sct>
-    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_l3.ld>
-    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_l3.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_s.icf>
 )
 
 if(BL2)
@@ -71,6 +67,7 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
+        tfm_peripherals_def.c
         CMSIS_Driver/Driver_QSPI_Flash.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
@@ -78,7 +75,6 @@ target_sources(platform_s
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
         Native_Driver/mpc_sie200_drv.c
-        Native_Driver/mpu_armv8m_drv.c
         Native_Driver/gpio_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
         Native_Driver/qspi_ip6514e_drv.c
@@ -165,7 +161,7 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        tfm_hal_isolation.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         tfm_hal_platform.c
         faults.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
@@ -244,6 +240,7 @@ install(FILES       target_cfg.h
                     Libraries/mt25ql_flash_lib.h
                     tfm_peripherals_def.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
+                    ${PLATFORM_DIR}/ext/common/common_target_cfg.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
                     ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)

@@ -6,7 +6,7 @@
  */
 
 #include "tfm_hal_device_header.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "Driver_MPC.h"
 #include "utilities.h"
 #include "tfm_hal_platform.h"
