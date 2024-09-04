@@ -31,6 +31,7 @@ static inline const char *get_log_prefix(uint8_t log_level)
     default:
         /* String must start with LOG_MARKER_* */
         assert(0);
+        return NULL;
     }
 }
 
