@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -100,7 +100,7 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
 #elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
     "http://arm.com/psa/2.0.0",
 #elif ATTEST_TOKEN_PROFILE_ARM_CCA
-    "http://arm.com/CCA-SSD/1.0.0",
+    "tag:arm.com,2023:cca_platform#1.0.0",
 #else
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
 #error "Attestation token profile is incorrect"
