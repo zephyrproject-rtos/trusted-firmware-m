@@ -101,14 +101,6 @@
 #define TFM_LINKER_PT_PROT_PART_PRIVATE_DATA_ALIGNMENT  TFM_LINKER_DEFAULT_ALIGNMENT
 #endif
 
-#ifndef TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT
-#define TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT       TFM_LINKER_DEFAULT_ALIGNMENT
-#endif
-
-#ifndef TFM_LINKER_SECURE_DATA_ALIGNMENT
-#define TFM_LINKER_SECURE_DATA_ALIGNMENT        TFM_LINKER_DEFAULT_ALIGNMENT
-#endif
-
 /* Alignment of stack of NS agent TZ partition. This should not be needed once
  * TZ NS agent partition is reworked to use manifest files. */
 #ifndef TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT
