@@ -20,7 +20,7 @@
 #include "tfm_hal_device_header.h"
 #include "utilities.h"
 #include "common_target_cfg.h"
-#include "Driver_PPC.h"
+#include "ppc_drv.h"
 #include "Driver_MPC.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
@@ -106,19 +106,6 @@ extern ARM_DRIVER_MPC Driver_VM0_MPC;
 extern ARM_DRIVER_MPC Driver_VM1_MPC;
 extern ARM_DRIVER_MPC Driver_SIC_MPC;
 
-/* Import PPC drivers */
-extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN0;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP0;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP1;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP2;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_MAIN_EXP3;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH0;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH1;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP0;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP1;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP2;
-extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP3;
-
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
 #define PERIPHERALS_BASE_NS_END        (0x4FFFFFFF)
@@ -144,21 +131,21 @@ extern DRIVER_PPC_RSE Driver_PPC_RSE_PERIPH_EXP3;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-static DRIVER_PPC_RSE *const ppc_bank_drivers[] = {
-    &Driver_PPC_RSE_MAIN0,
-    &Driver_PPC_RSE_MAIN_EXP0,
-    &Driver_PPC_RSE_MAIN_EXP1,
-    &Driver_PPC_RSE_MAIN_EXP2,
-    &Driver_PPC_RSE_MAIN_EXP3,
-    &Driver_PPC_RSE_PERIPH0,
-    &Driver_PPC_RSE_PERIPH1,
-    &Driver_PPC_RSE_PERIPH_EXP0,
-    &Driver_PPC_RSE_PERIPH_EXP1,
-    &Driver_PPC_RSE_PERIPH_EXP2,
-    &Driver_PPC_RSE_PERIPH_EXP3,
+static struct ppc_dev_t* const ppc_dev_bank[] = {
+    &PPC_RSE_MAIN0_DEV_S,
+    &PPC_RSE_MAIN_EXP0_DEV_S,
+    &PPC_RSE_MAIN_EXP1_DEV_S,
+    &PPC_RSE_MAIN_EXP2_DEV_S,
+    &PPC_RSE_MAIN_EXP3_DEV_S,
+    &PPC_RSE_PERIPH0_DEV_S,
+    &PPC_RSE_PERIPH1_DEV_S,
+    &PPC_RSE_PERIPH_EXP0_DEV_S,
+    &PPC_RSE_PERIPH_EXP1_DEV_S,
+    &PPC_RSE_PERIPH_EXP2_DEV_S,
+    &PPC_RSE_PERIPH_EXP3_DEV_S
 };
 
-#define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
+#define PPC_BANK_COUNT (sizeof(ppc_dev_bank)/sizeof(ppc_dev_bank[0]))
 
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
@@ -244,12 +231,8 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     /* PPC interrupt enabling */
     ppc_clear_irq();
 
-    for (i = 0; i < PPC_BANK_COUNT; i++)  {
-        ret = ppc_bank_drivers[i]->EnableInterrupt();
-        if (ret != ARM_DRIVER_OK) {
-            ERROR_MSG("Failed to Enable interrupt on PPC");
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
+    for (i = 0; i < PPC_BANK_COUNT; i++) {
+        ppc_irq_enable(ppc_dev_bank[i]);
     }
 
     NVIC_ClearPendingIRQ(PPC_IRQn);
@@ -474,20 +457,6 @@ void mpc_clear_irq(void)
 enum tfm_plat_err_t ppc_init_cfg(void)
 {
     struct rse_sacfg_t *sacfg = (struct rse_sacfg_t *)RSE_SACFG_BASE_S;
-    int32_t err = ARM_DRIVER_OK;
-
-    /* Initialize not used PPC drivers */
-    err |= Driver_PPC_RSE_MAIN0.Initialize();
-    err |= Driver_PPC_RSE_MAIN_EXP0.Initialize();
-    err |= Driver_PPC_RSE_MAIN_EXP1.Initialize();
-    err |= Driver_PPC_RSE_MAIN_EXP2.Initialize();
-    err |= Driver_PPC_RSE_MAIN_EXP3.Initialize();
-    err |= Driver_PPC_RSE_PERIPH0.Initialize();
-    err |= Driver_PPC_RSE_PERIPH1.Initialize();
-    err |= Driver_PPC_RSE_PERIPH_EXP0.Initialize();
-    err |= Driver_PPC_RSE_PERIPH_EXP1.Initialize();
-    err |= Driver_PPC_RSE_PERIPH_EXP2.Initialize();
-    err |= Driver_PPC_RSE_PERIPH_EXP3.Initialize();
 
     /*
      * Configure the response to a security violation as a
@@ -495,70 +464,55 @@ enum tfm_plat_err_t ppc_init_cfg(void)
      */
     sacfg->secrespcfg |= CMSDK_SECRESPCFG_BUS_ERR_MASK;
 
-    if (err != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
     return TFM_PLAT_ERR_SUCCESS;
 }
 
 void ppc_configure_to_secure(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSE *ppc_driver;
-
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
 
-    ppc_driver = ppc_bank_drivers[bank];
-    if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, PPC_RSE_SECURE_CONFIG);
+    if (ppc_dev_bank[bank]) {
+        ppc_config_security(ppc_dev_bank[bank], pos, PPC_SECURE_ACCESS);
     }
 }
 
 void ppc_configure_to_non_secure(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSE *ppc_driver;
-
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
-
-    ppc_driver = ppc_bank_drivers[bank];
-    if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, PPC_RSE_NONSECURE_CONFIG);
+     if (ppc_dev_bank[bank]) {
+        ppc_config_security(ppc_dev_bank[bank], pos, PPC_NONSECURE_ACCESS);
     }
 }
 
 void ppc_en_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSE *ppc_driver;
-
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
 
-    ppc_driver = ppc_bank_drivers[bank];
-    if (ppc_driver) {
-        ppc_driver->ConfigPrivilege(pos,
-                                    PPC_RSE_SECURE_CONFIG,
-                                    PPC_RSE_PRIV_AND_NONPRIV_CONFIG);
+    if (ppc_dev_bank[bank]) {
+        ppc_config_privilege(ppc_dev_bank[bank],
+                             pos,
+                             PPC_SECURE_ACCESS,
+                             PPC_PRIV_AND_NONPRIV_ACCESS);
     }
 }
 
 void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
-    DRIVER_PPC_RSE *ppc_driver;
-
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
 
-    ppc_driver = ppc_bank_drivers[bank];
-    if (ppc_driver) {
-        ppc_driver->ConfigPrivilege(pos,
-                                    PPC_RSE_SECURE_CONFIG,
-                                    PPC_RSE_PRIV_CONFIG);
+    if (ppc_dev_bank[bank]) {
+        ppc_config_privilege(ppc_dev_bank[bank],
+                             pos,
+                             PPC_SECURE_ACCESS,
+                             PPC_PRIV_ONLY_ACCESS);
     }
 }
 
@@ -567,7 +521,9 @@ void ppc_clear_irq(void)
     int32_t i = 0;
 
     for (i = 0; i < PPC_BANK_COUNT; i++) {
-        ppc_bank_drivers[i]->ClearInterrupt();
+        if (ppc_dev_bank[i]) {
+            ppc_clr_irq(ppc_dev_bank[i]);
+        }
     }
 }
 

@@ -146,6 +146,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/ppc
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
@@ -164,7 +165,6 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_MPC.c
-        cmsis_drivers/Driver_PPC.c
         device/source/device_definition.c
         $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
@@ -181,11 +181,11 @@ target_sources(platform_s
         $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
-        native_drivers/ppc_rse_drv.c
         native_drivers/integrity_checker_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/ppc/ppc_drv_sie200.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
@@ -310,6 +310,7 @@ target_include_directories(platform_bl2
         libraries
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/ppc
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
@@ -391,6 +392,7 @@ target_include_directories(platform_bl1_1_interface
         ./native_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/ppc
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk

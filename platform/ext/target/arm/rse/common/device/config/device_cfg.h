@@ -45,6 +45,7 @@
 #endif /* RSE_XIP */
 
 /* ARM Peripheral Protection Controllers (PPC) */
+#define PPC_RSE_S
 #define PPC_RSE_MAIN0_S
 #define PPC_RSE_MAIN_EXP0_S
 #define PPC_RSE_MAIN_EXP1_S
