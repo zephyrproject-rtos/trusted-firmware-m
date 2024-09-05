@@ -7,8 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 
-list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${CMAKE_CURRENT_LIST_DIR}/generated_file_list.yaml)
-
 if(BL2)
     set(BL2_TRAILER_SIZE 0x10000 CACHE STRING "Trailer size")
 else()

@@ -42,111 +42,81 @@
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = {MPU_BASE};
 
-#ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
-#endif /* CONFIG_TFM_PARTITION_META */
-
 #if TFM_ISOLATION_LEVEL == 3
 /* Isolation level 3 needs to reserve at lease one MPU region for private data asset. */
 #define MIN_NR_PRIVATE_DATA_REGION    1
 
 static uint32_t idx_boundary_handle = 0;
-REGION_DECLARE(Image$$, PT_RO_START, $$Base);
-REGION_DECLARE(Image$$, PT_RO_END, $$Base);
-REGION_DECLARE(Image$$, PT_PRIV_RWZI_START, $$Base);
-REGION_DECLARE(Image$$, PT_PRIV_RWZI_END, $$Base);
-
-const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_RO_END, $$Base) - 1,
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-    },
-    /* For isolation Level 3, set up static isolation for privileged data.
-     * Unprivileged data is dynamically set during Partition scheduling.
-     */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_END, $$Base) - 1,
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_ONLY,
-        MPU_ARMV8M_SH_NONE,
-    },
-#ifdef CONFIG_TFM_PARTITION_META
-    /* TFM partition metadata pointer region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
-    }
-#endif
-};
 #else /* TFM_ISOLATION_LEVEL == 3 */
 /* Isolation level 1&2 do not need to reserve MPU region for private data asset. */
 #define MIN_NR_PRIVATE_DATA_REGION    0
+#endif /* TFM_ISOLATION_LEVEL == 3 */
 
-REGION_DECLARE(Image$$, ER_VENEER, $$Base);
-REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
-REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
-REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
+REGION_DECLARE(Image$$, PT_UNPRIV_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_CODE_START, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_CODE_END, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_RO_DATA_END, $$Base);
+#if TFM_ISOLATION_LEVEL != 3
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_APP_ROT_DATA_END, $$Base);
+#elif defined(CONFIG_TFM_PARTITION_META)
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
+#endif
+REGION_DECLARE(Image$$, PT_PSA_ROT_DATA_START, $$Base);
+REGION_DECLARE(Image$$, PT_PSA_ROT_DATA_END, $$Base);
 
-const struct mpu_armv8m_region_cfg_t region_cfg[] = {
-    /* Veneer region */
+static const struct mpu_armv8m_region_cfg_t region_cfg[] = {
+    /* Combined unprivileged/ARoT code region */
     {
         0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
+        (uint32_t)&REGION_NAME(Image$$, PT_UNPRIV_CODE_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_CODE_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
-    /* TFM Core unprivileged code region */
+    /* PSA RoT code region */
     {
         0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
+        (uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_CODE_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_CODE_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
+        MPU_ARMV8M_AP_RO_PRIV_ONLY,
+        MPU_ARMV8M_SH_NONE
+    },
+    /* RO data region */
+    {
+        0, /* will be updated before using */
+        (uint32_t)&REGION_NAME(Image$$, PT_RO_DATA_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_RO_DATA_END, $$Base) - 1,
+        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
-    /* RO region */
+    /* For isolation levels below 3, configure all App RoT data (which includes
+     * the metadata pointer region) as unprivileged. For isolation level 3, only
+     * the metadata pointer region is configured unprivileged and App RoT
+     * partition data regions are dynamically configured during partition
+     * scheduling.
+     */
+#if TFM_ISOLATION_LEVEL != 3
+    /* Application RoT data region */
     {
         0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
-    },
-    /* RW, ZI and stack as one region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
+        (uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_APP_ROT_DATA_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
-#ifdef CONFIG_TFM_PARTITION_META
+#elif defined(CONFIG_TFM_PARTITION_META)
     /* TFM partition metadata pointer region */
     {
         0, /* will be updated before using */
@@ -156,10 +126,19 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
-    }
+    },
 #endif
+    /* PSA RoT data region */
+    {
+        0, /* will be updated before using */
+        (uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_DATA_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_PSA_ROT_DATA_END, $$Base) - 1,
+        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RW_PRIV_ONLY,
+        MPU_ARMV8M_SH_NONE
+    },
 };
-#endif /* TFM_ISOLATION_LEVEL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 #ifdef TFM_FIH_PROFILE_ON
