@@ -299,7 +299,7 @@ enum kmu_error_t kmu_get_slot_invalid(struct kmu_dev_t *dev, uint32_t slot)
         return err;
     }
 
-    if (p_kmu->kmuksc[slot] | KMU_KMUKSC_KSIP_MASK){
+    if (p_kmu->kmuksc[slot] & KMU_KMUKSC_KSIP_MASK){
         NONFATAL_ERR(KMU_ERROR_SLOT_INVALIDATED);
         return KMU_ERROR_SLOT_INVALIDATED;
     } else {
