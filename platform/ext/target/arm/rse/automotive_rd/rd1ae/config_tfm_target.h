@@ -32,6 +32,6 @@
 #define SYSCLKCFG_VAL  0
 
 /* Maximum RSE Comms payload size using Embed protocol */
-#define RSE_COMMS_PAYLOAD_MAX_SIZE (0x40 + 0x800)
+#define RSE_COMMS_PAYLOAD_MAX_SIZE (0x3FE0)
 
 #endif /* __CONFIG_TFM_TARGET_H__ */
