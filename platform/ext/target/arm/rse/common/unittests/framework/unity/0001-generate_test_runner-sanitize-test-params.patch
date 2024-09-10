@@ -1,0 +1,32 @@
+From 7bfc675129554141cbfe542fd1f68a56d3b7cc6e Mon Sep 17 00:00:00 2001
+From: Anubhav Raina <anubhav.raina@arm.com>
+Date: Tue, 10 Sep 2024 10:14:50 +0100
+Subject: [PATCH] generate_test_runner: dump test args
+
+ The test runner is generated with unescaped string literals when the
+`TEST_CASE` macro has a string parameter or a newline (from the
+formatter)
+
+Strip unescaped double quote characters, newlines and white space
+characters when pasting test cases for the `--list` opt.
+
+Signed-off-by: Anubhav Raina <anubhav.raina@arm.com>
+---
+ auto/generate_test_runner.rb | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/auto/generate_test_runner.rb b/auto/generate_test_runner.rb
+index 102f6f3..07299cb 100755
+--- a/auto/generate_test_runner.rb
++++ b/auto/generate_test_runner.rb
+@@ -414,6 +414,7 @@ class UnityTestRunnerGenerator
+           output.puts('      UNITY_PRINT_EOL();')
+         else
+           test[:args].each do |args|
++            args = args.gsub(/(?<!\\)\"/, '').gsub(/[\s\n]/, '')
+             output.puts("      UnityPrint(\"  #{test[:test]}(#{args})\");")
+             output.puts('      UNITY_PRINT_EOL();')
+           end
+--
+2.34.1
+
