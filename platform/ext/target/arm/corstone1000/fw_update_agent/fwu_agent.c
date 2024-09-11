@@ -206,8 +206,8 @@ static enum fwu_agent_error_t private_metadata_read(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_PRIVATE_METADATA_REPLICA_1_OFFSET, p_metadata,
-                                          sizeof(struct fwu_private_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+                                          sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -237,8 +237,8 @@ static enum fwu_agent_error_t private_metadata_read(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(part->start, p_metadata,
-                                          sizeof(struct fwu_private_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+                                          sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -268,8 +268,8 @@ static enum fwu_agent_error_t private_metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_PRIVATE_METADATA_REPLICA_1_OFFSET,
-                                p_metadata, sizeof(struct fwu_private_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -303,8 +303,8 @@ static enum fwu_agent_error_t private_metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
-                                p_metadata, sizeof(struct fwu_private_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -322,7 +322,7 @@ static enum fwu_agent_error_t metadata_validate(struct fwu_metadata *p_metadata)
     }
 
     uint32_t calculated_crc32 = crc32((uint8_t *)&(p_metadata->version),
-                                      sizeof(struct fwu_metadata) - sizeof(uint32_t));
+                                      sizeof(*p_metadata) - sizeof(p_metadata->crc_32));
 
     if (p_metadata->crc_32 != calculated_crc32) {
         FWU_LOG_MSG("%s: failed: crc32 calculated: 0x%x, given: 0x%x\n\r", __func__,
@@ -341,15 +341,15 @@ static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metada
     int ret;
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(*p_metadata));
 
     if (!p_metadata) {
         return FWU_AGENT_ERROR;
     }
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_METADATA_REPLICA_1_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -376,12 +376,12 @@ static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metada
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  part->start, sizeof(struct fwu_metadata));
+                  part->start, sizeof(*p_metadata));
 
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(part->start,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -398,15 +398,15 @@ static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
     int ret;
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(*p_metadata));
 
     if (!p_metadata) {
         return FWU_AGENT_ERROR;
     }
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_METADATA_REPLICA_1_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -437,11 +437,11 @@ static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  part->start, sizeof(struct fwu_metadata));
+                  part->start, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(part->start,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -464,7 +464,7 @@ static enum fwu_agent_error_t metadata_write(
     int ret;
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(*p_metadata));
 
     if (!p_metadata) {
         return FWU_AGENT_ERROR;
@@ -476,13 +476,13 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_1_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
     if (ret != ARM_DRIVER_OK) {
@@ -490,13 +490,13 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
     if (ret != ARM_DRIVER_OK) {
@@ -504,8 +504,8 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -532,7 +532,7 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  part->start, sizeof(struct fwu_metadata));
+                  part->start, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.EraseSector(part->start);
     if (ret != ARM_DRIVER_OK) {
@@ -540,8 +540,8 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -552,7 +552,7 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  part->start, sizeof(struct fwu_metadata));
+                  part->start, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.EraseSector(part->start);
     if (ret != ARM_DRIVER_OK) {
@@ -560,13 +560,13 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
     FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
-                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(*p_metadata));
 
     ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
     if (ret != ARM_DRIVER_OK) {
@@ -574,8 +574,8 @@ static enum fwu_agent_error_t metadata_write(
     }
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
-                                p_metadata, sizeof(struct fwu_metadata));
-    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+                                p_metadata, sizeof(*p_metadata));
+    if (ret < 0 || ret != sizeof(*p_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -597,7 +597,7 @@ enum fwu_agent_error_t fwu_metadata_init(void)
     }
 
     /* Code assumes everything fits into a sector */
-    if (sizeof(struct fwu_metadata) > FWU_METADATA_FLASH_SECTOR_SIZE) {
+    if (sizeof(_metadata) > FWU_METADATA_FLASH_SECTOR_SIZE) {
         return FWU_AGENT_ERROR;
     }
 
@@ -651,7 +651,7 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
     }
     /* Provision FWU Agent Metadata */
 
-    memset(&_metadata, 0, sizeof(struct fwu_metadata));
+    memset(&_metadata, 0, sizeof(_metadata));
 
     _metadata.version = FWU_METADATA_VERSION;
     _metadata.active_index = BANK_0;
@@ -677,14 +677,14 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
     /* Calculate CRC32 for fwu metadata. The first filed in the _metadata has to be the crc_32.
      * This should be omited from the calculation. */
     _metadata.crc_32 = crc32((uint8_t *)&_metadata.version,
-                             sizeof(struct fwu_metadata) - sizeof(uint32_t));
+                             sizeof(_metadata) - sizeof(_metadata.crc_32));
 
     ret = metadata_write(&_metadata);
     if (ret) {
         return ret;
     }
 
-    memset(&_metadata, 0, sizeof(struct fwu_metadata));
+    memset(&_metadata, 0, sizeof(_metadata));
     ret = metadata_read(&_metadata);
     if (ret) {
         return ret;
@@ -696,7 +696,7 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
     /* Provision Private metadata for update agent which is shared
        beween BL1 and tf-m of secure enclave */
 
-    memset(&priv_metadata, 0, sizeof(struct fwu_private_metadata));
+    memset(&priv_metadata, 0, sizeof(priv_metadata));
 
     priv_metadata.boot_index = BANK_0;
     priv_metadata.boot_attempted = 0;
@@ -710,7 +710,7 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
         return ret;
     }
 
-    memset(&priv_metadata, 0, sizeof(struct fwu_private_metadata));
+    memset(&priv_metadata, 0, sizeof(priv_metadata));
     ret = private_metadata_read(&priv_metadata);
     if (ret) {
         return ret;
@@ -749,7 +749,7 @@ static enum fwu_agent_state_t get_fwu_agent_state(
 
 static int get_image_info_in_bank(struct efi_guid* guid, uint32_t* image_bank_offset)
 {
-    if ((memcmp(guid, &full_capsule_image_guid, sizeof(struct efi_guid))) == 0) {
+    if ((memcmp(guid, &full_capsule_image_guid, sizeof(*guid))) == 0) {
         *image_bank_offset = 0;
         return IMAGE_ALL;
     }
@@ -850,7 +850,7 @@ static enum fwu_agent_error_t flash_full_capsule(
     metadata->active_index = previous_active_index;
     metadata->previous_active_index = active_index;
     metadata->crc_32 = crc32((uint8_t *)&metadata->version,
-                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
+                              sizeof(*metadata) - sizeof(metadata->crc_32));
 
     ret = metadata_write(metadata);
     if (ret) {
@@ -896,7 +896,7 @@ enum fwu_agent_error_t corstone1000_fwu_flash_image(void)
         goto out;
     }
 
-    memset(&capsule_info, 0, sizeof(capsule_image_info_t));
+    memset(&capsule_info, 0, sizeof(capsule_info));
     if (uefi_capsule_retrieve_images(capsule_ptr, &capsule_info)) {
         ret =  FWU_AGENT_ERROR;
         goto out;
@@ -963,7 +963,7 @@ static enum fwu_agent_error_t accept_full_capsule(
         return ret;
     }
     metadata->crc_32 = crc32((uint8_t *)&metadata->version,
-                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
+                              sizeof(*metadata) - sizeof(metadata->crc_32));
 
     ret = metadata_write(metadata);
     if (ret) {
@@ -1059,7 +1059,7 @@ static enum fwu_agent_error_t fwu_select_previous(
         return ret;
     }
     metadata->crc_32 = crc32((uint8_t *)&metadata->version,
-                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
+                              sizeof(*metadata) - sizeof(metadata->crc_32));
 
     ret = metadata_write(metadata);
     if (ret) {
