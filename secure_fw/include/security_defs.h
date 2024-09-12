@@ -21,6 +21,12 @@
 /* Attributes for psa api secure gateway functions */
 #if defined(__GNUC__) && !defined(__ARMCC_VERSION)
 /*
+ * LLVM offers 'noduplicate' attribute as 'noclone' equivalent in GNUARM
+ */
+#if defined(__clang__)
+#define noclone noduplicate
+#endif /* __clang__ */
+/*
  * GNUARM requires noclone attribute to protect gateway function symbol from
  * being renamed and cloned
  */

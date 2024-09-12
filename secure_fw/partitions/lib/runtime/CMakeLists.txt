@@ -20,10 +20,13 @@ target_sources(tfm_sprt
     PUBLIC
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
     PRIVATE
-        ./crt_memcmp.c
-        ./crt_memmove.c
-        ./crt_strnlen.c
-        ./service_api.c
+        crt_memcmp.c
+        crt_memmove.c
+        crt_strnlen.c
+        $<$<C_COMPILER_ID:Clang>:crt_start.c>
+        $<$<C_COMPILER_ID:Clang>:crt_exit.c>
+        $<$<C_COMPILER_ID:Clang>:crt_strlen.c>
+        service_api.c
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memcpy.c
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memset.c
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>

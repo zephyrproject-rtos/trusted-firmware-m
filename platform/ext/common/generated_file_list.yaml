@@ -47,5 +47,10 @@
         "template": "platform/ext/common/iar/tfm_isolation_s.icf.template",
         "output": "platform/ext/common/iar/tfm_isolation_s.icf"
     },
+    {
+        "description": "isolation l1-l3 linker script",
+        "template": "platform/ext/common/llvm/tfm_isolation_s.ld.template",
+        "output": "platform/ext/common/llvm/tfm_isolation_s.ld"
+    }
   ]
 }

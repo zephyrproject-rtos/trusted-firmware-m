@@ -203,6 +203,7 @@ target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-const-variable>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
+        $<$<C_COMPILER_ID:Clang>:-Wno-unused-parameter>
 )
 
 if(MBEDTLS_P256M_ENABLED)

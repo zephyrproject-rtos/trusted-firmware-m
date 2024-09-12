@@ -76,10 +76,10 @@ target_compile_options(tfm_s
 
 target_link_options(tfm_s
     PRIVATE
-        --entry=Reset_Handler
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_s.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/tfm_s.map>
+        $<$<C_COMPILER_ID:Clang>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_s.map -nostdlib>
     PUBLIC
         ${LINKER_CP_OPTION}
 )

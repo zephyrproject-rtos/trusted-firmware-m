@@ -81,6 +81,28 @@ int fputc(int ch, FILE *f)
     /* Return character written */
     return ch;
 }
+
+/* Redirect sdtio for PicoLib in LLVM toolchain
+   as per https://github.com/picolibc/picolibc/blob/main/doc/os.md
+   'fputch()' named intentionally different from 'fputc()' from picolib */
+#elif defined(__clang_major__)
+
+int fputch(char ch, struct __file *f)
+{
+    (void)f;
+
+    /* Send byte to USART */
+    (void)stdio_output_string((const char *)&ch, 1);
+
+    /* Return character written */
+    return ch;
+}
+
+static FILE __stdio = FDEV_SETUP_STREAM(fputch, NULL, NULL, _FDEV_SETUP_WRITE);
+FILE *const stdin = &__stdio;
+__strong_reference(stdin, stdout);
+__strong_reference(stdin, stderr);
+
 #elif defined(__GNUC__)
 /* Redirects printf to STDIO_DRIVER in case of GNUARM */
 int _write(int fd, char *str, int len)

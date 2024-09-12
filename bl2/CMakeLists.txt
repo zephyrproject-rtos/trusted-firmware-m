@@ -118,6 +118,7 @@ endif()
 
 add_executable(bl2
     src/flash_map.c
+    $<$<C_COMPILER_ID:Clang>:src/crt_exit.c>
     $<$<BOOL:${DEFAULT_MCUBOOT_SECURITY_COUNTERS}>:src/security_cnt.c>
     $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:src/default_flash_map.c>
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
@@ -158,6 +159,7 @@ target_link_options(bl2
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl2.map>
+        $<$<C_COMPILER_ID:Clang>:-lcrt0 -Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         ${BL2_LINKER_CP_OPTION}
 )
 

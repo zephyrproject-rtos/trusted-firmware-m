@@ -169,6 +169,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
             $<$<C_COMPILER_ID:GNU>:-E\;-xc>
             $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
             $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_s>>
+            $<$<C_COMPILER_ID:Clang>:-E\;-xc>
     )
     target_compile_definitions(signing_layout_s
         PRIVATE
@@ -185,7 +186,6 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
         SOURCES tfm_s_signed.bin
     )
     add_custom_command(OUTPUT tfm_s_signed.bin
-        DEPENDS $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         DEPENDS tfm_s_bin signing_layout_s
         DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
         WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
@@ -222,6 +222,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
             $<$<C_COMPILER_ID:GNU>:-E\;-xc>
             $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
             $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
+            $<$<C_COMPILER_ID:Clang>:-E\;-xc>
     )
     target_compile_definitions(signing_layout_ns
         PRIVATE
