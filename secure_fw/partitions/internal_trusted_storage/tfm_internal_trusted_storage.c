@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -45,8 +45,13 @@ static struct its_flash_fs_file_info_t g_file_info;
  * Note: size must be aligned to the max flash program unit to meet the
  * alignment requirement of the filesystem.
  */
+#ifndef ITS_ENCRYPTION
 static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
                                           ITS_FLASH_MAX_ALIGNMENT)];
+#else
+static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE,
+                                              ITS_FLASH_MAX_ALIGNMENT)];
+#endif
 #endif
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
@@ -85,11 +90,12 @@ static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
 }
 
 #ifdef ITS_ENCRYPTION
-/* Buffer to store the encrypted asset data before it is stored in the
- * filesystem.
+/* Buffer to store the encrypted asset data and the authentication tag before it
+ * is stored in the filesystem.
  */
-static uint8_t enc_asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
-                                              ITS_FLASH_MAX_ALIGNMENT)];
+static uint8_t __ALIGNED(4) enc_asset_data[ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE +
+                                           TFM_ITS_AUTH_TAG_LENGTH,
+                                           ITS_FLASH_MAX_ALIGNMENT)];
 
 static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
 {
@@ -102,7 +108,7 @@ static psa_status_t buffer_size_check(int32_t client_id, size_t buffer_size)
         /* When encryption is enabled the whole file needs to fit in the
          * global buffer.
          */
-        if (buffer_size > sizeof(enc_asset_data)) {
+        if (buffer_size > ITS_MAX_ASSET_SIZE) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     }

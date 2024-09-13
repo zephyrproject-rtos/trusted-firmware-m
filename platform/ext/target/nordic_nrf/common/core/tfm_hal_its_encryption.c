@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2023 Nordic Semiconductor ASA.
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +113,7 @@ static bool ctx_is_valid(struct tfm_hal_its_auth_crypt_ctx *ctx)
     }
 
     ret = (ctx->deriv_label == NULL && ctx->deriv_label_size != 0) ||
-          (ctx->aad == NULL && ctx->add_size != 0) ||
+          (ctx->aad == NULL && ctx->aad_size != 0) ||
           (ctx->nonce == NULL && ctx->nonce_size != 0);
 
     return !ret;
@@ -153,7 +154,7 @@ static enum tfm_hal_status_t tfm_hal_its_aead_init(
                                                        ctx->nonce,
                                                        ctx->nonce_size,
                                                        ctx->aad,
-                                                       ctx->add_size,
+                                                       ctx->aad_size,
                                                        tag,
                                                        tag_size);
     if (err != NRF_CC3XX_PLATFORM_SUCCESS) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -183,7 +183,11 @@
 
 /* The stack size of the Internal Trusted Storage Secure Partition */
 #ifndef ITS_STACK_SIZE
+#ifndef ITS_ENCRYPTION
 #define ITS_STACK_SIZE                         0x720
+#else
+#define ITS_STACK_SIZE                         0xC00
+#endif
 #endif
 
 /* PS Partition Configs */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -107,8 +107,8 @@ psa_status_t tfm_its_crypt_file(struct its_flash_fs_file_info_t *finfo,
         file_size = finfo->size_current;
     }
 
-    err =  tfm_its_fill_enc_add(finfo->add,
-                                sizeof(finfo->add),
+    err =  tfm_its_fill_enc_add(finfo->aad,
+                                sizeof(finfo->aad),
                                 fid,
                                 fid_size,
                                 finfo->flags,
@@ -131,8 +131,8 @@ psa_status_t tfm_its_crypt_file(struct its_flash_fs_file_info_t *finfo,
     aead_ctx.nonce_size = sizeof(finfo->nonce);
     aead_ctx.deriv_label = fid;
     aead_ctx.deriv_label_size = fid_size;
-    aead_ctx.aad = finfo->add;
-    aead_ctx.add_size = sizeof(finfo->add);
+    aead_ctx.aad = finfo->aad;
+    aead_ctx.aad_size = sizeof(finfo->aad);
 
 
     if (is_encrypt) {
