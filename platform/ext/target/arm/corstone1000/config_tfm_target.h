@@ -11,6 +11,9 @@
 /* Use stored NV seed to provide entropy */
 #define CRYPTO_NV_SEED                         0
 
+/* Use external RNG to provide entropy */
+#define CRYPTO_EXT_RNG                         1
+
 /* Size of output buffer in platform service. */
 #define PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE    256
 

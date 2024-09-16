@@ -100,6 +100,11 @@
 #define CRYPTO_NV_SEED                         1
 #endif
 
+/* Use external RNG to provide entropy */
+#ifndef CRYPTO_EXT_RNG
+#define CRYPTO_EXT_RNG                         0
+#endif
+
 /*
  * Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers,
  * to optimize memory footprint in resource-constrained devices.

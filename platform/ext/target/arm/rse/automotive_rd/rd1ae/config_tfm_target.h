@@ -16,6 +16,9 @@
 /* Use stored NV seed to provide entropy */
 #define CRYPTO_NV_SEED                          0
 
+/* Use external RNG to provide entropy */
+#define CRYPTO_EXT_RNG                         1
+
 /* The stack size of the NS Agent Mailbox Secure Partition */
 #define NS_AGENT_MAILBOX_STACK_SIZE             0x1000
 
