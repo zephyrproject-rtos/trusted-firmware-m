@@ -19,8 +19,6 @@
 #include "tfm_ns_mailbox.h"
 #include "platform_multicore.h"
 
-static uint8_t saved_irq_state = 1;
-
 /* -------------------------------------- HAL API ------------------------------------ */
 
 static void mailbox_ipc_init(void)
@@ -102,36 +100,41 @@ int32_t tfm_ns_mailbox_hal_init(struct ns_mailbox_queue_t *queue)
     return MAILBOX_SUCCESS;
 }
 
-void tfm_ns_mailbox_hal_enter_critical(void)
+uint32_t tfm_ns_mailbox_hal_enter_critical(void)
 {
-    saved_irq_state = Cy_SysLib_EnterCriticalSection();
+    uint32_t state = Cy_SysLib_EnterCriticalSection();
 
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     while(CY_IPC_DRV_SUCCESS != Cy_IPC_Drv_LockAcquire (ipc_struct))
     {
     }
+
+    return state;
 }
 
-void tfm_ns_mailbox_hal_exit_critical(void)
+void tfm_ns_mailbox_hal_exit_critical(uint32_t state)
 {
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     Cy_IPC_Drv_LockRelease(ipc_struct, CY_IPC_NO_NOTIFICATION);
-    Cy_SysLib_ExitCriticalSection(saved_irq_state);
+    Cy_SysLib_ExitCriticalSection(state);
 }
 
-void tfm_ns_mailbox_hal_enter_critical_isr(void)
+uint32_t tfm_ns_mailbox_hal_enter_critical_isr(void)
 {
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     while(CY_IPC_DRV_SUCCESS != Cy_IPC_Drv_LockAcquire (ipc_struct))
     {
     }
+
+    return 0;
 }
 
-void tfm_ns_mailbox_hal_exit_critical_isr(void)
+void tfm_ns_mailbox_hal_exit_critical_isr(uint32_t state)
 {
+    (void)state;
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     Cy_IPC_Drv_LockRelease(ipc_struct, CY_IPC_NO_NOTIFICATION);

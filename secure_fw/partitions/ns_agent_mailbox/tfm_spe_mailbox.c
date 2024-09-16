@@ -329,14 +329,15 @@ int32_t tfm_mailbox_handle_msg(void)
     mailbox_queue_status_t mask_bits, pend_slots, reply_slots = 0;
     struct mailbox_status_t *ns_status = spe_mailbox_queue.ns_status;
     struct mailbox_msg_t *msg_ptr;
+    uint32_t critical_section;
 
     SPM_ASSERT(ns_status != NULL);
 
-    tfm_mailbox_hal_enter_critical();
+    critical_section = tfm_mailbox_hal_enter_critical();
 
     pend_slots = get_nspe_queue_pend_status(ns_status);
 
-    tfm_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical(critical_section);
 
     /* Check if NSPE mailbox did assert a PSA client call request */
     if (!pend_slots) {
@@ -378,7 +379,7 @@ int32_t tfm_mailbox_handle_msg(void)
         }
     }
 
-    tfm_mailbox_hal_enter_critical();
+    critical_section = tfm_mailbox_hal_enter_critical();
 
     /* Clean the NSPE mailbox pending status. */
     clear_nspe_queue_pend_status(ns_status, pend_slots);
@@ -386,7 +387,7 @@ int32_t tfm_mailbox_handle_msg(void)
     /* Set the NSPE mailbox replied status */
     set_nspe_queue_replied_status(ns_status, reply_slots);
 
-    tfm_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical(critical_section);
 
     if (reply_slots) {
         tfm_mailbox_hal_notify_peer();
@@ -399,6 +400,7 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
 {
     uint8_t idx;
     int32_t ret;
+    uint32_t critical_section;
     struct mailbox_status_t *ns_status = spe_mailbox_queue.ns_status;
 
     SPM_ASSERT(ns_status != NULL);
@@ -424,12 +426,12 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
 
     mailbox_direct_reply(idx, (uint32_t)reply);
 
-    tfm_mailbox_hal_enter_critical();
+    critical_section = tfm_mailbox_hal_enter_critical();
 
     /* Set the NSPE mailbox replied status */
     set_nspe_queue_replied_status(ns_status, (1 << idx));
 
-    tfm_mailbox_hal_exit_critical();
+    tfm_mailbox_hal_exit_critical(critical_section);
 
     tfm_mailbox_hal_notify_peer();
 

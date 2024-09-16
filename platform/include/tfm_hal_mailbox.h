@@ -67,12 +67,18 @@ int32_t tfm_mailbox_hal_notify_peer(void);
 
 /**
  * \brief Enter critical section of NSPE mailbox
+ *
+ * \return Platform specific critical section state. Use it to exit from critical section
+ * by passing result to \ref tfm_mailbox_hal_exit_critical.
  */
-void tfm_mailbox_hal_enter_critical(void);
+uint32_t tfm_mailbox_hal_enter_critical(void);
 
 /**
  * \brief Exit critical section of NSPE mailbox
+ *
+ * \param[in] state             Critical section state returned by
+ *                              \ref tfm_mailbox_hal_enter_critical.
  */
-void tfm_mailbox_hal_exit_critical(void);
+void tfm_mailbox_hal_exit_critical(uint32_t state);
 
 #endif /* __TFM_HAL_MAILBOX_H__ */

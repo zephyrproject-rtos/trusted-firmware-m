@@ -78,17 +78,19 @@ int32_t tfm_mailbox_hal_init(struct secure_mailbox_queue_t *s_queue)
     return MAILBOX_SUCCESS;
 }
 
-void tfm_mailbox_hal_enter_critical(void)
+uint32_t tfm_mailbox_hal_enter_critical(void)
 {
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     while(CY_IPC_DRV_SUCCESS != Cy_IPC_Drv_LockAcquire (ipc_struct))
     {
     }
+    return 0;
 }
 
-void tfm_mailbox_hal_exit_critical(void)
+void tfm_mailbox_hal_exit_critical(uint32_t state)
 {
+    (void)state;
     IPC_STRUCT_Type* ipc_struct =
         Cy_IPC_Drv_GetIpcBaseAddress(IPC_PSA_MAILBOX_LOCK_CHAN);
     Cy_IPC_Drv_LockRelease(ipc_struct, CY_IPC_NO_NOTIFICATION);

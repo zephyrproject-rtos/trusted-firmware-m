@@ -159,15 +159,21 @@ int32_t tfm_ns_mailbox_hal_notify_peer(void);
  * Should not be used to lock non-secure data that are not shared with secure core.
  *
  * \note The implementation depends on platform specific hardware and use case.
+ *
+ * \return Platform specific critical section state. Use it to exit from critical section
+ * by passing result to \ref tfm_ns_mailbox_hal_exit_critical.
  */
-void tfm_ns_mailbox_hal_enter_critical(void);
+uint32_t tfm_ns_mailbox_hal_enter_critical(void);
 
 /**
  * \brief Exit critical section of NSPE mailbox.
  *
  * \note The implementation depends on platform specific hardware and use case.
+ *
+ * \param[in] state             Critical section state returned by
+ *                              \ref tfm_ns_mailbox_hal_enter_critical.
  */
-void tfm_ns_mailbox_hal_exit_critical(void);
+void tfm_ns_mailbox_hal_exit_critical(uint32_t state);
 
 /**
  * \brief Enter critical section of NSPE mailbox in IRQ handler.
@@ -176,15 +182,21 @@ void tfm_ns_mailbox_hal_exit_critical(void);
  * Should not be used to lock non-secure data that are not shared with secure core.
  *
  * \note The implementation depends on platform specific hardware and use case.
+ *
+ * \return Platform specific critical section state. Use it to exit from critical section
+ * by passing result to \ref tfm_ns_mailbox_hal_exit_critical_isr.
  */
-void tfm_ns_mailbox_hal_enter_critical_isr(void);
+uint32_t tfm_ns_mailbox_hal_enter_critical_isr(void);
 
 /**
  * \brief Enter critical section of NSPE mailbox in IRQ handler
  *
  * \note The implementation depends on platform specific hardware and use case.
+ *
+ * \param[in] state             Critical section state returned by
+ *                              \ref tfm_ns_mailbox_hal_enter_critical_isr.
  */
-void tfm_ns_mailbox_hal_exit_critical_isr(void);
+void tfm_ns_mailbox_hal_exit_critical_isr(uint32_t state);
 
 #ifdef TFM_MULTI_CORE_NS_OS
 /**

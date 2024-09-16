@@ -106,6 +106,7 @@ static int32_t mailbox_tx_client_call_msg(const struct ns_mailbox_req_t *req,
 {
     struct mailbox_msg_t *msg_ptr;
     struct mailbox_reply_t *reply_ptr;
+    uint32_t critical_section;
     uint8_t idx = NUM_MAILBOX_QUEUE_SLOT;
 
     idx = acquire_empty_slot(mailbox_queue_ptr);
@@ -135,9 +136,9 @@ static int32_t mailbox_tx_client_call_msg(const struct ns_mailbox_req_t *req,
      * from providing addresses of other applications or privileged area.
      */
 
-    tfm_ns_mailbox_hal_enter_critical();
+    critical_section = tfm_ns_mailbox_hal_enter_critical();
     set_queue_slot_pend(mailbox_queue_ptr, idx);
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_ns_mailbox_hal_exit_critical(critical_section);
 
     tfm_ns_mailbox_hal_notify_peer();
 
@@ -244,15 +245,16 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 {
     uint8_t idx;
     const void *task_handle;
+    uint32_t critical_section;
     mailbox_queue_status_t replied_status, complete_slots = 0x0;
 
     if (!mailbox_queue_ptr) {
         return MAILBOX_INIT_ERROR;
     }
 
-    tfm_ns_mailbox_hal_enter_critical_isr();
+    critical_section = tfm_ns_mailbox_hal_enter_critical_isr();
     replied_status = clear_queue_slot_all_replied(mailbox_queue_ptr);
-    tfm_ns_mailbox_hal_exit_critical_isr();
+    tfm_ns_mailbox_hal_exit_critical_isr(critical_section);
 
     if (!replied_status) {
         return MAILBOX_NO_PEND_EVENT;

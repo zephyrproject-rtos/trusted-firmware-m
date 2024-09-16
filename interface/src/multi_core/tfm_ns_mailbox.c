@@ -114,6 +114,7 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
     uint8_t idx;
     struct mailbox_msg_t *msg_ptr;
     const void *task_handle;
+    uint32_t critical_section;
 
     idx = acquire_empty_slot(mailbox_queue_ptr);
     if (idx >= NUM_MAILBOX_QUEUE_SLOT) {
@@ -139,9 +140,9 @@ static int32_t mailbox_tx_client_req(uint32_t call_type,
     task_handle = tfm_ns_mailbox_os_get_task_handle();
     set_msg_owner(idx, task_handle);
 
-    tfm_ns_mailbox_hal_enter_critical();
+    critical_section = tfm_ns_mailbox_hal_enter_critical();
     set_queue_slot_pend(mailbox_queue_ptr, idx);
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_ns_mailbox_hal_exit_critical(critical_section);
 
     tfm_ns_mailbox_hal_notify_peer();
 
@@ -220,14 +221,15 @@ int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 {
     uint8_t idx;
     mailbox_queue_status_t replied_status;
+    uint32_t critical_section;
 
     if (!mailbox_queue_ptr) {
         return MAILBOX_INIT_ERROR;
     }
 
-    tfm_ns_mailbox_hal_enter_critical_isr();
+    critical_section = tfm_ns_mailbox_hal_enter_critical_isr();
     replied_status = clear_queue_slot_all_replied(mailbox_queue_ptr);
-    tfm_ns_mailbox_hal_exit_critical_isr();
+    tfm_ns_mailbox_hal_exit_critical_isr(critical_section);
 
     if (!replied_status) {
         return MAILBOX_NO_PEND_EVENT;
@@ -277,16 +279,17 @@ static inline bool mailbox_wait_reply_signal(uint8_t idx)
 #else /* TFM_MULTI_CORE_NS_OS */
 static inline bool mailbox_wait_reply_signal(uint8_t idx)
 {
+    uint32_t critical_section;
     bool is_set = false;
 
-    tfm_ns_mailbox_hal_enter_critical();
+    critical_section = tfm_ns_mailbox_hal_enter_critical();
 
     if (is_queue_slot_replied(idx)) {
         clear_queue_slot_replied(idx);
         is_set = true;
     }
 
-    tfm_ns_mailbox_hal_exit_critical();
+    tfm_ns_mailbox_hal_exit_critical(critical_section);
 
     return is_set;
 }

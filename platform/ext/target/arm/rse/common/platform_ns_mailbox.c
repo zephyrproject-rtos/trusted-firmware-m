@@ -22,20 +22,24 @@ int32_t tfm_ns_mailbox_hal_notify_peer(void)
     return 0;
 }
 
-void tfm_ns_mailbox_hal_enter_critical(void)
+uint32_t tfm_ns_mailbox_hal_enter_critical(void)
 {
+    return 0;
 }
 
-void tfm_ns_mailbox_hal_exit_critical(void)
+void tfm_ns_mailbox_hal_exit_critical(uint32_t state)
 {
+    (void)state;
 }
 
-void tfm_ns_mailbox_hal_enter_critical_isr(void)
+uint32_t tfm_ns_mailbox_hal_enter_critical_isr(void)
 {
+    return 0;
 }
 
-void tfm_ns_mailbox_hal_exit_critical_isr(void)
+void tfm_ns_mailbox_hal_exit_critical_isr(uint32_t state)
 {
+    (void)state;
 }
 
 int32_t tfm_platform_ns_wait_for_s_cpu_ready(void)
