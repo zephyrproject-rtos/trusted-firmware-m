@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
 # company) or an affiliate of Cypress Semiconductor Corporation. All rights
 # reserved.
@@ -35,6 +35,8 @@ target_compile_definitions(tfm_config
         $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_CCM>:PS_CRYPTO_AEAD_ALG_CCM>
         $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
         $<$<BOOL:${PS_SUPPORT_FORMAT_TRANSITION}>:PS_SUPPORT_FORMAT_TRANSITION>
+        $<$<BOOL:${PLATFORM_RAM_FS}>:ITS_RAM_FS=1>
+        $<$<BOOL:${PLATFORM_RAM_FS}>:PS_RAM_FS=1>
 )
 
 target_include_directories(secure_fw
