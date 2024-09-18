@@ -165,9 +165,7 @@ psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
 
     status = psa_driver_wrapper_hash_setup(operation, alg);
 
-    if (status != PSA_SUCCESS) {
-        psa_hash_abort(operation);
-    }
+    assert(status == PSA_SUCCESS);
 
     return status;
 }
@@ -189,9 +187,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
 
     status = psa_driver_wrapper_hash_update(operation, input, input_length);
 
-    if (status != PSA_SUCCESS) {
-        psa_hash_abort(operation);
-    }
+    assert(status == PSA_SUCCESS);
 
     return status;
 }
@@ -349,28 +345,6 @@ psa_status_t mbedtls_to_psa_error(int ret)
     }
 }
 
-#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
-int mbedtls_psa_get_random(void *p_rng,
-                           unsigned char *output,
-                           size_t output_size)
-{
-    /* This function takes a pointer to the RNG state because that's what
-     * classic mbedtls functions using an RNG expect. The PSA RNG manages
-     * its own state internally and doesn't let the caller access that state.
-     * So we just ignore the state parameter, and in practice we'll pass
-     * NULL.
-     */
-    (void) p_rng;
-    psa_status_t status = psa_generate_random(output, output_size);
-
-    if (status == PSA_SUCCESS) {
-        return 0;
-    } else {
-        return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
-    }
-}
-#endif /* MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG */
-
 psa_status_t psa_generate_random(uint8_t *output,
                                  size_t output_size)
 {
@@ -444,86 +418,6 @@ psa_status_t psa_verify_hash_builtin(
     (void) signature_length;
 
     return PSA_ERROR_NOT_SUPPORTED;
-}
-
-/* Required when Mbed TLS backend converts from PSA to Mbed TLS native */
-mbedtls_ecp_group_id mbedtls_ecc_group_from_psa(psa_ecc_family_t family,
-                                                size_t bits)
-{
-    switch (family) {
-    case PSA_ECC_FAMILY_SECP_R1:
-        switch (bits) {
-#if defined(PSA_WANT_ECC_SECP_R1_192)
-        case 192:
-            return MBEDTLS_ECP_DP_SECP192R1;
-#endif
-#if defined(PSA_WANT_ECC_SECP_R1_224)
-        case 224:
-            return MBEDTLS_ECP_DP_SECP224R1;
-#endif
-#if defined(PSA_WANT_ECC_SECP_R1_256)
-        case 256:
-            return MBEDTLS_ECP_DP_SECP256R1;
-#endif
-#if defined(PSA_WANT_ECC_SECP_R1_384)
-        case 384:
-            return MBEDTLS_ECP_DP_SECP384R1;
-#endif
-#if defined(PSA_WANT_ECC_SECP_R1_521)
-        case 521:
-            return MBEDTLS_ECP_DP_SECP521R1;
-#endif
-        }
-        break;
-
-    case PSA_ECC_FAMILY_BRAINPOOL_P_R1:
-        switch (bits) {
-#if defined(PSA_WANT_ECC_BRAINPOOL_P_R1_256)
-        case 256:
-            return MBEDTLS_ECP_DP_BP256R1;
-#endif
-#if defined(PSA_WANT_ECC_BRAINPOOL_P_R1_384)
-        case 384:
-            return MBEDTLS_ECP_DP_BP384R1;
-#endif
-#if defined(PSA_WANT_ECC_BRAINPOOL_P_R1_512)
-        case 512:
-            return MBEDTLS_ECP_DP_BP512R1;
-#endif
-        }
-        break;
-
-    case PSA_ECC_FAMILY_MONTGOMERY:
-        switch (bits) {
-#if defined(PSA_WANT_ECC_MONTGOMERY_255)
-        case 255:
-            return MBEDTLS_ECP_DP_CURVE25519;
-#endif
-#if defined(PSA_WANT_ECC_MONTGOMERY_448)
-        case 448:
-            return MBEDTLS_ECP_DP_CURVE448;
-#endif
-        }
-        break;
-
-    case PSA_ECC_FAMILY_SECP_K1:
-        switch (bits) {
-#if defined(PSA_WANT_ECC_SECP_K1_192)
-        case 192:
-            return MBEDTLS_ECP_DP_SECP192K1;
-#endif
-#if defined(PSA_WANT_ECC_SECP_K1_224)
-            /* secp224k1 is not and will not be supported in PSA (#3541). */
-#endif
-#if defined(PSA_WANT_ECC_SECP_K1_256)
-        case 256:
-            return MBEDTLS_ECP_DP_SECP256K1;
-#endif
-        }
-        break;
-    }
-
-    return MBEDTLS_ECP_DP_NONE;
 }
 
 /* We don't need the full driver wrapper, we know the key is already a public key */

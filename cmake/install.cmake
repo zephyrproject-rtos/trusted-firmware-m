@@ -79,6 +79,7 @@ if (TFM_PARTITION_CRYPTO)
                         ${INTERFACE_INC_DIR}/psa/build_info.h
                         ${INTERFACE_INC_DIR}/psa/crypto.h
                         ${INTERFACE_INC_DIR}/psa/crypto_adjust_auto_enabled.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_adjust_config_dependencies.h
                         ${INTERFACE_INC_DIR}/psa/crypto_adjust_config_key_pair_types.h
                         ${INTERFACE_INC_DIR}/psa/crypto_adjust_config_synonyms.h
                         ${INTERFACE_INC_DIR}/psa/crypto_builtin_composites.h

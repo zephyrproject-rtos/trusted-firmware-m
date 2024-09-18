@@ -1,4 +1,4 @@
-From 5f1f13a6607a145ab6169810207ca1be8b844468 Mon Sep 17 00:00:00 2001
+From b543f78b0d9a103bcfec0ec1f8f3e1cb77b87f05 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 9 Apr 2024 15:26:59 +0100
 Subject: [PATCH 7/7] Enable sources when MCUBOOT_USE_PSA_CRYPTO and not
@@ -32,7 +32,7 @@ index c78cc2333..7350eafcb 100644
  /** The random generator function for the PSA subsystem.
   *
 diff --git a/library/psa_crypto_driver_wrappers.h b/library/psa_crypto_driver_wrappers.h
-index 3fa4583b7..1769ad405 100644
+index 9ba856145..2d566f5f8 100644
 --- a/library/psa_crypto_driver_wrappers.h
 +++ b/library/psa_crypto_driver_wrappers.h
 @@ -23,7 +23,7 @@
@@ -71,7 +71,7 @@ index eeb7666c1..5c025b335 100644
  #include <psa/crypto.h>
  #include "psa_crypto_core.h"
 diff --git a/library/psa_crypto_rsa.c b/library/psa_crypto_rsa.c
-index 2f613b32d..2594b110f 100644
+index 38dc3b8ed..20540d356 100644
 --- a/library/psa_crypto_rsa.c
 +++ b/library/psa_crypto_rsa.c
 @@ -8,7 +8,7 @@
