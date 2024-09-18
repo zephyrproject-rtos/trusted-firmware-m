@@ -21,7 +21,7 @@
  * otherwise error codes would be unknown in test_suite_psa_crypto_util.data.*/
 #include <mbedtls/asn1write.h>
 
-#if defined(MBEDTLS_PSA_CRYPTO_CLIENT)
+#if defined(MBEDTLS_PSA_CRYPTO_CLIENT) || defined(MCUBOOT_USE_PSA_CRYPTO)
 
 /** The random generator function for the PSA subsystem.
  *

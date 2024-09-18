@@ -138,20 +138,6 @@
 #define MBEDTLS_ECP_NIST_OPTIM
 
 /**
- * \def MBEDTLS_PK_PARSE_EC_EXTENDED
- *
- * Enhance support for reading EC keys using variants of SEC1 not allowed by
- * RFC 5915 and RFC 5480.
- *
- * Currently this means parsing the SpecifiedECDomain choice of EC
- * parameters (only known groups are supported, not arbitrary domains, to
- * avoid validation issues).
- *
- * Disable if you only need to support RFC 5915 + 5480 key formats.
- */
-#define MBEDTLS_PK_PARSE_EC_EXTENDED
-
-/**
  * \def MBEDTLS_NO_PLATFORM_ENTROPY
  *
  * Do not use built-in platform entropy functions.
