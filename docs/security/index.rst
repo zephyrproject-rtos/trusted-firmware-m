@@ -11,12 +11,12 @@ Security
 Security Disclosures
 --------------------
 
-Trusted Firmware-M(TF-M) disclose all security vulnerabilities, or are advised
+Trusted Firmware-M (TF-M) disclose all security vulnerabilities, or are advised
 about, that are relevant to TF-M. TF-M encourage responsible disclosure of
 vulnerabilities and try the best to inform users about all possible issues.
 
 The TF-M vulnerabilities are disclosed as Security Advisories, all of which are
-listed at the bottom of this page.
+listed in the `Security Advisories`_ section.
 
 Found a Security Issue?
 -----------------------
@@ -47,8 +47,9 @@ TF-M policy is to credit the contributor's name in the published security adviso
 .. _issue tracker: https://github.com/TrustedFirmware-M/trusted-firmware-m/issues
 .. _mailing list: https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org/
 .. _Security incident process: https://trusted-firmware-docs.readthedocs.io/en/latest/security_center/incident_handling_process.html
+.. _Security Advisories: https://trustedfirmware-m.readthedocs.io/en/latest/security/security_advisories/index.html
 
 
 --------------
 
-*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*
