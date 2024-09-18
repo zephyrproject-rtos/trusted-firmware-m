@@ -13,6 +13,7 @@ Security Advisories
     fwu_write_vulnerability
     cc3xx_partial_tag_compare_on_chacha20_poly1305
     debug_log_vulnerability
+    user_pointers_mailbox_vectors_vulnerability
 
 +------------+-----------------------------------------------------------------+
 | ID         | Title                                                           |
@@ -36,6 +37,9 @@ Security Advisories
 +------------+-----------------------------------------------------------------+
 |  |TFMV-7|  | ARoT can access PRoT data via debug logging functionality       |
 +------------+-----------------------------------------------------------------+
+|  |TFMV-8|  | Unchecked user-supplied pointer via mailbox messages may cause  |
+|            | write of arbitrary address                                      |
++------------+-----------------------------------------------------------------+
 
 .. |TFMV-1| replace:: :doc:`TFMV-1 <stack_seal_vulnerability>`
 .. |TFMV-2| replace:: :doc:`TFMV-2 <svc_caller_sp_fetching_vulnerability>`
@@ -44,7 +48,8 @@ Security Advisories
 .. |TFMV-5| replace:: :doc:`TFMV-5 <fwu_write_vulnerability>`
 .. |TFMV-6| replace:: :doc:`TFMV-6 <cc3xx_partial_tag_compare_on_chacha20_poly1305>`
 .. |TFMV-7| replace:: :doc:`TFMV-7 <debug_log_vulnerability>`
+.. |TFMV-8| replace:: :doc:`TFMV-8 <user_pointers_mailbox_vectors_vulnerability>`
 
 --------------
 
-*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*
