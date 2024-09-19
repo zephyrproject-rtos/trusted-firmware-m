@@ -8,10 +8,10 @@
 cmake_minimum_required(VERSION 3.21)
 
 add_library(tfm_vprintf_headers INTERFACE)
-add_library(tfm_vprintf STATIC)
+add_library(tfm_vprintf INTERFACE)
 
 target_sources(tfm_vprintf
-    PRIVATE
+    INTERFACE
         src/tfm_vprintf.c
 )
 
@@ -21,6 +21,6 @@ target_include_directories(tfm_vprintf_headers
 )
 
 target_link_libraries(tfm_vprintf
-    PUBLIC
+    INTERFACE
         tfm_vprintf_headers
 )
