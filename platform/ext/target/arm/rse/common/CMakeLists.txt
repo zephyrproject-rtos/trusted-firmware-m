@@ -373,7 +373,6 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./bl1/rse_kmu_keys.c
         ./rse_boot_state.c
-        $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bl1_patch_stubs.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
@@ -438,15 +437,6 @@ if(RSE_SUPPORT_ROM_LIB_RELOCATION)
             # address of the GOT, and that it doesn't need to try to set r9
             # itself (we do it in the initial setup).
             -msingle-pic-base
-            # Insert stub function calls into every function which can then be
-            # replaced with calls to patched versions of the function.
-            -finstrument-functions
-            # Don't insert stub function into the stub functions, or the early
-            # startup files where we are still setting up the GOT
-            -finstrument-functions-exclude-file-list=bl1_patch_stubs,startup_rse_bl1_1
-            # Don't insert stub function into functions where the stack isn't
-            # valid.
-            -finstrument-functions-exclude-function-list=boot_platform_quit,boot_jump_to_next_image
     )
 endif()
 
