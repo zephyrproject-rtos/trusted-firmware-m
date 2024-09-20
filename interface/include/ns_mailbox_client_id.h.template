@@ -33,7 +33,7 @@ extern "C" {
 /* Define a structure containing all the client id ranges and source information           */
 /*******************************************************************************************/
 struct tfm_ns_mailbox_client_id_info {
-    int32_t source;
+    uint32_t source;
     int32_t client_id_base;
     int32_t client_id_limit;
 };
@@ -42,6 +42,7 @@ struct tfm_ns_mailbox_client_id_info {
     {% if partition.manifest.ns_agent %}
         {% set irq_count = partition.manifest.irqs|count %}
 extern const struct tfm_ns_mailbox_client_id_info ns_mailbox_client_id_info[{{irq_count}}];
+extern void *ns_mailbox_client_id_range_owner[{{irq_count}}];
     {% endif %}
 {% endfor %}
 

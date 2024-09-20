@@ -131,16 +131,23 @@ int32_t check_address_range(const void *p, size_t s,
 /**
  * \brief Register a non-secure client ID range.
  *
- * \param[in] owner           Identifier of the non-secure client.
- * \param[in] client_id_base  The minimum client ID for this client.
- * \param[in] client_id_limit The maximum client ID for this client.
+ * \details This function looks for a pre-defined client ID range in
+ *          ns_mailbox_client_id_info[] according to \p irq_source value.
+ *          If matched, it links this non-secure client ID range to the
+ *          \p owner.
  *
- * \return SPM_SUCCESS if the registration is successful, SPM_ERROR_GENERIC
- *         if owner is null, or no free slots left.
+ * \note    Each client ID range shall be registered only once.
+ *
+ * \param[in] owner           Identifier of the non-secure client.
+ * \param[in] irq_source      The mailbox interrupt source of the target
+ *                            non-secure client ID range
+ *
+ * \return SPM_SUCCESS if the registration is successful.
+ *         SPM_ERROR_BAD_PARAMETERS if owner is null.
+ *         SPM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_multi_core_register_client_id_range(void *owner,
-                                                int32_t client_id_base,
-                                                int32_t client_id_limit);
+                                                uint32_t irq_source);
 
 /**
  * \brief Translate a non-secure client ID range.
@@ -150,8 +157,9 @@ int32_t tfm_multi_core_register_client_id_range(void *owner,
  * \param[out] client_id_out The translated client ID. Undefined if
  *                           SPM_ERROR_GENERIC is returned by the function
  *
- * \return SPM_SUCCESS if the translation is successful, SPM_ERROR_GENERIC
- *         otherwise.
+ * \return SPM_SUCCESS if the translation is successful.
+ *         SPM_ERROR_BAD_PARAMETERS if a parameter is invalid.
+ *         SPM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_multi_core_hal_client_id_translate(void *owner,
                                                int32_t client_id_in,

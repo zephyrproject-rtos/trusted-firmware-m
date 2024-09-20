@@ -12,6 +12,7 @@
 
 #include "tfm_hal_device_header.h"
 #include "cy_ipc_drv.h"
+#include "internal_status_code.h"
 #include "spe_ipc_config.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
@@ -80,8 +81,8 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     NVIC_DisableIRQ(NvicMux7_IRQn);
 
     if (tfm_multi_core_register_client_id_range(CLIENT_ID_OWNER_MAGIC,
-                                                p_ildi->client_id_base,
-                                                p_ildi->client_id_limit) != 0) {
+                                                p_ildi->source)
+        != SPM_SUCCESS) {
         return TFM_HAL_ERROR_INVALID_INPUT;
     }
     return TFM_HAL_SUCCESS;

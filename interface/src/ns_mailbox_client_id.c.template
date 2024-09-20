@@ -5,9 +5,11 @@
  *
  */
 /***********{{utilities.donotedit_warning}}***********/
+#include <stddef.h>
 #include "ns_mailbox_client_id.h"
 #include "tfm_peripherals_def.h"
 
+/* Non-secure client ID range for Mailbox NS Agent IRQs */
 const struct tfm_ns_mailbox_client_id_info ns_mailbox_client_id_info[] = {
 {% for partition in partitions %}
     {% if partition.manifest.ns_agent %}
@@ -24,3 +26,15 @@ const struct tfm_ns_mailbox_client_id_info ns_mailbox_client_id_info[] = {
     {% endif %}
 {% endfor %}
 };
+
+/*
+ * List of owners of non-secure client ID ranges.
+ * Each element in ns_mailbox_client_id_range_owner[] is the owner of the
+ * corresponding element in ns_mailbox_client_id_info[].
+ */
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% set irq_count = partition.manifest.irqs|count %}
+void *ns_mailbox_client_id_range_owner[{{irq_count}}] = {NULL};
+    {% endif %}
+{% endfor %}

@@ -91,8 +91,7 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     NVIC_DisableIRQ(CMU_MHU0_Receiver_IRQn);
 
     if (tfm_multi_core_register_client_id_range(&MHU_RSE_TO_AP_MONITOR_DEV,
-                                                p_ildi->client_id_base,
-                                                p_ildi->client_id_limit)
+                                                p_ildi->source)
         != SPM_SUCCESS) {
         return TFM_HAL_ERROR_INVALID_INPUT;
     }
@@ -116,8 +115,7 @@ enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
     NVIC_DisableIRQ(CMU_MHU1_Receiver_IRQn);
 
     if (tfm_multi_core_register_client_id_range(&MHU_RSE_TO_AP_NS_DEV,
-                                                p_ildi->client_id_base,
-                                                p_ildi->client_id_limit)
+                                                p_ildi->source)
         != SPM_SUCCESS) {
         return TFM_HAL_ERROR_INVALID_INPUT;
     }
