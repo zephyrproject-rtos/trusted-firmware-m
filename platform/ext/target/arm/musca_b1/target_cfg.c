@@ -20,6 +20,7 @@
 #include "platform_description.h"
 #include "device_definition.h"
 #include "region_defs.h"
+#include "tfm_peripherals_def.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
 
