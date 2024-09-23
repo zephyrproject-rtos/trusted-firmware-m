@@ -11,7 +11,7 @@
 #include "platform_locality.h"
 #include "tfm_peripherals_def.h"
 
-static int32_t get_locality_from_irq_source(int32_t irq_source)
+static int32_t get_locality_from_irq_source(uint32_t irq_source)
 {
     switch (irq_source) {
     case MAILBOX_IRQ:
