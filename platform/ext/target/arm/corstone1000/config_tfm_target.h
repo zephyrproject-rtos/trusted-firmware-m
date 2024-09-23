@@ -34,4 +34,11 @@
 
 /* This is also has to be increased to fit the EFI variables into the iovecs. */
 #define CRYPTO_IOVEC_BUFFER_SIZE    6000
+
+/* The Mailbox partition is used as an NS Agent so its stack size is used to
+ * determine the PSP and PSPLIM during the SFN backend initialization. It has to
+ * be increased because a stackoverflow could happen with the default 0x800 value.
+ */
+#define NS_AGENT_MAILBOX_STACK_SIZE 0x1000
+
 #endif /* __CONFIG_TFM_TARGET_H__ */
