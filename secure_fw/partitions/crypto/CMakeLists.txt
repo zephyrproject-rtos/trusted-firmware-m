@@ -8,11 +8,6 @@
 ############################### PSA CRYPTO CONFIG ##############################
 # Make sure these are available even if the TFM_PARTITION_CRYPTO is not defined
 
-# This defines the configuration files for the users of the client interface
-set(TFM_MBEDCRYPTO_CONFIG_CLIENT_PATH ${TFM_MBEDCRYPTO_CONFIG_PATH})
-cmake_path(REMOVE_EXTENSION TFM_MBEDCRYPTO_CONFIG_CLIENT_PATH)
-cmake_path(APPEND_STRING TFM_MBEDCRYPTO_CONFIG_CLIENT_PATH "_client.h")
-
 add_library(psa_crypto_config INTERFACE)
 target_compile_definitions(psa_crypto_config
     INTERFACE

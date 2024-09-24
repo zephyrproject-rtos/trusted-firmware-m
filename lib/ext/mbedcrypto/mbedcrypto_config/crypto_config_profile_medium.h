@@ -125,7 +125,11 @@
 #define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1
 //#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_DERIVE   1
 
-#ifdef CRYPTO_HW_ACCELERATOR
+/* Note: If this is being used on the client side, there is no need to further
+ * adjust the Mbed TLS configuration by including crypto_accelerator_config.h
+ * because those adjustments are only relevant on the service side of the build
+ */
+#if defined(CRYPTO_HW_ACCELERATOR) && !defined(MBEDTLS_PSA_CRYPTO_CLIENT)
 #include "crypto_accelerator_config.h"
 #endif
 
