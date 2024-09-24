@@ -24,7 +24,6 @@
 #include "crypto.h"
 #include "cc3xx_aes.h"
 #include "cc3xx_rng.h"
-#include "log.h"
 #include "cmsis.h"
 #include "dpa_hardened_word_copy.h"
 
