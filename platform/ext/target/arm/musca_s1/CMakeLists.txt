@@ -165,7 +165,6 @@ install(FILES       target_cfg.h
                     tfm_peripherals_def.h
                     Device/Config/device_cfg.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
-                    ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
 )

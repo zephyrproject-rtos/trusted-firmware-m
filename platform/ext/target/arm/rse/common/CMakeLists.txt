@@ -775,10 +775,6 @@ install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscou
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/native_drivers
 )
 
-install(FILES       ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
-)
-
 install(FILES       device/config/device_cfg_ns.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/device/config
         RENAME      device_cfg.h)

@@ -40,11 +40,6 @@ install(DIRECTORY
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(FILES
-    ${TARGET_PLATFORM_PATH}/accelerator/crypto_accelerator_config.h
-    DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
-)
-
 install(DIRECTORY
     ${STM_COMMON_DIR}/hal/accelerator/
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
