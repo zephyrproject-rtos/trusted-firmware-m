@@ -17,15 +17,6 @@ typedef int32_t    mailbox_msg_handle_t;
 
 #define MAILBOX_MSG_NULL_HANDLE             ((mailbox_msg_handle_t)0)
 
-#ifndef MAILBOX_ENABLE_INTERRUPTS
-#define MAILBOX_ENABLE_INTERRUPTS() \
-                        (psa_irq_enable(MAILBOX_INTERRUPT_SIGNAL))
-#define MAILBOX_SIGNAL_IS_ACTIVE(signals) \
-                        ((signals) & MAILBOX_INTERRUPT_SIGNAL)
-#define MAILBOX_SIGNAL_GET_ACTIVE(signals) \
-                        (MAILBOX_INTERRUPT_SIGNAL)
-#endif /* MAILBOX_ENABLE_INTERRUPTS */
-
 /* A single slot structure in SPE mailbox queue */
 struct secure_mailbox_slot_t {
     struct mailbox_msg_t msg;

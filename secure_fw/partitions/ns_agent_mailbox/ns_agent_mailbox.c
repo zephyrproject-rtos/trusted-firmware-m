@@ -9,6 +9,7 @@
 
 #include "async.h"
 #include "config_tfm.h"
+#include "ns_agent_mailbox_signal_utils.h"
 #include "psa/service.h"
 #include "psa_manifest/ns_agent_mailbox.h"
 #include "tfm_hal_mailbox.h"
@@ -38,12 +39,12 @@ void ns_agent_mailbox_entry(void)
         psa_panic();
     }
 
-    MAILBOX_ENABLE_INTERRUPTS();
+    mailbox_enable_interrupts();
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (MAILBOX_SIGNAL_IS_ACTIVE(signals)) {
-            psa_eoi(MAILBOX_SIGNAL_GET_ACTIVE(signals));
+        if (mailbox_signal_is_active(signals)) {
+            psa_eoi(mailbox_signal_get_active(signals));
             tfm_rpc_client_call_handler();
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         } else if (signals & ASYNC_MSG_REPLY) {

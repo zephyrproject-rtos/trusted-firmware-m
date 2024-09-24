@@ -1,0 +1,82 @@
+/*
+ * Copyright (c) 2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+/***********{{utilities.donotedit_warning}}***********/
+
+#ifndef __NS_AGENT_MAILBOX_SIGNAL_UTILS_H__
+#define __NS_AGENT_MAILBOX_SIGNAL_UTILS_H__
+
+#include <stdbool.h>
+#include <stdint.h>
+#include "psa_manifest/ns_agent_mailbox.h"
+#include "psa/service.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**********************************************************************/
+/* Defines the handling of NS Agent Mailbox signals                   */
+/**********************************************************************/
+
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% if partition.manifest.irqs %}
+#define DUMMY_SIGNAL        (psa_signal_t)0x0
+#define MAILBOX_SIGNALS     ( \
+            {% for irq in partition.manifest.irqs %}
+                {% if partition.manifest.psa_framework_version == 1.0 %}
+                             {{"%s"|format(irq.signal)}} | \
+                {% else %}
+                             {{"%s"|format(irq.name + "_SIGNAL")}} | \
+                {% endif %}
+            {% endfor %}
+                             DUMMY_SIGNAL)
+
+static inline void mailbox_enable_interrupts(void)
+{
+            {% for irq in partition.manifest.irqs %}
+                {% if partition.manifest.psa_framework_version == 1.0 %}
+    psa_irq_enable({{"%s"|format(irq.signal)}});
+                {% else %}
+    psa_irq_enable({{"%s"|format(irq.name + "_SIGNAL")}});
+                {% endif %}
+            {% endfor %}
+}
+
+static inline bool mailbox_signal_is_active(psa_signal_t signals)
+{
+    if (signals & MAILBOX_SIGNALS) {
+        return true;
+    }
+
+    return false;
+}
+
+static psa_signal_t mailbox_signal_get_active(psa_signal_t signals)
+{
+            {% for irq in partition.manifest.irqs %}
+                {% if partition.manifest.psa_framework_version == 1.0 %}
+    if (signals & {{"%s"|format(irq.signal)}}) {
+        return {{"%s"|format(irq.signal)}};
+                {% else %}
+    if (signals & {{"%s"|format(irq.name + "_SIGNAL")}}) {
+        return {{"%s"|format(irq.name + "_SIGNAL")}};
+                {% endif %}
+    }
+            {% endfor %}
+
+    return DUMMY_SIGNAL;
+}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* NS_AGENT_MAILBOX_SIGNAL_UTILS_H__ */

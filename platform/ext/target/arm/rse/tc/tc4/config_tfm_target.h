@@ -25,21 +25,6 @@
 /* Run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
 #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
 
-#ifdef MAILBOX_ENABLE_INTERRUPTS
-#undef MAILBOX_ENABLE_INTERRUPTS
-#undef MAILBOX_SIGNAL_IS_ACTIVE
-#undef MAILBOX_SIGNAL_GET_ACTIVE
-#endif /* MAILBOX_ENABLE_INTERRUPTS */
-#define MAILBOX_ENABLE_INTERRUPTS() \
-                        psa_irq_enable(MAILBOX_INTERRUPT_SIGNAL); \
-                        psa_irq_enable(MAILBOX_INTERRUPT_1_SIGNAL)
-#define MAILBOX_SIGNAL_IS_ACTIVE(signals) \
-                        (((signals) & MAILBOX_INTERRUPT_SIGNAL) || \
-                         ((signals) & MAILBOX_INTERRUPT_1_SIGNAL))
-#define MAILBOX_SIGNAL_GET_ACTIVE(signals) \
-                        (((signals) & MAILBOX_INTERRUPT_SIGNAL) ? \
-                         MAILBOX_INTERRUPT_SIGNAL : MAILBOX_INTERRUPT_1_SIGNAL)
-
 /* Default RSE SYSCLK/CPU0CLK value in Hz */
 #define SYSCLK         100000000UL /* 100 MHz */
 

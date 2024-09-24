@@ -43,6 +43,11 @@
         "output": "interface/src/ns_mailbox_client_id.c"
     },
     {
+        "description": "NS Mailbox signal handing utilities",
+        "template": "secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox_signal_utils.h.template",
+        "output": "secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox_signal_utils.h"
+    },
+    {
         "description": "CMake variables generated",
         "template": "tools/config_impl.cmake.template",
         "output": "tools/config_impl.cmake"
