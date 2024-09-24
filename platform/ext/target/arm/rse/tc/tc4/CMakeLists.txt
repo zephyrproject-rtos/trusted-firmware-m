@@ -70,6 +70,12 @@ target_include_directories(platform_bl2
         $<$<NOT:$<BOOL:${RSE_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
+# Prevent platform reset release during tf-m tests to avoid unintended boot
+target_compile_definitions(platform_bl2
+    PRIVATE
+        $<$<BOOL:${TC_NO_RELEASE_RESET}>:TC_NO_RELEASE_RESET>
+)
+
 #========================= Platform BL1 =======================================#
 
 target_sources(platform_bl1_1

@@ -243,6 +243,7 @@ int boot_platform_post_load(uint32_t image_id)
     }
 #endif /* RSE_XIP */
 
+#ifndef TC_NO_RELEASE_RESET
     if (image_id == RSE_BL2_IMAGE_SCP) {
         memset((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
 #if PLAT_MHU_VERSION == 2
@@ -283,6 +284,10 @@ int boot_platform_post_load(uint32_t image_id)
 #endif
         BOOT_LOG_INF("Sent the signal to SCP");
     }
+#else
+    BOOT_LOG_INF("Skipping SCP signaling as TC_NO_RELEASE_RESET is defined");
+#endif /* TC_NO_RELEASE_RESET */
+
 
     err = host_flash_atu_uninit_regions();
     if (err) {
