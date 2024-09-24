@@ -145,13 +145,18 @@ set(RSE_ENABLE_TRAM                     OFF        CACHE BOOL "Whether TRAM encr
 
 set(RSE_BIT_PROGRAMMABLE_OTP            ON         CACHE BOOL "Whether RSE OTP words can be programmed bit by bit, or whole words must be programmed at once")
 
+set(RSE_SUPPORT_ROM_LIB_RELOCATION      OFF        CACHE BOOL "Whether shared ROM code supports being copied to SRAM and then executed")
+set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
+
 if (RSE_USE_ROM_LIB_FROM_SRAM)
     set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
     set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols_in_sram.axf" CACHE STRING "Suffix to use for code-sharing input files")
+    if (RSE_XIP)
+        set(RSE_ROM_LIB_RELOCATION_OFFSET   +0x20010000           CACHE STRING "Relocation offset to be used to change section address w.r.t. ROM base address")
+    else()
+        set(RSE_ROM_LIB_RELOCATION_OFFSET   +0x20080000           CACHE STRING "Relocation offset to be used to change section address w.r.t. ROM base address")
+    endif()
 endif()
-
-set(RSE_SUPPORT_ROM_LIB_RELOCATION      OFF        CACHE BOOL "Whether shared ROM code supports being copied to SRAM and then executed")
-set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
 
 set(RSE_HAS_MANUFACTURING_DATA          OFF        CACHE BOOL "Whether manufacturing data is provisioned into RSE OTP")
 
