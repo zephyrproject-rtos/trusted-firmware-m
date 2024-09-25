@@ -1,11 +1,13 @@
 /*
  * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2024 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "critical_section.h"
 #include "internal_status_code.h"
 #include "spm.h"
 #include "tfm_pools.h"
@@ -114,7 +116,6 @@ void spm_init_connection_space(void)
 
 struct connection_t *spm_allocate_connection(void)
 {
-    /* Get buffer for handle list structure from handle pool */
     return (struct connection_t *)tfm_pool_alloc(connection_pool);
 }
 
@@ -131,12 +132,8 @@ psa_status_t spm_validate_connection(const struct connection_t *p_connection)
 
 void spm_free_connection(struct connection_t *p_connection)
 {
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-
     SPM_ASSERT(p_connection != NULL);
 
-    CRITICAL_SECTION_ENTER(cs_assert);
-    /* Back handle buffer to pool */
+    /* Return handle buffer to pool */
     tfm_pool_free(connection_pool, p_connection);
-    CRITICAL_SECTION_LEAVE(cs_assert);
 }
