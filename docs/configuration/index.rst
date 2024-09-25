@@ -166,7 +166,7 @@ Initial Attestation
 +-------------------------------------+-----------+-------------+
 |ATTEST_INCLUDE_COSE_KEY_ID           | Component |   0         |
 +-------------------------------------+-----------+-------------+
-|ATTEST_STACK_SIZE                    | Component |   0x700     |
+|ATTEST_STACK_SIZE                    | Component |   0x800     |
 +-------------------------------------+-----------+-------------+
 
 Internal Trusted Storage

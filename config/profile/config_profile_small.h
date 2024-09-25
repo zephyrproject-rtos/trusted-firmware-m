@@ -141,7 +141,7 @@
 
 /* The stack size of the Initial Attestation Secure Partition */
 #ifndef ATTEST_STACK_SIZE
-#define ATTEST_STACK_SIZE                      0x700
+#define ATTEST_STACK_SIZE                      0x800
 #endif
 
 /* Set the initial attestation token profile */

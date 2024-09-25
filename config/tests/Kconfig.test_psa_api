@@ -61,7 +61,7 @@ if PSA_API_TEST_INITIAL_ATTESTATION
         default n
 
     config ATTEST_STACK_SIZE
-        default 0x700
+        default 0x800
 
     choice ATTEST_TOKEN_PROFILE
         default ATTEST_TOKEN_PROFILE_PSA_IOT_1
