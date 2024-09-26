@@ -28,6 +28,7 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      https://github.com/laurencelundblade/QCBOR.git
         GIT_TAG             ${QCBOR_VERSION}
+        GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
 )
 

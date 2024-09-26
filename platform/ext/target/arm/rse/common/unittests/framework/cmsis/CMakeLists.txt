@@ -22,6 +22,7 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      https://github.com/ARM-software/CMSIS_6.git
         GIT_TAG             ${CMSIS_TAG}
+        GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
 )
 

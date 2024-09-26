@@ -18,6 +18,7 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY          https://github.com/ThrowTheSwitch/CMock
         GIT_TAG                 ${CMOCK_TAG}
+        GIT_SHALLOW             TRUE
         GIT_PROGRESS            FALSE
         GIT_SUBMODULES_RECURSE  TRUE
 )

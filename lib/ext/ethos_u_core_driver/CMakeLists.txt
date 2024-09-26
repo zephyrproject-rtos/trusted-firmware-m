@@ -12,5 +12,6 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      "https://review.mlplatform.org/ml/ethos-u/ethos-u-core-driver"
         GIT_TAG             "24.05"
+        GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
 )

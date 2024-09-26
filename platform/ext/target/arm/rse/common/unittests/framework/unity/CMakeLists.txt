@@ -18,6 +18,7 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY          https://github.com/ThrowTheSwitch/Unity
         GIT_TAG                 ${UNITY_TAG}
+        GIT_SHALLOW             TRUE
         GIT_PROGRESS            FALSE
 )
 
