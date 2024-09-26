@@ -12,6 +12,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if defined(PLATFORM_PSA_ADAC_SECURE_DEBUG) && !defined(MCUBOOT_SIGN_RSA)
+#define MBEDTLS_RSA_C
+/* Define the following just to avoid check_config.h complain */
+#define MBEDTLS_PKCS1_V21
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG && !MCUBOOT_SIGN_RSA */
+
 /* RNG Config */
 #undef MBEDTLS_ENTROPY_NV_SEED
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
