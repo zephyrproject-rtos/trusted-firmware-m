@@ -10,8 +10,6 @@ import os
 import re
 
 from kconfiglib import Kconfig, TRI_TO_STR, BOOL, TRISTATE
-import menuconfig
-import guiconfig
 
 # NOTE: in_component_label is related with Kconfig menu prompt.
 in_component_label = 'TF-M component configs'
@@ -281,8 +279,10 @@ if __name__ == '__main__':
 
     # UI options
     if args.ui == 'tui':
+        import menuconfig
         menuconfig.menuconfig(tfm_kconfig)
     elif args.ui == 'gui':
+        import guiconfig
         guiconfig.menuconfig(tfm_kconfig)
     else:
         logging.info(tfm_kconfig.write_config(dot_config))
