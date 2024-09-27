@@ -149,14 +149,10 @@ if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
             trusted-firmware-m-psa-adac
     )
 
-    target_link_libraries(trusted-firmware-m-psa-adac
+    # For microsecond_timer.h
+    target_include_directories(trusted-firmware-m-psa-adac
         PRIVATE
-            psa_adac_cc312
-    )
-
-    target_link_libraries(psa_adac_psa_crypto
-        PRIVATE
-            bl2_mbedcrypto_config
+            ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
 endif()

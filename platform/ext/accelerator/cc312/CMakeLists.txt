@@ -57,7 +57,14 @@ if (BL2)
     )
 
     if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
-        add_subdirectory(psa-adac)
+        target_link_libraries(psa_adac_psa_crypto
+            PUBLIC
+                bl2_crypto
+        )
+        target_sources(psa_adac_psa_crypto
+            PRIVATE
+                crypto_hw.c
+        )
     endif()
 
 endif()

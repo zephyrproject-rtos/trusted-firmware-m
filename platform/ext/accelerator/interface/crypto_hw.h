@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -54,7 +54,7 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
  * \param[in]   permissions_mask   permission vector for debug signals
  *                                 vector bits interpretation is specific
  *                                 to a target and depends on the architecture
- * \param[in]   len                length of permission vector
+ * \param[in]   len                length of \a permissions_mask array
  *
  * \return 0 on success, non-zero otherwise
  */

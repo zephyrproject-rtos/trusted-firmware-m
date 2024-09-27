@@ -725,16 +725,28 @@ static const tfm_plat_builtin_key_policy_t g_builtin_keys_policy[] = {
      .usage = PSA_KEY_USAGE_VERIFY_HASH},
 #endif /* MCUBOOT_IMAGE_NUMBER > 3 */
 };
+#endif /* !MCUBOOT_HW_KEY && !MCUBOOT_BUILTIN_KEY */
 
+#if defined(MCUBOOT_USE_PSA_CRYPTO)
 size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])
 {
+#if defined(MCUBOOT_BUILTIN_KEY)
     *desc_ptr = &g_builtin_keys_policy[0];
     return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy);
+#else
+    *desc_ptr = NULL;
+    return 0;
+#endif
 }
 
 size_t tfm_plat_builtin_key_get_desc_table_ptr(const tfm_plat_builtin_key_descriptor_t *desc_ptr[])
 {
+#if defined(MCUBOOT_BUILTIN_KEY)
     *desc_ptr = &g_builtin_keys_desc[0];
     return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc);
+#else
+    *desc_ptr = NULL;
+    return 0;
+#endif
 }
-#endif /* !MCUBOOT_HW_KEY && !MCUBOOT_BUILTIN_KEY */
+#endif /* MCUBOOT_USE_PSA_CRYPTO */

@@ -19,10 +19,10 @@
 #include "psa/crypto.h"
 #include "psa_crypto_driver_wrappers.h"
 #include "psa_crypto_driver_wrappers_no_static.h"
-#if defined(BLX_BUILTIN_KEY_LOADER)
+#if defined(MCUBOOT_BUILTIN_KEY)
 #include "tfm_plat_crypto_keys.h"
 #include "tfm_plat_otp.h"
-#endif /* BLX_BUILTIN_KEY_LOADER */
+#endif /* MCUBOOT_BUILTIN_KEY */
 
 /* For mbedtls_psa_ecdsa_verify_hash() */
 #include "psa_crypto_ecp.h"
@@ -43,7 +43,6 @@
  *       just hold a pointer to the key
  */
 
-#if defined(BLX_BUILTIN_KEY_LOADER)
 /**
  * @brief Static local buffer that holds enough data for the key material
  *        provisioned bundle to be retrieved from the platform.
@@ -56,7 +55,6 @@ static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TY
 #elif PSA_WANT_ECC_SECP_R1_256 == 1
 static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 256), 4)];
 #endif
-#endif /* BLX_BUILTIN_KEY_LOADER */
 
 /**
  * @brief A structure describing the contents of a thin key slot, which
@@ -66,10 +64,8 @@ struct thin_key_slot_s {
     uint8_t *buf;              /*!< Pointer to the buffer holding the key material */
     size_t len;                /*!< Size in bytes of the \a buf buffer */
     psa_key_attributes_t attr; /*!< Attributes of the key */
-#if !defined(BLX_BUILTIN_KEY_LOADER)
     psa_key_id_t key_id;       /*!< Key ID assigned to the key */
     bool is_valid;             /*!< Boolean value, true if the key material is valid */
-#endif
 };
 
 /**
@@ -78,28 +74,33 @@ struct thin_key_slot_s {
  *        new key will just cause the existing key to be forgotten
  */
 static struct thin_key_slot_s g_key_slot =  {
-#if !defined(BLX_BUILTIN_KEY_LOADER)
     .buf = NULL,
     .len = 0,
     .attr = PSA_KEY_ATTRIBUTES_INIT,
     .key_id = PSA_KEY_ID_NULL,
     .is_valid = false,
-#else
-    .buf  = (uint8_t *)g_pubkey_data,
-    .len  = sizeof(g_pubkey_data),
-    .attr = PSA_KEY_ATTRIBUTES_INIT,
-#endif /* !BLX_BUILTIN_KEY_LOADER */
 };
 
 /**
- * @brief Context required by the RNG function, mocked
- *
+ * @brief Context required by the RNG function, mocked because the RNG function
+ *        does not provide a valid implementation unless it is overridden by a
+ *        TRNG hardware driver integration
  */
 static mbedtls_psa_external_random_context_t *g_ctx = NULL;
 
-#if defined(BLX_BUILTIN_KEY_LOADER)
+/**
+ * @brief Retrieves the builtin key associated to the \a key_id
+ *        from the underlying platform, binding the core key
+ *        slot to the local storage which holds the key material,
+ *        and filling the associated key metadata
+ *
+ * @param[in] key_id Key id associated to the builtin key to retrieve
+ *
+ * @return psa_status_t PSA_SUCCESS or PSA_ERROR_GENERIC_ERROR, PSA_ERROR_DOES_NOT_EXIST
+ */
 static psa_status_t get_builtin_key(psa_key_id_t key_id)
 {
+#if defined(MCUBOOT_BUILTIN_KEY)
     const tfm_plat_builtin_key_descriptor_t *desc_table = NULL;
     size_t number_of_keys = tfm_plat_builtin_key_get_desc_table_ptr(&desc_table);
     size_t idx;
@@ -110,6 +111,9 @@ static psa_status_t get_builtin_key(psa_key_id_t key_id)
             psa_algorithm_t alg;
             psa_key_type_t key_type;
             enum tfm_plat_err_t plat_err;
+
+            /* Bind the local storage to the key slot */
+            g_key_slot.buf = (uint8_t *)g_pubkey_data;
 
             /* Load key */
             plat_err = desc_table[idx].loader_key_func(
@@ -137,8 +141,62 @@ static psa_status_t get_builtin_key(psa_key_id_t key_id)
     psa_set_key_usage_flags(&g_key_slot.attr, policy_table[idx].usage);
 
     return PSA_SUCCESS;
+#else
+    assert(0);
+    return PSA_ERROR_INVALID_ARGUMENT;
+#endif
 }
-#endif /* BLX_BUILTIN_KEY_LOADER */
+
+/**
+ * @brief Check if a \a key_id refers to a builtin key_id
+ *
+ * @note This is an arbitrary choice, i.e. setting the MSB of the key_id
+ *       that might be reworked in the future. The convention needs to be
+ *       enforced with the MCUboot caller application, the rationale for
+ *       the current choice is to remain as simple as possible
+ *
+ * @param[in] key_id The key_id to be checked, i.e. a uint32_t variable
+ * @return    true   True if it is associated to a builtin key_id
+ * @return    false  False if it is associated to a transient key imported
+ *                   in the core
+ */
+static bool is_key_builtin(psa_key_id_t key_id)
+{
+    /* If a key is imported, it sets the MSB of the psa_key_id_t */
+    if (key_id & 0x80000000) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Check in constant time if the \a a buffer matches the \a b
+ *        buffer
+ *
+ * @param[in] a  Buffer of length \a la
+ * @param[in] la Size in bytes of the \a a buffer
+ * @param[in] b  Buffer of length \a lb
+ * @param[in] lb Size in bytes of the \a b buffer
+ *
+ * @return psa_status_t PSA_SUCCESS or PSA_ERROR_INVALID_SIGNATURE in case
+ *                      the buffer don't match, i.e. this is normally used
+ *                      in the context of signature or hash verification
+ */
+static psa_status_t hash_check(const uint8_t *a, size_t la, const uint8_t *b,
+        size_t lb)
+{
+    uint8_t chk = 1;
+
+    if (la == lb) {
+        chk = 0;
+        for (size_t i = 0; i < la; i++) {
+            chk |= (uint8_t) (a[i] ^ b[i]);
+        }
+    }
+
+    return chk == 0 ? PSA_SUCCESS : PSA_ERROR_INVALID_SIGNATURE;
+}
 
 /*!
  * \defgroup thin_psa_crypto Set of functions implementing a thin PSA Crypto core
@@ -224,10 +282,115 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
     psa_status_t status = psa_driver_wrapper_hash_finish(
         operation, hash, hash_size, hash_length);
     psa_hash_abort(operation);
+
     return status;
 }
 
-#if !defined(BLX_BUILTIN_KEY_LOADER)
+psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
+                             const uint8_t *hash,
+                             size_t hash_length)
+{
+    /* Size this buffer for the worst case in terms of size */
+#if defined(PSA_WANT_ALG_SHA_384)
+    uint32_t hash_produced[PSA_HASH_LENGTH(PSA_ALG_SHA_384) / sizeof(uint32_t)];
+#else
+    uint32_t hash_produced[PSA_HASH_LENGTH(PSA_ALG_SHA_256) / sizeof(uint32_t)];
+#endif
+    size_t hash_produced_length;
+    psa_status_t status;
+
+    status = psa_hash_finish(operation,
+                             (uint8_t *)hash_produced,
+                             sizeof(hash_produced),
+                             &hash_produced_length);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return hash_check(hash, hash_length, (uint8_t *)hash_produced, hash_produced_length);
+}
+
+/* FixMe: psa_adac_mac_verify() and psa_adac_derive_key() for BL2 based ADAC flow with CC312
+ *        are not implemented yet, hence the APIs below are just stubbed to emulate
+ *        the same behaviour, i.e. PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
+                                psa_key_id_t key,
+                                psa_algorithm_t alg)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
+                                  psa_key_id_t key,
+                                  psa_algorithm_t alg)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_mac_update(psa_mac_operation_t *operation,
+                            const uint8_t *input,
+                            size_t input_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
+                                   const uint8_t *mac,
+                                   size_t mac_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
+                                 uint8_t *mac,
+                                 size_t mac_size,
+                                 size_t *mac_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_key_derivation_setup(psa_key_derivation_operation_t *operation,
+                                      psa_algorithm_t alg)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_key_derivation_input_key(
+    psa_key_derivation_operation_t *operation,
+    psa_key_derivation_step_t step,
+    psa_key_id_t key)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_key_derivation_input_bytes(
+    psa_key_derivation_operation_t *operation,
+    psa_key_derivation_step_t step,
+    const uint8_t *data,
+    size_t data_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_key_derivation_output_bytes(
+    psa_key_derivation_operation_t *operation,
+    uint8_t *output,
+    size_t output_length)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+psa_status_t psa_key_derivation_abort(psa_key_derivation_operation_t *operation)
+{
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
 /**
  * The key management subsystem is simplified to support only the key encodings
  * as expected by MCUboot. MCUboot key bundles can be encoded in the
@@ -286,7 +449,9 @@ psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
     g_key_slot.attr.bits = (psa_key_bits_t)bits;
 
     /* This signals that a new key has been imported */
-    *key = (++g_key_slot.key_id);
+    ++g_key_slot.key_id;
+    g_key_slot.key_id |= 0x80000000UL;
+    *key = g_key_slot.key_id;
 
     g_key_slot.is_valid = true;
 
@@ -300,27 +465,27 @@ psa_status_t psa_get_key_attributes(psa_key_id_t key,
     memcpy(attributes, &g_key_slot.attr, sizeof(psa_key_attributes_t));
     return PSA_SUCCESS;
 }
-#endif /* !BLX_BUILTIN_KEY_LOADER */
 
 psa_status_t psa_destroy_key(psa_key_id_t key)
 {
-#if !defined(BLX_BUILTIN_KEY_LOADER)
-    assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
+    if (is_key_builtin(key)) {
+
+        memset(g_pubkey_data, 0, sizeof(g_pubkey_data));
+
+    } else {
+
+        assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
+
+        /* This will keep the value of the key_id so that a new import will
+         * just use the next key_id. This allows to keep track of potential
+         * clients trying to reuse a deleted key ID
+         */
+    }
 
     g_key_slot.buf = NULL;
     g_key_slot.len = 0;
     g_key_slot.attr = psa_key_attributes_init();
     g_key_slot.is_valid = false;
-
-    /* This will keep the value of the key_id so that a new import will
-     * just use the next key_id. This allows to keep track of potential
-     * clients trying to reuse a deleted key ID
-     */
-#else
-    memset(g_pubkey_data, 0, sizeof(g_pubkey_data));
-    g_key_slot.len = 0;
-    g_key_slot.attr = psa_key_attributes_init();
-#endif /* !BLX_BUILTIN_KEY_LOADER */
 
     return PSA_SUCCESS;
 }
@@ -335,14 +500,14 @@ psa_status_t psa_verify_hash(psa_key_id_t key,
 {
     psa_status_t status;
 
-#if !defined(BLX_BUILTIN_KEY_LOADER)
-    assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
-#else
-    status = get_builtin_key(key);
-    if (status != PSA_SUCCESS) {
-        return status;
+    if (is_key_builtin(key)) {
+        status = get_builtin_key(key);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+    } else {
+        assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
     }
-#endif /* !BLX_BUILTIN_KEY_LOADER */
 
     status = psa_driver_wrapper_verify_hash(
                 &g_key_slot.attr,

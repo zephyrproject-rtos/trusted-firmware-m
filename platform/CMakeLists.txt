@@ -244,9 +244,11 @@ if(BL2)
             $<$<BOOL:${BL2_SANITIZE}>:-fsanitize=${BL2_SANITIZE}>
     )
 
+    # If BL2 uses builtin keys, then it requires to access platform
+    # related functionalities from the platform_bl2 to retrieve keys
     target_link_libraries(bl2_crypto
         PRIVATE
-        $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:platform_bl2>
+            $<$<BOOL:${MCUBOOT_BUILTIN_KEY}>:platform_bl2>
     )
 endif()
 
