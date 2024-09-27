@@ -156,9 +156,9 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
                                                                uint32_t *value, size_t value_size,
                                                                size_t *value_len)
 {
-    uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+    volatile uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
         temp_val[INTEGRITY_CHECKER_OUTPUT_SIZE_SHA256 / sizeof(uint32_t)] = {0};
-    uint32_t *value_ptr = value;
+    volatile uint32_t *value_ptr = value;
     struct _integrity_checker_reg_map_t* p_integrity_checker =
         (struct _integrity_checker_reg_map_t*)dev->cfg->base;
     enum integrity_checker_error_t err;
@@ -236,9 +236,9 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
                                                              const uint32_t *data, size_t size,
                                                              const uint32_t *value, size_t value_size)
 {
-    uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
+    volatile uint32_t __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
         temp_val[INTEGRITY_CHECKER_OUTPUT_SIZE_SHA256 / sizeof(uint32_t)] = {0};
-    uint32_t *value_ptr = (uint32_t *)value;
+    const volatile uint32_t *value_ptr = value;
     struct _integrity_checker_reg_map_t* p_integrity_checker =
         (struct _integrity_checker_reg_map_t*)dev->cfg->base;
     enum integrity_checker_error_t err;
