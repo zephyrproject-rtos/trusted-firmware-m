@@ -27,11 +27,12 @@ target_include_directories(psa_adac_cc312
         ${CMAKE_SOURCE_DIR}/lib/ext/cryptocell-312-runtime/codesafe/src/crypto_api/rnd_dma/local
 )
 
-target_compile_options(psa_adac_cc312
+target_compile_definitions(psa_adac_cc312
     PRIVATE
-        -DCC_IOT
-        -DUSE_MBEDTLS_CRYPTOCELL
-        -D_INTERNAL_CC_NO_RSA_SCHEME_15_SUPPORT
+        CC_IOT
+        USE_MBEDTLS_CRYPTOCELL
+        _INTERNAL_CC_NO_RSA_SCHEME_15_SUPPORT
+        $<$<NOT:$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>>:PSA_WANT_ALG_SHA_256>
 )
 
 target_link_libraries(psa_adac_cc312
