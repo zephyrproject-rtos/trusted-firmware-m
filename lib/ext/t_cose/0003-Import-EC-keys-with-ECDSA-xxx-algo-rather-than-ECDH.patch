@@ -1,0 +1,59 @@
+From 543f32dc625c905ddf98222270cdc23751ad4abe Mon Sep 17 00:00:00 2001
+From: Tamas Ban <tamas.ban@arm.com>
+Date: Mon, 30 Sep 2024 14:23:03 +0200
+Subject: [PATCH 3/3] Import EC keys with ECDSA(xxx) algo rather than ECDH
+
+To make the DPE certificate verification working
+with t_cose_key_dedode() API.
+
+The original code registers the keys with ECDH
+algorithm. In this case psa_has_verify() returns
+with PSA_ERROR_NOT_PERMITTED.
+
+Signed-off-by: Tamas Ban <tamas.ban@arm.com>
+---
+ crypto_adapters/t_cose_psa_crypto.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/crypto_adapters/t_cose_psa_crypto.c b/crypto_adapters/t_cose_psa_crypto.c
+index 16151c6..80d1961 100644
+--- a/crypto_adapters/t_cose_psa_crypto.c
++++ b/crypto_adapters/t_cose_psa_crypto.c
+@@ -1663,6 +1663,7 @@ t_cose_crypto_import_ec2_pubkey(int32_t               cose_ec_curve_id,
+     psa_status_t          status;
+     psa_key_attributes_t  attributes;
+     psa_key_type_t        type_public;
++    psa_algorithm_t       alg;
+     struct q_useful_buf_c  import;
+     // TODO: really make sure this size is right for the curve types supported
+     UsefulOutBuf_MakeOnStack (import_form, T_COSE_EXPORT_PUBLIC_KEY_MAX_SIZE + 5);
+@@ -1670,12 +1671,15 @@ t_cose_crypto_import_ec2_pubkey(int32_t               cose_ec_curve_id,
+     switch (cose_ec_curve_id) {
+     case T_COSE_ELLIPTIC_CURVE_P_256:
+          type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
++         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+          break;
+     case T_COSE_ELLIPTIC_CURVE_P_384:
+          type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
++         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+          break;
+     case T_COSE_ELLIPTIC_CURVE_P_521:
+          type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
++         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_512);
+          break;
+ 
+     default:
+@@ -1685,8 +1689,8 @@ t_cose_crypto_import_ec2_pubkey(int32_t               cose_ec_curve_id,
+ 
+     // TODO: are these attributes right?
+     attributes = psa_key_attributes_init();
+-    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_COPY);
+-    psa_set_key_algorithm(&attributes, PSA_ALG_ECDH);
++    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_VERIFY_HASH);
++    psa_set_key_algorithm(&attributes, alg);
+     psa_set_key_type(&attributes, type_public);
+ 
+     /* This converts to a serialized representation of an EC Point
+-- 
+2.34.1
+
