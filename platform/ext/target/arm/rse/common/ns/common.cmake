@@ -40,6 +40,11 @@ target_link_libraries(platform_ns
         platform_region_defs
 )
 
+target_compile_definitions(platform_ns
+    PRIVATE
+        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
+)
+
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${RSE_XIP}>:RSE_XIP>
