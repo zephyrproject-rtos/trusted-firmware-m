@@ -36,6 +36,7 @@ target_sources(${CC3XX_TARGET_NAME}
         src/cc3xx_ec_weierstrass.c
         src/cc3xx_ec_projective_point.c
         src/cc3xx_ecdh.c
+        src/cc3xx_dcu.c
         ../common/cc3xx_stdlib.c
 )
 
