@@ -161,6 +161,9 @@ enum rse_atu_ids {
                                          HOST_SCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
+/* SCP shared memory for SCMI transport */
+#define SCP_SHARED_MEMORY_PHYS_BASE 0x2F000000UL
+
 /* AP BL2 */
 
 /* AP BL2 ATU HEADER logical address start */

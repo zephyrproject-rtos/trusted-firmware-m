@@ -52,4 +52,8 @@
 /* Maximum RSE Comms payload size using Embed protocol */
 #define RSE_COMMS_PAYLOAD_MAX_SIZE (0x3FE0)
 
+/* SCMI Comms SCP doorbell IRQ number and handler */
+#define SCP_DOORBELL_IRQ         CMU_MHU4_Receiver_IRQn
+#define SCP_DOORBELL_IRQ_HANDLER CMU_MHU4_Receiver_Handler
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

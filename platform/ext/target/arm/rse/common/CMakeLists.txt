@@ -236,6 +236,23 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
+#====================== SCMI hardware abstraction layer =======================#
+
+if (TFM_PARTITION_SCMI_COMMS)
+    add_library(scmi_hal INTERFACE)
+
+    target_include_directories(scmi_hal
+        INTERFACE
+            scmi
+    )
+
+    target_sources(scmi_hal
+        INTERFACE
+            scmi/scmi_hal.c
+            ${PLATFORM_DIR}/ext/common/scmi_hal_common.c
+    )
+endif()
+
 #========================= Platform Crypto Keys ===============================#
 
 if (TFM_PARTITION_CRYPTO)

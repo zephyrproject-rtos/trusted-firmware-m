@@ -59,4 +59,6 @@
 #define SCP_BOOT_SRAM_BASE  0x1000000000000 /* SCP initial boot SRAM base address */
 #define SCP_BOOT_SRAM_SIZE  0x20000U        /* 128KB */
 
+#define SCP_SHARED_MEMORY_PHYS_BASE 0x45000000U /* SCP shared memory for SCMI transport */
+
 #endif  /* __HOST_BASE_ADDRESS_H__ */

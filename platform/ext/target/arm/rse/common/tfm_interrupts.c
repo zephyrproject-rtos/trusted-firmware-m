@@ -8,6 +8,7 @@
  *
  */
 
+#include "config_tfm.h"
 #include "internal_status_code.h"
 #include "tfm_hal_device_header.h"
 #include "device_definition.h"
@@ -183,6 +184,33 @@ enum tfm_hal_status_t mailbox_irq_2_init(void *p_pt,
 }
 #endif /* MHU_AP_S_TO_RSE_DEV */
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
+
+#ifdef TFM_PARTITION_SCMI_COMMS
+static struct irq_t scp_doorbell_irq = {0};
+
+void SCP_DOORBELL_IRQ_HANDLER(void)
+{
+    spm_handle_interrupt(scp_doorbell_irq.p_pt, scp_doorbell_irq.p_ildi);
+}
+
+enum tfm_hal_status_t scp_doorbell_irq_init(void *p_pt,
+                                            const struct irq_load_info_t *p_ildi)
+{
+    scp_doorbell_irq.p_pt = p_pt;
+    scp_doorbell_irq.p_ildi = p_ildi;
+
+    /* SCP MHU communication in the bootloader with the IRQ disabled may leave a
+     * pending IRQ. Clear it here to avoid a false IRQ being triggered.
+     */
+    NVIC_ClearPendingIRQ(SCP_DOORBELL_IRQ);
+
+    NVIC_SetPriority(SCP_DOORBELL_IRQ, DEFAULT_IRQ_PRIORITY);
+    NVIC_ClearTargetState(SCP_DOORBELL_IRQ);
+    NVIC_DisableIRQ(SCP_DOORBELL_IRQ);
+
+    return TFM_HAL_SUCCESS;
+}
+#endif /* TFM_PARTITION_SCMI_COMMS */
 
 static struct irq_t dma0_ch0_irq = {0};
 
