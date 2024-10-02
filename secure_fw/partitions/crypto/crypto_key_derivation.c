@@ -51,6 +51,11 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
 
     if (sid == TFM_CRYPTO_KEY_DERIVATION_SETUP_SID) {
         p_handle = out_vec[0].base;
+
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(*p_handle))) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
         *p_handle = iov->op_handle;
         status = tfm_crypto_operation_alloc(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
                                             out_vec[0].base,
@@ -79,6 +84,10 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     case TFM_CRYPTO_KEY_DERIVATION_GET_CAPACITY_SID:
     {
         size_t *capacity = out_vec[0].base;
+
+        if ((out_vec[0].base == NULL) || (out_vec[0].len != sizeof(*capacity))) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
 
         return psa_key_derivation_get_capacity(operation, capacity);
     }
@@ -115,11 +124,11 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     {
         psa_key_id_t *key_handle = out_vec[0].base;
         psa_key_attributes_t srv_key_attr;
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(psa_key_id_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(psa_key_id_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        if (in_vec[1].base == NULL || out_vec[0].len > sizeof(psa_key_attributes_t)) {
+        if ((in_vec[1].base == NULL) || (in_vec[1].len != (sizeof(srv_key_attr) - sizeof(mbedtls_key_owner_id_t)))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
         memcpy(&srv_key_attr, in_vec[1].base, in_vec[1].len);
@@ -134,7 +143,7 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     case TFM_CRYPTO_KEY_DERIVATION_ABORT_SID:
     {
         p_handle = out_vec[0].base;
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(iov->op_handle)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(iov->op_handle))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
         *p_handle = iov->op_handle;

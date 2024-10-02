@@ -39,7 +39,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     case TFM_CRYPTO_IMPORT_KEY_SID:
     case TFM_CRYPTO_COPY_KEY_SID:
     case TFM_CRYPTO_GENERATE_KEY_SID:
-        if (in_vec[1].base == NULL || in_vec[1].len > sizeof(psa_key_attributes_t)) {
+        if ((in_vec[1].base == NULL) || (in_vec[1].len != (sizeof(srv_key_attr) - sizeof(mbedtls_key_owner_id_t)))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
         memcpy(&srv_key_attr, in_vec[1].base, in_vec[1].len);
@@ -55,7 +55,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
         const uint8_t *data = in_vec[2].base;
         size_t data_length = in_vec[2].len;
         psa_key_id_t *key_id = out_vec[0].base;
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(psa_key_id_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(psa_key_id_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -68,7 +68,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     case TFM_CRYPTO_OPEN_KEY_SID:
     {
         psa_key_id_t *key_id = out_vec[0].base;
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(psa_key_id_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(psa_key_id_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -98,7 +98,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
          * only the client view of it, i.e. without the owner field at the
          * end of the structure
          */
-        if (out_vec[0].base == NULL || out_vec[0].len > sizeof(psa_key_attributes_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len > sizeof(psa_key_attributes_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
         memcpy(key_attributes, &srv_key_attr, out_vec[0].len);
@@ -137,7 +137,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     {
         psa_key_id_t *target_key_id = out_vec[0].base;
         tfm_crypto_library_key_id_t target_key = tfm_crypto_library_key_id_init_default();
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(psa_key_id_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(psa_key_id_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -154,7 +154,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     case TFM_CRYPTO_GENERATE_KEY_SID:
     {
         psa_key_id_t *key_handle = out_vec[0].base;
-        if (out_vec[0].base == NULL || out_vec[0].len < sizeof(psa_key_id_t)) {
+        if ((out_vec[0].base == NULL) || (out_vec[0].len < sizeof(psa_key_id_t))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
