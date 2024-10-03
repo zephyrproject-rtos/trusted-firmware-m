@@ -70,7 +70,9 @@ static psa_status_t aead_crypt(
     CC3XX_ASSERT(key_buffer != NULL);
     CC3XX_ASSERT(nonce != NULL);
     CC3XX_ASSERT(!additional_data_length ^ (additional_data != NULL));
-    CC3XX_ASSERT(input != NULL);
+    if (input_length != 0) {
+        CC3XX_ASSERT(input != NULL);
+    }
     CC3XX_ASSERT(!output_size ^ (output != NULL));
     CC3XX_ASSERT(output_length != NULL);
 
