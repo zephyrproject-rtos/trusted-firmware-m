@@ -951,7 +951,7 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
     }
 
     if (are_different) {
-        FATAL_ERR(CC3XX_ERR_INVALID_TAG);
+        NONFATAL_ERR(CC3XX_ERR_INVALID_TAG);
         return CC3XX_ERR_INVALID_TAG;
     } else {
         return CC3XX_ERR_SUCCESS;
