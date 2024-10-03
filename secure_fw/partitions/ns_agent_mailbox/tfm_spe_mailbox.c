@@ -195,7 +195,7 @@ static int local_copy_vects(const struct psa_client_params_t *params,
     }
 
     for (unsigned int i = 0; i < PSA_MAX_IOVEC; i++) {
-        if (i < params->psa_call_params.in_len) {
+        if (i < in_len) {
             vectors[idx].in_vec[i] = params->psa_call_params.in_vec[i];
         } else {
             vectors[idx].in_vec[i].base = 0;
@@ -204,7 +204,7 @@ static int local_copy_vects(const struct psa_client_params_t *params,
     }
 
     for (unsigned int i = 0; i < PSA_MAX_IOVEC; i++) {
-        if (i < params->psa_call_params.out_len) {
+        if (i < out_len) {
             vectors[idx].out_vec[i] = params->psa_call_params.out_vec[i];
         } else {
             vectors[idx].out_vec[i].base = 0;
@@ -215,7 +215,7 @@ static int local_copy_vects(const struct psa_client_params_t *params,
     *control = PARAM_SET_NS_INVEC(*control);
     *control = PARAM_SET_NS_OUTVEC(*control);
 
-    vectors[idx].out_len = params->psa_call_params.out_len;
+    vectors[idx].out_len = out_len;
     vectors[idx].original_out_vec = params->psa_call_params.out_vec;
 
     vectors[idx].in_use = true;
