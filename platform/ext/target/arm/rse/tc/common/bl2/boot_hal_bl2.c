@@ -35,6 +35,10 @@
 #include "flash_map/flash_map.h"
 #include "mhu.h"
 
+#ifdef RSE_BL2_ENABLE_IMAGE_STAGING
+#include "staged_boot.h"
+#endif /* RSE_BL2_ENABLE_IMAGE_STAGING */
+
 #ifdef FLASH_DEV_NAME
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 #endif /* FLASH_DEV_NAME */
@@ -167,6 +171,21 @@ int32_t boot_platform_post_init(void)
         return result;
     }
 #endif /* RSE_USE_SDS_LIB */
+
+#ifdef RSE_USE_SDS_LIB
+    result = clear_ap_sds_region();
+    if (result) {
+        return result;
+    }
+#endif /* RSE_USE_SDS_LIB */
+
+#ifdef RSE_BL2_ENABLE_IMAGE_STAGING
+    result = run_staged_boot();
+    if (result) {
+        BOOT_LOG_ERR("Staged boot init failed: %d", result);
+        return result;
+    }
+#endif /* RSE_BL2_ENABLE_IMAGE_STAGING */
 
     return 0;
 }

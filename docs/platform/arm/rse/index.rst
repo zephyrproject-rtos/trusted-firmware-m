@@ -16,6 +16,7 @@ Previously known as Runtime Security Subsystem (RSS).
     RSE ROM releases <rom_releases/index.rst>
     RSE Platforms <platforms/index.rst>
     RSE ROM unit test guidelines <rse_unit_tests_guidelines.rst>
+    RSE staged boot <rse_staged_boot.rst>
 
 RSE also includes the following extra partitions:
 

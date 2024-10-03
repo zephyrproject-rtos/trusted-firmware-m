@@ -20,7 +20,23 @@
 #include "platform_regs.h"
 #endif /* RSE_GPT_SUPPORT */
 
+#ifdef RSE_BL2_ENABLE_IMAGE_STAGING
+#include "staging_config.h"
+#endif /* RSE_BL2_ENABLE_IMAGE_STAGING */
 #include <string.h>
+
+/* Flash device names must be specified by target */
+#ifdef RSE_BL2_ENABLE_IMAGE_STAGING
+extern ARM_DRIVER_FLASH ram_driver;
+#define IMAGE_INPUT_FLASH_DRIVER ram_driver
+#define IMAGE_INPUT_FLASH_BASE_ADDRESS 0
+#define IMAGE_INPUT_BASE_PHYSICAL STAGING_AREA_FIP_A_BASE_S_PHYSICAL
+#else
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+#define IMAGE_INPUT_FLASH_DRIVER FLASH_DEV_NAME
+#define IMAGE_INPUT_FLASH_BASE_ADDRESS FLASH_BASE_ADDRESS
+#define IMAGE_INPUT_BASE_PHYSICAL HOST_FLASH0_BASE
+#endif /* RSE_BL2_ENABLE_IMAGE_STAGING */
 
 #define RSE_ATU_REGION_TEMP_SLOT           2
 #define RSE_ATU_REGION_INPUT_IMAGE_SLOT_0  3
@@ -28,8 +44,6 @@
 #define RSE_ATU_REGION_OUTPUT_IMAGE_SLOT   5
 #define RSE_ATU_REGION_OUTPUT_HEADER_SLOT  6
 
-/* Flash device names must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 #ifdef RSE_GPT_SUPPORT
 //TODO: Update required to persist over reset. Check if private metadata is needed.
@@ -65,8 +79,8 @@ static enum tfm_plat_err_t setup_aligned_atu_slot(uint64_t physical_address, uin
      * within the host flash, the parameters must not overflow, and we cannot
      * map further than the bounds of the logical address slot.
      */
-    if (aligned_physical_address < HOST_FLASH0_BASE
-        || aligned_physical_address + *atu_slot_size > HOST_FLASH0_BASE + HOST_FLASH0_SIZE
+    if (aligned_physical_address < IMAGE_INPUT_BASE_PHYSICAL
+        || aligned_physical_address + *atu_slot_size > IMAGE_INPUT_BASE_PHYSICAL + HOST_FLASH0_SIZE
         || aligned_physical_address + *atu_slot_size < aligned_physical_address
         || aligned_physical_address + *atu_slot_size < *atu_slot_size
         || *atu_slot_size > HOST_IMAGE_MAX_SIZE
@@ -94,7 +108,7 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
     enum atu_error_t atu_err;
     uint64_t region_offset;
     size_t region_size;
-    uint64_t physical_address = HOST_FLASH0_BASE + fip_offset;
+    uint64_t physical_address = IMAGE_INPUT_BASE_PHYSICAL + fip_offset;
     uint32_t alignment_offset;
     size_t atu_slot_size;
     size_t page_size = get_page_size(&ATU_DEV_S);
@@ -110,8 +124,8 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
         return plat_err;
     }
 
-    plat_err = fip_get_entry_by_uuid(&FLASH_DEV_NAME,
-                HOST_FLASH0_TEMP_BASE_S - FLASH_BASE_ADDRESS + alignment_offset,
+    plat_err = fip_get_entry_by_uuid(&IMAGE_INPUT_FLASH_DRIVER,
+                HOST_FLASH0_TEMP_BASE_S - IMAGE_INPUT_FLASH_BASE_ADDRESS + alignment_offset,
                 atu_slot_size - alignment_offset,
                 image_uuid, &region_offset, &region_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -151,7 +165,7 @@ static int host_flash_atu_get_gpt_header(gpt_header_t *header)
     uint32_t alignment_offset;
     size_t atu_slot_size;
 
-    physical_address = HOST_FLASH0_BASE + FLASH_LBA_SIZE;
+    physical_address = IMAGE_INPUT_BASE_PHYSICAL + FLASH_LBA_SIZE;
     plat_err = setup_aligned_atu_slot(physical_address, FLASH_LBA_SIZE,
                                       page_size, RSE_ATU_REGION_TEMP_SLOT,
                                       HOST_FLASH0_TEMP_BASE_S, &alignment_offset,
@@ -195,7 +209,7 @@ int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
         return rc;
     }
 
-    physical_address = HOST_FLASH0_BASE
+    physical_address = IMAGE_INPUT_BASE_PHYSICAL
                        + header.list_lba * FLASH_LBA_SIZE;
     plat_err = setup_aligned_atu_slot(physical_address,
                                       header.list_entry_size * header.list_num, page_size,

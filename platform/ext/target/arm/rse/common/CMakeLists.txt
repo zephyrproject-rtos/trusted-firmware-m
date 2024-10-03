@@ -288,6 +288,8 @@ target_sources(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
         ./rse_attack_tracking_counter.c
+        $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/staged_boot.c>
+        $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash_memcpy.c>
 )
 
 target_include_directories(platform_bl2
@@ -339,6 +341,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${PLATFORM_HOST_HAS_MCP}>:PLATFORM_HOST_HAS_MCP>
         $<$<BOOL:${PLATFORM_HOST_HAS_SCP}>:PLATFORM_HOST_HAS_SCP>
         $<$<BOOL:${RSE_USE_SDS_LIB}>:RSE_USE_SDS_LIB>
+        $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:RSE_BL2_ENABLE_IMAGE_STAGING>
 )
 
 target_compile_options(platform_bl2

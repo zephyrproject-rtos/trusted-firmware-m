@@ -64,4 +64,7 @@
  * currently being used elsewhere in RSE */
 #define TEMPORARY_ATU_MAPPING_REGION_ID (10)
 
+#define RSE_ATU_AP_BASE             (0x00000000000000UL)
+#define HOST_STAGING_MEM_BASE       (RSE_ATU_AP_BASE + 0x80000000UL)
+
 #endif /* __HOST_BASE_ADDRESS_COMMON_H__ */
