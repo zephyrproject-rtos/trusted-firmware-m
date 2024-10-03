@@ -50,7 +50,7 @@ void CMU_MHU4_Receiver_Handler(void)
 
     for (ch = 0; ch < MHU_SCP_RSE_CHANNEL_COUNT; ch++) {
         /* Read the doorbell channel value */
-        status = mhu_v3_x_doorbell_read(&MHU_V3_SCP_TO_RSE_DEV, ch, &value);
+        status = mhu_v3_x_doorbell_read(&MHU_SCP_TO_RSE_DEV, ch, &value);
         if (status != MHU_V_3_X_ERR_NONE) {
             break;
         }
@@ -75,7 +75,7 @@ void CMU_MHU4_Receiver_Handler(void)
     }
 
     /* Clear the pending interrupt */
-    mhu_v3_x_doorbell_clear(&MHU_V3_SCP_TO_RSE_DEV, ch, mask);
+    mhu_v3_x_doorbell_clear(&MHU_SCP_TO_RSE_DEV, ch, mask);
 }
 
 int32_t interrupts_bl2_init(void) {

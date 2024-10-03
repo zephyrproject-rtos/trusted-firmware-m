@@ -26,39 +26,6 @@
 
 #include <stddef.h>
 
-/* Message Handling Units (MHU) */
-#ifdef MHU_V3_AP_MONITOR_TO_RSE
-struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV = {
-    .base = MHU0_RECEIVER_BASE_S,
-    .frame = MHU_V3_X_MBX_FRAME,
-    .subversion = 0
-};
-#endif
-
-#ifdef MHU_V3_RSE_TO_AP_MONITOR
-struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV = {
-    .base = MHU0_SENDER_BASE_S,
-    .frame = MHU_V3_X_PBX_FRAME,
-    .subversion = 0
-};
-#endif
-
-#ifdef MHU_V3_SCP_TO_RSE
-struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV = {
-    .base = MHU4_RECEIVER_BASE_S,
-    .frame = MHU_V3_X_MBX_FRAME,
-    .subversion = 0
-};
-#endif
-
-#ifdef MHU_V3_RSE_TO_SCP
-struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV = {
-    .base = MHU4_SENDER_BASE_S,
-    .frame = MHU_V3_X_PBX_FRAME,
-    .subversion = 0
-};
-#endif
-
 #ifdef RD_SYSCTRL_NI_TOWER
 /* System Control NI-Tower device */
 struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {

@@ -26,7 +26,15 @@
 #define __HOST_DEVICE_CFG_H__
 
 /* MHU */
-#define MHU_AP_S_TO_RSE
-#define MHU_RSE_TO_AP_S
+#define MHU0_S
+#define MHU2_S
+#define MHU4_S
+
+#define MHU_RSE_TO_AP_MONITOR_DEV MHU0_SENDER_DEV_S
+#define MHU_AP_MONITOR_TO_RSE_DEV MHU0_RECEIVER_DEV_S
+#define MHU_RSE_TO_AP_S_DEV       MHU2_SENDER_DEV_S
+#define MHU_AP_S_TO_RSE_DEV       MHU2_RECEIVER_DEV_S
+#define MHU_RSE_TO_SCP_DEV        MHU4_SENDER_DEV_S
+#define MHU_SCP_TO_RSE_DEV        MHU4_RECEIVER_DEV_S
 
 #endif /* __HOST_DEVICE_CFG_H__ */

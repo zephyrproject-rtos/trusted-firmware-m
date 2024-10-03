@@ -8,7 +8,6 @@
 set(RSE_XIP                     ON  CACHE BOOL  "Whether to run runtime firmware XIP via the SIC")
 
 set(PLAT_MHU_VERSION                    3          CACHE STRING  "Supported MHU version by platform")
-set(RSE_MHU_SCP_DEVICE                  5          CACHE STRING  "MHU channel index to use for communications with the SCP")
 
 set(RSE_USE_HOST_UART                   OFF        CACHE BOOL     "Whether RSE should setup to use the UART from the host system")
 set(RSE_USE_LOCAL_UART                  ON         CACHE BOOL     "Whether RSE should setup to use the UART local to the RSE subsystem")

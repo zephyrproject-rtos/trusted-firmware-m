@@ -54,7 +54,6 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
         $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
         $<$<BOOL:${PLAT_MHU_VERSION}>:PLAT_MHU_VERSION=${PLAT_MHU_VERSION}>
-        $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
         TFM_UNIQUE_ERROR_CODES=1
 )
 

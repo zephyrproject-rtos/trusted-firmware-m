@@ -261,6 +261,85 @@ extern pl061_regblk_t *const GPIO0_DEV_NS;
 extern pl061_regblk_t *const GPIO1_DEV_NS;
 #endif
 
+/* Legacy MHUv2 support for TC2 */
+#if PLAT_MHU_VERSION == 2
+
+#ifdef MHU0_S
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU0_SENDER_DEV_S;
+extern struct mhu_v2_x_dev_t MHU0_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU1_S
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU1_SENDER_DEV_S;
+extern struct mhu_v2_x_dev_t MHU1_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU2_S
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU2_SENDER_DEV_S;
+extern struct mhu_v2_x_dev_t MHU2_RECEIVER_DEV_S;
+#endif
+
+#else /* PLAT_MHU_VERSION == 2 */
+
+#ifdef MHU0_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU0_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU0_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU1_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU1_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU1_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU2_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU2_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU2_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU3_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU3_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU3_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU4_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU4_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU4_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU5_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU5_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU5_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU6_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU6_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU6_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU7_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU7_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU7_RECEIVER_DEV_S;
+#endif
+
+#ifdef MHU8_S
+#include "mhu_v3_x.h"
+extern struct mhu_v3_x_dev_t MHU8_SENDER_DEV_S;
+extern struct mhu_v3_x_dev_t MHU8_RECEIVER_DEV_S;
+#endif
+
+#endif /* PLAT_MHU_VERSION == 2 */
+
 #ifdef __cplusplus
 }
 #endif

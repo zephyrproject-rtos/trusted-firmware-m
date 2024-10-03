@@ -33,6 +33,7 @@ target_sources(platform_s
 
 target_include_directories(platform_s
     PUBLIC
+        device
         ${TC_COMMON_SOURCE_DIR}/cmsis_drivers
         ${TC_COMMON_SOURCE_DIR}/device
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
@@ -58,6 +59,7 @@ target_sources(platform_bl2
 
 target_include_directories(platform_bl2
     PUBLIC
+        device
         ${TC_COMMON_SOURCE_DIR}/cmsis_drivers
         ${TC_COMMON_SOURCE_DIR}/device
         ${TC_COMMON_SOURCE_DIR}/bl2
@@ -83,6 +85,7 @@ target_sources(platform_bl1_1
 
 target_include_directories(platform_bl1_1_interface
     INTERFACE
+        device
         ${TC_COMMON_SOURCE_DIR}/cmsis_drivers
         ${TC_COMMON_SOURCE_DIR}/device
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
@@ -93,6 +96,7 @@ target_include_directories(platform_bl1_1_interface
 
 target_include_directories(platform_bl1_2
     PUBLIC
+        device
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
@@ -115,6 +119,10 @@ install(DIRECTORY   ${TC_COMMON_SOURCE_DIR}/cmsis_drivers
 )
 
 install(DIRECTORY   ${TC_COMMON_SOURCE_DIR}/device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   device
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 

@@ -45,7 +45,6 @@ target_compile_definitions(platform_region_defs
         RSE_TP_MODE=LCM_TP_MODE_${RSE_TP_MODE}
         LCM_DCU_PARITY
         $<$<BOOL:${PLAT_MHU_VERSION}>:PLAT_MHU_VERSION=${PLAT_MHU_VERSION}>
-        $<$<BOOL:${RSE_MHU_SCP_DEVICE}>:RSE_MHU_SCP_DEVICE=${RSE_MHU_SCP_DEVICE}>
         $<$<BOOL:${RSE_BL1_TEST_BINARY}>:RSE_BL1_TEST_BINARY>
         $<$<BOOL:${RSE_TEST_BINARY_IN_ROM}>:RSE_TEST_BINARY_IN_ROM>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>

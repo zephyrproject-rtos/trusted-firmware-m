@@ -55,41 +55,7 @@ extern struct uart_pl011_dev_t UART0_LOCAL_PL011_DEV_NS;
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
 #endif
 
-#if PLAT_MHU_VERSION == 2
-#include "mhu_v2_x.h"
-#define MHU_STRUCT_TYPE struct mhu_v2_x_dev_t
-#elif PLAT_MHU_VERSION == 3
-#include "mhu_v3_x.h"
 #define MHU_PBX_DBCH_FLAG_SCP_COMMS     UINT32_C(0x1)
-#define MHU_STRUCT_TYPE struct mhu_v3_x_dev_t
-#else
-#error Invalid MHU version
-#endif /* PLAT_MHU_VERSION == 2 */
-
-/* Message Handling Units (MHU) */
-#ifdef MHU_AP_MONITOR_TO_RSE
-extern MHU_STRUCT_TYPE MHU_AP_MONITOR_TO_RSE_DEV;
-#endif
-
-#ifdef MHU_RSE_TO_AP_MONITOR
-extern MHU_STRUCT_TYPE MHU_RSE_TO_AP_MONITOR_DEV;
-#endif
-
-#ifdef MHU_AP_NS_TO_RSE
-extern MHU_STRUCT_TYPE MHU_AP_NS_TO_RSE_DEV;
-#endif
-
-#ifdef MHU_RSE_TO_AP_NS
-extern MHU_STRUCT_TYPE MHU_RSE_TO_AP_NS_DEV;
-#endif
-
-#ifdef MHU_SCP_TO_RSE
-extern MHU_STRUCT_TYPE MHU_SCP_TO_RSE_DEV;
-#endif
-
-#ifdef MHU_RSE_TO_SCP
-extern MHU_STRUCT_TYPE MHU_RSE_TO_SCP_DEV;
-#endif
 
 #ifdef __cplusplus
 }

@@ -255,7 +255,7 @@ static int boot_platform_finish(void)
      * complete and that the SCP can release the LCPs and turn on the
      * primary AP core.
      */
-    mhu_error = mhu_v3_x_doorbell_write(&MHU_V3_RSE_TO_SCP_DEV,
+    mhu_error = mhu_v3_x_doorbell_write(&MHU_RSE_TO_SCP_DEV,
                                         MHU_SCP_READY_SIGNAL_CHANNEL,
                                         MHU_SCP_READY_SIGNAL_PAYLOAD);
 
@@ -315,7 +315,7 @@ static int initialize_rse_scp_mhu(void)
     /* Setup RSE to SCP MHU Sender */
 
     /* Initialize the RSE to SCP Sender MHU */
-    mhuv3_err = mhu_v3_x_driver_init(&MHU_V3_RSE_TO_SCP_DEV);
+    mhuv3_err = mhu_v3_x_driver_init(&MHU_RSE_TO_SCP_DEV);
     if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
         BOOT_LOG_ERR("BL2: RSE to SCP MHU driver init failed: %d", mhuv3_err);
         return 1;
@@ -323,7 +323,7 @@ static int initialize_rse_scp_mhu(void)
 
     /* Get number of channels for sender */
     mhuv3_err = mhu_v3_x_get_num_channel_implemented(
-                &MHU_V3_RSE_TO_SCP_DEV, MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
+                &MHU_RSE_TO_SCP_DEV, MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
     if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
         BOOT_LOG_ERR("BL2: RSE to SCP MHU get channels failed: %d", mhuv3_err);
         return 1;
@@ -332,7 +332,7 @@ static int initialize_rse_scp_mhu(void)
     /* Disable interrupts for sender */
     for (ch = 0; ch < num_ch; ++ch) {
         mhuv3_err = mhu_v3_x_channel_interrupt_disable(
-                    &MHU_V3_RSE_TO_SCP_DEV, ch, MHU_V3_X_CHANNEL_TYPE_DBCH);
+                    &MHU_RSE_TO_SCP_DEV, ch, MHU_V3_X_CHANNEL_TYPE_DBCH);
         if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
             BOOT_LOG_ERR("BL2: RSE to SCP MHU interrupt disable failed: %d",
                          mhuv3_err);
@@ -343,14 +343,14 @@ static int initialize_rse_scp_mhu(void)
     /* Setup SCP to RSE MHU Receiver */
 
     /* Initialize the SCP to RSE Receiver MHU */
-    mhuv3_err = mhu_v3_x_driver_init(&MHU_V3_SCP_TO_RSE_DEV);
+    mhuv3_err = mhu_v3_x_driver_init(&MHU_SCP_TO_RSE_DEV);
     if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
         BOOT_LOG_ERR("BL2: SCP to RSE MHU driver init failed: %d", mhuv3_err);
         return 1;
     }
 
     /* Get number of channels of receiver */
-    mhuv3_err = mhu_v3_x_get_num_channel_implemented(&MHU_V3_SCP_TO_RSE_DEV,
+    mhuv3_err = mhu_v3_x_get_num_channel_implemented(&MHU_SCP_TO_RSE_DEV,
             MHU_V3_X_CHANNEL_TYPE_DBCH, &num_ch);
     if (mhuv3_err != MHU_V_3_X_ERR_NONE){
         BOOT_LOG_ERR("BL2: SCP to RSE MHU get channels failed: %d", mhuv3_err);
@@ -363,14 +363,14 @@ static int initialize_rse_scp_mhu(void)
      * channel.
      */
     for (ch = 0; ch < num_ch; ch++) {
-        mhuv3_err = mhu_v3_x_channel_interrupt_enable(&MHU_V3_SCP_TO_RSE_DEV, ch,
+        mhuv3_err = mhu_v3_x_channel_interrupt_enable(&MHU_SCP_TO_RSE_DEV, ch,
                                                 MHU_V3_X_CHANNEL_TYPE_DBCH);
         if (mhuv3_err != MHU_V_3_X_ERR_NONE) {
             BOOT_LOG_ERR("BL2: RSE to SCP MHU interrupt enable failed: %d",
                          mhuv3_err);
             return 1;
         }
-        mhuv3_err = mhu_v3_x_doorbell_mask_clear(&MHU_V3_SCP_TO_RSE_DEV, ch,
+        mhuv3_err = mhu_v3_x_doorbell_mask_clear(&MHU_SCP_TO_RSE_DEV, ch,
                                                  UINT32_MAX);
         if (mhuv3_err != MHU_V_3_X_ERR_NONE){
             BOOT_LOG_ERR("BL2: RSE to SCP MHU mask clear failed: %d",

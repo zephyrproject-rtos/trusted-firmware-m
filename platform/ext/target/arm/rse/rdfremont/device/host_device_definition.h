@@ -29,27 +29,6 @@
 extern "C" {
 #endif
 
-/* Message Handling Units (MHU) */
-#ifdef MHU_V3_AP_MONITOR_TO_RSE
-#include "mhu_v3_x.h"
-extern struct mhu_v3_x_dev_t MHU_AP_MONITOR_TO_RSE_DEV;
-#endif
-
-#ifdef MHU_V3_RSE_TO_AP_MONITOR
-#include "mhu_v3_x.h"
-extern struct mhu_v3_x_dev_t MHU_RSE_TO_AP_MONITOR_DEV;
-#endif
-
-#ifdef MHU_V3_SCP_TO_RSE
-#include "mhu_v3_x.h"
-extern struct mhu_v3_x_dev_t MHU_V3_SCP_TO_RSE_DEV;
-#endif
-
-#ifdef MHU_V3_RSE_TO_SCP
-#include "mhu_v3_x.h"
-extern struct mhu_v3_x_dev_t MHU_V3_RSE_TO_SCP_DEV;
-#endif
-
 #ifdef RD_SYSCTRL_NI_TOWER
 #include "ni_tower_lib.h"
 extern struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;

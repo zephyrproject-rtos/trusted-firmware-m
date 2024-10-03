@@ -125,8 +125,6 @@ set(TFM_MULTI_CORE_TOPOLOGY             ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
 
-set(RSE_MHU_SCP_DEVICE                  2          CACHE STRING  "MHU device index to use for communications with the SCP")
-
 set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEes in the system")
 
 set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
