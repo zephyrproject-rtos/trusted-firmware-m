@@ -156,7 +156,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
             (const uint32_t *)key_buffer,
             sizeof(key_buffer_local) / sizeof(uint32_t));
 #else
-        memcpy(key_buffer_local, key_buffer, key_buffer_local);
+        memcpy(key_buffer_local, key_buffer, sizeof(key_buffer_local));
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
         err = cc3xx_lowlevel_ecdsa_getpub(
