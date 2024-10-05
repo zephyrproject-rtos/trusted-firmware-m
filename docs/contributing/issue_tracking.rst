@@ -12,7 +12,7 @@ active Long-Term Support (LTS) branches and will be included in the upcoming
 LTS release.
 
 .. warning:: Security-related issues should be addressed through the
-    :doc:`Secruity Disclosure </security/index>` and recorded in the `Issue tracker`_
+    :doc:`Security Disclosure </security/index>` and recorded in the `Issue tracker`_
     **only** after public disclosure.
 
 When reporting a new issue please cover:
