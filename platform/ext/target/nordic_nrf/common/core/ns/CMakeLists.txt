@@ -17,7 +17,7 @@ target_compile_definitions(platform_region_defs
 )
 
 # Startup sources should be put in the executable
-target_sources(tfm_ns
+target_sources(${NS_TARGET_NAME}
     PRIVATE
         startup.c
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>

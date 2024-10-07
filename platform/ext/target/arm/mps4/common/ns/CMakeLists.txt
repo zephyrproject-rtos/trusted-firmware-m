@@ -24,7 +24,7 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
-target_sources(tfm_ns
+target_sources(${NS_TARGET_NAME}
     PRIVATE
         device/source/startup_mps4_corstone3xx.c
         device/source/system_core_init.c

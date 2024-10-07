@@ -66,21 +66,21 @@ target_include_directories(platform_region_defs
 if (RSE_XIP)
     find_package(Python3)
 
-    add_custom_target(tfm_ns_sic_tables
+    add_custom_target(${NS_TARGET_NAME}_sic_tables
         ALL
-        SOURCES bin/tfm_ns_sic_tables.bin
+        SOURCES bin/${NS_TARGET_NAME}_sic_tables.bin
     )
 
-    add_custom_command(OUTPUT bin/tfm_ns_sic_tables.bin
-        DEPENDS $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-        DEPENDS tfm_ns_bin
+    add_custom_command(OUTPUT bin/${NS_TARGET_NAME}_sic_tables.bin
+        DEPENDS $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
+        DEPENDS ${NS_TARGET_NAME}_bin
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../image_signing/scripts/create_xip_tables.py
-            --input_image $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-            --table_output_file tfm_ns_sic_tables.bin
-            --encrypted_image_output_file tfm_ns_encrypted.bin
+            --input_image $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
+            --table_output_file ${NS_TARGET_NAME}_sic_tables.bin
+            --encrypted_image_output_file ${NS_TARGET_NAME}_encrypted.bin
             --image_version ${MCUBOOT_SECURITY_COUNTER_NS}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_sic_tables.bin ${CMAKE_BINARY_DIR}/bin
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_encrypted.bin ${CMAKE_BINARY_DIR}/bin
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${NS_TARGET_NAME}_sic_tables.bin ${CMAKE_BINARY_DIR}/bin
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${NS_TARGET_NAME}_encrypted.bin ${CMAKE_BINARY_DIR}/bin
     )
 
     add_library(signing_layout_ns OBJECT ../image_signing/layout_files/signing_layout_sic_tables_ns.c)
@@ -102,12 +102,12 @@ if (RSE_XIP)
             platform_region_defs
     )
 
-    add_custom_target(tfm_ns_sic_tables_signed_bin
-        SOURCES bin/tfm_ns_sic_tables_signed.bin
+    add_custom_target(${NS_TARGET_NAME}_sic_tables_signed_bin
+        SOURCES bin/${NS_TARGET_NAME}_sic_tables_signed.bin
     )
-    add_custom_command(OUTPUT bin/tfm_ns_sic_tables_signed.bin
-        DEPENDS tfm_ns_sic_tables
-        DEPENDS tfm_ns_bin signing_layout_ns
+    add_custom_command(OUTPUT bin/${NS_TARGET_NAME}_sic_tables_signed.bin
+        DEPENDS ${NS_TARGET_NAME}_sic_tables
+        DEPENDS ${NS_TARGET_NAME}_bin signing_layout_ns
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../image_signing/scripts
 
         #Sign non-secure binary image with provided secret key
@@ -126,17 +126,17 @@ if (RSE_XIP)
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/../image_signing/keys/image_enc_key.pem>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-            ${CMAKE_BINARY_DIR}/bin/tfm_ns_sic_tables.bin
+            ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_sic_tables.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-            ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_sic_tables_signed.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/${NS_TARGET_NAME}_sic_tables_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_sic_tables_signed.bin ${CMAKE_BINARY_DIR}/bin
+        ${CMAKE_CURRENT_BINARY_DIR}/${NS_TARGET_NAME}_sic_tables_signed.bin ${CMAKE_BINARY_DIR}/bin
     )
 
     add_custom_target(signed_images
         ALL
-        DEPENDS bin/tfm_ns_sic_tables_signed.bin
+        DEPENDS bin/${NS_TARGET_NAME}_sic_tables_signed.bin
     )
 endif()

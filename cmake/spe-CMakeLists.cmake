@@ -20,6 +20,11 @@ target_link_libraries(tfm_config INTERFACE psa_interface)
 # exported by TF-M build.
 set(INTERFACE_SRC_DIR    ${CMAKE_CURRENT_LIST_DIR}/interface/src)
 set(INTERFACE_INC_DIR    ${CMAKE_CURRENT_LIST_DIR}/interface/include)
+if (DEFINED NS_TARGET_NAME)
+    message(STATUS "Using NS_TARGET_NAME: ${NS_TARGET_NAME}")
+else()
+    set(NS_TARGET_NAME "tfm_ns")
+endif()
 
 add_library(tfm_api_ns STATIC)
 
@@ -140,16 +145,16 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
-            $<TARGET_FILE_DIR:tfm_ns>/${S_NS_SIGNED_TARGET_NAME}.bin
+            $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${S_NS_SIGNED_TARGET_NAME}.bin
     )
 
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 
-        add_custom_target(tfm_ns_signed_bin
-            SOURCES ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
+        add_custom_target(${NS_TARGET_NAME}_signed_bin
+            SOURCES ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_signed.bin
         )
-        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
-            DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
+        add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_signed.bin
+            DEPENDS ${NS_TARGET_NAME}_bin $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
             DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_ns.o
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
@@ -171,8 +176,8 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
                 $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
                 $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${CMAKE_CURRENT_SOURCE_DIR}/image_signing/keys/image_enc_key.pem>
                 $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-                $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-                ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
+                $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
+                ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_signed.bin
         )
 
         # Create concatenated binary image from the two independently signed
@@ -181,14 +186,14 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
         # support
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
-            DEPENDS tfm_ns_signed_bin ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
+            DEPENDS ${NS_TARGET_NAME}_signed_bin ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_signed.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
                 --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
-                --non_secure ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
+                --non_secure ${CMAKE_BINARY_DIR}/bin/${NS_TARGET_NAME}_signed.bin
                 --output ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
         )
     else()
@@ -197,7 +202,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
         )
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
-            DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
+            DEPENDS ${NS_TARGET_NAME}_bin $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
@@ -205,7 +210,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
                 --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
-                --non_secure $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
+                --non_secure $<TARGET_FILE_DIR:${NS_TARGET_NAME}>/${NS_TARGET_NAME}.bin
                 --output ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
         )
 

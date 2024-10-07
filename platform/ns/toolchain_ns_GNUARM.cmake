@@ -203,7 +203,6 @@ add_link_options(
     LINKER:--gc-sections
     LINKER:--no-wchar-size-warning
     LINKER:--print-memory-usage
-    LINKER:-Map=tfm_ns.map
 )
 
 # Specify the linker script used to link `target`.
