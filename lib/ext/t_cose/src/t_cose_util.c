@@ -1,7 +1,7 @@
 /*
  *  t_cose_util.c
  *
- * Copyright 2019, Laurence Lundblade
+ * Copyright 2019-2023, Laurence Lundblade
  * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -287,3 +287,22 @@ struct q_useful_buf_c get_short_circuit_kid(void)
     return short_circuit_kid;
 }
 #endif
+
+
+/*
+ * Public function. See t_cose_util.h
+ */
+enum t_cose_err_t
+qcbor_encode_error_to_t_cose_error(QCBOREncodeContext *cbor_encoder)
+{
+    switch(QCBOREncode_GetErrorState(cbor_encoder)) {
+        case QCBOR_ERR_BUFFER_TOO_SMALL:
+            return T_COSE_ERR_TOO_SMALL;
+
+        case QCBOR_SUCCESS:
+            return T_COSE_SUCCESS;
+
+        default:
+            return T_COSE_ERR_CBOR_FORMATTING;
+    }
+}

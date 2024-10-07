@@ -1,7 +1,7 @@
 /*
  *  t_cose_util.h
  *
- * Copyright 2019, Laurence Lundblade
+ * Copyright 2019-2023, Laurence Lundblade
  * Copyright (c) 2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -14,6 +14,7 @@
 #define __T_COSE_UTIL_H__
 
 #include <stdint.h>
+#include "qcbor/qcbor.h"
 #include "q_useful_buf.h"
 #include "t_cose_common.h"
 
@@ -228,6 +229,9 @@ enum t_cose_err_t create_tbs_hash(int32_t                     cose_algorithm_id,
  */
 struct q_useful_buf_c get_short_circuit_kid(void);
 #endif
+
+enum t_cose_err_t
+qcbor_encode_error_to_t_cose_error(QCBOREncodeContext *cbor_encoder);
 
 #ifdef __cplusplus
 }

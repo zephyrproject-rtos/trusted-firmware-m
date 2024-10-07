@@ -1,7 +1,7 @@
 /*
  * t_cose_psa_crypto.c
  *
- * Copyright 2019, Laurence Lundblade
+ * Copyright 2019-2023, Laurence Lundblade
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -411,6 +411,191 @@ t_cose_crypto_hash_finish(struct t_cose_crypto_hash *hash_ctx,
 Done:
     return psa_status_to_t_cose_error_hash(hash_ctx->status);
 }
+
+
+/*
+ * See documentation in t_cose_crypto.h
+ */
+enum t_cose_err_t
+t_cose_crypto_import_ec2_pubkey(int32_t               cose_ec_curve_id,
+                                struct q_useful_buf_c x_coord,
+                                struct q_useful_buf_c y_coord,
+                                bool                  y_bool,
+                                struct t_cose_key    *key_handle)
+{
+    psa_status_t          status;
+    psa_key_attributes_t  attributes;
+    psa_key_type_t        type_public;
+    psa_algorithm_t       alg;
+    struct q_useful_buf_c  import;
+    // TODO: really make sure this size is right for the curve types supported
+    UsefulOutBuf_MakeOnStack (import_form, T_COSE_EXPORT_PUBLIC_KEY_MAX_SIZE + 5);
+
+    switch (cose_ec_curve_id) {
+    case COSE_ELLIPTIC_CURVE_P_256:
+         type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+         break;
+    case COSE_ELLIPTIC_CURVE_P_384:
+         type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+         break;
+    case COSE_ELLIPTIC_CURVE_P_521:
+         type_public  = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+         alg = PSA_ALG_ECDSA(PSA_ALG_SHA_512);
+         break;
+
+    default:
+         return T_COSE_ERR_UNSUPPORTED_SIGNING_ALG;
+    }
+
+    // TODO: These attributes only suites to ECDSA(...) operations
+    attributes = psa_key_attributes_init();
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_VERIFY_HASH);
+    psa_set_key_algorithm(&attributes, alg);
+    psa_set_key_type(&attributes, type_public);
+
+    /* This converts to a serialized representation of an EC Point
+     * described in
+     * Certicom Research, "SEC 1: Elliptic Curve Cryptography", Standards for
+     * Efficient Cryptography, May 2009, <https://www.secg.org/sec1-v2.pdf>.
+     * The description is very mathematical and hard to read for us
+     * coder types. It was much easier to understand reading Jim's
+     * COSE-C implementation. See mbedtls_ecp_keypair() in COSE-C.
+     *
+     * This string is the format used by Mbed TLS to import an EC
+     * public key.
+     *
+     * This does implement point compression. The patents for it have
+     * run out so it's OK to implement. Point compression is commented
+     * out in Jim's implementation, presumably because of the paten
+     * issue.
+     *
+     * A simple English description of the format is this. The first
+     * byte is 0x04 for no point compression and 0x02 or 0x03 if there
+     * is point compression. 0x02 indicates a positive y and 0x03 a
+     * negative y (or is the other way). Following the first byte
+     * are the octets of x. If the first byte is 0x04 then following
+     * x is the y value.
+     *
+     * UsefulOutBut is used to safely construct this string.
+     */
+    uint8_t first_byte;
+    if(q_useful_buf_c_is_null(y_coord)) {
+        /* This is point compression */
+        first_byte = y_bool ? 0x03 : 0x02;
+    } else {
+        first_byte = 0x04;
+    }
+
+    // TODO: is padding of x necessary? Jim's code goes to
+    // a lot of trouble to look up the group and get the length.
+
+    UsefulOutBuf_AppendByte(&import_form, first_byte);
+    UsefulOutBuf_AppendUsefulBuf(&import_form, x_coord);
+    if(first_byte == 0x04) {
+        UsefulOutBuf_AppendUsefulBuf(&import_form, y_coord);
+    }
+    import = UsefulOutBuf_OutUBuf(&import_form);
+
+
+    status = psa_import_key(&attributes,
+                            import.ptr, import.len,
+                            (psa_key_handle_t *)(&key_handle->k.key_handle));
+
+    if (status != PSA_SUCCESS) {
+        return T_COSE_ERR_FAIL;
+    }
+
+    return T_COSE_SUCCESS;
+}
+
+
+enum t_cose_err_t
+t_cose_crypto_export_ec2_key(struct t_cose_key      key_handle,
+                             int32_t               *curve,
+                             struct q_useful_buf    x_coord_buf,
+                             struct q_useful_buf_c *x_coord,
+                             struct q_useful_buf    y_coord_buf,
+                             struct q_useful_buf_c *y_coord,
+                             bool                  *y_bool)
+{
+    psa_status_t          psa_status;
+    uint8_t               export_buf[T_COSE_EXPORT_PUBLIC_KEY_MAX_SIZE];
+    size_t                export_len;
+    struct q_useful_buf_c export;
+    size_t                len;
+    uint8_t               first_byte;
+    psa_key_attributes_t  attributes;
+
+    /* Export public key */
+    psa_status = psa_export_public_key((psa_key_handle_t)key_handle.k.key_handle, /* in: Key handle     */
+                                        export_buf,     /* in: PK buffer      */
+                                        sizeof(export_buf),     /* in: PK buffer size */
+                                       &export_len);           /* out: Result length */
+    if(psa_status != PSA_SUCCESS) {
+        return T_COSE_ERR_FAIL; // TODO: error code
+    }
+    first_byte = export_buf[0];
+    export = (struct q_useful_buf_c){export_buf+1, export_len-1};
+
+    /* export_buf is one first byte, the x-coord and maybe the y-coord
+     * per SEC1.
+     */
+
+    attributes = psa_key_attributes_init();
+    psa_status = psa_get_key_attributes((psa_key_handle_t)key_handle.k.key_handle,
+                                        &attributes);
+    if(PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attributes)) != PSA_ECC_FAMILY_SECP_R1) {
+        return T_COSE_ERR_FAIL;
+    }
+
+    switch(psa_get_key_bits(&attributes)) {
+    case 256:
+        *curve = COSE_ELLIPTIC_CURVE_P_256;
+        break;
+    case 384:
+        *curve = COSE_ELLIPTIC_CURVE_P_384;
+        break;
+    case 521:
+        *curve = COSE_ELLIPTIC_CURVE_P_521;
+        break;
+    default:
+        return T_COSE_ERR_FAIL;
+    }
+
+    switch(first_byte) {
+        case 0x04:
+            len = (export_len - 1 ) / 2;
+            *y_coord = UsefulBuf_Copy(y_coord_buf, UsefulBuf_Tail(export, len));
+            break;
+
+        case 0x02:
+            len = export_len - 1;
+            *y_coord = NULL_Q_USEFUL_BUF_C;
+            *y_bool = true;
+            break;
+
+        case 0x03:
+            len = export_len - 1;
+            *y_coord = NULL_Q_USEFUL_BUF_C;
+            *y_bool = false;
+            break;
+
+        default:
+            return T_COSE_ERR_FAIL;
+    }
+
+    *x_coord = UsefulBuf_Copy(x_coord_buf, UsefulBuf_Head(export, len));
+
+    if ( q_useful_buf_c_is_null(*x_coord) ||
+        (q_useful_buf_c_is_null(*y_coord) && first_byte == 0x04)) {
+        return T_COSE_ERR_TOO_SMALL;
+    }
+
+    return T_COSE_SUCCESS;
+}
+
 #endif /* !T_COSE_DISABLE_SHORT_CIRCUIT_SIGN || !T_COSE_DISABLE_SIGN1 */
 
 #ifndef T_COSE_DISABLE_MAC0

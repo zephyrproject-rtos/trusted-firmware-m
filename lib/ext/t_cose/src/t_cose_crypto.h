@@ -1,7 +1,7 @@
 /*
  * t_cose_crypto.h
  *
- * Copyright 2019, Laurence Lundblade
+ * Copyright 2019-2023, Laurence Lundblade
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -98,7 +98,19 @@ extern "C" {
  * works, whether dead stripping of object code is on and such.
  */
 
+/** Helper macro to convert bits to bytes */
+#define T_COSE_BITS_TO_BYTES(bits) (((bits) + 7) / 8)
 
+/** Constant for maximum ECC curve size in bits */
+#define T_COSE_ECC_MAX_CURVE_BITS 521
+
+/** Export of EC key in SEC1 uncompressed format */
+#define T_COSE_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(key_bits)                         \
+    (2 * T_COSE_BITS_TO_BYTES(key_bits) + 1)
+
+/** Wrapper for T_COSE_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE() */
+#define T_COSE_EXPORT_PUBLIC_KEY_MAX_SIZE                                       \
+    (T_COSE_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(T_COSE_ECC_MAX_CURVE_BITS))
 
 
 #define T_COSE_EC_P256_SIG_SIZE 64  /* size for secp256r1 */
@@ -660,6 +672,58 @@ t_cose_crypto_hmac_verify_finish(struct t_cose_crypto_hmac *hmac_ctx,
 static bool t_cose_algorithm_is_ecdsa(int32_t cose_algorithm_id);
 
 
+/* Import a COSE_Key in EC2 format into a key handle.
+ *
+ * \param[in] curve        EC curve from COSE curve registry.
+ * \param[in] x_coord      The X coordinate as a byte string.
+ * \param[in] y_coord      The Y coordinate or NULL.
+ * \param[in] y_bool       The Y sign bit when y_coord is NULL.
+ * \param[out] key_handle  The key handle.
+ *
+ * This doesn't do the actual CBOR decoding, just the import
+ * into a key handle for the crypto library.
+ *
+ * For most crypto libraries, this must be freed by
+ * t_cose_crypto_free_ec_key();
+ *
+ * The coordinates are as specified in SECG 1.
+ *
+ * TODO: also support the private key.
+ */
+enum t_cose_err_t
+t_cose_crypto_import_ec2_pubkey(int32_t               cose_ec_curve_id,
+                                struct q_useful_buf_c x_coord,
+                                struct q_useful_buf_c y_coord,
+                                bool                  y_bool,
+                                struct t_cose_key    *key_handle);
+
+
+/* Export a key handle into COSE_Key in EC2 format.
+ *
+ * \param[in] key_handle   The key handle.
+ * \param[out] curve        EC curve from COSE curve registry.
+ * \param[out] x_coord_buf  Buffer in which to put X coordinate.
+ * \param[out] x_coord      The X coordinate as a byte string.
+ * \param[out] y_coord_buf  Buffer in which to put Y coordinate.
+ * \param[out] y_coord      The Y coordinate or NULL.
+ * \param[out] y_bool       The Y sign bit when y_coord is NULL.
+ *
+ * This doesn't do the actual CBOR decoding, just the export
+ * from a key handle for the crypto library.
+ *
+ * The coordinates are as specified in SECG 1.
+ *
+ * TODO: also support the private key.
+ * TODO: a way to turn point compression on / off?
+ */
+enum t_cose_err_t
+t_cose_crypto_export_ec2_key(struct t_cose_key      key_handle,
+                             int32_t               *cose_ec_curve_id,
+                             struct q_useful_buf    x_coord_buf,
+                             struct q_useful_buf_c *x_coord,
+                             struct q_useful_buf    y_coord_buf,
+                             struct q_useful_buf_c *y_coord,
+                             bool                  *y_bool);
 
 
 /*

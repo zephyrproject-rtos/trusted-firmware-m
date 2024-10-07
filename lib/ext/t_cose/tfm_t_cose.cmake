@@ -43,6 +43,7 @@ target_sources(tfm_t_cose_common
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:${CMAKE_CURRENT_LIST_DIR}/src/t_cose_sign1_verify.c>
         ${CMAKE_CURRENT_LIST_DIR}/src/t_cose_util.c
         ${CMAKE_CURRENT_LIST_DIR}/src/t_cose_parameters.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/t_cose_key.c
         ${CMAKE_CURRENT_LIST_DIR}/crypto_adapters/t_cose_psa_crypto.c
 )
 
