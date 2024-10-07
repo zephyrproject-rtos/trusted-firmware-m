@@ -33,19 +33,25 @@ Contributions to the TF-M project need to follow the process below.
   - Ensure that each changed file has the correct copyright and license
     information. Files that entirely consist of contributions to this project
     should have a copyright notice and BSD-3-Clause SPDX license identifier of
-    the form as shown in :doc:`lic`. Files that contain changes to imported
-    Third Party IP files should retain their original copyright and license
-    notices.
-
-    Contributors can add the following copyright note, (whilst) it is suggested
-    to update copyright note only for *major*, non-trivial changes.
+    the form
 
     ::
 
+        SPDX-License-Identifier: BSD-3-Clause
+        SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+
+    to reflect the community ownership of the project. Individual copyrights
+    can be traced back through the corresponding commits. For more details please refer
+    to `Linux Foundation guidelines on copyright notices`_ for OSS projects.
+    Patches that contain changes to imported Third Party IP files should retain
+    their original copyright and license notices. If changes are made to the imported
+    files, then add an additional ``SPDX-FileCopyrightText`` tag line as shown above.
+
+    The original form of the project copyright note as
+
         Copyright (c) XXXX[-YYYY], <OWNER>. All rights reserved.
 
-    where XXXX is the year of first contribution and YYYY is the optional year
-    of most recent contribution. <OWNER> is your or your company name.
+    is still appropriate but shall be avoided in the new files.
 
   - Add a `Change-Id <https://review.trustedfirmware.org/Documentation/user-changeid.html>`_
     to the commit message, which can be generated any way you like (e.g. from
@@ -74,8 +80,9 @@ Contributions to the TF-M project need to follow the process below.
 - Once the change is approved by code owners, the patch will be merged by the
   maintainer.
 
-.. _mailing_list: tf-m@lists.trustedfirmware.org
-
 --------------
+
+.. _mailing_list: tf-m@lists.trustedfirmware.org
+.. _Linux Foundation guidelines on copyright notices: https://www.linuxfoundation.org/blog/blog/copyright-notices-in-open-source-software-projects
 
 *Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
