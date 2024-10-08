@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,7 +18,12 @@ execute_process(COMMAND git describe --tags --always
 
 string(FIND ${TFM_VERSION_FULL} "TF-M" TFM_TAG)
 if(TFM_TAG EQUAL -1)
-    set(TFM_VERSION_FULL v${TFM_VERSION_MANUAL})
+    execute_process(COMMAND git log --format=format:%h -n 1
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE TFM_GIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    set(TFM_VERSION_FULL "${TFM_VERSION_MANUAL}+g${TFM_GIT_HASH}")
 endif()
 
 string(REGEX REPLACE "TF-M" "" TFM_VERSION_FULL ${TFM_VERSION_FULL})
