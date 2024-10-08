@@ -5,6 +5,12 @@
 #
 #-------------------------------------------------------------------------------
 
+set(is_v8.1m    "$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>")
+set(is_v8m_base "$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>")
+set(is_v8m_main "$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>")
+set(is_v8.0m    "$<OR:${is_v8m_main},${is_v8m_base}>")
+set(is_v8.xm    "$<OR:${is_v8.1m},${is_v8.0m}>")
+
 ############################### PSA CRYPTO CONFIG ##############################
 # Make sure these are available even if the TFM_PARTITION_CRYPTO is not defined
 
@@ -206,6 +212,11 @@ if(MBEDTLS_P256M_ENABLED)
         PRIVATE
             MBEDTLS_PSA_P256M_DRIVER_ENABLED
             MBEDTLS_PSA_CRYPTO_SPM
+            # Code is branchless but UMLAL might take a variable amount of cycles
+            # depedening on inputs if ${is_v8.1m} is false. We don't aim to protect
+            # against side channel so this is a acknowledged behaviour
+            MUL64_IS_CONSTANT_TIME
+            MULADD64_IGNORE_ASM
     )
 
     # The crypto_spe.h to be passed to p256m is here
