@@ -261,6 +261,14 @@
 #define MAILBOX_IS_UNCACHED_NS                 1
 #endif
 
+/* Secure Test Partition Configs */
+#ifdef TFM_PARTITION_DPE
+/* DPE tests require larger test partition stack */
+#define SECURE_TEST_PARTITION_STACK_SIZE        0x3000
+#else
+#define SECURE_TEST_PARTITION_STACK_SIZE        0x0D00
+#endif
+
 /* SPM Configs */
 
 #ifdef CONFIG_TFM_CONNECTION_POOL_ENABLE
