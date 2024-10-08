@@ -144,6 +144,8 @@ target_sources(platform_s
         partition/gpt.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
         rse_comms_permissions_hal.c
+        mem_check_v6m_v7m_hal.c
+        ${PLATFORM_DIR}/ext/common/mem_check_v6m_v7m.c
 )
 
 if (PLATFORM_IS_FVP)

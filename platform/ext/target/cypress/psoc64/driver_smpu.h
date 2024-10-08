@@ -19,8 +19,8 @@
 #define __DRIVER_SMPU_H__
 
 #include "cy_prot.h"
+#include "mem_check_v6m_v7m.h"
 #include "RTE_Device.h"
-#include "tfm_multi_core.h"
 
 typedef struct smpu_resources SMPU_Resources;
 

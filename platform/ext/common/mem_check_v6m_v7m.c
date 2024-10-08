@@ -11,11 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "mem_check_v6m_v7m.h"
 #include "internal_status_code.h"
 #include "region.h"
 #include "region_defs.h"
-#include "tfm_hal_multi_core.h"
-#include "tfm_multi_core.h"
 #include "tfm_arch.h"
 #include "utilities.h"
 

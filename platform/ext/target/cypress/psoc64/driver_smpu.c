@@ -22,6 +22,7 @@
 
 #include "internal_status_code.h"
 #include "flash_layout.h"
+#include "mem_check_v6m_v7m.h"
 #include "nv_counters.h"
 #include "pc_config.h"
 #include "region_defs.h"
@@ -32,7 +33,6 @@
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
 #endif
-#include "tfm_multi_core.h"
 
 #include "cy_prot.h"
 

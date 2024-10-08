@@ -88,6 +88,8 @@ target_sources(platform_s
         ./driver_ppu.c
         ./driver_dap.c
         ./Device/Source/device_definition.c
+        ./mem_check_v6m_v7m_hal.c
+        ${PLATFORM_DIR}/ext/common/mem_check_v6m_v7m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

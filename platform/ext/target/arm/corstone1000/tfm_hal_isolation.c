@@ -9,8 +9,8 @@
  */
 
 #include "internal_status_code.h"
+#include "mem_check_v6m_v7m.h"
 #include "tfm_hal_defs.h"
-#include "tfm_multi_core.h"
 #include "tfm_hal_isolation.h"
 #include "mpu_config.h"
 #include "mmio_defs.h"
