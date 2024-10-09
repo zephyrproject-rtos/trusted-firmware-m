@@ -21,3 +21,4 @@ set(RSE_OTP_TRNG                            @RSE_OTP_TRNG@ CACHE BOOL "Whether t
 set(RSE_TP_MODE                             @RSE_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")
 set(RSE_ENABLE_TRAM                         @RSE_ENABLE_TRAM@ CACHE BOOL "Whether TRAM encryption is enabled")
 set(PLAT_MHU_VERSION                        @PLAT_MHU_VERSION@ CACHE BOOL "Supported MHU version by platform")
+set(MEASURED_BOOT_HASH_ALG                  @MEASURED_BOOT_HASH_ALG@ CACHE STRING "Hash algorithm used by Measured boot services")
