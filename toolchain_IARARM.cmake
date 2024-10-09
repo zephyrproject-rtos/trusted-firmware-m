@@ -35,6 +35,11 @@ set(CMAKE_C_FLAGS_DEBUG "-r -On")
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
+# CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE IAR_VERSION )
+string(REGEX MATCH "[v,V]([0-9]+\.[0-9]+\.[0-9]+)*" IAR_VERSION "${IAR_VERSION}")
+set(IAR_VERSION ${CMAKE_MATCH_1})
+
 macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
@@ -95,8 +100,8 @@ macro(tfm_toolchain_reload_compiler)
 
     # Can't use the highest optimization with IAR on v8.1m arch because of the
     # compilation bug in mbedcrypto
-    if ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "9.20") AND
-        (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL "9.32.1") AND
+    if ((IAR_VERSION VERSION_GREATER_EQUAL "9.20") AND
+        (IAR_VERSION VERSION_LESS_EQUAL "9.32.1") AND
         ((TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85") OR
          (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55")) AND
         (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug")))
@@ -151,12 +156,46 @@ macro(tfm_toolchain_reload_compiler)
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:__ARM_ARCH_8M_MAIN__=1>
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>
     )
+
+    #
+    # Pointer Authentication Code and Branch Target Identification (PACBTI) Options
+    #
+    if(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_STANDARD)
+        set(BRANCH_PROTECTION_OPTIONS "bti+pac-ret")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET)
+        set(BRANCH_PROTECTION_OPTIONS "pac-ret")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_PACRET_LEAF)
+        message(FATAL_ERROR "${CONFIG_TFM_BRANCH_PROTECTION_FEAT} option is not supported on IAR Compiler.")
+    elseif(${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_BTI)
+        set(BRANCH_PROTECTION_OPTIONS "bti")
+    endif()
+
+    if(NOT ${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_DISABLED AND
+       NOT ${CONFIG_TFM_BRANCH_PROTECTION_FEAT} STREQUAL BRANCH_PROTECTION_NONE)
+            if (IAR_VERSION VERSION_LESS "9.40.1")
+                message(FATAL_ERROR "Only IAR version 9.40.1 and above supports PAC+BTI.")
+            endif()
+
+            if((TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85") AND
+                (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main"))
+                message(NOTICE "BRANCH_PROTECTION enabled with: ${BRANCH_PROTECTION_OPTIONS}")
+
+                string(APPEND CMAKE_C_FLAGS " --branch_protection=${BRANCH_PROTECTION_OPTIONS}")
+                string(APPEND CMAKE_CXX_FLAGS " --branch_protection=${BRANCH_PROTECTION_OPTIONS}")
+
+                add_link_options(--library_security=pacbti-m)
+            else()
+                message(FATAL_ERROR "Your architecture does not support BRANCH_PROTECTION")
+            endif()
+    endif()
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
 # `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
 # done, all further compiler setup is done via tfm_toolchain_reload_compiler()
-tfm_toolchain_reload_compiler()
+tfm_toolchain_set_processor_arch()
+tfm_toolchain_reset_compiler_flags()
+tfm_toolchain_reset_linker_flags()
 
 # Behaviour for handling scatter files is so wildly divergent between compilers
 # that this macro is required.

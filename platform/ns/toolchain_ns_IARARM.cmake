@@ -31,6 +31,11 @@ set(CMAKE_C_FLAGS_DEBUG "-r -On")
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/set_extensions.cmake)
 
+# CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE IAR_VERSION )
+string(REGEX MATCH "[v,V]([0-9]+\.[0-9]+\.[0-9]+)*" IAR_VERSION "${IAR_VERSION}")
+set(IAR_VERSION ${CMAKE_MATCH_1})
+
 macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
@@ -133,7 +138,9 @@ endmacro()
 # Configure environment for the compiler setup run by cmake at the first
 # `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
 # done, all further compiler setup is done via tfm_toolchain_reload_compiler()
-tfm_toolchain_reload_compiler()
+tfm_toolchain_set_processor_arch()
+tfm_toolchain_reset_compiler_flags()
+tfm_toolchain_reset_linker_flags()
 
 # Specify the scatter file used to link `target`.
 # Behaviour for handling scatter files is so wildly divergent between compilers
