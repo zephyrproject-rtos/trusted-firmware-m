@@ -180,13 +180,13 @@ static int local_copy_vects(const struct psa_client_params_t *params,
 {
     size_t in_len, out_len;
 
-    if ((params->psa_call_params.out_vec == NULL) ||
-        (params->psa_call_params.in_vec == NULL)) {
-        return MAILBOX_INVAL_PARAMS;
-    }
-
     in_len = params->psa_call_params.in_len;
     out_len = params->psa_call_params.out_len;
+
+    if (((params->psa_call_params.out_vec == NULL) && (out_len != 0)) ||
+        ((params->psa_call_params.in_vec == NULL) && (in_len != 0))) {
+        return MAILBOX_INVAL_PARAMS;
+    }
 
     if ((in_len > PSA_MAX_IOVEC) ||
         (out_len > PSA_MAX_IOVEC) ||
