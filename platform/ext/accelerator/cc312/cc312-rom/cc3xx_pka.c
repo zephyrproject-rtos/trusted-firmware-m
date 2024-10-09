@@ -162,6 +162,9 @@ static void pka_init_from_state(void)
     P_CC3XX->misc.pka_clk_enable = 1;
     P_CC3XX->pka.pka_sw_reset = 1;
 
+    /* Wait for SW reset to complete before proceeding */
+    while(!P_CC3XX->pka.pka_done) {}
+
     /* The TRM says that this register is a byte-size, but it is in fact a
      * bit-size.
      */
