@@ -276,7 +276,7 @@ const struct dm_provisioning_data data = {
 #if ATTEST_TOKEN_PROFILE_PSA_IOT_1
     "PSA_IOT_PROFILE_1",
 #elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
-    "http://arm.com/psa/2.0.0",
+    "tag:psacertified.org,2023:psa#tfm",
 #elif ATTEST_TOKEN_PROFILE_ARM_CCA
     "tag:arm.com,2023:cca_platform#1.0.0",
 #else
