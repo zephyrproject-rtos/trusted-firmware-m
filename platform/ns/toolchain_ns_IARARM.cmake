@@ -36,111 +36,83 @@ EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE IAR_VERSI
 string(REGEX MATCH "[v,V]([0-9]+\.[0-9]+\.[0-9]+)*" IAR_VERSION "${IAR_VERSION}")
 set(IAR_VERSION ${CMAKE_MATCH_1})
 
-macro(tfm_toolchain_reset_compiler_flags)
-    set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
+if(${TFM_SYSTEM_PROCESSOR} STREQUAL "cortex-m0plus")
+    set(CMAKE_SYSTEM_PROCESSOR Cortex-M0+)
+else()
+    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+endif()
 
-    add_compile_options(
-        $<$<COMPILE_LANGUAGE:C,CXX>:-e>
-        $<$<COMPILE_LANGUAGE:C,CXX>:--dlib_config=full>
-        $<$<COMPILE_LANGUAGE:C,CXX>:--silent>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-DNO_TYPEOF>
-        $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
-        $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
-        $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
-    )
-endmacro()
+if (DEFINED TFM_SYSTEM_DSP)
+  if(NOT TFM_SYSTEM_DSP)
+      string(APPEND CMAKE_SYSTEM_PROCESSOR ".no_dsp")
+  endif()
+endif()
 
-macro(tfm_toolchain_reset_linker_flags)
-    set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
+set(CMAKE_C_FLAGS_INIT "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
+set(CMAKE_ASM_FLAGS_INIT "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
+set(CMAKE_C_LINK_FLAGS "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
+set(CMAKE_ASM_LINK_FLAGS "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
 
-    add_link_options(
-      --silent
-      --semihosting
-      --redirect __write=__write_buffered
-      --diag_suppress=lp005
-    )
-endmacro()
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
+set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
-macro(tfm_toolchain_set_processor_arch)
-    if(${TFM_SYSTEM_PROCESSOR} STREQUAL "cortex-m0plus")
-      set(CMAKE_SYSTEM_PROCESSOR Cortex-M0+)
-    else()
-      set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+# Can't use the highest optimization with IAR on v8.1m arch because of the
+# compilation bug in mbedcrypto
+if ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "9.20") AND
+    (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL "9.32.1") AND
+    ((TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85") OR
+        (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55")) AND
+    (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug")))
+    message(FATAL_ERROR "Only debug build available for M55 and M85"
+            " cores with IAR version between 9.20 and 9.32.1")
+endif()
+
+if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+    if (CONFIG_TFM_ENABLE_FP)
+        set(COMPILER_CP_C_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+        set(COMPILER_CP_ASM_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+        # armasm and armlink have the same option "--fpu" and are both used to
+        # specify the target FPU architecture. So the supported FPU architecture
+        # names can be shared by armasm and armlink.
+        set(LINKER_CP_OPTION "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
     endif()
+else()
+    set(COMPILER_CP_C_FLAG   "--fpu=none")
+    set(COMPILER_CP_ASM_FLAG "--fpu=none")
+    set(LINKER_CP_OPTION     "--fpu=none")
+endif()
 
-    if (DEFINED TFM_SYSTEM_DSP)
-        if(NOT TFM_SYSTEM_DSP)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR ".no_dsp")
-        endif()
-    endif()
-endmacro()
+string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_C_FLAG})
+string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_ASM_FLAG})
+string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
+string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 
-macro(tfm_toolchain_reload_compiler)
-    tfm_toolchain_set_processor_arch()
-    tfm_toolchain_reset_compiler_flags()
-    tfm_toolchain_reset_linker_flags()
+add_compile_definitions(
+    $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:__ARM_ARCH_6M__=1>
+    $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:__ARM_ARCH_7M__=1>
+    $<$<AND:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>,$<BOOL:__ARM_FEATURE_DSP>>:__ARM_ARCH_7EM__=1>
+    $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:__ARM_ARCH_8M_BASE__=1>
+    $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:__ARM_ARCH_8M_MAIN__=1>
+    $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>
+)
 
-    unset(CMAKE_C_FLAGS_INIT)
-    unset(CMAKE_C_LINK_FLAGS)
-    unset(CMAKE_ASM_FLAGS_INIT)
-    unset(CMAKE_ASM_LINK_FLAGS)
+add_compile_options(
+    $<$<COMPILE_LANGUAGE:C,CXX>:-e>
+    $<$<COMPILE_LANGUAGE:C,CXX>:--dlib_config=full>
+    $<$<COMPILE_LANGUAGE:C,CXX>:--silent>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-DNO_TYPEOF>
+    $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
+    $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
+    $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
+    $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
+)
 
-    set(CMAKE_C_FLAGS_INIT "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_FLAGS_INIT "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_C_LINK_FLAGS "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_LINK_FLAGS "--cpu ${CMAKE_SYSTEM_PROCESSOR}")
-
-    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
-    set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
-
-    # Can't use the highest optimization with IAR on v8.1m arch because of the
-    # compilation bug in mbedcrypto
-    if ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "9.20") AND
-        (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL "9.32.1") AND
-        ((TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85") OR
-         (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55")) AND
-        (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug")))
-        message(FATAL_ERROR "Only debug build available for M55 and M85"
-                " cores with IAR version between 9.20 and 9.32.1")
-    endif()
-
-    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-        if (CONFIG_TFM_ENABLE_FP)
-            set(COMPILER_CP_C_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
-            set(COMPILER_CP_ASM_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
-            # armasm and armlink have the same option "--fpu" and are both used to
-            # specify the target FPU architecture. So the supported FPU architecture
-            # names can be shared by armasm and armlink.
-            set(LINKER_CP_OPTION "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
-        endif()
-    else()
-        set(COMPILER_CP_C_FLAG   "--fpu=none")
-        set(COMPILER_CP_ASM_FLAG "--fpu=none")
-        set(LINKER_CP_OPTION     "--fpu=none")
-    endif()
-
-    string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_C_FLAG})
-    string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_ASM_FLAG})
-    string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
-    string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
-
-    add_compile_definitions(
-        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:__ARM_ARCH_6M__=1>
-        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:__ARM_ARCH_7M__=1>
-        $<$<AND:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>,$<BOOL:__ARM_FEATURE_DSP>>:__ARM_ARCH_7EM__=1>
-        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:__ARM_ARCH_8M_BASE__=1>
-        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:__ARM_ARCH_8M_MAIN__=1>
-        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>
-    )
-endmacro()
-
-# Configure environment for the compiler setup run by cmake at the first
-# `project` call in <tfm_root>/CMakeLists.txt. After this mandatory setup is
-# done, all further compiler setup is done via tfm_toolchain_reload_compiler()
-tfm_toolchain_set_processor_arch()
-tfm_toolchain_reset_compiler_flags()
-tfm_toolchain_reset_linker_flags()
+add_link_options(
+    --silent
+    --semihosting
+    --redirect __write=__write_buffered
+    --diag_suppress=lp005
+)
 
 # Specify the scatter file used to link `target`.
 # Behaviour for handling scatter files is so wildly divergent between compilers
