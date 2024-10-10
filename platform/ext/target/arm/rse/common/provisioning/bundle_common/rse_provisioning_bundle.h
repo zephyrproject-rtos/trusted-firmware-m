@@ -54,7 +54,7 @@ struct __attribute__((__packed__)) rse_provisioning_bundle {
             uint8_t host_rotpk_cca[96];
             uint8_t implementation_id[32];
             uint8_t verification_service_url[32];
-            uint8_t profile_definition[32];
+            uint8_t profile_definition[48];
             uint8_t secure_debug_pk[32];
         } dm_values;
         struct __attribute__((__packed__)) cm_provisioning_data {

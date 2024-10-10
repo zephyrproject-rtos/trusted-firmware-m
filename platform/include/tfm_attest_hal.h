@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,7 +40,7 @@ enum tfm_security_lifecycle_t {
  *
  * \brief Maximum size of profile definition in bytes
  */
-#define PROFILE_DEFINITION_MAX_SIZE (32u)
+#define PROFILE_DEFINITION_MAX_SIZE (48u)
 
 /**
  * \def PLATFORM_CONFIG_MAX_SIZE
