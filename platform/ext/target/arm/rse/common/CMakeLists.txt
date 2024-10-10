@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -171,6 +171,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
         soft_crc
+        ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
 )
 
 target_sources(platform_s
@@ -282,6 +283,7 @@ if (TFM_PARTITION_CRYPTO)
             ./native_drivers
             ./device/include
             ./device/config
+            ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
     )
 endif()
 
@@ -357,6 +359,7 @@ target_include_directories(platform_bl2
         ./bringup_helpers
         ./cc3xx
         bl2/cc3xx
+        ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
     PRIVATE
         ${PLATFORM_DIR}/..
 )
@@ -461,6 +464,7 @@ target_include_directories(platform_bl1_1_interface
         ./cc3xx
         ./bl1/cc3xx
         soft_crc
+        ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
 )
 
 target_compile_definitions(platform_bl1_1_interface

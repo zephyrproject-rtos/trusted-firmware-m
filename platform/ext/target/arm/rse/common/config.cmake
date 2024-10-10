@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -210,6 +210,7 @@ set(MCUBOOT_SIGNATURE_TYPE            "EC-P256"        CACHE STRING    "Algorith
 set(MCUBOOT_HW_KEY                    ON               CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
 set(MCUBOOT_BUILTIN_KEY               OFF              CACHE BOOL      "Use builtin key(s) for validation, no public key data is embedded into the image metadata")
 
+set(RSE_SUBPLATFORM_PAL_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/subplatform_pal_default_config" CACHE PATH "path where subplatform PAL config headers can be found")
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate
