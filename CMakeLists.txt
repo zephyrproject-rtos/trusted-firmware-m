@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -38,7 +38,6 @@ set(CMAKE_C_COMPILER_FORCED true)
 set(CMAKE_CXX_COMPILER_FORCED true)
 
 project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C CXX ASM)
-tfm_toolchain_reload_compiler()
 
 add_subdirectory(lib/backtrace)
 add_subdirectory(lib/ext)

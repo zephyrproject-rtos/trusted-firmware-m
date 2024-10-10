@@ -48,7 +48,7 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
             endif()
         endif()
         # GCC specifies that '+nofp' is available on following M-profile cpus: 'cortex-m4',
-        # 'cortex-m7', 'cortex-m33', 'cortex-m35p' and 'cortex-m55'.
+        # 'cortex-m7', 'cortex-m33', 'cortex-m35p', 'cortex-m55' and 'cortex-m85'.
         # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
         # Explicitly list those cpu to align with GCC description.
         if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
@@ -57,7 +57,8 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
                 OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
                 OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
                 OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
-                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"))
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85"))
                     string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
             endif()
         endif()
@@ -407,8 +408,4 @@ macro(target_weaken_symbols_from_dependency target dependency)
         COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
-endmacro()
-
-# A dummy macro to align with Armclang workaround
-macro(tfm_toolchain_reload_compiler)
 endmacro()
