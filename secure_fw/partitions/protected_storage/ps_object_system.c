@@ -240,8 +240,8 @@ static psa_status_t ps_write_object(uint32_t wrt_size)
 static psa_status_t ps_store_object(psa_storage_uid_t uid, int32_t client_id, uint32_t *p_blocks)
 {
     psa_status_t err;
-    uint32_t num_blocks;
 #ifndef PS_ENCRYPTION
+    uint32_t num_blocks;
     uint32_t wrt_size;
 #endif
 
@@ -288,6 +288,11 @@ psa_status_t ps_system_prepare(void)
     /* Sanity check that the largest allowed object can actually be written and read back */
     if (2 * ps_encrypted_object_blocks(PS_MAX_ASSET_SIZE) > PS_AES_KEY_USAGE_LIMIT) {
         LOG_ERRFMT("Config error: PS_AES_KEY_USAGE_LIMIT prevents storing largest allowable PS object\r\n");
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+    /* Ensure that we can never overflow a uint32_t block counter */
+    if (ps_encrypted_object_blocks(PS_MAX_ASSET_SIZE) > UINT32_MAX - PS_AES_KEY_USAGE_LIMIT) {
+        LOG_ERRFMT("Config error: PS_AES_KEY_USAGE_LIMIT too large to safely count key usage\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 #endif
