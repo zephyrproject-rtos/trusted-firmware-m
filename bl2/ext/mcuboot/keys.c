@@ -626,7 +626,7 @@ static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk(uint8_t image_idx,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_0(
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_0(const void *ctx,
                                             uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
@@ -636,7 +636,7 @@ static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_0(
     return tfm_plat_get_bl2_rotpk(0, buf, buf_len, key_len, key_bits, algorithm, type);
 }
 #if (MCUBOOT_IMAGE_NUMBER > 1)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_1(
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_1(const void *ctx,
                                             uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
@@ -647,7 +647,7 @@ static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_1(
 }
 #endif /* MCUBOOT_IMAGE_NUMBER > 1 */
 #if (MCUBOOT_IMAGE_NUMBER > 2)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_2(
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_2(const void *ctx,
                                             uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
@@ -658,7 +658,7 @@ static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_2(
 }
 #endif /* MCUBOOT_IMAGE_NUMBER > 2 */
 #if (MCUBOOT_IMAGE_NUMBER > 3)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_3(
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_3(const void *ctx,
                                             uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,

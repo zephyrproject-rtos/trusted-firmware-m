@@ -25,13 +25,16 @@
 #define MAPPED_TZ_NS_AGENT_DEFAULT_CLIENT_ID -0x3c000000
 #define TFM_NS_PARTITION_ID                  MAPPED_TZ_NS_AGENT_DEFAULT_CLIENT_ID
 
-static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_huk(const void *ctx,
+                                            uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
                                             psa_algorithm_t *algorithm,
                                             psa_key_type_t *type)
 {
     enum tfm_plat_err_t err;
+
+    (void)ctx;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_HUK, buf_len, buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -51,7 +54,8 @@ static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
 }
 
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
-static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_iak(const void *ctx,
+                                            uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
                                             psa_algorithm_t *algorithm,
@@ -61,6 +65,8 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
 #ifndef SYMMETRIC_INITIAL_ATTESTATION
     psa_ecc_family_t curve_type;
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
+
+    (void)ctx;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_LEN,
                             sizeof(size_t), (uint8_t*)key_len);
@@ -140,12 +146,14 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
     {.key_id = TFM_BUILTIN_KEY_ID_HUK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HUK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_huk},
+     .loader_key_func = tfm_plat_get_huk,
+     .loader_key_ctx = NULL},
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {.key_id = TFM_BUILTIN_KEY_ID_IAK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_IAK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_iak},
+     .loader_key_func = tfm_plat_get_iak,
+     .loader_key_ctx = NULL},
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 };
 

@@ -21,13 +21,16 @@
 #define MAPPED_TZ_NS_AGENT_DEFAULT_CLIENT_ID -0x3c000000
 #define TFM_NS_PARTITION_ID                  MAPPED_TZ_NS_AGENT_DEFAULT_CLIENT_ID
 
-static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_huk(const void *ctx,
+                                            uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
                                             psa_algorithm_t *algorithm,
                                             psa_key_type_t *type)
 {
     enum kmu_error_t kmu_err;
+
+    (void)ctx;
 
     if (buf_len < 32) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
@@ -46,7 +49,8 @@ static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_iak(const void *ctx,
+                                     uint8_t *buf, size_t buf_len,
                                      size_t *key_len,
                                      psa_key_bits_t *key_bits,
                                      psa_algorithm_t *algorithm,
@@ -59,6 +63,8 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
     psa_key_handle_t seed_key = PSA_KEY_HANDLE_INIT;
     psa_key_handle_t transient_key = PSA_KEY_HANDLE_INIT;
     psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
+
+    (void)ctx;
 
     if (buf_len < PSA_KEY_EXPORT_ECC_KEY_PAIR_MAX_SIZE(ATTEST_KEY_BITS)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
@@ -195,11 +201,13 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
     {.key_id = TFM_BUILTIN_KEY_ID_HUK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HUK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_huk},
+     .loader_key_func = tfm_plat_get_huk,
+     .loader_key_ctx = NULL},
     {.key_id = TFM_BUILTIN_KEY_ID_IAK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_IAK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_iak},
+     .loader_key_func = tfm_plat_get_iak,
+     .loader_key_ctx = NULL},
 };
 
 size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])

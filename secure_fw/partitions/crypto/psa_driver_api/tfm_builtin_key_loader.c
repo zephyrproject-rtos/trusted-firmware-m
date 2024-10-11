@@ -226,7 +226,8 @@ psa_status_t tfm_builtin_key_loader_init(void)
         tfm_crypto_library_key_id_t key_id = tfm_crypto_library_key_id_init(0, desc_table[key].key_id);
         psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
         enum tfm_plat_err_t plat_err = desc_table[key].loader_key_func(
-                                    &buf[0], TFM_BUILTIN_MAX_KEY_LEN, &key_len, &key_bits, &algorithm, &type);
+            desc_table[key].loader_key_ctx, &buf[0], TFM_BUILTIN_MAX_KEY_LEN, &key_len, &key_bits, &algorithm, &type);
+
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             err = PSA_ERROR_HARDWARE_FAILURE;
             goto wrap_up;

@@ -117,8 +117,8 @@ static psa_status_t get_builtin_key(psa_key_id_t key_id)
 
             /* Load key */
             plat_err = desc_table[idx].loader_key_func(
-                g_key_slot.buf, sizeof(g_pubkey_data), &g_key_slot.len,
-                &key_bits, &alg, &key_type);
+                desc_table[idx].loader_key_ctx, g_key_slot.buf, sizeof(g_pubkey_data), &g_key_slot.len, &key_bits, &alg, &key_type);
+
             if (plat_err != TFM_PLAT_ERR_SUCCESS) {
                 return PSA_ERROR_GENERIC_ERROR;
             }

@@ -22,7 +22,8 @@
 #define MAPPED_RSE_MBOX_NS_AGENT_DEFAULT_CLIENT_ID -0x04000000
 #define TFM_NS_PARTITION_ID                        MAPPED_RSE_MBOX_NS_AGENT_DEFAULT_CLIENT_ID
 
-static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_huk(const void *ctx,
+                                            uint8_t *buf, size_t buf_len,
                                             size_t *key_len,
                                             psa_key_bits_t *key_bits,
                                             psa_algorithm_t *algorithm,
@@ -47,7 +48,8 @@ static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_iak(const void *ctx,
+                                     uint8_t *buf, size_t buf_len,
                                      size_t *key_len,
                                      psa_key_bits_t *key_bits,
                                      psa_algorithm_t *algorithm,
@@ -152,7 +154,8 @@ err_release_seed_key:
 }
 
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
-static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_dak_seed(const void *ctx,
+                                                 uint8_t *buf, size_t buf_len,
                                                  size_t *key_len,
                                                  psa_key_bits_t *key_bits,
                                                  psa_algorithm_t *algorithm,
@@ -179,7 +182,8 @@ static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 
 #ifdef TFM_PARTITION_DPE
-static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_rot_cdi(const void *ctx,
+                                                uint8_t *buf, size_t buf_len,
                                                 size_t *key_len,
                                                 psa_key_bits_t *key_bits,
                                                 psa_algorithm_t *algorithm,
@@ -205,7 +209,8 @@ static enum tfm_plat_err_t tfm_plat_get_rot_cdi(uint8_t *buf, size_t buf_len,
 }
 #endif /* TFM_PARTITION_DPE */
 
-static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(const void *ctx,
+                                                     uint8_t *buf, size_t buf_len,
                                                      size_t *key_len,
                                                      psa_key_bits_t *key_bits,
                                                      psa_algorithm_t *algorithm,
@@ -224,7 +229,8 @@ static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_le
     return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_S, buf_len, buf);
 }
 
-static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(const void *ctx,
+                                                      uint8_t *buf, size_t buf_len,
                                                       size_t *key_len,
                                                       psa_key_bits_t *key_bits,
                                                       psa_algorithm_t *algorithm,
@@ -243,7 +249,8 @@ static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(uint8_t *buf, size_t buf_l
     return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_NS, buf_len, buf);
 }
 
-static enum tfm_plat_err_t tfm_plat_get_host_cca_rotpk(uint8_t *buf, size_t buf_len,
+static enum tfm_plat_err_t tfm_plat_get_host_cca_rotpk(const void *ctx,
+                                                       uint8_t *buf, size_t buf_len,
                                                        size_t *key_len,
                                                        psa_key_bits_t *key_bits,
                                                        psa_algorithm_t *algorithm,
@@ -355,34 +362,41 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
     {.key_id = TFM_BUILTIN_KEY_ID_HUK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HUK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_huk},
+     .loader_key_func = tfm_plat_get_huk,
+     .loader_key_ctx = NULL},
     {.key_id = TFM_BUILTIN_KEY_ID_IAK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_IAK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_iak},
+     .loader_key_func = tfm_plat_get_iak,
+     .loader_key_ctx = NULL},
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
     {.key_id = TFM_BUILTIN_KEY_ID_DAK_SEED,
      .slot_number = TFM_BUILTIN_KEY_SLOT_DAK_SEED,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_dak_seed},
+     .loader_key_func = tfm_plat_get_dak_seed,
+     .loader_key_ctx = NULL},
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
     {.key_id = TFM_BUILTIN_KEY_ID_HOST_S_ROTPK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_S_ROTPK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_s_rotpk},
+     .loader_key_func = tfm_plat_get_host_s_rotpk,
+     .loader_key_ctx = NULL},
     {.key_id = TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_NS_ROTPK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_ns_rotpk},
+     .loader_key_func = tfm_plat_get_host_ns_rotpk,
+     .loader_key_ctx = NULL},
     {.key_id = TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK,
      .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_cca_rotpk},
+     .loader_key_func = tfm_plat_get_host_cca_rotpk,
+     .loader_key_ctx = NULL},
 #ifdef TFM_PARTITION_DPE
     {.key_id = TFM_BUILTIN_KEY_ID_ROT_CDI,
      .slot_number = TFM_BUILTIN_KEY_SLOT_ROT_CDI,
      .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_rot_cdi},
+     .loader_key_func = tfm_plat_get_rot_cdi,
+     .loader_key_ctx = NULL},
 #endif /* TFM_PARTITION_DPE */
 };
 

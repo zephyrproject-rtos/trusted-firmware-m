@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,6 +23,7 @@ extern "C" {
  * key can be probed by the tfm_builtin_key_loader driver during the init phase. Note that the key
  * must be readable from the secure processing element to be able to use the tfm_builtin_key_loader
  *
+ * \param[in]  ctx       Context for the loader function
  * \param[out] buf       Buffer to hold the retrieved key material from the platform
  * \param[in]  buf_len   Size of the buf buffer
  * \param[out] key_len   Actual length of the key material in bytes retrieved from the platform
@@ -34,18 +35,19 @@ extern "C" {
  * \return Returns an error value as specified by the \ref tfm_plat_err_t type.
  *
  */
-typedef enum tfm_plat_err_t (*key_loader_func_ptr)
-    (uint8_t *buf, size_t buf_len, size_t *key_len, psa_key_bits_t *key_bits, psa_algorithm_t *algorithm, psa_key_type_t *type);
+typedef enum tfm_plat_err_t (*key_loader_func_ptr_t)
+    (const void *ctx, uint8_t *buf, size_t buf_len, size_t *key_len, psa_key_bits_t *key_bits, psa_algorithm_t *algorithm, psa_key_type_t *type);
 
 /**
  * \brief This type describes the information that each TF-M builtin key
  *        must key in the associated descriptor table in \ref crypto_keys.c
  */
 typedef struct {
-    psa_key_id_t key_id;                 /*!< Key id associated to the builtin key */
-    psa_drv_slot_number_t slot_number;   /*!< Slot number for the builtin key in the platform */
-    psa_key_lifetime_t lifetime;         /*!< Lifetime (persistence + location) for the builtin key */
-    key_loader_func_ptr loader_key_func; /*!< Loader function that reads the key from the platform */
+    psa_key_id_t key_id;                   /*!< Key id associated to the builtin key */
+    psa_drv_slot_number_t slot_number;     /*!< Slot number for the builtin key in the platform */
+    psa_key_lifetime_t lifetime;           /*!< Lifetime (persistence + location) for the builtin key */
+    key_loader_func_ptr_t loader_key_func; /*!< Loader function that reads the key from the platform */
+    const void *loader_key_ctx;            /*!< Context passed to the key loader function */
 } tfm_plat_builtin_key_descriptor_t;
 
 /**
