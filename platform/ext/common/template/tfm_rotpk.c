@@ -39,7 +39,7 @@ tfm_plat_get_rotpk_hash(uint8_t image_id,
 {
     /* Assumes BL2 ROTPK are contiguous */
     if (image_id < MCUBOOT_IMAGE_NUMBER) {
-        return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_0 + image_id, rotpk_hash,
+        return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_FROM_IMAGE(image_id), rotpk_hash,
                               rotpk_hash_size);
     }
 

@@ -66,6 +66,20 @@ enum tfm_otp_element_id_t {
 #include "platform_otp_ids.h"
 #endif /* PLATFORM_DEFAULT_OTP */
 
+#if defined(PLATFORM_DEFAULT_ROTPK) && !defined(PLAT_OTP_ID_BL2_ROTPK_FROM_IMAGE)
+/**
+ * @brief Macro which is required by the PLATFORM_DEFAULT_ROTPK implementation
+ *        which maps from an image_id index to the corresponding type
+ *        \ref tfm_otp_element_id_t. Note that if PLATFORM_DEFAULT_OTP is not
+ *        used but PLATFORM_DEFAULT_ROTPK is, the platform_otp_ids.h needs to
+ *        provide its own macro if the custom OTP IDs do not have a value for
+ *        PLAT_OTP_ID_BL2_ROTPK_0 in order to be able to build the default ROTPK
+ *        code.
+ */
+#define PLAT_OTP_ID_BL2_ROTPK_FROM_IMAGE(image_id) \
+    ((enum tfm_otp_element_id_t)(PLAT_OTP_ID_BL2_ROTPK_0 + (image_id)))
+#endif /* PLATFORM_DEFAULT_ROTPK && !PLAT_OTP_ID_BL2_ROTPK_FROM_IMAGE */
+
 /* These are separate from the tfm_security_lifecycle_t definitions because here
  * the possible transitions are encoded by using the property that OTP bits can
  * be changed from a 0 to a 1, but not from a 1 to a 0.
