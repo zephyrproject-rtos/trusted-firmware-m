@@ -241,7 +241,6 @@ static psa_status_t ps_store_object(psa_storage_uid_t uid, int32_t client_id, ui
 {
     psa_status_t err;
 #ifndef PS_ENCRYPTION
-    uint32_t num_blocks;
     uint32_t wrt_size;
 #endif
 
@@ -249,7 +248,8 @@ static psa_status_t ps_store_object(psa_storage_uid_t uid, int32_t client_id, ui
 #if PS_AES_KEY_USAGE_LIMIT == 0
     err = ps_encrypted_object_write(g_obj_tbl_info.fid, &g_ps_object);
 #else
-    num_blocks = ps_encrypted_object_blocks(g_ps_object.header.info.current_size);
+    uint32_t num_blocks = ps_encrypted_object_blocks(g_ps_object.header.info.current_size);
+
     /* Switch to new key if this write will not leave enough blocks to read the object */
     if (2 * num_blocks >= PS_AES_KEY_USAGE_LIMIT - g_obj_tbl_info.num_blocks) {
         ps_switch_key();
