@@ -129,6 +129,20 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
         SOURCES ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
     )
 
+    if (DEFINED S_NS_SIGNED_TARGET_NAME)
+        message(STATUS "Using S_NS_SIGNED_TARGET_NAME: ${S_NS_SIGNED_TARGET_NAME}")
+    else()
+        set(S_NS_SIGNED_TARGET_NAME tfm_s_ns_signed)
+    endif()
+
+    add_custom_command(
+        TARGET tfm_s_ns_signed_bin
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
+            $<TARGET_FILE_DIR:tfm_ns>/${S_NS_SIGNED_TARGET_NAME}.bin
+    )
+
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 
         add_custom_target(tfm_ns_signed_bin
