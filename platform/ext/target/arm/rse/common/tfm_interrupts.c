@@ -75,7 +75,7 @@ void CMU_MHU1_Receiver_Handler(void)
 }
 #endif /* MHU_AP_NS_TO_RSE_DEV */
 
-#ifdef MHU_AP_S_TO_RSE
+#ifdef MHU_AP_S_TO_RSE_DEV
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU2_Receiver_Handler(void)
 {
@@ -89,7 +89,7 @@ void CMU_MHU2_Receiver_Handler(void)
      */
     spm_handle_interrupt(mbox_irq_info[2].p_pt, mbox_irq_info[2].p_ildi);
 }
-#endif /* MHU_AP_S_TO_RSE */
+#endif /* MHU_AP_S_TO_RSE_DEV */
 
 enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
                                        const struct irq_load_info_t *p_ildi)
