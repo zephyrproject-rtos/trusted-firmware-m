@@ -348,6 +348,19 @@ void tfm_arch_config_extensions(void)
 #if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1)
     SCB->CCR |= SCB_CCR_TRD_Msk;
 #endif
+
+#if defined(__ARM_ARCH_8_1M_MAIN__) && (__ARM_ARCH_8_1M_MAIN__ == 1)
+    /*
+     * \note Set Data Indepedent Timing (DIT) bit in AIRCR_S. This makes sure
+     *       that instructions which might have variable duration based on the
+     *       value of their operands, are always taking the same amount of
+     *       cycles to complete, for example UMLAL instruction used by the
+     *       P256M ECDSA driver.
+     *       If the implementation is not capable of guaranteeing this, the
+     *       write is ignored
+     */
+    SCB->AIRCR |= SCB_AIRCR_DIT_Msk;
+#endif
 }
 
 #if (CONFIG_TFM_FLOAT_ABI > 0)

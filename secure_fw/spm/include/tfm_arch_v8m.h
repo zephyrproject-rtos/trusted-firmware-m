@@ -204,4 +204,4 @@ __STATIC_INLINE void tfm_arch_config_branch_protection(void)
 #endif /* BRANCH_PROTECTION_CONTROL > 0 */
 }
 
-#endif
+#endif /* __TFM_ARCH_V8M_H__ */

@@ -293,7 +293,8 @@ FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
 }
 #endif
 
-/* There are no coprocessors in Armv8-M Baseline implementations */
 void tfm_arch_config_extensions(void)
 {
+    /* There are no coprocessors in Armv8-M Baseline implementations */
+    return;
 }
