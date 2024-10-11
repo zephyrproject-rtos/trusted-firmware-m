@@ -27,13 +27,11 @@
  *
  */
 
-#include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "device_definition.h"
 #include "region_defs.h"
 #include "region.h"
 #include "cmsis_driver_config.h"
-#include "target_cfg.h"
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"

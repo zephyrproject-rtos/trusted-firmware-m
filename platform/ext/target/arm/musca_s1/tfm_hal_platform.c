@@ -9,7 +9,7 @@
 #include "tfm_hal_device_header.h"
 #include "cmsis_driver_config.h"
 #include "musca_s1_scc_drv.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"

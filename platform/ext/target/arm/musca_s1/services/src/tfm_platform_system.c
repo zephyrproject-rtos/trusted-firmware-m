@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include "tfm_platform_system.h"
 #include "platform_description.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "device_definition.h"
 #include "psa/client.h"
 #include "tfm_ioctl_api.h"
