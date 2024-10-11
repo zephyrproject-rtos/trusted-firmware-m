@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -47,39 +47,6 @@ static psa_status_t platform_sp_system_reset_psa_api(const psa_msg_t *msg)
 }
 
 #if !PLATFORM_NV_COUNTER_MODULE_DISABLED
-static enum tfm_platform_err_t nv_counter_permissions_check(
-        int32_t client_id,
-        enum tfm_nv_counter_t nv_counter_no,
-        bool is_read)
-{
-    /* Not used currently */
-    (void)is_read;
-
-    switch (nv_counter_no) {
-#ifdef TFM_PARTITION_PROTECTED_STORAGE
-    case PLAT_NV_COUNTER_PS_0:
-    case PLAT_NV_COUNTER_PS_1:
-    case PLAT_NV_COUNTER_PS_2:
-        if (client_id == TFM_SP_PS) {
-            return TFM_PLATFORM_ERR_SUCCESS;
-        } else {
-            return TFM_PLATFORM_ERR_NOT_SUPPORTED;
-        }
-#endif
-    case PLAT_NV_COUNTER_NS_0:
-    case PLAT_NV_COUNTER_NS_1:
-    case PLAT_NV_COUNTER_NS_2:
-        /* TODO how does this interact with the ns_ctx extension? */
-        if (client_id < 0) {
-            return TFM_PLATFORM_ERR_SUCCESS;
-        } else {
-            return TFM_PLATFORM_ERR_NOT_SUPPORTED;
-        }
-    default:
-        return TFM_PLATFORM_ERR_NOT_SUPPORTED;
-    }
-}
-
 static psa_status_t platform_sp_nv_read_psa_api(const psa_msg_t *msg)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SYSTEM_ERR;
@@ -110,11 +77,14 @@ static psa_status_t platform_sp_nv_read_psa_api(const psa_msg_t *msg)
     }
 
     if (msg->client_id < 0) {
-        counter_id += PLAT_NV_COUNTER_NS_0;
+        err = tfm_plat_ns_counter_idx_to_nv_counter(counter_id, &counter_id);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return TFM_PLATFORM_ERR_INVALID_PARAM;
+        }
     }
 
-    if (nv_counter_permissions_check(msg->client_id, counter_id, true)
-        != TFM_PLATFORM_ERR_SUCCESS) {
+    err = tfm_plat_nv_counter_permissions_check(msg->client_id, counter_id, false);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 
@@ -158,11 +128,14 @@ static psa_status_t platform_sp_nv_increment_psa_api(const psa_msg_t *msg)
     }
 
     if (msg->client_id < 0) {
-        counter_id += PLAT_NV_COUNTER_NS_0;
+        err = tfm_plat_ns_counter_idx_to_nv_counter(counter_id, &counter_id);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return TFM_PLATFORM_ERR_INVALID_PARAM;
+        }
     }
 
-    if (nv_counter_permissions_check(msg->client_id, counter_id, false)
-        != TFM_PLATFORM_ERR_SUCCESS) {
+    err = tfm_plat_nv_counter_permissions_check(msg->client_id, counter_id, false);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 

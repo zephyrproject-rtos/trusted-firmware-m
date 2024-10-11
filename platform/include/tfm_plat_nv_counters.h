@@ -24,6 +24,7 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "tfm_plat_defs.h"
 
 #ifndef PLATFORM_NS_NV_COUNTERS
@@ -119,6 +120,34 @@ enum tfm_plat_err_t tfm_plat_increment_nv_counter(
  */
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value);
+
+/**
+ * @brief Checks permissions for the requesting \a client_id on the \a counter_id
+ *
+ * @param[in] client_id  Client ID making the request
+ * @param[in] counter_id Counter ID for which the request is being made
+ * @param[in] is_read    True if the request is for reading only the counter value
+ *
+ * @retval TFM_PLAT_ERR_SUCCESS     The permissions are granted for the request
+ * @retval TFM_PLAT_ERR_UNSUPPORTED The NV counter does not support the requested action for
+ *                                  the requesting \a client_id
+ */
+enum tfm_plat_err_t tfm_plat_nv_counter_permissions_check(int32_t client_id,
+                                                          enum tfm_nv_counter_t counter_id,
+                                                          bool is_read);
+
+/**
+ * @brief Maps a NS counter index to the corresponding NV counter ID enum
+ *
+ * @param[in]  ns_counter_idx Index for the requested NS counter
+ * @param[out] counter_id     Corresponding NV counter ID
+ *
+ * @retval TFM_PLAT_ERR_SUCCESS       A valid mapping has been returned
+ * @retval TFM_PLAT_ERR_INVALID_INPUT The requested NS counter index does not have a valid
+ *                                    mapping to an NV counter ID
+ */
+enum tfm_plat_err_t tfm_plat_ns_counter_idx_to_nv_counter(uint32_t ns_counter_idx,
+                                                          enum tfm_nv_counter_t *counter_id);
 
 #ifdef __cplusplus
 }
