@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <stddef.h>
+
 #include "array.h"
 #include "internal_status_code.h"
 #include "ns_mailbox_client_id.h"
