@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "mem_check_v6m_v7m.h"
+#include "mem_check_v6m_v7m_hal.h"
 #include "internal_status_code.h"
 #include "region.h"
 #include "region_defs.h"
