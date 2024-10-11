@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,11 +42,12 @@ extern "C" {
 #define IAT_NONCE                          10  /* EAT nonce */
 #define IAT_INSTANCE_ID                    256 /* EAT ueid */
 #define IAT_PROFILE_DEFINITION             265 /* EAT eat_profile */
+#define IAT_BOOT_SEED                      268 /* EAT bootseed */
 #define IAT_ARM_RANGE_BASE                 (2393)
 #define IAT_CLIENT_ID                      (IAT_ARM_RANGE_BASE + 1)
 #define IAT_SECURITY_LIFECYCLE             (IAT_ARM_RANGE_BASE + 2)
 #define IAT_IMPLEMENTATION_ID              (IAT_ARM_RANGE_BASE + 3)
-#define IAT_BOOT_SEED                      (IAT_ARM_RANGE_BASE + 4)
+/* Reserved                                (IAT_ARM_RANGE_BASE + 4) */
 #define IAT_CERTIFICATION_REFERENCE        (IAT_ARM_RANGE_BASE + 5)
 #define IAT_SW_COMPONENTS                  (IAT_ARM_RANGE_BASE + 6)
 #define IAT_VERIFICATION_SERVICE           (IAT_ARM_RANGE_BASE + 7)
