@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,6 +9,7 @@
 #ifndef __TFM_PERIPHERALS_DEF_H__
 #define __TFM_PERIPHERALS_DEF_H__
 
+#include "common_target_cfg.h"
 #include "platform_irq.h"
 
 #ifdef __cplusplus
@@ -23,8 +24,6 @@ extern "C" {
 
 #define TFM_TIMER0_IRQ    (TIMER0_IRQn)
 #define TFM_TIMER1_IRQ    (TIMER1_IRQn)
-
-struct platform_data_t;
 
 extern struct platform_data_t tfm_peripheral_std_uart;
 extern struct platform_data_t tfm_peripheral_uart1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited
+ * Copyright (c) 2018-2024 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include "platform_retarget_dev.h"
 #include "RTE_Device.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 
 #ifdef RTE_USART0
 #define UART0_DEV       ARM_UART0_DEV_NS

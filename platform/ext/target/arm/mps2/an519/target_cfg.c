@@ -15,7 +15,7 @@
  */
 
 #include "tfm_hal_device_header.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "Driver_MPC.h"
 #include "platform_retarget_dev.h"
 #include "region_defs.h"
@@ -316,13 +316,13 @@ void sau_and_idau_cfg(void)
 
 /*------------------- Memory configuration functions -------------------------*/
 
-int32_t mpc_init_cfg(void)
+enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
     ret = Driver_SRAM1_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = Driver_SRAM1_MPC.ConfigRegion(
@@ -330,7 +330,7 @@ int32_t mpc_init_cfg(void)
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
 #ifdef BL2
@@ -339,30 +339,30 @@ int32_t mpc_init_cfg(void)
                                   memory_regions.secondary_partition_limit,
                                   ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif /* BL2 */
 
     ret = Driver_SRAM2_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
                                         ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Lock down the MPC configuration */
     ret = Driver_SRAM1_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     ret = Driver_SRAM2_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Add barriers to assure the MPC configuration is done before continue
@@ -371,12 +371,12 @@ int32_t mpc_init_cfg(void)
     __DSB();
     __ISB();
 
-    return ARM_DRIVER_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 /*---------------------- PPC configuration functions -------------------------*/
 
-void ppc_init_cfg(void)
+enum tfm_plat_err_t ppc_init_cfg(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     struct nspctrl_def* nspctrl = CMSDK_NSPCTRL;
@@ -442,29 +442,31 @@ void ppc_init_cfg(void)
      * bus error instead of RAZ/WI
      */
     spctrl->secrespcfg |= 1U;
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
+void ppc_configure_to_non_secure(ppc_bank_t bank, uint32_t pos)
 {
     /* Setting NS flag for peripheral to enable NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] |= (1U << pos);
 }
 
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
+void ppc_configure_to_secure(ppc_bank_t bank, uint32_t pos)
 {
     /* Clear NS flag for peripheral to prevent NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] &= ~(1U << pos);
 }
 
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_en_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] |= (1U << pos);
 }
 
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_clr_secure_unpriv(ppc_bank_t bank, uint32_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] &= ~(1U << pos);
