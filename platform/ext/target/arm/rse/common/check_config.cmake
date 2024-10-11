@@ -19,6 +19,14 @@ tfm_invalid_config(RSE_USE_ROM_LIB_FROM_SRAM AND NOT RSE_SUPPORT_ROM_LIB_RELOCAT
 tfm_invalid_config(NOT BL1)
 tfm_invalid_config(NOT BL2)
 
+# RSE requires crypto accelerator
+tfm_invalid_config(NOT CRYPTO_HW_ACCELERATOR)
+
+# RSE uses MCUBOOT_BUILTIN_KEY to enable having full keys in OTP. TODO fixme
+# this can't be enabled until mcuboot supports image->key ID translation
+# properly.
+tfm_invalid_config(NOT MCUBOOT_HW_KEY)
+
 ########################## Attestation #########################################
 
 get_property(TFM_ATTESTATION_SCHEME_LIST CACHE TFM_ATTESTATION_SCHEME PROPERTY STRINGS)
