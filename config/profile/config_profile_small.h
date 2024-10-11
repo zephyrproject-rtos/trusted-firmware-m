@@ -158,7 +158,7 @@
 #if (!ATTEST_TOKEN_PROFILE_PSA_IOT_1) && \
     (!ATTEST_TOKEN_PROFILE_PSA_2_0_0) && \
     (!ATTEST_TOKEN_PROFILE_ARM_CCA)
-#define ATTEST_TOKEN_PROFILE_PSA_IOT_1         1
+#define ATTEST_TOKEN_PROFILE_PSA_2_0_0         1
 #endif
 
 /* ITS Partition Configs */
