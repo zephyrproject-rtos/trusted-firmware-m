@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "rse_rotpk_config.h"
 
 /**
  * \brief The persistent key identifiers for TF-M builtin keys.
@@ -30,9 +32,10 @@ enum tfm_key_id_builtin_t {
     TFM_BUILTIN_KEY_ID_ROT_CDI,
 #endif /* TFM_PARTITION_DPE */
     TFM_BUILTIN_KEY_ID_PLAT_SPECIFIC_MIN = 0x7FFF816Bu,
-    TFM_BUILTIN_KEY_ID_HOST_S_ROTPK,
-    TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK,
-    TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK,
+    TFM_BUILTIN_KEY_HOST_CM_MIN,
+    TFM_BUILTIN_KEY_HOST_CM_MAX = TFM_BUILTIN_KEY_HOST_CM_MIN + RSE_ROTPK_CM_HOST_AMOUNT,
+    TFM_BUILTIN_KEY_HOST_DM_MIN,
+    TFM_BUILTIN_KEY_HOST_DM_MAX = TFM_BUILTIN_KEY_HOST_DM_MIN + RSE_ROTPK_DM_HOST_AMOUNT,
     TFM_BUILTIN_KEY_ID_MAX = 0x7FFF817Bu,
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +17,7 @@
 #include "device_definition.h"
 #include "tfm_plat_otp.h"
 #include "rse_kmu_slot_ids.h"
+#include "rse_rotpk_mapping.h"
 
 #define NUMBER_OF_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
 #define MAPPED_RSE_MBOX_NS_AGENT_DEFAULT_CLIENT_ID -0x04000000
@@ -209,64 +210,84 @@ static enum tfm_plat_err_t tfm_plat_get_rot_cdi(const void *ctx,
 }
 #endif /* TFM_PARTITION_DPE */
 
-static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(const void *ctx,
+static enum tfm_plat_err_t tfm_plat_load_cm_host_key(const void *ctx,
                                                      uint8_t *buf, size_t buf_len,
                                                      size_t *key_len,
                                                      psa_key_bits_t *key_bits,
                                                      psa_algorithm_t *algorithm,
                                                      psa_key_type_t *type)
 {
-    if (buf_len < 96) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    tfm_plat_builtin_key_descriptor_t *descriptor =
+        (tfm_plat_builtin_key_descriptor_t *)ctx;
+    enum tfm_otp_element_id_t otp_id =
+        rse_cm_get_host_rotpk(TFM_BUILTIN_KEY_HOST_CM_MIN - descriptor->key_id);
+    size_t key_size;
+    enum tfm_plat_err_t err;
+
+    err = tfm_plat_otp_get_size(otp_id, &key_size);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
-    /* P384 public keys are 96 bytes in length */
-    *key_len = 96;
-    *key_bits = 384;
-    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
-    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+    *key_len = key_size;
+    *key_bits = key_size * 8;
 
-    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_S, buf_len, buf);
+#ifdef RSE_OTP_CM_ROTPK_IS_HASH_NOT_KEY
+    *algorithm = PSA_ALG_NONE;
+    *type = PSA_KEY_TYPE_VENDOR_FLAG | PSA_KEY_TYPE_CATEGORY_RAW;
+#else
+    if (key_size == 64) {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+    } else if (key_size == 96) {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    } else {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_512);
+    }
+
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+#endif
+
+    return tfm_plat_otp_read(otp_id, buf_len, buf);
 }
 
-static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(const void *ctx,
-                                                      uint8_t *buf, size_t buf_len,
-                                                      size_t *key_len,
-                                                      psa_key_bits_t *key_bits,
-                                                      psa_algorithm_t *algorithm,
-                                                      psa_key_type_t *type)
+static enum tfm_plat_err_t tfm_plat_load_dm_host_key(const void *ctx,
+                                                     uint8_t *buf, size_t buf_len,
+                                                     size_t *key_len,
+                                                     psa_key_bits_t *key_bits,
+                                                     psa_algorithm_t *algorithm,
+                                                     psa_key_type_t *type)
 {
-    if (buf_len < 96) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+    tfm_plat_builtin_key_descriptor_t *descriptor =
+        (tfm_plat_builtin_key_descriptor_t *)ctx;
+    enum tfm_otp_element_id_t otp_id =
+        rse_dm_get_host_rotpk(TFM_BUILTIN_KEY_HOST_DM_MIN - descriptor->key_id);
+    size_t key_size;
+    enum tfm_plat_err_t err;
+
+    err = tfm_plat_otp_get_size(otp_id, &key_size);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
-    /* P384 public keys are 96 bytes in length */
-    *key_len = 96;
-    *key_bits = 384;
-    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
-    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+    *key_len = key_size;
+    *key_bits = key_size * 8;
 
-    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_NS, buf_len, buf);
-}
-
-static enum tfm_plat_err_t tfm_plat_get_host_cca_rotpk(const void *ctx,
-                                                       uint8_t *buf, size_t buf_len,
-                                                       size_t *key_len,
-                                                       psa_key_bits_t *key_bits,
-                                                       psa_algorithm_t *algorithm,
-                                                       psa_key_type_t *type)
-{
-    if (buf_len < 96) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
+#ifdef RSE_OTP_DM_ROTPK_IS_HASH_NOT_KEY
+    *algorithm = PSA_ALG_NONE;
+    *type = PSA_KEY_TYPE_VENDOR_FLAG | PSA_KEY_TYPE_CATEGORY_RAW;
+#else
+    if (key_size == 64) {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+    } else if (key_size == 96) {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    } else {
+        *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_512);
     }
 
-    /* P384 public keys are 96 bytes in length */
-    *key_len = 96;
-    *key_bits = 384;
-    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
     *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+#endif
 
-    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_CCA, buf_len, buf);
+    return tfm_plat_otp_read(otp_id, buf_len, buf);
 }
 
 /**
@@ -337,15 +358,6 @@ static const tfm_plat_builtin_key_policy_t g_builtin_keys_policy[] = {
      .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_dak_seed_per_user_policy),
      .policy_ptr = g_dak_seed_per_user_policy},
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_S_ROTPK,
-     .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
-     .policy_ptr = g_host_rotpk_per_user_policy},
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK,
-     .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
-     .policy_ptr = g_host_rotpk_per_user_policy},
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK,
-     .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
-     .policy_ptr = g_host_rotpk_per_user_policy},
 #ifdef TFM_PARTITION_DPE
     {.key_id = TFM_BUILTIN_KEY_ID_ROT_CDI,
      .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_rot_cdi_per_user_policy),
@@ -376,21 +388,6 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
      .loader_key_func = tfm_plat_get_dak_seed,
      .loader_key_ctx = NULL},
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_S_ROTPK,
-     .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_S_ROTPK,
-     .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_s_rotpk,
-     .loader_key_ctx = NULL},
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK,
-     .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_NS_ROTPK,
-     .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_ns_rotpk,
-     .loader_key_ctx = NULL},
-    {.key_id = TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK,
-     .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK,
-     .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
-     .loader_key_func = tfm_plat_get_host_cca_rotpk,
-     .loader_key_ctx = NULL},
 #ifdef TFM_PARTITION_DPE
     {.key_id = TFM_BUILTIN_KEY_ID_ROT_CDI,
      .slot_number = TFM_BUILTIN_KEY_SLOT_ROT_CDI,
@@ -400,14 +397,88 @@ static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
 #endif /* TFM_PARTITION_DPE */
 };
 
-size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])
+size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *policy_ptr[])
 {
-    *desc_ptr = &g_builtin_keys_policy[0];
-    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy);
+    static bool dynamic_table_set_up = false;
+    static tfm_plat_builtin_key_policy_t dynamic_policy_table[NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy) +
+                                                                RSE_ROTPK_CM_HOST_AMOUNT +
+                                                                RSE_ROTPK_DM_HOST_AMOUNT];
+
+    if (!dynamic_table_set_up) {
+        tfm_plat_builtin_key_policy_t *dynamic_table_fill_ptr =
+            &dynamic_policy_table[NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy)];
+        memcpy(dynamic_policy_table, g_builtin_keys_policy, sizeof(g_builtin_keys_policy));
+
+        for (uint32_t idx = 0; idx < RSE_ROTPK_CM_HOST_AMOUNT; idx++) {
+             tfm_plat_builtin_key_policy_t policy = {
+                .key_id = TFM_BUILTIN_KEY_HOST_CM_MIN + idx,
+                .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
+                .policy_ptr = g_host_rotpk_per_user_policy,
+            };
+
+            *dynamic_table_fill_ptr = policy;
+            dynamic_table_fill_ptr++;
+        }
+
+        for (uint32_t idx = 0; idx < RSE_ROTPK_DM_HOST_AMOUNT; idx++) {
+             tfm_plat_builtin_key_policy_t policy = {
+                .key_id = TFM_BUILTIN_KEY_HOST_DM_MIN + idx,
+                .per_user_policy = NUMBER_OF_ELEMENTS_OF(g_host_rotpk_per_user_policy),
+                .policy_ptr = g_host_rotpk_per_user_policy,
+            };
+
+            *dynamic_table_fill_ptr = policy;
+            dynamic_table_fill_ptr++;
+        }
+
+        dynamic_table_set_up = true;
+    }
+
+    *policy_ptr = &dynamic_policy_table[0];
+    return NUMBER_OF_ELEMENTS_OF(dynamic_policy_table);
 }
 
 size_t tfm_plat_builtin_key_get_desc_table_ptr(const tfm_plat_builtin_key_descriptor_t *desc_ptr[])
 {
-    *desc_ptr = &g_builtin_keys_desc[0];
-    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc);
+    static bool dynamic_table_set_up = false;
+    static tfm_plat_builtin_key_descriptor_t dynamic_desc_table[NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc) +
+                                                                RSE_ROTPK_CM_HOST_AMOUNT +
+                                                                RSE_ROTPK_DM_HOST_AMOUNT];
+
+    if (!dynamic_table_set_up) {
+        tfm_plat_builtin_key_descriptor_t *dynamic_table_fill_ptr =
+            &dynamic_desc_table[NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc)];
+        memcpy(dynamic_desc_table, g_builtin_keys_desc, sizeof(g_builtin_keys_desc));
+
+        for (uint32_t idx = 0; idx < RSE_ROTPK_CM_HOST_AMOUNT; idx++) {
+             tfm_plat_builtin_key_descriptor_t desc = {
+                .key_id = TFM_BUILTIN_KEY_HOST_CM_MIN + idx,
+                .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_CM_MIN + idx,
+                .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
+                .loader_key_func = tfm_plat_load_cm_host_key,
+                .loader_key_ctx = dynamic_table_fill_ptr,
+            };
+
+            *dynamic_table_fill_ptr = desc;
+            dynamic_table_fill_ptr++;
+        }
+
+        for (uint32_t idx = 0; idx < RSE_ROTPK_DM_HOST_AMOUNT; idx++) {
+             tfm_plat_builtin_key_descriptor_t desc = {
+                .key_id = TFM_BUILTIN_KEY_HOST_DM_MIN + idx,
+                .slot_number = TFM_BUILTIN_KEY_SLOT_HOST_DM_MIN + idx,
+                .lifetime = TFM_BUILTIN_KEY_LOADER_LIFETIME,
+                .loader_key_func = tfm_plat_load_dm_host_key,
+                .loader_key_ctx = dynamic_table_fill_ptr,
+            };
+
+            *dynamic_table_fill_ptr = desc;
+            dynamic_table_fill_ptr++;
+        }
+
+        dynamic_table_set_up = true;
+    }
+
+    *desc_ptr = &dynamic_desc_table[0];
+    return NUMBER_OF_ELEMENTS_OF(dynamic_desc_table);
 }

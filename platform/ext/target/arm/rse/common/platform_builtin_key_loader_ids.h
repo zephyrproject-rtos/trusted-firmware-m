@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #ifndef __PLATFORM_BUILTIN_KEY_LOADER_IDS_H__
 #define __PLATFORM_BUILTIN_KEY_LOADER_IDS_H__
+
+#include "rse_rotpk_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,9 +25,10 @@ enum psa_drv_slot_number_t {
 #ifdef TFM_PARTITION_DPE
     TFM_BUILTIN_KEY_SLOT_ROT_CDI,
 #endif /* TFM_PARTITION_DPE */
-    TFM_BUILTIN_KEY_SLOT_HOST_S_ROTPK,
-    TFM_BUILTIN_KEY_SLOT_HOST_NS_ROTPK,
-    TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK,
+    TFM_BUILTIN_KEY_SLOT_HOST_CM_MIN,
+    TFM_BUILTIN_KEY_SLOT_HOST_CM_MAX = TFM_BUILTIN_KEY_SLOT_HOST_CM_MIN + RSE_ROTPK_CM_HOST_AMOUNT,
+    TFM_BUILTIN_KEY_SLOT_HOST_DM_MIN,
+    TFM_BUILTIN_KEY_SLOT_HOST_DM_MAX = TFM_BUILTIN_KEY_SLOT_HOST_DM_MIN + RSE_ROTPK_DM_HOST_AMOUNT,
     TFM_BUILTIN_KEY_SLOT_MAX,
 };
 
