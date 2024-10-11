@@ -164,9 +164,11 @@ static enum tfm_plat_err_t get_otp_id(enum tfm_nv_counter_t counter_id,
         *otp_id = rse_get_bl2_counter(counter_id - PLAT_NV_COUNTER_BL2_0);
     }
 
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     if (counter_id >= PLAT_NV_COUNTER_PS_0 && counter_id < PLAT_NV_COUNTER_PS_2) {
         *otp_id = rse_get_ps_counter(counter_id - PLAT_NV_COUNTER_PS_0);
     }
+#endif
 
     if (counter_id >= PLAT_NV_COUNTER_HOST_0 && counter_id < PLAT_NV_COUNTER_HOST_MAX) {
         *otp_id = rse_get_host_counter(counter_id - PLAT_NV_COUNTER_HOST_0);
@@ -174,6 +176,22 @@ static enum tfm_plat_err_t get_otp_id(enum tfm_nv_counter_t counter_id,
 
     if (counter_id >= PLAT_NV_COUNTER_SUBPLATFORM_0 && counter_id < PLAT_NV_COUNTER_SUBPLATFORM_MAX) {
         *otp_id = rse_get_subplatform_counter(counter_id - PLAT_NV_COUNTER_SUBPLATFORM_0);
+    }
+
+    if (counter_id == PLAT_NV_COUNTER_LFT) {
+        *otp_id = PLAT_OTP_ID_LFT_COUNTER;
+    }
+
+    if (counter_id == PLAT_NV_COUNTER_KRTL_USAGE) {
+        *otp_id = PLAT_OTP_ID_KRTL_USAGE_COUNTER;
+    }
+
+    if (counter_id == PLAT_NV_COUNTER_CM_ROTPK_REPROVISIONING) {
+        *otp_id = PLAT_OTP_ID_CM_ROTPK_REPROVISIONING;
+    }
+
+    if (counter_id == PLAT_NV_COUNTER_DM_ROTPK_REPROVISIONING) {
+        *otp_id = PLAT_OTP_ID_DM_ROTPK_REPROVISIONING;
     }
 
     if (*otp_id == PLAT_OTP_ID_INVALID) {
@@ -304,40 +322,36 @@ enum tfm_plat_err_t tfm_plat_nv_counter_permissions_check(int32_t client_id,
 {
     (void)is_read;
 
-    switch (nv_counter_no) {
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-    case PLAT_NV_COUNTER_PS_0:
-    case PLAT_NV_COUNTER_PS_1:
-    case PLAT_NV_COUNTER_PS_2:
+    if (nv_counter_no >= PLAT_NV_COUNTER_PS_0 && nv_counter_no <= PLAT_NV_COUNTER_PS_2) {
         if (client_id == TFM_SP_PS) {
             return TFM_PLAT_ERR_SUCCESS;
         } else {
             return TFM_PLAT_ERR_UNSUPPORTED;
         }
+    }
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
-    case PLAT_NV_COUNTER_NS_0:
-    case PLAT_NV_COUNTER_NS_1:
-    case PLAT_NV_COUNTER_NS_2:
+
+    if (nv_counter_no >= PLAT_NV_COUNTER_HOST_0 && nv_counter_no < PLAT_NV_COUNTER_HOST_MAX) {
         /* TODO how does this interact with the ns_ctx extension? */
         if (client_id < 0) {
             return TFM_PLAT_ERR_SUCCESS;
         } else {
             return TFM_PLAT_ERR_UNSUPPORTED;
         }
-    default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
     }
+
+    return TFM_PLAT_ERR_UNSUPPORTED;
 }
 
 enum tfm_plat_err_t tfm_plat_ns_counter_idx_to_nv_counter(uint32_t ns_counter_idx,
                                                           enum tfm_nv_counter_t *counter_id)
 {
-    /* Default NV counters only have PLAT_NV_COUNTERS_NS_0, _1 and _2 */
-    if ((ns_counter_idx > 2) || (counter_id == NULL)) {
+    if ((ns_counter_idx >= RSE_NV_COUNTER_HOST_AMOUNT) || (counter_id == NULL)) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
-    *counter_id = PLAT_NV_COUNTER_NS_0 + ns_counter_idx;
+    *counter_id = PLAT_NV_COUNTER_HOST_0 + ns_counter_idx;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
