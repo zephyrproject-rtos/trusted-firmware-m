@@ -8,6 +8,7 @@
 
 #include "rse_rotpk_mapping.h"
 #include "rse_otp_dev.h"
+#include "fatal_error.h"
 
 #include "rse_rotpk_config.h"
 
@@ -19,13 +20,19 @@ enum tfm_plat_err_t rse_rotpk_get_type(enum tfm_otp_element_id_t otp_id,
     uint32_t policy_word;
     uint32_t rotpk_index;
 
-    if (otp_id >= PLAT_OTP_ID_CM_ROTPK && otp_id < PLAT_OTP_ID_CM_ROTPK_MAX) {
+    if (P_RSE_OTP_CM_ROTPK == NULL) {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_TYPE_ROTPK_AREA_INVALID);
+        return TFM_PLAT_ERR_ROTPK_GET_TYPE_ROTPK_AREA_INVALID;
+    }
+
+    if ((otp_id >= PLAT_OTP_ID_CM_ROTPK) && (otp_id < PLAT_OTP_ID_CM_ROTPK_MAX)) {
         rotpk_base = PLAT_OTP_ID_CM_ROTPK;
-        policy_word = P_RSE_OTP_CM->rotpk_policies;
-    } else if (otp_id >= PLAT_OTP_ID_DM_ROTPK && otp_id < PLAT_OTP_ID_DM_ROTPK_MAX) {
+        policy_word = P_RSE_OTP_CM_ROTPK->cm_rotpk_policies;
+    } else if ((otp_id >= PLAT_OTP_ID_DM_ROTPK) && (otp_id < PLAT_OTP_ID_DM_ROTPK_MAX)) {
         rotpk_base = PLAT_OTP_ID_DM_ROTPK;
-        policy_word = P_RSE_OTP_DM->rotpk_policies;
+        policy_word = P_RSE_OTP_DM_ROTPK->dm_rotpk_policies;
     } else {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_TYPE_INVALID_ID);
         return TFM_PLAT_ERR_ROTPK_GET_TYPE_INVALID_ID;
     }
 
@@ -42,19 +49,54 @@ enum tfm_plat_err_t rse_rotpk_get_policy(enum tfm_otp_element_id_t otp_id,
     uint32_t policy_word;
     uint32_t rotpk_index;
 
+    if (P_RSE_OTP_CM_ROTPK == NULL) {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_POLICY_ROTPK_AREA_INVALID);
+        return TFM_PLAT_ERR_ROTPK_GET_POLICY_ROTPK_AREA_INVALID;
+    }
+
     if (otp_id >= PLAT_OTP_ID_CM_ROTPK && otp_id < PLAT_OTP_ID_CM_ROTPK_MAX) {
         rotpk_base = PLAT_OTP_ID_CM_ROTPK;
-        policy_word = P_RSE_OTP_CM->rotpk_policies;
+        policy_word = P_RSE_OTP_CM_ROTPK->cm_rotpk_policies;
     } else if (otp_id >= PLAT_OTP_ID_DM_ROTPK && otp_id < PLAT_OTP_ID_DM_ROTPK_MAX) {
         rotpk_base = PLAT_OTP_ID_DM_ROTPK;
-        policy_word = P_RSE_OTP_DM->rotpk_policies;
+        policy_word = P_RSE_OTP_DM_ROTPK->dm_rotpk_policies;
     } else {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_POLICY_INVALID_ID)
         return TFM_PLAT_ERR_ROTPK_GET_POLICY_INVALID_ID;
     }
 
     rotpk_index = otp_id - rotpk_base;
 
-    *policy = (policy_word >> (16 + rotpk_index)) & 0b1;
+    *policy = (policy_word >> (18 + rotpk_index)) & 0b1;
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t rse_rotpk_get_hash_alg(enum tfm_otp_element_id_t otp_id,
+                                           enum rse_rotpk_hash_alg *hash_alg)
+{
+    enum tfm_otp_element_id_t rotpk_base;
+    uint32_t policy_word;
+    uint32_t rotpk_index;
+
+    if (P_RSE_OTP_CM_ROTPK == NULL) {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_HASH_ALG_ROTPK_AREA_INVALID);
+        return TFM_PLAT_ERR_ROTPK_GET_HASH_ALG_ROTPK_AREA_INVALID;
+    }
+
+    if (otp_id >= PLAT_OTP_ID_CM_ROTPK && otp_id < PLAT_OTP_ID_CM_ROTPK_MAX) {
+        rotpk_base = PLAT_OTP_ID_CM_ROTPK;
+        policy_word = P_RSE_OTP_CM_ROTPK->cm_rotpk_policies;
+    } else if (otp_id >= PLAT_OTP_ID_DM_ROTPK && otp_id < PLAT_OTP_ID_DM_ROTPK_MAX) {
+        rotpk_base = PLAT_OTP_ID_DM_ROTPK;
+        policy_word = P_RSE_OTP_DM_ROTPK->dm_rotpk_policies;
+    } else {
+        FATAL_ERR(TFM_PLAT_ERR_ROTPK_GET_HASH_ALG_INVALID_ID)
+        return TFM_PLAT_ERR_ROTPK_GET_HASH_ALG_INVALID_ID;
+    }
+
+    rotpk_index = otp_id - rotpk_base;
+
+    *hash_alg = (policy_word >> (12 + rotpk_index)) & 0b1;
     return TFM_PLAT_ERR_SUCCESS;
 }
 

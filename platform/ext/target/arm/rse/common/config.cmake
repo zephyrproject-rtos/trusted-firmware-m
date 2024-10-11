@@ -24,8 +24,10 @@ set(CC3XX_RUNTIME_ENABLED               ON         CACHE BOOL     "Whether the C
 
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        OFF        CACHE BOOL     "Use default crypto keys implementation.")
+set(PLATFORM_DEFAULT_ROTPK              OFF        CACHE BOOL      "Use default root of trust public key.")
 set(PLATFORM_DEFAULT_PROVISIONING       OFF        CACHE BOOL     "Use default provisioning implementation")
 set(TFM_BL1_DEFAULT_PROVISIONING        OFF        CACHE BOOL     "Whether BL1_1 will use default provisioning")
+set(TFM_BL1_DEFAULT_OTP                 OFF        CACHE BOOL     "Whether BL1_1 will use default OTP memory")
 set(PLATFORM_DEFAULT_NV_SEED            OFF        CACHE BOOL     "Use default NV seed implementation.")
 set(PLATFORM_DEFAULT_NV_COUNTERS        OFF        CACHE BOOL     "Use default nv counter implementation.")
 set(PLATFORM_DEFAULT_ATTEST_HAL         OFF        CACHE BOOL     "Use default attest hal implementation.")

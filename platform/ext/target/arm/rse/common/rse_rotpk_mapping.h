@@ -9,16 +9,7 @@
 #define __RSE_ROTPK_MAPPING_H__
 
 #include "tfm_plat_otp.h"
-
-enum rse_rotpk_type {
-    RSE_ROTPK_TYPE_ECDSA = 0b00,
-    RSE_ROTPK_TYPE_LMS   = 0b01,
-};
-
-enum rse_rotpk_policy {
-    RSE_ROTPK_POLICY_SIG_OPTIONAL = 0b00,
-    RSE_ROTPK_POLICY_SIG_REQUIRED = 0b01,
-};
+#include "rse_rotpk_policy.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +20,9 @@ enum tfm_plat_err_t rse_rotpk_get_type(enum tfm_otp_element_id_t otp_id,
 
 enum tfm_plat_err_t rse_rotpk_get_policy(enum tfm_otp_element_id_t otp_id,
                                          enum rse_rotpk_policy *policy);
+
+enum tfm_plat_err_t rse_rotpk_get_hash_alg(enum tfm_otp_element_id_t otp_id,
+                                           enum rse_rotpk_hash_alg *hash_alg);
 
 enum tfm_otp_element_id_t rse_cm_get_bl1_rotpk();
 enum tfm_otp_element_id_t rse_cm_get_bl2_rotpk(uint32_t image_id);

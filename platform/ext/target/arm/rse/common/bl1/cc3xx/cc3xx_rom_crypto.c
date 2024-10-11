@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -97,6 +97,10 @@ static fih_int bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
         break;
     case TFM_BL1_KEY_GUK:
         *cc3xx_key_type = KMU_HW_SLOT_GUK;
+        *key_buf = NULL;
+        break;
+    case TFM_BL1_KEY_BL2_ENCRYPTION:
+        *cc3xx_key_type = KMU_HW_SLOT_KCE_CM;
         *key_buf = NULL;
         break;
     default:

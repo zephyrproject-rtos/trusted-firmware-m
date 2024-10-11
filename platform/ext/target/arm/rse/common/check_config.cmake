@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -22,10 +22,8 @@ tfm_invalid_config(NOT BL2)
 # RSE requires crypto accelerator
 tfm_invalid_config(NOT CRYPTO_HW_ACCELERATOR)
 
-# RSE uses MCUBOOT_BUILTIN_KEY to enable having full keys in OTP. TODO fixme
-# this can't be enabled until mcuboot supports image->key ID translation
-# properly.
-tfm_invalid_config(NOT MCUBOOT_HW_KEY)
+# RSE uses MCUBOOT_BUILTIN_KEY to enable having full keys in OTP.
+tfm_invalid_config(NOT MCUBOOT_HW_KEY AND NOT MCUBOOT_BUILTIN_KEY)
 
 ########################## Attestation #########################################
 
