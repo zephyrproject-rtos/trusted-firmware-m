@@ -25,6 +25,7 @@
  */
 
 #include <stddef.h>
+#include <stdbool.h>
 #include <bootutil/sign_key.h>
 #include "mcuboot_config/mcuboot_config.h"
 #include "tfm_plat_rotpk.h"
@@ -32,8 +33,6 @@
 #if defined(MCUBOOT_BUILTIN_KEY)
 #include "tfm_plat_otp.h"
 #endif
-
-#define NUMBER_OF_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
 
 #ifdef MCUBOOT_ENC_IMAGES
 unsigned char enc_priv_key[] = {
@@ -543,18 +542,15 @@ int boot_retrieve_public_key_hash(uint8_t image_index,
  */
 const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
 
-/* FixMe: Define the IDs of the builtin keys here until this is sorted properly */
-#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_0 (1)
-#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_1 (2)
-#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_2 (3)
-#define TFM_BUILTIN_KEY_ID_BL2_ROTPK_3 (4)
-
 /**
  * @brief Loader function to retrieve the Root of Trust Public Key
  *        to perform signature verification of the runtime image
  *        being loaded during the BL2 stage by MCUboot, with its associated
  *        metadata in order to be processed by the thin PSA Crypto core
  *
+ * @param[in]  ctx       Loader function context. This contains loader function specific
+ *                       information, i.e. the \ref tfm_plat_builtin_key_descriptor_t of
+ *                       the keys, the descriptor table
  * @param[in]  image_idx The index of the ROTPK, i.e. corresponds to the image index
  * @param[out] buf       Buffer containing the retrieved key material
  * @param[in]  buf_len   Size in bytes of the \a buf buffer
@@ -565,14 +561,17 @@ const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
  *
  * @return enum tfm_plat_err_t TFM_PLAT_ERR_SUCCESS or an error returned by OTP read
  */
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk(uint8_t image_idx,
-                                            uint8_t *buf, size_t buf_len,
-                                            size_t *key_len,
-                                            psa_key_bits_t *key_bits,
-                                            psa_algorithm_t *algorithm,
-                                            psa_key_type_t *type)
+static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk(const void *ctx,
+                                                  uint8_t *buf, size_t buf_len,
+                                                  size_t *key_len,
+                                                  psa_key_bits_t *key_bits,
+                                                  psa_algorithm_t *algorithm,
+                                                  psa_key_type_t *type)
 {
     enum tfm_plat_err_t err;
+    const tfm_plat_builtin_key_descriptor_t *descriptor = (const tfm_plat_builtin_key_descriptor_t *)ctx;
+    /* ToDo: sort out the mapping between Key IDs and image indexes at runtime */
+    uint32_t image_idx = descriptor->key_id - 1;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_BL2_ROTPK_0 + image_idx, buf_len, buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -626,124 +625,64 @@ static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk(uint8_t image_idx,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_0(const void *ctx,
-                                            uint8_t *buf, size_t buf_len,
-                                            size_t *key_len,
-                                            psa_key_bits_t *key_bits,
-                                            psa_algorithm_t *algorithm,
-                                            psa_key_type_t *type)
-{
-    return tfm_plat_get_bl2_rotpk(0, buf, buf_len, key_len, key_bits, algorithm, type);
-}
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_1(const void *ctx,
-                                            uint8_t *buf, size_t buf_len,
-                                            size_t *key_len,
-                                            psa_key_bits_t *key_bits,
-                                            psa_algorithm_t *algorithm,
-                                            psa_key_type_t *type)
-{
-    return tfm_plat_get_bl2_rotpk(1, buf, buf_len, key_len, key_bits, algorithm, type);
-}
-#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
-#if (MCUBOOT_IMAGE_NUMBER > 2)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_2(const void *ctx,
-                                            uint8_t *buf, size_t buf_len,
-                                            size_t *key_len,
-                                            psa_key_bits_t *key_bits,
-                                            psa_algorithm_t *algorithm,
-                                            psa_key_type_t *type)
-{
-    return tfm_plat_get_bl2_rotpk(2, buf, buf_len, key_len, key_bits, algorithm, type);
-}
-#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
-#if (MCUBOOT_IMAGE_NUMBER > 3)
-static enum tfm_plat_err_t tfm_plat_get_bl2_rotpk_3(const void *ctx,
-                                            uint8_t *buf, size_t buf_len,
-                                            size_t *key_len,
-                                            psa_key_bits_t *key_bits,
-                                            psa_algorithm_t *algorithm,
-                                            psa_key_type_t *type)
-{
-    return tfm_plat_get_bl2_rotpk(3, buf, buf_len, key_len, key_bits, algorithm, type);
-}
-#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
-
-/**
- * @brief Table describing the builtin-in keys (plaform keys) available in the
- *        platform that are relevant to BL2
+/* The policy table is built dynamically at runtime to allow for an arbitrary
+ * number of MCUBOOT_IMAGE_NUMBER entries, without hardcoding at build time
  */
-static const tfm_plat_builtin_key_descriptor_t g_builtin_keys_desc[] = {
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_0,
-     .slot_number = 0, /* Unused */
-     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
-     .loader_key_func = tfm_plat_get_bl2_rotpk_0},
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_1,
-     .slot_number = 0, /* Unused */
-     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
-     .loader_key_func = tfm_plat_get_bl2_rotpk_1},
-#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
-#if (MCUBOOT_IMAGE_NUMBER > 2)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_2,
-     .slot_number = 0, /* Unused */
-     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
-     .loader_key_func = tfm_plat_get_bl2_rotpk_2},
-#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
-#if (MCUBOOT_IMAGE_NUMBER > 3)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_3,
-     .slot_number = 0, /* Unused */
-     .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
-     .loader_key_func = tfm_plat_get_bl2_rotpk_3},
-#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
-};
-
-/**
- * @brief Table describing per-key user policies. Keys can't have a per-user
- *        policy in BL2 as the only user is MCUboot. The usage of each ROTPK
- *        is always the same, so to save a few bytes in flash this table can
- *        be reduced to only ROTPK_0, and all the other key IDs should access
- *        always the image 0 policy
- */
-static const tfm_plat_builtin_key_policy_t g_builtin_keys_policy[] = {
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_0,
-     .per_user_policy = 0,
-     .usage = PSA_KEY_USAGE_VERIFY_HASH},
-#if (MCUBOOT_IMAGE_NUMBER > 1)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_1,
-     .per_user_policy = 0,
-     .usage = PSA_KEY_USAGE_VERIFY_HASH},
-#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
-#if (MCUBOOT_IMAGE_NUMBER > 2)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_2,
-     .per_user_policy = 0,
-     .usage = PSA_KEY_USAGE_VERIFY_HASH},
-#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
-#if (MCUBOOT_IMAGE_NUMBER > 3)
-    {.key_id = TFM_BUILTIN_KEY_ID_BL2_ROTPK_3,
-     .per_user_policy = 0,
-     .usage = PSA_KEY_USAGE_VERIFY_HASH},
-#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
-};
-#endif /* !MCUBOOT_HW_KEY && !MCUBOOT_BUILTIN_KEY */
-
-#if defined(MCUBOOT_USE_PSA_CRYPTO)
-size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *desc_ptr[])
+size_t tfm_plat_builtin_key_get_policy_table_ptr(const tfm_plat_builtin_key_policy_t *policy_ptr[])
 {
 #if defined(MCUBOOT_BUILTIN_KEY)
-    *desc_ptr = &g_builtin_keys_policy[0];
-    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_policy);
+    static tfm_plat_builtin_key_policy_t policy_table[MCUBOOT_IMAGE_NUMBER];
+    static bool policy_table_is_initalized = false;
+
+    if (!policy_table_is_initalized) {
+        for (uint32_t idx = 0; idx < MCUBOOT_IMAGE_NUMBER; idx++) {
+            tfm_plat_builtin_key_policy_t policy = {
+                .key_id = idx + 1, /* ToDo: Relationship between key_id and image_idx is simply hardcoded */
+                .per_user_policy = 0,
+                .usage = PSA_KEY_USAGE_VERIFY_HASH,
+            };
+
+            policy_table[idx] = policy;
+        }
+
+        policy_table_is_initalized = true;
+    }
+
+    *policy_ptr = &policy_table[0];
+    return MCUBOOT_IMAGE_NUMBER;
 #else
-    *desc_ptr = NULL;
+    *policy_ptr = NULL;
     return 0;
 #endif
 }
 
+/* The descriptor table is built dynamically at runtime to allow for an arbitrary
+ * number of MCUBOOT_IMAGE_NUMBER entries, without hardcoding at build time
+ */
 size_t tfm_plat_builtin_key_get_desc_table_ptr(const tfm_plat_builtin_key_descriptor_t *desc_ptr[])
 {
 #if defined(MCUBOOT_BUILTIN_KEY)
-    *desc_ptr = &g_builtin_keys_desc[0];
-    return NUMBER_OF_ELEMENTS_OF(g_builtin_keys_desc);
+    static tfm_plat_builtin_key_descriptor_t descriptor_table[MCUBOOT_IMAGE_NUMBER];
+    static bool descriptor_table_is_initalized = false;
+
+    if (!descriptor_table_is_initalized) {
+        for (uint32_t idx = 0; idx < MCUBOOT_IMAGE_NUMBER; idx++) {
+            tfm_plat_builtin_key_descriptor_t descriptor = {
+                .key_id = idx + 1, /* ToDo: Relationship between key_id and image_idx is simply hardcoded */
+                .slot_number = 0, /* Unused */
+                .lifetime = PSA_KEY_LIFETIME_PERSISTENT,
+                .loader_key_func = tfm_plat_get_bl2_rotpk,
+                .loader_key_ctx = &descriptor_table[idx],
+            };
+
+            descriptor_table[idx] = descriptor;
+        }
+
+        descriptor_table_is_initalized = true;
+    }
+
+    *desc_ptr = &descriptor_table[0];
+    return MCUBOOT_IMAGE_NUMBER;
 #else
     *desc_ptr = NULL;
     return 0;
