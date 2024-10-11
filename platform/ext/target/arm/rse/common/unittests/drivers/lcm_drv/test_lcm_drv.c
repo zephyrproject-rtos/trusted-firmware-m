@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "lcm_drv.h"
-
+#include "lcm_otp_layout.h"
 #include "unity.h"
 
 /* Lifecycle state reset value */

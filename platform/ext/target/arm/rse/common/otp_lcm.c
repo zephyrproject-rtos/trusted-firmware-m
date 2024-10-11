@@ -11,6 +11,7 @@
 #include "cmsis_compiler.h"
 #include "device_definition.h"
 #include "lcm_drv.h"
+#include "lcm_otp_layout.h"
 #include "tfm_hal_device_header.h"
 #include "uart_stdout.h"
 #include "tfm_hal_platform.h"

@@ -23,7 +23,6 @@
 #define __LCM_DRV_H__
 
 #include <stdint.h>
-#include <stdbool.h>
 #include <limits.h>
 
 #ifdef __cplusplus
@@ -38,23 +37,6 @@ extern "C" {
 
 #define LCM_DCU_WIDTH_IN_BYTES (16)
 #define LCM_OTP_OFFSET 0x1000
-
-struct lcm_otp_layout_t {
-    volatile uint32_t huk[8];
-    volatile uint32_t guk[8];
-    volatile uint32_t kp_cm[8];
-    volatile uint32_t kce_cm[8];
-    volatile uint32_t kp_dm[8];
-    volatile uint32_t kce_dm[8];
-    volatile uint32_t rotpk[8];
-    volatile uint32_t tp_mode_config;
-    volatile uint32_t cm_config_1;
-    volatile uint32_t cm_config_2;
-    volatile uint32_t dm_config;
-    volatile uint32_t cm_rma_flag;
-    volatile uint32_t dm_rma_flag;
-    volatile uint32_t user_data[];
-};
 
 /**
  * \brief ARM LCM LCS enumeration types

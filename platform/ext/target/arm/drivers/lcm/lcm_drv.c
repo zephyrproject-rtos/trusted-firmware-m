@@ -20,9 +20,10 @@
  */
 
 #include "lcm_drv.h"
+#include "lcm_otp_layout.h"
+
 #include "tfm_hal_device_header.h"
 #include "device_definition.h"
-
 #include "fatal_error.h"
 
 #include <stddef.h>
