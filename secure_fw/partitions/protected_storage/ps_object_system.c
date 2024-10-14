@@ -382,9 +382,7 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
     psa_status_t err;
     uint32_t old_fid = PS_INVALID_FID;
     uint32_t fid_am_reserved = 1;
-#ifdef PS_ENCRYPTION
     uint32_t num_blocks;
-#endif
     bool object_exists = false;
 
     /* Boundary check the incoming request */
@@ -406,7 +404,7 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
         err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object, &num_blocks);
 #if PS_AES_KEY_USAGE_LIMIT != 0
         g_obj_tbl_info.num_blocks += num_blocks;
-#endif
+#endif /* PS_AES_KEY_USAGE_LIMIT */
 #else
         /* Read the object header */
         err = ps_read_object(READ_HEADER_ONLY);
@@ -504,9 +502,7 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
 {
     psa_status_t err;
     uint32_t old_fid = PS_INVALID_FID;
-#ifdef PS_ENCRYPTION
     uint32_t num_blocks;
-#endif
 
     /* Retrieve the object information from the object table if the object
      * exists.
