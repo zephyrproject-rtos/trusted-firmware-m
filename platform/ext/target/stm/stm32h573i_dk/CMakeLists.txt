@@ -21,7 +21,7 @@ target_sources(tfm_s
 )
 
 if(NS)
-    target_sources(${NS_TARGET_NAME}
+    target_sources(platform_ns
         PRIVATE
             ${STM_COMMON_DIR}/stm32h5xx/Device/Source/startup_stm32h5xx_ns.c
     )

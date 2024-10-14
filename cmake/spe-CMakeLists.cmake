@@ -109,8 +109,11 @@ target_sources(platform_ns
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
 )
 
-target_compile_definitions(platform_ns
-    PUBLIC
+add_library(platform_ns_definitions INTERFACE)
+
+# these compile definitions must match on the secure and nonsecure side for security
+target_compile_definitions(platform_ns_definitions
+    INTERFACE
         DOMAIN_NS=1
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
@@ -119,10 +122,22 @@ target_compile_definitions(platform_ns
         $<$<BOOL:${CONFIG_TFM_ENABLE_CP10CP11}>:CONFIG_TFM_ENABLE_CP10CP11>
 )
 
+target_link_libraries(platform_ns
+    PUBLIC
+        platform_ns_definitions
+)
+
+if (DEFINED PLATFORM_CUSTOM_NS_FILES)
+    message(STATUS "Using PLATFORM_CUSTOM_NS_FILES: ${PLATFORM_CUSTOM_NS_FILES}")
+else()
+    set(PLATFORM_CUSTOM_NS_FILES FALSE)
+endif()
+
 target_link_libraries(tfm_api_ns
     PUBLIC
         platform_region_defs
-        platform_ns
+        platform_ns_definitions
+        $<$<NOT:$<BOOL:${PLATFORM_CUSTOM_NS_FILES}>>:platform_ns>
 )
 
 if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)

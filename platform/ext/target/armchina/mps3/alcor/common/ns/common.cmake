@@ -20,7 +20,7 @@ target_include_directories(platform_region_defs
         ${PLATFORM_DIR}
 )
 
-target_sources(${NS_TARGET_NAME}
+target_sources(platform_ns
     PRIVATE
         ${ALCOR_COMMON_DIR}/device/source/startup_alcor_mps3.c
         ${ALCOR_COMMON_DIR}/device/source/system_core_init.c

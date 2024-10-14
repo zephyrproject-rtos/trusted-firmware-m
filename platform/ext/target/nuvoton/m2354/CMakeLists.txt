@@ -135,11 +135,11 @@ target_sources(tfm_spm
 
 
 if(NS)
-    target_sources(${NS_TARGET_NAME}
+    target_sources(platform_ns
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_m2354.c
     )
-    target_add_scatter_file(${NS_TARGET_NAME}
+    target_add_scatter_file(platform_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2354_ns.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/m2354_ns.ld>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/m2354_ns.icf>

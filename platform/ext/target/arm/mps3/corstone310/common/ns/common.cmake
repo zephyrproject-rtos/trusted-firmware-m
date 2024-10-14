@@ -20,7 +20,7 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
-target_sources(${NS_TARGET_NAME}
+target_sources(platform_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/device/source/startup_corstone310.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
