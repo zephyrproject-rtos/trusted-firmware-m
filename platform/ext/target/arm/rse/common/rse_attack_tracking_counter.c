@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,11 +10,10 @@
 
 #include "device_definition.h"
 #include "tfm_hal_platform.h"
-
-extern volatile uint32_t * const attack_tracking_bits_ptr;
-extern uint32_t attack_tracking_bits_word_size;
+#include "rse_otp_dev.h"
 
 #define MINOR_ATTACK_TRACKING_COUNTER_MAX 128
+#define MAJOR_LFT_COUNTER_WORD_SIZE (sizeof(P_RSE_OTP_HEADER->lft_counter) / sizeof(uint32_t))
 
 void increment_attack_tracking_counter_major(void)
 {
@@ -25,11 +24,11 @@ void increment_attack_tracking_counter_major(void)
     tfm_hal_system_halt();
 #endif
 
-    for (uint32_t idx = 0; idx < attack_tracking_bits_word_size; idx++) {
-        tmp = attack_tracking_bits_ptr[idx] + 1;
+    for (uint32_t idx = 0; idx < MAJOR_LFT_COUNTER_WORD_SIZE; idx++) {
+        tmp = P_RSE_OTP_HEADER->lft_counter[idx] + 1;
 
         if (tmp) {
-            attack_tracking_bits_ptr[idx] = tmp;
+            P_RSE_OTP_HEADER->lft_counter[idx] = tmp;
             break;
         }
     }
