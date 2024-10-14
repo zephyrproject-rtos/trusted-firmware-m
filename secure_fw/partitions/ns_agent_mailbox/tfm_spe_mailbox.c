@@ -11,7 +11,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "cmsis.h"
 #include "cmsis_compiler.h"
 
 #include "async.h"
