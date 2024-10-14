@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,12 +16,24 @@
 #include "device_definition.h"
 #include "tfm_plat_otp.h"
 #include "psa_manifest/pid.h"
+
+#include "rse_nv_counter_mapping.h"
+#include "rse_otp_layout.h"
+
 #include <limits.h>
 #include <string.h>
 
-#define OTP_COUNTER_MAX_SIZE    (16u * sizeof(uint32_t))
-#define NV_COUNTER_SIZE         4
+#define MAX(x,y) ((x) > (y) ? (x) : (y))
+
+#define OTP_COUNTER_MAX_SIZE    MAX(COUNTER_BYTES(RSE_OTP_NV_COUNTERS_BANK_0_MAX_VALUE), \
+                                MAX(COUNTER_BYTES(RSE_OTP_NV_COUNTERS_BANK_1_MAX_VALUE), \
+                                MAX(COUNTER_BYTES(RSE_OTP_NV_COUNTERS_BANK_2_MAX_VALUE), \
+                                MAX(COUNTER_BYTES(RSE_OTP_NV_COUNTERS_BANK_3_MAX_VALUE), \
+                                0))))
+
+
 #define OTP_COUNTER_MAGIC       0x3333CAFE
+#define NV_COUNTER_SIZE         sizeof(uint32_t)
 
 enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
 {
@@ -41,7 +53,7 @@ static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
                                              NULL);
 
     if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-        return ic_err;
+        return (enum tfm_plat_err_t)ic_err;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -139,46 +151,54 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
 }
 #endif /* RSE_BIT_PROGRAMMABLE_OTP */
 
+static enum tfm_plat_err_t get_otp_id(enum tfm_nv_counter_t counter_id,
+                                      enum tfm_otp_element_id_t *otp_id)
+{
+    *otp_id = PLAT_OTP_ID_INVALID;
+
+    if (counter_id >= PLAT_NV_COUNTER_BL1_0 && counter_id < PLAT_NV_COUNTER_BL1_MAX) {
+        *otp_id = rse_get_bl1_counter(counter_id - PLAT_NV_COUNTER_BL1_0);
+    }
+
+    if (counter_id >= PLAT_NV_COUNTER_BL2_0 && counter_id < PLAT_NV_COUNTER_BL2_MAX) {
+        *otp_id = rse_get_bl2_counter(counter_id - PLAT_NV_COUNTER_BL2_0);
+    }
+
+    if (counter_id >= PLAT_NV_COUNTER_PS_0 && counter_id < PLAT_NV_COUNTER_PS_2) {
+        *otp_id = rse_get_ps_counter(counter_id - PLAT_NV_COUNTER_PS_0);
+    }
+
+    if (counter_id >= PLAT_NV_COUNTER_HOST_0 && counter_id < PLAT_NV_COUNTER_HOST_MAX) {
+        *otp_id = rse_get_host_counter(counter_id - PLAT_NV_COUNTER_HOST_0);
+    }
+
+    if (counter_id >= PLAT_NV_COUNTER_SUBPLATFORM_0 && counter_id < PLAT_NV_COUNTER_SUBPLATFORM_MAX) {
+        *otp_id = rse_get_subplatform_counter(counter_id - PLAT_NV_COUNTER_SUBPLATFORM_0);
+    }
+
+    if (*otp_id == PLAT_OTP_ID_INVALID) {
+        return TFM_PLAT_ERR_READ_NV_COUNTER_UNSUPPORTED;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                              uint32_t size, uint8_t *val)
 {
+    enum tfm_otp_element_id_t otp_id;
+    enum tfm_plat_err_t err;
+
     if (size != NV_COUNTER_SIZE) {
         return TFM_PLAT_ERR_READ_NV_COUNTER_INVALID_COUNTER_SIZE;
     }
 
-    /* Assumes Platform nv counters are contiguous*/
-    if (counter_id >= PLAT_NV_COUNTER_BL2_0 &&
-        counter_id < (PLAT_NV_COUNTER_BL2_0 + MCUBOOT_IMAGE_NUMBER)) {
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL2_0 +
-                                       (counter_id - PLAT_NV_COUNTER_BL2_0),
-                                   val);
+    err = get_otp_id(counter_id, &otp_id);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
-    switch (counter_id) {
-#ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
-    case (PLAT_NV_COUNTER_PS_0):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_0, val);
-    case (PLAT_NV_COUNTER_PS_1):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_1, val);
-    case (PLAT_NV_COUNTER_PS_2):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_2, val);
-#endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
-    case (PLAT_NV_COUNTER_NS_0):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_0, val);
-    case (PLAT_NV_COUNTER_NS_1):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_1, val);
-    case (PLAT_NV_COUNTER_NS_2):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_2, val);
-
-    case (PLAT_NV_COUNTER_BL1_0):
-        return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, val);
-
-    case (PLAT_NV_COUNTER_ATTACK_TRACKING):
-        return read_otp_counter(PLAT_OTP_ID_ATTACK_TRACKING_BITS, val);
-
-    default:
-        return TFM_PLAT_ERR_READ_NV_COUNTER_UNSUPPORTED;
-    }
+    return read_otp_counter(otp_id, val);
 }
 
 
@@ -251,40 +271,15 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value)
 {
-    /* Assumes Platform nv counters are contiguous*/
-    if (counter_id >= PLAT_NV_COUNTER_BL2_0 &&
-        counter_id < (PLAT_NV_COUNTER_BL2_0 + MCUBOOT_IMAGE_NUMBER)) {
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL2_0 +
-                                      (counter_id - PLAT_NV_COUNTER_BL2_0),
-                                  value);
+    enum tfm_otp_element_id_t otp_id;
+    enum tfm_plat_err_t err;
+
+    err = get_otp_id(counter_id, &otp_id);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
-    switch (counter_id) {
-#ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
-    case (PLAT_NV_COUNTER_PS_0):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_0, value);
-    case (PLAT_NV_COUNTER_PS_1):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_1, value);
-    case (PLAT_NV_COUNTER_PS_2):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_PS_2, value);
-#endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
-
-    case (PLAT_NV_COUNTER_NS_0):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_0, value);
-    case (PLAT_NV_COUNTER_NS_1):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_1, value);
-    case (PLAT_NV_COUNTER_NS_2):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_2, value);
-
-    case (PLAT_NV_COUNTER_BL1_0):
-        return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_BL1_0, value);
-
-    case (PLAT_NV_COUNTER_ATTACK_TRACKING):
-        return set_otp_counter(PLAT_OTP_ID_ATTACK_TRACKING_BITS, value);
-
-    default:
-        return TFM_PLAT_ERR_SET_NV_COUNTER_UNSUPPORTED;
-    }
+    return set_otp_counter(otp_id, value);
 }
 
 enum tfm_plat_err_t tfm_plat_increment_nv_counter(
