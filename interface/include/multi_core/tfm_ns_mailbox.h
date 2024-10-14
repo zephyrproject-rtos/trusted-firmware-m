@@ -15,8 +15,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "cmsis.h"
-
 #include "tfm_mailbox.h"
 
 #ifdef __cplusplus
