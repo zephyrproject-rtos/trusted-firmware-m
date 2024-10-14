@@ -137,6 +137,7 @@ set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer
 ############################ Partitions ########################################
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
+set(PS_ROLLBACK_PROTECTION              ON          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
 set(PS_SUPPORT_FORMAT_TRANSITION        OFF         CACHE BOOL      "Enable reading the older format of Protected Storage data")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 set(PS_AES_KEY_USAGE_LIMIT              0           CACHE STRING    "Number of blocks to use a key for before changing it. 0 for no limit")
