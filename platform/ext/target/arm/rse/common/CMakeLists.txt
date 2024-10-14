@@ -208,6 +208,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
         otp_lcm.c
         nv_counters.c
+        $<$<BOOL:${RSE_SUBPLATFORM_PAL_DEFAULT_ROTPK}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_rotpk_mapping.c>
         attest_hal.c
         tfm_hal_platform_reset.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
@@ -318,6 +319,7 @@ target_sources(platform_bl2
         native_drivers/integrity_checker_drv.c
         otp_lcm.c
         nv_counters.c
+        $<$<BOOL:${RSE_SUBPLATFORM_PAL_DEFAULT_ROTPK}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_rotpk_mapping.c>
         $<$<BOOL:${RSE_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
@@ -409,6 +411,7 @@ target_sources(platform_bl1_1
         ./native_drivers/tram_drv.c
         ./native_drivers/integrity_checker_drv.c
         ./nv_counters.c
+        $<$<BOOL:${RSE_SUBPLATFORM_PAL_DEFAULT_ROTPK}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_rotpk_mapping.c>
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
         $<$<BOOL:${RSE_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>

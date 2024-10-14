@@ -1,0 +1,68 @@
+/*
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#ifndef __RSE_ROTPK_CONFIG_H__
+#define __RSE_ROTPK_CONFIG_H__
+
+enum rse_host_rotpk_id {
+    RSE_HOST_ROTPK_S,
+    RSE_HOST_ROTPK_NS,
+    RSE_HOST_ROTPK_CCA,
+};
+
+#define RSE_ROTPK_CM_BL1_AMOUNT  1
+#define RSE_ROTPK_CM_BL2_AMOUNT  1
+#define RSE_ROTPK_CM_HOST_AMOUNT 1
+#define RSE_ROTPK_CM_SECURE_DEBUG_AMOUNT 1
+#define RSE_ROTPK_CM_SUBPLATFORM_AMOUNT 0
+
+#define RSE_ROTPK_DM_BL1_AMOUNT  0
+#define RSE_ROTPK_DM_BL2_AMOUNT  1
+#define RSE_ROTPK_DM_HOST_AMOUNT 2
+#define RSE_ROTPK_DM_SECURE_DEBUG_AMOUNT 0
+#define RSE_ROTPK_DM_SUBPLATFORM_AMOUNT 0
+
+#include "rse_rotpk_auto_generated_mappings.h"
+
+/* ========================== CM Mappings ====================================*/
+
+#define RSE_CM_OTP_ID_FOR_BL1_IMAGE() \
+    (RSE_ROTPK_CM_BL1_AMOUNT ? CM_ROTPK_BL1_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_CM_OTP_ID_FOR_BL2_IMAGE(id) \
+    (RSE_ROTPK_CM_BL2_AMOUNT && \
+    (id) != 1 ? CM_ROTPK_BL2_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_CM_OTP_ID_FOR_HOST(id) \
+    (RSE_ROTPK_CM_HOST_AMOUNT ? CM_ROTPK_HOST_0 + (id) : PLAT_OTP_ID_INVALID)
+
+#define RSE_CM_OTP_ID_FOR_SECURE_DEBUG() \
+    (RSE_ROTPK_CM_SECURE_DEBUG_AMOUNT ? CM_ROTPK_SECURE_DEBUG_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_CM_OTP_ID_FOR_SUBPLATFORM(id) \
+    (RSE_ROTPK_CM_SUBPLATFORM_AMOUNT ? CM_ROTPK_SUBPLATFORM_0 + (id) : PLAT_OTP_ID_INVALID)
+
+/* ========================== DM Mappings ====================================*/
+
+#define RSE_DM_OTP_ID_FOR_BL1_IMAGE() \
+    (RSE_ROTPK_DM_BL1_AMOUNT ? DM_ROTPK_BL1_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_DM_OTP_ID_FOR_BL2_IMAGE(id) \
+    (RSE_ROTPK_DM_BL2_AMOUNT && \
+    (id) == 1 ? DM_ROTPK_BL2_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_DM_OTP_ID_FOR_HOST(id) \
+    (RSE_ROTPK_DM_HOST_AMOUNT ? DM_ROTPK_HOST_0 + (id) : PLAT_OTP_ID_INVALID)
+
+#define RSE_DM_OTP_ID_FOR_SECURE_DEBUG() \
+    (RSE_ROTPK_DM_SECURE_DEBUG_AMOUNT ? DM_ROTPK_SECURE_DEBUG_0 : PLAT_OTP_ID_INVALID)
+
+#define RSE_DM_OTP_ID_FOR_SUBPLATFORM(id) \
+    (RSE_ROTPK_DM_SUBPLATFORM_AMOUNT ? DM_ROTPK_SUBPLATFORM_0 + (id) : PLAT_OTP_ID_INVALID)
+
+
+#endif /* __RSE_ROTPK_CONFIG_H__ */
