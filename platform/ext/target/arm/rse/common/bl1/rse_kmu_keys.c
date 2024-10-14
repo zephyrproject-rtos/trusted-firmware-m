@@ -128,6 +128,27 @@ static enum tfm_plat_err_t duplicate_into_next_slot(enum rse_kmu_slot_id_t slot,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+/**
+ * @brief Computes the size of key from the relevant configuration values
+ *        of the KMUKSC<n> register, e.g. Destination Port Data Width (DPDW)
+ *        and Num Destination Port Writes (NDPW)
+ *
+ * @note  DPDW 00b -> 8 bits, 01b -> 16 bits, 10b -> 32 bits
+ *        NDPW 00b -> 4 writes, 01b -> 8 writes, 10b -> 16 writes, 11b -> 32 writes
+ *        key size in bytes is then: 2^(DPDW) * 2^(2 + NDPW)
+ *
+ * @param[in] cfg  Pointer to the configuration structure holding DPDW and NDPW
+ *
+ * @return size_t  Size in bytes of the configured key
+ */
+static inline size_t key_size_from_export_config(const struct kmu_key_export_config_t *cfg)
+{
+    const uint32_t DPDW = cfg->destination_port_data_width_code;
+    const uint32_t NDPW = cfg->destination_port_data_writes_code;
+
+    return ((1 << DPDW) * (1 << (2 + NDPW)));
+}
+
 enum tfm_plat_err_t setup_key_from_derivation(enum kmu_hardware_keyslot_t input_key_id,
                                               uint32_t *key_buf, const uint8_t *label,
                                               size_t label_len, enum rse_kmu_slot_id_t slot,
@@ -140,6 +161,7 @@ enum tfm_plat_err_t setup_key_from_derivation(enum kmu_hardware_keyslot_t input_
     size_t context_len;
     enum kmu_error_t kmu_err;
     volatile uint32_t *p_kmu_slot_buf;
+    const size_t key_size = key_size_from_export_config(export_config);
     size_t kmu_slot_size;
 
     plat_err = rse_get_boot_state(context, sizeof(context), &context_len, mask);
@@ -152,10 +174,14 @@ enum tfm_plat_err_t setup_key_from_derivation(enum kmu_hardware_keyslot_t input_
         return (enum tfm_plat_err_t) kmu_err;
     }
 
+    if (key_size > kmu_slot_size) {
+        return TFM_PLAT_ERR_KEY_DERIVATION_DERIVATION_SLOT_TOO_SMALL;
+    }
+
     plat_err = cc3xx_lowlevel_kdf_cmac((cc3xx_aes_key_id_t)input_key_id,
                                  key_buf, CC3XX_AES_KEYSIZE_256, label,
                                  label_len, context, context_len,
-                                 (uint32_t *)p_kmu_slot_buf, 32);
+                                 (uint32_t *)p_kmu_slot_buf, key_size);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
@@ -184,6 +210,7 @@ enum tfm_plat_err_t setup_key_from_otp(enum rse_kmu_slot_id_t slot,
     enum tfm_plat_err_t plat_err;
     enum kmu_error_t kmu_err;
     volatile uint32_t *p_kmu_slot_buf;
+    const size_t key_size = key_size_from_export_config(export_config);
     size_t kmu_slot_size;
 
     kmu_err = kmu_get_key_buffer_ptr(&KMU_DEV_S, slot, &p_kmu_slot_buf, &kmu_slot_size);
@@ -191,7 +218,11 @@ enum tfm_plat_err_t setup_key_from_otp(enum rse_kmu_slot_id_t slot,
         return (enum tfm_plat_err_t)kmu_err;
     }
 
-    plat_err = tfm_plat_otp_read(otp_id, kmu_slot_size, (uint8_t *)p_kmu_slot_buf);
+    if (key_size > kmu_slot_size) {
+        return TFM_PLAT_ERR_KEY_DERIVATION_OTP_SLOT_TOO_SMALL;
+    }
+
+    plat_err = tfm_plat_otp_read(otp_id, key_size, (uint8_t *)p_kmu_slot_buf);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
@@ -219,6 +250,7 @@ enum tfm_plat_err_t setup_key_from_rng(enum rse_kmu_slot_id_t slot,
     enum tfm_plat_err_t plat_err;
     enum kmu_error_t kmu_err;
     volatile uint32_t *p_kmu_slot_buf;
+    const size_t key_size = key_size_from_export_config(export_config);
     size_t kmu_slot_size;
 
     kmu_err = kmu_get_key_buffer_ptr(&KMU_DEV_S, slot, &p_kmu_slot_buf, &kmu_slot_size);
@@ -226,7 +258,11 @@ enum tfm_plat_err_t setup_key_from_rng(enum rse_kmu_slot_id_t slot,
         return (enum tfm_plat_err_t)kmu_err;
     }
 
-    bl1_trng_generate_random((uint8_t *)p_kmu_slot_buf, kmu_slot_size);
+    if (key_size > kmu_slot_size) {
+        return TFM_PLAT_ERR_KEY_DERIVATION_RNG_SLOT_TOO_SMALL;
+    }
+
+    bl1_trng_generate_random((uint8_t *)p_kmu_slot_buf, key_size);
 
     /* Due to limitations in CryptoCell, any key that needs to be used for
      * AES-CCM needs to be duplicated into a second slot.
