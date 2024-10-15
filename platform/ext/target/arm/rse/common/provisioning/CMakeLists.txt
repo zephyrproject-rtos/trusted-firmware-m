@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -7,8 +7,7 @@
 
 find_package(Python3)
 
-add_subdirectory(bundle_cm)
-add_subdirectory(bundle_dm)
+add_subdirectory(bundle)
 
 target_sources(platform_s
     PRIVATE

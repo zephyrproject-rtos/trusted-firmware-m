@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -253,19 +253,12 @@
 #error Shared data regions size is too large to fit in BOOT_TFM_SHARED_DATA_SIZE
 #endif
 
-#define PROVISIONING_BUNDLE_CODE_START VM0_BASE_S
+#define PROVISIONING_BUNDLE_CODE_START   (ITCM_BASE_S)
+#define PROVISIONING_BUNDLE_CODE_SIZE    (ITCM_SIZE)
 #define PROVISIONING_BUNDLE_VALUES_START (BL1_2_DATA_START)
-#define PROVISIONING_BUNDLE_DATA_START (PROVISIONING_BUNDLE_VALUES_START + \
-                                        PROVISIONING_BUNDLE_VALUES_SIZE)
-#define PROVISIONING_BUNDLE_DATA_SIZE (BL1_2_DATA_SIZE - \
-                                       PROVISIONING_BUNDLE_VALUES_SIZE)
-
-#define CM_PROVISIONING_BUNDLE_START (VM0_BASE_S + OTP_DMA_ICS_SIZE)
-#define DM_PROVISIONING_BUNDLE_START VM1_BASE_S
-
-#if PROVISIONING_BUNDLE_CODE_SIZE + PROVISIONING_BUNDLE_VALUES_SIZE + OTP_DMA_ICS_SIZE > VM0_SIZE
-#error Provisioning bundle is too large for slot
-#endif
+#define PROVISIONING_BUNDLE_VALUES_SIZE  (BL1_2_DATA_SIZE)
+#define PROVISIONING_BUNDLE_DATA_START   (VM1_BASE_S)
+#define PROVISIONING_BUNDLE_DATA_SIZE    (VM1_SIZE)
 
 #define RSE_TESTS_HEAP_SIZE      0x1000
 #define RSE_TESTS_MSP_STACK_SIZE 0x1800

@@ -16,6 +16,7 @@ bl1_trng_generate_random
 bl_fih_memeql
 cc3xx_lowlevel_uninit
 computed_bl1_2_hash
+dm_area_info
 dpa_hardened_word_copy
 get_supported_region_count
 host_flash_atu_init_regions_for_image
