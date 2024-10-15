@@ -678,6 +678,9 @@ static void ccm_calc_iv(bool from_auth)
      */
     b0_block[0] |= (q - 1) & 0b111;
 
+    /* Check that the message size is acceptable according to q */
+    assert(((aes_state.aes_to_crypt_len + aes_state.aes_to_auth_len) >> (q * 8)) == 0);
+
     /* Store t mod 0b111 where t=((ccm_tag_len - 2)/2) in the next 3 bytes. Tag
      * lengths under 4 are not acceptable, but CCM* allows a special-case tag
      * length of 0 which is encoded as 0b000. The case where aes_tag_len is 2 is
