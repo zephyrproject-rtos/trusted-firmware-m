@@ -20,6 +20,7 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "tfm_peripherals_config.h"
+#include "tfm_plat_provisioning.h"
 #include "region.h"
 #include "array.h"
 
