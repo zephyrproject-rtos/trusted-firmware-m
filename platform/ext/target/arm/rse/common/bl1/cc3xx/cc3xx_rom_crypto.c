@@ -101,6 +101,7 @@ static fih_int bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
         break;
     default:
         FIH_CALL(bl1_otp_read_key, fih_rc, key_id, *key_buf);
+        *cc3xx_key_type = 0;
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             memset(*key_buf, 0, key_buf_size);
             FIH_RET(fih_rc);
@@ -144,6 +145,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         }
     } else {
         input_key = (uint8_t *)key_material;
+        kmu_key_slot = 0;
     }
 
     cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
