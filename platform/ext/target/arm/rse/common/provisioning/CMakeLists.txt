@@ -32,28 +32,50 @@ target_include_directories(platform_bl1_1_interface
 
 add_custom_target(cm_provisioning_key
     ALL
-    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/cm_provisioning_key.bin
+    SOURCES ${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin
+    SOURCES ${CMAKE_BINARY_DIR}/bin/keys/kmaster_cm.bin
 )
 
 add_custom_target(dm_provisioning_key
     ALL
-    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/dm_provisioning_key.bin
+    SOURCES ${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
+    SOURCES ${CMAKE_BINARY_DIR}/bin/keys/kmaster_dm.bin
 )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cm_provisioning_key.bin
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/keys)
+
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin
+    OUTPUT ${CMAKE_BINARY_DIR}/bin/keys/kmaster_cm.bin
     DEPENDS ${RSE_RTL_KEY_PATH}
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/derive_cm_and_dm_keys.py
-        --tp_mode=${RSE_TP_MODE}
-        --krtl_file=${RSE_RTL_KEY_PATH}
-        --key_select=cm
-        --output_key_file=${CMAKE_CURRENT_BINARY_DIR}/cm_provisioning_key.bin
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/derive_provisioning_master_key.py
+        --krtl=${RSE_RTL_KEY_PATH}
+        --key_owner=CM
+        --batch_number=${RSE_BATCH_NUMBER}
+        --kmaster_file=${CMAKE_BINARY_DIR}/bin/keys/kmaster_cm.bin
+
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/derive_provisioning_key.py
+        --kmaster=${CMAKE_BINARY_DIR}/bin/keys/kmaster_cm.bin
+        --key_owner=CM
+        --kprov_file=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin
 )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/dm_provisioning_key.bin
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
+    OUTPUT ${CMAKE_BINARY_DIR}/bin/keys/kmaster_dm.bin
     DEPENDS ${RSE_RTL_KEY_PATH}
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/derive_cm_and_dm_keys.py
-        --tp_mode=${RSE_TP_MODE}
-        --krtl_file=${RSE_RTL_KEY_PATH}
-        --key_select=dm
-        --output_key_file=${CMAKE_CURRENT_BINARY_DIR}/dm_provisioning_key.bin
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/derive_provisioning_master_key.py
+        --krtl=${RSE_RTL_KEY_PATH}
+        --key_owner=DM
+        --dm_number=${RSE_DM_NUMBER}
+        --kmaster_file=${CMAKE_BINARY_DIR}/bin/keys/kmaster_dm.bin
+
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/derive_provisioning_key.py
+        --kmaster=${CMAKE_BINARY_DIR}/bin/keys/kmaster_dm.bin
+        --key_owner=DM
+        --kprov_file=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
 )

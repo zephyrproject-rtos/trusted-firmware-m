@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,8 +23,10 @@ extern "C" {
 #endif
 
 enum tfm_plat_err_t setup_key_from_derivation(enum kmu_hardware_keyslot_t input_key_id,
-                                              uint32_t *key_buf, const uint8_t *label,
-                                              size_t label_len, enum rse_kmu_slot_id_t slot,
+                                              uint32_t *key_buf,
+                                              const uint8_t *label, size_t label_len,
+                                              const uint8_t *context, size_t context_len,
+                                              enum rse_kmu_slot_id_t slot,
                                               const struct kmu_key_export_config_t *export_config,
                                               const struct kmu_key_export_config_t *aead_export_config,
                                               bool setup_aes_aead_key, boot_state_include_mask mask);
@@ -104,8 +106,7 @@ enum tfm_plat_err_t rse_setup_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_
 enum tfm_plat_err_t rse_setup_session_key(const uint8_t *ivs, size_t ivs_len);
 
 /**
- * \brief                     setup the CM provisioning key, and lock into two
- *                            KMU slots.
+ * \brief                     Setup the master key, and lock into two KMU slots.
  *
  * \note                      Due to a limitation in KMU key export, keys used
  *                            for AEAD (such as this one) require two slots. The
@@ -116,10 +117,11 @@ enum tfm_plat_err_t rse_setup_session_key(const uint8_t *ivs, size_t ivs_len);
  *
  * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-enum tfm_plat_err_t rse_setup_cm_provisioning_key(void);
+enum tfm_plat_err_t rse_setup_master_key(const uint8_t *label, size_t label_len,
+                                         const uint8_t *context, size_t context_len);
 
 /**
- * \brief                     setup the DM provisioning key, and lock into two
+ * \brief                     Setup the provisioning key, and lock into two
  *                            KMU slots.
  *
  * \note                      Due to a limitation in KMU key export, keys used
@@ -131,7 +133,8 @@ enum tfm_plat_err_t rse_setup_cm_provisioning_key(void);
  *
  * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
-enum tfm_plat_err_t rse_setup_dm_provisioning_key(void);
+enum tfm_plat_err_t rse_setup_provisioning_key(const uint8_t *label, size_t label_len,
+                                               const uint8_t *context, size_t context_len);
 
 /**
  * \brief                     Setup the runtime secure image decryption key, and

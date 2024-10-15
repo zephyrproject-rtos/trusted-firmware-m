@@ -146,12 +146,16 @@ set(RSE_AMOUNT                          1          CACHE STRING  "Amount of RSEe
 set(RSE_TP_MODE                         TCI        CACHE STRING "Whether system is in Test or Production mode")
 
 if (RSE_TP_MODE STREQUAL "TCI")
-    set(RSE_RTL_KEY_PATH                ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+    set(RSE_RTL_KEY_PATH ${CMAKE_CURRENT_LIST_DIR}/provisioning/keys/krtl/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
 elseif(RSE_TP_MODE STREQUAL "PCI")
-    set(RSE_RTL_KEY_PATH                ${CMAKE_CURRENT_LIST_DIR}/provisioning/pci_krtl_dummy.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+    set(RSE_RTL_KEY_PATH ${CMAKE_CURRENT_LIST_DIR}/provisioning/keys/krtl/pci_krtl_dummy.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
 else()
     message(FATAL_ERROR "Invalid TP mode ${RSE_TP_MODE}")
 endif()
+
+set(RSE_CM_CA_ROOT_HASH_PATH
+    ${CMAKE_CURRENT_LIST_DIR}/provisioning/keys/ca_hash/cm_root_ca_hash.bin CACHE FILEPATH "Path to CM root CA hash")
+set(RSE_DM_CA_ROOT_HASH_PATH ${CMAKE_CURRENT_LIST_DIR}/provisioning/keys/ca_hash/dm_root_ca_hash.bin CACHE FILEPATH "Path to DM root CA hash")
 
 # FIXME Enable this once the FVP is fixed
 set(RSE_ENCRYPTED_OTP_KEYS              OFF        CACHE BOOL "Whether keys in OTP are encrypted")
