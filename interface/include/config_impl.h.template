@@ -68,6 +68,14 @@
 
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
+/* Stack size must be aligned to satisfy platform alignment requirements
+ * Note that .c file that uses this define need to include region_defs.h and
+ * tfm_s_linker_alignments.h in this exact order. This is needed to ensure
+ * that correct align values are used. */
+#define TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED \
+    ROUND_UP_TO_MULTIPLE(CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,\
+                         TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT)
+
 {% set arot = namespace(CONFIG_TFM_AROT_PRESENT="0") %}
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}

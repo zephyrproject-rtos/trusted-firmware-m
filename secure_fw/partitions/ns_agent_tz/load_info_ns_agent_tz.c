@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -33,11 +33,6 @@
 
 /* Entrypoint function declaration */
 extern void ns_agent_tz_main(uint32_t c_entry);
-
-/* Stack size must be aligned to satisfy platform alignment requirements */
-#define TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED \
-    ROUND_UP_TO_MULTIPLE(CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,\
-                         TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT)
 
 /* Stack */
 uint8_t ns_agent_tz_stack[TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED] __aligned(TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT);
