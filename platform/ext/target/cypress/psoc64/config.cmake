@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2024 Cypress Semiconductor Corporation (an Infineon
 # company) or an affiliate of Cypress Semiconductor Corporation. All rights
 # reserved.
@@ -33,7 +33,7 @@ set(CY_P64_UTILS_LIB_VERSION            "release-v1.0.0" CACHE STRING "The versi
 set(CY_P64_UTILS_FORCE_PATCH            OFF         CACHE BOOL      "Always apply p64_utils patches")
 
 # Configure PDL to use RAM interrup vectors. This is required by P64_utils
-add_compile_definitions(RAM_VECTORS_SUPPORT)
+add_compile_definitions($<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:RAM_VECTORS_SUPPORT>)
 
 # Disable default PDL IPC configuration. Use Cy_Platform_Init() in
 # in psoc6_system_init_cm4.c and psoc6_system_init_cm0p.c instead.

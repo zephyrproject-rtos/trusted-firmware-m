@@ -17,7 +17,7 @@ endif()
 
 set(CMAKE_C_COMPILER armclang)
 set(CMAKE_CXX_COMPILER armclang)
-set(CMAKE_ASM_COMPILER armasm)
+set(CMAKE_ASM_COMPILER armclang)
 
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
@@ -65,25 +65,6 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85"))
             string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-    endif()
-
-    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-else()
-    set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
-
-    # Armasm uses different syntax than armclang for architecture targets
-    string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-    string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-
-    # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
-    if (TFM_SYSTEM_DSP)
-        string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
-    endif()
-
-    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-        string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
     endif()
 endif()
 
@@ -136,6 +117,7 @@ endif()
 if (CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_CXX_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_ASM_FLAGS "--target=${CMAKE_ASM_COMPILER_TARGET} -mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
@@ -156,8 +138,6 @@ else()
     set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
 endif()
 
-set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
-
 # This flag is used to check if toolchain has fixed VLLDM vulnerability
 # Check command will fail if C flags consist of keyword other than cpu/arch type.
 set(CP_CHECK_C_FLAGS ${CMAKE_C_FLAGS})
@@ -166,7 +146,7 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     set(COMPILER_CP_C_FLAG "-mfloat-abi=hard")
     if (CONFIG_TFM_ENABLE_FP)
         set(COMPILER_CP_C_FLAG "-mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH}")
-        set(COMPILER_CP_ASM_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
+        set(COMPILER_CP_ASM_FLAG "-mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH}")
         # armasm and armlink have the same option "--fpu" and are both used to
         # specify the target FPU architecture. So the supported FPU architecture
         # names can be shared by armasm and armlink.
@@ -174,7 +154,7 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     endif()
 else()
     set(COMPILER_CP_C_FLAG   "-mfpu=softvfp")
-    set(COMPILER_CP_ASM_FLAG "--fpu=softvfp")
+    set(COMPILER_CP_ASM_FLAG "-mfpu=softvfp")
     set(LINKER_CP_OPTION     "--fpu=SoftVFP")
 endif()
 
@@ -182,11 +162,6 @@ string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_C_FLAG})
 string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_ASM_FLAG})
 string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
 string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
-
-# Workaround for issues with --depend-single-line with armasm and Ninja
-if (CMAKE_GENERATOR STREQUAL "Ninja")
-    set( CMAKE_DEPFILE_FLAGS_ASM "--depend=<OBJECT>.d")
-endif()
 
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
 
@@ -207,7 +182,7 @@ add_compile_options(
     $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
-    $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
+    $<$<COMPILE_LANGUAGE:ASM>:-masm=armasm>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
 )

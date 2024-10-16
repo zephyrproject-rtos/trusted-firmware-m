@@ -12,7 +12,7 @@ SET(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_C_COMPILER armclang)
 set(CMAKE_CXX_COMPILER armclang)
-set(CMAKE_ASM_COMPILER armasm)
+set(CMAKE_ASM_COMPILER armclang)
 
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out=)
 set(COMPILER_CMSE_FLAG $<$<COMPILE_LANGUAGE:C>:-mcmse>)
@@ -58,25 +58,6 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85"))
             string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-    endif()
-
-    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-else()
-    set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
-
-    # Armasm uses different syntax than armclang for architecture targets
-    string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-    string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
-
-    # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
-    if (TFM_SYSTEM_DSP)
-        string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
-    endif()
-
-    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-        string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
     endif()
 endif()
 
@@ -131,7 +112,7 @@ add_compile_options(
     $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
-    $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
+    $<$<COMPILE_LANGUAGE:ASM>:-masm=armasm>
     $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
 )
@@ -176,6 +157,7 @@ endif()
 if (CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_CXX_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_ASM_FLAGS "--target=${CMAKE_ASM_COMPILER_TARGET} -mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
@@ -196,11 +178,8 @@ else()
     set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
 endif()
 
-set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
-
 set(BL2_COMPILER_CP_FLAG
-    $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
-    $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    -mfpu=softvfp
 )
 # As BL2 does not use hardware FPU, specify '--fpu=SoftVFP' explicitly to use software
 # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
@@ -209,8 +188,7 @@ set(BL2_COMPILER_CP_FLAG
 set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
 
 set(BL1_COMPILER_CP_FLAG
-    $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
-    $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    -mfpu=softvfp
 )
 set(BL1_LINKER_CP_OPTION --fpu=SoftVFP)
 
@@ -220,8 +198,7 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     )
     if (CONFIG_TFM_ENABLE_FP)
         set(COMPILER_CP_FLAG
-            $<$<COMPILE_LANGUAGE:C>:-mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard>
-            $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+            -mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard
         )
         # armasm and armlink have the same option "--fpu" and are both used to
         # specify the target FPU architecture. So the supported FPU architecture
@@ -230,15 +207,9 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     endif()
 else()
     set(COMPILER_CP_FLAG
-        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
-        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+        -mfpu=softvfp
     )
     set(LINKER_CP_OPTION --fpu=SoftVFP)
-endif()
-
-# Workaround for issues with --depend-single-line with armasm and Ninja
-if (CMAKE_GENERATOR STREQUAL "Ninja")
-    set( CMAKE_DEPFILE_FLAGS_ASM "--depend=<OBJECT>.d")
 endif()
 
 set(CMAKE_C_FLAGS_MINSIZEREL "-Oz -DNDEBUG")
