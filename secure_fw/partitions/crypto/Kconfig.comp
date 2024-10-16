@@ -8,6 +8,16 @@
 menu "Crypto component options"
     depends on TFM_PARTITION_CRYPTO
 
+config CRYPTO_LIBRARY_ABI_COMPAT
+    bool "The interfaces towards PSA Crypto in the service and towards the service are the same"
+    default n
+    help
+      The crypto service acts as a layer between a client and towards a library that provides
+      PSA Crypto APIs through the implementation of a PSA Crypto core component. With this option
+      set, the crypto service assumes that the ABI of the internal interface is the same as the
+      client interface. This is not the default case when using the headers provided by the Mbed
+      TLS reference implementation
+
 config CRYPTO_STACK_SIZE
     hex "Stack size"
     default 0x1B00

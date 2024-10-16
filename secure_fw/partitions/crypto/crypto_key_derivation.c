@@ -128,7 +128,8 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        if ((in_vec[1].base == NULL) || (in_vec[1].len != (sizeof(srv_key_attr) - sizeof(mbedtls_key_owner_id_t)))) {
+        if ((in_vec[1].base == NULL) ||
+            (in_vec[1].len != (sizeof(srv_key_attr) - TFM_CRYPTO_KEY_ATTR_OFFSET_CLIENT_SERVER))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
         memcpy(&srv_key_attr, in_vec[1].base, in_vec[1].len);

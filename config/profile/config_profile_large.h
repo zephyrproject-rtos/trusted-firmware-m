@@ -33,6 +33,16 @@
 /* Crypto Partition Configs */
 
 /*
+ * The service assumes that the client interface and internal
+ * interface towards the library that provides the PSA Crypto
+ * core component maintain the same ABI. This is not the default
+ * when using the Mbed TLS reference implementation
+ */
+#ifndef CRYPTO_LIBRARY_ABI_COMPAT
+#define CRYPTO_LIBRARY_ABI_COMPAT (0)
+#endif
+
+/*
  * Heap size for the crypto backend
  * CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
  */
