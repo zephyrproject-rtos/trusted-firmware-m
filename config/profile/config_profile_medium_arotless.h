@@ -108,6 +108,16 @@
 #define CRYPTO_SINGLE_PART_FUNCS_DISABLED      0
 #endif
 
+/*
+ * The service assumes that the client interface and internal
+ * interface towards the library that provides the PSA Crypto
+ * core component maintain the same ABI. This is not the default
+ * when using the Mbed TLS reference implementation
+ */
+#ifndef CRYPTO_LIBRARY_ABI_COMPAT
+#define CRYPTO_LIBRARY_ABI_COMPAT (0)
+#endif
+
 /* The stack size of the Crypto Secure Partition */
 #ifndef CRYPTO_STACK_SIZE
 #define CRYPTO_STACK_SIZE                      0x1B00

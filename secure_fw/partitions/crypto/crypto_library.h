@@ -25,6 +25,19 @@ extern "C" {
 #include "psa/crypto.h"
 
 /**
+ * @brief Some integration might decide to enforce the same ABI on client and
+ *        service interfaces to PSA Crypto defining the \a CRYPTO_LIBRARY_ABI_COMPAT
+ *        In this case the size of the structure describing the key attributes
+ *        is the same both in client and server views. The semantics remain
+ *        unchanged
+ */
+#if defined(CRYPTO_LIBRARY_ABI_COMPAT) && (CRYPTO_LIBRARY_ABI_COMPAT == 1)
+#define TFM_CRYPTO_KEY_ATTR_OFFSET_CLIENT_SERVER (0)
+#else
+#define TFM_CRYPTO_KEY_ATTR_OFFSET_CLIENT_SERVER (sizeof(mbedtls_key_owner_id_t))
+#endif /* CRYPTO_LIBRARY_ABI_COMPAT */
+
+/**
  * @brief This macro extracts the key ID from the library encoded key passed as parameter
  *
  */
