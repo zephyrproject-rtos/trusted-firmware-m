@@ -38,7 +38,7 @@
 #define SPMLOG_DBGMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
 #define SPMLOG_DBGMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
-#define SPMLOG_DBGMSGVAL(msg, val)
+#define SPMLOG_DBGMSGVAL(msg, val) (void)(val)
 #define SPMLOG_DBGMSG(msg)
 #endif
 
@@ -46,7 +46,7 @@
 #define SPMLOG_INFMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
 #define SPMLOG_INFMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
-#define SPMLOG_INFMSGVAL(msg, val)
+#define SPMLOG_INFMSGVAL(msg, val) (void)(val)
 #define SPMLOG_INFMSG(msg)
 #endif
 
@@ -54,7 +54,7 @@
 #define SPMLOG_ERRMSGVAL(msg, val) spm_log_msgval(msg, sizeof(msg), val)
 #define SPMLOG_ERRMSG(msg) tfm_hal_output_spm_log(msg, sizeof(msg))
 #else
-#define SPMLOG_ERRMSGVAL(msg, val)
+#define SPMLOG_ERRMSGVAL(msg, val) (void)(val)
 #define SPMLOG_ERRMSG(msg)
 #endif
 
