@@ -1,4 +1,4 @@
-From 289657404e7e3ea79ad3cda9a7c4caea5a04b6e2 Mon Sep 17 00:00:00 2001
+From 49e1f6ec6bc1a5a52a82b0cbb423db7c361f2896 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Thu, 21 Mar 2024 12:58:37 +0000
 Subject: [PATCH 5/7] Hardcode CC3XX entry points

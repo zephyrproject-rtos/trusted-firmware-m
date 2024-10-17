@@ -1,4 +1,4 @@
-From 90a321cd74cc551e929496146e3a4a4b205cff64 Mon Sep 17 00:00:00 2001
+From f7ee76eb24a88e7168749e273f76282658da6ca9 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Thu, 21 Mar 2024 11:58:19 +0000
 Subject: [PATCH 4/7] Initialise driver wrappers as first step in

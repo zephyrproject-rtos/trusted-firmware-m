@@ -1,4 +1,4 @@
-From c9f25ec14a33c06242e41edce1b65454936bdc92 Mon Sep 17 00:00:00 2001
+From 610c09f7d76b30768c9c0b6e68bfc95920529beb Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Wed, 9 Oct 2024 13:36:42 +0100
 Subject: [PATCH 7/7] P256M: Add option to force not use of asm

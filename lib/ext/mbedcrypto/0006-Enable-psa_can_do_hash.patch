@@ -1,4 +1,4 @@
-From 7ece999fa14a83f87a6b8f6b0d2388da7709d731 Mon Sep 17 00:00:00 2001
+From b9e1f06ba19b1c05557fd082ea8fa2f8f1b0c0a2 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Thu, 21 Mar 2024 13:02:44 +0000
 Subject: [PATCH 6/7] Enable psa_can_do_hash
