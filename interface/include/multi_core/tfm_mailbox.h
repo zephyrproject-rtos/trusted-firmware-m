@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -151,12 +151,13 @@ struct mailbox_status_t {
 } MAILBOX_ALIGN;
 
 /*
- * Data used to send information to mailbox partition about mailbox queue allocated by non-secure image.
- * It's expected that data in this structure is not modified by the secure side.
+ * Data used to send information to mailbox partition about mailbox queue
+ * allocated by non-secure image. It's expected that data in this structure
+ * is not modified by the secure side.
  */
 struct mailbox_init_t {
     /* Shared data with fixed size */
-    struct mailbox_status_t *status MAILBOX_ALIGN;
+    struct mailbox_status_t *status;
 
     /* Number of slots allocated by NS. */
     uint32_t slot_count;
