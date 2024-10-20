@@ -22,11 +22,13 @@
  */
 
 #include "tfm_hal_device_header.h"
-
 #include "device_definition.h"
 #include "region_defs.h"
 #include "rse_kmu_slot_ids.h"
 #include "trng.h"
+#if defined(RSE_ENABLE_TRAM)
+#include "uart_stdout.h"
+#endif
 
 /*----------------------------------------------------------------------------
   External References
@@ -196,8 +198,6 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #endif
 
 #ifdef RSE_ENABLE_TRAM
-extern uint32_t stdio_is_initialized;
-
 /*
  * This can't be inlined, since the stack push to get space for the local
  * variables is done at the start of the function, and the function which calls
@@ -238,7 +238,7 @@ static void __attribute__ ((noinline)) setup_tram_encryption(void) {
     };
     struct lcm_dev_t lcm_dev_s = {&lcm_dev_cfg_s};
 
-    stdio_is_initialized = 0;
+    stdio_is_initialized_reset();
 
     lcm_get_sp_enabled(&lcm_dev_s, &sp_enabled);
     lcm_get_lcs(&lcm_dev_s, &lcs);
@@ -271,7 +271,7 @@ static void __attribute__ ((noinline)) setup_tram_encryption(void) {
         }
     }
 
-    stdio_is_initialized = 0;
+    stdio_is_initialized_reset();
 };
 #endif /* RSE_ENABLE_TRAM */
 

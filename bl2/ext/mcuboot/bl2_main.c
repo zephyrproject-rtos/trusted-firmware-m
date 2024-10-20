@@ -90,7 +90,7 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
-#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || defined(TEST_BL2)
     stdio_uninit();
 #endif
 
@@ -99,6 +99,13 @@ static void do_boot(struct boot_rsp *rsp)
      */
     boot_platform_quit(vt);
 }
+
+#if defined(TEST_BL2)
+static inline void uart_putch(char ch)
+{
+    (void)stdio_output_string(&ch, sizeof(ch));
+}
+#endif /* TEST_BL2 */
 
 int main(void)
 {
@@ -112,9 +119,17 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
-#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || TEST_BL2
+#if (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || defined(TEST_BL2)
     stdio_init();
-#endif
+#if defined(TEST_BL2)
+    for (int i = 0; i < 0xFFFFF; i++) {
+        if ((i & 0xFFF) == 0x0) {
+            uart_putch(0x55);
+        }
+    }
+    stdio_output_string("\r\n", 2);
+#endif /* defined(TEST_BL2) */
+#endif /* (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || defined(TEST_BL2) */
 
     /* Perform platform specific initialization */
     if (boot_platform_init() != 0) {

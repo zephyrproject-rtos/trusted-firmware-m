@@ -5,14 +5,10 @@
  *
  */
 
-
-#include "fatal_error.h"
-
-#include "tfm_hal_device_header.h"
-
 #include <stdio.h>
-
-extern uint32_t stdio_is_initialized;
+#include "fatal_error.h"
+#include "tfm_hal_device_header.h"
+#include "uart_stdout.h"
 
 __WEAK bool log_error_permissions_check(uint32_t err, bool is_fatal)
 {
@@ -21,7 +17,7 @@ __WEAK bool log_error_permissions_check(uint32_t err, bool is_fatal)
 
 __WEAK void log_error(char *file, uint32_t line, uint32_t err, void *sp, bool is_fatal)
 {
-    if (stdio_is_initialized) {
+    if (stdio_is_initialized()) {
         if (is_fatal) {
             printf("[ERR] Fatal error ");
         } else {

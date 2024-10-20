@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "uart_stdout.h"
-
 #include <assert.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include "Driver_USART.h"
 #include "target_cfg.h"
 #include "device_cfg.h"
@@ -33,23 +33,35 @@ extern ARM_DRIVER_USART TFM_DRIVER_STDIO;
 #define STDIO_DRIVER    TFM_DRIVER_STDIO
 #endif
 
+static bool is_initialized = false;
+
 int stdio_output_string(const unsigned char *str, uint32_t len)
 {
     int32_t ret;
 
     /* Add a busy wait before sending. */
     while (STDIO_DRIVER.GetStatus().tx_busy);
+
     ret = STDIO_DRIVER.Send(str, len);
     if (ret != ARM_DRIVER_OK) {
         return 0;
     }
+
     /* Add a busy wait after sending. */
     while (STDIO_DRIVER.GetStatus().tx_busy);
 
     return STDIO_DRIVER.GetTxCount();
 }
 
-uint32_t stdio_is_initialized = 0;
+void stdio_is_initialized_reset(void)
+{
+    is_initialized = false;
+}
+
+bool stdio_is_initialized(void)
+{
+    return is_initialized;
+}
 
 /* Redirects printf to STDIO_DRIVER in case of ARMCLANG*/
 #if defined(__ARMCC_VERSION)
@@ -105,7 +117,7 @@ void stdio_init(void)
 
     (void)STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
 
-    stdio_is_initialized = true;
+    is_initialized = true;
 }
 
 void stdio_uninit(void)
@@ -118,5 +130,5 @@ void stdio_uninit(void)
     ASSERT_HIGH(ret);
     (void)ret;
 
-    stdio_is_initialized = false;
+    is_initialized = false;
 }
