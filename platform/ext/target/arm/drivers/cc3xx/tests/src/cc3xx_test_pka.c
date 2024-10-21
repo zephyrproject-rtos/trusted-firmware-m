@@ -1196,6 +1196,7 @@ void add_cc3xx_pka_tests_to_testsuite(struct test_suite_t *p_ts, uint32_t ts_siz
  || defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) \
  || defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) \
  || defined(CC3XX_CONFIG_ECDH_ENABLE)
+    enable_cycle_counter();
     cc3xx_add_tests_to_testsuite(pka_tests, ARRAY_SIZE(pka_tests), p_ts, ts_size);
 #endif
 }
