@@ -198,6 +198,9 @@ void cc3xx_lowlevel_hash_finish(uint32_t *res, size_t length)
         P_CC3XX->hash.hash_pad_cfg = 0x4U;
     }
 
+    /* Wait until HASH engine is idle */
+    while (P_CC3XX->cc_ctl.hash_busy != 0) {}
+
     get_hash_h(res, length);
 
     cc3xx_lowlevel_hash_uninit();
