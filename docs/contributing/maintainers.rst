@@ -168,6 +168,13 @@ Jidong Mei
     :email: `Jidong.Mei@armchina.com <Jidong.Mei@armchina.com>`__
     :github: `JidongMei <https://github.com/JidongMei>`__
 
+Raspberry Pi Platform:
+~~~~~~~~~~~~~~~~~~~~~~
+
+William Vinnicombe
+    :email: `William.Vinnicombe@raspberrypi.com <william.vinnicombe@raspberrypi.com>`__
+    :github: `Raspberry Pi <https://github.com/raspberrypi>`__
+
 =============
 
 .. _Project Maintenance Process: https://trusted-firmware-docs.readthedocs.io/en/latest/generic_processes/project_maintenance_process.html
