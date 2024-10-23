@@ -41,13 +41,13 @@ struct tfm_crypto_aead_pack_input {
  *
  */
 struct tfm_crypto_pack_iovec {
-    psa_key_id_t key_id;     /*!< Key id */
-    psa_algorithm_t alg;     /*!< Algorithm */
-    uint32_t op_handle;      /*!< Client context handle associated to a
-                              *   multipart operation
-                              */
-    size_t ad_length;        /*!< Additional Data length for multipart AEAD */
-    size_t plaintext_length; /*!< Plaintext length for multipart AEAD */
+    psa_key_id_t key_id;       /*!< Key id */
+    psa_algorithm_t alg;       /*!< Algorithm */
+    uint32_t op_handle;        /*!< Client context handle associated to a
+                                *   multipart operation
+                                */
+    uint32_t ad_length;        /*!< Additional Data length for multipart AEAD */
+    uint32_t plaintext_length; /*!< Plaintext length for multipart AEAD */
 
     struct tfm_crypto_aead_pack_input aead_in; /*!< Packs AEAD-related inputs */
 
@@ -57,7 +57,7 @@ struct tfm_crypto_pack_iovec {
                               */
     uint16_t step;           /*!< Key derivation step */
     union {
-        size_t capacity;     /*!< Key derivation capacity */
+        uint32_t capacity;   /*!< Key derivation capacity */
         uint64_t value;      /*!< Key derivation integer for update*/
     };
 };
