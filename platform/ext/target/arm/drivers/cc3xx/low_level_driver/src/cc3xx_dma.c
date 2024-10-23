@@ -68,6 +68,44 @@ static uintptr_t remap_addr(uintptr_t addr) {
 
 #endif /* CC3XX_CONFIG_DMA_REMAP_ENABLE */
 
+static void wait_for_dma_complete(void) {
+#if defined(CC3XX_CONFIG_HW_VERSION_CC310)
+    if (dma_state.block_buf_needs_output)
+        /* Wait for DOUT_TO_MEM_INT */
+        while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x80U)) {
+#ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
+            __asm("WFI");
+#endif /* CC3XX_CONFIG_WFI_WAIT_ENABLE */
+        }
+
+        /* Reset DOUT_TO_MEM_INT interrupt */
+        P_CC3XX->host_rgf.host_rgf_icr = 0x80U;
+    else {
+        /* Wait for MEM_TO_DIN_INT */
+        while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x40U)) {
+#ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
+            __asm("WFI");
+#endif /* CC3XX_CONFIG_WFI_WAIT_ENABLE */
+        }
+
+        /* Reset MEM_TO_DIN_INT interrupt */
+        P_CC3XX->host_rgf.host_rgf_icr = 0x40U;
+    }
+#else
+    /* Wait for the DMA to complete (The SYM_DMA_COMPLETED interrupt to be
+     * asserted)
+     */
+    while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x800U)) {
+#ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
+        __asm("WFI");
+#endif /* CC3XX_CONFIG_WFI_WAIT_ENABLE */
+    }
+
+    /* Reset the SYM_DMA_COMPLETED interrupt */
+    P_CC3XX->host_rgf.host_rgf_icr = 0x800U;
+#endif /* CC3XX_CONFIG_HW_VERSION_CC310 */
+}
+
 static void process_data(const void* buf, size_t length)
 {
     uintptr_t remapped_buf;
@@ -121,17 +159,7 @@ static void process_data(const void* buf, size_t length)
     /* Writing the length triggers the DMA */
     P_CC3XX->din.src_lli_word1 = length;
 
-    /* Wait for the DMA to complete (The SYM_DMA_COMPLETED interrupt to be
-     * asserted)
-     */
-    while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x800U)) {
-#ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
-        __asm("WFI");
-#endif /* CC3XX_CONFIG_WFI_WAIT_ENABLE */
-    }
-
-    /* Reset the SYM_DMA_COMPLETED interrupt */
-    P_CC3XX->host_rgf.host_rgf_icr = 0x800U;
+    wait_for_dma_complete();
 
     /* Disable the DMA clock */
     P_CC3XX->misc.dma_clk_enable = 0x0U;
