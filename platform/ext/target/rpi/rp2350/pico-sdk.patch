@@ -1,0 +1,39 @@
+diff --git a/src/common/pico_sync/sem.c b/src/common/pico_sync/sem.c
+index 9044817..8fc4458 100644
+--- a/src/common/pico_sync/sem.c
++++ b/src/common/pico_sync/sem.c
+@@ -15,7 +15,7 @@ void sem_init(semaphore_t *sem, int16_t initial_permits, int16_t max_permits) {
+ }
+ 
+ int __time_critical_func(sem_available)(semaphore_t *sem) {
+-#ifdef __GNUC__
++#if defined(__GNUC__) && !defined(__STRICT_ANSI__)
+     return *(volatile typeof(sem->permits) *) &sem->permits;
+ #else
+     static_assert(sizeof(sem->permits) == 2, "");
+diff --git a/src/rp2_common/pico_bootrom/CMakeLists.txt b/src/rp2_common/pico_bootrom/CMakeLists.txt
+index 0648098..93a52ea 100644
+--- a/src/rp2_common/pico_bootrom/CMakeLists.txt
++++ b/src/rp2_common/pico_bootrom/CMakeLists.txt
+@@ -8,5 +8,5 @@ target_sources(pico_bootrom INTERFACE
+         ${CMAKE_CURRENT_LIST_DIR}/bootrom_lock.c
+         )
+ 
+-target_link_libraries(pico_bootrom_headers INTERFACE boot_picoboot_headers)
++target_link_libraries(pico_bootrom_headers INTERFACE boot_picoboot_headers boot_picobin_headers)
+ pico_mirrored_target_link_libraries(pico_bootrom INTERFACE pico_base hardware_boot_lock)
+diff --git a/src/rp2_common/pico_multicore/multicore.c b/src/rp2_common/pico_multicore/multicore.c
+index 58c2ee2..6ec689f 100644
+--- a/src/rp2_common/pico_multicore/multicore.c
++++ b/src/rp2_common/pico_multicore/multicore.c
+@@ -100,8 +100,8 @@ int core1_wrapper(int (*entry)(void), void *stack_base) {
+ void multicore_reset_core1(void) {
+     // Use atomic aliases just in case core 1 is also manipulating some PSM state
+     io_rw_32 *power_off = (io_rw_32 *) (PSM_BASE + PSM_FRCE_OFF_OFFSET);
+-    io_rw_32 *power_off_set = hw_set_alias(power_off);
+-    io_rw_32 *power_off_clr = hw_clear_alias(power_off);
++    io_rw_32 *power_off_set = hw_set_alias_untyped(power_off);
++    io_rw_32 *power_off_clr = hw_clear_alias_untyped(power_off);
+ 
+     // Hard-reset core 1.
+     // Reading back confirms the core 1 reset is in the correct state, but also
