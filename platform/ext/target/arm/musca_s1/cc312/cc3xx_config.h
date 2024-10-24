@@ -191,4 +191,7 @@
 #define CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS 128
 #endif /* CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS */
 
+/* Whether the present hardware is a CC310 */
+/* #define CC3XX_CONFIG_HW_VERSION_CC310 */
+
 #endif /* CC3XX_CONFIG_H */
