@@ -98,7 +98,7 @@ static int read_fwu_metadadata(struct metadata_header_t *md_header,
     return 0;
 }
 
-int parse_fwu_metadata(uint64_t md_offset)
+int parse_fwu_metadata(uint64_t md_offset, uint8_t *boot_index)
 {
     int rc;
     struct metadata_header_t metadata_header;
@@ -127,7 +127,8 @@ int parse_fwu_metadata(uint64_t md_offset)
 
     if ((metadata_header.bank_state[active_index] == BANK_VALID) ||
         (metadata_header.bank_state[active_index] == BANK_ACCEPTED)) {
-        // Images should load from current bank
+        /* Images should load from current bank */
+        *boot_index = active_index;
         return 0;
     } else {
         //TODO: One or more images corrupted or partially written

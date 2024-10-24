@@ -267,6 +267,7 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
 #ifdef RSE_GPT_SUPPORT
     bool metadata_found[2];
     uint64_t metadata_offsets[2];
+    uint8_t bootable_fip_index;
 
     rc = host_flash_atu_get_fip_and_metadata_offsets(fip_found, fip_offsets,
                                                      metadata_found, metadata_offsets);
@@ -276,18 +277,32 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
 
     if (metadata_found[0]) {
         /* FWU-Metadata found */
-        rc = parse_fwu_metadata(metadata_offsets[0]);
+        rc = parse_fwu_metadata(metadata_offsets[0], &bootable_fip_index);
         if (rc) {
             return rc;
         }
     } else {
         /* Parse Bkup-FWU-Metadata */
         if (metadata_found[1]) {
-            rc = parse_fwu_metadata(metadata_offsets[1]);
+            rc = parse_fwu_metadata(metadata_offsets[1], &bootable_fip_index);
             if (rc) {
                 return rc;
             }
         }
+    }
+
+    if (!fip_found[bootable_fip_index]) {
+        return TFM_PLAT_ERR_HOST_FLASH_SETUP_IMAGE_SLOT_NO_FIP_FOUND;
+    }
+    /* MCUBoot requires that we map both regions. If we can only have the offset
+     * of one, then map it to both slots.
+     */
+    if (bootable_fip_index == 0) {
+        /* Boot from fip #0, map it to other slot as well */
+        fip_offsets[1] = fip_offsets[0];
+    } else {
+        /* Boot from fip #1, map it to other slot as well */
+        fip_offsets[0] = fip_offsets[1];
     }
 
 #else
@@ -296,17 +311,6 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     fip_found[1] = true;
     fip_offsets[1] = FLASH_FIP_B_OFFSET;
 #endif /* RSE_GPT_SUPPORT */
-
-    /* MCUBoot requires that we map both regions. If we can only have the offset
-     * of one, then map it to both slots.
-     */
-    if (fip_found[0] && !fip_found[1]) {
-        fip_offsets[1] = fip_offsets[0];
-    } else if (fip_found[1] && !fip_found[0]) {
-        fip_offsets[0] = fip_offsets[1];
-    } else if (!fip_found[0] && !fip_found[1]) {
-        return TFM_PLAT_ERR_HOST_FLASH_SETUP_IMAGE_SLOT_NO_FIP_FOUND;
-    }
 
     rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[0],
                                           RSE_ATU_REGION_INPUT_IMAGE_SLOT_0,

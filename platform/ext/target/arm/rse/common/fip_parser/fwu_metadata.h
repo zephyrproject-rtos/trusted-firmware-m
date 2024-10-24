@@ -20,8 +20,10 @@
  *
  * \param[in]  md_offset              The host flash offset of the metadata to
  *                                    be parsed.
+ * \param[out] boot_index             The active index of the bank/fip that
+ *                                    should be booted from as per metadata.
  * \return                            0 on success, non-zero on failure.
  */
-int parse_fwu_metadata(uint64_t md_offset);
+int parse_fwu_metadata(uint64_t md_offset, uint8_t *boot_index);
 
 #endif /* __FWU_METADATA_H__ */
