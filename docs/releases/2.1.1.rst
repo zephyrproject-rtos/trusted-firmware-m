@@ -1,0 +1,34 @@
+*************
+Version 2.1.1
+*************
+
+New features
+============
+
+  - Mbed TLS upgrade to v3.6.2.
+
+New security advisories
+=======================
+
+A new security vulnerability has been fixed in v2.1.1.
+Refer to :doc:`TFMV-8 </security/security_advisories/user_pointers_mailbox_vectors_vulnerability>` for more details.
+The mitigation is included in this release.
+
+New platforms supported
+=======================
+
+ - :doc:`RP2350. </platform/rpi/rp2350/readme>`
+
+Hotfixes
+========
+
+ - Crypto: Additional checks for writes to avoid out-of-bound access
+ - Crypto: Prevent the scratch allocator from overflowing
+ - Crypto: Protect writes to avoid out-of-bound access
+ - SPM: mailbox_agent_api: Free connection if params association fails
+
+
+--------------
+
+ *SPDX-License-Identifier: BSD-3-Clause*
+ *SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*
