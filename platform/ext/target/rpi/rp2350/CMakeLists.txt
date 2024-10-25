@@ -201,7 +201,12 @@ target_compile_definitions(platform_s
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
 )
 
-target_link_options(platform_s INTERFACE "LINKER:--no-warn-rwx-segments")
+# GNU Arm compiler version greater equal than *11.3.Rel1*
+# throw warning when linker segments used as rwx
+# Adding --no-warn-rwx-segments like the RPi SDK did.
+if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.3.1)
+    target_link_options(platform_s INTERFACE "LINKER:--no-warn-rwx-segments")
+endif()
 
 #========================= Platform BL2 =======================================#
 
@@ -227,7 +232,12 @@ if(BL2)
             cmsis_core
     )
 
-    target_link_options(platform_bl2 INTERFACE "LINKER:--no-warn-rwx-segments")
+    # GNU Arm compiler version greater equal than *11.3.Rel1*
+    # throw warning when linker segments used as rwx
+    # Adding --no-warn-rwx-segments like the RPi SDK did.
+    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.3.1)
+        target_link_options(platform_bl2 INTERFACE "LINKER:--no-warn-rwx-segments")
+    endif()
 
     target_include_directories(platform_bl2
         PUBLIC
