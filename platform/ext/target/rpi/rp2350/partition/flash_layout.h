@@ -10,8 +10,8 @@
 #include "hardware/regs/addressmap.h" /* Coming from SDK */
 
 
-#define FLASH_S_PARTITION_SIZE     (0x3C000)    /* 240 kB */
-#define FLASH_NS_PARTITION_SIZE    (0x2F000)    /* 188 kB */
+#define FLASH_S_PARTITION_SIZE     (0x60000)    /* 384 kB */
+#define FLASH_NS_PARTITION_SIZE    (0x60000)    /* 384 kB */
 
 #define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
 
