@@ -29,7 +29,14 @@ add_library(static_assert_override INTERFACE)
 add_library(device_definition INTERFACE)
 add_library(platform_ns STATIC)
 
-target_link_options(tfm_ns PRIVATE "LINKER:--no-warn-rwx-segments;LINKER:--entry=_entry_point")
+# GNU Arm compiler version greater equal than *11.3.Rel1*
+# throw warning when linker segments used as rwx
+# Adding --no-warn-rwx-segments like the RPi SDK did.
+if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11.3.1)
+    target_link_options(tfm_ns PRIVATE "LINKER:--no-warn-rwx-segments")
+endif()
+
+target_link_options(tfm_ns PRIVATE "LINKER:--entry=_entry_point")
 
 add_library(platform_ns_init INTERFACE)
 target_sources(platform_ns_init
