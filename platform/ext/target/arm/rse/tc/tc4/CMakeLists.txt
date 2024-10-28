@@ -133,10 +133,10 @@ install(DIRECTORY   device
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(FILES       rse_memory_sizes.h
-                    flash_layout.h
-                    host_base_address.h
-                    ${TC_COMMON_SOURCE_DIR}/host_base_address_common.h
+install(FILES       ${TC_COMMON_SOURCE_DIR}/rse_memory_sizes.h
+                    ${TC_COMMON_SOURCE_DIR}/flash_layout.h
+                    ${TC_COMMON_SOURCE_DIR}/host_base_address.h
+                    ${TC_COMMON_SOURCE_DIR}/config_tfm_target_common.h
                     rse_platform_defs.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition)
 
