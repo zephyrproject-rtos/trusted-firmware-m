@@ -39,8 +39,8 @@ Building TF-M
 Follow the instructions in :doc:`Build instructions </building/tfm_build_instruction>`.
 Build TF-M with platform name: `arm/rse/<rse platform name>`
 
-For example, to build RSE for the Total Compute TC2 platform use:
-``-DTFM_PLATFORM=arm/rse/tc/tc2``
+For example, to build RSE for the Total Compute TC3 platform use:
+``-DTFM_PLATFORM=arm/rse/tc/tc3``
 
 Signing host images
 -------------------

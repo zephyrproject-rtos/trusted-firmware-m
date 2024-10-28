@@ -47,44 +47,6 @@ extern struct boot_rsp rsp;
 extern struct flash_area flash_map[];
 extern const int flash_map_entry_num;
 
-static int mhu_init_receiver_generic(void)
-{
-    int status;
-
-#if PLAT_MHU_VERSION == 2
-    status = mhu_v2_x_driver_init(&MHU_SCP_TO_RSE_DEV, MHU_REV_READ_FROM_HW);
-    if (status != MHU_V_2_X_ERR_NONE) {
-        return 1;
-    }
-#elif PLAT_MHU_VERSION == 3
-    status = mhu_init_receiver(&MHU_SCP_TO_RSE_DEV);
-    if (status != MHU_ERR_NONE) {
-        return 1;
-    }
-#endif
-
-    return 0;
-}
-
-static int mhu_init_sender_generic(void)
-{
-    int status;
-
-#if PLAT_MHU_VERSION == 2
-    status = mhu_v2_x_driver_init(&MHU_RSE_TO_SCP_DEV, MHU_REV_READ_FROM_HW);
-    if (status != MHU_V_2_X_ERR_NONE) {
-        return 1;
-    }
-#elif PLAT_MHU_VERSION == 3
-    status = mhu_init_sender(&MHU_RSE_TO_SCP_DEV);
-    if (status != MHU_ERR_NONE) {
-        return 1;
-    }
-#endif
-
-    return 0;
-}
-
 #ifdef RSE_USE_SDS_LIB
 static int clear_ap_sds_region(void)
 {
@@ -115,11 +77,7 @@ static int clear_ap_sds_region(void)
 
 int32_t boot_platform_post_init(void)
 {
-#if PLAT_MHU_VERSION == 2
-    enum mhu_v2_x_error_t status;
-#elif PLAT_MHU_VERSION == 3
     enum mhu_error_t status;
-#endif
 #ifdef PLATFORM_HAS_BOOT_DMA
     enum tfm_plat_err_t plat_err;
 #endif /* PLATFORM_HAS_BOOT_DMA */
@@ -135,15 +93,15 @@ int32_t boot_platform_post_init(void)
     fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    status = mhu_init_receiver_generic();
-    if (status != 0) {
+    status = mhu_init_receiver(&MHU_SCP_TO_RSE_DEV);
+    if (status != MHU_ERR_NONE) {
         BOOT_LOG_ERR("SCP->RSE MHU driver initialization failed");
         return 1;
     }
     BOOT_LOG_INF("SCP->RSE MHU driver initialized successfully");
 
-    status = mhu_init_sender_generic();
-    if (status != 0) {
+    status = mhu_init_sender(&MHU_RSE_TO_SCP_DEV);
+    if (status != MHU_ERR_NONE) {
         BOOT_LOG_ERR("RSE->SCP MHU driver initialization failed");
         return 1;
     }
@@ -266,9 +224,7 @@ int boot_platform_post_load(uint32_t image_id)
 #ifndef TC_NO_RELEASE_RESET
     if (image_id == RSE_BL2_IMAGE_SCP) {
         memset((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
-#if PLAT_MHU_VERSION == 2
-        uint32_t channel_stat = 0;
-#endif
+
         struct rse_sysctrl_t *sysctrl =
                                      (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
 
@@ -277,31 +233,19 @@ int boot_platform_post_load(uint32_t image_id)
 
         /* Wait for SCP to finish its startup */
         BOOT_LOG_INF("Waiting for SCP BL1 started event");
-#if PLAT_MHU_VERSION == 2
-        while (channel_stat == 0) {
-            mhu_v2_x_channel_receive(&MHU_SCP_TO_RSE_DEV, 0, &channel_stat);
-        }
-#elif PLAT_MHU_VERSION == 3
         err = wait_for_signal_and_clear(&MHU_SCP_TO_RSE_DEV, MHU_PBX_DBCH_FLAG_SCP_COMMS);
         if (err) {
             return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
         }
-#endif
         BOOT_LOG_INF("Got SCP BL1 started event");
 
     } else if (image_id == RSE_BL2_IMAGE_AP) {
         memset((void *)HOST_BOOT_IMAGE0_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
         BOOT_LOG_INF("Telling SCP to start AP cores");
-#if PLAT_MHU_VERSION == 2
-        mhu_v2_x_initiate_transfer(&MHU_RSE_TO_SCP_DEV);
-        /* Slot 0 is used in the SCP protocol */
-        mhu_v2_x_channel_send(&MHU_RSE_TO_SCP_DEV, 0, 1);
-#elif PLAT_MHU_VERSION == 3
         err = signal_and_wait_for_clear(&MHU_RSE_TO_SCP_DEV, MHU_PBX_DBCH_FLAG_SCP_COMMS);
         if (err) {
             return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
         }
-#endif
         BOOT_LOG_INF("Sent the signal to SCP");
     }
 #else
