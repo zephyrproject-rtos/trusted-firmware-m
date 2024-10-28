@@ -5,5 +5,4 @@
 #
 #-------------------------------------------------------------------------------
 
-# Note: The PSA API Test repository doesn't have config for Corstone-3xx yet.
-set(PSA_API_TEST_TARGET          ""    CACHE STRING  "PSA_API_TARGET name")
+set(PSA_API_TEST_TARGET          "mps4"    CACHE STRING  "PSA_API_TARGET name")

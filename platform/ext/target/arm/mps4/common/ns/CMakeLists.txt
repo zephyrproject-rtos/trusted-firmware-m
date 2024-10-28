@@ -39,7 +39,6 @@ target_include_directories(device_definition
         device/include
         native_drivers
         partition
-        libraries
         native_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
@@ -48,8 +47,6 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-        ${ETHOS_DRIVER_PATH}/src
-        ${ETHOS_DRIVER_PATH}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
 )
 
