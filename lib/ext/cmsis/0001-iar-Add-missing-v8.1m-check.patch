@@ -16,7 +16,7 @@ index 4fe09f20..c726cecf 100644
 --- a/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h
 +++ b/CMSIS/Core/Include/m-profile/cmsis_iccarm_m.h
 @@ -77,7 +77,7 @@
-
+ 
  /* Alternativ core deduction for older ICCARM's */
  #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && !defined(__ARM_ARCH_7EM__) && \
 -    !defined(__ARM_ARCH_8M_BASE__) && !defined(__ARM_ARCH_8M_MAIN__)
