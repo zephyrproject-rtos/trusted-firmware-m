@@ -16,6 +16,10 @@ with Isolation Level 1 and 2.
 
    Only GNU toolchain is supported.
 
+.. note::
+
+   Only "profile_medium" predefined profile is supported.
+
 Building TF-M
 -------------
 
@@ -29,9 +33,9 @@ Build instructions with platform name: rpi/rp2350
 .. note::
 
    This platform port relies on
-   `Raspberry Pi Pico SDK <https://github.com/raspberrypi/pico-sdk>`__
+   `Raspberry Pi Pico SDK <https://github.com/raspberrypi/pico-sdk>`__.
    Make sure it is either cloned locally or available to download during build.
-   SDK version used for testing: SDK 2.0.0 release
+   SDK version used for testing: SDK 2.0.0 release.
 
 .. note::
 
@@ -45,7 +49,7 @@ Build instructions with platform name: rpi/rp2350
 
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` and
    ``-DTFM_DUMMY_PROVISIONING=ON`` then the keys in the
-   ``tf-m/platform/ext/common/provisioning_bundle/provisioning_config.cmake``
+   ``<TF-M source dir>/platform/ext/common/provisioning_bundle/provisioning_config.cmake``
    and the default MCUBoot signing keys will be used for provisioning.
 
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` and
@@ -54,7 +58,7 @@ Build instructions with platform name: rpi/rp2350
    the build command, or by setting the ``-DPROVISIONING_KEYS_CONFIG`` flag to a
    .cmake file that contains the keys. An example config cmake file can be seen
    at
-   ``tf-m/platform/ext/common/provisioning_bundle/provisioning_config.cmake``.
+   ``<TF-M source dir>/platform/ext/common/provisioning_bundle/provisioning_config.cmake``.
    Otherwise new random values are going to be generated and used. For the image
    signing the ${MCUBOOT_KEY_S} and ${MCUBOOT_KEY_NS} will be used. These
    variables should point to .pem files that contain the code signing private
@@ -69,37 +73,41 @@ Build instructions with platform name: rpi/rp2350
    The new generated keypair can be found in the ``<build dir>/bin`` folder or
    in the ``<install directory>/image_signing/keys`` after installation.
    The generated provisioning_data.c file can be found at
-   ``<build directory>/platform/target/provisioning/provisioning_data.c``
+   ``<build dir>/platform/target/provisioning/provisioning_data.c``
 
 .. note::
 
-   The provisioning bundle generation depends on pyelftools that's have to be
-   installed::
+   The provisioning bundle generation depends on pyelftools that needs to be
+   installed via::
 
     pip3 install pyelftools
 
-Example build instructions for regression tests with dummy keys:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example of build instructions for regression tests with dummy keys:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Building Secure side with provisioning bundle:
 
 .. note::
 
-   Add -DTFM_MULTI_CORE_TOPOLOGY=ON to the above for multicore support
+   Add optionally:
 
+   - -DTFM_MULTI_CORE_TOPOLOGY=ON for multicore support
+   - -DPICO_SDK_PATH=<abs-path-to-pico-sdk> for a pre-fetched Pico SDK
 
 .. code-block:: bash
 
-     cmake -S <TF-M tests source dir>/tests_reg/spe \
-     -B <TF-M tests source dir>/tests_reg/spe/build_rpi_myns_single \
+     cmake -S <TF-M-tests source dir>/tests_reg/spe \
+     -B <TF-M-tests source dir>/tests_reg/spe/build_rpi_single \
      -DTFM_PLATFORM=rpi/rp2350 \
      -DTFM_TOOLCHAIN_FILE=<TF-M source dir>/toolchain_GNUARM.cmake \
      -DCONFIG_TFM_SOURCE_PATH=<TF-M source dir> \
-     -DTFM_PROFILE=profile_medium -DPLATFORM_DEFAULT_PROVISIONING=OFF \
-     -DTEST_S=ON -DTEST_NS=ON
+     -DTFM_PROFILE=profile_medium \
+     -DPLATFORM_DEFAULT_PROVISIONING=OFF \
+     -DTEST_S=ON \
+     -DTEST_NS=ON
 
 .. code-block:: bash
 
-     cmake --build <TF-M tests source dir>/tests_reg/spe/build_rpi_myns_single \
+     cmake --build <TF-M-tests source dir>/tests_reg/spe/build_rpi_single \
      -- -j8 install
 
 
@@ -107,30 +115,37 @@ Building Non-Secure side:
 
 .. code-block:: bash
 
-     cmake -S <TF-M tests source dir>/tests_reg \
-     -B <TF-M tests source dir>/tests_reg/build_rpi_myns_single \
-     -DCONFIG_SPE_PATH=<TF-M tests source dir>/tests_reg/spe/build_rpi_myns_single/api_ns \
-     -DTFM_TOOLCHAIN_FILE=<TF-M tests source dir>/tests_reg/spe/build_rpi_myns_single/api_ns/cmake/toolchain_ns_GNUARM.cmake
-     cmake --build <TF-M tests source dir>/tests_reg/build_rpi_myns_single -- -j8
-
-Binaries need to be converted with a small script pico_uf2.sh
-It uses uf2conv.py from here:
-https://github.com/microsoft/uf2/blob/master/utils/uf2conv.py
-It depends on:
-https://github.com/microsoft/uf2/blob/master/utils/uf2families.json
-The tool takes the combined and signed S and NS images in .bin format, and
-outputs .uf2. It also generates the .uf2 for the bootloader (bl2.uf2) and the
-provisioning bundle.
+     cmake -S <TF-M-tests source dir>/tests_reg \
+     -B <TF-M-tests source dir>/tests_reg/build_rpi_single \
+     -DCONFIG_SPE_PATH=<TF-M tests source dir>/tests_reg/spe/build_rpi_single/api_ns \
+     -DTFM_TOOLCHAIN_FILE=<TF-M-tests source dir>/tests_reg/spe/build_rpi_single/api_ns/cmake/toolchain_ns_GNUARM.cmake
 
 .. code-block:: bash
 
-     pico_uf2.sh <TF-M tests source dir> build_rpi_myns_single
+     cmake --build <TF-M-tests source dir>/tests_reg/build_rpi_single -- -j8
 
-Then just copy the bl2.uf and tfm_s_ns_signed.bin.uf2 files to the board. It
-will run the BL2, S and NS tests and print the results to the UART (Baudrate
-115200).
+Binaries need to be converted with a small script pico_uf2.sh.
+It requires uf2conv.py from here:
+https://github.com/microsoft/uf2/blob/master/utils/uf2conv.py.
+It depends on:
+https://github.com/microsoft/uf2/blob/master/utils/uf2families.json.
+Both the above files need to be copied into the same place where pico_uf2.sh
+runs.
+Also, you may need to give executable permissions to both pico_uf2.sh and
+uf2conv.py.
+The tool takes the combined and signed S and NS images in .bin format, and
+generates the corresponding .uf2 file. It also generates the .uf2 for the
+bootloader (bl2.uf2) and the provisioning bundle one.
+
+.. code-block:: bash
+
+     pico_uf2.sh <TF-M-tests source dir> build_rpi_single
+
+Then just copy (drag-and-drop) the bl2.uf2 and tfm_s_ns_signed.uf2 files into
+the board, one at time. It will run the BL2, S and NS tests and print the
+results to the UART (Baudrate 115200).
 If the board needs provisioning, the .uf2 file containing the provisioning
-bundle needs to be copied before tfm_s_ns_signed.bin.uf2. It only needs to be
+bundle needs to be copied before tfm_s_ns_signed.uf2. It only needs to be
 done once.
 
 .. note::
