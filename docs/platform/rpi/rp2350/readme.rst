@@ -133,6 +133,24 @@ If the board needs provisioning, the .uf2 file containing the provisioning
 bundle needs to be copied before tfm_s_ns_signed.bin.uf2. It only needs to be
 done once.
 
+.. note::
+
+   If a different application was copied to the board before, erasing the flash
+   might be necessary.
+
+Erasing the flash:
+
+Generating flash sized image of zeros can be done with the truncate command,
+then it can be converted to the uf2 format with the uf2conv.py utility. The
+resulting uf2 file then needs to be copied to the board. Current platform flash
+size is 2MB, please adjust size based on your board specs
+( ``PICO_FLASH_SIZE_BYTES`` ):
+
+.. code-block:: bash
+
+   truncate -s 2M nullbytes2M.bin
+   uf2conv.py nullbytes2M.bin --base 0x10000000 --convert --output nullbytes2M.uf2 --family 0xe48bff59
+
 -------------
 
  *SPDX-License-Identifier: BSD-3-Clause*
