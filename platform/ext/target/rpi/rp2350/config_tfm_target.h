@@ -16,4 +16,7 @@
 /* Run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
 #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
 
+/* Use ITS for PS and NS NV counters */
+#define NV_COUNTER_IN_ITS 1
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

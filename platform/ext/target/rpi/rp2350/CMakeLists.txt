@@ -79,6 +79,11 @@ target_compile_definitions(platform_region_defs
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
     add_subdirectory(${PLATFORM_DIR}/ext/common/provisioning_bundle provisioning)
 
+    target_include_directories(provisioning_bundle
+        INTERFACE
+            ${PLATFORM_DIR}/../interface/include
+    )
+
     if(NOT PLATFORM_DEFAULT_PROV_LINKER_SCRIPT)
         target_add_scatter_file(provisioning_bundle
             linker_provisioning.ld
@@ -149,6 +154,8 @@ target_include_directories(platform_s
         partition
         device/config
         ${PLATFORM_DIR}/..
+    INTERFACE
+        ${PLATFORM_DIR}/../interface/include
 )
 
 target_link_libraries(platform_s
@@ -164,6 +171,7 @@ target_link_libraries(platform_s
         hardware_flash
         hardware_uart
         cmsis_core
+        tfm_sprt
 )
 
 target_sources(platform_s
