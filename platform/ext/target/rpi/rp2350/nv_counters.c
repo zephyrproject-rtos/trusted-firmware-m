@@ -7,7 +7,7 @@
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_otp.h"
 
-#if (NV_COUNTER_IN_ITS == 1)
+#if (PS_NS_NV_COUNTER_IN_ITS == 1)
 #include "psa/internal_trusted_storage.h"
 #endif
 
@@ -62,7 +62,7 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-#if (NV_COUNTER_IN_ITS == 1)
+#if (PS_NS_NV_COUNTER_IN_ITS == 1)
 static enum tfm_plat_err_t read_its_nv_counter(enum tfm_otp_element_id_t id,
                                             uint8_t *val)
 {
@@ -70,20 +70,20 @@ static enum tfm_plat_err_t read_its_nv_counter(enum tfm_otp_element_id_t id,
     psa_status_t status;
     size_t data_length = 0;
 
-    status = psa_its_get(uid, 0, OTP_COUNTER_MAX_SIZE, val, &data_length);
+    status = psa_its_get(uid, 0, NV_COUNTER_SIZE, val, &data_length);
 
     if (status == PSA_ERROR_DOES_NOT_EXIST) {
         memset(val, 0, NV_COUNTER_SIZE);
     }
 
-    if (((status == PSA_SUCCESS) && (data_length == OTP_COUNTER_MAX_SIZE)) ||
+    if (((status == PSA_SUCCESS) && (data_length == NV_COUNTER_SIZE)) ||
         (status == PSA_ERROR_DOES_NOT_EXIST)) {
         return TFM_PLAT_ERR_SUCCESS;
     } else {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 }
-#endif /* (NV_COUNTER_IN_ITS == 1) */
+#endif /* (PS_NS_NV_COUNTER_IN_ITS == 1) */
 
 enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
                                              uint32_t size, uint8_t *val)
@@ -101,7 +101,7 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
     }
 
     switch (counter_id) {
-#if (NV_COUNTER_IN_ITS == 0)
+#if (PS_NS_NV_COUNTER_IN_ITS == 0)
     case (PLAT_NV_COUNTER_NS_0):
         return read_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_0, val);
     case (PLAT_NV_COUNTER_NS_1):
@@ -127,7 +127,7 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
         return read_its_nv_counter(PLAT_OTP_ID_NV_COUNTER_PS_1, val);
     case (PLAT_NV_COUNTER_PS_2):
         return read_its_nv_counter(PLAT_OTP_ID_NV_COUNTER_PS_2, val);
-#endif /* (NV_COUNTER_IN_ITS == 0) */
+#endif /* (PS_NS_NV_COUNTER_IN_ITS == 0) */
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -164,14 +164,14 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
     return err;
 }
 
-#if (NV_COUNTER_IN_ITS == 1)
+#if (PS_NS_NV_COUNTER_IN_ITS == 1)
 static enum tfm_plat_err_t set_its_nv_counter(enum tfm_otp_element_id_t id,
                                            uint32_t val)
 {
     psa_storage_uid_t uid = (ITS_NV_COUNTER_UID_BASE + id);
     psa_status_t status;
 
-    status = psa_its_set(uid, OTP_COUNTER_MAX_SIZE, &val, PSA_STORAGE_FLAG_NONE);
+    status = psa_its_set(uid, NV_COUNTER_SIZE, &val, PSA_STORAGE_FLAG_NONE);
 
     if (status == PSA_SUCCESS) {
         return TFM_PLAT_ERR_SUCCESS;
@@ -179,7 +179,7 @@ static enum tfm_plat_err_t set_its_nv_counter(enum tfm_otp_element_id_t id,
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 }
-#endif /* (NV_COUNTER_IN_ITS == 1) */
+#endif /* (PS_NS_NV_COUNTER_IN_ITS == 1) */
 
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value)
@@ -193,7 +193,7 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
     }
 
     switch (counter_id) {
-#if (NV_COUNTER_IN_ITS == 0)
+#if (PS_NS_NV_COUNTER_IN_ITS == 0)
     case (PLAT_NV_COUNTER_NS_0):
         return set_otp_counter(PLAT_OTP_ID_NV_COUNTER_NS_0, value);
     case (PLAT_NV_COUNTER_NS_1):
@@ -219,7 +219,7 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
         return set_its_nv_counter(PLAT_OTP_ID_NV_COUNTER_PS_1, value);
     case (PLAT_NV_COUNTER_PS_2):
         return set_its_nv_counter(PLAT_OTP_ID_NV_COUNTER_PS_2, value);
-#endif /* (NV_COUNTER_IN_ITS == 0) */
+#endif /* (PS_NS_NV_COUNTER_IN_ITS == 0) */
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;

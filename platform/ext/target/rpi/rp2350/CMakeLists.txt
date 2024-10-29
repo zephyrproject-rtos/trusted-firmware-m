@@ -203,6 +203,7 @@ target_compile_definitions(platform_s
     PUBLIC
         CMSIS_device_header=<RP2350.h>
         PICO_UART_DEFAULT_CRLF=1
+        $<$<BOOL:${PS_NS_NV_COUNTER_IN_ITS}>:PS_NS_NV_COUNTER_IN_ITS=1>
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
         $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
         $<$<BOOL:${ITS_ENCRYPTION}>:ITS_ENCRYPTION>
