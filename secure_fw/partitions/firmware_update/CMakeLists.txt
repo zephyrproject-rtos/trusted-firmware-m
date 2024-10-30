@@ -38,10 +38,15 @@ target_sources(tfm_partitions
 )
 
 # The bootloader specific configuration.
-if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bootloader/${TFM_FWU_BOOTLOADER_LIB}))
-    message(FATAL_ERROR "TFM_FWU_BOOTLOADER_LIB invalid")
+if(TFM_FWU_BOOTLOADER_LIB STREQUAL "mcuboot")
+    add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
+else()
+    # Use platform specific bootloader configuration if present.
+    if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${TFM_FWU_BOOTLOADER_LIB}))
+        message(FATAL_ERROR "TFM_FWU_BOOTLOADER_LIB invalid")
+    endif()
+    add_subdirectory(${TFM_FWU_BOOTLOADER_LIB} ${CMAKE_CURRENT_BINARY_DIR}/${TFM_FWU_BOOTLOADER_LIB})
 endif()
-add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
 
 target_link_libraries(tfm_psa_rot_partition_fwu
     PRIVATE
