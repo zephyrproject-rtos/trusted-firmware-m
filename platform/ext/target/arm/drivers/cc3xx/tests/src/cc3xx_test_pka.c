@@ -650,6 +650,38 @@ void pka_test_mod_inv(struct test_result_t *ret)
     cc3xx_pka_reg_id_t r0;
     cc3xx_pka_reg_id_t res;
     uint32_t val0 = 32;
+    uint32_t valN = 35;
+    uint32_t expected = 23;
+    uint64_t readback;
+
+    cc3xx_lowlevel_pka_init(16);
+    cc3xx_pka_reg_id_t N = cc3xx_lowlevel_pka_allocate_reg();
+    cc3xx_lowlevel_pka_write_reg(N, (uint32_t*)&valN, sizeof(valN));
+    cc3xx_lowlevel_pka_set_modulus(N, true, 0);
+
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
+    res = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg(r0, (uint32_t *)&val0, sizeof(val0));
+
+    cc3xx_lowlevel_pka_mod_inv(r0, res);
+
+    cc3xx_lowlevel_pka_read_reg(res, (uint32_t *)&readback, sizeof(readback));
+
+    TEST_ASSERT(readback == expected, "readback not equal to expected");
+
+    ret->val = TEST_PASSED;
+cleanup:
+    cc3xx_lowlevel_pka_uninit();
+
+    return;
+}
+
+void pka_test_mod_inv_prime_modulus(struct test_result_t *ret)
+{
+    cc3xx_pka_reg_id_t r0;
+    cc3xx_pka_reg_id_t res;
+    uint32_t val0 = 32;
     uint32_t valN = 37;
     uint32_t expected = 22;
     uint64_t readback;
@@ -664,7 +696,7 @@ void pka_test_mod_inv(struct test_result_t *ret)
 
     cc3xx_lowlevel_pka_write_reg(r0, (uint32_t *)&val0, sizeof(val0));
 
-    cc3xx_lowlevel_pka_mod_inv(r0, res);
+    cc3xx_lowlevel_pka_mod_inv_prime_modulus(r0, res);
 
     cc3xx_lowlevel_pka_read_reg(res, (uint32_t *)&readback, sizeof(readback));
 
@@ -1158,6 +1190,11 @@ static struct test_t pka_tests[] = {
         &pka_test_mod_inv,
         "CC3XX_PKA_TEST_MOD_INV",
         "CC3XX PKA modular inversion test",
+    },
+    {
+        &pka_test_mod_inv_prime_modulus,
+        "CC3XX_PKA_TEST_MOD_INV_PRIME",
+        "CC3XX PKA modular inversion (prime modulus) test",
     },
     {
         &pka_test_test_bits_ui,

@@ -748,6 +748,18 @@ void cc3xx_lowlevel_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka
 void cc3xx_lowlevel_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res);
 
 /**
+ * @brief                       Perform modular inversion for prime modulus.
+ *                              res = x where (r0 * x mod N) == 1, if N is prime.
+ *
+ * @param[in]  r0               The register ID of the first operand.
+ * @param[out] res              The register ID the result will be stored in.
+ *
+ * @note                        It is acceptable to have some or all of the
+ *                              register IDs be identical.
+ */
+void cc3xx_lowlevel_pka_mod_inv_prime_modulus(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res);
+
+/**
  * @brief                       Perform modular reduction. res = r0 mod N.
  *
  * @param[in/out]  r0           The register ID of the first operand.

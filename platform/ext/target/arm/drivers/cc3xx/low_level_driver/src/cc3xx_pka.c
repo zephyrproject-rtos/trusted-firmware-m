@@ -1259,6 +1259,31 @@ void cc3xx_lowlevel_pka_mod_exp_si(cc3xx_pka_reg_id_t r0, int32_t imm, cc3xx_pka
 
 void cc3xx_lowlevel_pka_mod_inv(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
 {
+    assert(virt_reg_in_use[CC3XX_PKA_REG_N]);
+    assert(cc3xx_lowlevel_pka_less_than(r0, CC3XX_PKA_REG_N));
+
+    /* MODINV changes the content of r0, therefore work on copy of r0 */
+    cc3xx_pka_reg_id_t r0_copy = cc3xx_lowlevel_pka_allocate_reg();
+    cc3xx_lowlevel_pka_copy(r0, r0_copy);
+
+    /* This operation uses PKA_OP_SIZE_N, instead of _REGISTER. This is not
+     * because it performs reduction, since mod_add uses _REGISTER, but because
+     * it does not use the ALU, but the special-purpose modular multiplier.
+     */
+    P_CC3XX->pka.opcode = opcode_construct(CC3XX_PKA_OPCODE_MODINV,
+                                           PKA_OP_SIZE_N,
+                                           false, 0, false, r0_copy, false, res);
+
+    /* Because this uses use OP_SIZE_N, it sometime leaves garbage bits in the
+     * top words. Do a mask operation to clear these
+     */
+    cc3xx_lowlevel_pka_and(res, CC3XX_PKA_REG_N_MASK, res);
+
+    cc3xx_lowlevel_pka_free_reg(r0_copy);
+}
+
+void cc3xx_lowlevel_pka_mod_inv_prime_modulus(cc3xx_pka_reg_id_t r0, cc3xx_pka_reg_id_t res)
+{
     cc3xx_pka_reg_id_t n_minus_2 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Use the special-case Euler theorem  a^-1 = a^N-2 mod N */

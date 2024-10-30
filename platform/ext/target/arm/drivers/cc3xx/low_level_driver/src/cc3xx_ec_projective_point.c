@@ -104,7 +104,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_jacobian_to_affine(cc3xx_ec_curve_t *curve,
     cc3xx_pka_reg_id_t temp = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Construct 1/(Z^2) */
-    cc3xx_lowlevel_pka_mod_inv(p->z, z_inv);
+    cc3xx_lowlevel_pka_mod_inv_prime_modulus(p->z, z_inv);
     cc3xx_lowlevel_pka_mod_mul(z_inv, z_inv, temp);
 
     /* Divide X by Z^2 */

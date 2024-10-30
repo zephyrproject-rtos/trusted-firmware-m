@@ -255,7 +255,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_verify(cc3xx_ec_curve_id_t curve_id,
     /* u = hash * s^-1. Put s^-1 into v_reg so we can reuse it for calculating v
      * later
      */
-    cc3xx_lowlevel_pka_mod_inv(sig_s_reg, v_reg);
+    cc3xx_lowlevel_pka_mod_inv_prime_modulus(sig_s_reg, v_reg);
     cc3xx_lowlevel_pka_mod_mul(v_reg, hash_reg, u_reg);
 
     /* v = r * s^-1 */
@@ -391,7 +391,7 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
 
         cc3xx_lowlevel_pka_mod_mul(sig_r_reg, private_key_reg, temp_reg);
         cc3xx_lowlevel_pka_mod_add(temp_reg, hash_reg, temp_reg);
-        cc3xx_lowlevel_pka_mod_inv(k_reg, k_reg);
+        cc3xx_lowlevel_pka_mod_inv_prime_modulus(k_reg, k_reg);
         cc3xx_lowlevel_pka_mod_mul(k_reg, temp_reg, sig_s_reg);
 
         /* Destroy K */
