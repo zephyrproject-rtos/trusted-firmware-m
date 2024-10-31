@@ -123,7 +123,7 @@ static void dump_exception_info(bool stack_error,
     SPMLOG_DBGMSGVAL("        PC:   ", ctx->EXC_FRAME_COPY[6]);
     SPMLOG_DBGMSGVAL("        xPSR: ", ctx->EXC_FRAME_COPY[7]);
 
-    SPMLOG_DBGMSG("    Callee saved register state:");
+    SPMLOG_DBGMSG("    Callee saved register state:\r\n");
     SPMLOG_DBGMSGVAL("        R4:   ", ctx->CALLEE_SAVED_COPY[0]);
     SPMLOG_DBGMSGVAL("        R5:   ", ctx->CALLEE_SAVED_COPY[1]);
     SPMLOG_DBGMSGVAL("        R6:   ", ctx->CALLEE_SAVED_COPY[2]);
