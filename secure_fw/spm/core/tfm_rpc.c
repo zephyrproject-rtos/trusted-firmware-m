@@ -14,7 +14,6 @@
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"
-#include "private/assert.h"
 #include "load/partition_defs.h"
 #include "tfm_psa_call_pack.h"
 

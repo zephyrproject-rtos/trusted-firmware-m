@@ -14,7 +14,6 @@
 #include "sds.h"
 #include "tfm_plat_defs.h"
 #include "utilities.h"
-#include "private/assert.h" /* temporarily included - to be removed */
 
 /*!
  * \brief Aligns a value to the next multiple.

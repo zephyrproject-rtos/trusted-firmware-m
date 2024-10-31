@@ -12,7 +12,6 @@
 #include "thread.h"
 #include "tfm_arch.h"
 #include "utilities.h"
-#include "private/assert.h"
 #include "critical_section.h"
 
 /* Declaration of current thread pointer. */

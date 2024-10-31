@@ -14,7 +14,6 @@
 #include "internal_status_code.h"
 #include "cmsis_compiler.h"
 #include "utilities.h"
-#include "private/assert.h"
 #include "lists.h"
 #include "tfm_pools.h"
 

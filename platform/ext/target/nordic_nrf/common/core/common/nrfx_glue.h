@@ -37,7 +37,6 @@
 #include <assert.h>
 #else
 #include <utilities.h>
-#include "private/assert.h" /* temporarily included - to be removed */
 #endif
 
 #include <soc/nrfx_coredep.h>

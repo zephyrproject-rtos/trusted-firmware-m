@@ -16,6 +16,22 @@
  */
 void tfm_core_panic(void);
 
+/* SPM assert */
+#ifndef NDEBUG
+#define SPM_ASSERT(cond)                                                    \
+            do {                                                            \
+                if (!(cond)) {                                              \
+                    SPMLOG_INFMSG("Assert:");                               \
+                    SPMLOG_INFMSG(__func__);                                \
+                    SPMLOG_INFMSGVAL(",", __LINE__);                        \
+                    while (1)                                               \
+                        ;                                                   \
+                }                                                           \
+            } while (0)
+#else
+#define SPM_ASSERT(cond)
+#endif
+
 /* Get container structure start address from member */
 #define TO_CONTAINER(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
