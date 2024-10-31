@@ -21,7 +21,7 @@ PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$P
 stm32programmercli="STM32_Programmer_CLI"
 # remove write protection
 secbootadd0=0x180030
-connect="-c port=SWD "$sn_option" mode=UR"
+connect="-c port=SWD "$sn_option" mode=UR --hardRst"
 connect_no_reset="-c port=SWD "$sn_option" mode=HotPlug"
 rdp_0="-ob RDP=0xAA TZEN=1"
 remove_bank1_protect="-ob SECWM1_PSTRT=127 SECWM1_PEND=0 WRP1A_PSTRT=127 WRP1A_PEND=0 WRP1B_PSTRT=127 WRP1B_PEND=0"
