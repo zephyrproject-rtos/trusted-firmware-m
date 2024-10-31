@@ -75,4 +75,5 @@ set(CONFIG_TFM_LAZY_STACKING               @CONFIG_TFM_LAZY_STACKING@   CACHE BO
 set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)
 
-set(RECOMMENDED_TFM_TESTS_VERSION          @TFM_TESTS_VERSION@)
+# Recommended tf-m-tests version
+set(RECOMMEND_TFM_TESTS_VERSION            @TFM_TESTS_VERSION@)
