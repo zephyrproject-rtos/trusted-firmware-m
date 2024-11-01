@@ -70,7 +70,7 @@ static uintptr_t remap_addr(uintptr_t addr) {
 
 static void wait_for_dma_complete(void) {
 #if defined(CC3XX_CONFIG_HW_VERSION_CC310)
-    if (dma_state.block_buf_needs_output)
+    if (dma_state.block_buf_needs_output) {
         /* Wait for DOUT_TO_MEM_INT */
         while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x80U)) {
 #ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
@@ -80,7 +80,7 @@ static void wait_for_dma_complete(void) {
 
         /* Reset DOUT_TO_MEM_INT interrupt */
         P_CC3XX->host_rgf.host_rgf_icr = 0x80U;
-    else {
+    } else {
         /* Wait for MEM_TO_DIN_INT */
         while (!(P_CC3XX->host_rgf.host_rgf_irr & 0x40U)) {
 #ifdef CC3XX_CONFIG_DMA_WFI_WAIT_ENABLE
