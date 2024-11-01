@@ -65,6 +65,11 @@ static void check_features(void)
 
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
+#ifdef CC3XX_CONFIG_HW_VERSION_CC310
+    /* CC310 has no AO interface where DFA could be disabled */
+    return CC3XX_ERR_SUCCESS;
+#endif /* CC3XX_CONFIG_HW_VERSION_CC310 */
+
 #ifdef CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
     const uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
     uint32_t lock_dfa_enabled = dfa_is_supported;
