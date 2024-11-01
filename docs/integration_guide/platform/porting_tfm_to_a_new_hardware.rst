@@ -622,7 +622,7 @@ Functions
 
     There are a few functions that need to be declared and properly
     initialized for TF-M to work. The function declarations can be found in
-    platform/include/tfm_platform_system.h and platform/include/tfm_spm_hal.h.
+    ``platform/include/tfm_platform_system.h`` and ``platform/include/tfm_hal_*.h``.
 
 tfm_platform_hal_system_reset:
 ------------------------------
@@ -646,38 +646,66 @@ tfm_platform_hal_ioctl:
 
     enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request, psa_invec  *in_vec, psa_outvec *out_vec);
 
-tfm_hal_get_mem_security_attr:
-------------------------------
+tfm_hal_set_up_static_boundaries:
+---------------------------------
 
-    Required on multi-core platforms only.
-    This function shall fill the security_attr_info_t argument with the current
-    active security configuration.
-
-.. code-block:: c
-
-    void tfm_hal_get_mem_security_attr(const void *p, size_t s, struct security_attr_info_t *p_attr);
-
-tfm_hal_get_secure_access_attr:
--------------------------------
-
-    Required on multi-core platforms only.
-    This function shall fill the mem_attr_info_t argument with the current active memory
-    configuration of the target S memory region.
+    Sets up the static isolation boundaries which are constant throughout the
+    runtime of the system, including the SPE/NSPE and partition boundaries.
 
 .. code-block:: c
 
-    void tfm_hal_get_secure_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
+    enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(uintptr_t *p_spm_boundary);
 
-tfm_hal_get_ns_access_attr:
----------------------------
+tfm_hal_activate_boundary:
+--------------------------
 
-    Required on multi-core platforms only.
-    This function shall fill the mem_attr_info_t argument with the current active memory
-    configuration for the target NS memory region.
+    Activates one Secure Partition boundary.
 
 .. code-block:: c
 
-    void tfm_hal_get_ns_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
+    enum tfm_hal_status_t tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf, uintptr_t boundary);
+
+tfm_hal_memory_check:
+---------------------
+
+    Checks if a given range of memory can be accessed with specified access
+    types in boundary. The boundary belongs to a partition which contains all
+    asset info.
+
+    A default implementation for Armv8-M platforms with TrustZone is provided in
+    ``platform/ext/common/tfm_hal_isolation_v8m.c``. Multi-core topology
+    platforms without TrustZone may use the
+    :doc:`Memory Check APIs </design_docs/dual-cpu/tfm_multi_core_access_check>`
+    to implement this HAL.
+
+.. code-block:: c
+
+    enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base, size_t size, uint32_t access_type);
+
+tfm_hal_bind_boundary:
+----------------------
+
+    Binds partition boundaries with the platform. The platform maintains the
+    platform-specific settings for SPM further usage, such as update partition
+    boundaries or check resource accessibility. The platform needs to manage the
+    settings with internal mechanism, and return a value to SPM. SPM delivers
+    this value back to platform when necessary. And SPM checks this value to
+    decide if the platform-specific settings need to be updated. Hence multiple
+    partitions can have the same value if they have the same platform-specific
+    settings, depending on isolation level.
+
+.. code-block:: c
+
+    enum tfm_hal_status_t tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf, uintptr_t *p_boundary);
+
+tfm_hal_boundary_need_switch:
+-----------------------------
+
+    Lets the platform decide if a boundary switch is needed.
+
+.. code-block:: c
+
+    bool tfm_hal_boundary_need_switch(uintptr_t boundary_from, uintptr_t boundary_to);
 
 tfm_hal_irq_clear_pending:
 --------------------------
@@ -873,7 +901,7 @@ check_config.cmake
 
 .. _cpuarch.cmake:
 
-*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2024, Arm Limited. All rights reserved.*
 
 *Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

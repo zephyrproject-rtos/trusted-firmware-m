@@ -10,19 +10,24 @@ Memory Access Check of Trusted Firmware-M in Multi-Core Topology
 Introduction
 ************
 
-TF-M memory access check function ``tfm_has_access_to_region()`` checks whether an access has proper
-permission to read or write the target memory region.
+On Armv8-M platforms with TrustZone, the platform's TF-M isolation HAL implementation usually relies
+on the `Armv8-M Security Extension`_ (CMSE) intrinsic ``cmse_check_address_range()`` to check memory
+access permissions. However, on multi-core platforms, the secure core may be an Armv6-M or Armv7-M
+core that does not implement CMSE. Even if CMSE is implemented on a multi-core platform, additional
+checks on system-level security and memory access management units may be required since CMSE
+intrinsics and TT instructions are only aware of MPU/SAU/IDAU inside the secure core.
 
-On single Armv8-M core platform based on Trustzone, TF-M memory access check implementation relies
-on `Armv8-M Security Extension`_ (CMSE) intrinsic ``cmse_check_address_range()``.
-The secure core may not implement CMSE on multi-core platforms. Even if CMSE is
-implemented on a multi-core platform, additional check on system-level security
-and memory access management units are still necessary since CMSE intrinsics and
-TT instructions are only aware of MPU/SAU/IDAU inside the secure core.
+As a result, TF-M provides a common platform memory access check API and an implementation that
+works without CMSE support. Multi-core topology platforms may use the memory check API
+``tfm_has_access_to_region()``, which checks whether an access has proper permission to read or
+write the target memory region, as a substitute for ``cmse_check_address_range()`` when implementing
+the TF-M isolation HAL.
 
-As a result, TF-M in multi-core topology requires a dedicated access check
-process which can work without CMSE support. This document discuss about the
-design of the memory access check in multi-core topology.
+The memory check API is defined in ``platform/ext/common/mem_check_v6m_v7m.h`` and the common
+implementation is provided in ``platform/ext/common/mem_check_v6m_v7m.c``. The HAL defined in
+``platform/ext/common/mem_check_v6m_v7m_hal.h`` must be implemented by each platform that uses the
+common implementation. This document discusses the design of the memory access check API and
+implementation.
 
 .. _Armv8-M Security Extension: https://developer.arm.com/documentation/100720/0100/Secure-Software-Guidelines/ARMv8-M-Security-Extension
 
@@ -65,12 +70,11 @@ specs.
 General Check Process in TF-M Core
 ==================================
 
-In multi-core topology, ``tfm_has_access_to_region()`` is still invoked to keep an uniform interface
-to TF-M SPM. The function implementation should be placed in multi-core topology specific files
-separated from Trustzone-based access check.
+The TF-M SPM calls the ``tfm_hal_memory_check()`` HAL API in both TrustZone-based and multi-core
+topology platforms to keep a uniform interface between SPM and platform.
 
-Multi-core platform specific ``tfm_hal_memory_check()`` can invoke ``tfm_has_access_to_region()`` to
-implement the entire memory access check routine.
+Multi-core platform specific ``tfm_hal_memory_check()`` implementations can invoke
+``tfm_has_access_to_region()`` to implement the entire memory access check routine.
 
 During the check process, ``tfm_has_access_to_region()`` compares the access permission with memory
 region attributes and determines whether the access is allowed to access the region according to
@@ -516,4 +520,4 @@ the ``mem_attr_info_t``.
 
 --------------
 
-*Copyright (c) 2019-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2024, Arm Limited. All rights reserved.*
