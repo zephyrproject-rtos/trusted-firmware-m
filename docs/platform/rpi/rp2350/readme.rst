@@ -154,4 +154,5 @@ size is 2MB, please adjust size based on your board specs
 -------------
 
  *SPDX-License-Identifier: BSD-3-Clause*
+
  *SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*

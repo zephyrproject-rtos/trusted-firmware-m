@@ -11,4 +11,5 @@ Raspberry Pi platforms
 --------------
 
  *SPDX-License-Identifier: BSD-3-Clause*
+
  *SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*
