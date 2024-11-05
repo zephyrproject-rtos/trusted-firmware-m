@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#define PROVISIONING_MESSAGE_START (VM0_BASE_S + 0x400)
+#define PROVISIONING_MESSAGE_START (VM0_BASE_S + OTP_DMA_ICS_SIZE)
 #define RSE_PROVISIONING_MESSAGE_MAX_SIZE (VM1_BASE_S - PROVISIONING_MESSAGE_START)
 
 static const struct rse_provisioning_message_t *provisioning_message =
@@ -111,13 +111,6 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     INFO("Beginning RSE provisioning\n");
     enum tfm_plat_err_t err;
     size_t msg_len;
-
-#ifdef RSE_PROVISIONING_AUTO_GENERATE_SOC_UID
-    err = rse_generate_soc_uid();
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-#endif
 
     struct provisioning_message_handler_config config = {
         .blob_handler = &default_blob_handler,
