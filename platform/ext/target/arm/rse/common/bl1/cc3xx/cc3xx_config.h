@@ -128,23 +128,23 @@
 /* Whether PKA operations will be inlined to increase performance at the cost of
  * code size
  */
-/* #define CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE */
+#define CC3XX_CONFIG_PKA_INLINE_FOR_PERFORMANCE
 
 /* Whether PKA variables will be aligned to word-size to increase performance at
  * the cost of code size
  */
-/* #define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE */
+#define CC3XX_CONFIG_PKA_ALIGN_FOR_PERFORMANCE
 
 /* Whether various EC curve types are enabled */
-/* #define CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
+#define CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
 /* #define CC3XX_CONFIG_EC_CURVE_TYPE_MONTGOMERY_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
 
 /* Whether various EC curves are enabled */
 /* #define CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_SECP_224_R1_ENABLE */
-/* #define CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE */
-/* #define CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE */
+#define CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE
+#define CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE
 /* #define CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_SECP_192_K1_ENABLE */
 /* #define CC3XX_CONFIG_EC_CURVE_SECP_224_K1_ENABLE */
@@ -174,12 +174,12 @@
 /* #define CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE */
 
 /* Whether various ECDSA features are enabled */
-/* #define CC3XX_CONFIG_ECDSA_SIGN_ENABLE */
-/* #define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE */
-/* #define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE */
+#define CC3XX_CONFIG_ECDSA_SIGN_ENABLE
+#define CC3XX_CONFIG_ECDSA_VERIFY_ENABLE
+#define CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE
 
 /* Whether ECDH feature is enabled */
-/* #define CC3XX_CONFIG_ECDH_ENABLE */
+#define CC3XX_CONFIG_ECDH_ENABLE
 
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
