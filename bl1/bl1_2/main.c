@@ -324,7 +324,7 @@ int main(void)
 #endif /* TFM_MEASURED_BOOT_API */
 
     INFO("Jumping to BL2\n");
-    boot_platform_quit((struct boot_arm_vector_table *)BL2_CODE_START);
+    boot_platform_start_next_image((struct boot_arm_vector_table *)BL2_CODE_START);
 
     FIH_PANIC;
 }

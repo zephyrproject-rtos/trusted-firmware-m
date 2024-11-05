@@ -97,7 +97,7 @@ static void do_boot(struct boot_rsp *rsp)
     /* This function never returns, because it calls the secure application
      * Reset_Handler().
      */
-    boot_platform_quit(vt);
+    boot_platform_start_next_image(vt);
 }
 
 #if defined(TEST_BL2)
@@ -109,6 +109,7 @@ static inline void uart_putch(char ch)
 
 int main(void)
 {
+    int err;
     fih_ret fih_rc = FIH_FAILURE;
     fih_ret recovery_succeeded = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
@@ -127,14 +128,15 @@ int main(void)
             uart_putch(0x55);
         }
     }
-    stdio_output_string("\r\n", 2);
+    (void)stdio_output_string("\r\n", 2);
 #endif /* defined(TEST_BL2) */
 #endif /* (MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF) || defined(TEST_BL2) */
 
     /* Perform platform specific initialization */
-    if (boot_platform_init() != 0) {
+    err = boot_platform_init();
+    if (err != 0) {
         BOOT_LOG_ERR("Platform init failed");
-        FIH_PANIC;
+        boot_platform_error_state(err);
     }
 
     BOOT_LOG_INF("Starting bootloader");
@@ -142,14 +144,14 @@ int main(void)
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         BOOT_LOG_ERR("OTP system initialization failed");
-        FIH_PANIC;
+        boot_platform_error_state(plat_err);
     }
 
     if (tfm_plat_provisioning_is_required()) {
         plat_err = tfm_plat_provisioning_perform();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             BOOT_LOG_ERR("Provisioning failed");
-            FIH_PANIC;
+            boot_platform_error_state(plat_err);
         }
     }
     tfm_plat_provisioning_check_for_dummy_keys();
@@ -157,13 +159,14 @@ int main(void)
     FIH_CALL(boot_nv_security_counter_init, fih_rc);
     if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
         BOOT_LOG_ERR("Error while initializing the security counter");
-        FIH_PANIC;
+        boot_platform_error_state(fih_rc);
     }
 
     /* Perform platform specific post-initialization */
-    if (boot_platform_post_init() != 0) {
+    err = boot_platform_post_init();
+    if (err != 0) {
         BOOT_LOG_ERR("Platform post init failed");
-        FIH_PANIC;
+        boot_platform_error_state(err);
     }
 
 #if defined(MCUBOOT_USE_PSA_CRYPTO)
@@ -175,7 +178,7 @@ int main(void)
     psa_status_t status = psa_crypto_init();
     if (status != PSA_SUCCESS) {
         BOOT_LOG_ERR("PSA Crypto init failed with error code %d", status);
-        FIH_PANIC;
+        boot_platform_error_state(status);
     }
     BOOT_LOG_INF("PSA Crypto init done, sig_type: %s%s", xstr(MCUBOOT_SIGNATURE_TYPE), key_type_str);
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
@@ -192,9 +195,10 @@ int main(void)
             continue;
         }
 
-        if (boot_platform_pre_load(image_id)) {
+        err = boot_platform_pre_load(image_id);
+        if (err != 0) {
             BOOT_LOG_ERR("Pre-load step for image %d failed", image_id);
-            FIH_PANIC;
+            boot_platform_error_state(err);
         }
 
         do {
@@ -211,14 +215,15 @@ int main(void)
 
                 recovery_succeeded = fih_ret_encode_zero_equality(boot_initiate_recovery_mode(image_id));
                 if (FIH_NOT_EQ(recovery_succeeded, FIH_SUCCESS)) {
-                    FIH_PANIC;
+                    boot_platform_error_state(recovery_succeeded);
                 }
             }
         } while FIH_NOT_EQ(fih_rc, FIH_SUCCESS);
 
-        if (boot_platform_post_load(image_id)) {
+        err = boot_platform_post_load(image_id);
+        if (err != 0) {
             BOOT_LOG_ERR("Post-load step for image %d failed", image_id);
-            FIH_PANIC;
+            boot_platform_error_state(err);
         }
     }
 
@@ -231,7 +236,7 @@ int main(void)
     do_boot(&rsp);
 
     BOOT_LOG_ERR("Never should get here");
-    FIH_PANIC;
+    boot_platform_error_state(0);
 
     /* Dummy return to be compatible with some check tools */
     return FIH_FAILURE;

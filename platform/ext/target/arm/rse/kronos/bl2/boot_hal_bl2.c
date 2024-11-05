@@ -206,7 +206,7 @@ bool boot_platform_should_load_image(uint32_t image_id)
     return true;
 }
 
-void boot_platform_quit(struct boot_arm_vector_table *vt)
+void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.
      * When manually set the SP then the place of reset vector is lost.

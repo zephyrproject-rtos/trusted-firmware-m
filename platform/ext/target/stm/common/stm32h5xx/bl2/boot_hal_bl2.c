@@ -358,7 +358,7 @@ __attribute__((section(".BL2_NoHdp_Code")))
   * @note
   * @retval void
   */
-void boot_platform_quit(struct boot_arm_vector_table *vector)
+void boot_platform_start_next_image(struct boot_arm_vector_table *vector)
 {
     static struct boot_arm_vector_table *vt;
 #if defined(MCUBOOT_DOUBLE_SIGN_VERIF)

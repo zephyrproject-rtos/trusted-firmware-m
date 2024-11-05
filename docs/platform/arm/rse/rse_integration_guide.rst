@@ -68,7 +68,7 @@ Boot HAL:
 
 - ``bl2/boot_hal_bl2.c``: Platform HAL for the BL2 bootloader. The platform
   should implement the ``boot_platform_post_init()`` and
-  ``boot_platform_quit()`` functions to initialize and uninitialize drivers. It
+  ``boot_platform_start_next_image()`` functions to initialize and uninitialize drivers. It
   should implement ``boot_platform_pre_load()`` and
   ``boot_platform_post_load()`` to setup and tear down the required ATU regions
   before and after each image is loaded, as well as to implement any required

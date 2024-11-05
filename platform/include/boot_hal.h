@@ -74,7 +74,14 @@ int32_t boot_platform_post_init(void);
  *
  * \param[in] vt  pointer to secure application vector table descriptor
  */
-__NO_RETURN void boot_platform_quit(struct boot_arm_vector_table *vt);
+__NO_RETURN void boot_platform_start_next_image(struct boot_arm_vector_table *vt);
+
+/**
+ * \brief Platform-specific error state
+ *
+ * \param[in] error  The error code
+ */
+__NO_RETURN void boot_platform_error_state(uint32_t error);
 
 /**
  * \brief Platform operation to perform steps required before image load.

@@ -170,7 +170,7 @@ __WEAK int32_t boot_platform_post_init(void)
     return 0;
 }
 
-__WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
+__WEAK void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.
      * When manually set the SP then the place of reset vector is lost.
@@ -205,6 +205,12 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     __ISB();
 
     boot_jump_to_next_image(vt_cpy->reset);
+}
+
+__WEAK __NO_RETURN void boot_platform_error_state(uint32_t error)
+{
+    ERROR("Fatal boot error %d\r\n", error);
+    while(1){}
 }
 
 __WEAK int boot_platform_pre_load(uint32_t image_id)

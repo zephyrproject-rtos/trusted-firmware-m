@@ -157,7 +157,7 @@ int main(void)
 
     INFO("Jumping to BL1_2\n");
     /* Jump to BL1_2 */
-    boot_platform_quit((struct boot_arm_vector_table *)BL1_2_CODE_START);
+    boot_platform_start_next_image((struct boot_arm_vector_table *)BL1_2_CODE_START);
 
     /* This should never happen */
     FIH_PANIC;
