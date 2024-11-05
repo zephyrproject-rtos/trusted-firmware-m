@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -62,6 +62,7 @@ target_compile_definitions(platform_region_defs
 target_include_directories(platform_region_defs
     INTERFACE
         partition
+        subplatform_pal_config
 )
 
 if (RSE_XIP)

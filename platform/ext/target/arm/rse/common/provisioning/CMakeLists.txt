@@ -19,15 +19,24 @@ target_sources(platform_bl2
         ./bl2_stub_provisioning.c
 )
 
-target_sources(bl1_1_lib
-    INTERFACE
+target_sources(platform_bl1_1
+    PRIVATE
         ./bl1_provisioning.c
+        ./rse_provisioning_comms.c
+        ./rse_provisioning_message_handler.c
+        ./rse_provisioning_rotpk.c
+)
+
+target_link_libraries(platform_bl1_1
+    PUBLIC
+        tfm_log
 )
 
 target_include_directories(platform_bl1_1_interface
     INTERFACE
         ./bundle_common
         ../bl1
+        .
 )
 
 add_custom_target(cm_provisioning_key

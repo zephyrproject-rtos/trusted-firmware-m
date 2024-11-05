@@ -15,6 +15,8 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(platform_region_defs
     INTERFACE
         partition
+        ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
+        .
 )
 
 target_compile_definitions(platform_region_defs
@@ -171,7 +173,6 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
         soft_crc
-        ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
 )
 
 target_sources(platform_s
@@ -863,6 +864,18 @@ install(DIRECTORY   cmsis_drivers
 
 install(DIRECTORY   partition
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/subplatform_pal_config
+)
+
+install(FILES       rse_otp_check_config.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/subplatform_pal_config/
+)
+
+install(FILES       rse_rotpk_auto_generated_mappings.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/subplatform_pal_config/
 )
 
 install(FILES       target_cfg.h
