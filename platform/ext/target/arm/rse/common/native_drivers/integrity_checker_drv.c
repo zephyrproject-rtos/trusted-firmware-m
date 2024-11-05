@@ -170,7 +170,7 @@ enum integrity_checker_error_t integrity_checker_compute_value(struct integrity_
         return err;
     }
 
-    if (value_size != mode_sizes[mode]) {
+    if (value_size < mode_sizes[mode]) {
         FATAL_ERR(INTEGRITY_CHECKER_ERROR_COMPUTE_VALUE_BUFFER_TOO_SMALL);
         return INTEGRITY_CHECKER_ERROR_COMPUTE_VALUE_BUFFER_TOO_SMALL;
     }
@@ -249,7 +249,7 @@ enum integrity_checker_error_t integrity_checker_check_value(struct integrity_ch
         return err;
     }
 
-    if (value_size != mode_sizes[mode]) {
+    if (value_size < mode_sizes[mode]) {
         FATAL_ERR(INTEGRITY_CHECKER_ERROR_CHECK_VALUE_BUFFER_TOO_SMALL);
         return INTEGRITY_CHECKER_ERROR_CHECK_VALUE_BUFFER_TOO_SMALL;
     }
