@@ -123,6 +123,7 @@ add_compile_options(
     $<$<COMPILE_LANGUAGE:C>:-std=c99>
     $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
     $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
+    $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<BOOL:${CONFIG_TFM_WARNINGS_ARE_ERRORS}>>:-Werror>
 )
 
 #

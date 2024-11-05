@@ -53,6 +53,8 @@ set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to 
 set(CODE_SHARING_OUTPUT_FILE_SUFFIX     "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing output files")
 set(CODE_SHARING_INPUT_FILE_SUFFIX      "_shared_symbols.axf" CACHE STRING "Suffix to use for code-sharing input files")
 
+set(CONFIG_TFM_WARNINGS_ARE_ERRORS      OFF         CACHE BOOL      "Whether to treat warnings as errors")
+
 ####################################################################################################
 # These configurations below are also referred by Kconfig configuration system,
 # together with TF-M Header File Config System options.
