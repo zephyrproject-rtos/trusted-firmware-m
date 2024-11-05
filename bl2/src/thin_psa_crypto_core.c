@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,6 +23,9 @@
 #include "tfm_plat_crypto_keys.h"
 #include "tfm_plat_otp.h"
 #endif /* MCUBOOT_BUILTIN_KEY */
+#ifdef PSA_WANT_ALG_LMS
+#include "mbedtls/lms.h"
+#endif /* PSA_WANT_ALG_LMS */
 
 /* For mbedtls_psa_ecdsa_verify_hash() */
 #include "psa_crypto_ecp.h"
@@ -32,9 +35,9 @@
 #include "mbedtls/ecp.h"
 
 /**
- * \brief Aligns a value x up to an alignment a.
+ * \brief Rounds a value x up to a bound.
  */
-#define ALIGN(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
+#define ROUND_UP(x, bound) ((((x) + bound - 1) / bound) * bound)
 
 /**
  * @note The assumption is that key import will happen just
@@ -47,14 +50,10 @@
  * @brief Static local buffer that holds enough data for the key material
  *        provisioned bundle to be retrieved from the platform.
  *
- * @note  The buffer is aligned on 4-byte words to match the requirements on the
+ * @note  The buffer is rounded to a 4-byte size to match the requirements on the
  *        alignment for the underlying OTP memory
  */
-#if PSA_WANT_ECC_SECP_R1_384 == 1
-static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 384), 4)];
-#elif PSA_WANT_ECC_SECP_R1_256 == 1
-static uint32_t g_pubkey_data[ALIGN(PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1), 256), 4)];
-#endif
+static uint32_t g_pubkey_data[ROUND_UP(PSA_EXPORT_PUBLIC_KEY_MAX_SIZE,  sizeof(uint32_t)) / sizeof(uint32_t)];
 
 /**
  * @brief A structure describing the contents of a thin key slot, which
@@ -291,11 +290,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
                              size_t hash_length)
 {
     /* Size this buffer for the worst case in terms of size */
-#if defined(PSA_WANT_ALG_SHA_384)
-    uint32_t hash_produced[PSA_HASH_LENGTH(PSA_ALG_SHA_384) / sizeof(uint32_t)];
-#else
-    uint32_t hash_produced[PSA_HASH_LENGTH(PSA_ALG_SHA_256) / sizeof(uint32_t)];
-#endif
+    uint32_t hash_produced[PSA_HASH_MAX_SIZE / sizeof(uint32_t)];
     size_t hash_produced_length;
     psa_status_t status;
 
@@ -509,13 +504,73 @@ psa_status_t psa_verify_hash(psa_key_id_t key,
         assert(g_key_slot.is_valid && (g_key_slot.key_id == key));
     }
 
-    status = psa_driver_wrapper_verify_hash(
-                &g_key_slot.attr,
-                g_key_slot.buf, g_key_slot.len,
-                alg, hash, hash_length,
-                signature, signature_length);
+    assert(PSA_ALG_IS_SIGN_HASH(alg));
 
-    return status;
+    return psa_driver_wrapper_verify_hash(&g_key_slot.attr,
+                                          g_key_slot.buf, g_key_slot.len,
+                                          alg, hash, hash_length,
+                                          signature, signature_length);
+}
+
+#ifdef PSA_WANT_ALG_LMS
+static psa_status_t psa_lms_verify_message(psa_key_attributes_t *attr,
+                                           const uint8_t *key, size_t key_length,
+                                           psa_algorithm_t alg,
+                                           const uint8_t *message, size_t message_length,
+                                           const uint8_t *signature, size_t signature_length)
+{
+    int rc;
+    mbedtls_lms_public_t ctx;
+
+    mbedtls_lms_public_init(&ctx);
+
+    rc = mbedtls_lms_import_public_key(&ctx, key, key_length);
+    if (rc) {
+        goto out;
+    }
+
+    rc = mbedtls_lms_verify(&ctx, message, message_length, signature, signature_length);
+    if (rc) {
+        goto out;
+    }
+
+out:
+    mbedtls_lms_public_free(&ctx);
+
+    return PSA_SUCCESS;
+}
+#endif /* PSA_WANT_ALG_LMS */
+
+psa_status_t psa_verify_message(psa_key_id_t key,
+                                psa_algorithm_t alg,
+                                const uint8_t *message,
+                                size_t message_length,
+                                const uint8_t *signature,
+                                size_t signature_length)
+{
+    psa_status_t status;
+    uint8_t hash[PSA_HASH_MAX_SIZE];
+    size_t hash_length;
+    const psa_algorithm_t hash_alg = PSA_ALG_SIGN_GET_HASH(alg);
+
+    assert(PSA_ALG_IS_SIGN_MESSAGE(alg));
+
+    /* LMS isn't part of PSA yet, so we need this here */
+#ifdef PSA_WANT_ALG_LMS
+    if (PSA_ALG_IS_LMS(alg)) {
+        return psa_lms_verify_message(&g_key_slot.attr,
+                                      g_key_slot.buf, g_key_slot.len,
+                                      alg, message, message_length,
+                                      signature, signature_length);
+    }
+#else
+    status = psa_driver_wrapper_hash_compute(hash_alg, message, message_length, hash, sizeof(hash), &hash_length);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_verify_hash(key, alg, hash, hash_length, signature, signature_length);
+#endif /* PSA_WANT_ALG_LMS */
 }
 
 void mbedtls_psa_crypto_free(void)
@@ -614,17 +669,11 @@ psa_status_t psa_driver_wrapper_export_public_key(
     const uint8_t *key_buffer, size_t key_buffer_size,
     uint8_t *data, size_t data_size, size_t *data_length)
 {
-    /* The verification handles only public keys, and this is called from P256M verify */
     assert(PSA_KEY_TYPE_IS_PUBLIC_KEY(psa_get_key_type(attributes)));
 
-#if PSA_WANT_ALG_ECDSA == 1
-    assert(PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes)));
     assert(key_buffer_size <= data_size);
     memcpy(data, key_buffer, key_buffer_size);
     *data_length = key_buffer_size;
-#else
-    assert(0); /* Should never be reached */
-#endif /* PSA_WANT_ALG_ECDSA */
 
     return PSA_SUCCESS;
 }

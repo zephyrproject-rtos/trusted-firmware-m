@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -34,7 +34,7 @@ target_compile_definitions(bl2_crypto_config
 
 target_include_directories(bl2_crypto_config
     INTERFACE
-        ${MBEDCRYPTO_PATH}/include
+        ${CMAKE_SOURCE_DIR}/interface/include
 )
 
 # Check if the p256m driver is enabled in the config file, as that will require
