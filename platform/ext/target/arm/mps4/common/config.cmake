@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,7 +38,6 @@ set(BL1                                 ON              CACHE BOOL     "Whether 
 set(PLATFORM_DEFAULT_BL1                ON              CACHE STRING   "Whether to use default BL1 or platform-specific one")
 set(TFM_BL1_SOFTWARE_CRYPTO             ON              CACHE BOOL     "Whether BL1_1 will use software crypto")
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON              CACHE BOOL     "Whether BL1 can directly access flash content")
-set(TFM_BL1_PQ_CRYPTO                   OFF             CACHE BOOL     "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
 set(CONFIG_TFM_BOOT_STORE_MEASUREMENTS  ON              CACHE BOOL     "")
 set(TFM_BL2_IMAGE_FLASH_AREA_NUM        "BL2"           CACHE STRING   "Which flash area BL2 is stored in")
 set(PLATFORM_DEFAULT_OTP                OFF             CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")

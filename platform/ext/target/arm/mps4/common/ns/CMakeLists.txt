@@ -20,6 +20,7 @@ target_include_directories(platform_region_defs
     INTERFACE
         partition
         ${CMAKE_CURRENT_SOURCE_DIR}
+        bl1_2_config
 )
 
 #========================= Platform common defs ===============================#

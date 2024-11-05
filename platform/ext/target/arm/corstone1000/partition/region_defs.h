@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -22,6 +22,7 @@
 #define __REGION_DEFS_H__
 
 #include "flash_layout.h"
+#include "bl1_2_config.h"
 
 /* BL1_1 */
 #define BL1_1_HEAP_SIZE         (0x0001000) /* 4KiB */

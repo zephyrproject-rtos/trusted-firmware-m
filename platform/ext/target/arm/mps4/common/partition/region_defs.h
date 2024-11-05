@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 
 #include "flash_layout.h"
 #include "platform_base_address.h"
+#include "bl1_2_config.h"
 
 #define BL1_1_HEAP_SIZE         (0x0001000)
 #define BL1_1_MSP_STACK_SIZE    (0x0001800)

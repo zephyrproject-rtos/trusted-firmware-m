@@ -1,176 +1,186 @@
+#!/usr/bin/env python3
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-import hashlib
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import cmac
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.backends import default_backend
-import secrets
-import argparse
-import os
+import sign_data
+import encrypt_data
+
+import logging
+logger = logging.getLogger("TF-M")
+from arg_utils import *
+from crypto_conversion_utils import convert_curve_define, convert_hash_define
+
 import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../bl2/ext/mcuboot/scripts"))
-import macro_parser
-import struct
-import pyhsslms
+import os
+sys.path.append(os.path.join(sys.path[0], 'modules'))
 
-def struct_pack(objects, pad_to=0):
-    defstring = "<"
-    for obj in objects:
-        defstring += str(len(obj)) + "s"
+import bl2_image_config
+from bl2_image_config import BL2_image_config
 
-    size = struct.calcsize(defstring)
-    if size < pad_to:
-        defstring += str(pad_to - size) + "x"
+def add_arguments(parser : argparse.ArgumentParser,
+                  prefix : str = "",
+                  required : bool = True,
+                  ) -> None:
+    image_config = bl2_image_config.add_arguments(parser, prefix, required)
 
-    return (bytes(struct.pack(defstring, *objects)))
+    add_prefixed_argument(parser, "bl2_bin", prefix, help="Binary file for BL2 code and data", type=arg_type_bytes, required=True)
+    add_prefixed_argument(parser, "image_version", prefix, help="BL2 image version", type=arg_type_version, default="0.0.0+0", required=False)
+    add_prefixed_argument(parser, "image_security_counter", prefix, help="BL2 image security counter value", type=int, default=0, required=False)
 
-def parse_version(version_string):
-    version = [0, 0, 0, 0]
-    split = version_string.split("+")
-    if len(split) > 1:
-        version[3] = int(split[1])
-    split = split[0].split(".")
-    for i in range(len(split)):
-        version[i] = int(split[i])
+    for i in range(int(image_config.TFM_BL1_2_SIGNER_AMOUNT)):
+        sign_data.add_arguments(parser, "signer_{}".format(i), False)
 
-    return struct_pack([version[0].to_bytes(1, "little"),
-                        version[1].to_bytes(1, "little"),
-                        version[2].to_bytes(2, "little"),
-                        version[3].to_bytes(4, "little")])
+    if hasattr(image_config, "TFM_BL1_2_IMAGE_ENCRYPTION"):
+        encrypt_data.add_arguments(parser, "", required)
 
-def derive_encryption_key_cmac(security_counter):
-    with open(args.encrypt_key_file, "rb") as encrypt_key_file:
-        encrypt_key = encrypt_key_file.read()
 
-    state = struct_pack(["BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
-                         bytes(1), security_counter,
-                         (32).to_bytes(4, byteorder='little')])
-    c = cmac.CMAC(algorithms.AES(encrypt_key))
-    c.update(state)
-    k0 = c.finalize()
+def parse_args(args : argparse.Namespace,
+               prefix : str = "",
+               ) -> dict:
+    out = parse_args_automatically(args, ["bl2_bin", "image_version",
+                                          "image_security_counter",
+                                          "bl2_image_config"], prefix)
+    out["encrypt_args"] = encrypt_data.parse_args(args)
+    for i in range(int(out["bl2_image_config"].TFM_BL1_2_SIGNER_AMOUNT)):
+        out["signer_{}_args".format(i)] = sign_data.parse_args(args,
+                                                               prefix="signer_{}".format(i))
 
-    output_key = bytes(0);
-    # The KDF outputs 16 bytes per iteration, so we need 2 for an AES-256 key
-    for i in range(2):
-        state = struct_pack([(i + 1).to_bytes(4, byteorder='little'),
-                             # C keeps the null byte, python removes it, so we add
-                             # it back manually.
-                             "BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
-                             bytes(1), security_counter,
-                             (32).to_bytes(4, byteorder='little'),
-                             k0])
-        c = cmac.CMAC(algorithms.AES(encrypt_key))
-        c.update(state)
-        output_key += c.finalize()
-    return output_key
+    out |= bl2_image_config.parse_args(args, prefix)
 
-def derive_encryption_key_hkdf(security_counter):
-    with open(args.encrypt_key_file, "rb") as encrypt_key_file:
-        encrypt_key = encrypt_key_file.read()
+    return out
 
-    state = struct_pack([
-                        # C keeps the null byte, python removes it, so we add
-                        # it back manually.
-                        "BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
-                        security_counter
-                        ])
+def get_data_to_be_signed(bl2_image_config : BL2_image_config,
+                          bl2_bin : bytes,
+                          image_version : [int] = [0, 0, 0, 0],
+                          image_security_counter : int = 0,
+                          ) -> bytes:
+    image = bl2_image_config.image
+    config = bl2_image_config.defines
 
-    output_key = bytes(0)
-    hkdf = HKDF(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=None,
-        info=state
-    )
-    output_key = hkdf.derive(encrypt_key)
+    image.protected_values.encrypted_data.data.set_value(bl2_bin)
 
-    return output_key
+    image.protected_values.version.major.set_value(image_version[0])
+    image.protected_values.version.minor.set_value(image_version[1])
+    image.protected_values.version.revision.set_value(image_version[2])
+    if (len(image_version) == 4):
+        image.protected_values.version.build_num.set_value(image_version[3])
 
-def sign_binary_blob(blob):
-    priv_key = pyhsslms.HssLmsPrivateKey(args.sign_key_file)
-    # Remove the first 4 bytes since it's HSS info
-    sig = priv_key.sign(blob)[4:]
-    if (len(sig) != 1452):
-        raise Exception
-    return sig
+    image.protected_values.security_counter.set_value(image_security_counter)
 
-def hash_binary_blob(blob):
-   hash = hashlib.sha256()
-   hash.update(blob)
-   return hash.digest()
+    if hasattr(config, "TFM_BL1_2_IMAGE_ENCRYPTION"):
+        magic = config.TFM_BL1_2_IMAGE_DECRYPT_MAGIC_EXPECTED
+        image.protected_values.encrypted_data.decrypt_magic.set_value(magic)
 
-def encrypt_binary_blob(blob, counter_val, encrypt_key):
-    cipher = Cipher(algorithms.AES(encrypt_key), modes.CTR(counter_val))
-    return cipher.encryptor().update(blob)
+    return image.protected_values.to_bytes()
 
-parser = argparse.ArgumentParser(allow_abbrev=False)
-parser.add_argument("--input_file", help="the image to process", required=True)
-parser.add_argument("--img_version", help="version of the image", required=True)
-parser.add_argument("--img_security_counter", help="Secuity counter value for the image", required=True)
-parser.add_argument("--encrypt_key_file", help="encryption key file", required=True)
-parser.add_argument("--sign_key_file", help="signing key file", required=False)
-parser.add_argument("--img_output_file", help="image output file", required=True)
-parser.add_argument("--hash_output_file", help="hash output file", required=False)
-parser.add_argument("--signing_layout_file", help="signing layout file", required=True)
-parser.add_argument("--header_size", help="size of the header", required=True)
-parser.add_argument("--kdf_alg", help="which KDF will be used", required=False, default="cmac")
-args = parser.parse_args()
+def get_data_to_encrypt(bl2_image_config : BL2_image_config) -> bytes:
+    image = bl2_image_config.image
+    config = bl2_image_config.defines
+    return image.protected_values.encrypted_data.to_bytes()
 
-with open(args.input_file, "rb") as in_file:
-    bl2_code = in_file.read()
+def create_bl2_img(bl2_image_config : BL2_image_config,
+                   bl2_bin : bytes,
+                   image_version: [int] = [0, 0, 0, 0],
+                   image_security_counter: int = 0,
+                   encrypted_data : bytes = None,
+                   encrypt_args : dict = {},
+                   **kwargs
+                   ):
+    image = bl2_image_config.image
+    config = bl2_image_config.defines
 
-counter_val = secrets.token_bytes(12) + int(0).to_bytes(4, 'little')
+    data_to_be_signed = get_data_to_be_signed(bl2_image_config=bl2_image_config,
+                                              bl2_bin=bl2_bin,
+                                              image_version=image_version,
+                                              image_security_counter=image_security_counter)
+    with open("script.bin", "wb") as f:
+        f.write(data_to_be_signed)
 
-version = parse_version(args.img_version)
+    image.protected_values.set_value_from_bytes(data_to_be_signed)
 
-bl2_partition_size = macro_parser.evaluate_macro(args.signing_layout_file,
-                                    ".*(RE_BL2_BIN_SIZE) = *(.*)",
-                                    1, 2, True)['RE_BL2_BIN_SIZE']
+    for i in range(int(config.TFM_BL1_2_SIGNER_AMOUNT)):
+        if not kwargs["signer_{}_args".format(i)]:
+            continue
+        else:
+            sign_args = kwargs["signer_{}_args".format(i)]
 
-plaintext = struct_pack([
-    int("0xDEADBEEF", 16).to_bytes(4, 'little'),
-    int(0).to_bytes(int(args.header_size, 0) - (1452 + 16 + 8 + 4 + 4), 'little'),
-    bl2_code,
-    ],
-    pad_to=bl2_partition_size - (1452 + 16 + 8 + 4))
+        if "sign_hash_alg" in sign_args.keys():
+            config_hash_alg = convert_hash_define(getattr(config, "TFM_BL1_2_MEASUREMENT_HASH_ALG"), "TFM_BL1_HASH_ALG")
+            assert(config_hash_alg.name == sign_args["sign_hash_alg"].name)
 
-if args.kdf_alg == "hkdf":
-    encrypt_key = derive_encryption_key_hkdf(int(args.img_security_counter, 16).to_bytes(4, 'little'))
-else:
-    encrypt_key = derive_encryption_key_cmac(int(args.img_security_counter, 16).to_bytes(4, 'little'))
-ciphertext = encrypt_binary_blob(plaintext, counter_val, encrypt_key)
 
-data_to_sign = struct_pack([
-    version,
-    int(args.img_security_counter, 0).to_bytes(4, 'little'),
-    plaintext,
-    ])
+        curve = convert_curve_define(getattr(config, "TFM_BL1_2_ECDSA_CURVE"), "TFM_BL1_CURVE")
+        sign_args |= {"curve": curve}
 
-hash = hash_binary_blob(data_to_sign)
-sig = sign_binary_blob(data_to_sign)
+        if "sig_{}".format(i) not in kwargs.keys():
+            sig = sign_data.sign_data(data = image.protected_values.to_bytes(),
+                                      **sign_args)
+        else:
+            sig = kwargs["sig_{}".format(i)]
 
-image = struct_pack([
-    counter_val,
-    sig,
-    version,
-    int(args.img_security_counter, 0).to_bytes(4, 'little'),
-    ciphertext,
-    ])
+        image.header.sigs[i].sig.set_value_from_bytes(sig)
+        image.header.sigs[i].sig_len.set_value(len(sig))
 
-if len(image) > bl2_partition_size:
-    print("Error: Signed image size {} exceeds BL2 partition size {}"
-          .format(len(image), bl2_partition_size))
-    exit(1)
+        if hasattr(config, "TFM_BL1_2_EMBED_ROTPK_IN_IMAGE"):
+            if "pub_key_{}".format(i) not in kwargs.keys():
+                pub_key = sign_data.get_pubkey(**sign_args)
+            else:
+                pub_key = kwargs["pub_key_{}".format(i)]
+            # if not hasattr(pub_key:
+            image.header.sigs[i].rotpk.set_value_from_bytes(pub_key)
+            image.header.sigs[i].rotpk_len.set_value(len(pub_key))
 
-with open(args.img_output_file, "wb") as img_out_file:
-    img_out_file.write(image)
+    if hasattr(config, "TFM_BL1_2_IMAGE_ENCRYPTION"):
+        if (not encrypted_data):
+            if (encrypt_args["kdf_args"]):
+                encrypt_args["kdf_args"] |= {
+                    "context" : image.protected_values.security_counter.to_bytes(),
+                    "label" : "BL2_DECRYPTION_KEY",
+                }
+            iv, encrypted_data = encrypt_data.encrypt_data(get_data_to_encrypt(bl2_image_config),
+                                                           **encrypt_args)
 
-with open(args.hash_output_file, "wb") as hash_out_file:
-    hash_out_file.write(hash)
+        image.header.ctr_iv.set_value_from_bytes(iv)
+        image.protected_values.encrypted_data.set_value_from_bytes(encrypted_data)
+
+    image_size = image.get_size()
+    image_max_size = int(config.IMAGE_BL2_CODE_SIZE, 0) + int(config.TFM_BL1_2_HEADER_MAX_SIZE, 0)
+    header_size = image_size - image.protected_values.encrypted_data.data.get_size()
+    header_max_size = int(config.TFM_BL1_2_HEADER_MAX_SIZE, 0)
+
+    assert header_size <= header_max_size, "Header size {} is larger than HEADER_MAX_SIZE {}".format(header_size, header_max_size)
+    assert image_size <= image_max_size, "Image size {} is larger than FLASH_BL2_PARTITION_SIZE {}".format(image_size, image_max_size)
+
+    logger.debug(image)
+
+    return image.to_bytes()
+
+script_description = """
+This script creates a BL2 image from a config file and some parameter arguments.
+Any unset parameters will be 0.
+"""
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(allow_abbrev=False,
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description=script_description)
+
+    add_arguments(parser, "", True)
+
+    parser.add_argument("--image_output_file", help="BL2 image output file", required=True)
+    parser.add_argument("--log_level", help="log level", required=False, default="ERROR", choices=logging._levelToName.values())
+
+    args = parser.parse_args()
+    logger.setLevel(args.log_level)
+
+    config = parse_args(args, "")
+
+    output = create_bl2_img(**config)
+
+    with open(args.image_output_file, "wb") as f:
+        f.write(output)

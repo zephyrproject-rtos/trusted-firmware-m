@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -312,6 +312,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
     target_link_libraries(platform_bl1_1
         PUBLIC
             platform_bl1_1_interface
+            bl1_1_shared_lib_interface
             platform_region_defs
         PRIVATE
             tfm_fih

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,6 @@
 #include "crypto.h"
 #include "otp.h"
 #include "boot_hal.h"
-#ifdef TFM_MEASURED_BOOT_API
-#include "boot_measurement.h"
-#endif /* TFM_MEASURED_BOOT_API */
 #include "psa/crypto.h"
 #include "uart_stdout.h"
 #include "fih.h"
@@ -25,6 +22,14 @@
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_otp.h"
 
+#ifdef TFM_MEASURED_BOOT_API
+#include "boot_measurement.h"
+#else
+enum boot_measurement_slot_t {
+    BOOT_MEASUREMENT_SLOT_BL2,
+};
+#endif
+
 #if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
 #include "bl1_2_suites.h"
 #endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
@@ -34,25 +39,18 @@
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
-#if defined(TFM_MEASURED_BOOT_API) || !defined(TFM_BL1_PQ_CRYPTO)
-static uint8_t computed_bl2_hash[BL2_HASH_SIZE];
-#endif
-
 #ifdef TFM_MEASURED_BOOT_API
-#if (BL2_HASH_SIZE == 32)
-#define BL2_HASH_ALG  PSA_ALG_SHA_256
-#elif (BL2_HASH_SIZE == 64)
-#define BL2_HASH_ALG  PSA_ALG_SHA_512
-#else
-#error "The specified BL2_HASH_SIZE is not supported with measured boot."
-#endif /* BL2_HASH_SIZE */
-
-static void collect_boot_measurement(const struct bl1_2_image_t *image)
+static fih_int submit_boot_measurement(const struct bl1_2_image_t *image,
+                                       uint8_t *rotpk_hash, size_t rotpk_hash_size,
+                                       uint8_t *measurement_hash, size_t measurement_hash_size,
+                                       enum boot_measurement_slot_t slot)
 {
+    fih_int fih_rc;
+
     struct boot_measurement_metadata bl2_metadata = {
-        .measurement_type = BL2_HASH_ALG,
+        .measurement_type = TFM_BL1_2_MEASUREMENT_HASH_ALG,
         .signer_id = { 0 },
-        .signer_id_size = BL2_HASH_SIZE,
+        .signer_id_size = measurement_hash_size,
         .sw_type = "BL2",
         .sw_version = {
             image->protected_values.version.major,
@@ -62,42 +60,21 @@ static void collect_boot_measurement(const struct bl1_2_image_t *image)
         },
     };
 
-#ifdef TFM_BL1_PQ_CRYPTO
-    /* Get the public key hash as the signer ID */
-    if (pq_crypto_get_pub_key_hash(TFM_BL1_KEY_ROTPK_0, bl2_metadata.signer_id,
-                                   sizeof(bl2_metadata.signer_id),
-                                   &bl2_metadata.signer_id_size)) {
-        WARN("Signer ID missing in measurement of BL2\n");
+    if (sizeof(bl2_metadata.signer_id) < rotpk_hash_size) {
+        FIH_RET(FIH_FAILURE);
     }
-#endif
+
+    /* Use the ROTPK hash as the signer ID */
+    memcpy(bl2_metadata.signer_id, rotpk_hash, rotpk_hash_size);
 
     /* Save the boot measurement of the BL2 image. */
-    if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL2, computed_bl2_hash,
-                               BL2_HASH_SIZE, &bl2_metadata, true)) {
-        WARN("Failed to store boot measurement of BL2\n");
-    }
-}
-#endif /* TFM_MEASURED_BOOT_API */
-
-#ifndef TFM_BL1_PQ_CRYPTO
-static fih_int image_hash_check(struct bl1_2_image_t *img)
-{
-    enum tfm_plat_err_t plat_err;
-    uint8_t stored_bl2_hash[BL2_HASH_SIZE];
-    fih_int fih_rc = FIH_FAILURE;
-
-    plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL2_IMAGE_HASH, BL2_HASH_SIZE,
-                                 stored_bl2_hash);
-    fih_rc = fih_int_encode_zero_equality(plat_err);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
-    }
-
-    FIH_CALL(bl_fih_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
-                                    BL2_HASH_SIZE);
+    fih_rc = fih_int_encode_zero_equality(boot_store_measurement(slot,
+                                                                 measurement_hash,
+                                                                 measurement_hash_size,
+                                                                 &bl2_metadata, true));
     FIH_RET(fih_rc);
 }
-#endif /* !TFM_BL1_PQ_CRYPTO */
+#endif /* TFM_MEASURED_BOOT_API */
 
 static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
 {
@@ -119,34 +96,224 @@ static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
                                      > img->protected_values.security_counter));
 }
 
+static fih_int validate_image_signature(struct bl1_2_image_t *img,
+                                        struct tfm_bl1_image_signature_t *sig,
+                                        enum tfm_bl1_key_id_t key_id,
+                                        uint8_t *measurement_hash,
+                                        size_t measurement_hash_size,
+                                        enum boot_measurement_slot_t measurement_slot)
+{
+    fih_int fih_rc = FIH_FAILURE;
+    uint8_t rotpk[TFM_BL1_2_ROTPK_MAX_SIZE];
+    uint8_t *p_rotpk = rotpk;
+    size_t rotpk_size;
+    uint8_t rotpk_hash[TFM_BL1_2_ROTPK_HASH_MAX_SIZE];
+    enum tfm_bl1_key_type_t key_type;
+    enum tfm_bl1_hash_alg_t key_hash_alg;
+
+
+    if (sig->sig_len > sizeof(sig->sig)) {
+        ERROR("Invalid signature length\n");
+        FIH_RET(FIH_FAILURE);
+    }
+
+    assert(TFM_BL1_2_ROTPK_MAX_SIZE >= TFM_BL1_2_ROTPK_HASH_MAX_SIZE);
+
+    FIH_CALL(bl1_otp_read_key, fih_rc, key_id, rotpk, sizeof(rotpk), &rotpk_size);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("ROTPK not provisioned\n");
+        FIH_RET(fih_rc);
+    }
+
+#ifdef TFM_BL1_2_EMBED_ROTPK_IN_IMAGE
+    if (rotpk_size > TFM_BL1_2_ROTPK_HASH_MAX_SIZE) {
+        ERROR("Image ROTPK hash size mismatch\n");
+        FIH_RET(FIH_FAILURE);
+    }
+
+#if defined(TFM_BL1_ENABLE_SHA256) && defined(TFM_BL1_ENABLE_SHA384)
+    FIH_CALL(bl1_otp_get_key_hash_alg, fih_rc, key_id, &key_hash_alg);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Key type lookup failure\n");
+        FIH_RET(fih_rc);
+    }
+#elif defined(TFM_BL1_ENABLE_SHA256)
+    key_hash_alg = TFM_BL1_HASH_ALG_SHA256;
+#elif defined(TFM_BL1_ENABLE_SHA384)
+    key_hash_alg = TFM_BL1_HASH_ALG_SHA384;
+#else
+    #error No TFM_BL1_2 ROTPK hash algorithms enabled
+#endif
+
+    FIH_CALL(bl1_hash_compute, fih_rc, key_hash_alg,
+                                       sig->rotpk, sig->rotpk_len,
+                                       rotpk_hash, sizeof(rotpk_hash), NULL);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Hash function failure\n");
+        FIH_RET(fih_rc);
+    }
+
+    FIH_CALL(bl_fih_memeql, fih_rc, rotpk, rotpk_hash, rotpk_size);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Image ROTPK hash mismatch\n");
+        FIH_RET(fih_rc);
+    }
+
+    p_rotpk = sig->rotpk;
+    rotpk_size = sig->rotpk_len;
+#endif /* TFM_BL1_2_EMBED_ROTPK_IN_IMAGE */
+
+#if defined(TFM_BL1_2_ENABLE_ECDSA) && defined(TFM_BL1_2_ENABLE_LMS)
+    FIH_CALL(bl1_otp_get_key_type, fih_rc, key_id, &key_type);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Key type lookup failure\n");
+        FIH_RET(fih_rc);
+    }
+#elif defined(TFM_BL1_2_ENABLE_ECDSA)
+    key_type = TFM_BL1_KEY_TYPE_ECDSA;
+#elif defined(TFM_BL1_2_ENABLE_LMS)
+    key_type = TFM_BL1_KEY_TYPE_LMS;
+#else
+    #error No TFM_BL1_2 authenication methods enabled
+#endif
+
+    switch(key_type) {
+    case TFM_BL1_KEY_TYPE_ECDSA:
+#ifdef TFM_BL1_2_ENABLE_ECDSA
+        FIH_CALL(bl1_ecdsa_verify, fih_rc, TFM_BL1_2_ECDSA_CURVE,
+                                           p_rotpk, rotpk_size,
+                                           measurement_hash,
+                                           measurement_hash_size,
+                                           sig->sig,
+                                           sig->sig_len);
+        break;
+#else
+        ERROR("ECDSA key type but ECDSA support not enabled\n");
+        FIH_RET(FIH_FAILURE);
+#endif
+    case TFM_BL1_KEY_TYPE_LMS:
+#ifdef TFM_BL1_2_ENABLE_LMS
+        FIH_CALL(pq_crypto_verify, fih_rc, p_rotpk, rotpk_size,
+                                           (uint8_t *)&img->protected_values,
+                                           sizeof(img->protected_values),
+                                           sig->sig,
+                                           sig->sig_len);
+        break;
+#else
+        ERROR("LMS key type but LMS support not enabled\n");
+        FIH_RET(FIH_FAILURE);
+#endif
+    default:
+        ERROR("Unknown key type\n");
+        FIH_RET(FIH_FAILURE);
+    }
+
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Signature validation failed\n");
+        FIH_RET(FIH_FAILURE);
+    }
+
+#ifdef TFM_MEASURED_BOOT_API
+    /* At this point there is a valid and decrypted BL2 image in the RAM at
+     * address BL2_IMAGE_START.
+     */
+#if !defined(TFM_BL1_2_EMBED_ROTPK_IN_IMAGE)
+    FIH_CALL(bl1_hash_compute, fih_rc, key_hash_alg,
+                                       p_rotpk, rotpk_size,
+                                       rotpk_hash, sizeof(rotpk_hash),
+                                       NULL);
+#endif
+    FIH_CALL(submit_boot_measurement, fih_rc, img, rotpk_hash, sizeof(rotpk_hash),
+                                              measurement_hash, measurement_hash_size,
+                                              measurement_slot);
+#endif /* TFM_MEASURED_BOOT_API */
+
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+
+    FIH_RET(FIH_SUCCESS);
+}
+
+#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
+static fih_int check_key_policy(fih_int validate_rc,
+                                enum tfm_bl1_key_id_t key_id,
+                                bool *key_might_sign, bool *key_must_sign)
+{
+    enum tfm_bl1_key_policy_t policy;
+    fih_int fih_rc;
+
+    FIH_CALL(bl1_otp_get_key_policy, fih_rc, TFM_BL1_KEY_ROTPK_0, &policy);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+
+    if (policy == TFM_BL1_KEY_MIGHT_SIGN) {
+        *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
+    } else {
+        *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
+        *key_must_sign  &= fih_eq(fih_rc, FIH_SUCCESS);
+    }
+
+    FIH_RET(FIH_SUCCESS);
+}
+#endif
+
 static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
 {
     fih_int fih_rc = FIH_FAILURE;
+    static uint8_t measurement_hash[TFM_BL1_2_MEASUREMENT_HASH_MAX_SIZE];
+    static size_t measurement_hash_size;
+#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
+    bool key_must_sign  = true;
+    bool key_might_sign = false;
+#endif
 
-    /* Calculate the image hash for measured boot and/or a hash-locked image */
-#if defined(TFM_MEASURED_BOOT_API) || !defined(TFM_BL1_PQ_CRYPTO)
-    FIH_CALL(bl1_sha256_compute, fih_rc, (uint8_t *)&img->protected_values,
-                                         sizeof(img->protected_values),
-                                         computed_bl2_hash);
+    /* Calculate the image hash for measured boot */
+    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_2_MEASUREMENT_HASH_ALG,
+                                       (uint8_t *)&img->protected_values,
+                                       sizeof(img->protected_values),
+                                       measurement_hash, sizeof(measurement_hash),
+                                       &measurement_hash_size);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("Boot measurement failed\n");
+        FIH_RET(fih_rc);
+    }
+
+    FIH_CALL(validate_image_signature, fih_rc, img,
+                                               &img->header.cm_sig,
+                                               TFM_BL1_KEY_ROTPK_0,
+                                               measurement_hash, measurement_hash_size,
+                                               BOOT_MEASUREMENT_SLOT_BL2);
+#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
+    fih_rc = check_key_policy(fih_rc, TFM_BL1_KEY_ROTPK_0, &key_might_sign, &key_must_sign);
+#endif
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+
+
+#ifdef TFM_BL1_2_ALLOW_DM_SIGNATURE
+    /* TODO fix the boot measurement for this */
+    FIH_CALL(validate_image_signature, fih_rc, img,
+                                               &img->header.dm_sig,
+                                               TFM_BL1_KEY_ROTPK_1,
+                                               BOOT_MEASUREMENT_SLOT_BL2);
+#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
+    fih_rc = check_key_policy(fih_rc, TFM_BL1_KEY_ROTPK_1, &key_might_sign, &key_must_sign);
+#endif
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(fih_rc);
     }
 #endif
 
-#ifdef TFM_BL1_PQ_CRYPTO
-    FIH_CALL(pq_crypto_verify, fih_rc, TFM_BL1_KEY_ROTPK_0,
-                                       (uint8_t *)&img->protected_values,
-                                       sizeof(img->protected_values),
-                                       img->header.sig,
-                                       sizeof(img->header.sig));
-#else
-    FIH_CALL(image_hash_check, fih_rc, img);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
+#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
+    if (fih_not_eq(key_must_sign, true) || fih_not_eq(key_might_sign, true)) {
+        FIH_RET(FIH_FAILURE);
     }
-#endif /* TFM_BL1_PQ_CRYPTO */
+#endif
 
-    FIH_RET(fih_rc);
+    FIH_RET(FIH_SUCCESS);
 }
 
 #ifndef TEST_BL1_2
@@ -155,31 +322,23 @@ static
 fih_int bl1_2_validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
-    enum tfm_plat_err_t plat_err;
 
     FIH_CALL(is_image_signature_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         ERROR("BL2 image signature failed to validate\n");
         FIH_RET(fih_rc);
     }
+
     FIH_CALL(is_image_security_counter_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         ERROR("BL2 image security_counter failed to validate\n");
         FIH_RET(fih_rc);
     }
 
-    /* TODO work out if the image actually boots before updating the counter */
-    plat_err = tfm_plat_set_nv_counter(PLAT_NV_COUNTER_BL1_0,
-                                       image->protected_values.security_counter);
-    fih_rc = fih_int_encode_zero_equality(plat_err);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        ERROR("NV counter update failed\n");
-        FIH_RET(fih_rc);
-    }
-
     FIH_RET(FIH_SUCCESS);
 }
 
+#ifdef TFM_BL1_2_IMAGE_ENCRYPTION
 #ifndef TEST_BL1_2
 static
 #endif
@@ -189,8 +348,11 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
     struct bl1_2_image_t *image_to_decrypt;
     uint8_t key_buf[32];
     uint8_t label[] = "BL2_DECRYPTION_KEY";
+#ifndef TFM_BL1_2_MEMORY_MAPPED_FLASH
+    fih_int fih_rc = FIH_FAILURE;
+#endif
 
-#ifdef TFM_BL1_MEMORY_MAPPED_FLASH
+#ifdef TFM_BL1_2_MEMORY_MAPPED_FLASH
     /* If we have memory-mapped flash, we can do the decrypt directly from the
      * flash and output to the SRAM. This is significantly faster if the AES
      * invocation calls through to a crypto accelerator with a DMA, and slightly
@@ -208,9 +370,12 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
     /* If the flash isn't memory-mapped, defer to the flash driver to copy the
      * entire block in to SRAM. We'll then do the decrypt in-place.
      */
-    bl1_image_copy_to_sram(image_id, (uint8_t *)BL2_IMAGE_START);
-    image_to_decrypt = (struct bl1_2_image_t *)BL2_IMAGE_START;
-#endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
+    FIH_CALL(bl1_image_copy_to_sram, fih_rc, image_id, (uint8_t *)image);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+    image_to_decrypt = image;
+#endif /* TFM_BL1_2_MEMORY_MAPPED_FLASH */
 
     /* As the security counter is an attacker controlled parameter, bound the
      * values to a sensible range. In this case, we choose 1024 as the bound as
@@ -239,18 +404,41 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
     }
 
     if (image->protected_values.encrypted_data.decrypt_magic
-            != BL1_2_IMAGE_DECRYPT_MAGIC_EXPECTED) {
+            != TFM_BL1_2_IMAGE_DECRYPT_MAGIC_EXPECTED) {
         FIH_RET(FIH_FAILURE);
     }
 
     FIH_RET(FIH_SUCCESS);
 }
 
+#else /* TFM_BL1_2_IMAGE_ENCRYPTION */
+
+fih_int copy_image(uint32_t image_id, struct bl1_2_image_t *image)
+{
+    struct bl1_2_image_t *image_to_copy;
+
+#ifdef TFM_BL1_2_MEMORY_MAPPED_FLASH
+    image_to_copy = (struct bl1_2_image_t *)(FLASH_BL1_BASE_ADDRESS +
+                       bl1_image_get_flash_offset(image_id));
+
+    memcpy(image, image_to_copy, sizeof(struct bl1_2_image_t));
+#else
+    bl1_image_copy_to_sram(image_id, (uint8_t *)image);
+#endif /* TFM_BL1_2_MEMORY_MAPPED_FLASH */
+
+    FIH_RET(FIH_SUCCESS);
+}
+
+#endif /* TFM_BL1_2_IMAGE_ENCRYPTION */
+
 static fih_int bl1_2_validate_image(uint32_t image_id)
 {
     fih_int fih_rc = FIH_FAILURE;
-    struct bl1_2_image_t *image = (struct bl1_2_image_t *)BL2_IMAGE_START;
+    struct bl1_2_image_t *image =
+        (struct bl1_2_image_t *)(BL2_CODE_START -
+                                 offsetof(struct bl1_2_image_t, protected_values.encrypted_data.data));
 
+#ifdef TFM_BL1_2_IMAGE_ENCRYPTION
     FIH_CALL(copy_and_decrypt_image, fih_rc, image_id, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         ERROR("BL2 image failed to decrypt\n");
@@ -258,6 +446,15 @@ static fih_int bl1_2_validate_image(uint32_t image_id)
     }
 
     INFO("BL2 image decrypted successfully\n");
+#else
+    FIH_CALL(copy_image, fih_rc, image_id, image);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        ERROR("BL2 image failed to decrypt\n");
+        FIH_RET(fih_rc);
+    }
+
+    INFO("BL2 image copied successfully\n");
+#endif
 
     FIH_CALL(bl1_2_validate_image_at_addr, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -316,13 +513,6 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-
-#ifdef TFM_MEASURED_BOOT_API
-    /* At this point there is a valid and decrypted BL2 image in the RAM at
-     * address BL2_IMAGE_START.
-     */
-    collect_boot_measurement((const struct bl1_2_image_t *)BL2_IMAGE_START);
-#endif /* TFM_MEASURED_BOOT_API */
 
     INFO("Jumping to BL2\n");
     boot_platform_start_next_image((struct boot_arm_vector_table *)BL2_CODE_START);

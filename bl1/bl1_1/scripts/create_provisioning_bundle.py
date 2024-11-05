@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -46,7 +46,7 @@ with open(args.bl1_2_input_file, "rb") as in_file:
     bl1_2 = in_file.read()
 
 if args.bl2_signing_key_input_file:
-    with open(args.bl2_signing_key_input_file + ".pub", "rb") as in_file:
+    with open(args.bl2_signing_key_input_file, "rb") as in_file:
         # Remove the first 4 bytes since it's HSS info
         bl1_rotpk_0 = in_file.read()[4:]
 else:
