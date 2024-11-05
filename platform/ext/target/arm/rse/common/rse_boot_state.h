@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,7 +27,7 @@ enum boot_state_include_field {
 
 typedef uint32_t boot_state_include_mask;
 
-int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
+enum tfm_plat_err_t rse_get_boot_state(uint8_t *state, size_t state_buf_len,
                        size_t *state_size, boot_state_include_mask mask);
 
 #ifdef __cplusplus
