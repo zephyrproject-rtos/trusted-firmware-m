@@ -22,8 +22,6 @@
 #include "target_cfg.h"
 #include "device_cfg.h"
 
-#define ASSERT_HIGH(X)  assert(X == ARM_DRIVER_OK)
-
 /* Imports USART driver */
 #if DOMAIN_NS == 1U
 extern ARM_DRIVER_USART NS_DRIVER_STDIO;
@@ -103,32 +101,44 @@ int putchar(int ch)
 
 void stdio_init(void)
 {
-    int32_t ret;
+    int32_t ret = ARM_DRIVER_ERROR;
+
     ret = STDIO_DRIVER.Initialize(NULL);
-    ASSERT_HIGH(ret);
+    if (ret != ARM_DRIVER_OK) {
+        assert(0);
+        return;
+    }
 
     ret = STDIO_DRIVER.PowerControl(ARM_POWER_FULL);
-    ASSERT_HIGH(ret);
+    if (ret != ARM_DRIVER_OK) {
+        assert(0);
+        return;
+    }
 
-    ret = STDIO_DRIVER.Control(DEFAULT_UART_CONTROL | ARM_USART_MODE_ASYNCHRONOUS,
-                               DEFAULT_UART_BAUDRATE);
-    ASSERT_HIGH(ret);
-    (void)ret;
+    ret = STDIO_DRIVER.Control(DEFAULT_UART_CONTROL | ARM_USART_MODE_ASYNCHRONOUS, DEFAULT_UART_BAUDRATE);
+    if (ret != ARM_DRIVER_OK) {
+        assert(0);
+        return;
+    }
 
-    (void)STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
+    ret = STDIO_DRIVER.Control(ARM_USART_CONTROL_TX, 1);
+    if (ret != ARM_DRIVER_OK) {
+        assert(0);
+        return;
+    }
 
     is_initialized = true;
 }
 
 void stdio_uninit(void)
 {
-    int32_t ret;
-
-    (void)STDIO_DRIVER.PowerControl(ARM_POWER_OFF);
+    int32_t ret = ARM_DRIVER_ERROR;
 
     ret = STDIO_DRIVER.Uninitialize();
-    ASSERT_HIGH(ret);
-    (void)ret;
+    if (ret != ARM_DRIVER_OK) {
+        assert(0);
+        return;
+    }
 
     is_initialized = false;
 }
