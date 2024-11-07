@@ -224,18 +224,18 @@ static inline int32_t ARM_USARTx_Control(UARTx_Resources *uart_dev,
 #ifdef UART_TX_RX_CONTROL_ENABLED
         case ARM_USART_CONTROL_TX:
             if (arg == 0) {
-                uart_get_hw(uart)->cr &= ~UART_UARTCR_TXE_BITS;
+                uart_get_hw(uart_dev->dev)->cr &= ~UART_UARTCR_TXE_BITS;
             } else if (arg == 1) {
-                uart_get_hw(uart)->cr |= UART_UARTCR_TXE_BITS;
+                uart_get_hw(uart_dev->dev)->cr |= UART_UARTCR_TXE_BITS;
             } else {
                 return ARM_DRIVER_ERROR_PARAMETER;
             }
             break;
         case ARM_USART_CONTROL_RX:
             if (arg == 0) {
-                uart_get_hw(uart)->cr &= ~UART_UARTCR_RXE_BITS;
+                uart_get_hw(uart_dev->dev)->cr &= ~UART_UARTCR_RXE_BITS;
             } else if (arg == 1) {
-                uart_get_hw(uart)->cr |= UART_UARTCR_RXE_BITS;
+                uart_get_hw(uart_dev->dev)->cr |= UART_UARTCR_RXE_BITS;
             } else {
                 return ARM_DRIVER_ERROR_PARAMETER;
             }
