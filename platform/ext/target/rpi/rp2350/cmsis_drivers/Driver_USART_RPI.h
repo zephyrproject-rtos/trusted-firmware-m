@@ -221,7 +221,6 @@ static inline int32_t ARM_USARTx_Control(UARTx_Resources *uart_dev,
                                          uint32_t arg)
 {
     switch (control & ARM_USART_CONTROL_Msk) {
-#ifdef UART_TX_RX_CONTROL_ENABLED
         case ARM_USART_CONTROL_TX:
             if (arg == 0) {
                 uart_get_hw(uart_dev->dev)->cr &= ~UART_UARTCR_TXE_BITS;
@@ -240,7 +239,6 @@ static inline int32_t ARM_USARTx_Control(UARTx_Resources *uart_dev,
                 return ARM_DRIVER_ERROR_PARAMETER;
             }
             break;
-#endif
         case ARM_USART_MODE_ASYNCHRONOUS:
             uart_set_baudrate(uart_dev->dev, arg);
             break;

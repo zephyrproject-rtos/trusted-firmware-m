@@ -38,8 +38,6 @@ target_include_directories(platform_ns
 target_compile_definitions(platform_ns
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
-    PRIVATE
-        $<$<BOOL:${CONFIG_ENABLE_NS_UART_TX_RX_CONTROL}>:UART_TX_RX_CONTROL_ENABLED>
 )
 
 # Include region_defs.h and flash_layout.h

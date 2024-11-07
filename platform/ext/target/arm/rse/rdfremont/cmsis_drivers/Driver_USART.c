@@ -195,7 +195,6 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
                                   uint32_t arg)
 {
     switch (control & ARM_USART_CONTROL_Msk) {
-#ifdef UART_TX_RX_CONTROL_ENABLED
         case ARM_USART_CONTROL_TX:
             if (arg == 0) {
                 uart_pl011_disable_transmit(uart_dev->dev);
@@ -214,7 +213,6 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
                 return ARM_DRIVER_ERROR_PARAMETER;
             }
             break;
-#endif
         case ARM_USART_MODE_ASYNCHRONOUS:
             if(uart_pl011_set_baudrate(uart_dev->dev, arg) !=
                 UART_PL011_ERR_NONE) {
