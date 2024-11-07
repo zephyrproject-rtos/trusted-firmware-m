@@ -14,6 +14,9 @@
 /* Number of metadata replicas */
 #define FWU_MD_REPLICAS     2u
 
+ /* Maximum times a boot failure is allowed */
+#define FWU_MAX_FAILED_BOOT 1
+
 #if (FWU_BANK_COUNT > 4)
 /* DEN0118 Firmware update metadata: v2 restricts #banks to 4 */
 #   error "Too many firmware banks!"

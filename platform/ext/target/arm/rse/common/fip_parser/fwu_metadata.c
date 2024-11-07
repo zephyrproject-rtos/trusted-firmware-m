@@ -98,12 +98,13 @@ static int read_fwu_metadadata(struct metadata_header_t *md_header,
     return 0;
 }
 
-int parse_fwu_metadata(uint64_t md_offset, uint8_t *boot_index)
+int parse_fwu_metadata(uint64_t md_offset, uint8_t failed_boot_count,
+                       uint8_t *boot_index)
 {
     int rc;
     struct metadata_header_t metadata_header;
     static uint8_t metadata[METADATA_SIZE];
-    uint32_t calc_crc, active_index;
+    uint32_t calc_crc, active_index, previous_active_index;
 
     rc = read_fwu_metadadata(&metadata_header,
                              metadata,
@@ -125,14 +126,27 @@ int parse_fwu_metadata(uint64_t md_offset, uint8_t *boot_index)
         return -1;
     }
 
-    if ((metadata_header.bank_state[active_index] == BANK_VALID) ||
-        (metadata_header.bank_state[active_index] == BANK_ACCEPTED)) {
-        /* Images should load from current bank */
-        *boot_index = active_index;
-        return 0;
-    } else {
-        //TODO: One or more images corrupted or partially written
+    previous_active_index = metadata_header.previous_active_index;
+    if (previous_active_index >= FWU_BANK_COUNT) {
+        return -1;
     }
 
-    return -1;
+    if ((failed_boot_count < FWU_MAX_FAILED_BOOT) &&
+        ((metadata_header.bank_state[active_index] == BANK_VALID) ||
+         (metadata_header.bank_state[active_index] == BANK_ACCEPTED))) {
+        /* Images should load from current bank */
+        *boot_index = active_index;
+
+    } else if ((active_index != previous_active_index) &&
+               ((metadata_header.bank_state[previous_active_index] == BANK_VALID) ||
+                (metadata_header.bank_state[previous_active_index] == BANK_ACCEPTED))) {
+        /* Boot from previous active bank */
+        *boot_index = previous_active_index;
+
+    } else {
+        //TODO: One or more images corrupted or partially written
+        return -1;
+    }
+
+    return 0;
 }

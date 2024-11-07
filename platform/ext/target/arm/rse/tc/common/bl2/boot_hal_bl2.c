@@ -308,6 +308,42 @@ bool boot_platform_should_load_image(uint32_t image_id)
     return true;
 }
 
+#ifdef RSE_GPT_SUPPORT
+/* Register boot failure by setting bit 24 (SWSYN) of SWRESET register.
+ * On reset, the SWSYN value propagates to the RESET_SYNDROME register
+ * which will be read to understand cause of reset.
+ */
+static void boot_platform_register_failed_boot(void)
+{
+    uint32_t reg_value;
+    struct rse_sysctrl_t *rse_sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
+
+    /* The SWSYN shall be written along with SWRESETREQ (bit position 5)
+     * otherwise it is ignored
+     */
+    reg_value = ((1 & 0xff) << SWSYN_FAILED_BOOT_BIT_POS) | (1 << 5);
+
+    /* Raise reset request for new attempt */
+    __DSB();
+    rse_sysctrl->swreset = reg_value;
+    __DSB();
+
+    while(1) {
+        __NOP();
+    }
+}
+
+int boot_initiate_recovery_mode(uint32_t image_id)
+{
+    (void)image_id;
+
+    /* Mark as failed boot attempt */
+    boot_platform_register_failed_boot();
+
+    return 0;
+}
+#endif /* RSE_GPT_SUPPORT */
+
 void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.

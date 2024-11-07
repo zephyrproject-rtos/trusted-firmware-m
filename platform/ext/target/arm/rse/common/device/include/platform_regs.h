@@ -425,6 +425,8 @@ struct rse_sysctrl_t {
     volatile uint32_t cidr3;             /* 0xFFC (R/ ) Component ID 3 */
 };
 
+/* Bit to mark boot failure (SWSYN) in swreset reg */
+#define SWSYN_FAILED_BOOT_BIT_POS      24
 #define CLK_CFG1_SYSCLKCFG_POS         0
 #define CLK_CFG1_SYSCLKCFG_MASK        (0xFUL << CLK_CFG1_SYSCLKCFG_POS)
 #define CLK_CFG1_AONCLKCFG_POS         4

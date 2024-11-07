@@ -17,6 +17,7 @@
 #include "tfm_plat_defs.h"
 #ifdef RSE_GPT_SUPPORT
 #include "fwu_metadata.h"
+#include "platform_regs.h"
 #endif /* RSE_GPT_SUPPORT */
 
 #include <string.h>
@@ -29,6 +30,11 @@
 
 /* Flash device names must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+
+#ifdef RSE_GPT_SUPPORT
+//TODO: Update required to persist over reset. Check if private metadata is needed.
+uint8_t failed_boot_count;
+#endif /* RSE_GPT_SUPPORT */
 
 static inline uint32_t round_down(uint32_t num, uint32_t boundary)
 {
@@ -256,6 +262,13 @@ int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
 
     return 0;
 }
+
+static bool plat_check_if_prev_boot_failed(void)
+{
+    struct rse_sysctrl_t *rse_sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
+
+    return (rse_sysctrl->reset_syndrome & (1u << SWSYN_FAILED_BOOT_BIT_POS));
+}
 #endif /* RSE_GPT_SUPPORT */
 
 static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
@@ -268,6 +281,22 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     bool metadata_found[2];
     uint64_t metadata_offsets[2];
     uint8_t bootable_fip_index;
+    uuid_t bl2_uuid, scp_bl1_uuid;
+
+    bl2_uuid = UUID_RSE_FIRMWARE_BL2;
+    scp_bl1_uuid = UUID_RSE_FIRMWARE_SCP_BL1;
+
+    /* Only check once in each boot loader stage.
+     * Since bl1_2 loads bl2 and bl2 first loads scp_bl1 image
+     */
+    if ((memcmp(&image_uuid, &bl2_uuid, sizeof(uuid_t)) == 0) ||
+        (memcmp(&image_uuid, &scp_bl1_uuid, sizeof(uuid_t)) == 0)) {
+        if (plat_check_if_prev_boot_failed()) {
+            failed_boot_count++;
+        } else {
+            failed_boot_count = 0;
+        }
+    }
 
     rc = host_flash_atu_get_fip_and_metadata_offsets(fip_found, fip_offsets,
                                                      metadata_found, metadata_offsets);
@@ -277,14 +306,16 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
 
     if (metadata_found[0]) {
         /* FWU-Metadata found */
-        rc = parse_fwu_metadata(metadata_offsets[0], &bootable_fip_index);
+        rc = parse_fwu_metadata(metadata_offsets[0], failed_boot_count,
+                                &bootable_fip_index);
         if (rc) {
             return rc;
         }
     } else {
         /* Parse Bkup-FWU-Metadata */
         if (metadata_found[1]) {
-            rc = parse_fwu_metadata(metadata_offsets[1], &bootable_fip_index);
+            rc = parse_fwu_metadata(metadata_offsets[1], failed_boot_count,
+                                    &bootable_fip_index);
             if (rc) {
                 return rc;
             }
