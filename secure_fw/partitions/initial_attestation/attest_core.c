@@ -128,6 +128,7 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
                                         (int64_t)NO_SW_COMPONENT_FIXED_VALUE);
 #else
         /* Mandatory to have SW components claim in the token */
+        LOG_ERRFMT("[ERR][Attest] Boot record is not available\r\n");
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
 #endif
     }
