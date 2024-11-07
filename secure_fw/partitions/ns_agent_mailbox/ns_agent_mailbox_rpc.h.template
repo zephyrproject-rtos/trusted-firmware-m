@@ -1,0 +1,54 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ */
+/***********{{utilities.donotedit_warning}}***********/
+
+#ifndef __NS_AGENT_MAILBOX_RPC_H__
+#define __NS_AGENT_MAILBOX_RPC_H__
+
+#include <stdint.h>
+#include "psa_manifest/ns_agent_mailbox.h"
+#include "psa/service.h"
+#include "tfm_peripherals_def.h"
+
+/*
+ * It is unlikely that a mailbox IRQ number is assigned to 0 in a system.
+ * Return 0 if it fails to map a signal to a mailbox IRQ source.
+ */
+#define INVALID_MAILBOX_IRQ        0
+
+/******************************************************************/
+/* Map mailbox signals into mailbox sources                       */
+/******************************************************************/
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% if partition.manifest.irqs %}
+/******** {{partition.manifest.name}} ********/
+            {% set irq_counter = partition.manifest.irqs|count %}
+            {% if irq_counter > 1 %}
+
+static inline uint32_t rpc_map_signal_to_irq(psa_signal_t signal) {
+    switch (signal) {
+                {% for irq in partition.manifest.irqs %}
+                    {% if partition.manifest.psa_framework_version == 1.0 %}
+    case {{irq.signal}}:
+                    {% else %}
+    case {{irq.name + "_SIGNAL"}}:
+                    {% endif %}
+        return {{irq.source}};
+                {% endfor %}
+    default:
+        return INVALID_MAILBOX_IRQ;
+    }
+}
+            {% else %}
+                {% for irq in partition.manifest.irqs %}
+#define rpc_map_signal_to_irq(x)    (uint32_t){{irq.source}}
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+#endif /* __NS_AGENT_MAILBOX_RPC_H__ */

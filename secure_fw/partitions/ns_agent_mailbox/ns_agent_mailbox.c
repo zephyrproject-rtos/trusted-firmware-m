@@ -30,7 +30,7 @@ static void boot_ns_core(void)
 
 void ns_agent_mailbox_entry(void)
 {
-    psa_signal_t signals = 0;
+    psa_signal_t signals = 0, active_signal = 0;
 
     boot_ns_core();
 
@@ -44,8 +44,9 @@ void ns_agent_mailbox_entry(void)
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
         if (mailbox_signal_is_active(signals)) {
-            psa_eoi(mailbox_signal_get_active(signals));
-            tfm_rpc_client_call_handler();
+            active_signal = mailbox_signal_get_active(signals);
+            psa_eoi(active_signal);
+            tfm_rpc_client_call_handler(active_signal);
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         } else if (signals & ASYNC_MSG_REPLY) {
             tfm_rpc_client_call_reply();

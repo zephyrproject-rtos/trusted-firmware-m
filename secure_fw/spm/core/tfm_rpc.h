@@ -34,13 +34,17 @@
  * the specific operations to complete the RPC functionalities.
  *
  * It includes the following operations:
- * handle_req() - Handle PSA client call request from NSPE
- * reply()      - Reply PSA client call return result to NSPE. The parameter
- *                owner identifies the owner of the PSA client call.
+ * handle_req()         - Handle PSA client call request from NSPE
+ * reply()              - Reply PSA client call return result to NSPE.
+ *                        The parameter owner identifies the owner of the PSA
+ *                        client call.
+ * handle_req_irq_src() - Handle PSA client call request from NSPE and identify
+ *                        mailbox message source according to irq_src.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);
     void (*reply)(const void *owner, int32_t ret);
+    void (*handle_req_irq_src)(uint32_t irq_src);
 };
 
 /**
@@ -128,6 +132,8 @@ psa_status_t tfm_rpc_psa_close(psa_handle_t handle, int32_t ns_client_id);
 /**
  * \brief Register underlying mailbox communication operations.
  *
+ * \note Register callbacks handle_req() and reply()
+ *
  * \param[in] ops_ptr           Pointer to the specific operation structure.
  *
  * \retval TFM_RPC_SUCCESS      Mailbox operations are successfully registered.
@@ -147,11 +153,25 @@ int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr);
 void tfm_rpc_unregister_ops(void);
 
 /**
+ * \brief Register underlying mailbox communication operations when multiple
+ *        mailbox message sources require diverse mailbox message handlings.
+ *
+ * \note Register callbacks handle_req_irq_src() and reply()
+ *
+ * \param[in] ops_ptr           Pointer to the specific operation structure.
+ *
+ * \retval TFM_RPC_SUCCESS      Mailbox operations are successfully registered.
+ * \retval Other error code     Fail to register mailbox operations.
+ */
+int32_t tfm_rpc_register_ops_multi_srcs(const struct tfm_rpc_ops_t *ops_ptr);
+
+/**
  * \brief Handling PSA client call request
  *
- * \param void
+ * \param[in] signal    The received signal indicating the incoming PSA client
+ *                      call request
  */
-void tfm_rpc_client_call_handler(void);
+void tfm_rpc_client_call_handler(psa_signal_t signal);
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /**
