@@ -105,7 +105,7 @@ int main(void)
     /* set Main Stack Pointer limit */
     tfm_arch_set_msplim(SPM_BOOT_STACK_TOP);
 
-    fih_delay_init();
+    (void)fih_delay_init();
 
     FIH_CALL(tfm_core_init, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(SPM_SUCCESS))) {
