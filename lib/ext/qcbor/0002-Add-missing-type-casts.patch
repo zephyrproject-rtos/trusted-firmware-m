@@ -1,0 +1,43 @@
+commit 77752f353691fcf0c372db013d70f621e48ba8df
+Author: Bohdan Hunko <Bohdan.Hunko@infineon.com>
+Date:   Fri Nov 8 19:27:13 2024 +0200
+
+    [PATCH] Add missing type casts to fix compile warnings
+    
+    Fixes following warning for IAR compiler:
+        qcbor_decode.c,3129  Error[Pe188]:
+              enumerated type mixed with another type
+    
+    Signed-off-by: Bohdan Hunko <Bohdan.Hunko@infineon.com>
+
+diff --git a/src/qcbor_decode.c b/src/qcbor_decode.c
+index 70aa41d..ef4ce75 100644
+--- a/src/qcbor_decode.c
++++ b/src/qcbor_decode.c
+@@ -2624,7 +2624,7 @@ QCBORError QCBORDecode_PartialFinish(QCBORDecodeContext *pMe, size_t *puConsumed
+       *puConsumed = pMe->InBuf.cursor;
+    }
+ 
+-   QCBORError uReturn = pMe->uLastError;
++   QCBORError uReturn = (QCBORError)pMe->uLastError;
+ 
+    if(uReturn != QCBOR_SUCCESS) {
+       goto Done;
+@@ -3126,7 +3126,7 @@ MapSearch(QCBORDecodeContext *pMe,
+    uint64_t   uFoundItemBitMap = 0;
+ 
+    if(pMe->uLastError != QCBOR_SUCCESS) {
+-      uReturn = pMe->uLastError;
++      uReturn = (QCBORError)pMe->uLastError;
+       goto Done2;
+    }
+ 
+@@ -3796,7 +3796,7 @@ InternalEnterBstrWrapped(QCBORDecodeContext *pMe,
+ 
+    if(pMe->uLastError != QCBOR_SUCCESS) {
+       /* Already in error state; do nothing. */
+-      return pMe->uLastError;
++      return (QCBORError)pMe->uLastError;
+    }
+ 
+    QCBORError uError;
