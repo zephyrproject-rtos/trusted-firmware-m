@@ -460,7 +460,7 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     sched_attempted = arch_release_sched_lock();
 
     /* Interrupt is masked, PendSV will not happen immediately. */
-    if ((result == STATUS_NEED_SCHEDULE) ||
+    if (((psa_status_t)result == STATUS_NEED_SCHEDULE) ||
         (sched_attempted == SCHEDULER_ATTEMPTED)) {
         arch_attempt_schedule();
     }
