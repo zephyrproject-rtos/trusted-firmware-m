@@ -28,7 +28,7 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_hash_operation_t *operation = NULL;
     uint32_t *p_handle = NULL;
-    enum tfm_crypto_func_sid_t sid = iov->function_id;
+    enum tfm_crypto_func_sid_t sid = (enum tfm_crypto_func_sid_t)iov->function_id;
 
     if (sid == TFM_CRYPTO_HASH_COMPUTE_SID) {
 #if CRYPTO_SINGLE_PART_FUNCS_DISABLED
