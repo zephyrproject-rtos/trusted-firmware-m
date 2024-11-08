@@ -68,33 +68,33 @@ enum tfm_plat_err_t set_tp_mode(void);
 static struct rse_provisioning_bundle test_bundle;
 
 static struct kmu_key_export_config_t aes_key0_export_config = {
-    CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static struct kmu_key_export_config_t aes_key1_export_config = {
-    CC3XX_BASE_S + 0x420, /* CC3XX AES_KEY_1 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0x420, /* CC3XX AES_KEY_1 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static struct kmu_key_export_config_t aes_128_key0_export_config = {
-    CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static enum tfm_plat_err_t setup_random_key(enum rse_kmu_slot_id_t key)

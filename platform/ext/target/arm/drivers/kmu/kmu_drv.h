@@ -216,12 +216,14 @@ enum kmu_hardware_keyslot_t {
     KMU_HW_SLOT_KCE_DM,
     KMU_USER_SLOT_MIN = (7u),
     KMU_USER_SLOT_MAX = (31u),
+    KMU_INVALID_SLOT = UINT_MAX,
 };
 
 enum kmu_destination_port_data_width_t {
     KMU_DESTINATION_PORT_WIDTH_8_BITS = (0x0u),
     KMU_DESTINATION_PORT_WIDTH_16_BITS,
     KMU_DESTINATION_PORT_WIDTH_32_BITS,
+    KMU_DESTINATION_PORT_WIDTH_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 enum kmu_destination_port_data_writes_t {
@@ -229,12 +231,14 @@ enum kmu_destination_port_data_writes_t {
     KMU_DESTINATION_PORT_WIDTH_8_WRITES,
     KMU_DESTINATION_PORT_WIDTH_16_WRITES,
     KMU_DESTINATION_PORT_WIDTH_32_WRITES,
+    KMU_DESTINATION_PORT_WIDTH_WRITE_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 enum kmu_delay_limit_t {
     KMU_DELAY_LIMIT_8_CYCLES,
     KMU_DELAY_LIMIT_16_CYCLES,
     KMU_DELAY_LIMIT_32_CYCLES,
+    KMU_DELAY_LIMIT_FORCE_UINT_SIZE = UINT_MAX,
 };
 
 /**
@@ -242,10 +246,10 @@ enum kmu_delay_limit_t {
  */
 struct kmu_key_export_config_t {
     uint32_t export_address;
-    uint8_t destination_port_write_delay;
-    uint8_t destination_port_address_increment;
     enum kmu_destination_port_data_width_t destination_port_data_width_code;
     enum kmu_destination_port_data_writes_t destination_port_data_writes_code;
+    uint8_t destination_port_write_delay;
+    uint8_t destination_port_address_increment;
     bool new_mask_for_next_key_writes;
     bool write_mask_disable;
 };

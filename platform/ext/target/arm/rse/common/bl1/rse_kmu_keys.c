@@ -16,56 +16,56 @@
 #include "trng.h"
 
 static const struct kmu_key_export_config_t aes_key0_export_config = {
-    CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static const struct kmu_key_export_config_t aes_key1_export_config = {
-    CC3XX_BASE_S + 0x420, /* CC3XX AES_KEY_1 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0x420, /* CC3XX AES_KEY_1 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static const struct kmu_key_export_config_t sic_dr0_export_config = {
-    SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static const struct kmu_key_export_config_t sic_dr1_export_config = {
-    SIC_BASE_S + 0x220, /* SIC DR1_KEY_WORD0 register */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = SIC_BASE_S + 0x220, /* SIC DR1_KEY_WORD0 register */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static const struct kmu_key_export_config_t cc3xx_pka_sram_key_config = {
-    CC3XX_BASE_S + 0xFD0, /* CC3XX keystore mux. This address is reused from the
-                           * CC3XX register map and redirected to the PKA SRAM
-                           * keystore.
-                           */
-    0, /* No delay */
-    0x01, /* Increment by 4 bytes with each write */
-    KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-    KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 4 writes (total 128 bits) */
-    true,  /* refresh the masking */
-    false, /* Don't disable the masking */
+    .export_address = CC3XX_BASE_S + 0xFD0, /* CC3XX keystore mux. This address is reused from the
+                                             * CC3XX register map and redirected to the PKA SRAM
+                                             * keystore.
+                                             */
+    .destination_port_write_delay = 0, /* No delay */
+    .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+    .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+    .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 4 writes (total 128 bits) */
+    .new_mask_for_next_key_writes = true,  /* refresh the masking */
+    .write_mask_disable = false, /* Don't disable the masking */
 };
 
 static enum tfm_plat_err_t set_export_config_and_lock_key(enum rse_kmu_slot_id_t slot,

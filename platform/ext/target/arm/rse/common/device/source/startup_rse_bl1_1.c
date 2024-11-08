@@ -213,13 +213,13 @@ static void __attribute__ ((noinline)) setup_tram_encryption(void) {
     uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
 
     const struct kmu_key_export_config_t tram_key_export_config = {
-        TRAM_BASE_S + 0x8, /* TRAM key register */
-        0, /* No delay */
-        0x01, /* Increment by 4 bytes with each write */
-        KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-        KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-        true,  /* refresh the masking */
-        false, /* Don't disable the masking */
+        .export_address = TRAM_BASE_S + 0x8, /* TRAM key register */
+        .destination_port_write_delay = 0, /* No delay */
+        .destination_port_address_increment = 0x01, /* Increment by 4 bytes with each write */
+        .destination_port_data_width_code = KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+        .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+        .new_mask_for_next_key_writes = true,  /* refresh the masking */
+        .write_mask_disable = false, /* Don't disable the masking */
     };
 
     /* Redefine these, as at this point the constants haven't been loaded */
