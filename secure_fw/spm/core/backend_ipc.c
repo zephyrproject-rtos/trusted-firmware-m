@@ -308,6 +308,8 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
     (void)p_pt;
     (void)service_setting;
     (void)param;
+
+    return POSITION_TO_ENTRY(NULL, thrd_fn_t);
 }
 #endif
 
