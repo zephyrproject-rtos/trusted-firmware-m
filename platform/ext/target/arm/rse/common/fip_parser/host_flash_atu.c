@@ -15,6 +15,9 @@
 #include "host_base_address.h"
 #include "platform_base_address.h"
 #include "tfm_plat_defs.h"
+#ifdef RSE_GPT_SUPPORT
+#include "fwu_metadata.h"
+#endif /* RSE_GPT_SUPPORT */
 
 #include <string.h>
 
@@ -132,20 +135,16 @@ int host_flash_atu_setup_image_input_slots_from_fip(uint64_t fip_offset,
     return 0;
 }
 
-int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
-{
 #ifdef RSE_GPT_SUPPORT
+static int host_flash_atu_get_gpt_header(gpt_header_t *header)
+{
     enum tfm_plat_err_t plat_err;
     enum atu_error_t atu_err;
-    gpt_header_t header;
-    gpt_entry_t entry;
     size_t page_size = get_page_size(&ATU_DEV_S);
     uint64_t physical_address;
     uint32_t alignment_offset;
     size_t atu_slot_size;
-#endif /* RSE_GPT_SUPPORT */
 
-#ifdef RSE_GPT_SUPPORT
     physical_address = HOST_FLASH0_BASE + FLASH_LBA_SIZE;
     plat_err = setup_aligned_atu_slot(physical_address, FLASH_LBA_SIZE,
                                       page_size, RSE_ATU_REGION_TEMP_SLOT,
@@ -156,7 +155,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     }
 
     plat_err = gpt_get_header(HOST_FLASH0_TEMP_BASE_S + alignment_offset,
-                              atu_slot_size - alignment_offset, &header);
+                              atu_slot_size - alignment_offset, header);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return plat_err;
     }
@@ -165,6 +164,29 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
                                       RSE_ATU_REGION_TEMP_SLOT);
     if (atu_err != ATU_ERR_NONE) {
         return atu_err;
+    }
+
+    return 0;
+}
+
+int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
+                                                uint64_t fip_offsets[2],
+                                                bool metadata_found[2],
+                                                uint64_t metadata_offsets[2])
+{
+    int rc;
+    enum tfm_plat_err_t plat_err;
+    enum atu_error_t atu_err;
+    gpt_header_t header;
+    gpt_entry_t entry;
+    size_t page_size = get_page_size(&ATU_DEV_S);
+    uint64_t physical_address;
+    uint32_t alignment_offset;
+    size_t atu_slot_size;
+
+    rc = host_flash_atu_get_gpt_header(&header);
+    if (rc) {
+        return rc;
     }
 
     physical_address = HOST_FLASH0_BASE
@@ -202,20 +224,39 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
         fip_found[1] = false;
     }
 
+    plat_err = gpt_get_list_entry_by_name(HOST_FLASH0_TEMP_BASE_S + alignment_offset,
+                                          header.list_num, header.list_entry_size,
+                                          (uint8_t *)FWU_METADATA_GPT_NAME,
+                                          sizeof(FWU_METADATA_GPT_NAME),
+                                          atu_slot_size - alignment_offset, &entry);
+    if (plat_err == TFM_PLAT_ERR_SUCCESS) {
+        metadata_found[0] = true;
+        metadata_offsets[0] = entry.first_lba * FLASH_LBA_SIZE;
+    } else {
+        metadata_found[0] = false;
+    }
+
+    plat_err = gpt_get_list_entry_by_name(HOST_FLASH0_TEMP_BASE_S + alignment_offset,
+                                          header.list_num, header.list_entry_size,
+                                          (uint8_t *)FWU_BK_METADATA_GPT_NAME,
+                                          sizeof(FWU_BK_METADATA_GPT_NAME),
+                                          atu_slot_size - alignment_offset, &entry);
+    if (plat_err == TFM_PLAT_ERR_SUCCESS) {
+        metadata_found[1] = true;
+        metadata_offsets[1] = entry.first_lba * FLASH_LBA_SIZE;
+    } else {
+        metadata_found[1] = false;
+    }
+
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
                                       RSE_ATU_REGION_TEMP_SLOT);
     if (atu_err != ATU_ERR_NONE) {
         return atu_err;
     }
-#else
-    fip_found[0] = true;
-    fip_offsets[0] = FLASH_FIP_A_OFFSET;
-    fip_found[1] = true;
-    fip_offsets[1] = FLASH_FIP_B_OFFSET;
-#endif /* RSE_GPT_SUPPORT */
 
     return 0;
 }
+#endif /* RSE_GPT_SUPPORT */
 
 static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
 {
@@ -223,11 +264,38 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     bool fip_found[2];
     uint64_t fip_offsets[2];
     bool fip_mapped[2] = {false};
+#ifdef RSE_GPT_SUPPORT
+    bool metadata_found[2];
+    uint64_t metadata_offsets[2];
 
-    rc = host_flash_atu_get_fip_offsets(fip_found, fip_offsets);
+    rc = host_flash_atu_get_fip_and_metadata_offsets(fip_found, fip_offsets,
+                                                     metadata_found, metadata_offsets);
     if (rc) {
         return rc;
     }
+
+    if (metadata_found[0]) {
+        /* FWU-Metadata found */
+        rc = parse_fwu_metadata(metadata_offsets[0]);
+        if (rc) {
+            return rc;
+        }
+    } else {
+        /* Parse Bkup-FWU-Metadata */
+        if (metadata_found[1]) {
+            rc = parse_fwu_metadata(metadata_offsets[1]);
+            if (rc) {
+                return rc;
+            }
+        }
+    }
+
+#else
+    fip_found[0] = true;
+    fip_offsets[0] = FLASH_FIP_A_OFFSET;
+    fip_found[1] = true;
+    fip_offsets[1] = FLASH_FIP_B_OFFSET;
+#endif /* RSE_GPT_SUPPORT */
 
     /* MCUBoot requires that we map both regions. If we can only have the offset
      * of one, then map it to both slots.

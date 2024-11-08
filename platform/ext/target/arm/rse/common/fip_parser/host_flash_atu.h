@@ -19,17 +19,24 @@ extern "C" {
 #endif
 
 /**
- * \brief                  Gets the offsets of the FIPs in host flash. If GPT is
- *                         supported these are parsed from the GPT partition
- *                         list, else the hardcoded values are returned.
+ * \brief                       Gets the offsets of the FIPs and metadata in
+ *                              host flash. These are parsed from the GPT
+ *                              partition list.
  *
- * \param[out] fip_found   Which fips were found. If fip_found[x] is 0, then the
- *                         value of fip_offsets[x] is undefined.
- * \param[out] fip_offsets The FIP offsets.
+ * \param[out] fip_found        Which fips were found. If fip_found[x] is 0,
+ *                              then the value of fip_offsets[x] is undefined.
+ * \param[out] fip_offsets      The FIP offsets.
+ * \param[out] metadata_found   Which metadata were found. If metadata_found[x]
+ *                              is 0, then the value of fip_offsets[x] is
+ *                              undefined.
+ * \param[out] metadata_offsets The metadata offsets.
  *
  * \return                 0 on success, non-zero on failure.
  */
-int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2]);
+int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
+                                                uint64_t fip_offsets[2],
+                                                bool metadata_found[2],
+                                                uint64_t metadata_offsets[2]);
 
 /**
  * \brief                             Set up the input ATU slots so that an

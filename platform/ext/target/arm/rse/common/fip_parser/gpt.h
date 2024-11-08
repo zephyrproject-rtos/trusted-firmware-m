@@ -20,6 +20,8 @@
 #define GPT_SIGNATURE          "EFI PART"
 #define PRIMARY_FIP_GPT_NAME   "FIP_A"
 #define SECONDARY_FIP_GPT_NAME "FIP_B"
+#define FWU_METADATA_GPT_NAME  "FWU-Metadata"
+#define FWU_BK_METADATA_GPT_NAME "Bkup-FWU-Metadata"
 
 typedef struct gpt_entry {
     struct efi_guid type_uuid;
