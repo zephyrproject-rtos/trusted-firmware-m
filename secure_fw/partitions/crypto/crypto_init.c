@@ -253,8 +253,6 @@ static psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
         LOG_ERRFMT("[ERR][Crypto] Unsupported request!\r\n");
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_NOT_SUPPORTED;
 }
 
 static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
@@ -408,7 +406,5 @@ psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 /*!@}*/

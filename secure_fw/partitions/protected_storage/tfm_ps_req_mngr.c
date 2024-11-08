@@ -154,8 +154,6 @@ psa_status_t tfm_protected_storage_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t tfm_ps_entry(void)

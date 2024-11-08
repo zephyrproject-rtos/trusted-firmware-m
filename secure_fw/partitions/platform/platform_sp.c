@@ -230,8 +230,6 @@ psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t platform_sp_init(void)

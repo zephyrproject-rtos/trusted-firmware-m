@@ -85,8 +85,6 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_NOT_SUPPORTED;
 }
 #else /* CRYPTO_ASYM_SIGN_MODULE_ENABLED */
 psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
@@ -153,8 +151,6 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_NOT_SUPPORTED;
 }
 #else /* CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED */
 psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],

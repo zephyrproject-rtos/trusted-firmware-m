@@ -136,8 +136,6 @@ psa_status_t tfm_attestation_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t attest_partition_init(void)

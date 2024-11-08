@@ -166,8 +166,6 @@ psa_status_t tfm_internal_trusted_storage_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
