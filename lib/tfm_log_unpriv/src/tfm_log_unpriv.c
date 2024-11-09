@@ -19,12 +19,12 @@ struct tfm_log_unpriv_data {
     char buf[LOG_UNPRIV_BUFFER_SIZE];
 };
 
-static void output_buf(char *buf, uint32_t buf_len)
+static void output_buf(const char *buf, uint32_t buf_len)
 {
-    tfm_hal_output_sp_log((const unsigned char *)buf, buf_len);
+    tfm_hal_output_sp_log(buf, buf_len);
 }
 
-static void output_string_to_buf(void *priv, const unsigned char *str, uint32_t len)
+static void output_string_to_buf(void *priv, const char *str, uint32_t len)
 {
     struct tfm_log_unpriv_data *data = priv;
     uint32_t i;

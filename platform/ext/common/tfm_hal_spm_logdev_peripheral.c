@@ -11,5 +11,5 @@
 int32_t tfm_hal_output_spm_log(const char *str, uint32_t len)
 {
     /* Peripheral based log function call the stdio_output_string directly */
-    return stdio_output_string((const unsigned char *)str, len);
+    return stdio_output_string(str, len);
 }

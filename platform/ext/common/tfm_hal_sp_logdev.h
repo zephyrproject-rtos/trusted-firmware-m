@@ -20,6 +20,6 @@
  * \retval >= 0          Number of chars output.
  * \retval < 0           TF-M HAL error code.
  */
-int32_t tfm_hal_output_sp_log(const unsigned char *str, size_t len);
+int32_t tfm_hal_output_sp_log(const char *str, size_t len);
 
 #endif /* __TFM_HAL_SP_LOGDEV_H__ */

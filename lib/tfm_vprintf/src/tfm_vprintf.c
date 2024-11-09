@@ -37,7 +37,7 @@ static inline const char *get_log_prefix(uint8_t log_level)
 
 static void output_char(tfm_log_output_str output_func, void *priv, char c)
 {
-    output_func(priv, (const unsigned char *)&c, 1);
+    output_func(priv, &c, 1);
 }
 
 static void output_str(tfm_log_output_str output_func, void *priv, const char *str)
@@ -49,7 +49,7 @@ static void output_str(tfm_log_output_str output_func, void *priv, const char *s
         len++;
     }
 
-    output_func(priv, (const unsigned char *)str, len);
+    output_func(priv, str, len);
 }
 
 static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,

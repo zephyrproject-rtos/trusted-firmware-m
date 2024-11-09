@@ -12,7 +12,7 @@
 #include "tfm_log.h"
 #include "uart_stdout.h"
 
-static void output_log(void *priv, const unsigned char *str, uint32_t len)
+static void output_log(void *priv, const char *str, uint32_t len)
 {
     stdio_output_string(str, len);
 }

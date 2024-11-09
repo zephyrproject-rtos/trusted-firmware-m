@@ -34,7 +34,7 @@ void stdio_uninit(void);
 /**
  * \brief Output buffer by STDIO.
  */
-int stdio_output_string(const unsigned char *str, uint32_t len);
+int stdio_output_string(const char *str, uint32_t len);
 
 /**
  * \brief Returns the initialization status of the stdio
