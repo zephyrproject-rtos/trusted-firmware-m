@@ -981,6 +981,8 @@ uint32_t ps_object_table_current_gen(void)
 #if PS_AES_KEY_USAGE_LIMIT == 0
     /* This function should never be called in this config */
     tfm_core_panic();
+    /* Add a dummy return to silence compiler warnings */
+    return 0;
 #else
     struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
 
