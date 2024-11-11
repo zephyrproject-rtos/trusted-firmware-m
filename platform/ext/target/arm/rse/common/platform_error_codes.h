@@ -81,6 +81,9 @@ enum tfm_plat_err_t {
     TFM_PLAT_ERR_ROM_TRNG_GENERATE_RANDOM_INVALID_INPUT,
     /* RSE BL1_2 read image error codes */
     TFM_PLAT_ERR_READ_BL1_2_IMAGE_FLASH_INVALID_READ,
+    /* RSE BL2 error codes */
+    TFM_PLAT_ERR_PRE_LOAD_IMG_BY_BL2_FAIL,
+    TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL,
     /* Generic errors */
     TFM_PLAT_ERR_SYSTEM_ERR,
     TFM_PLAT_ERR_MAX_VALUE,

@@ -18,6 +18,7 @@
 #include "device_definition.h"
 #include "host_base_address.h"
 #include "platform_base_address.h"
+#include "platform_error_codes.h"
 #include "platform_regs.h"
 #include "host_device_definition.h"
 #include "rse_platform_defs.h"
@@ -194,7 +195,7 @@ int boot_platform_pre_load(uint32_t image_id)
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 
     if (flash_area_primary == NULL || flash_area_secondary == NULL) {
-        return 1;
+        return TFM_PLAT_ERR_PRE_LOAD_IMG_BY_BL2_FAIL;
     }
 
     switch(image_id) {
@@ -219,12 +220,12 @@ int boot_platform_pre_load(uint32_t image_id)
 #endif /* RSE_XIP */
         break;
     default:
-        return 1;
+        return TFM_PLAT_ERR_PRE_LOAD_IMG_BY_BL2_FAIL;
     }
 
     rc = host_flash_atu_init_regions_for_image(uuid, offsets);
     if (rc) {
-        return rc;
+        return TFM_PLAT_ERR_PRE_LOAD_IMG_BY_BL2_FAIL;
     }
 
     flash_area_primary->fa_off += offsets[0];
@@ -239,7 +240,7 @@ int boot_platform_post_load(uint32_t image_id)
 
 #ifdef RSE_XIP
     if (sic_boot_post_load(image_id, rsp.br_image_off) != SIC_BOOT_SUCCESS) {
-        return 1;
+        return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
     }
 #endif /* RSE_XIP */
 
@@ -264,7 +265,7 @@ int boot_platform_post_load(uint32_t image_id)
 #elif PLAT_MHU_VERSION == 3
         err = wait_for_signal_and_clear(&MHU_SCP_TO_RSE_DEV, MHU_PBX_DBCH_FLAG_SCP_COMMS);
         if (err) {
-            return err;
+            return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
         }
 #endif
         BOOT_LOG_INF("Got SCP BL1 started event");
@@ -279,7 +280,7 @@ int boot_platform_post_load(uint32_t image_id)
 #elif PLAT_MHU_VERSION == 3
         err = signal_and_wait_for_clear(&MHU_RSE_TO_SCP_DEV, MHU_PBX_DBCH_FLAG_SCP_COMMS);
         if (err) {
-            return err;
+            return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
         }
 #endif
         BOOT_LOG_INF("Sent the signal to SCP");
@@ -291,7 +292,7 @@ int boot_platform_post_load(uint32_t image_id)
 
     err = host_flash_atu_uninit_regions();
     if (err) {
-        return err;
+        return TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL;
     }
 
     return 0;
@@ -341,6 +342,20 @@ int boot_initiate_recovery_mode(uint32_t image_id)
     boot_platform_register_failed_boot();
 
     return 0;
+}
+
+void boot_platform_error_state(uint32_t error)
+{
+    if ((error == TFM_PLAT_ERR_PRE_LOAD_IMG_BY_BL2_FAIL) ||
+        (error == TFM_PLAT_ERR_POST_LOAD_IMG_BY_BL2_FAIL)) {
+
+        /* Initiate recovery mode. Argument image_id is not applicable
+         * as it is ignored in boot_initiate_recovery_mode()
+         */
+        boot_initiate_recovery_mode(0);
+    }
+
+    FIH_PANIC;
 }
 #endif /* RSE_GPT_SUPPORT */
 
