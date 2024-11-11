@@ -976,26 +976,16 @@ psa_status_t ps_object_table_get_free_fid(uint32_t fid_num,
     return PSA_SUCCESS;
 }
 
+#if PS_AES_KEY_USAGE_LIMIT != 0
 uint32_t ps_object_table_current_gen(void)
 {
-#if PS_AES_KEY_USAGE_LIMIT == 0
-    /* This function should never be called in this config */
-    tfm_core_panic();
-    /* Add a dummy return to silence compiler warnings */
-    return 0;
-#else
     struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
 
     return p_table->crypto.ref.key_gen_nr;
-#endif
 }
 
 void ps_object_table_set_gen(uint32_t new_gen)
 {
-#if PS_AES_KEY_USAGE_LIMIT == 0
-    /* This function should never be called in this config */
-    tfm_core_panic();
-#else
     struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
 
     /* Sanity check the parameter */
@@ -1004,8 +994,8 @@ void ps_object_table_set_gen(uint32_t new_gen)
         tfm_core_panic();
     }
     p_table->crypto.ref.key_gen_nr = new_gen;
-#endif
 }
+#endif /* PS_AES_KEY_USAGE_LIMIT != 0 */
 
 psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
                                               int32_t client_id,
