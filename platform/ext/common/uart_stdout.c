@@ -37,15 +37,17 @@ int stdio_output_string(const char *str, uint32_t len)
 {
     int32_t ret;
 
-    /* Add a busy wait before sending. */
-    while (STDIO_DRIVER.GetStatus().tx_busy);
-
     ret = STDIO_DRIVER.Send(str, len);
     if (ret != ARM_DRIVER_OK) {
         return 0;
     }
 
-    /* Add a busy wait after sending. */
+    /* Busy wait after Send(). CMSIS mandates the Send() to be non-blocking,
+     * while TF-M's current implementation expects to block on Send(), i.e.
+     * polling the tx_busy itself in driver code. For this reason the below
+     * busy wait does not have any practical effect, but we keep it in place
+     * for those platforms which might decide to implement IRQ-based UART
+     */
     while (STDIO_DRIVER.GetStatus().tx_busy);
 
     return STDIO_DRIVER.GetTxCount();
@@ -133,6 +135,15 @@ void stdio_init(void)
 void stdio_uninit(void)
 {
     int32_t ret = ARM_DRIVER_ERROR;
+
+    ret = STDIO_DRIVER.PowerControl(ARM_POWER_OFF);
+    /* FixMe: Still allow this function not to be implemented as in blocking
+     *        mode there is not much that needs to be done when powering off
+     */
+    if ((ret != ARM_DRIVER_OK) && (ret != ARM_DRIVER_ERROR_UNSUPPORTED)) {
+        assert(0);
+        return;
+    }
 
     ret = STDIO_DRIVER.Uninitialize();
     if (ret != ARM_DRIVER_OK) {
