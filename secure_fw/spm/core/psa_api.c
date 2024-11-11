@@ -356,6 +356,14 @@ psa_status_t tfm_spm_partition_psa_panic(void)
     tfm_hal_system_reset();
 #endif
 
+    /* Suppress Pe111 (statement is unreachable) for IAR as return here is in
+     * case system reset fails, which should not happen */
+#if defined(__ICCARM__)
+#pragma diag_suppress = Pe111
+#endif
     /* Execution should not reach here */
     return PSA_ERROR_GENERIC_ERROR;
+#if defined(__ICCARM__)
+#pragma diag_default = Pe111
+#endif
 }
