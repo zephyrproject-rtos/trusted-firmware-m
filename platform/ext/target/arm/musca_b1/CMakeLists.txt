@@ -60,7 +60,9 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
     INTERFACE
         cc312
 )
@@ -81,7 +83,7 @@ target_sources(platform_s
         Native_Driver/musca_b1_scc_drv.c
         Native_Driver/ppc_sse200_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
-        $<$<NOT:$<BOOL:${TFM_PARTITION_SLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        $<$<NOT:$<BOOL:${TFM_PARTITION_SLIH_TEST}>>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -95,7 +97,7 @@ target_sources(tfm_sprt
     PRIVATE
         # The SLIH test Partition accesses the timer as ARoT Partitions.
         # Put the driver to SPRT so that the SLIH tests can access it.
-        $<$<BOOL:${TFM_PARTITION_SLIH_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        $<$<BOOL:${TFM_PARTITION_SLIH_TEST}>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.c>
 )
 
 #========================= Platform BL2 =======================================#
@@ -121,7 +123,9 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
+            ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include # for fih.h interop only
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
@@ -174,7 +178,9 @@ add_library(flash_drivers STATIC)
 
 target_include_directories(flash_drivers
     PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
         ${PLATFORM_DIR}/ext/common
         ${PLATFORM_DIR}/include
         Native_Driver
@@ -218,6 +224,7 @@ install(FILES       Device/Source/startup_musca.c
 )
 
 install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.c
                     CMSIS_Driver/Driver_USART.c
                     Libraries/mt25ql_flash_lib.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
@@ -243,6 +250,9 @@ install(FILES       target_cfg.h
                     ${PLATFORM_DIR}/include/tfm_plat_defs.h
                     ${PLATFORM_DIR}/ext/common/common_target_cfg.h
                     ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common/Driver_USART_Common.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/Driver_USART_PL011.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 
 # copy all files from active platform directory

@@ -16,7 +16,7 @@ target_sources(platform_ns
         Device/Source/startup_musca.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
-        Native_Driver/timer_cmsdk_drv.c
+        timer_cmsdk_drv.c
         Driver_USART.c
         uart_pl011_drv.c
 )

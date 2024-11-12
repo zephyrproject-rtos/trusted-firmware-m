@@ -47,6 +47,22 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+#if (RTE_USART0)
+    #include "cmsis_driver_config.h"
+    enum musca_b1_scc_error_t scc_err = SCC_ERR_NONE;
+
+    /* Set pin for UART functionality */
+    scc_err = musca_b1_scc_set_alt_func(&MUSCA_B1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
+    if (scc_err != SCC_ERR_NONE) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+
+    scc_err = musca_b1_scc_set_alt_func(&MUSCA_B1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
+    if (scc_err != SCC_ERR_NONE) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+#endif
+
     return TFM_HAL_SUCCESS;
 }
 

@@ -71,6 +71,12 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
 #endif
 
+#if (RTE_USART0)
+    /* Set pin for UART functionality */
+    musca_s1_scc_set_alt_func(&MUSCA_S1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_0);
+    musca_s1_scc_set_alt_func(&MUSCA_S1_SCC_DEV, GPIO_ALTFUNC_1, 1<<AHB_GPIO0_1);
+#endif
+
     return TFM_HAL_SUCCESS;
 }
 

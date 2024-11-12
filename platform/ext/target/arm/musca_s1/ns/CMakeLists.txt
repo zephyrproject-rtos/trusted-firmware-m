@@ -17,7 +17,7 @@ target_sources(platform_ns
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
         uart_pl011_drv.c
-        Native_Driver/timer_cmsdk_drv.c
+        timer_cmsdk_drv.c
         CMSIS_Driver/Driver_USART.c
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:services/src/tfm_ioctl_ns_api.c>
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:services/src/tfm_gpled_api.c>
