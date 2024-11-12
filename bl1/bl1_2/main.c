@@ -248,11 +248,13 @@ static fih_int check_key_policy(fih_int validate_rc,
         FIH_RET(fih_rc);
     }
 
-    if (policy == TFM_BL1_KEY_MIGHT_SIGN) {
-        *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
-    } else {
-        *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
-        *key_must_sign  &= fih_eq(fih_rc, FIH_SUCCESS);
+    if (fih_eq(validate_rc, FIH_SUCCESS)) {
+        if (policy == TFM_BL1_KEY_MIGHT_SIGN) {
+            *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
+        } else {
+            *key_might_sign |= fih_eq(fih_rc, FIH_SUCCESS);
+            *key_must_sign  &= fih_eq(fih_rc, FIH_SUCCESS);
+        }
     }
 
     FIH_RET(FIH_SUCCESS);
@@ -264,6 +266,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     fih_int fih_rc = FIH_FAILURE;
     static uint8_t measurement_hash[TFM_BL1_2_MEASUREMENT_HASH_MAX_SIZE];
     static size_t measurement_hash_size;
+    uint32_t idx;
 #ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
     bool key_must_sign  = true;
     bool key_might_sign = false;
@@ -280,32 +283,19 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
         FIH_RET(fih_rc);
     }
 
-    FIH_CALL(validate_image_signature, fih_rc, img,
-                                               &img->header.cm_sig,
-                                               TFM_BL1_KEY_ROTPK_0,
-                                               measurement_hash, measurement_hash_size,
-                                               BOOT_MEASUREMENT_SLOT_BL2);
+    for (idx = 0; idx < TFM_BL1_2_SIGNER_AMOUNT; idx++) {
+        FIH_CALL(validate_image_signature, fih_rc, img,
+                                                   &img->header.sigs[idx],
+                                                   TFM_BL1_KEY_ROTPK_0 + idx,
+                                                   measurement_hash, measurement_hash_size,
+                                                   BOOT_MEASUREMENT_SLOT_BL2);
 #ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
-    fih_rc = check_key_policy(fih_rc, TFM_BL1_KEY_ROTPK_0, &key_might_sign, &key_must_sign);
+        fih_rc = check_key_policy(fih_rc, TFM_BL1_KEY_ROTPK_0, &key_might_sign, &key_must_sign);
 #endif
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            FIH_RET(fih_rc);
+        }
     }
-
-
-#ifdef TFM_BL1_2_ALLOW_DM_SIGNATURE
-    /* TODO fix the boot measurement for this */
-    FIH_CALL(validate_image_signature, fih_rc, img,
-                                               &img->header.dm_sig,
-                                               TFM_BL1_KEY_ROTPK_1,
-                                               BOOT_MEASUREMENT_SLOT_BL2);
-#ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
-    fih_rc = check_key_policy(fih_rc, TFM_BL1_KEY_ROTPK_1, &key_might_sign, &key_must_sign);
-#endif
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
-    }
-#endif
 
 #ifdef TFM_BL1_2_ENABLE_ROTPK_POLICIES
     if (fih_not_eq(key_must_sign, true) || fih_not_eq(key_might_sign, true)) {
@@ -474,6 +464,7 @@ int main(void)
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        boot_platform_error_state(fih_rc);
         FIH_PANIC;
     }
     INFO("Starting TF-M BL1_2\n");
@@ -484,11 +475,13 @@ int main(void)
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        boot_platform_error_state(fih_rc);
         FIH_PANIC;
     }
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        boot_platform_error_state(fih_rc);
         FIH_PANIC;
     }
 
@@ -504,6 +497,7 @@ int main(void)
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
             if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
+                boot_platform_error_state(recovery_succeeded);
                 FIH_PANIC;
             }
         }
@@ -511,11 +505,13 @@ int main(void)
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        boot_platform_error_state(fih_rc);
         FIH_PANIC;
     }
 
     INFO("Jumping to BL2\n");
     boot_platform_start_next_image((struct boot_arm_vector_table *)BL2_CODE_START);
 
+    boot_platform_error_state(0);
     FIH_PANIC;
 }
