@@ -26,6 +26,10 @@ void tfm_core_panic(void)
     tfm_dump_backtrace(__func__, tfm_log);
 #endif
 
+/* Suppress Pe111 (statement is unreachable) for IAR as redundant code is needed for FIH */
+#if defined(__ICCARM__)
+#pragma diag_suppress = Pe111
+#endif
 #ifdef CONFIG_TFM_HALT_ON_CORE_PANIC
 
     /*
@@ -58,4 +62,7 @@ void tfm_core_panic(void)
 #endif
 
 #endif /* CONFIG_TFM_HALT_ON_CORE_PANIC */
+#if defined(__ICCARM__)
+#pragma diag_default = Pe111
+#endif
 }

@@ -27,6 +27,10 @@ void tfm_idle_thread(void)
     }
 
 #ifdef TFM_FIH_PROFILE_ON
+/* Suppress Pe111 (statement is unreachable) for IAR as redundant code is needed for FIH */
+#if defined(__ICCARM__)
+#pragma diag_suppress = Pe111
+#endif
     (void)fih_delay();
 
     while (1) {
@@ -40,5 +44,8 @@ void tfm_idle_thread(void)
             __WFI();
         }
     }
+#if defined(__ICCARM__)
+#pragma diag_default = Pe111
+#endif
 #endif
 }
