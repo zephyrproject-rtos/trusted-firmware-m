@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2024 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -845,6 +845,17 @@ bool uart_pl011_get_ri_status(struct uart_pl011_dev_t* dev);
  */
 enum uart_pl011_error_t uart_pl011_set_sirlp_divisor(
             struct uart_pl011_dev_t* dev, uint32_t value);
+
+/**
+ * \brief Returns BUSY bit value of the UART dev.
+ *
+ * \param[in] dev   UART device struct \ref uart_pl011_dev_t
+ *
+ * \return Returns bool, true if UART is busy, false otherwise
+ *
+ * \note This function doesn't check if dev is NULL.
+ */
+bool uart_pl011_is_busy(struct uart_pl011_dev_t* dev);
 
 #ifdef __cplusplus
 }

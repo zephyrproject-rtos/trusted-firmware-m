@@ -129,7 +129,7 @@ static inline int32_t ARM_USARTx_Send(UARTx_Resources* uart_dev, const void *dat
     }
 
     /* Waits until character is transmited */
-    while (!uart_pl011_is_writable(uart_dev->dev)){};
+    while (uart_pl011_is_busy(uart_dev->dev));
 
     return ARM_DRIVER_OK;
 }

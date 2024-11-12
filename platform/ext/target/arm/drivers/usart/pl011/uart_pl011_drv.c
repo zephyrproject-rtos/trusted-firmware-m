@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 Arm Limited
+ * Copyright (c) 2016-2024 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,11 +193,6 @@ static void _uart_pl011_disable_fifo(struct _uart_pl011_reg_map_t* p_uart)
 static bool _uart_pl011_is_fifo_enabled(struct _uart_pl011_reg_map_t* p_uart)
 {
     return (bool)(p_uart->uartlcr_h & UART_PL011_UARTLCR_H_FEN_MASK);
-}
-
-static bool _uart_pl011_is_busy(struct _uart_pl011_reg_map_t* p_uart)
-{
-    return (bool)(p_uart->uartfr & UART_PL011_UARTFR_BUSYBIT);
 }
 
 static enum uart_pl011_error_t _uart_pl011_set_baudrate(
@@ -403,7 +398,7 @@ void uart_pl011_uninit(struct uart_pl011_dev_t* dev)
     struct _uart_pl011_reg_map_t* p_uart =
         (struct _uart_pl011_reg_map_t*)dev->cfg->base;
 
-    while(_uart_pl011_is_busy(p_uart));
+    while(uart_pl011_is_busy(dev));
 
     /* Disable and restore the default configuration of the peripheral */
     _uart_pl011_reset_regs(p_uart);
@@ -1016,4 +1011,12 @@ enum uart_pl011_error_t uart_pl011_set_sirlp_divisor(
     p_uart->uartilpr = value;
 
     return UART_PL011_ERR_NONE;
+}
+
+bool uart_pl011_is_busy(struct uart_pl011_dev_t* dev)
+{
+    struct _uart_pl011_reg_map_t* p_uart =
+        (struct _uart_pl011_reg_map_t*)dev->cfg->base;
+
+    return (bool)(p_uart->uartfr & UART_PL011_UARTFR_BUSYBIT);
 }
