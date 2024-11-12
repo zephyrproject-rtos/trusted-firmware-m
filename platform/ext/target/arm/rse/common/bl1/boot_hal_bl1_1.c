@@ -127,7 +127,7 @@ int32_t boot_platform_init(void)
         cc3xx_lowlevel_dma_remap_region_init(idx, &remap_regions[idx]);
     }
 
-    (void)fih_delay_init();
+    fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     /* Init KMU */

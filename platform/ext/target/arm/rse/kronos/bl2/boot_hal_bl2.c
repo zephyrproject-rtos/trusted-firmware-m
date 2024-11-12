@@ -54,7 +54,7 @@ int32_t boot_platform_post_init(void)
         return 1;
     }
 
-    (void)fih_delay_init();
+    fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     status = mhu_v2_x_driver_init(&MHU_SCP_TO_RSE_DEV, MHU_REV_READ_FROM_HW);

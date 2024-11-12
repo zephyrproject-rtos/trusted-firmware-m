@@ -213,7 +213,7 @@ int32_t boot_platform_init(void)
     BOOT_LOG_ERR("Error while initializing Crypto Hw");
     Error_Handler();
   }
-  (void)fih_delay_init();
+  fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
   /* Configure the System clock to have a frequency of 110 MHz */

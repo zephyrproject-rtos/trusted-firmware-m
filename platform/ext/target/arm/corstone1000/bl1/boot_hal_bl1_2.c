@@ -83,7 +83,7 @@ void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
         while (1);
     }
 
-    (void)fih_delay_init();
+    fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 

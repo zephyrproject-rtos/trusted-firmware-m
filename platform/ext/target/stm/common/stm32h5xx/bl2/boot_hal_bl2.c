@@ -601,7 +601,7 @@ int32_t boot_platform_init(void)
       Error_Handler();
     }
     /* Start HW randomization */
-    (void)fih_delay_init();
+    fih_delay_init();
     /* Apply Run time Protection */
     LL_SECU_ApplyRunTimeProtections();
     /* Check static protections */

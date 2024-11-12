@@ -461,7 +461,7 @@ typedef int32_t fih_int;
 
 #define fih_not_eq(x, y)      ((x) != (y))
 
-#define fih_delay_init()      (0)
+#define fih_delay_init()
 #define fih_delay()           1
 
 #define FIH_CALL(f, ret, ...) \
