@@ -81,7 +81,7 @@ enum tfm_plat_err_t comms_atu_get_rse_ptr_from_host_addr(uint8_t region,
 static int get_free_region_idx(uint32_t *region_idx) {
     uint32_t idx;
 
-    for (idx = 0; idx <= RSE_COMMS_ATU_REGION_AM; idx++) {
+    for (idx = 0; idx < RSE_COMMS_ATU_REGION_AM; idx++) {
         if (atu_regions[idx].ref_count == 0) {
             *region_idx = idx;
             return TFM_PLAT_ERR_SUCCESS;
