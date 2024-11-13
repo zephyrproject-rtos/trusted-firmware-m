@@ -44,5 +44,5 @@ int32_t boot_platform_post_init(void)
     BOOT_LOG_INF("%s: Musca-B1 secure_debug is a %s.\r\n", __func__,
             (result == 0) ? "success" : "failure");
 
-    return 0;
+    return result;
 }
