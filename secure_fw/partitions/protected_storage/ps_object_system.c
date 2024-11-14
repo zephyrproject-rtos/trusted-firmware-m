@@ -638,6 +638,7 @@ psa_status_t ps_object_get_info(psa_storage_uid_t uid, int32_t client_id,
 
     /* Copy PS object info to the PSA PS info struct */
     info->size = g_ps_object.header.info.current_size;
+    info->capacity = g_ps_object.header.info.max_size;
     info->flags = g_ps_object.header.info.create_flags;
 
 #ifdef PS_ENCRYPTION
