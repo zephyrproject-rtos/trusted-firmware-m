@@ -64,7 +64,7 @@ set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_
 set(TFM_ATTESTATION_SCHEME              "PSA"      CACHE STRING   "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 
 set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD"  CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
-set(TFM_EXTRAS_REPO_VERSION             "3a7b499"   CACHE STRING  "The version of tf-m-extras to use")
+set(TFM_EXTRAS_REPO_VERSION             "3ff04e4"   CACHE STRING  "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation;dice_protection_environment" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
