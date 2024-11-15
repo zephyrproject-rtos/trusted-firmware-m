@@ -32,7 +32,11 @@
 
 /* Crypto Partition Configs */
 
-/* Heap size for the crypto backend */
+/*
+ * Heap size for the crypto backend. This is statically allocated
+ * inside the Crypto service and used as heap through the default
+ * Mbed TLS allocator
+ */
 #ifndef CRYPTO_ENGINE_BUF_SIZE
 #define CRYPTO_ENGINE_BUF_SIZE                 0x400
 #endif
