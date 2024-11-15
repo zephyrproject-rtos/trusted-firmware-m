@@ -33,8 +33,9 @@
 /* Crypto Partition Configs */
 
 /*
- * Heap size for the crypto backend
- * CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
+ * Heap size for the crypto backend. This is statically allocated
+ * inside the Crypto service and used as heap through the default
+ * Mbed TLS allocator
  */
 #ifndef CRYPTO_ENGINE_BUF_SIZE
 #define CRYPTO_ENGINE_BUF_SIZE                 0x2080
