@@ -125,7 +125,7 @@
 
 /* The stack size of the Crypto Secure Partition */
 #ifndef CRYPTO_STACK_SIZE
-#define CRYPTO_STACK_SIZE                      0x1B00
+#define CRYPTO_STACK_SIZE                      0x1800
 #endif
 
 /* FWU Partition Configs */
