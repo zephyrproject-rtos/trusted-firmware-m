@@ -110,16 +110,12 @@
 #define IMAGE_NS_CODE_SIZE \
     (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-/* FIXME: veneer region size is increased temporarily while both legacy veneers
- * and their iovec-based equivalents co-exist for secure partitions. To be
- * adjusted as legacy veneers are eliminated
- */
-#define CMSE_VENEER_REGION_SIZE             (0x00000380)
+/* Size to accomodate the veneers for iovec based services */
+#define CMSE_VENEER_REGION_SIZE             (0x00000040)
 
 /* Use SRAM1 memory to store Code data */
 #define S_ROM_ALIAS_BASE                    (_FLASH_BASE_S)
 #define NS_ROM_ALIAS_BASE                   (_FLASH_BASE_NS)
-
 
 #define S_RAM_ALIAS_BASE                    (_SRAM1_BASE_S)
 #define NS_RAM_ALIAS_BASE                   (_SRAM1_BASE_NS)
@@ -132,7 +128,6 @@
 
 #define S_RAM_ALIAS(x)                      (S_RAM_ALIAS_BASE + (x))
 #define NS_RAM_ALIAS(x)                     (NS_RAM_ALIAS_BASE + (x))
-
 
 #define S_IMAGE_PRIMARY_AREA_OFFSET         (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 #define S_CODE_START                        (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))
