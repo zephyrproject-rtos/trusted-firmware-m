@@ -59,6 +59,13 @@ static char mbedtls_version_full[18];
 #include "config_engine_buf.h"
 static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
 
+/* Make sure the library won't print anything through mbedtls_printf */
+static int null_printf(const char *fmt, ...)
+{
+    (void)fmt;
+    return 0;
+}
+
 /*!
  * \defgroup tfm_crypto_library Set of functions implementing the abstractions of the underlying cryptographic
  *                              library that implements the PSA Crypto APIs to provide the PSA Crypto core
@@ -85,10 +92,9 @@ psa_status_t tfm_crypto_core_library_init(void)
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
                                      CRYPTO_ENGINE_BUF_SIZE);
 
-    /* mbedtls_printf is used to print messages including error information. */
-#if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)
-    mbedtls_platform_set_printf(printf);
-#endif
+    mbedtls_platform_set_printf(null_printf);
+
+    LOG_DBGFMT("[DBG][Crypto] Internal heap size is %d bytes\r\n", sizeof(mbedtls_mem_buf));
 
     return PSA_SUCCESS;
 }
