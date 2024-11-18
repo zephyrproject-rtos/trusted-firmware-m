@@ -67,10 +67,16 @@ set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_
 set(TFM_ATTESTATION_SCHEME              "PSA"      CACHE STRING   "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 
 set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD"  CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
-set(TFM_EXTRAS_REPO_VERSION             "278c038"   CACHE STRING  "The version of tf-m-extras to use")
+set(TFM_EXTRAS_REPO_VERSION             "9076ca6"   CACHE STRING  "The version of tf-m-extras to use")
 set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation;dice_protection_environment;scmi" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
-set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml;partitions/scmi/scmi_comms_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
+set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
+
+if (TEST_S_SCMI_COMMS)
+    list(APPEND TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/scmi/test/secure/scmi_comms_manifest_list.yaml")
+else()
+    list(APPEND TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/scmi/scmi_comms_manifest_list.yaml")
+endif()
 
 set(ATTEST_KEY_BITS                     384        CACHE STRING   "The size of the initial attestation key in bits")
 set(PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   0x800      CACHE STRING    "The maximum possible size of a token")
