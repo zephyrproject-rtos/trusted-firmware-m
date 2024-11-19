@@ -13,6 +13,7 @@
 #include "tfm_hal_device_header.h"
 #include "device_definition.h"
 #include "tfm_peripherals_def.h"
+#include "tfm_sp_log.h"
 #include "tfm_spm_log.h"
 #include "tfm_pools.h"
 #include "rse_comms_protocol.h"
@@ -135,7 +136,10 @@ out_return_err:
                                      PSA_ERROR_CONNECTION_BUSY,
                                      &reply, &reply_size)
         == TFM_PLAT_ERR_SUCCESS) {
-        mhu_send_data(mhu_sender_dev, (uint8_t *)&reply, reply_size);
+        mhu_err = mhu_send_data(mhu_sender_dev, (uint8_t *)&reply, reply_size);
+        if (mhu_err != MHU_ERR_NONE) {
+            LOG_ERRFMT("[COMMS] Cannot send failure message: %i\r\n", mhu_err);
+        }
     }
 
     if (req) {
