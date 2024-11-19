@@ -44,12 +44,6 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 #define RSE_ATU_REGION_OUTPUT_IMAGE_SLOT   5
 #define RSE_ATU_REGION_OUTPUT_HEADER_SLOT  6
 
-
-#ifdef RSE_GPT_SUPPORT
-//TODO: Update required to persist over reset. Check if private metadata is needed.
-uint8_t failed_boot_count;
-#endif /* RSE_GPT_SUPPORT */
-
 static inline uint32_t round_down(uint32_t num, uint32_t boundary)
 {
     return num - (num % boundary);
@@ -192,7 +186,9 @@ static int host_flash_atu_get_gpt_header(gpt_header_t *header)
 int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
                                                 uint64_t fip_offsets[2],
                                                 bool metadata_found[2],
-                                                uint64_t metadata_offsets[2])
+                                                uint64_t metadata_offsets[2],
+                                                bool private_metadata_found[1],
+                                                uint64_t private_metadata_offsets[1])
 {
     int rc;
     enum tfm_plat_err_t plat_err;
@@ -268,6 +264,18 @@ int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
         metadata_found[1] = false;
     }
 
+    plat_err = gpt_get_list_entry_by_name(HOST_FLASH0_TEMP_BASE_S + alignment_offset,
+                                          header.list_num, header.list_entry_size,
+                                          (uint8_t *)FWU_PRIVATE_METADATA_1_GPT_NAME,
+                                          sizeof(FWU_PRIVATE_METADATA_1_GPT_NAME),
+                                          atu_slot_size - alignment_offset, &entry);
+    if (plat_err == TFM_PLAT_ERR_SUCCESS) {
+        private_metadata_found[0] = true;
+        private_metadata_offsets[0] = entry.first_lba * FLASH_LBA_SIZE;
+    } else {
+        private_metadata_found[0] = false;
+    }
+
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
                                       RSE_ATU_REGION_TEMP_SLOT);
     if (atu_err != ATU_ERR_NONE) {
@@ -294,8 +302,12 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
 #ifdef RSE_GPT_SUPPORT
     bool metadata_found[2];
     uint64_t metadata_offsets[2];
+    bool private_metadata_found[1];
+    uint64_t private_metadata_offsets[1];
     uint8_t bootable_fip_index;
     uuid_t bl2_uuid, scp_bl1_uuid;
+    uint64_t found_metadata_offset;
+    bool increment_failed_boot = false;
 
     bl2_uuid = UUID_RSE_FIRMWARE_BL2;
     scp_bl1_uuid = UUID_RSE_FIRMWARE_SCP_BL1;
@@ -306,34 +318,35 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     if ((memcmp(&image_uuid, &bl2_uuid, sizeof(uuid_t)) == 0) ||
         (memcmp(&image_uuid, &scp_bl1_uuid, sizeof(uuid_t)) == 0)) {
         if (plat_check_if_prev_boot_failed()) {
-            failed_boot_count++;
-        } else {
-            failed_boot_count = 0;
+            increment_failed_boot = true;
         }
     }
 
     rc = host_flash_atu_get_fip_and_metadata_offsets(fip_found, fip_offsets,
-                                                     metadata_found, metadata_offsets);
+                                                     metadata_found, metadata_offsets,
+                                                     private_metadata_found,
+                                                     private_metadata_offsets);
     if (rc) {
         return rc;
     }
 
-    if (metadata_found[0]) {
-        /* FWU-Metadata found */
-        rc = parse_fwu_metadata(metadata_offsets[0], failed_boot_count,
-                                &bootable_fip_index);
-        if (rc) {
-            return rc;
-        }
-    } else {
-        /* Parse Bkup-FWU-Metadata */
-        if (metadata_found[1]) {
-            rc = parse_fwu_metadata(metadata_offsets[1], failed_boot_count,
-                                    &bootable_fip_index);
-            if (rc) {
-                return rc;
-            }
-        }
+    if (!private_metadata_found[0]) {
+        return TFM_PLAT_ERR_HOST_FLASH_SETUP_IMAGE_SLOT_NO_PRIVATE_METADATA_FOUND;
+    }
+
+    if (!metadata_found[0] && !metadata_found[1]) {
+        return TFM_PLAT_ERR_HOST_FLASH_SETUP_IMAGE_SLOT_NO_METADATA_FOUND;
+    }
+
+    found_metadata_offset = (metadata_found[0]) ?
+                             metadata_offsets[0] : metadata_offsets[1];
+
+    rc = parse_fwu_metadata(found_metadata_offset,
+                            private_metadata_offsets[0],
+                            increment_failed_boot,
+                            &bootable_fip_index);
+    if (rc) {
+        return rc;
     }
 
     if (!fip_found[bootable_fip_index]) {

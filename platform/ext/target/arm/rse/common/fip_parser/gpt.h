@@ -22,6 +22,7 @@
 #define SECONDARY_FIP_GPT_NAME "FIP_B"
 #define FWU_METADATA_GPT_NAME  "FWU-Metadata"
 #define FWU_BK_METADATA_GPT_NAME "Bkup-FWU-Metadata"
+#define FWU_PRIVATE_METADATA_1_GPT_NAME "private_metadata_1"
 
 typedef struct gpt_entry {
     struct efi_guid type_uuid;
