@@ -523,6 +523,7 @@ target_sources(tfm_spm
     PRIVATE
         target_cfg.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
+        tfm_hal_isolation_rse.c
         tfm_hal_platform.c
         tfm_interrupts.c
 )

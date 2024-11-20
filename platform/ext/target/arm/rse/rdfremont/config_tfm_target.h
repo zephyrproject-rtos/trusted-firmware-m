@@ -26,6 +26,12 @@
 /* Run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
 #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
 
+/*
+ * tfm_hal_post_partition_init_hook is called if this option is enabled.
+ * It's called by SPM right before starting scheduler.
+ */
+#define CONFIG_TFM_POST_PARTITION_INIT_HOOK     1
+
 /* Default RSE SYSCLK/CPU0CLK value in Hz */
 #define SYSCLK         100000000UL /* 100 MHz */
 
