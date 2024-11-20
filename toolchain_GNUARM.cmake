@@ -257,11 +257,6 @@ macro(target_add_scatter_file target)
         PRIVATE
             $<$<NOT:$<BOOL:${CONFIG_GNU_LINKER_READONLY_ATTRIBUTE}>>:READONLY=>
     )
-
-    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
-    add_dependencies(${target}_scatter
-        manifest_tool
-    )
 endmacro()
 
 macro(add_convert_to_bin_target target)

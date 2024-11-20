@@ -291,11 +291,6 @@ macro(target_add_scatter_file target)
             -E
             -xc
     )
-
-    # Scatter file shall be preprocessed by manifest tool in isolation level 2,3
-    add_dependencies(${target}_scatter
-        manifest_tool
-    )
 endmacro()
 
 macro(add_convert_to_bin_target target)

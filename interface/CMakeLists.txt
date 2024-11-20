@@ -41,6 +41,8 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TEST_NS_MULTI_CORE}>:TFM_MULTI_CORE_TEST>
 )
 
+add_dependencies(psa_interface manifest_tool)
+
 ###################### PSA api (S lib) #########################################
 
 target_sources(tfm_sprt
