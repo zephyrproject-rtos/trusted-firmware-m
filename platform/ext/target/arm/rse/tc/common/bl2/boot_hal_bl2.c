@@ -130,13 +130,6 @@ int32_t boot_platform_post_init(void)
     }
 #endif /* RSE_USE_SDS_LIB */
 
-#ifdef RSE_USE_SDS_LIB
-    result = clear_ap_sds_region();
-    if (result) {
-        return result;
-    }
-#endif /* RSE_USE_SDS_LIB */
-
 #ifdef RSE_BL2_ENABLE_IMAGE_STAGING
     result = run_staged_boot();
     if (result) {
