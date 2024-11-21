@@ -11,12 +11,20 @@ set(TFM_VERSION_MANUAL "2.1.1")
 execute_process(COMMAND git describe --tags --always
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE TFM_VERSION_FULL
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULTS_VARIABLE GIT_RESULT)
+
+if(GIT_RESULT EQUAL 128)
+    # Git execution fails.
+    # Applying a manual version assuming the code tree is a local copy.
+    set(TFM_VERSION_FULL "v${TFM_VERSION_MANUAL}")
+    return()
+endif()
 
 # In a repository cloned with --no-tags option TFM_VERSION_FULL will be a hash
 # only hence checking it for a tag format to accept as valid version.
 
-string(FIND ${TFM_VERSION_FULL} "TF-M" TFM_TAG)
+string(FIND "${TFM_VERSION_FULL}" "TF-M" TFM_TAG)
 if(TFM_TAG EQUAL -1)
     execute_process(COMMAND git log --format=format:%h -n 1
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
