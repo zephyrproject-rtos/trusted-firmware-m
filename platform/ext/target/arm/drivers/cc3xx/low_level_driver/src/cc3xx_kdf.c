@@ -69,12 +69,8 @@ cc3xx_err_t cc3xx_lowlevel_kdf_cmac(
         cc3xx_lowlevel_aes_update_authed_data((uint8_t *)k0, sizeof(k0));
         cc3xx_lowlevel_aes_finish(cmac_buf, NULL);
 
-#ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
         cc3xx_dpa_hardened_word_copy((void *)output_key + output_idx, cmac_buf,
                                      sizeof(cmac_buf) / sizeof(uint32_t));
-#else
-        memcpy((void *)output_key + output_idx, cmac_buf, sizeof(cmac_buf));
-#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
         i_idx += 1;
     }
 
