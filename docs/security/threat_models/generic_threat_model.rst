@@ -234,6 +234,22 @@ The field ``CVSS Score`` reflects the threat priority defined in
 representation of the CVSS metric values used to score the threat. Refer to
 [CVSS_SPEC]_ for more details of CVSS vector string.
 
+For each threat, a mitigation strategy is determined:
+
+- **Controlled**: a mitigation has been implemented by TF-M.
+
+- **Accepted**: no mitigation is currently implemented as the risk is
+  acceptable, and the mitigation description justifies the acceptance.
+
+- **Suppressed**: the feature can be disabled to remove the threat.
+
+- **Transferred**: the threat cannot be fully mitigated within the scope of
+  TF-M. The threat must be handled by downstream users for their specific
+  platform.
+
+- **Out-of-scope**: some threats are out-of-scope and so do not have a
+  mitigation but are included for completeness.
+
 .. note::
 
   A generic threat may have different behaviors and therefore require different
@@ -260,14 +276,15 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | By default TF-M relies on MCUBoot to validate NS image.    |
-  |               | The validation of NS image integrity and authenticity is   |
-  |               | completed in secure boot before jumping to NS entry or     |
-  |               | booting up NS core.                                        |
+  | Mitigation    | **Controlled**: TF-M BL2 uses MCUBoot to validate the      |
+  |               | integrity and authenticity of the NS image during secure   |
+  |               | boot, before the Secure firmware jumps to the NS entry or  |
+  |               | boots up the NS core.                                      |
   |               | Refer to [SECURE-BOOT]_ for more details.                  |
   |               |                                                            |
-  |               | The validation may vary in diverse vendor platforms        |
-  |               | specific Chain of Trust (CoT) implementation.              |
+  |               | Platforms may replace the TF-M Chain of Trust (CoT)        |
+  |               | implementation, in which case this threat is               |
+  |               | **transferred**.                                           |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 3.5 (Low)                                                  |
   +---------------+------------------------------------------------------------+
@@ -293,12 +310,12 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M relies on MCUBoot to perform anti-rollback            |
-  |               | protection.                                                |
+  | Mitigation    | **Controlled**: TF-M relies on MCUBoot to perform          |
+  |               | anti-rollback checks.                                      |
   |               |                                                            |
-  |               | TF-M defines a non-volatile counter API to support         |
-  |               | anti-rollback. Each platform must implement it using       |
-  |               | specific trusted hardware non-volatile counters.           |
+  |               | **Transferred**: TF-M defines a non-volatile counter API   |
+  |               | to support anti-rollback. Each platform must implement it  |
+  |               | using specific trusted hardware non-volatile counters.     |
   |               | For more details, refer to [ROLLBACK-PROTECT]_.            |
   |               |                                                            |
   |               | The anti-rollback protection implementation can vary on    |
@@ -326,20 +343,18 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering/Information disclosure                           |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | SPE must complete and enable proper isolation to protect   |
-  |               | secure regions from being accessed by NSPE, before jumping |
-  |               | to NS entry or booting up NS core.                         |
-  |               |                                                            |
-  |               | TF-M executes isolation configuration at early stage of    |
-  |               | secure initialization before NS initialization starts.     |
+  | Mitigation    | **Transferred**: TF-M defines isolation configuration      |
+  |               | HALs, which platforms must implement using platform-       |
+  |               | specific isolation hardware. TF-M provides a reference     |
+  |               | implementation of the isolation HAL for Armv8-M platforms  |
+  |               | with TrustZone.                                            |
   |               |                                                            |
   |               | On dual-cpu platform, platform specific initialization     |
   |               | must halt NS core until isolation is completed, as defined |
   |               | in [DUAL-CPU-BOOT]_.                                       |
   |               |                                                            |
-  |               | TF-M defines isolation configuration HALs for platform     |
-  |               | implementation. The specific isolation configuration       |
-  |               | depends on platform specific implementation.               |
+  |               | TF-M executes isolation configuration at an early stage of |
+  |               | secure initialization before starting NS execution.        |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 9.0 (Critical)                                             |
   +---------------+------------------------------------------------------------+
@@ -366,17 +381,14 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering/Information disclosure                           |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | SPE must complete and enable proper configuration and      |
-  |               | isolation to protect critical devices and peripherals from |
-  |               | being accessed by NSPE, before jumping to NS entry or      |
-  |               | booting up NS core.                                        |
+  | Mitigation    | **Transferred**: Platforms must implement the TF-M         |
+  |               | isolation HALs to complete and enable proper configuration |
+  |               | and isolation to protect critical devices and peripherals  |
+  |               | from being accessed by the NSPE.                           |
   |               |                                                            |
   |               | TF-M executes isolation configuration of devices and       |
-  |               | peripherals at early stage of secure initialization before |
-  |               | NS initialization starts.                                  |
-  |               |                                                            |
-  |               | The specific isolation configuration depends on platform   |
-  |               | specific implementation.                                   |
+  |               | peripherals at an early stage of secure initialization,    |
+  |               | before jumping to NS entry or booting up NS core.          |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 9.0 (Critical)                                             |
   +---------------+------------------------------------------------------------+
@@ -400,19 +412,19 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | SPE must clean up the secure information from shared       |
-  |               | registers before NS starts.                                |
+  | Mitigation    | **Controlled**: TF-M clears registers that are not banked  |
+  |               | between security states before handing over execution to   |
+  |               | the NSPE on Armv8-M platforms with TrustZone.              |
   |               |                                                            |
-  |               | TF-M invalidates registers not banked before handing over  |
-  |               | the system to NSPE on Armv8-M platforms with TrustZone.    |
+  |               | TF-M does not store SPE information in Non-secure memory.  |
+  |               |                                                            |
+  |               | **Transferred**: Platform-specific code in the SPE must    |
+  |               | not store SPE information in Non-secure memory.            |
   |               |                                                            |
   |               | On dual-cpu platforms, shared registers are implementation |
   |               | defined, such as Inter-Processor Communication registers.  |
   |               | Dual-cpu platforms must not store any data which may       |
   |               | disclose secure information in the shared registers.       |
-  |               |                                                            |
-  |               | SPE must avoid storing SPE information in non-secure       |
-  |               | memory.                                                    |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 4.3 (Medium)                                               |
   +---------------+------------------------------------------------------------+
@@ -434,8 +446,8 @@ This section identifies threats on ``DF1`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Denial of service                                          |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | No SPE information will be disclosed and TF-M won't be     |
-  |               | directly impacted.                                         |
+  | Mitigation    | **Out-of-scope**: No SPE information will be disclosed and |
+  |               | TF-M won't be directly impacted.                           |
   |               |                                                            |
   |               | It relies on NSPE and platform specific implementation to  |
   |               | mitigate this threat. It is out of scope of this threat    |
@@ -472,9 +484,9 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Spoofing                                                   |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M checks the ``Client ID`` from NSPE. If the NS         |
-  |               | ``Client ID`` is not a valid one, TF-M will report this as |
-  |               | a security error.                                          |
+  | Mitigation    | **Controlled**: TF-M checks the ``Client ID`` from NSPE.   |
+  |               | If the NS ``Client ID`` is not a valid one, TF-M will      |
+  |               | report this as a security error.                           |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 8.4 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -501,10 +513,11 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In TF-M implementation, the validation of NS input/output  |
-  |               | vectors are only executed after those vectors are copied   |
-  |               | from NSPE into SPE. It prevents an attack from NSPE to     |
-  |               | tamper those parameters after validation in TF-M.          |
+  | Mitigation    | **Controlled**: In TF-M implementation, the validation of  |
+  |               | NS input/output vectors are only executed after those      |
+  |               | vectors are copied from NSPE into SPE. It prevents an      |
+  |               | attack from NSPE to tamper those parameters after          |
+  |               | validation in TF-M.                                        |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.8 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -529,10 +542,10 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M executes memory access check to all the RoT service   |
-  |               | requests. If a request doesn't have enough permission to   |
-  |               | access the target memory region, TF-M will refuse this     |
-  |               | request and assert a security error.                       |
+  | Mitigation    | **Controlled**: TF-M executes memory access check to all   |
+  |               | the RoT service requests. If a request doesn't have enough |
+  |               | permission to access the target memory region, TF-M will   |
+  |               | refuse this request and assert a security error.           |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -556,8 +569,11 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Repudiation                                                |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M implements an event logging secure service to record  |
-  |               | the critical events, such as the access to critical data.  |
+  | Mitigation    | **Transferred**: This threat can be mitigated with an      |
+  |               | audit logging secure service that records significant      |
+  |               | security events, such as access to sensitive data. If this |
+  |               | threat is in-scope for a particular integration, then the  |
+  |               | system integrator must implement the mitigation.           |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 0.0 (None)                                                 |
   +---------------+------------------------------------------------------------+
@@ -581,10 +597,10 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M executes memory access check to all the RoT service   |
-  |               | requests. If a request doesn't have enough permission to   |
-  |               | access the target memory region, TF-M will refuse this     |
-  |               | request and assert a security error.                       |
+  | Mitigation    | **Controlled**: TF-M executes memory access checks for all |
+  |               | the RoT service requests. If a request doesn't have enough |
+  |               | permission to access the target memory region, TF-M will   |
+  |               | refuse the request and assert a security error.            |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -608,9 +624,9 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering/Information disclose                             |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M performs client check to validate whether the client  |
-  |               | has the permission to access the secure device and         |
-  |               | peripherals.                                               |
+  | Mitigation    | **Controlled**: TF-M performs client check to validate     |
+  |               | whether the client has the permission to access the secure |
+  |               | device and peripherals.                                    |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 9.0 (Critical)                                             |
   +---------------+------------------------------------------------------------+
@@ -640,9 +656,9 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Denial of service                                          |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M is unable to manage behavior of NS applications.      |
-  |               | Assets are not disclosed and TF-M is neither directly      |
-  |               | impacted in this threat.                                   |
+  | Mitigation    | **Out-of-scope**: TF-M is unable to manage behavior of NS  |
+  |               | applications. Assets are not disclosed and neither is TF-M |
+  |               | directly impacted in this threat.                          |
   |               |                                                            |
   |               | It relies on NS OS to enhance scheduling policy and        |
   |               | prevent a single NS application to occupy entire CPU time. |
@@ -679,8 +695,8 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Denial of service                                          |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M executes memory access check to the memory addresses  |
-  |               | in all the NS requests.                                    |
+  | Mitigation    | **Controlled**: TF-M executes memory access check to the   |
+  |               | memory addresses in all the NS requests.                   |
   |               |                                                            |
   |               | On Armv8-M platforms with TrustZone, TF-M invokes ``TT``   |
   |               | instructions to execute memory address check. If a NS      |
@@ -696,10 +712,10 @@ This section identifies threats on ``DF2`` defined in `Data Flow Diagram`_.
   |               | as invalid and therefore SPM will reject the corresponding |
   |               | NS request. It will be reported as a security error.       |
   |               |                                                            |
-  |               | Dual-core platforms may implement platform specific memory |
-  |               | check to replace the default one. It relies on platform    |
-  |               | specific implementation to capture invalid memory address. |
-  |               | It is out of the scope of this document.                   |
+  |               | **Transferred**: Dual-core platforms may implement         |
+  |               | platform specific memory check to replace the default one. |
+  |               | It relies on platform specific implementation to capture   |
+  |               | invalid memory address.                                    |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 3.2 (Low)                                                  |
   +---------------+------------------------------------------------------------+
@@ -737,18 +753,20 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | If RoT services request SPM to read and write NS data, SPM |
-  |               | follows [FF-M]_ to copy the NS input data into SPE memory  |
-  |               | region owned by the RoT service, before the RoT service    |
-  |               | processes the data.                                        |
-  |               | Therefore, the NS input data is protected during the RoT   |
-  |               | service execution from being tampered.                     |
+  | Mitigation    | **Controlled**: If RoT services request SPM to read and    |
+  |               | write NS data, SPM follows [FF-M]_ to copy the NS input    |
+  |               | data into SPE memory region owned by the RoT service,      |
+  |               | before the RoT service processes the data. Therefore, the  |
+  |               | NS input data is protected during the RoT service          |
+  |               | execution from being tampered.                             |
   |               |                                                            |
-  |               | If RoT services can directly access NS memory and read NS  |
-  |               | input data multiple times during data processing, it is    |
-  |               | required to review and confirm the implementation of the   |
-  |               | RoT service copies NS input data into SPE memory area      |
-  |               | before it processes the data.                              |
+  |               | **Transferred**: If RoT services can directly access NS    |
+  |               | memory and read NS input data multiple times during data   |
+  |               | processing, then the RoT service implementor must review   |
+  |               | and confirm the implementation of the RoT service copies   |
+  |               | NS input data into SPE memory area before it processes the |
+  |               | data. TF-M-provided RoT services implement this            |
+  |               | mitigation.                                                |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 3.2 (Low)                                                  |
   +---------------+------------------------------------------------------------+
@@ -787,12 +805,12 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | It should be avoided to embed memory addresses into a      |
-  |               | single input/output vector. If more than 4 memory          |
-  |               | addresses are required in a RoT service request, it is     |
-  |               | recommended to split this request into two or multiple     |
-  |               | service calls and therefore each service call requires no  |
-  |               | more than 4 input/output vectors.                          |
+  | Mitigation    | **Transferred**: The RoT service implementor must not      |
+  |               | embed memory addresses into a single input/output vector.  |
+  |               | If more than 4 memory addresses are required in a RoT      |
+  |               | service request, it is recommended to split this request   |
+  |               | into two or multiple service calls and therefore each      |
+  |               | service call requires no more than 4 input/output vectors. |
   |               |                                                            |
   |               | If RoT services request SPM to read and write NS data,     |
   |               | SPM will validate the target addresses and can detect the  |
@@ -801,6 +819,8 @@ send response data back to NS memory.
   |               | If RoT services can directly access NS memory, it is       |
   |               | required to review and confirm the implementation of RoT   |
   |               | service request doesn't embed memory addresses.            |
+  |               |                                                            |
+  |               | TF-M-provided RoT services implement these mitigations.    |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -830,12 +850,12 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | It should be avoided to embed memory addresses into a      |
-  |               | single input/output vector. If more than 4 memory          |
-  |               | addresses are required in a RoT service request, it is     |
-  |               | recommended to split this request into two or multiple     |
-  |               | service calls and therefore each service call requires no  |
-  |               | more than 4 input/output vectors.                          |
+  | Mitigation    | **Transferred**: The RoT service implementor must not      |
+  |               | embed memory addresses into a single input/output vector.  |
+  |               | If more than 4 memory addresses are required in a RoT      |
+  |               | service request, it is recommended to split this request   |
+  |               | into two or multiple service calls and therefore each      |
+  |               | service call requires no more than 4 input/output vectors. |
   |               |                                                            |
   |               | If RoT services request SPM to read and write NS data,     |
   |               | SPM will validate the target addresses and can detect the  |
@@ -844,6 +864,8 @@ send response data back to NS memory.
   |               | If RoT services can directly access NS memory, it is       |
   |               | required to review and confirm the implementation of RoT   |
   |               | service request doesn't embed memory addresses.            |
+  |               |                                                            |
+  |               | TF-M-provided RoT services implement these mitigations.    |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -881,9 +903,10 @@ via mailbox.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In Armv8-M TrustZone scenarios, TF-M cleans general        |
-  |               | purpose registers not banked before switching into NSPE to |
-  |               | prevent NSPE probing secure context from the registers.    |
+  | Mitigation    | **Controlled**: In Armv8-M TrustZone scenarios, TF-M       |
+  |               | cleans general purpose registers not banked before         |
+  |               | switching into NSPE to prevent NSPE probing secure context |
+  |               | from the registers.                                        |
   |               |                                                            |
   |               | When FPU is enabled in TF-M, secure FP context belonging to|
   |               | a secure partition will be saved on this partition's stack |
@@ -917,9 +940,10 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | On Armv8-M processors with TrustZone, Armv8-M architecture |
-  |               | automatically cleans up the registers not banked before    |
-  |               | switching to Non-secure state while taking NS interrupts.  |
+  | Mitigation    | **Controlled**: On Armv8-M processors with TrustZone,      |
+  |               | Armv8-M architecture automatically cleans up the registers |
+  |               | not banked before switching to Non-secure state when       |
+  |               | taking NS interrupts.                                      |
   |               |                                                            |
   |               | When FPU is enabled in TF-M, with setting of FPCCR_S.TS = 1|
   |               | besides secure FP context in FP caller registers, FP       |
@@ -929,10 +953,11 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   |               | to Armv8-M Architecture Reference Manual [Arm-ARM]_ for    |
   |               | details.                                                   |
   |               |                                                            |
-  |               | On dual-cpu platforms, shared registers are implementation |
-  |               | defined, such as Inter-Processor Communication registers.  |
-  |               | Dual-cpu platforms must not store any data which may       |
-  |               | disclose secure information in the shared registers.       |
+  |               | **Transferred**: On dual-cpu platforms, shared registers   |
+  |               | are implementation defined, such as Inter-Processor        |
+  |               | Communication registers. Dual-cpu platforms must not store |
+  |               | any data which may disclose secure information in the      |
+  |               | shared registers.                                          |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 4.3 (Medium)                                               |
   +---------------+------------------------------------------------------------+
@@ -957,7 +982,8 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Denial of service                                          |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | It is out of scope of TF-M.                                |
+  | Mitigation    | **Out-of-scope**: Availability of the whole system is out  |
+  |               | of scope of TF-M.                                          |
   |               |                                                            |
   |               | Assets protected by TF-M won't be leaked. TF-M won't be    |
   |               | directly impacted.                                         |
@@ -993,11 +1019,11 @@ This section identifies threats on ``DF6`` defined in `Data Flow Diagram`_.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M saves NSPE context in general purpose register R4~R11 |
-  |               | into secure stack during secure interrupt entry.           |
-  |               | After secure interrupt handling completes, TF-M unstacks   |
-  |               | NSPE context from secure stack to overwrite secure context |
-  |               | in R4~R11 before secure interrupt return.                  |
+  | Mitigation    | **Controlled**: TF-M saves NSPE context in general purpose |
+  |               | registers R4~R11 into secure stack during secure interrupt |
+  |               | entry. After secure interrupt handling completes, TF-M     |
+  |               | unstacks NSPE context from secure stack to overwrite       |
+  |               | secure context in R4~R11 before secure interrupt return.   |
   |               |                                                            |
   |               | Armv8-M architecture will automatically unstack NSPE       |
   |               | context from non-secure stack to overwrite other registers |
@@ -1046,8 +1072,8 @@ above.
   +---------------+------------------------------------------------------------+
   | Category      | Elevation of privilege                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M has implemented common mitigation against stack seal  |
-  |               | vulnerability.                                             |
+  | Mitigation    | **Controlled**: TF-M has implemented a common mitigation   |
+  |               | against the stack seal vulnerability.                      |
   |               |                                                            |
   |               | Refer to [ADVISORY-TFMV-1]_ for details on analysis and    |
   |               | mitigation in TF-M.                                        |
@@ -1077,8 +1103,8 @@ above.
   +---------------+------------------------------------------------------------+
   | Category      | Denial of service/Tampering                                |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | TF-M has enhanced implementation to mitigate this          |
-  |               | vulnerability.                                             |
+  | Mitigation    | **Controlled**: TF-M has enhanced implementation to        |
+  |               | mitigate this vulnerability.                               |
   |               |                                                            |
   |               | Refer to [ADVISORY-TFMV-2]_ for details on analysis and    |
   |               | mitigation in TF-M.                                        |
@@ -1102,10 +1128,10 @@ above.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering/Information disclosure                           |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In current TF-M implementation, when FPU is enabled in SPE,|
-  |               | TF-M configures NSACR to disable NSPE to access FPU.       |
-  |               | Therefore, secure data in FP registers is protected from   |
-  |               | NSPE.                                                      |
+  | Mitigation    | **Controlled**: In the current TF-M implementation, when   |
+  |               | FPU is enabled in SPE, TF-M configures NSACR to disable    |
+  |               | NSPE to access FPU. Therefore, secure data in FP registers |
+  |               | is protected from NSPE.                                    |
   |               |                                                            |
   |               | Refer to [VLLDM-Vulnerability]_, for details on analysis   |
   |               | and mitigation.                                            |
@@ -1134,6 +1160,8 @@ Version control
   | v1.2    | Update details to align FP support in NSPE.      | TF-M v1.5.0   |
   +---------+--------------------------------------------------+---------------+
   | v1.3    | Update for validity of dual-cpu model Armv8-M    | TF-M v2.1.0   |
+  +---------+--------------------------------------------------+---------------+
+  | v1.4    | Clarify mitigation strategies of threats         | TF-M v2.2.0   |
   +---------+--------------------------------------------------+---------------+
 
 **********
