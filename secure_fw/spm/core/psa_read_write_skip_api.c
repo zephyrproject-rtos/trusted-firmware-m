@@ -47,7 +47,8 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
      * It is a fatal error if the input vector has already been mapped using
      * psa_map_invec().
      */
-    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE)) ||
+        IOVEC_IS_UNMAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -115,7 +116,8 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
      * It is a fatal error if the input vector has already been mapped using
      * psa_map_invec().
      */
-    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE)) ||
+        IOVEC_IS_UNMAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -184,7 +186,8 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
      * It is a fatal error if the output vector has already been mapped using
      * psa_map_outvec().
      */
-    if (IOVEC_IS_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE)) ||
+        IOVEC_IS_UNMAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
