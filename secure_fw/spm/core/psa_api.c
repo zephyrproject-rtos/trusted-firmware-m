@@ -203,11 +203,11 @@ static void update_caller_outvec_len(struct connection_t *handle)
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     /*
-     * Any output vectors that are still mapped will report that
-     * zero bytes have been written.
+     * If no unmapping call was made, output vectors will report that no data
+     * has been written.
      */
     for (i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
-        if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
+        if (!IOVEC_IS_UNMAPPED(handle, i) && !IOVEC_IS_ACCESSED(handle, i)) {
             handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
         }
     }
