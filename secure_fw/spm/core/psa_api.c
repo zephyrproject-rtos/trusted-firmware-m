@@ -184,6 +184,23 @@ static void update_caller_outvec_len(struct connection_t *handle)
 {
     uint32_t i;
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    /*
+     * Any output vectors that are still mapped will report that
+     * zero bytes have been written.
+     */
+    for (i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
+        if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
+            handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
+        }
+    }
+#endif
+
+    /*
+     * The total number of bytes written to a single parameter must be reported
+     * to the client by updating the len member of the psa_outvec structure for
+     * the parameter before returning from psa_call().
+     */
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
         if (handle->msg.out_size[i] == 0) {
             continue;
@@ -251,26 +268,9 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     default:
         if (handle->msg.type >= PSA_IPC_CALL) {
-
-#if PSA_FRAMEWORK_HAS_MM_IOVEC
-            /*
-             * Any output vectors that are still mapped will report that
-             * zero bytes have been written.
-             */
-            for (int i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
-                if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
-                    handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
-                }
-            }
-#endif
             /* Reply to a request message. Return values are based on status */
             ret = status;
-            /*
-             * The total number of bytes written to a single parameter must be
-             * reported to the client by updating the len member of the
-             * psa_outvec structure for the parameter before returning from
-             * psa_call().
-             */
+
             update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
                 handle->status = TFM_HANDLE_STATUS_TO_FREE;
