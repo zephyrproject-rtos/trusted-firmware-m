@@ -180,6 +180,21 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 }
 #endif
 
+static void update_caller_outvec_len(struct connection_t *handle)
+{
+    uint32_t i;
+
+    for (i = 0; i < PSA_MAX_IOVEC; i++) {
+        if (handle->msg.out_size[i] == 0) {
+            continue;
+        }
+
+        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec_base[i]);
+
+        handle->caller_outvec[i].len = handle->outvec_written[i];
+    }
+}
+
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {

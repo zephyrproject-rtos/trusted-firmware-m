@@ -342,8 +342,6 @@ psa_handle_t connection_to_handle(struct connection_t *p_connection);
  */
 struct connection_t *handle_to_connection(psa_handle_t handle);
 
-void update_caller_outvec_len(struct connection_t *handle);
-
 
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
