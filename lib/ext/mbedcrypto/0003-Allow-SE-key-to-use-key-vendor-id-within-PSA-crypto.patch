@@ -9,7 +9,7 @@ Signed-off-by: Benjamin Baratte <benjamin.baratte@st.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 5180435de..589a00e6e 100644
+index 5180435dea..589a00e6e2 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
 @@ -1719,7 +1719,11 @@ static psa_status_t psa_validate_key_attributes(

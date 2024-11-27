@@ -18,7 +18,7 @@ Co-authored-by: Antonio de Angelis <antonio.deangelis@arm.com>
  3 files changed, 143 insertions(+), 9 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index c4f41db10..5180435de 100644
+index c4f41db10b..5180435dea 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
 @@ -73,6 +73,10 @@
@@ -46,7 +46,7 @@ index c4f41db10..5180435de 100644
          *p_slot = NULL;
          return PSA_ERROR_NOT_SUPPORTED;
 diff --git a/library/psa_crypto_driver_wrappers.h b/library/psa_crypto_driver_wrappers.h
-index b90155720..2e828115f 100644
+index b901557208..2e828115f8 100644
 --- a/library/psa_crypto_driver_wrappers.h
 +++ b/library/psa_crypto_driver_wrappers.h
 @@ -42,16 +42,32 @@
@@ -340,7 +340,7 @@ index b90155720..2e828115f 100644
               * cycle through all known transparent accelerators */
              status = PSA_ERROR_NOT_SUPPORTED;
 diff --git a/library/psa_crypto_driver_wrappers_no_static.c b/library/psa_crypto_driver_wrappers_no_static.c
-index de8a5269b..436a650fc 100644
+index de8a5269b3..436a650fc3 100644
 --- a/library/psa_crypto_driver_wrappers_no_static.c
 +++ b/library/psa_crypto_driver_wrappers_no_static.c
 @@ -41,16 +41,32 @@

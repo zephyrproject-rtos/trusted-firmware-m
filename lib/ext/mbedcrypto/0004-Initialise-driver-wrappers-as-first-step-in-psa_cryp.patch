@@ -16,7 +16,7 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 589a00e6e..d3f729320 100644
+index 589a00e6e2..d3f7293201 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
 @@ -8341,12 +8341,12 @@ psa_status_t psa_crypto_init(void)
