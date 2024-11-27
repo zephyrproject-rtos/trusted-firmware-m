@@ -53,6 +53,7 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
                                       token_buff, token_buff_size, &token_size);
     if (status == PSA_SUCCESS) {
         psa_unmap_outvec(msg->handle, 0, token_size);
+        psa_unmap_invec(msg->handle, 0);
     }
 
     return status;
