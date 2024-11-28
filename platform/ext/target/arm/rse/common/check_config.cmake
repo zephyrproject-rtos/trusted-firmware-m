@@ -31,3 +31,8 @@ tfm_invalid_config(NOT MCUBOOT_HW_KEY)
 
 get_property(TFM_ATTESTATION_SCHEME_LIST CACHE TFM_ATTESTATION_SCHEME PROPERTY STRINGS)
 tfm_invalid_config(NOT TFM_ATTESTATION_SCHEME IN_LIST TFM_ATTESTATION_SCHEME_LIST)
+
+########################## Tests ###############################################
+
+# The SCMI comms tests use the same timer interrupt as the IRQ tests
+tfm_invalid_config(TEST_S_SCMI_COMMS AND (TEST_NS_SLIH_IRQ OR TEST_NS_FLIH_IRQ))
