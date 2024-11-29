@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -1668,6 +1668,9 @@ TFM_CRYPTO_API(psa_status_t, psa_key_derivation_verify_bytes)(
                                       const uint8_t *expected_output,
                                       size_t output_length)
 {
+    (void)operation;
+    (void)expected_output;
+    (void)output_length;
     /* To be implemented when the PSA backend supports it */
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -1676,6 +1679,8 @@ TFM_CRYPTO_API(psa_status_t, psa_key_derivation_verify_key)(
                                       psa_key_derivation_operation_t *operation,
                                       psa_key_id_t expected)
 {
+    (void)operation;
+    (void)expected;
     /* To be implemented when the PSA backend supports it */
     return PSA_ERROR_NOT_SUPPORTED;
 }
