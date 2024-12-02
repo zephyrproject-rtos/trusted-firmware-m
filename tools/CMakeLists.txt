@@ -55,7 +55,6 @@ foreach(MANIFEST_LIST ${MANIFEST_LISTS})
         message(FATAL_ERROR "Manifest list ${MANIFEST_LIST} doesn't exist")
     endif()
 
-
     # Get the path of the manifest list
     get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)
 
@@ -159,21 +158,19 @@ set(MANIFEST_COMMAND
     -o ${CMAKE_BINARY_DIR}/generated
     ${PARSE_MANIFEST_QUIET_FLAG})
 
+# Extract names of the generated files with full destination path
+parse_field_from_yaml("${GENERATED_FILE_LISTS}" output OUTPUT_FILES)
+list(TRANSFORM OUTPUT_FILES PREPEND ${CMAKE_BINARY_DIR}/generated/)
+
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/generated
+    OUTPUT ${OUTPUT_FILES}
     COMMAND ${MANIFEST_COMMAND}
-    DEPENDS ${MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
-            ${MANIFEST_FILES} ${TEMPLATE_FILES}
+    DEPENDS ${MANIFEST_LISTS} ${TEMPLATE_FILES} ${GENERATED_FILE_LISTS}
 )
 
 add_custom_target(
     manifest_tool
-    DEPENDS ${CMAKE_BINARY_DIR}/generated
-)
-
-set_target_properties(
-    manifest_tool PROPERTIES
-    ADDITIONAL_CLEAN_FILES ${CMAKE_BINARY_DIR}/generated
+    DEPENDS ${OUTPUT_FILES}
 )
 
 # The files need to be generated before cmake will allow them to be used as
