@@ -52,7 +52,7 @@ List of rules
 - Use curly braces ``{ }`` for one line statement bodies also.
 - Put open curly brace in the line below the function header.
 - Order function parameters so that input params are before output params.
-- Declare local variables at the beginning of the function.
+- Declare local variables at the beginning of a scope.
 - Define macros in all caps i.e. ``CAPITAL_WITH_UNDERSCORE``.
 - Use typedefs **ONLY** for function prototype declarations.
 - Type definitions in ``lower_case_with_underscore`` ended by ``_t``.
