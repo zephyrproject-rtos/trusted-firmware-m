@@ -37,7 +37,9 @@ extern "C" {
  *        driver does not support it, or if an invalid translation from a PSA type
  *        has been performed
  */
-#define CC3XX_IS_CURVE_ID_INVALID(curve_id) (curve_id == _CURVE_ID_MAX)
+#define CC3XX_IS_CURVE_ID_INVALID(curve_id)                  \
+    (((curve_id) >= _CURVE_ID_MAX) ||                        \
+     (cc3xx_lowlevel_ec_get_curve_data(curve_id) == NULL))
 
 #if defined(CC3XX_CONFIG_ASSERT_ENABLE)
 

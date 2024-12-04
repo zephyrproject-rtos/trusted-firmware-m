@@ -10,13 +10,55 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "cc3xx_ec.h"
 
 #include "cc3xx_config.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief List of curve types
+ *
+ */
+typedef enum {
+    CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
+    CC3XX_EC_CURVE_TYPE_MONTGOMERY,
+    CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
+} cc3xx_ec_curve_type_t;
+
+/**
+ * @brief List of curve identifiers
+ *
+ */
+typedef enum {
+    CC3XX_EC_CURVE_SECP_192_R1,
+    CC3XX_EC_CURVE_SECP_224_R1,
+    CC3XX_EC_CURVE_SECP_256_R1,
+    CC3XX_EC_CURVE_SECP_384_R1,
+    CC3XX_EC_CURVE_SECP_521_R1,
+
+    CC3XX_EC_CURVE_SECP_192_K1,
+    CC3XX_EC_CURVE_SECP_224_K1,
+    CC3XX_EC_CURVE_SECP_256_K1,
+
+    CC3XX_EC_CURVE_BRAINPOOLP_192_R1,
+    CC3XX_EC_CURVE_BRAINPOOLP_224_R1,
+    CC3XX_EC_CURVE_BRAINPOOLP_256_R1,
+    CC3XX_EC_CURVE_BRAINPOOLP_320_R1,
+    CC3XX_EC_CURVE_BRAINPOOLP_384_R1,
+    CC3XX_EC_CURVE_BRAINPOOLP_512_R1,
+
+    CC3XX_EC_CURVE_FRP_256_V1,
+
+    CC3XX_EC_CURVE_25519,
+    CC3XX_EC_CURVE_448,
+
+    CC3XX_EC_CURVE_ED25519,
+    CC3XX_EC_CURVE_ED448,
+    _CURVE_ID_MAX,
+    _CURVE_ID_SIZE_PAD = UINT32_MAX,
+} cc3xx_ec_curve_id_t;
 
 #if defined(CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE)
 #define CC3XX_EC_MAX_POINT_SIZE 68

@@ -11,55 +11,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "cc3xx_ec_curve_data.h"
 #include "cc3xx_error.h"
 #include "cc3xx_pka.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief List of curve types
- *
- */
-typedef enum {
-    CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
-    CC3XX_EC_CURVE_TYPE_MONTGOMERY,
-    CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
-} cc3xx_ec_curve_type_t;
-
-/**
- * @brief List of curve identifiers
- *
- */
-typedef enum {
-    CC3XX_EC_CURVE_SECP_192_R1,
-    CC3XX_EC_CURVE_SECP_224_R1,
-    CC3XX_EC_CURVE_SECP_256_R1,
-    CC3XX_EC_CURVE_SECP_384_R1,
-    CC3XX_EC_CURVE_SECP_521_R1,
-
-    CC3XX_EC_CURVE_SECP_192_K1,
-    CC3XX_EC_CURVE_SECP_224_K1,
-    CC3XX_EC_CURVE_SECP_256_K1,
-
-    CC3XX_EC_CURVE_BRAINPOOLP_192_R1,
-    CC3XX_EC_CURVE_BRAINPOOLP_224_R1,
-    CC3XX_EC_CURVE_BRAINPOOLP_256_R1,
-    CC3XX_EC_CURVE_BRAINPOOLP_320_R1,
-    CC3XX_EC_CURVE_BRAINPOOLP_384_R1,
-    CC3XX_EC_CURVE_BRAINPOOLP_512_R1,
-
-    CC3XX_EC_CURVE_FRP_256_V1,
-
-    CC3XX_EC_CURVE_25519,
-    CC3XX_EC_CURVE_448,
-
-    CC3XX_EC_CURVE_ED25519,
-    CC3XX_EC_CURVE_ED448,
-    _CURVE_ID_MAX,
-    _CURVE_ID_SIZE_PAD = UINT32_MAX,
-} cc3xx_ec_curve_id_t;
 
 /**
  * @brief A representation of an EC point on the PKA engine
@@ -231,11 +189,24 @@ cc3xx_err_t cc3xx_lowlevel_ec_shamir_multiply_points_by_scalars_and_add(
  *        so for, e.g. 521 bit curves this will be slightly greater than what
  *        would be strictly required
  *
- * @param curve_id An ID of the curve to retrieve the modulus size
+ * @param[in] curve_id An ID of the curve to retrieve the modulus size
  *
  * @return size_t Size in bytes of the modulus
  */
 size_t cc3xx_lowlevel_ec_get_modulus_size_from_curve(cc3xx_ec_curve_id_t curve_id);
+
+/**
+ * @brief Getter method to retrieve the curve_data of type \a cc3xx_ec_curve_data_t *
+ *        from the \a curve_id. Note that the \a curve_id must be in valid range, if
+ *        the getter returns NULL it means that support for the curve has not been
+ *        compiled in
+ *
+ * @param[in] curve_id An ID of the curve to retrieve the parameters structure
+ *
+ * @return cc3xx_ec_curve_data_t* Pointer to the curve data. NULL if support for the
+ *                                curve is not compiled in
+ */
+cc3xx_ec_curve_data_t *cc3xx_lowlevel_ec_get_curve_data(cc3xx_ec_curve_id_t curve_id);
 
 /**
  * @brief De-initializes the Elliptic Curve operation

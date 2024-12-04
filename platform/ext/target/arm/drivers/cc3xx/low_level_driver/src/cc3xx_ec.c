@@ -196,7 +196,15 @@ static cc3xx_ec_curve_data_t *curve_data_map[_CURVE_ID_MAX] = {
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_TWISTED_EDWARDS_ENABLE */
 };
 
+cc3xx_ec_curve_data_t *cc3xx_lowlevel_ec_get_curve_data(cc3xx_ec_curve_id_t curve_id) {
+    return (curve_id < _CURVE_ID_MAX) ? curve_data_map[curve_id] : NULL;
+}
+
 size_t cc3xx_lowlevel_ec_get_modulus_size_from_curve(cc3xx_ec_curve_id_t curve_id) {
+    /* The data is NULL when the support for the curve has not been compiled in */
+    if (curve_id >= _CURVE_ID_MAX || curve_data_map[curve_id] == NULL) {
+        return 0;
+    }
     return (curve_data_map[curve_id])->modulus_size;
 }
 
