@@ -131,30 +131,30 @@ typedef struct {
     uint32_t cofactor;
 } cc3xx_ec_curve_data_t;
 
-extern cc3xx_ec_curve_data_t secp_192_r1;
-extern cc3xx_ec_curve_data_t secp_224_r1;
-extern cc3xx_ec_curve_data_t secp_256_r1;
-extern cc3xx_ec_curve_data_t secp_384_r1;
-extern cc3xx_ec_curve_data_t secp_521_r1;
+extern const cc3xx_ec_curve_data_t secp_192_r1;
+extern const cc3xx_ec_curve_data_t secp_224_r1;
+extern const cc3xx_ec_curve_data_t secp_256_r1;
+extern const cc3xx_ec_curve_data_t secp_384_r1;
+extern const cc3xx_ec_curve_data_t secp_521_r1;
 
-extern cc3xx_ec_curve_data_t secp_192_k1;
-extern cc3xx_ec_curve_data_t secp_224_k1;
-extern cc3xx_ec_curve_data_t secp_256_k1;
+extern const cc3xx_ec_curve_data_t secp_192_k1;
+extern const cc3xx_ec_curve_data_t secp_224_k1;
+extern const cc3xx_ec_curve_data_t secp_256_k1;
 
-extern cc3xx_ec_curve_data_t brainpoolp_192_r1;
-extern cc3xx_ec_curve_data_t brainpoolp_224_r1;
-extern cc3xx_ec_curve_data_t brainpoolp_256_r1;
-extern cc3xx_ec_curve_data_t brainpoolp_320_r1;
-extern cc3xx_ec_curve_data_t brainpoolp_384_r1;
-extern cc3xx_ec_curve_data_t brainpoolp_512_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_192_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_224_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_256_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_320_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_384_r1;
+extern const cc3xx_ec_curve_data_t brainpoolp_512_r1;
 
-extern cc3xx_ec_curve_data_t frp_256_v1;
+extern const cc3xx_ec_curve_data_t frp_256_v1;
 
-extern cc3xx_ec_curve_data_t curve_25519;
-extern cc3xx_ec_curve_data_t curve_448;
+extern const cc3xx_ec_curve_data_t curve_25519;
+extern const cc3xx_ec_curve_data_t curve_448;
 
-extern cc3xx_ec_curve_data_t ed25519;
-extern cc3xx_ec_curve_data_t ed448;
+extern const cc3xx_ec_curve_data_t ed25519;
+extern const cc3xx_ec_curve_data_t ed448;
 
 #ifdef __cplusplus
 }

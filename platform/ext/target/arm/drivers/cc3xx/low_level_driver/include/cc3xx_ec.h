@@ -203,10 +203,11 @@ size_t cc3xx_lowlevel_ec_get_modulus_size_from_curve(cc3xx_ec_curve_id_t curve_i
  *
  * @param[in] curve_id An ID of the curve to retrieve the parameters structure
  *
- * @return cc3xx_ec_curve_data_t* Pointer to the curve data. NULL if support for the
- *                                curve is not compiled in
+ * @return cc3xx_ec_curve_data_t* Pointer to the curve data. NULL if support for
+ *                                the curve is not compiled in
  */
-cc3xx_ec_curve_data_t *cc3xx_lowlevel_ec_get_curve_data(cc3xx_ec_curve_id_t curve_id);
+const cc3xx_ec_curve_data_t *cc3xx_lowlevel_ec_get_curve_data(
+                                                    cc3xx_ec_curve_id_t curve_id);
 
 /**
  * @brief De-initializes the Elliptic Curve operation

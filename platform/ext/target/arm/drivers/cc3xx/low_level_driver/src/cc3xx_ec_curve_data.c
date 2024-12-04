@@ -15,7 +15,7 @@
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_192_R1_ENABLE
-cc3xx_ec_curve_data_t secp_192_r1 = {
+const cc3xx_ec_curve_data_t secp_192_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 24,
     .field_modulus = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0xFFFFFFFF,
@@ -45,7 +45,7 @@ cc3xx_ec_curve_data_t secp_192_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_224_R1_ENABLE
-cc3xx_ec_curve_data_t secp_224_r1 = {
+const cc3xx_ec_curve_data_t secp_224_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 28,
     .field_modulus = {0x00000001, 0x00000000, 0x00000000, 0xFFFFFFFF,
@@ -75,7 +75,7 @@ cc3xx_ec_curve_data_t secp_224_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_256_R1_ENABLE
-cc3xx_ec_curve_data_t secp_256_r1 = {
+const cc3xx_ec_curve_data_t secp_256_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 32,
     .field_modulus = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000,
@@ -105,7 +105,7 @@ cc3xx_ec_curve_data_t secp_256_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_384_R1_ENABLE
-cc3xx_ec_curve_data_t secp_384_r1 = {
+const cc3xx_ec_curve_data_t secp_384_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 48,
     .field_modulus = {0xFFFFFFFF, 0x00000000, 0x00000000, 0xFFFFFFFF,
@@ -141,7 +141,7 @@ cc3xx_ec_curve_data_t secp_384_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_521_R1_ENABLE
-cc3xx_ec_curve_data_t secp_521_r1 = {
+const cc3xx_ec_curve_data_t secp_521_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 68,
     .field_modulus = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -189,7 +189,7 @@ cc3xx_ec_curve_data_t secp_521_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_192_K1_ENABLE
-cc3xx_ec_curve_data_t secp_192_k1 = {
+const cc3xx_ec_curve_data_t secp_192_k1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 24,
     .field_modulus = {0xFFFFEE37, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -219,7 +219,7 @@ cc3xx_ec_curve_data_t secp_192_k1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_224_K1_ENABLE
-cc3xx_ec_curve_data_t secp_224_k1 = {
+const cc3xx_ec_curve_data_t secp_224_k1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 32,
     .field_modulus = {0xFFFFE56D, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -249,7 +249,7 @@ cc3xx_ec_curve_data_t secp_224_k1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_SECP_256_K1_ENABLE
-cc3xx_ec_curve_data_t secp_256_k1 = {
+const cc3xx_ec_curve_data_t secp_256_k1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 32,
     .field_modulus = {0xFFFFFC2F, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF,
@@ -279,7 +279,7 @@ cc3xx_ec_curve_data_t secp_256_k1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_192_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_192_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_192_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 24,
     .field_modulus = {0xe1a86297, 0x8fce476d, 0x93d18db7, 0xa7a34630,
@@ -307,7 +307,7 @@ cc3xx_ec_curve_data_t brainpoolp_192_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_224_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_224_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_224_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 28,
     .field_modulus = {0x7ec8c0ff, 0x97da89f5, 0xb09f0757, 0x75d1d787,
@@ -335,7 +335,7 @@ cc3xx_ec_curve_data_t brainpoolp_224_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_256_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_256_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_256_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 32,
     .field_modulus = {0x1f6e5377, 0x2013481d, 0xd5262028, 0x6e3bf623,
@@ -363,7 +363,7 @@ cc3xx_ec_curve_data_t brainpoolp_256_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_320_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_320_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_320_r1 = {
     .register_size = 40,
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .field_modulus = {0xf1b32e27, 0xfcd412b1, 0x7893ec28, 0x4f92b9ec,
@@ -397,7 +397,7 @@ cc3xx_ec_curve_data_t brainpoolp_320_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_384_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_384_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_384_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 48,
     .field_modulus = {0x3107ec53, 0x87470013, 0x901d1a71, 0xacd3a729,
@@ -431,7 +431,7 @@ cc3xx_ec_curve_data_t brainpoolp_384_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_BRAINPOOLP_512_R1_ENABLE
-cc3xx_ec_curve_data_t brainpoolp_512_r1 = {
+const cc3xx_ec_curve_data_t brainpoolp_512_r1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 64,
     .field_modulus = {0x583a48f3, 0x28aa6056, 0x2d82c685, 0x2881ff2f,
@@ -471,7 +471,7 @@ cc3xx_ec_curve_data_t brainpoolp_512_r1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_FRP_256_V1_ENABLE
-cc3xx_ec_curve_data_t frp_256_v1 = {
+const cc3xx_ec_curve_data_t frp_256_v1 = {
     .type = CC3XX_EC_CURVE_TYPE_WEIERSTRASS,
     .register_size = 32,
     .field_modulus = {0xd86e9c03, 0xe8fcf353, 0xabc8ca6d, 0x3961adbc,
@@ -499,25 +499,25 @@ cc3xx_ec_curve_data_t frp_256_v1 = {
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_25519_ENABLE
-cc3xx_ec_curve_data_t curve_25519 = {
+const cc3xx_ec_curve_data_t curve_25519 = {
     .type = CC3XX_EC_CURVE_TYPE_MONTGOMERY,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_448_ENABLE
-cc3xx_ec_curve_data_t curve_448 = {
+const cc3xx_ec_curve_data_t curve_448 = {
     .type = CC3XX_EC_CURVE_TYPE_MONTGOMERY,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_ED25519_ENABLE
-cc3xx_ec_curve_data_t ed25519 = {
+const cc3xx_ec_curve_data_t ed25519 = {
     .type = CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_ED448_ENABLE
-cc3xx_ec_curve_data_t ed448 = {
+const cc3xx_ec_curve_data_t ed448 = {
     .type = CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
 };
 #endif
