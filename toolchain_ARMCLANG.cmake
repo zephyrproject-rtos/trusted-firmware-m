@@ -36,8 +36,15 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
     set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
 
     if (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
-        message(WARNING "MVE is not yet supported using ARMCLANG")
-        string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+        if(NOT CONFIG_TFM_ENABLE_MVE)
+            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+        endif()
+        if((NOT TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85")
+            AND (NOT CONFIG_TFM_ENABLE_MVE_FP)
+            AND CONFIG_TFM_ENABLE_MVE
+            AND CONFIG_TFM_ENABLE_FP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve.fp")
+        endif()
     endif()
 
     if (DEFINED TFM_SYSTEM_DSP)
@@ -50,7 +57,7 @@ if (DEFINED TFM_SYSTEM_PROCESSOR)
     # 'cortex-m4', 'cortex-m7', 'cortex-m33', 'cortex-m35p', 'cortex-m55' and 'cortex-m85'.
     # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
     # Explicitly list those cpu to align with ARMCLANG description.
-    if (NOT CONFIG_TFM_FLOAT_ABI STREQUAL "hard" AND
+    if (NOT CONFIG_TFM_ENABLE_FP AND
         (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m4"
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
         OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
@@ -73,15 +80,29 @@ set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
 set(CMAKE_CXX_COMPILER_TARGET    arm-${CROSS_COMPILE})
 set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
-# MVE is currently not supported in case of armclang
 if (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
-    string(APPEND CMAKE_SYSTEM_ARCH "+nomve")
+    # These three feature options are the only ones armlink accepts
+    if(CONFIG_TFM_ENABLE_MVE_FP)
+        string(APPEND CMAKE_SYSTEM_ARCH "+mve.fp")
+    elseif(CONFIG_TFM_ENABLE_MVE)
+        string(APPEND CMAKE_SYSTEM_ARCH "+mve")
+    elseif(TFM_SYSTEM_DSP)
+        string(APPEND CMAKE_SYSTEM_ARCH "+dsp")
+    endif()
+
+    # Generic fp extension names to be used instead of -mfpu
+    # +fp/fpv5-sp-d16 is not handled as it is the default
+    if(CONFIG_TFM_ENABLE_FP)
+        if (CONFIG_TFM_FP_ARCH STREQUAL "fpv5-d16")
+            string(APPEND CMAKE_SYSTEM_ARCH "+fp.dp")
+        endif()
+    else()
+        string(APPEND CMAKE_SYSTEM_ARCH "+nofp")
+    endif()
 endif()
 
-if (DEFINED TFM_SYSTEM_DSP)
-    if(NOT TFM_SYSTEM_DSP)
-        string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
-    endif()
+if(TFM_SYSTEM_DSP AND (NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main"))
+    string(APPEND CMAKE_SYSTEM_ARCH "+dsp")
 endif()
 
 # Cmake's ARMClang support has several issues with compiler validation. To
@@ -159,24 +180,37 @@ if (CMAKE_SYSTEM_PROCESSOR)
     set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_CXX_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     set(CMAKE_ASM_FLAGS "--target=${CMAKE_ASM_COMPILER_TARGET} -mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
-    # But armlink doesn't support this +dsp syntax
-    string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nodsp" "" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
-    # And uses different syntax for +nofp
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    set(ARMLINK_MAPPED_OPTION "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+    # But armlink doesn't support this +dsp syntax
+    string(REGEX REPLACE "\\+nodsp"         ""          ARMLINK_MAPPED_OPTION "${ARMLINK_MAPPED_OPTION}")
+    # And uses different syntax for +nofp, +nomve.fp, nomve
+    string(REGEX REPLACE "\\+nofp"          ".no_fp"    ARMLINK_MAPPED_OPTION "${ARMLINK_MAPPED_OPTION}")
+    string(REGEX REPLACE "\\+nomve\\.fp"    ".no_mvefp" ARMLINK_MAPPED_OPTION "${ARMLINK_MAPPED_OPTION}")
+    string(REGEX REPLACE "\\+nomve"         ".no_mve"   ARMLINK_MAPPED_OPTION "${ARMLINK_MAPPED_OPTION}")
+
+    set(CMAKE_C_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
+    set(CMAKE_CXX_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
+    set(CMAKE_ASM_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
 else()
     set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    set(CMAKE_ASM_FLAGS "--target=${CMAKE_ASM_COMPILER_TARGET} -march=${CMAKE_SYSTEM_ARCH}")
+
+    set(ARMLINK_MAPPED_OPTION "--cpu=${CMAKE_SYSTEM_ARCH}")
+    # Mapping the architecture name
+    string(REGEX REPLACE "armv"         ""      ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+    # Armlink uses --fpu option instead of the generic extension names
+    string(REGEX REPLACE "\\+fp\\.dp"   ""      ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+    string(REGEX REPLACE "\\+nofp"      ""      ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+    # And different syntax for these features
+    string(REGEX REPLACE "\\+mve\\.fp"  ".mve.fp" ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+    string(REGEX REPLACE "\\+mve"       ".mve"  ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+    string(REGEX REPLACE "\\+dsp"       ".dsp"  ARMLINK_MAPPED_OPTION   "${ARMLINK_MAPPED_OPTION}")
+
+    set(CMAKE_C_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
+    set(CMAKE_CXX_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
+    set(CMAKE_ASM_LINK_FLAGS ${ARMLINK_MAPPED_OPTION})
 endif()
 
 set(BL2_COMPILER_CP_FLAG
@@ -198,9 +232,12 @@ if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
         $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
     )
     if (CONFIG_TFM_ENABLE_FP)
-        set(COMPILER_CP_FLAG
-            -mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard
-        )
+        if (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+            # setting the -mfpu option disables the floating point mve, generic +fp.dp is used instead
+            set(COMPILER_CP_FLAG -mfloat-abi=hard)
+        else()
+            set(COMPILER_CP_FLAG -mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard)
+        endif()
         # armasm and armlink have the same option "--fpu" and are both used to
         # specify the target FPU architecture. So the supported FPU architecture
         # names can be shared by armasm and armlink.
