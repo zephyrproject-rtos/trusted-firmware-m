@@ -68,9 +68,9 @@ set(TFM_ATTESTATION_SCHEME              "PSA"      CACHE STRING   "Attestation s
 
 set(TFM_EXTRAS_REPO_PATH                "DOWNLOAD"  CACHE PATH    "Path to tf-m-extras repo (or DOWNLOAD to fetch automatically")
 set(TFM_EXTRAS_REPO_VERSION             "9076ca6"   CACHE STRING  "The version of tf-m-extras to use")
-set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation;dice_protection_environment;scmi" CACHE STRING "List of extra secure partition directory name(s)")
+set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot;delegated_attestation;dice_protection_environment;scmi;adac" CACHE STRING "List of extra secure partition directory name(s)")
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
-set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
+set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml;partitions/delegated_attestation/delegated_attestation_manifest_list.yaml;partitions/dice_protection_environment/dpe_manifest_list.yaml;partitions/adac/adac_manifest_list.yaml;" CACHE STRING "List of extra secure partition manifests")
 
 if (TEST_S_SCMI_COMMS)
     list(APPEND TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/scmi/test/secure/scmi_comms_manifest_list.yaml")
@@ -90,6 +90,10 @@ set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation lev
 set(TFM_PXN_ENABLE                      ON         CACHE BOOL     "Use Privileged execute never (PXN)")
 
 set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
+
+if (PLATFORM_PSA_ADAC_SECURE_DEBUG)
+    set(TFM_PARTITION_ADAC                          ON      CACHE BOOL  "Enable Authenticatd Debug partition")
+endif()
 
 # Platform-specific configurations
 if (RSE_LOAD_NS_IMAGE)
