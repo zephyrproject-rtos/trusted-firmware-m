@@ -43,22 +43,6 @@ typedef enum
 } ppc_bank_t;
 
 /**
- * \brief Enumerates all the CCA and NON-CCA debug zones for the platform.
- */
-enum tfm_debug_zones {
-    TFM_PLAT_NO_DEBUG = 0,
-    TFM_PLAT_CCA_ADAC_ZONE1,
-    TFM_PLAT_CCA_ADAC_ZONE2,
-    /* !!! If new zones are added, please update TFM_PLAT_LAST_CCA_ADAC_ZONE */
-    TFM_PLAT_LAST_CCA_ADAC_ZONE = TFM_PLAT_CCA_ADAC_ZONE2,
-    TFM_PLAT_NON_CCA_DEBUG_ZONE1,
-    TFM_PLAT_NON_CCA_DEBUG_ZONE2,
-    TFM_PLAT_NON_CCA_DEBUG_ZONE3,
-    TFM_PLAT_NON_CCA_DEBUG_ZONE4,
-    TFM_PLAT_MAX_NUM_DEBUG_ZONES
-};
-
-/**
  * \brief Initialize the DMA devices and channels.
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t

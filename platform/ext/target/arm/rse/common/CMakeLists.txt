@@ -216,7 +216,7 @@ target_sources(platform_s
         ./rse_attack_tracking_counter.c
         runtime_shared_data.c
         soft_crc/soft_crc.c
-
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_debug_after_reset.c>
 )
 
 target_link_libraries(platform_s
@@ -413,6 +413,14 @@ target_sources(platform_bl1_1
         ./rse_attack_tracking_counter.c
         runtime_shared_data.c
         soft_crc/soft_crc.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
+        ./device/source/device_definition.c
+        ./bl1/bl1_1_debug.c
+)
+
+target_compile_definitions(platform_bl1_1
+    PRIVATE
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -502,9 +510,8 @@ target_sources(platform_bl1_2
         device/source/system_core_init.c
         ./bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
-        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c>
-        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/device_definition.c>
-        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_dcu.c>
+        ./bl1/bl1_2_debug.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_drv.c
 )
 
 target_include_directories(platform_bl1_2
@@ -521,7 +528,6 @@ target_compile_definitions(platform_bl1_2
     PUBLIC
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
-        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
 if(RSE_USE_HOST_FLASH)

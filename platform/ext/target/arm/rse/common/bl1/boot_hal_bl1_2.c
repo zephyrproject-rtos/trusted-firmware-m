@@ -39,15 +39,8 @@
 #if RSE_AMOUNT > 1
 #include "rse_handshake.h"
 #endif
+#include "bl1_2_debug.h"
 
-#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
-#include <stdbool.h>
-#include "target_cfg.h"
-#include "platform_dcu.h"
-
-#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
-
-#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 //TODO: This debug state needs be a context parameter for IAK derivation
 uint32_t debug_state = 0;
@@ -96,78 +89,6 @@ static int32_t init_atu_regions(void)
 
     return 0;
 }
-
-#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
-static void read_debug_state_from_reset_syndrome(void)
-{
-    struct rse_sysctrl_t *sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
-    uint32_t reg_value = sysctrl->reset_syndrome;
-
-    /* Bits 24:31 (SWSYN) are allocated for software defined reset syndrome */
-    reg_value = (reg_value >> 24) & 0xFF;
-
-    /* Use last TFM_PLAT_LAST_CCA_ADAC_ZONE number of bits of
-     * RESET_SYNDROME.SWSYN register for conveying debug state information
-     */
-    uint16_t read_mask = (1 << TFM_PLAT_LAST_CCA_ADAC_ZONE) -1;
-    debug_state = reg_value & read_mask;
-}
-
-static int32_t tfm_plat_select_and_apply_debug_permissions(void)
-{
-    if (CHECK_BIT(debug_state, TFM_PLAT_CCA_ADAC_ZONE1 - 1)) {
-        return tfm_plat_apply_debug_permissions(TFM_PLAT_CCA_ADAC_ZONE1);
-    }
-
-    if (CHECK_BIT(debug_state, TFM_PLAT_CCA_ADAC_ZONE2 - 1)) {
-        return tfm_plat_apply_debug_permissions(TFM_PLAT_CCA_ADAC_ZONE2);
-
-    } else {
-        return 0;
-    }
-}
-
-static int32_t debug_preconditions_check(bool *valid_debug_conditions)
-{
-    enum tfm_plat_err_t plat_err;
-    enum plat_otp_lcs_t lcs;
-
-    /* Read LCS from OTP */
-    plat_err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t*)&lcs);
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return plat_err;
-    }
-
-    *valid_debug_conditions = (lcs == PLAT_OTP_LCS_SECURED) ? true : false;
-
-    return 0;
-}
-
-static int32_t boot_platform_init_debug(void)
-{
-    int32_t rc;
-    bool valid_debug_conditions;
-
-    rc = debug_preconditions_check(&valid_debug_conditions);
-    if (rc != 0) {
-        return rc;
-    }
-
-    if (valid_debug_conditions) {
-        /* Read debug state from reset syndrome register */
-        read_debug_state_from_reset_syndrome();
-        /* Apply required debug permissions */
-        rc = tfm_plat_select_and_apply_debug_permissions();
-        if (rc != 0) {
-            return rc;
-        }
-    }
-    /* Lock DCU so that debug permissions cannot be updated during current
-     * power cycle
-     */
-    return tfm_plat_lock_dcu();
-}
-#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 #ifdef RSE_SUPPORT_ROM_LIB_RELOCATION
 static void setup_got_register(void)
@@ -261,14 +182,18 @@ int32_t boot_platform_init(void)
 
 int32_t boot_platform_post_init(void)
 {
-#if (RSE_AMOUNT > 1) || defined(PLATFORM_PSA_ADAC_SECURE_DEBUG)
     int32_t rc;
-#endif
     enum tfm_plat_err_t plat_err;
     enum kmu_error_t kmu_err;
 
     uint32_t vhuk_seed[8 * RSE_AMOUNT];
     size_t vhuk_seed_len;
+
+
+    rc = b1_2_platform_debug_init();
+    if (rc != 0) {
+        return rc;
+    }
 
     plat_err = rse_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -325,13 +250,6 @@ int32_t boot_platform_post_init(void)
     if (kmu_err != KMU_ERROR_NONE) {
         return kmu_err;
     }
-
-#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
-    rc = boot_platform_init_debug();
-    if (rc != 0) {
-        return rc;
-    }
-#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return 0;
 }

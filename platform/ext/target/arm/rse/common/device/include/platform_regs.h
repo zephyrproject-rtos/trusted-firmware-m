@@ -427,6 +427,8 @@ struct rse_sysctrl_t {
 
 /* Bit to mark boot failure (SWSYN) in swreset reg */
 #define SWSYN_FAILED_BOOT_BIT_POS      24
+/* Bit to notify boot to enter debug state (SWSYN) in swreset reg */
+#define SWSYN_DEBUG_STATE_IN_BOOT_BIT_POS 25
 #define CLK_CFG1_SYSCLKCFG_POS         0
 #define CLK_CFG1_SYSCLKCFG_MASK        (0xFUL << CLK_CFG1_SYSCLKCFG_POS)
 #define CLK_CFG1_AONCLKCFG_POS         4

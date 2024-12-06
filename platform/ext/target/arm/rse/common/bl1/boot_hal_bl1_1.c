@@ -32,6 +32,7 @@
 #endif /* RSE_BRINGUP_OTP_EMULATION */
 #include "trng.h"
 #include "tfm_log.h"
+#include "bl1_1_debug.h"
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -139,6 +140,11 @@ int32_t boot_platform_init(void)
     kmu_err = kmu_init(&KMU_DEV_S, prbg_seed);
     if (kmu_err != KMU_ERROR_NONE) {
         return kmu_err;
+    }
+
+    err = b1_1_platform_debug_init();
+    if (err != 0) {
+        return err;
     }
 
     /* Clear boot data area */
