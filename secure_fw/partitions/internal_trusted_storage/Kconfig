@@ -14,5 +14,6 @@ if TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 config ITS_ENCRYPTION
     bool "Enable authenticated encryption of ITS files using platform specific APIs"
     default n
+    depends on !PSA_FRAMEWORK_HAS_MM_IOVEC
 
 endif

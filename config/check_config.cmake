@@ -66,6 +66,10 @@ tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT TFM_PARTITION_PLATFORM)
 tfm_invalid_config((MCUBOOT_UPGRADE_STRATEGY STREQUAL "DIRECT_XIP" OR MCUBOOT_UPGRADE_STRATEGY STREQUAL "RAM_LOAD") AND TFM_PARTITION_FIRMWARE_UPDATE AND TFM_FWU_BOOTLOADER_LIB STREQUAL "mcuboot")
 tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 
+####################### Internal Trusted Storage Partition ########################
+
+tfm_invalid_config(ITS_ENCRYPTION AND PSA_FRAMEWORK_HAS_MM_IOVEC )
+
 ####################### Protected Storage Partition ###############################
 
 # PS only uses the platform partition when PS_ROLLBACK_PROTECTION is ON, but
