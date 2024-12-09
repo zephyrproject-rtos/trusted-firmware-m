@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -59,7 +59,8 @@ target_compile_definitions(bl1_2
         $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
-        $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:TFM_BL1_PQ_CRYPTO>
+        $<$<BOOL:${TFM_BL1_2_ENABLE_LMS}>:TFM_BL1_2_ENABLE_LMS>
+        $<$<BOOL:${TFM_BL1_2_ENABLE_ECDSA}>:TFM_BL1_2_ENABLE_ECDSA>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<NOT:$<BOOL:${CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS}>>>:TFM_MEASURED_BOOT_API>
 )
 
@@ -79,23 +80,25 @@ add_dependencies(bl1_2
 
 ################################################################################
 
-set(FLASH_AREA_NUM ${TFM_BL2_IMAGE_FLASH_AREA_NUM})
-configure_file(signing_layout.c.in signing_layout_bl2.c @ONLY)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/config)
 
-add_library(signing_layout_bl2 OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_bl2.c)
-target_compile_options(signing_layout_bl2
-    PRIVATE
-        $<$<C_COMPILER_ID:GNU>:-E\;-xc>
-        $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
-        $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_bl2>>
-        $<$<C_COMPILER_ID:Clang>:-E\;-xc>
-)
-target_link_libraries(signing_layout_bl2
-    PRIVATE
-        platform_region_defs
+add_custom_target(bl2_image_config
+    ALL
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
 )
 
-################################################################################
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modules/bl2_image_config.py
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lib/interface/image_layout_bl1_2.h
+    DEPENDS ${BL1_2_CONFIG_DIR}/bl1_2_config.h
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modules/bl2_image_config.py
+        --bl2_image_layout_h_file=${CMAKE_CURRENT_SOURCE_DIR}/lib/interface/image_layout_bl1_2.h
+        --compile_commands_file=${CMAKE_BINARY_DIR}/compile_commands.json
+        --bl2_image_config_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
+)
+
+
 get_target_property(bin_dir bl2 RUNTIME_OUTPUT_DIRECTORY)
 
 add_custom_target(bl2_signed_bin
@@ -108,19 +111,25 @@ add_custom_target(bl2_signed_bin
 
 add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
     OUTPUT ${bin_dir}/bl2_signed.bin ${bin_dir}/bl2_signed_hash.bin
-    DEPENDS bl2_bin signing_layout_bl2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
-                    --input_file $<TARGET_FILE_DIR:bl2>/bl2.bin
-                    --img_output_file bl2_signed.bin
-                    --hash_output_file bl2_signed_hash.bin
-                    --encrypt_key_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
-                    --sign_key_file ${TFM_BL2_SIGNING_KEY_PATH}
-                    --signing_layout_file $<TARGET_OBJECTS:signing_layout_bl2>
-                    --img_version ${TFM_BL1_IMAGE_VERSION_BL2}
-                    --img_security_counter ${TFM_BL1_IMAGE_SECURITY_COUNTER_BL2}
-                    --header_size ${BL1_HEADER_SIZE}
-                    --kdf_alg $<IF:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>,hkdf,cmac>
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
+    DEPENDS bl2_bin
+    DEPENDS ${CMAKE_BINARY_DIR}/bin/bl2.bin
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
+                    --bl2_image_config ${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
+                    --bl2_bin $<TARGET_FILE_DIR:bl2>/bl2.bin
+                    --image_output_file bl2_signed.bin
+                    --signer_0:sign_alg ${TFM_BL1_2_CM_SIGNING_ALG}
+                    --signer_0:sign_key ${TFM_BL1_2_CM_SIGNING_KEY_PATH}
+                    --signer_0:sign_hash_alg ${TFM_BL1_2_MEASUREMENT_HASH_ALG}
+                    $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--signer_1:sign_alg=${TFM_BL1_2_DM_SIGNING_ALG}>
+                    $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--signer_1:sign_key=${TFM_BL1_2_DM_SIGNING_KEY_PATH}>
+                    $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--signer_1:sign_hash_alg=${TFM_BL1_2_MEASUREMENT_HASH_ALG}>
+                    --image_version ${TFM_BL1_IMAGE_VERSION_BL2}
+                    --image_security_counter ${TFM_BL1_IMAGE_SECURITY_COUNTER_BL2}
+                    $<$<BOOL:${TFM_BL1_2_IMAGE_ENCRYPTION}>:--encrypt_key=${TFM_BL2_ENCRYPTION_KEY_PATH}>
+                    $<$<BOOL:${TFM_BL1_2_IMAGE_ENCRYPTION}>:--encrypt_alg=AES_CTR>
+                    $<$<BOOL:${TFM_BL1_2_IMAGE_ENCRYPTION}>:--kdf_alg=$<IF:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>,hkdf,sp800-108_cmac>>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin $<TARGET_FILE_DIR:bl2>
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed_hash.bin $<TARGET_FILE_DIR:bl2>
 )
