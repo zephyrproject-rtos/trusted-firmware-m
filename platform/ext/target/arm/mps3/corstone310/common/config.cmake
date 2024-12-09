@@ -28,9 +28,9 @@ set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
 
 # Ethos-U NPU configurations
-set(ETHOSU_ARCH                       "U55")
-set(ETHOS_DRIVER_PATH                 "DOWNLOAD"  CACHE PATH      "Path to Ethos-U Core Driver (or DOWNLOAD to fetch automatically")
-set(ETHOSU_LOG_SEVERITY               "-1"        CACHE STRING    "Ethos-U Core Driver log severity")
+set(ETHOSU_ARCH                       "U55"            CACHE STRING    "Ethos-U NPU type [U55,U65]")
+set(ETHOS_DRIVER_PATH                 "DOWNLOAD"       CACHE PATH      "Path to Ethos-U Core Driver (or DOWNLOAD to fetch automatically")
+set(ETHOSU_LOG_SEVERITY               "-1"             CACHE STRING    "Ethos-U Core Driver log severity")
 
 set(MCUBOOT_USE_PSA_CRYPTO            ON               CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto APIs")
 set(MCUBOOT_SIGNATURE_TYPE            "EC-P256"        CACHE STRING    "Algorithm to use for signature validation [RSA-2048, RSA-3072, EC-P256, EC-P384]")
