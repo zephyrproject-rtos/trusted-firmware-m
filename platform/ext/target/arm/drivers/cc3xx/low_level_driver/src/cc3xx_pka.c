@@ -317,11 +317,13 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
 {
     size_t idx;
 
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     /* Check alignment */
     assert(((uintptr_t)data & (sizeof(uint32_t) - 1)) == 0);
+#endif
+
     /* Check length */
     assert((len & (sizeof(uint32_t) - 1)) == 0);
-
 
     /* Check slot */
     assert(reg_id < pka_reg_am_max);
@@ -367,8 +369,12 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
 {
     size_t idx;
 
+
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     /* Check alignment */
     assert(((uintptr_t)data & (sizeof(uint32_t) - 1)) == 0);
+#endif
+
     /* Check length */
     assert((len & (sizeof(uint32_t) - 1)) == 0);
 

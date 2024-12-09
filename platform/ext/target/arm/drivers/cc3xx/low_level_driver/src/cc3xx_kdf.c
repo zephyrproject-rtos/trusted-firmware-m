@@ -33,7 +33,9 @@ cc3xx_err_t cc3xx_lowlevel_kdf_cmac(
     size_t output_idx;
 
     /* Check alignment */
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     assert(((uintptr_t)output_key & 0b11) == 0);
+#endif
     assert((out_length / sizeof(cmac_buf)) != 0);
 
     err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CMAC,

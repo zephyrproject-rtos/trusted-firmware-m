@@ -443,8 +443,10 @@ cc3xx_err_t cc3xx_lowlevel_aes_init(
     cc3xx_err_t err;
 
     /* Check alignment */
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     assert(((uintptr_t)key & 0b11) == 0);
     assert(((uintptr_t)iv & 0b11) == 0);
+#endif
 
     /* Check larger keys are supported */
     assert(P_CC3XX->host_rgf.host_boot & (1 << 28)); /* SUPPORT_256_192_KEY_LOCAL */
@@ -1059,7 +1061,9 @@ cc3xx_err_t cc3xx_lowlevel_aes_finish(uint32_t *tag, size_t *size)
     bool write_output;
 
     /* Check alignment */
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     assert(((uintptr_t)tag & 0b11) == 0);
+#endif
 
     /* Check how much data is in the DMA block buffer, and set
      * aes_remaining_bytes accordingly.

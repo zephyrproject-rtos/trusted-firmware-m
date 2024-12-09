@@ -172,8 +172,11 @@ void cc3xx_lowlevel_hash_set_state(const struct cc3xx_hash_state_t *state)
 
 void cc3xx_lowlevel_hash_finish(uint32_t *res, size_t length)
 {
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     /* Check alignment */
     assert(((uintptr_t)res & 0b11) == 0);
+#endif
+
     /* Check size */
     switch (P_CC3XX->hash.hash_control & 0b1111) {
     case CC3XX_HASH_ALG_SHA256:

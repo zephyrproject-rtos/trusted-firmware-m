@@ -347,7 +347,9 @@ cc3xx_err_t cc3xx_lowlevel_chacha20_finish(uint32_t *tag, size_t *size)
     cc3xx_err_t err;
 
     /* Check alignment */
+#ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     assert(((uintptr_t)tag & 0b11) == 0);
+#endif
 
     cc3xx_lowlevel_dma_flush_buffer(false);
 

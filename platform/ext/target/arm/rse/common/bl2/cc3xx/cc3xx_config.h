@@ -13,6 +13,9 @@
 #define CC3XX_CONFIG_BASE_ADDRESS (CC3XX_BASE_S)
 #endif /* CC3XX_CONFIG_BASE_ADDRESS */
 
+/* Whether uint32_t accesses must be strictly 4-byte aligned */
+/* CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT */
+
 /* Whether the SHA256 hash support is enabled */
 #define CC3XX_CONFIG_HASH_SHA256_ENABLE
 
