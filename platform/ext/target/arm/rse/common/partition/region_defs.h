@@ -25,6 +25,7 @@
 #if defined(RSE_BL1_TEST_BINARY) && !defined(RSE_TEST_BINARY_IN_ROM)
 #include "rse_test_binary_location.h"
 #endif /* defined(RSE_BL1_TEST_BINARY) && defined(RSE_TEST_BINARY_IN_ROM) */
+#include "bl1_2_config.h"
 
 /* RSE memory layout is as follows during BL1
  *      |----------------------------------------|
@@ -98,7 +99,7 @@
 #define BL1_2_MSP_STACK_SIZE    (0x0001800)
 
 #define BL2_HEAP_SIZE           (0x0001000)
-#define BL2_MSP_STACK_SIZE      (0x0001800)
+#define BL2_MSP_STACK_SIZE      (0x0002000)
 
 #define S_HEAP_SIZE             (0x0001000)
 #define S_MSP_STACK_SIZE        (0x0000800)
@@ -124,7 +125,7 @@
  * by the bootloader.
  */
 #define IMAGE_BL2_CODE_SIZE \
-            (FLASH_BL2_PARTITION_SIZE - BL1_HEADER_SIZE - BL1_TRAILER_SIZE)
+            (FLASH_BL2_PARTITION_SIZE - TFM_BL1_2_HEADER_MAX_SIZE)
 
 #define IMAGE_S_CODE_SIZE \
             (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
@@ -209,7 +210,7 @@
 
 /* BL2 is aligned to the start of the combined secure/non-secure data region */
 #define BL2_IMAGE_START   (S_DATA_START)
-#define BL2_CODE_START    (BL2_IMAGE_START + BL1_HEADER_SIZE)
+#define BL2_CODE_START    (BL2_IMAGE_START + TFM_BL1_2_HEADER_MAX_SIZE)
 #define BL2_CODE_SIZE     (IMAGE_BL2_CODE_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 

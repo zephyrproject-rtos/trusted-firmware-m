@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2022-2024 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -129,9 +129,6 @@ set(PLATFORM_DEFAULT_IMAGE_SIGNING      ON          CACHE BOOL      "Use default
 set(PLATFORM_DEFAULT_PROV_LINKER_SCRIPT ON          CACHE BOOL      "Use default provisioning linker script")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
-
-set(BL1_HEADER_SIZE                     0x000       CACHE STRING    "BL1 Header size")
-set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")
 
 set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header size")
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")

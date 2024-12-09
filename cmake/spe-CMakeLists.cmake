@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -89,8 +89,6 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${BL2}>:BL2>
         BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
         BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
-        BL1_HEADER_SIZE=${BL1_HEADER_SIZE}
-        BL1_TRAILER_SIZE=${BL1_TRAILER_SIZE}
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_${TEST_PSA_API}>
