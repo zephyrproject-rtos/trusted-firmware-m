@@ -303,7 +303,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
+psa_status_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data)
 {
     const struct partition_t *p_client, *p_target;
@@ -328,7 +328,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
         spm_handle_programmer_errors(stat);
     }
 
-    return (psa_handle_t)stat;
+    return stat;
 }
 
 psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)

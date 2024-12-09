@@ -169,7 +169,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
+psa_status_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data)
 {
     return PART_METADATA()->psa_fns->agent_psa_connect(sid, version,

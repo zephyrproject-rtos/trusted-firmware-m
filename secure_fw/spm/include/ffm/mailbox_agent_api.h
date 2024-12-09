@@ -67,7 +67,7 @@ psa_status_t agent_psa_call(psa_handle_t handle, uint32_t control,
  *                                      supported, or the caller is not
  *                                      permitted to access the service.
  */
-psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
+psa_status_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data);
 
 /**
