@@ -63,6 +63,7 @@ target_include_directories(platform_region_defs
     INTERFACE
         partition
         subplatform_pal_config
+        bl1_2_config
 )
 
 if (RSE_XIP)

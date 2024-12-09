@@ -24,6 +24,10 @@ tfm_invalid_config(NOT CRYPTO_HW_ACCELERATOR)
 
 # RSE uses MCUBOOT_BUILTIN_KEY to enable having full keys in OTP.
 tfm_invalid_config(NOT MCUBOOT_HW_KEY AND NOT MCUBOOT_BUILTIN_KEY)
+tfm_invalid_config(MCUBOOT_BUILTIN_KEY AND TFM_BL1_2_EMBED_ROTPK_IN_IMAGE)
+tfm_invalid_config(NOT MCUBOOT_BUILTIN_KEY AND NOT TFM_BL1_2_EMBED_ROTPK_IN_IMAGE)
+
+tfm_invalid_config(MEASURED_BOOT_HASH_ALG STREQUAL SHA384 AND NOT MCUBOOT_SIGNATURE_TYPE STREQUAL EC-P384)
 
 ########################## Attestation #########################################
 

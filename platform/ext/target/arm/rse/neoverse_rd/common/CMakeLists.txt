@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -61,11 +61,6 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_USART.c
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
-)
-
-target_compile_definitions(platform_bl2
-    PRIVATE
-        MEASURED_BOOT_HASH_ALG=${MEASURED_BOOT_HASH_ALG}
 )
 
 target_include_directories(platform_bl2
