@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -55,6 +55,12 @@ set(MCUBOOT_SIGNATURE_TYPE              "RSA-3072"       CACHE STRING    "Algori
 set(MCUBOOT_GENERATE_SIGNING_KEYPAIR    OFF              CACHE BOOL      "Generate new keypair for signing and use that instead of MCUBOOT_KEY_S and MCUBOOT_KEY_NS")
 set(MCUBOOT_KEY_S                       "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}.pem" CACHE FILEPATH "Path to key with which to sign secure binary")
 set(MCUBOOT_KEY_NS                      "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}_1.pem" CACHE FILEPATH "Path to key with which to sign non-secure binary")
+
+if (MCUBOOT_SIGNATURE_TYPE STREQUAL EC-P384)
+    set(MCUBOOT_ROTPK_HASH_ALG          SHA384           CACHE STRING "Algoritm to use to hash mcuboot ROTPKs")
+else()
+    set(MCUBOOT_ROTPK_HASH_ALG          SHA256           CACHE STRING "Algoritm to use to hash mcuboot ROTPKs")
+endif()
 
 set(MCUBOOT_IMAGE_VERSION_S             ${TFM_VERSION} CACHE STRING "Version number of S image")
 set(MCUBOOT_IMAGE_VERSION_NS            0.0.0       CACHE STRING    "Version number of NS image")
