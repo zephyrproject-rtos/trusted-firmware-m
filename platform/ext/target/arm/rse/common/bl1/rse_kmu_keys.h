@@ -55,8 +55,6 @@ enum tfm_plat_err_t rse_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_b
 /**
  * \brief                     setup the CPAK seed, and lock in a KMU slot.
  *
- * \param[in]  slot           The KMU slot to setup and lock the seed into.
- *
  * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
 enum tfm_plat_err_t rse_setup_cpak_seed(void);
@@ -64,16 +62,12 @@ enum tfm_plat_err_t rse_setup_cpak_seed(void);
 /**
  * \brief                     setup the DAK seed, and lock in a KMU slot.
  *
- * \param[in]  slot           The KMU slot to setup and lock the seed into.
- *
  * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */
 enum tfm_plat_err_t rse_setup_dak_seed(void);
 
 /**
  * \brief                     setup the RoT CDI, and lock in a KMU slot.
- *
- * \param[in]  slot           The KMU slot to setup and lock the seed into.
  *
  * \return                    TFM_PLAT_ERR_SUCCESS on success, non-zero on error.
  */

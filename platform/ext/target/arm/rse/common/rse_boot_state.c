@@ -10,6 +10,9 @@
 #include "cc3xx_drv.h"
 #include "tfm_plat_otp.h"
 #include "device_definition.h"
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+#include "lcm_drv.h"
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 extern uint8_t computed_bl1_2_hash[];
 
@@ -73,6 +76,24 @@ int rse_get_boot_state(uint8_t *state, size_t state_buf_len,
             return -1;
         }
     }
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    if (mask & RSE_BOOT_STATE_INCLUDE_DCU_STATE) {
+        /* Get current DCU state */
+        enum lcm_error_t lcm_err;
+        uint32_t dcu_state[LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t)];
+
+        lcm_err = lcm_dcu_get_enabled(&LCM_DEV_S, (uint8_t *)dcu_state);
+        if (lcm_err != LCM_ERROR_NONE) {
+            return -1;
+        }
+
+        err = cc3xx_lowlevel_hash_update((uint8_t *)dcu_state, LCM_DCU_WIDTH_IN_BYTES);
+        if (err != CC3XX_ERR_SUCCESS) {
+            return -1;
+        }
+    }
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     cc3xx_lowlevel_hash_finish((uint32_t *)state, SHA256_OUTPUT_SIZE);
     *state_size = SHA256_OUTPUT_SIZE;

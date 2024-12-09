@@ -246,9 +246,17 @@ enum tfm_plat_err_t setup_key_from_rng(enum rse_kmu_slot_id_t slot,
 enum tfm_plat_err_t rse_setup_cpak_seed(void)
 {
     const uint8_t cpak_seed_label[] = "BL1_CPAK_SEED_DERIVATION";
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    const boot_state_include_mask boot_state_config =
+        RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
+        RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS |
+        RSE_BOOT_STATE_INCLUDE_DCU_STATE;
+#else
     const boot_state_include_mask boot_state_config =
         RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
         RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS;
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return setup_key_from_derivation(KMU_HW_SLOT_GUK, NULL, cpak_seed_label,
                                      sizeof(cpak_seed_label),
@@ -261,9 +269,16 @@ enum tfm_plat_err_t rse_setup_cpak_seed(void)
 enum tfm_plat_err_t rse_setup_dak_seed(void)
 {
     const uint8_t dak_seed_label[]  = "BL1_DAK_SEED_DERIVATION";
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    const boot_state_include_mask boot_state_config =
+        RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
+        RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS |
+        RSE_BOOT_STATE_INCLUDE_DCU_STATE;
+#else
     const boot_state_include_mask boot_state_config =
         RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
         RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS;
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return setup_key_from_derivation(KMU_HW_SLOT_GUK, NULL, dak_seed_label,
                                      sizeof(dak_seed_label),
@@ -277,9 +292,16 @@ enum tfm_plat_err_t rse_setup_dak_seed(void)
 enum tfm_plat_err_t rse_setup_rot_cdi(void)
 {
     const uint8_t rot_cdi_label[] = "BL1_ROT_CDI_DERIVATION";
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    const boot_state_include_mask boot_state_config =
+        RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
+        RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS |
+        RSE_BOOT_STATE_INCLUDE_DCU_STATE;
+#else
     const boot_state_include_mask boot_state_config =
         RSE_BOOT_STATE_INCLUDE_LCS | RSE_BOOT_STATE_INCLUDE_TP_MODE |
         RSE_BOOT_STATE_INCLUDE_BL1_2_HASH | RSE_BOOT_STATE_INCLUDE_REPROVISIONING_BITS;
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return setup_key_from_derivation(KMU_HW_SLOT_HUK, NULL, rot_cdi_label,
                                      sizeof(rot_cdi_label), RSE_KMU_SLOT_ROT_CDI,
