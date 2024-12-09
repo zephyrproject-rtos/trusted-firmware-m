@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -20,6 +20,9 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/localrepos.cmake)
 endif()
 
 ############################ CONFIGURATION #####################################
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
+
 include(config/pre_config.cmake)
 
 if(USE_KCONFIG_TOOL)

@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+#-------------------------------------------------------------------------------
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+import os
+import json
+
+def get_compile_command(compile_commands_file, c_file):
+    with open(compile_commands_file, "rt") as f:
+        compile_commands = json.load(f)
+
+    return [x['command'] for x in compile_commands if c_file in x['file']][0]
+
+def get_includes(compile_commands_file, c_file):
+    compile_command = get_compile_command(compile_commands_file, c_file).split()
+    return [x[2:].strip() for x in compile_command if x.rstrip()[:2] == "-I"]
+
+def get_defines(compile_commands_file, c_file):
+    compile_command = get_compile_command(compile_commands_file, c_file).split()
+    return [x[2:].strip() for x in compile_command if x.rstrip()[:2] == "-D"]
+
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument("--compile_commands_file", help="path to compile_command.json", required=True)
+    parser.add_argument("--c_file", help="name of the c file to take", required=True)
+    parser.add_argument("--log_level", help="log level", required=False, default="ERROR", choices=logging._levelToName.values())
+    args = parser.parse_args()
+    logger.setLevel(args.log_level)
+
+    print(get_compile_command(args.compile_commands_file, args.c_file))
+    print(get_includes(args.compile_commands_file, args.c_file))
+    print(get_defines(args.compile_commands_file, args.c_file))
