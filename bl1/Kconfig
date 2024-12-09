@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,9 +27,15 @@ config TFM_BL2_IMAGE_FLASH_AREA_NUM
     int "Which flash area BL2 is stored in"
     default 0
 
-config TFM_BL2_SIGNING_KEY_PATH
+config TFM_BL2_CM_SIGNING_KEY_PATH
     string
     default "$(TFM_SOURCE_DIR)/bl1/bl1_2/bl1_dummy_rotpk"
+    help
+      Path to binary BL2 signing private key
+
+config TFM_BL2_SIGNING_ALG
+    string
+    default "LMS"
     help
       Path to binary BL2 signing private key
 
@@ -61,12 +67,17 @@ config TFM_BL1_DUMMY_TRNG
     help
       Whether BL1_1 will use dummy TRNG
 
-config TFM_BL1_PQ_CRYPTO
+config TFM_BL1_2_ENABLE_LMS
     bool "Enable LMS PQ crypto for BL2 verification."
     default n
     help
-      Enable LMS PQ crypto for BL2 verification. This is experimental and should
-      not yet be used in production
+      Enable LMS PQ crypto for BL2 verification.
+
+config TFM_BL1_2_ENABLE_ECDSA
+    bool "Enable ECDSA crypto for BL2 verification."
+    default n
+    help
+      Enable ECSDA crypto for BL2 verification.
 
 config TFM_BL1_IMAGE_VERSION_BL2
     string "Image version of BL2 image"
@@ -83,14 +94,6 @@ config TFM_BL1_2_IN_OTP
 config TFM_BL1_2_IN_FLASH
     bool "Whether BL1_2 is stored in FLASH"
     default n
-
-config BL1_HEADER_SIZE
-    hex "BL1 Header size"
-    default 0x800
-
-config BL1_TRAILER_SIZE
-    hex "BL1 Trailer size"
-    default 0x000
 
 config BL1_2_BUILD_TYPE
     string "BL1_2 build type"
