@@ -1,6 +1,8 @@
 /*
- * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  */
 
 #include "boot_hal.h"
@@ -25,9 +27,6 @@
 #ifdef RSE_ENABLE_BRINGUP_HELPERS
 #include "rse_bringup_helpers.h"
 #endif /* RSE_ENABLE_BRINGUP_HELPERS */
-#ifdef RSE_BRINGUP_OTP_EMULATION
-#include "rse_otp_emulation.h"
-#endif /* RSE_BRINGUP_OTP_EMULATION */
 #include "trng.h"
 #include "rse_sam_config.h"
 #include "tfm_log.h"
@@ -96,15 +95,6 @@ int32_t boot_platform_init(void)
     if (err != 0) {
         return err;
     }
-
-#ifdef RSE_BRINGUP_OTP_EMULATION
-    if (rse_otp_emulation_is_enabled()) {
-        err = FLASH_DEV_NAME.Initialize(NULL);
-        if (err != ARM_DRIVER_OK) {
-            return err;
-        }
-    }
-#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     plat_err = init_atu_regions();
@@ -178,18 +168,6 @@ void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
      * no effect on them.
      */
     static struct boot_arm_vector_table *vt_cpy;
-#ifdef RSE_BRINGUP_OTP_EMULATION
-    int32_t err;
-#endif /* RSE_BRINGUP_OTP_EMULATION */
-
-#ifdef RSE_BRINGUP_OTP_EMULATION
-    if (rse_otp_emulation_is_enabled()) {
-        err = FLASH_DEV_NAME.Uninitialize();
-        if (err != ARM_DRIVER_OK) {
-            while (1){}
-        }
-    }
-#endif /* RSE_BRINGUP_OTP_EMULATION */
 
 #if (LOG_LEVEL > LOG_LEVEL_NONE) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();

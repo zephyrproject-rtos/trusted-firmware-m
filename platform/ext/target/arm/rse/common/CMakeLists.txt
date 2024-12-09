@@ -10,6 +10,8 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+find_package(Python3)
+
 #========================= Platform region defs ===============================#
 
 target_include_directories(platform_region_defs
@@ -18,6 +20,11 @@ target_include_directories(platform_region_defs
         ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}
         .
 )
+
+string(REPLACE "SHA" "PSA_HASH_SHA_" PSA_MEASUREMENT_HASH_ALG ${MEASURED_BOOT_HASH_ALG})
+if (RSE_PROVISIONING_CURVE)
+    string(REGEX REPLACE "P" "P_" CC3XX_PROVISIONING_CURVE ${RSE_PROVISIONING_CURVE})
+endif()
 
 target_compile_definitions(platform_region_defs
     INTERFACE
@@ -33,13 +40,10 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:RSE_ENABLE_BRINGUP_HELPERS>
         $<$<BOOL:${RSE_OTP_TRNG}>:RSE_OTP_TRNG>
         $<$<BOOL:${RSE_LOAD_NS_IMAGE}>:RSE_LOAD_NS_IMAGE>
-        $<$<BOOL:${RSE_ENABLE_TRAM}>:RSE_ENABLE_TRAM>
         $<$<BOOL:${RSE_BIT_PROGRAMMABLE_OTP}>:RSE_BIT_PROGRAMMABLE_OTP>
         $<$<BOOL:${RSE_USE_ROM_LIB_FROM_SRAM}>:RSE_USE_ROM_LIB_FROM_SRAM>
         $<$<BOOL:${RSE_SUPPORT_ROM_LIB_RELOCATION}>:RSE_SUPPORT_ROM_LIB_RELOCATION>
-        $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:RSE_BRINGUP_OTP_EMULATION>
         RSE_AMOUNT=${RSE_AMOUNT}
-        $<$<BOOL:${RSE_HAS_MANUFACTURING_DATA}>:RSE_HAS_MANUFACTURING_DATA>
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSE_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         TFM_UNIQUE_ERROR_CODES=1
@@ -50,6 +54,14 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSE_BL1_TEST_BINARY}>:RSE_BL1_TEST_BINARY>
         $<$<BOOL:${RSE_TEST_BINARY_IN_ROM}>:RSE_TEST_BINARY_IN_ROM>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
+        MEASURED_BOOT_HASH_ALG=${PSA_MEASUREMENT_HASH_ALG}
+        $<$<BOOL:${RSE_PROVISIONING_CURVE}>:RSE_PROVISIONING_CURVE=CC3XX_EC_CURVE_SEC${CC3XX_PROVISIONING_CURVE}_R1>
+        $<$<BOOL:${RSE_PROVISIONING_CURVE}>:RSE_PROVISIONING_CURVE_${RSE_PROVISIONING_CURVE}>
+        $<$<BOOL:${RSE_PROVISIONING_HASH_ALG}>:RSE_PROVISIONING_HASH_ALG=TFM_BL1_HASH_ALG_${RSE_PROVISIONING_HASH_ALG}>
+        $<$<BOOL:${RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES}>:RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES>
+        $<$<BOOL:${RSE_PROVISIONING_ENABLE_AES_SIGNATURES}>:RSE_PROVISIONING_ENABLE_AES_SIGNATURES>
+        $<$<BOOL:${RSE_PROVISIONING_CM_DEBUG_CLOSED}>:RSE_PROVISIONING_CM_DEBUG_CLOSED>
+        $<$<BOOL:${RSE_PROVISIONING_REQUIRE_AUTHENTICATION_FOR_TCI}>:RSE_PROVISIONING_REQUIRE_AUTHENTICATION_FOR_TCI>
 )
 
 #========================= Platform common defs ===============================#
@@ -425,7 +437,6 @@ target_sources(platform_bl1_1
         ./dpa_hardened_word_copy.c
         ./cc3xx/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
-        $<$<BOOL:${RSE_BRINGUP_OTP_EMULATION}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bl1_2_image_otp_or_flash.c>
         ./bl1/rse_kmu_keys.c
         ./rse_boot_state.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
@@ -606,52 +617,9 @@ target_sources(tfm_s
         sam_interrupts.c
 )
 
-#=========================== CPAK generator tool ===============================
-
-find_package(Python3)
-
-add_custom_target(cpak_generator
-    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/cpak_generator.c
-)
-
-add_dependencies(cpak_generator
-    bl1_2_padded_bin
-)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_generator
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/cpak_generator.c
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
-    COMMAND ${CMAKE_COMMAND} -S ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator
-                             -B ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
-                             -G ${CMAKE_GENERATOR}
-                             -DMBEDCRYPTO_PATH=${MBEDCRYPTO_PATH}
-                             -DBL1_2_HASH_PATH=\\\"$<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin\\\"
-                             -DGUK_PATH=\\\"${TFM_GUK_PATH}\\\"
-                             -DCPAK_OUTPUT_PATH=\\\"${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin\\\"
-                             -DRSE_TP_MODE=${RSE_TP_MODE}
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
-)
-
-add_custom_target(cpak_public ALL
-    DEPENDS ${TFM_GUK_PATH}
-    DEPENDS cpak_generator
-    DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_generator
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/bin_to_pem.py
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/
-    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_generator
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/bin_to_pem.py
-                    --input_key_file ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin
-                    --output_key_file ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.pem
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin $<TARGET_FILE_DIR:bl1_1>
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.pem $<TARGET_FILE_DIR:bl1_1>
-)
-
 ############################### IMAGE SIGNING ##################################
 
 if (RSE_XIP)
-    find_package(Python3)
-
     add_custom_target(public_key ALL
         SOURCES
             image_s_signing_public_key.pem
@@ -789,6 +757,7 @@ if (RSE_XIP)
 endif()
 
 ############################## BL1 DMA ###################################
+
 set(bin_dir ${CMAKE_BINARY_DIR}/bin)
 
 add_custom_target(dma_icses
@@ -817,6 +786,47 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/rom_dma_ics.hex $<TARGET_FILE_DIR:bl1_1>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/otp_dma_ics.hex $<TARGET_FILE_DIR:bl1_1>
 )
+
+############################## OTP Layout ######################################
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/config)
+
+add_custom_target(otp_config
+    ALL
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modules/otp_config.py
+    DEPENDS ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/rse_otp_config.h
+    DEPENDS ${PLATFORM_DIR}/ext/target/arm/drivers/lcm/lcm_otp_layout.h
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/modules/otp_config.py
+        --rse_otp_layout_h_file=${CMAKE_CURRENT_SOURCE_DIR}/rse_otp_layout.h
+        --compile_commands_file=${CMAKE_BINARY_DIR}/compile_commands.json
+        --otp_config_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+)
+
+install(FILES       ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config)
+
+add_custom_target(otp_layout_specification
+    ALL
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config/otp_layout.csv
+)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/otp_layout.csv
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_otp_layout_specification.py
+    DEPENDS ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/rse_otp_config.h
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_otp_layout_specification.py
+            --otp_config=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+            --specification_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_layout.csv
+)
+
+install(FILES       ${CMAKE_CURRENT_BINARY_DIR}/config/otp_layout.csv
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config)
 
 #========================= Files for building NS side platform ================#
 
@@ -868,6 +878,10 @@ install(DIRECTORY   partition
 
 install(DIRECTORY   ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/subplatform_pal_config
+)
+
+install(DIRECTORY   ${BL1_2_CONFIG_DIR}/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/bl1_2_config
 )
 
 install(FILES       rse_otp_check_config.h
