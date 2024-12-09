@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,7 +31,9 @@ enum tfm_bl1_key_id_t {
     TFM_BL1_KEY_HUK,
     TFM_BL1_KEY_GUK,
     TFM_BL1_KEY_BL2_ENCRYPTION,
+
     TFM_BL1_KEY_ROTPK_0,
+    TFM_BL1_KEY_ROTPK_MAX = TFM_BL1_KEY_ROTPK_0 + TFM_BL1_2_SIGNER_AMOUNT,
 
     TFM_BL1_KEY_USER,
 };

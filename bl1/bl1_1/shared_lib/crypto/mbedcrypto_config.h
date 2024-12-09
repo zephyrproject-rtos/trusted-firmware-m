@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,6 +19,13 @@ extern "C" {
 
 #define MBEDTLS_SHA256_C
 #define MBEDTLS_SHA224_C
+#define MBEDTLS_SHA512_C
+#define MBEDTLS_SHA384_C
+
+#define MBEDTLS_PSA_CRYPTO_C
+#define MBEDTLS_LMS_C
+#define MBEDTLS_LMOTS_C
+#define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
 
 #define MBEDTLS_AES_C
 #define MBEDTLS_HKDF_C

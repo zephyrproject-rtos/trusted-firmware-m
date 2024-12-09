@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,32 +22,36 @@ extern uint8_t tfm_bl1_key_test_2_buf[];
 fih_int bl1_otp_read(uint8_t *dst, uint8_t *src, size_t size);
 fih_int bl1_otp_write(uint8_t *dst, uint8_t *src, size_t size);
 
-fih_int bl1_otp_read_key(enum tfm_bl1_key_id_t key_id, uint8_t *key_buf)
+fih_int bl1_otp_read_key(enum tfm_bl1_key_id_t key_id, uint8_t *key_buf,
+                         size_t key_buf_len, size_t *key_size)
 {
     fih_int fih_rc;
     enum tfm_plat_err_t plat_err;
+    enum tfm_otp_element_id_t otp_id;
 
     switch (key_id) {
     case TFM_BL1_KEY_HUK:
-        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_HUK, 32, key_buf);
-        fih_rc = fih_int_encode_zero_equality(plat_err);
+        otp_id = PLAT_OTP_ID_HUK;
         break;
     case TFM_BL1_KEY_GUK:
-        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_GUK, GUK_SIZE, key_buf);
-        fih_rc = fih_int_encode_zero_equality(plat_err);
+        otp_id = PLAT_OTP_ID_GUK;
         break;
     case TFM_BL1_KEY_BL2_ENCRYPTION:
-        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_KEY_BL2_ENCRYPTION, 32,
-                                     key_buf);
-        fih_rc = fih_int_encode_zero_equality(plat_err);
+        otp_id = PLAT_OTP_ID_KEY_BL2_ENCRYPTION;
         break;
     case TFM_BL1_KEY_ROTPK_0:
-        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_ROTPK_0, 56, key_buf);
-        fih_rc = fih_int_encode_zero_equality(plat_err);
+        otp_id = PLAT_OTP_ID_BL1_ROTPK_0;
         break;
     default:
         FIH_RET(FIH_FAILURE);
     }
+
+    if (key_size != NULL) {
+        tfm_plat_otp_get_size(otp_id, key_size);
+    }
+
+    plat_err = tfm_plat_otp_read(otp_id, key_buf_len, key_buf);
+    fih_rc = fih_int_encode_zero_equality(plat_err);
 
     FIH_RET(fih_rc);
 }

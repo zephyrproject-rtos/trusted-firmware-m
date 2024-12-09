@@ -5,10 +5,10 @@ bl1_aes_256_ctr_decrypt
 bl1_derive_key
 bl1_get_active_bl2_image
 bl1_otp_read_key
-bl1_sha256_compute
-bl1_sha256_finish
-bl1_sha256_init
-bl1_sha256_update
+bl1_hash_compute
+bl1_hash_finish
+bl1_hash_init
+bl1_hash_update
 bl1_trng_generate_random
 bl_fih_memeql
 cc3xx_lowlevel_uninit

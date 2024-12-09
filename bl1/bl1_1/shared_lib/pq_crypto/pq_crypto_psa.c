@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +24,7 @@ psa_status_t psa_hash_setup(
     (void)operation;
     (void)alg;
 
-    return fih_int_decode(bl1_sha256_init());
+    return fih_int_decode(bl1_hash_init(TFM_BL1_HASH_ALG_SHA256));
 }
 
 psa_status_t psa_hash_update(
@@ -34,7 +34,7 @@ psa_status_t psa_hash_update(
 {
     (void)operation;
 
-    return fih_int_decode(bl1_sha256_update((unsigned char *)input, input_length));
+    return fih_int_decode(bl1_hash_update((unsigned char *)input, input_length));
 }
 
 psa_status_t psa_hash_finish(
@@ -46,8 +46,7 @@ psa_status_t psa_hash_finish(
     (void)operation;
     (void)hash_size;
 
-    *hash_length = 32;
-    return fih_int_decode(bl1_sha256_finish(hash));
+    return fih_int_decode(bl1_hash_finish(hash, hash_size, hash_length));
 }
 
 psa_status_t psa_hash_abort(
@@ -58,7 +57,7 @@ psa_status_t psa_hash_abort(
     return PSA_SUCCESS;
 }
 
-fih_int pq_crypto_verify(enum tfm_bl1_key_id_t key,
+fih_int pq_crypto_verify(uint8_t *key, size_t key_size,
                          const uint8_t *data,
                          size_t data_length,
                          const uint8_t *signature,
@@ -67,16 +66,10 @@ fih_int pq_crypto_verify(enum tfm_bl1_key_id_t key,
     int rc;
     fih_int fih_rc;
     mbedtls_lms_public_t ctx;
-    uint8_t key_buf[MBEDTLS_LMS_PUBLIC_KEY_LEN(MBEDTLS_LMS_SHA256_M32_H10)];
-
-    FIH_CALL(bl1_otp_read_key, fih_rc, key, key_buf);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
-    }
 
     mbedtls_lms_public_init(&ctx);
 
-    rc = mbedtls_lms_import_public_key(&ctx, key_buf, MBEDTLS_LMS_PUBLIC_KEY_LEN(MBEDTLS_LMS_SHA256_M32_H10));
+    rc = mbedtls_lms_import_public_key(&ctx, key, key_size);
     fih_rc = fih_int_encode_zero_equality(rc);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         goto out;
@@ -97,22 +90,22 @@ int pq_crypto_get_pub_key_hash(enum tfm_bl1_key_id_t key,
 {
     fih_int fih_rc;
     uint8_t key_buf[MBEDTLS_LMS_PUBLIC_KEY_LEN(MBEDTLS_LMS_SHA256_M32_H10)];
+    size_t key_size;
 
     if (hash_size < 32) {
         return -1;
     }
 
-    fih_rc = bl1_otp_read_key(key, key_buf);
+    fih_rc = bl1_otp_read_key(key, key_buf, sizeof(key_buf), &key_size);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return fih_int_decode(fih_rc);
     }
 
-    fih_rc = bl1_sha256_compute(key_buf, sizeof(key_buf), hash);
+    fih_rc = bl1_hash_compute(TFM_BL1_HASH_ALG_SHA256, key_buf, sizeof(key_buf),
+                              hash, sizeof(hash), hash_length);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return fih_int_decode(fih_rc);
     }
-
-    *hash_length = 32;
 
     return 0;
 }

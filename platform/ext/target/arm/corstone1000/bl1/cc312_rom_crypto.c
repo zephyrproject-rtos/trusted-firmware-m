@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,66 +18,249 @@
 
 #define KEY_DERIVATION_MAX_BUF_SIZE 128
 
-fih_int bl1_sha256_init(void)
-{
-    fih_int fih_rc = FIH_FAILURE;
+static enum tfm_bl1_hash_alg_t multipart_alg = 0;
+static mbedtls_sha512_context multipart_ctx;
 
+fih_int sha256_init()
+{
+    fih_int fih_rc;
+
+    multipart_alg = TFM_BL1_HASH_ALG_SHA256;
+
+    /* This is only used by TFM_BL1_2 which currently only uses SHA256 */
     fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
     }
-
-    return FIH_SUCCESS;
-}
-
-fih_int bl1_sha256_finish(uint8_t *hash)
-{
-    uint32_t tmp_buf[32 / sizeof(uint32_t)];
-
-    cc3xx_lowlevel_hash_finish(tmp_buf, 32);
-
-    memcpy(hash, tmp_buf, sizeof(tmp_buf));
-
-    return FIH_SUCCESS;
-}
-
-fih_int bl1_sha256_update(uint8_t *data, size_t data_length)
-{
-    fih_int fih_rc = FIH_FAILURE;
-
-    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data, data_length));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
-
-    return FIH_SUCCESS;
-}
-
-fih_int bl1_sha256_compute(const uint8_t *data,
-                           size_t data_length,
-                           uint8_t *hash)
-{
-    uint32_t tmp_buf[32 / sizeof(uint32_t)];
-    fih_int fih_rc = FIH_FAILURE;
-
-    if (data == NULL || hash == NULL) {
-        FIH_RET(FIH_FAILURE);
-    }
-
-    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
-
-    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data, data_length));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
-    cc3xx_lowlevel_hash_finish(tmp_buf, 32);
-
-    memcpy(hash, tmp_buf, sizeof(tmp_buf));
 
     FIH_RET(FIH_SUCCESS);
+}
+
+fih_int sha256_finish(uint8_t *hash,
+                        size_t hash_length,
+                        size_t *hash_size)
+{
+    cc3xx_lowlevel_hash_finish((uint32_t *)hash, hash_length);
+
+    if (hash_size != NULL) {
+        *hash_size = 32;
+    }
+
+    multipart_alg = 0;
+
+    FIH_RET(FIH_SUCCESS);
+}
+
+fih_int sha256_update(const uint8_t *data,
+                        size_t data_length)
+{
+    fih_int fih_rc;
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data, data_length));
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+
+    return FIH_SUCCESS;
+}
+
+static fih_int sha256_compute(const uint8_t *data,
+                              size_t data_length,
+                              uint8_t *hash, size_t hash_len, size_t *hash_size)
+{
+    fih_int fih_rc;
+
+    if (data == NULL || hash == NULL) {
+        FIH_RET(1);
+    }
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_init(CC3XX_HASH_ALG_SHA256));
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_lowlevel_hash_update(data,
+                                                                     data_length));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+    cc3xx_lowlevel_hash_finish((uint32_t *)hash, hash_len);
+
+    if (hash_size != NULL) {
+        *hash_size = 32;
+    }
+
+    FIH_RET(FIH_SUCCESS);
+}
+
+
+fih_int sha384_init()
+{
+    fih_int fih_rc;
+    int rc;
+
+    multipart_alg = TFM_BL1_HASH_ALG_SHA384;
+
+    mbedtls_sha512_init(&multipart_ctx);
+
+    rc = mbedtls_sha512_starts(&multipart_ctx, 1);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    FIH_RET(FIH_SUCCESS);
+
+out:
+    mbedtls_sha512_free(&multipart_ctx);
+    multipart_alg = 0;
+    FIH_RET(fih_rc);
+
+}
+
+fih_int sha384_finish(uint8_t *hash,
+                        size_t hash_length,
+                        size_t *hash_size)
+{
+    fih_int fih_rc;
+    int rc;
+
+    if (hash_length < 48) {
+        fih_rc = FIH_FAILURE;
+        goto out;
+    }
+
+    rc = mbedtls_sha512_finish(&multipart_ctx, hash);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    if (hash_size != NULL) {
+        *hash_size = 48;
+    }
+
+out:
+    mbedtls_sha512_free(&multipart_ctx);
+    multipart_alg = 0;
+    FIH_RET(fih_rc);
+}
+
+fih_int sha384_update(const uint8_t *data,
+                        size_t data_length)
+{
+    int rc;
+    fih_int fih_rc;
+
+    rc = mbedtls_sha512_update(&multipart_ctx, data, data_length);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    FIH_RET(FIH_SUCCESS);
+
+out:
+    mbedtls_sha512_free(&multipart_ctx);
+    multipart_alg = 0;
+    FIH_RET(fih_rc);
+}
+
+static fih_int sha384_compute(const uint8_t *data,
+                           size_t data_length,
+                           uint8_t *hash, size_t hash_len, size_t *hash_size)
+{
+    int rc = 0;
+    fih_int fih_rc;
+    mbedtls_sha512_context ctx;
+
+    if (hash_len < 48) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    mbedtls_sha512_init(&ctx);
+
+    rc = mbedtls_sha512_starts(&ctx, 1);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    rc = mbedtls_sha512_update(&ctx, data, data_length);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    rc = mbedtls_sha512_finish(&ctx, hash);
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        goto out;
+    }
+
+    if (hash_size != NULL) {
+        *hash_size = 48;
+    }
+
+out:
+    mbedtls_sha512_free(&ctx);
+    FIH_RET(fih_rc);
+}
+
+fih_int bl1_hash_init(enum tfm_bl1_hash_alg_t alg)
+{
+    switch(alg) {
+    case TFM_BL1_HASH_ALG_SHA256:
+        FIH_RET(sha256_init());
+    case TFM_BL1_HASH_ALG_SHA384:
+        FIH_RET(sha384_init());
+    default:
+        FIH_RET(FIH_FAILURE);
+    }
+}
+
+fih_int bl1_hash_finish(uint8_t *hash,
+                        size_t hash_length,
+                        size_t *hash_size)
+{
+    switch(multipart_alg) {
+    case TFM_BL1_HASH_ALG_SHA256:
+        FIH_RET(sha256_finish(hash, hash_length, hash_size));
+    case TFM_BL1_HASH_ALG_SHA384:
+        FIH_RET(sha384_finish(hash, hash_length, hash_size));
+    default:
+        FIH_RET(FIH_FAILURE);
+    }
+}
+
+fih_int bl1_hash_update(const uint8_t *data,
+                        size_t data_length)
+{
+    switch(multipart_alg) {
+    case TFM_BL1_HASH_ALG_SHA256:
+        FIH_RET(sha256_update(data, data_length));
+    case TFM_BL1_HASH_ALG_SHA384:
+        FIH_RET(sha384_update(data, data_length));
+    default:
+        FIH_RET(FIH_FAILURE);
+    }
+}
+
+fih_int bl1_hash_compute(enum tfm_bl1_hash_alg_t alg,
+                         const uint8_t *data,
+                         size_t data_length,
+                         uint8_t *hash,
+                         size_t hash_length,
+                         size_t *hash_size)
+{
+    switch(alg) {
+    case TFM_BL1_HASH_ALG_SHA256:
+        FIH_RET(sha256_compute(data, data_length, hash, hash_length, hash_size));
+    case TFM_BL1_HASH_ALG_SHA384:
+        FIH_RET(sha384_compute(data, data_length, hash, hash_length, hash_size));
+    default:
+        FIH_RET(FIH_FAILURE);
+    }
 }
 
 static int32_t bl1_key_to_cc3xx_key(enum tfm_bl1_key_id_t key_id,
@@ -95,7 +278,7 @@ static int32_t bl1_key_to_cc3xx_key(enum tfm_bl1_key_id_t key_id,
         break;
     default:
         *cc3xx_key_type = CC3XX_AES_KEY_ID_USER_KEY;
-        rc = bl1_otp_read_key(key_id, key_buf);
+        rc = bl1_otp_read_key(key_id, key_buf, key_buf_size, NULL);
         if (rc) {
             memset(key_buf, 0, key_buf_size);
             return rc;
