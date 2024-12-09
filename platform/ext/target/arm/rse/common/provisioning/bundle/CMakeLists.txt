@@ -7,13 +7,9 @@
 
 find_package(Python3)
 
+set (ENV{PYTHONPATH} ${CMAKE_SOURCE_DIR}/tools/modules)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/config)
-
-add_custom_target(provisioning_tooling_otp_config
-    ALL
-    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-)
 
 add_custom_target(provisioning_tooling_message_config
     ALL
@@ -25,35 +21,27 @@ add_custom_target(provisioning_tooling_provisioning_config
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
 )
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-    DEPENDS ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/otp_config.py
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/otp_config.py
-        --rse_otp_layout_h_file=${CMAKE_CURRENT_SOURCE_DIR}/../../rse_otp_layout.h
-        --compile_commands_file=${CMAKE_BINARY_DIR}/compile_commands.json
-        --otp_lcm_c_file=${CMAKE_CURRENT_SOURCE_DIR}/cm_provisioning_code.c
-        --otp_config_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-)
-
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_message_config.py
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_message_config.py
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../rse_otp_layout.h
+    DEPENDS ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/rse_provisioning_config.h
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_message_config.py
         --rse_provisioning_message_h_file=${CMAKE_CURRENT_SOURCE_DIR}/../rse_provisioning_message.h
         --compile_commands_file=${CMAKE_BINARY_DIR}/compile_commands.json
-        --otp_lcm_c_file=${CMAKE_CURRENT_SOURCE_DIR}/cm_provisioning_code.c
         --provisioning_message_config_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_config.py
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_config.py
+    DEPENDS ${RSE_SUBPLATFORM_PAL_CONFIG_DIR}/rse_provisioning_config.h
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/modules/provisioning_config.py
         --rse_provisioning_layout_h_file=${CMAKE_CURRENT_SOURCE_DIR}/../rse_provisioning_values.h
+        --rse_rotpk_policy_h_file=${CMAKE_CURRENT_SOURCE_DIR}/../../rse_rotpk_policy.h
         --compile_commands_file=${CMAKE_BINARY_DIR}/compile_commands.json
-        --otp_lcm_c_file=${CMAKE_CURRENT_SOURCE_DIR}/cm_provisioning_code.c
         --provisioning_config_output_file=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
 )
-
-install(FILES       ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/provisioning/config)
 
 install(FILES       ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/provisioning/config)
@@ -145,9 +133,40 @@ if (TFM_DUMMY_PROVISIONING)
 
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin/provisioning)
 
+    STRING(REGEX REPLACE "-.*$" "" MCUBOOT_ROTPK_TYPE ${MCUBOOT_SIGNATURE_TYPE})
+    STRING(REGEX REPLACE "EC" "ECDSA" MCUBOOT_ROTPK_TYPE ${MCUBOOT_ROTPK_TYPE})
+
     set(CM_BUNDLE_SCRIPT_ARGS
+            --cm:bl1_2.bl1_2=${CMAKE_BINARY_DIR}/bin/bl1_2_padded.bin
+            --cm:bl1_2.bl1_2_hash=${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
+            --cm:guk=${TFM_GUK_PATH}
+            --cm:otp_dma_ics=${CMAKE_BINARY_DIR}/bin/otp_dma_ics.bin
+            $<$<BOOL:${TFM_BL1_2_IMAGE_ENCRYPTION}>:--cm:kce_cm=${TFM_BL2_ENCRYPTION_KEY_PATH}>
+
+            --cm:cm.rotpk_areas_0.rotpk_0=${TFM_BL1_2_CM_SIGNING_KEY_PATH}
+            --cm:cm.rotpk_areas_0.rotpk_policy_0 RSE_ROTPK_POLICY_SIG_REQUIRED
+            --cm:cm.rotpk_areas_0.rotpk_type_0 RSE_ROTPK_TYPE_${TFM_BL1_2_CM_SIGNING_ALG}
+            --cm:cm.rotpk_areas_0.rotpk_hash_alg_0 RSE_ROTPK_HASH_ALG_${TFM_BL1_2_ROTPK_HASH_ALG}
+
+            --cm:cm.rotpk_areas_0.rotpk_1=${MCUBOOT_KEY_S}
+            --cm:cm.rotpk_areas_0.rotpk_policy_1 RSE_ROTPK_POLICY_SIG_REQUIRED
+            --cm:cm.rotpk_areas_0.rotpk_type_1 RSE_ROTPK_TYPE_${MCUBOOT_ROTPK_TYPE}
+            --cm:cm.rotpk_areas_0.rotpk_hash_alg_1 RSE_ROTPK_HASH_ALG_${MCUBOOT_ROTPK_HASH_ALG}
+            --valid_lcs=RSE_PROVISIONING_BLOB_VALID_IN_CM_LCS
     )
 
+    set(DM_BUNDLE_SCRIPT_ARGS
+            $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_0=${TFM_BL1_2_DM_SIGNING_KEY_PATH}>
+            $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_policy_0=RSE_ROTPK_POLICY_SIG_OPTIONAL>
+            $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_type_0=RSE_ROTPK_TYPE_${TFM_BL1_2_DM_SIGNING_ALG}>
+            $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_hash_alg_0=RSE_ROTPK_HASH_ALG_${TFM_BL1_2_ROTPK_HASH_ALG}>
+
+            --dm:dm.rotpk_areas_0.rotpk_1=${MCUBOOT_KEY_NS}
+            --dm:dm.rotpk_areas_0.rotpk_policy_1 RSE_ROTPK_POLICY_SIG_REQUIRED
+            --dm:dm.rotpk_areas_0.rotpk_type_1 RSE_ROTPK_TYPE_${MCUBOOT_ROTPK_TYPE}
+            --dm:dm.rotpk_areas_0.rotpk_hash_alg_1 RSE_ROTPK_HASH_ALG_${MCUBOOT_ROTPK_HASH_ALG}
+            --valid_lcs=RSE_PROVISIONING_BLOB_VALID_IN_DM_LCS
+    )
 
     add_custom_target(cm_provisioning_message
         ALL
@@ -156,7 +175,8 @@ if (TFM_DUMMY_PROVISIONING)
 
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/provisioning/cm_provisioning_message.bin
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_cm_provisioning_bundle.py
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+        DEPENDS otp_config
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/cm_provisioning_code.axf
@@ -167,23 +187,36 @@ if (TFM_DUMMY_PROVISIONING)
         DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
         DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded.bin
         DEPENDS bl1_2_padded_bin
+        DEPENDS ${CMAKE_BINARY_DIR}/bin/otp_dma_ics.bin
+        DEPENDS dma_icses
         DEPENDS ${TFM_BL2_ENCRYPTION_KEY_PATH}
-        COMMAND ${Python3_EXECUTABLE}
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_cm_provisioning_bundle.py
-            --otp_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-            --provisioning_message_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
-            --provisioning_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
-            --provisioning_code_elf_file=${CMAKE_CURRENT_BINARY_DIR}/bin/cm_provisioning_code.axf
-            --authentication_symmetric_key_file=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin
+            --otp_config=${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
+            --provisioning_message_config=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
+            --provisioning_config=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
+            --provisioning_code_elf=${CMAKE_CURRENT_BINARY_DIR}/bin/cm_provisioning_code.axf
             --bundle_output_file ${CMAKE_BINARY_DIR}/bin/provisioning/cm_provisioning_message.bin
-            --tp_mode=${RSE_TP_MODE}
 
-            --bl1_2_hash_path=${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
-            --bl1_2.bl1_2_path=${CMAKE_BINARY_DIR}/bin/bl1_2_padded.bin
-            --guk_path=${TFM_GUK_PATH}
-            --otp_dma_ics_path=${CMAKE_BINARY_DIR}/bin/otp_dma_ics.bin
-            --kce_cm_path=${TFM_BL2_ENCRYPTION_KEY_PATH}
-            --cm.rotpk_0_path=${TFM_BL2_SIGNING_KEY_PATH}.pub
+            --tp_mode=RSE_PROVISIONING_BLOB_REQUIRES_TP_MODE_${RSE_TP_MODE}
+            --version=${RSE_CM_BLOB_VERSION}
+
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin>
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_alg=${RSE_PROVISIONING_SIGN_ALG}>
+
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_key=${RSE_CM_PROVISIONING_SIGNING_KEY}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_alg=${RSE_PROVISIONING_SIGN_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_hash_alg=${RSE_PROVISIONING_HASH_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_alg=${RSE_PROVISIONING_ENCRYPTION_ALG}>
+
+            $<$<BOOL:${RSE_PROVISIONING_CM_ENCRYPT_CODE_DATA}>:--encrypt_code_and_data=RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES>
+            $<$<BOOL:${RSE_PROVISIONING_CM_ENCRYPT_SECRET_VALUES}>:--encrypt_secret_values=RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES>
+
+            --sp_mode RSE_PROVISIONING_BLOB_REQUIRES_SP_MODE_ENABLED
+
+            ${CM_BUNDLE_SCRIPT_ARGS}
     )
 
     add_custom_target(dm_provisioning_message
@@ -193,22 +226,41 @@ if (TFM_DUMMY_PROVISIONING)
 
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/provisioning/dm_provisioning_message.bin
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_dm_provisioning_bundle.py
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+        DEPENDS otp_config
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/dm_provisioning_code.axf
         DEPENDS ${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
         DEPENDS dm_provisioning_code
         DEPENDS dm_provisioning_key
-        COMMAND ${Python3_EXECUTABLE}
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_dm_provisioning_bundle.py
-            --otp_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-            --provisioning_message_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
-            --provisioning_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
-            --provisioning_code_elf_file=${CMAKE_CURRENT_BINARY_DIR}/bin/dm_provisioning_code.axf
-            --authentication_symmetric_key_file=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
+            --otp_config=${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
+            --provisioning_message_config=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
+            --provisioning_config=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
+            --provisioning_code_elf=${CMAKE_CURRENT_BINARY_DIR}/bin/dm_provisioning_code.axf
             --bundle_output_file ${CMAKE_BINARY_DIR}/bin/provisioning/dm_provisioning_message.bin
-            --tp_mode=${RSE_TP_MODE}
+
+            --tp_mode=RSE_PROVISIONING_BLOB_REQUIRES_TP_MODE_${RSE_TP_MODE}
+            --version=${RSE_CM_BLOB_VERSION}
+
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin>
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_alg=${RSE_PROVISIONING_SIGN_ALG}>
+
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_key=${RSE_CM_PROVISIONING_SIGNING_KEY}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_alg=${RSE_PROVISIONING_SIGN_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_hash_alg=${RSE_PROVISIONING_HASH_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_alg=${RSE_PROVISIONING_ENCRYPTION_ALG}>
+
+            $<$<BOOL:${RSE_PROVISIONING_DM_ENCRYPT_CODE_DATA}>:--encrypt_code_and_data=RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES>
+            $<$<BOOL:${RSE_PROVISIONING_DM_ENCRYPT_SECRET_VALUES}>:--encrypt_secret_values=RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES>
+
+            --sp_mode RSE_PROVISIONING_BLOB_REQUIRES_SP_MODE_ENABLED
+
+            ${DM_BUNDLE_SCRIPT_ARGS}
     )
 
     add_custom_target(combined_provisioning_message
@@ -218,7 +270,8 @@ if (TFM_DUMMY_PROVISIONING)
 
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/provisioning/combined_provisioning_message.bin
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_combined_provisioning_bundle.py
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
+        DEPENDS otp_config
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/combined_provisioning_code.axf
@@ -228,20 +281,35 @@ if (TFM_DUMMY_PROVISIONING)
         DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
         DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded.bin
         DEPENDS bl1_2_padded_bin
-        COMMAND ${Python3_EXECUTABLE}
+        DEPENDS ${CMAKE_BINARY_DIR}/bin/otp_dma_ics.bin
+        DEPENDS dma_icses
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+            ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_combined_provisioning_bundle.py
-            --otp_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/otp_config.pickle
-            --provisioning_message_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
-            --provisioning_config_file=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
-            --provisioning_code_elf_file=${CMAKE_CURRENT_BINARY_DIR}/bin/combined_provisioning_code.axf
-            --authentication_symmetric_key_file=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin
+            --otp_config=${CMAKE_CURRENT_BINARY_DIR}/../../config/otp_config.pickle
+            --provisioning_message_config=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
+            --provisioning_config=${CMAKE_CURRENT_BINARY_DIR}/config/provisioning_config.pickle
+            --provisioning_code_elf=${CMAKE_CURRENT_BINARY_DIR}/bin/combined_provisioning_code.axf
             --bundle_output_file ${CMAKE_BINARY_DIR}/bin/provisioning/combined_provisioning_message.bin
-            --tp_mode=${RSE_TP_MODE}
-            --cm:bl1_2_hash_path=${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
-            --cm:bl1_2.bl1_2_path=${CMAKE_BINARY_DIR}/bin/bl1_2_padded.bin
-            --cm:guk_path=${TFM_GUK_PATH}
-            --cm:otp_dma_ics_path=${CMAKE_BINARY_DIR}/bin/otp_dma_ics.bin
-            --cm:kce_cm_path=${TFM_BL2_ENCRYPTION_KEY_PATH}
-            --cm:cm.rotpk_0_path=${TFM_BL2_SIGNING_KEY_PATH}.pub
+
+            --tp_mode=RSE_PROVISIONING_BLOB_REQUIRES_TP_MODE_${RSE_TP_MODE}
+            --version=${RSE_CM_BLOB_VERSION}
+
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin>
+            $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_alg=${RSE_PROVISIONING_SIGN_ALG}>
+
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_key=${RSE_CM_PROVISIONING_SIGNING_KEY}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_alg=${RSE_PROVISIONING_SIGN_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_hash_alg=${RSE_PROVISIONING_HASH_ALG}>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_cm.bin>
+            $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_alg=${RSE_PROVISIONING_ENCRYPTION_ALG}>
+
+            $<$<BOOL:${RSE_PROVISIONING_CM_ENCRYPT_CODE_DATA}>:--encrypt_code_and_data=RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES>
+            $<$<BOOL:${RSE_PROVISIONING_CM_ENCRYPT_SECRET_VALUES}>:--encrypt_secret_values=RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES>
+
+            --sp_mode RSE_PROVISIONING_BLOB_REQUIRES_SP_MODE_ENABLED
+
+            ${CM_BUNDLE_SCRIPT_ARGS}
+            ${DM_BUNDLE_SCRIPT_ARGS}
     )
 endif()
