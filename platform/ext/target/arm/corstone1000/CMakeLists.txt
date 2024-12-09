@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -445,7 +445,7 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
     DEPENDS ${CMAKE_SOURCE_DIR}/bl1/bl1_1/scripts/create_provisioning_bundle.py
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bl1/bl1_1/scripts/create_provisioning_bundle.py
                     --bl2_encryption_key_input_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
-                    --bl2_signing_key_input_file ${TFM_BL2_SIGNING_KEY_PATH}
+                    --bl2_signing_key_input_file ${TFM_BL2_CM_VERIFICATION_KEY_PATH}
                     --guk_input_file ${TFM_GUK_PATH}
                     --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                     --bl2_signed_hash_input_file $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin

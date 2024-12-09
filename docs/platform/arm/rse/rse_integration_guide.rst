@@ -153,7 +153,7 @@ This will generate a private key ``bl2_signing_key.prv`` and public key
 ``bl2_signing_key.pub``, which can be used to replace the development keys in
 ``bl1/bl1_2/bl1_dummy_rotpk.prv`` and ``bl1/bl1_2/bl1_dummy_rotpk.pub`` by
 building TF-M with the parameter
-``TFM_BL2_SIGNING_KEY_PATH=path/to/bl2_signing_key``.
+``TFM_BL2_CM_SIGNING_KEY_PATH=path/to/bl2_signing_key``.
 
 The private key is updated each time a new BL2 image is signed. In a production
 system, a process must be put in place to ensure that the private keys are kept
@@ -251,4 +251,6 @@ must be included in the DM provisioning bundle.
 
 --------------
 
-*Copyright (c) 2024, Arm Limited. All rights reserved.*
+*SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*
+
+*SPDX-License-Identifier: BSD-3-Clause*
