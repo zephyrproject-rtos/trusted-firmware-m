@@ -12,3 +12,4 @@ kconfiglib
 networkx ~= 3.1
 pyelftools
 rich
+libclang
