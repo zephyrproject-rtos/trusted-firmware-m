@@ -229,6 +229,11 @@
 /* DRAM end address */
 #define HOST_DRAM_PHYS_LIMIT                        0x0FFFFFFFFULL
 
+/* Base of AP region for MHU Pointer-access protocol */
+#define HOST_AP_MHU_POINTER_ACCESS_PHYS_BASE        0x0FFFFC000ULL
+/* End of AP region for MHU Pointer-access protocol */
+#define HOST_AP_MHU_POINTER_ACCESS_PHYS_LIMIT       0x0FFFFFFFFULL
+
 /* CMN GPV base address */
 #define HOST_CMN_GPV_PHYS_BASE                      0x100000000ULL
 /* CMN GPV end address */
