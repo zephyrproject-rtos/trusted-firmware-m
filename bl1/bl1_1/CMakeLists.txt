@@ -95,6 +95,7 @@ add_custom_command(OUTPUT bl1_2_padded.bin bl1_2_padded_hash.bin
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl1_2_img.py
                     --input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2.bin
                     --img_output_file bl1_2_padded.bin
+                    --hash_alg ${TFM_BL1_1_MEASUREMENT_HASH_ALG}
                     --hash_output_file bl1_2_padded_hash.bin
                     --signing_layout_file $<TARGET_OBJECTS:signing_layout_bl1_2>
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl1_2_padded.bin $<TARGET_FILE_DIR:bl1_2>
