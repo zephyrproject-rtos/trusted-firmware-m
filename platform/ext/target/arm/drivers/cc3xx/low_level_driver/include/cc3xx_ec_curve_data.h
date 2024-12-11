@@ -32,7 +32,7 @@ typedef enum {
  *
  */
 typedef enum {
-    CC3XX_EC_CURVE_SECP_192_R1,
+    CC3XX_EC_CURVE_SECP_192_R1 = 0U,
     CC3XX_EC_CURVE_SECP_224_R1,
     CC3XX_EC_CURVE_SECP_256_R1,
     CC3XX_EC_CURVE_SECP_384_R1,

@@ -3284,17 +3284,17 @@ int cc3xx_test_ecdsa_verify(cc3xx_ecdsa_validate_test_data_t *data)
     int rc;
 
     switch(data->hash_alg) {
-        case CC3XX_HASH_ALG_SHA1:
-            hash_len = SHA1_OUTPUT_SIZE;
-            break;
-        case CC3XX_HASH_ALG_SHA224:
-            hash_len = SHA224_OUTPUT_SIZE;
-            break;
-        case CC3XX_HASH_ALG_SHA256:
-            hash_len = SHA256_OUTPUT_SIZE;
-            break;
-        default:
-            return 1;
+    case CC3XX_HASH_ALG_SHA1:
+        hash_len = SHA1_OUTPUT_SIZE;
+        break;
+    case CC3XX_HASH_ALG_SHA224:
+        hash_len = SHA224_OUTPUT_SIZE;
+        break;
+    case CC3XX_HASH_ALG_SHA256:
+        hash_len = SHA256_OUTPUT_SIZE;
+        break;
+    default:
+        return 1;
     };
 
     err = cc3xx_lowlevel_hash_init(data->hash_alg);
@@ -3312,11 +3312,11 @@ int cc3xx_test_ecdsa_verify(cc3xx_ecdsa_validate_test_data_t *data)
     cc3xx_lowlevel_hash_finish(hash, hash_len);
 
     err = cc3xx_lowlevel_ecdsa_verify(data->curve_id,
-                             data->Qx, data->Qx_len,
-                             data->Qy, data->Qy_len,
+                             (const uint32_t *)data->Qx, data->Qx_len,
+                             (const uint32_t *)data->Qy, data->Qy_len,
                              hash, hash_len,
-                             data->R, data->R_len,
-                             data->S, data->S_len);
+                             (const uint32_t *)data->R, data->R_len,
+                             (const uint32_t *)data->S, data->S_len);
 
     if (err == CC3XX_ERR_EC_CURVE_NOT_SUPPORTED) {
         rc = 0;
@@ -3327,6 +3327,76 @@ int cc3xx_test_ecdsa_verify(cc3xx_ecdsa_validate_test_data_t *data)
     rc = 0;
 cleanup:
     return rc;
+}
+
+#define X(name) [CC3XX_EC_CURVE_##name] = #name,
+static const char * const curve_names[_CURVE_ID_MAX] = {
+    X(SECP_192_R1)
+    X(SECP_224_R1)
+    X(SECP_256_R1)
+    X(SECP_384_R1)
+    X(SECP_521_R1)
+    X(SECP_192_K1)
+    X(SECP_224_K1)
+    X(SECP_256_K1)
+    X(BRAINPOOLP_192_R1)
+    X(BRAINPOOLP_224_R1)
+    X(BRAINPOOLP_256_R1)
+    X(BRAINPOOLP_320_R1)
+    X(BRAINPOOLP_384_R1)
+    X(BRAINPOOLP_512_R1)
+    X(FRP_256_V1)
+    X(25519)
+    X(448)
+    X(ED25519)
+    X(ED448)
+};
+#undef X
+
+#define X(name) [CC3XX_ERR_##name] = #name,
+static const char * const err_names[_ERROR_MAX] = {
+    X(SUCCESS)
+    X(FAULT_DETECTED)
+    X(BUFFER_OVERFLOW)
+    X(INVALID_LCS)
+    X(INVALID_DATA)
+    X(INVALID_STATE)
+    X(NOT_IMPLEMENTED)
+    X(ENGINE_IN_USE)
+    X(KEY_IMPORT_FAILED)
+    X(INVALID_REMAP_REGION)
+    X(BUS_ERROR)
+    X(RNG_INVALID_RNG)
+    X(RNG_TOO_MANY_ATTEMPTS)
+    X(VERIFY_FAILED)
+    X(INVALID_TAG)
+    X(DMA_OUTPUT_BUFFER_TOO_SMALL)
+    X(INVALID_INPUT_LENGTH)
+    X(GCM_VARIABLE_IV_NOT_IMPLEMENTED)
+    X(CHACHA_IV_SIZE_INCORRECT)
+    X(DFA_VIOLATION)
+    X(EC_CURVE_NOT_SUPPORTED)
+    X(EC_POINT_OUTSIDE_FIELD)
+    X(EC_POINT_IS_INFINITY)
+    X(ECDSA_SIGNATURE_INVALID)
+    X(ECDSA_INVALID_HASH)
+    X(ECDSA_INVALID_KEY)
+    X(DRBG_RESEED_REQUIRED)
+    X(DRBG_INVALID_ID)
+    X(DCU_LOCKED)
+    X(DCU_MASK_MISMATCH)
+};
+#undef X
+
+static int curve_id_to_name(cc3xx_ec_curve_id_t curve_id, const char **curve_name)
+{
+    if (curve_id >= _CURVE_ID_MAX) {
+        *curve_name = NULL;
+        return 1;
+    }
+
+    *curve_name = curve_names[curve_id];
+    return 0;
 }
 
 int cc3xx_test_sign_verify(cc3xx_ecdsa_validate_test_data_t *data)
@@ -3344,88 +3414,30 @@ int cc3xx_test_sign_verify(cc3xx_ecdsa_validate_test_data_t *data)
     size_t sig_r_size;
     uint32_t sig_s[68];
     size_t sig_s_size;
-    char *hash_name;
-    char *curve_name;
+    const char *hash_name = NULL;
+    const char *curve_name = NULL;
     int rc;
 
     switch(data->hash_alg) {
-        case CC3XX_HASH_ALG_SHA1:
-            hash_len = SHA1_OUTPUT_SIZE;
-            hash_name = "SHA1";
-            break;
-        case CC3XX_HASH_ALG_SHA224:
-            hash_len = SHA224_OUTPUT_SIZE;
-            hash_name = "SHA224";
-            break;
-        case CC3XX_HASH_ALG_SHA256:
-            hash_len = SHA256_OUTPUT_SIZE;
-            hash_name = "SHA256";
-            break;
-        default:
-            return 1;
+    case CC3XX_HASH_ALG_SHA1:
+        hash_len = SHA1_OUTPUT_SIZE;
+        hash_name = "SHA1";
+        break;
+    case CC3XX_HASH_ALG_SHA224:
+        hash_len = SHA224_OUTPUT_SIZE;
+        hash_name = "SHA224";
+        break;
+    case CC3XX_HASH_ALG_SHA256:
+        hash_len = SHA256_OUTPUT_SIZE;
+        hash_name = "SHA256";
+        break;
+    default:
+        return 1;
     };
 
-    switch(data->curve_id) {
-    case CC3XX_EC_CURVE_SECP_192_R1:
-        curve_name = "SECP_192_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_224_R1:
-        curve_name = "SECP_224_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_256_R1:
-        curve_name = "SECP_256_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_384_R1:
-        curve_name = "SECP_384_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_521_R1:
-        curve_name = "SECP_521_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_192_K1:
-        curve_name = "SECP_192_K1";
-        break;
-    case CC3XX_EC_CURVE_SECP_224_K1:
-        curve_name = "SECP_224_K1";
-        break;
-    case CC3XX_EC_CURVE_SECP_256_K1:
-        curve_name = "SECP_256_K1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_192_R1:
-        curve_name = "BRAINPOOLP_192_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_224_R1:
-        curve_name = "BRAINPOOLP_224_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_256_R1:
-        curve_name = "BRAINPOOLP_256_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_320_R1:
-        curve_name = "BRAINPOOLP_320_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_384_R1:
-        curve_name = "BRAINPOOLP_384_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_512_R1:
-        curve_name = "BRAINPOOLP_512_R1";
-        break;
-    case CC3XX_EC_CURVE_FRP_256_V1:
-        curve_name = "FRP_256_V1";
-        break;
-    case CC3XX_EC_CURVE_25519:
-        curve_name = "25519";
-        break;
-    case CC3XX_EC_CURVE_448:
-        curve_name = "448";
-        break;
-    case CC3XX_EC_CURVE_ED25519:
-        curve_name = "ED25519";
-        break;
-    case CC3XX_EC_CURVE_ED448:
-        curve_name = "ED448";
-        break;
-        default:
-            return 1;
-    };
+    if (curve_id_to_name(data->curve_id, &curve_name)) {
+        return 1;
+    }
 
     err = cc3xx_lowlevel_hash_init(data->hash_alg);
     if (err == CC3XX_ERR_NOT_IMPLEMENTED) {
@@ -3481,7 +3493,6 @@ int cc3xx_test_sign_verify(cc3xx_ecdsa_validate_test_data_t *data)
 #endif
                                             cyccnt_end_2 - cyccnt_start_2);
 
-
     cc3xx_test_assert(err == CC3XX_ERR_SUCCESS);
 
     rc = 0;
@@ -3489,7 +3500,6 @@ int cc3xx_test_sign_verify(cc3xx_ecdsa_validate_test_data_t *data)
 cleanup:
     return rc;
 }
-
 
 int cc3xx_test_sign_timing(cc3xx_ecdsa_validate_test_data_t *data)
 {
@@ -3502,89 +3512,30 @@ int cc3xx_test_sign_timing(cc3xx_ecdsa_validate_test_data_t *data)
     size_t sig_r_size;
     uint32_t sig_s[68];
     size_t sig_s_size;
-    char *hash_name;
-    char *curve_name;
+    const char *hash_name = NULL;
+    const char *curve_name = NULL;
     int rc;
 
     switch(data->hash_alg) {
-        case CC3XX_HASH_ALG_SHA1:
-            hash_len = SHA1_OUTPUT_SIZE;
-            hash_name = "SHA1";
-            break;
-        case CC3XX_HASH_ALG_SHA224:
-            hash_len = SHA224_OUTPUT_SIZE;
-            hash_name = "SHA224";
-            break;
-        case CC3XX_HASH_ALG_SHA256:
-            hash_len = SHA256_OUTPUT_SIZE;
-            hash_name = "SHA256";
-            break;
-        default:
-            return 1;
+    case CC3XX_HASH_ALG_SHA1:
+        hash_len = SHA1_OUTPUT_SIZE;
+        hash_name = "SHA1";
+        break;
+    case CC3XX_HASH_ALG_SHA224:
+        hash_len = SHA224_OUTPUT_SIZE;
+        hash_name = "SHA224";
+        break;
+    case CC3XX_HASH_ALG_SHA256:
+        hash_len = SHA256_OUTPUT_SIZE;
+        hash_name = "SHA256";
+        break;
+    default:
+        return 1;
     };
 
-    switch(data->curve_id) {
-    case CC3XX_EC_CURVE_SECP_192_R1:
-        curve_name = "SECP_192_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_224_R1:
-        curve_name = "SECP_224_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_256_R1:
-        curve_name = "SECP_256_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_384_R1:
-        curve_name = "SECP_384_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_521_R1:
-        curve_name = "SECP_521_R1";
-        break;
-    case CC3XX_EC_CURVE_SECP_192_K1:
-        curve_name = "SECP_192_K1";
-        break;
-    case CC3XX_EC_CURVE_SECP_224_K1:
-        curve_name = "SECP_224_K1";
-        break;
-    case CC3XX_EC_CURVE_SECP_256_K1:
-        curve_name = "SECP_256_K1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_192_R1:
-        curve_name = "BRAINPOOLP_192_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_224_R1:
-        curve_name = "BRAINPOOLP_224_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_256_R1:
-        curve_name = "BRAINPOOLP_256_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_320_R1:
-        curve_name = "BRAINPOOLP_320_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_384_R1:
-        curve_name = "BRAINPOOLP_384_R1";
-        break;
-    case CC3XX_EC_CURVE_BRAINPOOLP_512_R1:
-        curve_name = "BRAINPOOLP_512_R1";
-        break;
-    case CC3XX_EC_CURVE_FRP_256_V1:
-        curve_name = "FRP_256_V1";
-        break;
-    case CC3XX_EC_CURVE_25519:
-        curve_name = "25519";
-        break;
-    case CC3XX_EC_CURVE_448:
-        curve_name = "448";
-        break;
-    case CC3XX_EC_CURVE_ED25519:
-        curve_name = "ED25519";
-        break;
-    case CC3XX_EC_CURVE_ED448:
-        curve_name = "ED448";
-        break;
-        default:
-            return 1;
-    };
-
+    if (curve_id_to_name(data->curve_id, &curve_name)) {
+        return 1;
+    }
 
     err = cc3xx_lowlevel_hash_init(data->hash_alg);
     if (err == CC3XX_ERR_NOT_IMPLEMENTED) {
@@ -3626,6 +3577,136 @@ cleanup:
     return rc;
 }
 
+static void swap_endianess(uint8_t *p, size_t len)
+{
+   int val;
+
+   for (int i = 0; i < len/2; i++) {
+      val = p[i];
+      p[i] = p[len - 1 - i];
+      p[len - 1 - i] = val;
+   }
+}
+
+int cc3xx_test_ecdsa_getpub(void)
+{
+    const cc3xx_ec_curve_id_t curve_id[] = {
+        CC3XX_EC_CURVE_SECP_224_R1,
+        CC3XX_EC_CURVE_SECP_256_R1,
+        CC3XX_EC_CURVE_SECP_384_R1,
+        //CC3XX_EC_CURVE_SECP_521_R1
+    };
+
+    uint32_t priv_key[CC3XX_EC_MAX_POINT_SIZE / sizeof(uint32_t)];
+    uint32_t pub_x[CC3XX_EC_MAX_POINT_SIZE / sizeof(uint32_t)];
+    uint32_t pub_y[CC3XX_EC_MAX_POINT_SIZE / sizeof(uint32_t)];
+    size_t pub_x_len, pub_y_len;
+    const char *curve_name = NULL;
+    int rc;
+    int observed_mismatches = 0;
+
+    for (size_t i = 0; i < ARRAY_SIZE(curve_id); i++) {
+
+        if (curve_id_to_name(curve_id[i], &curve_name)) {
+            return 1;
+        }
+
+        const cc3xx_ec_curve_data_t *curve_data = cc3xx_lowlevel_ec_get_curve_data(curve_id[i]);
+        if (curve_data == NULL) {
+            continue;
+        }
+
+        /* We test 4 cases around the edges of the valid private key range */
+        for (size_t j = 0; j < 4; j++) {
+            switch (j) {
+            case 0:
+                /* Test all_zeros as private key, which is invalid */
+                memset(priv_key, 0, sizeof(priv_key));
+                break;
+            case 1:
+                /* Test all_zeros plus one, which is valid */
+                memset(priv_key, 0, sizeof(priv_key));
+                priv_key[0] += 1;
+                break;
+            case 2:
+                /* Test the order minus one, which is valid */
+                memcpy(priv_key, curve_data->order, sizeof(priv_key));
+                /* This assumes there is no carry when decrementing the order,
+                 * which is the case for the curves tested above
+                 */
+                priv_key[0] -= 1;
+                break;
+            case 3:
+                /* Test the order, which is invalid */
+                memcpy(priv_key, curve_data->order, sizeof(priv_key));
+                break;
+            }
+
+            /* We use the register_size for the private key size as it would match closely the
+             * required size in bytes for the private key which is in the range (0, n), apart
+             * for P-521 for which the register size is 2 bytes greater than required, but this
+             * is not a problem, just a slight waste of space
+             */
+            const size_t priv_size_in_bytes = curve_data->register_size;
+
+            /* The APIs expect the inputs/outputs in big-endian */
+            swap_endianess((uint8_t *)priv_key, priv_size_in_bytes);
+
+            /* Print the private key being tested */
+            printf("%s, priv: 0x", curve_name);
+            for (int k = 0; k < priv_size_in_bytes; k++) {
+                printf("%02x", ((uint8_t *)priv_key)[k]);
+            }
+            printf("\r\n");
+
+            /* Exercise the API */
+            cc3xx_err_t err = cc3xx_lowlevel_ecdsa_getpub(
+                            curve_id[i], priv_key, priv_size_in_bytes,
+                            pub_x, sizeof(pub_x), &pub_x_len, pub_y, sizeof(pub_y), &pub_y_len);
+            switch (j) {
+            case 0:
+            case 3:
+                if (err != CC3XX_ERR_ECDSA_INVALID_KEY) {
+                    printf("%s case %d expected ECDSA_INVALID_KEY, returned %s\r\n",
+                                curve_name, j, err < _ERROR_MAX ? err_names[err] : NULL);
+                    observed_mismatches++;
+                }
+                break;
+            case 1:
+            case 2:
+                if (err != CC3XX_ERR_SUCCESS) {
+                    printf("%s case %d expected SUCCESS, returned %s\r\n",
+                                curve_name, j, err < _ERROR_MAX ? err_names[err] : NULL);
+                    observed_mismatches++;
+                };
+                break;
+            }
+
+            if (err == CC3XX_ERR_SUCCESS) {
+                printf("%s pub.x: 0x", curve_name);
+                for (int k = 0; k < pub_x_len; k++) {
+                    printf("%02x", ((uint8_t *)pub_x)[k]);
+                }
+                printf("\r\n");
+
+                printf("%s pub.y: 0x", curve_name);
+                for (int k = 0; k < pub_y_len; k++) {
+                    printf("%02x", ((uint8_t *)pub_y)[k]);
+                }
+                printf("\r\n");
+            }
+        }
+        printf("%s getpub test done\r\n", curve_name);
+    }
+
+    cc3xx_test_assert(observed_mismatches == 0);
+
+    rc = 0;
+
+cleanup:
+    return rc;
+}
+
 static void ecdsa_tests_run(struct test_result_t *ret)
 {
     for (int idx = 0; idx < sizeof(python_interop_test_data) / sizeof(python_interop_test_data[0]); idx++) {
@@ -3644,15 +3725,20 @@ static void ecdsa_tests_run(struct test_result_t *ret)
     for (int idx = 0; idx < sizeof(cavp_validate_test_data) / sizeof(cavp_validate_test_data[0]); idx++) {
 #if defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE)
         TEST_ASSERT(cc3xx_test_ecdsa_verify(&cavp_validate_test_data[idx]) == 0,
-                    "");
-#endif /* defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) */
+                    "TEST_ECDSA_VERIFY failed");
+#endif /* CC3XX_CONFIG_ECDSA_VERIFY_ENABLE */
 #if defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) && defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE)
         TEST_ASSERT(cc3xx_test_sign_verify(&cavp_validate_test_data[idx]) == 0,
-                    "");
+                    "TEST_SIGN_VERIFY failed");
         /* TEST_ASSERT(cc3xx_test_sign_timing(&cavp_validate_test_data[idx]) == 0, */
         /*             ""); */
-#endif
+#endif /* CC3XX_CONFIG_ECDSA_SIGN_ENABLE && CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE */
     }
+
+#if defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE)
+    TEST_ASSERT(cc3xx_test_ecdsa_getpub() == 0,
+                "TEST_ECDSA_GETPUB failed");
+#endif /* CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE */
 
     ret->val = TEST_PASSED;
     return;

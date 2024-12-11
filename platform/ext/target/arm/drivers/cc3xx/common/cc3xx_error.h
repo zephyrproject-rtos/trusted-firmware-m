@@ -46,7 +46,8 @@ enum cc3xx_error {
     CC3XX_ERR_DRBG_INVALID_ID,
     CC3XX_ERR_DCU_LOCKED,
     CC3XX_ERR_DCU_MASK_MISMATCH,
-    CC3XX_ERR_MAX_VALUE = UINT32_MAX
+    _ERROR_MAX,
+    _ERROR_SIZE_PAD = UINT32_MAX,
 };
 
 #ifdef __cplusplus
