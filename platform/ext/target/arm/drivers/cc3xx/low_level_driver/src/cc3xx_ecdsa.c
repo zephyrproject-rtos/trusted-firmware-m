@@ -20,6 +20,40 @@
 
 #include "fatal_error.h"
 
+#if defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) || defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE)
+/**
+ * @brief Function to load and validate the value of the private key based
+ *        on the order of the curve. It uses the PKA for range comparisons based
+ *        on the curve parameters loaded after cc3xx_lowlevel_ec_init()
+ *
+ * @param[in] private_key_reg  Allocated PKA register to hold the private key material
+ * @param[in] private_key      Buffer containing the private key bytes
+ * @param[in] private_key_len  Size in bytes of the private key
+ *
+ * @return cc3xx_err_t \a CC3XX_ERR_SUCCESS in case the key is in the valid range and loaded,
+ *                     \a CC3XX_ERR_ECDSA_INVALID_KEY in case the key is not in the valid range
+ */
+static cc3xx_err_t load_validate_private_key(
+    cc3xx_pka_reg_id_t private_key_reg,
+    const uint32_t *private_key,
+    size_t private_key_len)
+{
+    cc3xx_lowlevel_pka_write_reg_swap_endian(private_key_reg, private_key, private_key_len);
+    /* Check that d is less than N */
+    if (!cc3xx_lowlevel_pka_less_than(private_key_reg, CC3XX_PKA_REG_N)) {
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        return CC3XX_ERR_ECDSA_INVALID_KEY;
+    }
+    /* Check that d is not 0 */
+    if (cc3xx_lowlevel_pka_are_equal_si(private_key_reg, 0)) {
+        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
+        return CC3XX_ERR_ECDSA_INVALID_KEY;
+    }
+
+    return CC3XX_ERR_SUCCESS;
+}
+#endif /* CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE || CC3XX_CONFIG_ECDSA_SIGN_ENABLE */
+
 #ifdef CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE
 cc3xx_err_t cc3xx_lowlevel_ecdsa_genkey(cc3xx_ec_curve_id_t curve_id,
                                         uint32_t *private_key,
@@ -81,7 +115,11 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
         goto out;
     }
 
-    if (private_key_len > curve.modulus_size) {
+    /* This only checks that the private key fits in the allocated register size on PKA engine.
+     * The validation of the private key happens in load_validate_private_key using the PKA
+     * engine itself
+     */
+    if (private_key_len > cc3xx_lowlevel_pka_get_register_size()) {
         FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
         err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
@@ -102,7 +140,12 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
     public_key_point = cc3xx_lowlevel_ec_allocate_point();
     private_key_reg = cc3xx_lowlevel_pka_allocate_reg();
 
-    cc3xx_lowlevel_pka_write_reg_swap_endian(private_key_reg, private_key, private_key_len);
+    /* Load and validate the private key to be in range for the curve */
+    if ((err = load_validate_private_key(
+                        private_key_reg, private_key, private_key_len)) != CC3XX_ERR_SUCCESS) {
+        /* FATAL_ERR macros are in the load_validate_private_key function already */
+        goto out;
+    }
 
     err = cc3xx_lowlevel_ec_multiply_point_by_scalar(&curve, &curve.generator, private_key_reg,
                                            &public_key_point);
@@ -313,7 +356,11 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
         goto out;
     }
 
-    if (private_key_len > curve.modulus_size) {
+    /* This only checks that the private key fits in the allocated register size on PKA engine.
+     * The validation of the private key happens in load_validate_private_key using the PKA
+     * engine itself
+     */
+    if (private_key_len > cc3xx_lowlevel_pka_get_register_size()) {
         FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
         err = CC3XX_ERR_ECDSA_INVALID_KEY;
         goto out;
@@ -331,7 +378,6 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
         goto out;
     }
 
-
     /* Now that PKA is initialized, allocate the registers / points we'll use */
     sig_r_reg = cc3xx_lowlevel_pka_allocate_reg();
     sig_s_reg = cc3xx_lowlevel_pka_allocate_reg();
@@ -342,17 +388,10 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
 
     temp_point = cc3xx_lowlevel_ec_allocate_point();
 
-    cc3xx_lowlevel_pka_write_reg_swap_endian(private_key_reg, private_key, private_key_len);
-    /* Check that d is less than N */
-    if (!cc3xx_lowlevel_pka_less_than(private_key_reg, CC3XX_PKA_REG_N)) {
-        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
-        err = CC3XX_ERR_ECDSA_INVALID_KEY;
-        goto out;
-    }
-    /* Check that d is not 0 */
-    if (cc3xx_lowlevel_pka_are_equal_si(private_key_reg, 0)) {
-        FATAL_ERR(CC3XX_ERR_ECDSA_INVALID_KEY);
-        err = CC3XX_ERR_ECDSA_INVALID_KEY;
+    /* Load and validate the private key to be in range for the curve */
+    if ((err = load_validate_private_key(
+                        private_key_reg, private_key, private_key_len)) != CC3XX_ERR_SUCCESS) {
+        /* FATAL_ERR macros are in the load_validate_private_key function already */
         goto out;
     }
 
