@@ -229,6 +229,22 @@ static void update_caller_outvec_len(struct connection_t *handle)
     }
 }
 
+static inline psa_status_t psa_reply_error_connection(
+    struct connection_t *handle,
+    psa_status_t status,
+    bool *del_conn)
+{
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+    *del_conn = true;
+#else
+    (void)del_conn;
+#endif
+
+    handle->status = TFM_HANDLE_STATUS_TO_FREE;
+
+    return status;
+}
+
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {
@@ -264,11 +280,10 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            ret = PSA_ERROR_CONNECTION_REFUSED;
-            handle->status = TFM_HANDLE_STATUS_TO_FREE;
+            ret = psa_reply_error_connection(handle, status, &delete_connection);
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
-            ret = PSA_ERROR_CONNECTION_BUSY;
+            ret = psa_reply_error_connection(handle, status, &delete_connection);
         } else {
             tfm_core_panic();
         }
