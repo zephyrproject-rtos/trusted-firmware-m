@@ -137,6 +137,11 @@ static inline uint32_t pad_to_pka_word_size(uint32_t byte_size)
     return (((byte_size + PKA_WORD_SIZE - 1) / PKA_WORD_SIZE) * PKA_WORD_SIZE);
 }
 
+uint32_t cc3xx_lowlevel_pka_get_register_size(void)
+{
+    return pka_state.reg_size;
+}
+
 void cc3xx_lowlevel_pka_unmap_physical_registers(void)
 {
     uint32_t idx;
@@ -152,7 +157,6 @@ void cc3xx_lowlevel_pka_unmap_physical_registers(void)
             virt_reg_phys_reg[virt_reg] = 0;
             virt_reg_is_mapped[virt_reg] = false;
         }
-
     }
 
     memset(phys_reg_mapping_list, 0, sizeof(phys_reg_mapping_list));

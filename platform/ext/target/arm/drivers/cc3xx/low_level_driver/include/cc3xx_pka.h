@@ -188,6 +188,14 @@ void cc3xx_lowlevel_pka_set_state(const struct cc3xx_pka_state_t *state,
                                   const uint32_t **load_reg_ptr_list,
                                   const size_t *load_reg_size_list);
 /**
+ * @brief Getter function to return the value of the register size currently
+ *        configured on the PKA engine
+ *
+ * @return uint32_t Register size in bytes currently configured on the PKA engine
+ */
+uint32_t cc3xx_lowlevel_pka_get_register_size(void);
+
+/**
  * @brief                       Uninitialize the PKA engine.
  */
 void cc3xx_lowlevel_pka_uninit(void);
