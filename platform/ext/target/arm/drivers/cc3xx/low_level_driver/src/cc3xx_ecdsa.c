@@ -141,8 +141,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_getpub(cc3xx_ec_curve_id_t curve_id,
     private_key_reg = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Load and validate the private key to be in range for the curve */
-    if ((err = load_validate_private_key(
-                        private_key_reg, private_key, private_key_len)) != CC3XX_ERR_SUCCESS) {
+    err = load_validate_private_key(private_key_reg, private_key, private_key_len);
+    if (err != CC3XX_ERR_SUCCESS) {
         /* FATAL_ERR macros are in the load_validate_private_key function already */
         goto out;
     }
@@ -389,8 +389,8 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_sign(cc3xx_ec_curve_id_t curve_id,
     temp_point = cc3xx_lowlevel_ec_allocate_point();
 
     /* Load and validate the private key to be in range for the curve */
-    if ((err = load_validate_private_key(
-                        private_key_reg, private_key, private_key_len)) != CC3XX_ERR_SUCCESS) {
+    err = load_validate_private_key(private_key_reg, private_key, private_key_len);
+    if (err != CC3XX_ERR_SUCCESS) {
         /* FATAL_ERR macros are in the load_validate_private_key function already */
         goto out;
     }
