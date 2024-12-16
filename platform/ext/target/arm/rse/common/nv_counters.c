@@ -19,6 +19,7 @@
 
 #include "rse_nv_counter_mapping.h"
 #include "rse_otp_layout.h"
+#include "rse_permanently_disable_device.h"
 
 #include <limits.h>
 #include <string.h>
@@ -238,6 +239,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
                                                        : counter_size;
 
     if (val > counter_size * 8) {
+        rse_permanently_disable_device(RSE_PERMANENT_ERROR_SECURITY_COUNTER_EXCEEDED);
         return TFM_PLAT_ERR_SET_OTP_COUNTER_MAX_VALUE;
     }
 
@@ -272,6 +274,7 @@ static enum tfm_plat_err_t set_otp_counter(enum tfm_otp_element_id_t id,
                                                        : counter_size;
 
     if (val > (counter_size / sizeof(uint32_t))) {
+        rse_permanently_disable_device(RSE_PERMANENT_ERROR_SECURITY_COUNTER_EXCEEDED);
         return TFM_PLAT_ERR_SET_OTP_COUNTER_MAX_VALUE;
     }
 
