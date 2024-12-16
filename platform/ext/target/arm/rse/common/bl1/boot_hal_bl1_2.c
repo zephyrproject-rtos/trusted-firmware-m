@@ -1,6 +1,8 @@
 /*
- * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  */
 
 #include "boot_hal.h"
@@ -200,9 +202,12 @@ int32_t boot_platform_post_init(void)
     }
 
 #if RSE_AMOUNT > 1
-    rc = rse_handshake(vhuk_seed);
-    if (rc != 0) {
-        return rc;
+    /* Check the RSE config virtual key agreement policy */
+    if (rse_otp_policy_check(P_RSE_OTP_CM->config_flags, CM_POLICIES_VHUK_AGREEMENT_REQUIRED)) {
+        rc = rse_handshake(vhuk_seed);
+        if (rc != 0) {
+            return rc;
+        }
     }
 #endif /* RSE_AMOUNT > 1 */
 

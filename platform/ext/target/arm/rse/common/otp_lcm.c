@@ -776,9 +776,18 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
 }
 
 #ifdef RSE_OTP_HAS_LFT_COUNTER
-static enum tfm_plat_err_t check_lft_counter(void) {
+static enum tfm_plat_err_t check_lft_counter(enum lcm_lcs_t lcs) {
     enum tfm_plat_err_t plat_err;
     uint32_t counter_value;
+
+    if (lcs == LCM_LCS_CM) {
+        return TFM_PLAT_ERR_SUCCESS;
+    }
+
+    /* If the LFT counter should not cause bricking of the device we just return */
+    if (!rse_otp_policy_check(P_RSE_OTP_CM->config_flags, CM_POLICIES_LFT_COUNTER_MAX_BRICKS_DEVICE)) {
+        return TFM_PLAT_ERR_SUCCESS;
+    }
 
     plat_err = get_bit_counter_counter_value((uint32_t *)P_RSE_OTP_HEADER->lft_counter,
                                              sizeof(P_RSE_OTP_HEADER->lft_counter),
@@ -848,7 +857,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
         return err;
     }
 
-    err = setup_rotpk_info();
+    err = setup_rotpk_info(lcs);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

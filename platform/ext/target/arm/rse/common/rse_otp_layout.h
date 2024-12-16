@@ -8,10 +8,10 @@
 #ifndef __RSE_OTP_LAYOUT_H__
 #define __RSE_OTP_LAYOUT_H__
 
+#include <stdint.h>
+
 #include "rse_otp_config.h"
 #include "lcm_otp_layout.h"
-
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -172,6 +172,35 @@ __PACKED_STRUCT rse_otp_soc_area_t {
 
     uint8_t reserved[RSE_OTP_SOC_RESERVED_SIZE];
 };
+
+/* Accessor macros for CM defined policies specified at
+ * the CM area (offset: 0x0C, size: 0x04). Each policy
+ * is specified through the corresponding bit value
+ */
+enum rse_otp_cm_policies_t {
+    CM_POLICIES_VHUK_AGREEMENT_REQUIRED                = 0x0,
+    CM_POLICIES_LFT_COUNTER_MAX_BRICKS_DEVICE          = 0x1,
+    CM_POLICIES_DM_PROVISIONING_RTL_KEY_BASED          = 0x2,
+    CM_POLICIES_DM_PROVISIONING_PUBLIC_KEY_ENDORSEMENT = 0x3,
+    CM_POLICIES_DM_PROVISIONING_NON_ENDORSED_FLOW      = 0x4, /*!< ownership taking in LCS == SE */
+    CM_POLICIES_DM_PROVISIONING_RESERVED               = 0x5,
+
+    _CM_POLICIES_MAX_VALUE = UINT32_MAX
+};
+
+/**
+ * @brief Given the CM policies flags, check the desired policy
+ *
+ * @param[in] policies_flags  A word containing the CM defined policies
+ * @param[in] policy_to_check Policy to be checked
+ *
+ * @return 1 The corresponding policy is true
+ * @return 0 The corresponding policy is false
+ */
+static inline uint8_t rse_otp_policy_check(uint32_t policies_flags, enum rse_otp_cm_policies_t policy_to_check)
+{
+    return (((policies_flags >> policy_to_check) & 0b1) == 1) ? 1 : 0;
+}
 
 #ifdef __cplusplus
 }
