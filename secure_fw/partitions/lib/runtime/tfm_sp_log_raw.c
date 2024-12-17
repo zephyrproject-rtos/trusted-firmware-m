@@ -108,7 +108,28 @@ int vprintf(const char *fmt, va_list ap)
 
     while (*fmt) {
         if (*fmt == '%') {
-            switch (*(++fmt)) {
+
+            /* Skip the % character */
+            fmt++;
+
+            /* special case for %02x and %02X which print bytes 0-filled */
+            if (*fmt == '0' && *(fmt + 1) == '2' &&
+                (*(fmt + 2) == 'x' || *(fmt + 2) == 'X')) {
+
+                uint32_t val = va_arg(ap, uint32_t);
+
+                count += _tfm_hex_num_output(&outputbuf, (val >> 4) & 0xF,
+                                (*(fmt + 2) == 'x') ? hex_digits_lo : hex_digits_up);
+                count += _tfm_hex_num_output(&outputbuf, val & 0xF,
+                                (*(fmt + 2) == 'x') ? hex_digits_lo : hex_digits_up);
+
+                /* Skip the three characters of the format specifier */
+                fmt += 3;
+                continue;
+            }
+
+            /* Single character specifiers: d, i, u, x, X, p, s, c, % */
+            switch (*fmt) {
             case 'd':
             case 'i':
                 count += _tfm_dec_num_output(&outputbuf,
