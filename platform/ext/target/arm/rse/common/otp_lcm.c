@@ -783,9 +783,9 @@ static enum tfm_plat_err_t check_lft_counter(void) {
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif
+#endif /* RSE_OTP_HAS_LFT_COUNTER */
 
-#ifdef RSE_OTP_HAS_LFT_COUNTER
+#ifdef RSE_OTP_HAS_KRTL_USAGE_COUNTER
 static enum tfm_plat_err_t check_krtl_counter(void) {
     enum tfm_plat_err_t plat_err;
     uint32_t counter_value;
@@ -801,7 +801,7 @@ static enum tfm_plat_err_t check_krtl_counter(void) {
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif
+#endif /* RSE_OTP_HAS_KRTL_USAGE_COUNTER */
 
 static enum tfm_plat_err_t check_device_status(void) {
     if (P_RSE_OTP_HEADER->device_status >> 16 != 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,9 @@
 #include "cc3xx_dev.h"
 
 #include "device_definition.h"
+#include "rse_otp_config.h"
+#include "tfm_plat_nv_counters.h"
+#include "fatal_error.h"
 
 cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
                     cc3xx_aes_keysize_t key_size, bool is_tun1)
@@ -25,6 +28,15 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         hw_key_buf_ptr = P_CC3XX->aes.aes_key_1;
     }
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
+
+#ifdef RSE_OTP_HAS_KRTL_USAGE_COUNTER
+    if (key_id == (cc3xx_aes_key_id_t)KMU_HW_SLOT_KRTL) {
+        const enum tfm_plat_err_t plat_err = tfm_plat_increment_nv_counter(PLAT_NV_COUNTER_KRTL_USAGE);
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            return (cc3xx_err_t)plat_err;
+        }
+    }
+#endif /* RSE_OTP_HAS_KRTL_USAGE_COUNTER */
 
     /* Check if the HOST_FATAL_ERROR mode is enabled */
     if (P_CC3XX->ao.host_ao_lock_bits & 0x1U) {
@@ -78,15 +90,18 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         /* It's an error to use an unlocked slot */
         kmu_err = kmu_get_key_export_config_locked(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_SLOT_LOCKED) {
+            FATAL_ERR(CC3XX_ERR_KEY_IMPORT_FAILED);
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
         kmu_err = kmu_get_key_locked(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_SLOT_LOCKED) {
+            FATAL_ERR(CC3XX_ERR_KEY_IMPORT_FAILED);
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
 
         kmu_err = kmu_export_key(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_NONE) {
+            FATAL_ERR(CC3XX_ERR_KEY_IMPORT_FAILED);
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
     }
