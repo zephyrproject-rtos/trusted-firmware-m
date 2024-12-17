@@ -13,6 +13,8 @@ if(NOT TFM_PARTITION_CRYPTO)
     return()
 endif()
 
+message(STATUS "Enabling MUSCA_S1 Tests in the Secure tests")
+
 target_sources(tfm_test_suite_extra_s
     PRIVATE
         ./secure_test.c
