@@ -166,6 +166,7 @@ target_include_directories(platform_s
         ./runtime/cc3xx
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/low_level_driver/include
         ${PLATFORM_DIR}/ext/target/arm/drivers/cc3xx/common
+        soft_crc
 )
 
 target_sources(platform_s
@@ -213,6 +214,9 @@ target_sources(platform_s
         ./platform_fatal_error.c
         ./cc3xx/cc3xx_aes_external_key_loader.c
         ./rse_attack_tracking_counter.c
+        runtime_shared_data.c
+        soft_crc/soft_crc.c
+
 )
 
 target_link_libraries(platform_s
@@ -407,6 +411,8 @@ target_sources(platform_bl1_1
         $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
         $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
         ./rse_attack_tracking_counter.c
+        runtime_shared_data.c
+        soft_crc/soft_crc.c
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -433,6 +439,7 @@ target_include_directories(platform_bl1_1_interface
         ./bringup_helpers
         ./cc3xx
         ./bl1/cc3xx
+        soft_crc
 )
 
 target_compile_definitions(platform_bl1_1_interface
