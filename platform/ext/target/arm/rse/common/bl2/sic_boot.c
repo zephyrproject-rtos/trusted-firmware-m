@@ -156,28 +156,12 @@ enum sic_boot_err_t sic_boot_post_load(uint32_t image_id, uint32_t image_load_of
     uint32_t atu_region;
     uuid_t image_uuid;
     uint32_t *image_offset;
-
     int rc;
 
-#ifdef RSE_GPT_SUPPORT
-    bool metadata_found[2];
-    bool private_metadata_found[1];
-    uint64_t metadata_offsets[2];
-    uint64_t private_metadata_offsets[1];
-
-    rc = host_flash_atu_get_fip_and_metadata_offsets(fip_found, fip_offsets,
-                                                     metadata_found, metadata_offsets,
-                                                     private_metadata_found,
-                                                     private_metadata_offsets);
+    rc = host_flash_atu_get_fip_offsets(fip_found, fip_offsets);
     if (rc) {
         return SIC_BOOT_INVALID_REGION;
     }
-#else
-    fip_found[0] = true;
-    fip_offsets[0] = FLASH_FIP_A_OFFSET;
-    fip_found[1] = true;
-    fip_offsets[1] = FLASH_FIP_B_OFFSET;
-#endif /* RSE_GPT_SUPPORT */
 
     switch (image_id) {
     case RSE_BL2_IMAGE_NS:

@@ -19,32 +19,17 @@ extern "C" {
 #endif
 
 /**
- * \brief                               Gets the offsets of the FIPs and
- *                                      metadata in host flash. These are parsed
- *                                      from the GPT partition list.
+ * \brief                  Gets the offsets of the FIPs in host flash. If GPT is
+ *                         supported these are parsed from the GPT partition
+ *                         list, else the hardcoded values are returned.
  *
- * \param[out] fip_found                Which fips were found. If fip_found[x]
- *                                      is 0, then the value of fip_offsets[x]
- *                                      is undefined.
- * \param[out] fip_offsets              The FIP offsets.
- * \param[out] metadata_found           Which metadata were found. If
- *                                      metadata_found[x] is 0, then the value
- *                                      of metadata_offsets[x] is undefined.
- * \param[out] metadata_offsets         The metadata offsets.
- * \param[out] private_metadata_found   Which private metadata were found. If
- *                                      private_metadata_found[x] is 0, then the
-                                        value of private_metadata_offsets[x] is
- *                                      undefined.
- * \param[out] private_metadata_offsets The private metadata offsets.
+ * \param[out] fip_found   Which fips were found. If fip_found[x] is 0, then the
+ *                         value of fip_offsets[x] is undefined.
+ * \param[out] fip_offsets The FIP offsets.
  *
- * \return                              0 on success, non-zero on failure.
+ * \return                 0 on success, non-zero on failure.
  */
-int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
-                                                uint64_t fip_offsets[2],
-                                                bool metadata_found[2],
-                                                uint64_t metadata_offsets[2],
-                                                bool private_metadata_found[1],
-                                                uint64_t private_metadata_offsets[1]);
+int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2]);
 
 /**
  * \brief                             Set up the input ATU slots so that an

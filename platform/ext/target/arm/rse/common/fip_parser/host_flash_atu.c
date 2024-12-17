@@ -183,7 +183,8 @@ static int host_flash_atu_get_gpt_header(gpt_header_t *header)
     return 0;
 }
 
-int host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
+static int
+    host_flash_atu_get_fip_and_metadata_offsets(bool fip_found[2],
                                                 uint64_t fip_offsets[2],
                                                 bool metadata_found[2],
                                                 uint64_t metadata_offsets[2],
@@ -293,13 +294,12 @@ static bool plat_check_if_prev_boot_failed(void)
 }
 #endif /* RSE_GPT_SUPPORT */
 
-static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
+
+int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
 {
-    int rc;
-    bool fip_found[2];
-    uint64_t fip_offsets[2];
-    bool fip_mapped[2] = {false};
 #ifdef RSE_GPT_SUPPORT
+    int rc;
+    uuid_t image_uuid;
     bool metadata_found[2];
     uint64_t metadata_offsets[2];
     bool private_metadata_found[1];
@@ -369,6 +369,21 @@ static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
     fip_found[1] = true;
     fip_offsets[1] = FLASH_FIP_B_OFFSET;
 #endif /* RSE_GPT_SUPPORT */
+
+    return 0;
+}
+
+static int setup_image_input_slots(uuid_t image_uuid, uint32_t offsets[2])
+{
+    int rc;
+    bool fip_found[2];
+    uint64_t fip_offsets[2];
+    bool fip_mapped[2] = {false};
+
+    rc = host_flash_atu_get_fip_offsets(fip_found, fip_offsets);
+    if (rc) {
+        return rc;
+    }
 
     rc = host_flash_atu_setup_image_input_slots_from_fip(fip_offsets[0],
                                           RSE_ATU_REGION_INPUT_IMAGE_SLOT_0,
