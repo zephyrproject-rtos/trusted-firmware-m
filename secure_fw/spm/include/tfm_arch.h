@@ -105,9 +105,27 @@ struct tfm_additional_context_t {
     uint32_t    callee[8];     /* R4-R11. NOT ORDERED!! */
 };
 
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+struct tfm_fpu_context_t {
+    uint32_t    s16_s31[16];   /* S16-S31 */
+};
+#define TFM_FPU_CONTEXT             struct tfm_fpu_context_t
+#endif /* defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__) */
+#endif /* CONFIG_TFM_FLOAT_ABI */
+
+#ifdef TFM_FPU_CONTEXT
+#define TFM_FPU_CONTEXT_SIZE        sizeof(TFM_FPU_CONTEXT)
+#else
+#define TFM_FPU_CONTEXT_SIZE        0
+#endif
+
 /* Full thread context */
 struct full_context_t {
     struct tfm_additional_context_t addi_ctx;
+#ifdef TFM_FPU_CONTEXT
+    TFM_FPU_CONTEXT                 fpu_ctx;
+#endif
     struct tfm_state_context_t      stat_ctx;
 };
 
@@ -136,6 +154,9 @@ struct context_ctrl_t {
 struct context_flih_ret_t {
     uint64_t stack_seal;                  /* Two words stack seal                              */
     struct tfm_additional_context_t addi_ctx;
+#ifdef TFM_FPU_CONTEXT
+    TFM_FPU_CONTEXT fpu_ctx;
+#endif
     uint32_t exc_return;                  /* exception return value on SVC_PREPARE_DEPRIV_FLIH */
     uint32_t dummy;                       /* dummy value for 8 bytes aligned                   */
     uint32_t psp;                         /* PSP when interrupt exception occurs               */

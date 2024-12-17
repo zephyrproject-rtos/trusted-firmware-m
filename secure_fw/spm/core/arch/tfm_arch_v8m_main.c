@@ -116,6 +116,9 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   cpsid   i                                   \n"
         "   isb                                         \n"
         "   mrs     r2, psp                             \n"
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+        "   vstmdb  r2!, {s16-s31}                      \n" /* Store s16-s31. */
+#endif
         "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
         "   itt     ne                                  \n" /* Skip saving callee */
         "   stmdbne r2!, {r4-r11}                       \n" /* Save callee */
@@ -136,6 +139,9 @@ __attribute__((naked)) void PendSV_Handler(void)
                                                              * integrity signature
                                                              */
         "   ldmiane r2!, {r4-r11}                       \n" /* Load callee */
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+        "   vldmia  r2!, {s16-s31}                      \n" /* Load s16-s31. */
+#endif
         "   ldr     r3, [r1]                            \n" /* Load sp_limit */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
@@ -171,6 +177,9 @@ __attribute__((naked)) void SVC_Handler(void)
                                                   */
     "BX      lr                              \n"
     "to_flih_func:                           \n"
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+    "VPUSH   {s16-s31}                       \n" /* Save callee FPU registers */
+#endif
     "ANDS    r3, lr, #"M2S(EXC_RETURN_DCRS)" \n" /* Check DCRS */
     "ITT     ne                              \n" /* Skip saving callee */
     "PUSHNE  {r4-r11}                        \n" /* Save callee */
@@ -201,6 +210,9 @@ __attribute__((naked)) void SVC_Handler(void)
                                                   * integrity signature
                                                   */
     "POPNE   {r4-r11}                        \n" /* Load callee */
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
+    "VPOP    {s16-s31}                       \n" /* Load callee FPU registers */
+#endif
     "ADD     sp, #16                         \n" /*
                                                   * "Unstack" unused orig_exc_return, dummy,
                                                   * PSP, PSPLIM pushed by the previous

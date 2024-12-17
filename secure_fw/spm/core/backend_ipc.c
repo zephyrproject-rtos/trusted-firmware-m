@@ -507,7 +507,8 @@ uint64_t ipc_schedule(uint32_t exc_return)
      */
     p_curr_ctx->sp = __get_PSP() -
         (is_default_stacking_rules_apply(exc_return) ?
-            sizeof(struct tfm_additional_context_t) : 0);
+            sizeof(struct tfm_additional_context_t) : 0) -
+            TFM_FPU_CONTEXT_SIZE;
 
     pth_next = thrd_next();
 
@@ -518,7 +519,7 @@ uint64_t ipc_schedule(uint32_t exc_return)
 
     if ((pth_next != NULL) && (p_part_curr != p_part_next)) {
         /* Check if there is enough room on stack to save more context */
-        if ((p_curr_ctx->sp_limit +
+        if ((p_curr_ctx->sp_limit + TFM_FPU_CONTEXT_SIZE +
                 sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
             tfm_core_panic();
         }
