@@ -130,7 +130,7 @@ void tfm_core_validate_boot_data(void)
 #ifdef BOOT_DATA_AVAILABLE
     struct tfm_boot_data *boot_data;
 
-    boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
+    boot_data = (struct tfm_boot_data *)SHARED_BOOT_MEASUREMENT_BASE;
 
     if (boot_data->header.tlv_magic == SHARED_DATA_TLV_INFO_MAGIC) {
         is_boot_data_valid = BOOT_DATA_VALID;
@@ -176,9 +176,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
 
 #ifdef BOOT_DATA_AVAILABLE
     /* Get the boundaries of TLV section */
-    boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
-    tlv_end = BOOT_TFM_SHARED_DATA_BASE + boot_data->header.tlv_tot_len;
-    offset  = BOOT_TFM_SHARED_DATA_BASE + SHARED_DATA_HEADER_SIZE;
+    boot_data = (struct tfm_boot_data *)SHARED_BOOT_MEASUREMENT_BASE;
+    tlv_end = SHARED_BOOT_MEASUREMENT_BASE + boot_data->header.tlv_tot_len;
+    offset  = SHARED_BOOT_MEASUREMENT_BASE + SHARED_DATA_HEADER_SIZE;
 #endif /* BOOT_DATA_AVAILABLE */
 
     /* Add header to output buffer as well */
