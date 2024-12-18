@@ -103,8 +103,15 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
-    /* Client ID range overlap check between NS agent partitions. */
+    /* Client ID range checks */
     if (IS_NS_AGENT(p_ptldinf)) {
+        /* Check that the base and limit are valid */
+        if ((p_ptldinf->client_id_base >= 0) ||
+            (p_ptldinf->client_id_limit >= 0) ||
+            (p_ptldinf->client_id_base > p_ptldinf->client_id_limit)) {
+            tfm_core_panic();
+        }
+        /* Check for overlaps between partitions */
         UNI_LIST_FOREACH(partition, head, next) {
             if (!IS_NS_AGENT(partition->p_ldinf)) {
                 continue;
