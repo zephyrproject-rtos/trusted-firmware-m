@@ -69,6 +69,13 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
     FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
              p_curr_sp->boundary, p_owner_sp->boundary);
     if (fih_not_eq(fih_bool, fih_int_encode(false))) {
+        /*
+         * FPU lazy stacking context preservation uses privilege and relative priorities
+         * recorded during original stacking. Thus it's important to flush FP context
+         * before boundary is changed for a new partition.
+         */
+        ARCH_FLUSH_FP_CONTEXT();
+
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_owner_sp->p_ldinf, p_owner_sp->boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
@@ -109,6 +116,13 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     FIH_CALL(tfm_hal_boundary_need_switch, fih_bool,
              p_owner_sp->boundary, p_prev_sp->boundary);
     if (fih_not_eq(fih_bool, fih_int_encode(false))) {
+        /*
+         * FPU lazy stacking context preservation uses privilege and relative priorities
+         * recorded during original stacking. Thus it's important to flush FP context
+         * before boundary is changed for a new partition.
+         */
+        ARCH_FLUSH_FP_CONTEXT();
+
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_prev_sp->p_ldinf, p_prev_sp->boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
