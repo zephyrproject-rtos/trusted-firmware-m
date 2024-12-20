@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-#include "ni_tower_util.h"
+#include "noc_s3_util.h"
 
 #include <stdbool.h>
 

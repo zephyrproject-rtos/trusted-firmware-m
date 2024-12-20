@@ -8,11 +8,10 @@
 #ifndef __NOC_S3_LIB_H__
 #define __NOC_S3_LIB_H__
 
-#include "ni_tower_rse_drv.h"
+#include "noc_s3_rse_drv.h"
 
+#include "array.h"
 #include <stdint.h>
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
 /*
  * Platform specific apu region initialization macro wrapper. This macros
@@ -37,15 +36,15 @@
  * by providing the base and end address of APU region and the associated
  * access permission for all four enitities.
  */
-#define INIT_APU_REGION_WITH_ALL_ID_FILTER(base, end, mcp_perm, scp_perm, \
+#define INIT_APU_REGION_WITH_ALL_ID_FILTER(base, end, scp_perm,           \
                                            rse_perm, dap_perm)            \
     {                                                                     \
         .base_addr = base,                                                \
         .end_addr = end,                                                  \
         .background = NOC_S3_FOREGROUND,                                  \
-        .permissions = { mcp_perm, scp_perm, rse_perm, dap_perm },        \
-        .entity_ids = { SYSCTRL_MCP_APU_ID, SYSCTRL_SCP_APU_ID,           \
-                        SYSCTRL_RSE_APU_ID, SYSCTRL_DAP_APU_ID },         \
+        .permissions = { scp_perm, rse_perm, dap_perm },                  \
+        .entity_ids = { SYSCTRL_SCP_APU_ID, SYSCTRL_RSE_APU_ID,           \
+                        SYSCTRL_DAP_APU_ID },                             \
         .id_valid = NOC_S3_ID_VALID_ALL,                                  \
         .region_enable = NOC_S3_REGION_ENABLE,                            \
         .lock = NOC_S3_LOCK                                               \
@@ -73,49 +72,40 @@
 enum sysctrl_xSNI_ids {
     /* Request from AP */
     SYSCTRL_APP_ASNI_ID = 0x0,
-    /* Request from LCP */
-    SYSCTRL_LCP_ASNI_ID,
-    /* Request from MCP ATU */
-    SYSCTRL_MCP_ASNI_ID,
     /* Request from RSE ATU */
-    SYSCTRL_RSE_MAIN_ASNI_ID,
-    /* Request from RSE and SCP targeting LCP address space */
-    SYSCTRL_RSE_SCP_ASNI_ID,
+    SYSCTRL_RSE_MAIN_ASNI_ID = 0x3,
+    /* Request from RSE and SCP targeting Cluster Utility address space */
+    SYSCTRL_RSE_SCP_ASNI_ID = 0x4,
     /* Request from SCP ATU */
-    SYSCTRL_SCP_ASNI_ID
+    SYSCTRL_SCP_ASNI_ID = 0x5,
 };
 
 /* Interface ID of xMNI components - requester interfaces */
 enum sysctrl_xMNI_ids {
     /* Targets AP address space */
     SYSCTRL_APP_AMNI_ID = 0x0,
-    /* Targets memory map shared between AP and MCP */
-    SYSCTRL_APP_MCP_AMNI_ID,
     /* Targets memory map shared between AP and SCP */
-    SYSCTRL_APP_SCP_AMNI_ID,
-    /* Targets LCP address space */
-    SYSCTRL_LCP_AMNI_ID,
-    /* Targets memory map shared between LCP and SCP */
-    SYSCTRL_LCP_SCP_AMNI_ID,
-    /* Targets Shared SRAM between RSE, SCP and MCP */
-    SYSCTRL_RSM_AMNI_ID,
-    /* Targets MCP address space */
-    SYSCTRL_RSE_MCP_AMNI_ID,
+    SYSCTRL_APP_SCP_AMNI_ID = 0x2,
+    /* Targets Cluster Utility address space */
+    SYSCTRL_CLUS_UTIL_AMNI_ID = 0x3,
+    /* Targets Shared SRAM between RSE and SCP */
+    SYSCTRL_RSM_AMNI_ID = 0x5,
+    /* Targets SI address space */
+    SYSCTRL_RSE_SI_AMNI_ID = 0x6,
     /* Targets SCP address space */
-    SYSCTRL_RSE_SCP_AMNI_ID,
+    SYSCTRL_RSE_SCP_AMNI_ID = 0x7,
     /* Targets CMN GPV registers */
-    SYSCTRL_CMN_PMNI_ID,
-    /* Targets Shared RAM between RSE/SCP/MCP */
-    SYSCTRL_RSM_PMNI_ID,
+    SYSCTRL_CMN_PMNI_ID = 0x8,
+    /* Targets Shared RAM between RSE and SCP */
+    SYSCTRL_RSM_PMNI_ID = 0x9,
     /* Targets SYSCTRL SMMU registers */
-    SYSCTRL_TCU_PMNI_ID,
+    SYSCTRL_TCU_PMNI_ID = 0xA,
     /* Targets the System Control NoC S3 registers (default target) */
     SYSCTRL_CONFIG_SPACE_ID = 0xF
 };
 
 /* APU IDs of the initiator for filter access */
 enum sysctrl_apu_filter_ids {
-    SYSCTRL_MCP_APU_ID = 0x3C,
     SYSCTRL_SCP_APU_ID = 0x3D,
     SYSCTRL_RSE_APU_ID = 0x3E,
     SYSCTRL_DAP_APU_ID = 0x3F,
@@ -150,11 +140,9 @@ enum periph_xMNI_ids {
 /**
  * \brief Programs System Control block NoC S3 PSAM and APU for AON domain
  *
- * \param[in] chip_id  Current Chip ID
- *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id);
+int32_t program_sysctrl_noc_s3_aon(void);
 
 /**
  * \brief Programs System Control block NoC S3 PSAM and APU for SYSTOP domain
@@ -176,6 +164,6 @@ int32_t program_periph_noc_s3(void);
  *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_periph_noc_s3_post_ap_bl1_load(void);
+int32_t program_periph_noc_s3_post_ap_bl2_load(void);
 
 #endif /* __NOC_S3_LIB_H__ */

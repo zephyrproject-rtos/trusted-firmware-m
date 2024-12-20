@@ -8,7 +8,7 @@
 #ifndef __NOC_S3_UTIL_H__
 #define __NOC_S3_UTIL_H__
 
-#include "ni_tower_drv.h"
+#include "noc_s3_drv.h"
 #include <stdint.h>
 
 /* Pretty print log for NoC S3 */

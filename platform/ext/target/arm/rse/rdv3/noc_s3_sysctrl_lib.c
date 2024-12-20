@@ -7,7 +7,7 @@
 #include "bootutil/bootutil_log.h"
 #include "host_device_definition.h"
 #include "host_base_address.h"
-#include "ni_tower_lib.h"
+#include "noc_s3_lib.h"
 
 #include <stddef.h>
 

@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-#include "ni_tower_discovery_drv.h"
-#include "ni_tower_discovery_reg.h"
+#include "noc_s3_discovery_drv.h"
+#include "noc_s3_discovery_reg.h"
 
 #include <stdbool.h>
 #include <stdlib.h>

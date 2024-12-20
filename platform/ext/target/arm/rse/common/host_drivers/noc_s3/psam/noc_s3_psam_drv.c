@@ -5,10 +5,10 @@
  *
  */
 
-#include "discovery/ni_tower_discovery_drv.h"
-#include "ni_tower_psam_drv.h"
-#include "ni_tower_psam_reg.h"
-#include "util/ni_tower_util.h"
+#include "discovery/noc_s3_discovery_drv.h"
+#include "noc_s3_psam_drv.h"
+#include "noc_s3_psam_reg.h"
+#include "util/noc_s3_util.h"
 
 #include <stddef.h>
 

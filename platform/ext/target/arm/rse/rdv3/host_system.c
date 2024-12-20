@@ -15,7 +15,7 @@
 #include "tfm_hal_device_header.h"
 #include "tfm_plat_otp.h"
 #ifdef RD_SYSCTRL_NOC_S3
-#include "ni_tower_lib.h"
+#include "noc_s3_lib.h"
 
 #define NOC_S3_SYSCTRL_SYSTOP_PARENT_TYPE      NOC_S3_VD
 #define NOC_S3_SYSCTRL_SYSTOP_PARENT_ID        (0)

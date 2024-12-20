@@ -81,8 +81,8 @@ target_sources(platform_bl2
         device/host_device_definition.c
         device/rse_expansion_device_definition.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
-        ni_tower_periph_lib.c
-        ni_tower_sysctrl_lib.c
+        noc_s3_periph_lib.c
+        noc_s3_sysctrl_lib.c
         $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_v3_x.c>
         $<$<EQUAL:${PLAT_MHU_VERSION},0>:${CMAKE_CURRENT_SOURCE_DIR}/../common/native_drivers/mhu_wrapper_v3_x.c>
 )

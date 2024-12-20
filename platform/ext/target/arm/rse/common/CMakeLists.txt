@@ -285,11 +285,11 @@ target_sources(platform_bl2
         device/source/device_definition.c
         $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/apu/ni_tower_apu_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/discovery/ni_tower_discovery_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/util/ni_tower_util.c>
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rse_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3/apu/noc_s3_apu_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3/discovery/noc_s3_discovery_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3/psam/noc_s3_psam_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3/util/noc_s3_util.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3/noc_s3_rse_drv.c>
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3/smmu_v3_drv.c>
         $<$<OR:$<BOOL:${PLATFORM_HOST_HAS_MCP}>,$<BOOL:${PLATFORM_HOST_HAS_SCP}>>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/mscp_drv/mscp_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c>
@@ -326,7 +326,7 @@ target_include_directories(platform_bl2
         device/config
         device/include
         device/source/armclang
-        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/noc_s3>
         $<$<OR:$<BOOL:${PLATFORM_HOST_HAS_MCP}>,$<BOOL:${PLATFORM_HOST_HAS_SCP}>>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/mscp_drv>
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3>
         native_drivers

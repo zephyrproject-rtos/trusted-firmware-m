@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-#include "ni_tower_rse_drv.h"
+#include "noc_s3_rse_drv.h"
 
 #include <stddef.h>
 

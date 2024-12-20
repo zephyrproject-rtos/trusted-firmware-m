@@ -16,7 +16,7 @@
 #include "host_base_address.h"
 #include "interrupts_bl2.h"
 #include "mhu_v3_x.h"
-#include "ni_tower_lib.h"
+#include "noc_s3_lib.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "rse_expansion_regs.h"

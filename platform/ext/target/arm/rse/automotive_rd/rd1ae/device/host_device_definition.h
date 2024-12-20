@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 #ifdef PLATFORM_HAS_NOC_S3
-#include "ni_tower_lib.h"
+#include "noc_s3_lib.h"
 extern struct noc_s3_dev SYSCTRL_NOC_S3_DEV;
 extern const struct noc_s3_dev PERIPH_NOC_S3_DEV;
 #endif /* PLATFORM_HAS_NOC_S3 */

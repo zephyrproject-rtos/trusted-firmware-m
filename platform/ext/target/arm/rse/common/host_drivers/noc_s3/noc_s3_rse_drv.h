@@ -11,10 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "ni_tower_drv.h"
-#include "apu/ni_tower_apu_drv.h"
-#include "discovery/ni_tower_discovery_drv.h"
-#include "psam/ni_tower_psam_drv.h"
+#include "noc_s3_drv.h"
+#include "apu/noc_s3_apu_drv.h"
+#include "discovery/noc_s3_discovery_drv.h"
+#include "psam/noc_s3_psam_drv.h"
 
 /**
  * \brief NoC S3 PSAM config structure
