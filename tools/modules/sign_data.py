@@ -44,6 +44,7 @@ def _sign_ecdsa(data : bytes,
                 key : str,
                 curve : ec.EllipticCurve = None,
                 hash_alg : hashes.HashAlgorithm = None,
+                dsr_output_file = None,
                 **kwargs : {},
                 ) -> bytes:
     with open(key, "rb") as f:
@@ -66,48 +67,47 @@ def _sign_ecdsa(data : bytes,
 
     digest = hashes.Hash(hash_alg())
     digest.update(data)
-    logger.info("Signing hash {}".format(digest.finalize().hex()))
+    data_hash = digest.finalize()
+    logger.info("Signing hash {}".format(data_hash.hex()))
 
-    asn1_sig = priv_key.sign(data, ec.ECDSA(hash_alg()))
+    if dsr_output_file:
+        dsr_output_file.write(data_hash)
+        exit(0)
+
+    asn1_sig = priv_key.sign(data_hash, ec.ECDSA(utils.Prehashed(hash_alg())))
 
     return _asn1_sig_to_raw(asn1_sig, priv_key.curve)
 
 def _sign_lms(data : bytes,
               key : str,
+              dsr_output_file = None,
               **kwargs : {},
               ) -> bytes:
+    if dsr_output_file:
+        dsr_output_file.write(data)
+        exit(0)
+
     priv_key = pyhsslms.HssLmsPrivateKey(key[:-4])
     logger.info("Signing with LMS key {}".format(key))
     return priv_key.sign(data)[4:]
-
-def _sign_aes_ccm(data : bytes,
-                  key : str,
-                  iv : bytes,
-                  **kwargs : {},
-                  ) -> bytes:
-    with open(key, "rb") as f:
-        key_data = f.read()
-
-    if not iv:
-        iv = secrets.token_bytes(12)
-
-    return AESCCM(key_data).encrypt(iv, plaintext, data)
 
 def sign_data(data : bytes,
               sign_key : str,
               sign_alg : str,
               sign_hash_alg : str = None,
+              signature : bytes = None,
               **kwargs,
               ) -> bytes:
-    assert(sign_key)
-    assert(sign_alg)
+    if not signature:
+        assert(sign_key)
+        assert(sign_alg)
 
-    sig = sign_algs[sign_alg](data = data,
-                              key = sign_key,
-                              hash_alg = sign_hash_alg,
-                              **kwargs)
+        signature = sign_algs[sign_alg](data = data,
+                                        key = sign_key,
+                                        hash_alg = sign_hash_alg,
+                                        **kwargs)
 
-    return sig
+    return signature
 
 def get_pubkey(sign_key : str,
                sign_alg : str,
@@ -130,6 +130,10 @@ def add_arguments(parser : argparse.ArgumentParser,
                           choices=sign_algs.keys(), required=required)
     add_prefixed_argument(parser, "sign_hash_alg", prefix, help="signing hash algorithm",
                           type=arg_type_hash, required=False)
+    add_prefixed_argument(parser, "dsr_output_file", prefix, help="path to output Data Signing Request to",
+                          type=arg_type_bytes_output_file, required=False)
+    add_prefixed_argument(parser, "signature", prefix, help="signature (if already signed)",
+                          type=arg_type_bytes, required=False)
 
 def parse_args(args : argparse.Namespace,
                prefix : str = "",
