@@ -163,6 +163,19 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_double_point(cc3xx_ec_curve_t *curve,
 static void add_points(cc3xx_ec_curve_t *curve, cc3xx_ec_point_projective *p,
                        cc3xx_ec_point_projective *q, cc3xx_ec_point_projective *res)
 {
+    const bool p_is_infinity = cc3xx_lowlevel_ec_projective_point_is_infinity(p);
+    const bool q_is_infinity = cc3xx_lowlevel_ec_projective_point_is_infinity(q);
+
+    /* if P == 0, P + Q = Q */
+    if (p_is_infinity) {
+        return cc3xx_lowlevel_ec_copy_projective_point(q, res);
+    }
+
+    /* if Q == 0, P + Q = P */
+    if (q_is_infinity) {
+        return cc3xx_lowlevel_ec_copy_projective_point(p, res);
+    }
+
     if ((p->x == q->x || cc3xx_lowlevel_pka_are_equal(p->x, q->x))
      && (p->y == q->y || cc3xx_lowlevel_pka_are_equal(p->y, q->y))
      && (p->z == q->z || cc3xx_lowlevel_pka_are_equal(p->z, q->z))) {
