@@ -29,11 +29,11 @@
 extern "C" {
 #endif
 
-#ifdef PLATFORM_HAS_NI_TOWER
+#ifdef PLATFORM_HAS_NOC_S3
 #include "ni_tower_lib.h"
-extern struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
-extern const struct ni_tower_dev PERIPH_NI_TOWER_DEV;
-#endif /* PLATFORM_HAS_NI_TOWER */
+extern struct noc_s3_dev SYSCTRL_NOC_S3_DEV;
+extern const struct noc_s3_dev PERIPH_NOC_S3_DEV;
+#endif /* PLATFORM_HAS_NOC_S3 */
 
 #ifdef PLATFORM_HOST_HAS_SCP
 #include "mscp_drv.h"

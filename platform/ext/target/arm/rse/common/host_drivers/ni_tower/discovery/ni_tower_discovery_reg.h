@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __NI_TOWER_DISCOVERY_REG_H__
-#define __NI_TOWER_DISCOVERY_REG_H__
+#ifndef __NOC_S3_DISCOVERY_REG_H__
+#define __NOC_S3_DISCOVERY_REG_H__
 
 #include "tfm_hal_device_header.h"
 
@@ -19,32 +19,32 @@
 #define FMU_CHECK_OFFSET_ADDRESS    (0xFFE0)
 
 /**
- * \brief Interconnect Part Number for NI-Tower
+ * \brief Interconnect Part Number for NoC S3
  */
-#define NI_TOWER_PID0_PART_NUM      (0x3F)
-#define NI_TOWER_PID1_PART_NUM      (0x4)
+#define NOC_S3_PID0_PART_NUM      (0x3F)
+#define NOC_S3_PID1_PART_NUM      (0x4)
 
 /**
- * \brief NI-Tower Domain top registers. These are common for all domains
+ * \brief NoC S3 Domain top registers. These are common for all domains
  */
-struct ni_tower_domain_cfg_hdr {
+struct noc_s3_domain_cfg_hdr {
     __IM uint32_t node_type;
     __IM uint32_t child_node_info;
     __IM uint32_t x_pointers[];
 };
 
 /*  Field definitions for node_type register */
-#define NI_TOWER_DOMAIN_NODE_TYPE_POS     (0U)
-#define NI_TOWER_DOMAIN_NODE_TYPE_MSK     (0xFFFFUL << NI_TOWER_DOMAIN_NODE_TYPE_POS)
-#define NI_TOWER_DOMAIN_NODE_TYPE         NI_TOWER_DOMAIN_NODE_TYPE_MSK
-#define NI_TOWER_DOMAIN_NODE_ID_POS       (16U)
-#define NI_TOWER_DOMAIN_NODE_ID_MSK       (0xFFFFUL << NI_TOWER_DOMAIN_NODE_ID_POS)
-#define NI_TOWER_DOMAIN_NODE_ID           NI_TOWER_DOMAIN_NODE_ID_MSK
+#define NOC_S3_DOMAIN_NODE_TYPE_POS     (0U)
+#define NOC_S3_DOMAIN_NODE_TYPE_MSK     (0xFFFFUL << NOC_S3_DOMAIN_NODE_TYPE_POS)
+#define NOC_S3_DOMAIN_NODE_TYPE         NOC_S3_DOMAIN_NODE_TYPE_MSK
+#define NOC_S3_DOMAIN_NODE_ID_POS       (16U)
+#define NOC_S3_DOMAIN_NODE_ID_MSK       (0xFFFFUL << NOC_S3_DOMAIN_NODE_ID_POS)
+#define NOC_S3_DOMAIN_NODE_ID           NOC_S3_DOMAIN_NODE_ID_MSK
 
 /**
- * \brief NI-Tower Component top registers. These are common for all components
+ * \brief NoC S3 Component top registers. These are common for all components
  */
-struct ni_tower_component_cfg_hdr {
+struct noc_s3_component_cfg_hdr {
     __IM  uint32_t node_type;
     const uint32_t reserved_0[4];
     __IM  uint32_t interface_id_0_3;
@@ -58,9 +58,9 @@ struct ni_tower_component_cfg_hdr {
 };
 
 /**
- * \brief NI-Tower Global register
+ * \brief NoC S3 Global register
  */
-struct ni_tower_global_reg_map {
+struct noc_s3_global_reg_map {
     __IM  uint32_t node_type;
     __IM  uint32_t child_node_info;
     __IM  uint32_t vd_pointers;
@@ -80,13 +80,13 @@ struct ni_tower_global_reg_map {
 };
 
 /*  Field definitions for peripheral_id0 register */
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID0_POS         (0U)
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID0_MSK         (0xFFUL << NI_TOWER_GLOBAL_PERIPHERAL_ID0_POS)
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID0             NI_TOWER_GLOBAL_PERIPHERAL_ID0_MSK
+#define NOC_S3_GLOBAL_PERIPHERAL_ID0_POS         (0U)
+#define NOC_S3_GLOBAL_PERIPHERAL_ID0_MSK         (0xFFUL << NOC_S3_GLOBAL_PERIPHERAL_ID0_POS)
+#define NOC_S3_GLOBAL_PERIPHERAL_ID0             NOC_S3_GLOBAL_PERIPHERAL_ID0_MSK
 
 /*  Field definitions for peripheral_id1 register */
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID1_POS         (0U)
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID1_MSK         (0xFUL << NI_TOWER_GLOBAL_PERIPHERAL_ID1_POS)
-#define NI_TOWER_GLOBAL_PERIPHERAL_ID1             NI_TOWER_GLOBAL_PERIPHERAL_ID1_MSK
+#define NOC_S3_GLOBAL_PERIPHERAL_ID1_POS         (0U)
+#define NOC_S3_GLOBAL_PERIPHERAL_ID1_MSK         (0xFUL << NOC_S3_GLOBAL_PERIPHERAL_ID1_POS)
+#define NOC_S3_GLOBAL_PERIPHERAL_ID1             NOC_S3_GLOBAL_PERIPHERAL_ID1_MSK
 
-#endif /* __NI_TOWER_DISCOVERY_REG_H__ */
+#endif /* __NOC_S3_DISCOVERY_REG_H__ */

@@ -42,8 +42,8 @@ enum rse_atu_ids {
     /* ID to use for region initializing firmware */
     RSE_ATU_FW_INIT_ID,
 
-    /* ATU region ID for programming NI-Tower */
-    RSE_ATU_NI_TOWER_ID,
+    /* ATU region ID for programming NoC S3 */
+    RSE_ATU_NOC_S3_ID,
     /* ATU region ID for SYSCTRL SMMU */
     RSE_ATU_SYSCTRL_SMMU_ID,
 };
@@ -260,16 +260,16 @@ enum rse_atu_ids {
 #define HOST_MCP_INIT_CTRL_ATU_ID    RSE_ATU_FW_INIT_ID
 
 /*
- * ATU region mapping to access System Control NI-Tower and Peripheral
- * NI-Tower
+ * ATU region mapping to access System Control NoC S3 and Peripheral
+ * NoC S3
  */
-#define HOST_NI_TOWER_BASE      (HOST_MCP_INIT_CTRL_BASE_S +                \
+#define HOST_NOC_S3_BASE      (HOST_MCP_INIT_CTRL_BASE_S +                \
                                  HOST_MCP_INIT_CTRL_SIZE)
-#define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
-#define HOST_NI_TOWER_ATU_ID    RSE_ATU_NI_TOWER_ID
+#define HOST_NOC_S3_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
+#define HOST_NOC_S3_ATU_ID    RSE_ATU_NOC_S3_ID
 
 /* ATU region mapping to access SYSCTRL SMMU */
-#define HOST_SYSCTRL_SMMU_BASE      (HOST_NI_TOWER_BASE + HOST_NI_TOWER_SIZE)
+#define HOST_SYSCTRL_SMMU_BASE      (HOST_NOC_S3_BASE + HOST_NOC_S3_SIZE)
 #define HOST_SYSCTRL_SMMU_SIZE      0x100000U
 #define HOST_SYSCTRL_SMMU_ATU_ID    RSE_ATU_SYSCTRL_SMMU_ID
 

@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-#ifdef RD_SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NOC_S3
 #include "ni_tower_lib.h"
-extern struct ni_tower_dev SYSCTRL_NI_TOWER_DEV;
+extern struct noc_s3_dev SYSCTRL_NOC_S3_DEV;
 #endif
 
-#ifdef RD_PERIPH_NI_TOWER
+#ifdef RD_PERIPH_NOC_S3
 #include "ni_tower_lib.h"
-extern struct ni_tower_dev PERIPH_NI_TOWER_DEV;
+extern struct noc_s3_dev PERIPH_NOC_S3_DEV;
 #endif
 
 #ifdef HOST_SCP

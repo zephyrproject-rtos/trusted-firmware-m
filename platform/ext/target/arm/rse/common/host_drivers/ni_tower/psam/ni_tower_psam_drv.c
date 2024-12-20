@@ -12,41 +12,41 @@
 
 #include <stddef.h>
 
-#define NI_TOWER_PSAM_ADDRESS_GRAN      (1ULL << 12)
-#define NI_TOWER_PSAM_ADDRESS_MASK      (~(NI_TOWER_PSAM_ADDRESS_GRAN - 1))
-#define NI_TOWER_PSAM_ADDRESS_H(addr)   ((addr) >> 32)
-#define NI_TOWER_PSAM_ADDRESS_L(addr)   ((addr) & NI_TOWER_PSAM_ADDRESS_MASK)
+#define NOC_S3_PSAM_ADDRESS_GRAN      (1ULL << 12)
+#define NOC_S3_PSAM_ADDRESS_MASK      (~(NOC_S3_PSAM_ADDRESS_GRAN - 1))
+#define NOC_S3_PSAM_ADDRESS_H(addr)   ((addr) >> 32)
+#define NOC_S3_PSAM_ADDRESS_L(addr)   ((addr) & NOC_S3_PSAM_ADDRESS_MASK)
 
-#define NI_TOWER_PSAM_GET64_BASE_ADDRESS(high, low)   \
-    (((uint64_t)(high) << 32) | (low)) & NI_TOWER_PSAM_ADDRESS_MASK
+#define NOC_S3_PSAM_GET64_BASE_ADDRESS(high, low)   \
+    (((uint64_t)(high) << 32) | (low)) & NOC_S3_PSAM_ADDRESS_MASK
 
-#define NI_TOWER_PSAM_GET64_END_ADDRESS(high, low)                          \
-    (((uint64_t)(high) << 32) | (low)) | (NI_TOWER_PSAM_ADDRESS_GRAN - 1) | \
+#define NOC_S3_PSAM_GET64_END_ADDRESS(high, low)                          \
+    (((uint64_t)(high) << 32) | (low)) | (NOC_S3_PSAM_ADDRESS_GRAN - 1) | \
         0xFFFF
 
-static uint64_t ni_tower_psam_get_base_address(
-                    const struct ni_tower_psam_reg_map* reg, uint32_t region)
+static uint64_t noc_s3_psam_get_base_address(
+                    const struct noc_s3_psam_reg_map* reg, uint32_t region)
 {
     uint64_t base;
 
-    base = NI_TOWER_PSAM_GET64_BASE_ADDRESS(reg->nh_region[region].cfg1,
+    base = NOC_S3_PSAM_GET64_BASE_ADDRESS(reg->nh_region[region].cfg1,
                                             reg->nh_region[region].cfg0);
 
     return base;
 }
 
-static uint64_t ni_tower_psam_get_end_address(
-                    const struct ni_tower_psam_reg_map* reg, uint32_t region)
+static uint64_t noc_s3_psam_get_end_address(
+                    const struct noc_s3_psam_reg_map* reg, uint32_t region)
 {
     uint64_t end;
 
-    end = NI_TOWER_PSAM_GET64_END_ADDRESS(reg->nh_region[region].cfg3,
+    end = NOC_S3_PSAM_GET64_END_ADDRESS(reg->nh_region[region].cfg3,
                                           reg->nh_region[region].cfg2);
 
     return end;
 }
 
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
 /*
  * Example pretty print log for a configured PSAM
  *
@@ -70,17 +70,17 @@ static uint64_t ni_tower_psam_get_end_address(
  *      3. A : Target where a particular region is routed to. '<undefined>' if no
  *         routing target is defined.
  */
-#define NI_TOWER_INVALID_REGION     UINT32_MAX
-static void ni_tower_print_psam_region(uint64_t base, uint64_t end,
+#define NOC_S3_INVALID_REGION     UINT32_MAX
+static void noc_s3_print_psam_region(uint64_t base, uint64_t end,
                                        uint32_t region, const char* target)
 {
-    if (region == NI_TOWER_INVALID_REGION) {
-        NI_TOWER_DRV_LOG("\r\n        ");
+    if (region == NOC_S3_INVALID_REGION) {
+        NOC_S3_DRV_LOG("\r\n        ");
     } else {
-        NI_TOWER_DRV_LOG("\r\n(REG %02d)", region);
+        NOC_S3_DRV_LOG("\r\n(REG %02d)", region);
     }
 
-    NI_TOWER_DRV_LOG("[0x%08lx%08lx - 0x%08lx%08lx]: %s ",
+    NOC_S3_DRV_LOG("[0x%08lx%08lx - 0x%08lx%08lx]: %s ",
                                     (uint32_t)(base >> 32),
                                     (uint32_t)(base),
                                     (uint32_t)(end >> 32),
@@ -89,19 +89,19 @@ static void ni_tower_print_psam_region(uint64_t base, uint64_t end,
                                                      : target);
 }
 
-static void ni_tower_print_undefined_psam_region(uint64_t base, uint64_t end)
+static void noc_s3_print_undefined_psam_region(uint64_t base, uint64_t end)
 {
-    ni_tower_print_psam_region(base, end, NI_TOWER_INVALID_REGION, NULL);
+    noc_s3_print_psam_region(base, end, NOC_S3_INVALID_REGION, NULL);
 }
 
-static enum ni_tower_err ni_tower_print_psam_config(
-    const struct ni_tower_psam_dev *dev)
+static enum noc_s3_err noc_s3_print_psam_config(
+    const struct noc_s3_psam_dev *dev)
 {
     const char *node_label;
-    enum ni_tower_err err;
-    struct ni_tower_psam_reg_map* reg;
-    struct ni_tower_sorted_region_data sorted_buffer[NI_TOWER_MAX_NH_REGIONS];
-    struct ni_tower_sorted_region_list list = {
+    enum noc_s3_err err;
+    struct noc_s3_psam_reg_map* reg;
+    struct noc_s3_sorted_region_data sorted_buffer[NOC_S3_MAX_NH_REGIONS];
+    struct noc_s3_sorted_region_list list = {
             .sorted_regions = sorted_buffer,
             .sorted_region_count = 0,
         };
@@ -109,247 +109,247 @@ static enum ni_tower_err ni_tower_print_psam_config(
     uint64_t base, end, prev_end, tgt_id;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    reg = (struct ni_tower_psam_reg_map*)dev->base;
+    reg = (struct noc_s3_psam_reg_map*)dev->base;
 
-    if (dev->data.ni_tower_dev == NULL || dev->data.component == NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+    if (dev->data.noc_s3_dev == NULL || dev->data.component == NULL) {
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    if (dev->data.ni_tower_dev->get_xSNI_label == NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+    if (dev->data.noc_s3_dev->get_xSNI_label == NULL) {
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    node_label = dev->data.ni_tower_dev->get_xSNI_label(
+    node_label = dev->data.noc_s3_dev->get_xSNI_label(
                     dev->data.component->id);
 
     if (node_label == NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    NI_TOWER_DRV_LOG_HEADING("PSAM configuration for %s", node_label);
+    NOC_S3_DRV_LOG_HEADING("PSAM configuration for %s", node_label);
 
-    for (region = 0; region < NI_TOWER_MAX_NH_REGIONS; ++region) {
-        if (reg->nh_region[region].cfg0 & NI_TOWER_NH_REGION_REGION_VALID) {
-            err = ni_tower_sorted_add_entry(&list, region,
-                    ni_tower_psam_get_base_address(reg, region));
-            if (err != NI_TOWER_SUCCESS) {
+    for (region = 0; region < NOC_S3_MAX_NH_REGIONS; ++region) {
+        if (reg->nh_region[region].cfg0 & NOC_S3_NH_REGION_REGION_VALID) {
+            err = noc_s3_sorted_add_entry(&list, region,
+                    noc_s3_psam_get_base_address(reg, region));
+            if (err != NOC_S3_SUCCESS) {
                 return err;
             }
         }
     }
 
     if (list.sorted_region_count == 0) {
-        ni_tower_print_undefined_psam_region(0x0, UINT64_MAX);
-        return NI_TOWER_SUCCESS;
+        noc_s3_print_undefined_psam_region(0x0, UINT64_MAX);
+        return NOC_S3_SUCCESS;
     }
 
     for (r_idx = 0; r_idx < list.sorted_region_count; ++r_idx) {
         region = list.sorted_regions[r_idx].region_idx;
-        base = ni_tower_psam_get_base_address(reg, region);
-        end = ni_tower_psam_get_end_address(reg, region);
+        base = noc_s3_psam_get_base_address(reg, region);
+        end = noc_s3_psam_get_end_address(reg, region);
 
-        prev_end = (r_idx > 0) ? ni_tower_psam_get_end_address(reg,
+        prev_end = (r_idx > 0) ? noc_s3_psam_get_end_address(reg,
                      list.sorted_regions[r_idx - 1].region_idx) : UINT64_MAX;
         if (base != prev_end + 1) {
-            ni_tower_print_undefined_psam_region(prev_end + 1, base - 1);
+            noc_s3_print_undefined_psam_region(prev_end + 1, base - 1);
         }
 
-        tgt_id = reg->nh_region[region].cfg2 & NI_TOWER_NH_REGION_TGT_ID_MSK;
-        ni_tower_print_psam_region(base, end, region,
-                dev->data.ni_tower_dev->get_xMNI_label(tgt_id));
+        tgt_id = reg->nh_region[region].cfg2 & NOC_S3_NH_REGION_TGT_ID_MSK;
+        noc_s3_print_psam_region(base, end, region,
+                dev->data.noc_s3_dev->get_xMNI_label(tgt_id));
     }
 
     if (end != UINT64_MAX) {
-        ni_tower_print_undefined_psam_region(end + 1, UINT64_MAX);
+        noc_s3_print_undefined_psam_region(end + 1, UINT64_MAX);
     }
 
-    NI_TOWER_DRV_LOG("\r\n");
+    NOC_S3_DRV_LOG("\r\n");
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }
 #endif
 
-enum ni_tower_err ni_tower_psam_dev_init(
-    const struct ni_tower_dev *ni_tower_dev,
-    const struct ni_tower_component_node* component,
+enum noc_s3_err noc_s3_psam_dev_init(
+    const struct noc_s3_dev *noc_s3_dev,
+    const struct noc_s3_component_node* component,
     const uint64_t region_mapping_offset,
-    struct ni_tower_psam_dev *dev)
+    struct noc_s3_psam_dev *dev)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
     uint32_t off_addr;
-    struct ni_tower_discovery_node root = {
-        .node_type = NI_TOWER_CFGNI,
+    struct noc_s3_discovery_node root = {
+        .node_type = NOC_S3_CFGNI,
         .node_id = 0,
         .node_off_addr = 0x0
     };
 
-    if (ni_tower_dev == NULL || ni_tower_dev->periphbase == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+    if (noc_s3_dev == NULL || noc_s3_dev->periphbase == (uintptr_t)NULL) {
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
     if (component == NULL || dev == NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
     /* Discover offset address for the PSAM */
-    err = ni_tower_discover_offset(
-            ni_tower_dev, &root,
+    err = noc_s3_discover_offset(
+            noc_s3_dev, &root,
             component->type,
             component->id,
-            NI_TOWER_PSAM, &off_addr);
-    if (err != NI_TOWER_SUCCESS) {
+            NOC_S3_PSAM, &off_addr);
+    if (err != NOC_S3_SUCCESS) {
         return err;
     }
 
-    dev->base = ni_tower_dev->periphbase + off_addr;
+    dev->base = noc_s3_dev->periphbase + off_addr;
     dev->region_mapping_offset = region_mapping_offset;
 
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
-    dev->data.ni_tower_dev = ni_tower_dev;
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    dev->data.noc_s3_dev = noc_s3_dev;
     dev->data.component = component;
 #endif
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_psam_configure_nhregion(
-    const struct ni_tower_psam_dev *dev,
-    const struct ni_tower_psam_reg_cfg_info *cfg_info,
+enum noc_s3_err noc_s3_psam_configure_nhregion(
+    const struct noc_s3_psam_dev *dev,
+    const struct noc_s3_psam_reg_cfg_info *cfg_info,
     const uint32_t region)
 {
-    struct ni_tower_psam_reg_map* reg;
+    struct noc_s3_psam_reg_map* reg;
     uint64_t base_addr, end_addr;
     uint64_t temp_base_addr, temp_end_addr;
     uint32_t r_idx;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    reg = (struct ni_tower_psam_reg_map*)dev->base;
+    reg = (struct noc_s3_psam_reg_map*)dev->base;
 
     if (cfg_info == NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
     base_addr = cfg_info->base_addr + dev->region_mapping_offset;
     end_addr = cfg_info->end_addr + dev->region_mapping_offset;
 
     /* Checking alignment of base and end addresses */
-    if (((base_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0) ||
-        ((~end_addr & (NI_TOWER_PSAM_ADDRESS_GRAN - 1)) != 0)) {
-        return NI_TOWER_ERR_INVALID_ARG;
+    if (((base_addr & (NOC_S3_PSAM_ADDRESS_GRAN - 1)) != 0) ||
+        ((~end_addr & (NOC_S3_PSAM_ADDRESS_GRAN - 1)) != 0)) {
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
     /* Disable region */
-    reg->nh_region[region].cfg0 &= ~NI_TOWER_NH_REGION_REGION_VALID;
+    reg->nh_region[region].cfg0 &= ~NOC_S3_NH_REGION_REGION_VALID;
 
     /* Check whether region overlaps with another valid region */
-    for (r_idx = 0; r_idx < NI_TOWER_MAX_NH_REGIONS; ++r_idx) {
-        if (reg->nh_region[r_idx].cfg0 & NI_TOWER_NH_REGION_REGION_VALID) {
-            temp_base_addr = ni_tower_psam_get_base_address(reg, r_idx);
-            temp_end_addr = ni_tower_psam_get_end_address(reg, r_idx);
+    for (r_idx = 0; r_idx < NOC_S3_MAX_NH_REGIONS; ++r_idx) {
+        if (reg->nh_region[r_idx].cfg0 & NOC_S3_NH_REGION_REGION_VALID) {
+            temp_base_addr = noc_s3_psam_get_base_address(reg, r_idx);
+            temp_end_addr = noc_s3_psam_get_end_address(reg, r_idx);
 
-            if (ni_tower_check_region_overlaps(base_addr, end_addr,
+            if (noc_s3_check_region_overlaps(base_addr, end_addr,
                     temp_base_addr, temp_end_addr) !=
-                NI_TOWER_SUCCESS) {
-                return NI_TOWER_ERR_REGION_OVERLAPS;
+                NOC_S3_SUCCESS) {
+                return NOC_S3_ERR_REGION_OVERLAPS;
             }
         }
     }
 
     /* Set base address */
-    reg->nh_region[region].cfg0 = NI_TOWER_PSAM_ADDRESS_L(base_addr);
-    reg->nh_region[region].cfg1 = NI_TOWER_PSAM_ADDRESS_H(base_addr);
+    reg->nh_region[region].cfg0 = NOC_S3_PSAM_ADDRESS_L(base_addr);
+    reg->nh_region[region].cfg1 = NOC_S3_PSAM_ADDRESS_H(base_addr);
     /* Set end address */
-    reg->nh_region[region].cfg2 = NI_TOWER_PSAM_ADDRESS_L(end_addr);
-    reg->nh_region[region].cfg3 = NI_TOWER_PSAM_ADDRESS_H(end_addr);
+    reg->nh_region[region].cfg2 = NOC_S3_PSAM_ADDRESS_L(end_addr);
+    reg->nh_region[region].cfg3 = NOC_S3_PSAM_ADDRESS_H(end_addr);
     /* Set ID for the Target interface. */
     reg->nh_region[region].cfg2 |= (cfg_info->target_id &
-                                    NI_TOWER_NH_REGION_TGT_ID_MSK);
+                                    NOC_S3_NH_REGION_TGT_ID_MSK);
     /* Set region valid */
-    reg->nh_region[region].cfg0 |= NI_TOWER_NH_REGION_REGION_VALID;
+    reg->nh_region[region].cfg0 |= NOC_S3_NH_REGION_REGION_VALID;
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }
 
-static enum ni_tower_err get_next_available_region(
-    const struct ni_tower_psam_dev *dev,
+static enum noc_s3_err get_next_available_region(
+    const struct noc_s3_psam_dev *dev,
     uint32_t *region)
 {
-    struct ni_tower_psam_reg_map* reg;
+    struct noc_s3_psam_reg_map* reg;
     uint32_t r_idx;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    reg = (struct ni_tower_psam_reg_map*)dev->base;
+    reg = (struct noc_s3_psam_reg_map*)dev->base;
 
-    for (r_idx = 0; r_idx < NI_TOWER_MAX_NH_REGIONS; ++r_idx) {
-        if (!(reg->nh_region[r_idx].cfg0 & NI_TOWER_NH_REGION_REGION_VALID)) {
+    for (r_idx = 0; r_idx < NOC_S3_MAX_NH_REGIONS; ++r_idx) {
+        if (!(reg->nh_region[r_idx].cfg0 & NOC_S3_NH_REGION_REGION_VALID)) {
             *region = r_idx;
-            return NI_TOWER_SUCCESS;
+            return NOC_S3_SUCCESS;
         }
     }
 
-    return NI_TOWER_ERR;
+    return NOC_S3_ERR;
 }
 
-enum ni_tower_err ni_tower_psam_configure_next_available_nhregion(
-    const struct ni_tower_psam_dev *dev,
-    const struct ni_tower_psam_reg_cfg_info *cfg_info)
+enum noc_s3_err noc_s3_psam_configure_next_available_nhregion(
+    const struct noc_s3_psam_dev *dev,
+    const struct noc_s3_psam_reg_cfg_info *cfg_info)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
     uint32_t next_available_region;
 
     err = get_next_available_region(dev, &next_available_region);
-    if (err != NI_TOWER_SUCCESS) {
+    if (err != NOC_S3_SUCCESS) {
         return err;
     }
 
-    return ni_tower_psam_configure_nhregion(dev, cfg_info,
+    return noc_s3_psam_configure_nhregion(dev, cfg_info,
             next_available_region);
 }
 
-enum ni_tower_err ni_tower_psam_enable(const struct ni_tower_psam_dev *dev)
+enum noc_s3_err noc_s3_psam_enable(const struct noc_s3_psam_dev *dev)
 {
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
-    enum ni_tower_err err;
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    enum noc_s3_err err;
 #endif
-    struct ni_tower_psam_reg_map* reg;
+    struct noc_s3_psam_reg_map* reg;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    reg = (struct ni_tower_psam_reg_map*)dev->base;
+    reg = (struct noc_s3_psam_reg_map*)dev->base;
 
-    reg->sam_status |= NI_TOWER_SAM_STATUS_SETUP_COMPLETE;
+    reg->sam_status |= NOC_S3_SAM_STATUS_SETUP_COMPLETE;
 
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
-    err = ni_tower_print_psam_config(dev);
-    if (err != NI_TOWER_SUCCESS) {
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    err = noc_s3_print_psam_config(dev);
+    if (err != NOC_S3_SUCCESS) {
         return err;
     }
 #endif
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }
 
-enum ni_tower_err ni_tower_psam_disable(const struct ni_tower_psam_dev *dev)
+enum noc_s3_err noc_s3_psam_disable(const struct noc_s3_psam_dev *dev)
 {
-    struct ni_tower_psam_reg_map* reg;
+    struct noc_s3_psam_reg_map* reg;
 
     if (dev == NULL || dev->base == (uintptr_t)NULL) {
-        return NI_TOWER_ERR_INVALID_ARG;
+        return NOC_S3_ERR_INVALID_ARG;
     }
 
-    reg = (struct ni_tower_psam_reg_map*)dev->base;
+    reg = (struct noc_s3_psam_reg_map*)dev->base;
 
-    reg->sam_status &= ~NI_TOWER_SAM_STATUS_SETUP_COMPLETE;
+    reg->sam_status &= ~NOC_S3_SAM_STATUS_SETUP_COMPLETE;
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }

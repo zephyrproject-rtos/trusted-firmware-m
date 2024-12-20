@@ -106,7 +106,7 @@ target_include_directories(platform_bl2
 
 target_compile_definitions(platform_bl2
     PRIVATE
-        $<$<CONFIG:Debug>:NI_TOWER_PRETTY_PRINT_LOG_ENABLED>
+        $<$<CONFIG:Debug>:NOC_S3_PRETTY_PRINT_LOG_ENABLED>
         PLAT_LCP_COUNT=${PLAT_LCP_COUNT}
 )
 

@@ -5,115 +5,115 @@
  *
  */
 
-#ifndef __NI_TOWER_DRV_H__
-#define __NI_TOWER_DRV_H__
+#ifndef __NOC_S3_DRV_H__
+#define __NOC_S3_DRV_H__
 
 #include <stdint.h>
 
 /**
- * \brief NI-Tower error enumeration types
+ * \brief NoC S3 error enumeration types
  */
-enum ni_tower_err {
-    NI_TOWER_SUCCESS,
-    NI_TOWER_ERR_INVALID_ARG,
-    NI_TOWER_ERR_NOT_FOUND,
-    NI_TOWER_DEVICE_INVALID,
-    NI_TOWER_ERR_NOT_PERMITTED,
-    NI_TOWER_ERR_REGION_OVERLAPS,
-    NI_TOWER_ERR
+enum noc_s3_err {
+    NOC_S3_SUCCESS,
+    NOC_S3_ERR_INVALID_ARG,
+    NOC_S3_ERR_NOT_FOUND,
+    NOC_S3_DEVICE_INVALID,
+    NOC_S3_ERR_NOT_PERMITTED,
+    NOC_S3_ERR_REGION_OVERLAPS,
+    NOC_S3_ERR
 };
 
 /**
- * \brief NI-Tower node type value enumerations
+ * \brief NoC S3 node type value enumerations
  */
-enum ni_tower_node_type_value {
+enum noc_s3_node_type_value {
     /* Domains */
-    NI_TOWER_CFGNI = 0x0,
-    NI_TOWER_VD,
-    NI_TOWER_PD,
-    NI_TOWER_CD,
+    NOC_S3_CFGNI = 0x0,
+    NOC_S3_VD,
+    NOC_S3_PD,
+    NOC_S3_CD,
     /* Components */
-    NI_TOWER_ASNI,
-    NI_TOWER_AMNI,
-    NI_TOWER_PMU,
-    NI_TOWER_HSNI,
-    NI_TOWER_HMNI,
-    NI_TOWER_PMNI
+    NOC_S3_ASNI,
+    NOC_S3_AMNI,
+    NOC_S3_PMU,
+    NOC_S3_HSNI,
+    NOC_S3_HMNI,
+    NOC_S3_PMNI
 };
 
 /**
- * \brief NI-Tower subfeature type value enumerations
+ * \brief NoC S3 subfeature type value enumerations
  */
-enum ni_tower_subfeature_type_value {
-    NI_TOWER_APU = 0x0,
-    NI_TOWER_PSAM,
-    NI_TOWER_FCU,
-    NI_TOWER_IDM
+enum noc_s3_subfeature_type_value {
+    NOC_S3_APU = 0x0,
+    NOC_S3_PSAM,
+    NOC_S3_FCU,
+    NOC_S3_IDM
 };
 
 /**
- * \brief NI-Tower configuration node granularity enumeration
+ * \brief NoC S3 configuration node granularity enumeration
  */
-enum ni_tower_granularity {
-    NI_TOWER_4KB_CONFIG_NODES,
-    NI_TOWER_64KB_CONFIG_NODES,
+enum noc_s3_granularity {
+    NOC_S3_4KB_CONFIG_NODES,
+    NOC_S3_64KB_CONFIG_NODES,
 };
 
 /**
- * \brief NI-Tower component node structure
+ * \brief NoC S3 component node structure
  */
-struct ni_tower_component_node{
+struct noc_s3_component_node{
     /* Component type of the node */
-    const enum ni_tower_node_type_value type;
+    const enum noc_s3_node_type_value type;
     /* Component id of the node */
     const uint32_t id;
 };
 
 /**
- * \brief NI-Tower skip component discovery node data structure
+ * \brief NoC S3 skip component discovery node data structure
  */
-struct ni_tower_skip_component_discovery_node_data {
+struct noc_s3_skip_component_discovery_node_data {
     /* Parent component node of the node to be skipped */
-    const struct ni_tower_component_node *parent_node;
+    const struct noc_s3_component_node *parent_node;
     /*
      * Index of the child node of the \ref
-     * ni_tower_skip_component_discovery_node_data.parent_node to be skipped.
+     * noc_s3_skip_component_discovery_node_data.parent_node to be skipped.
      */
     const uint32_t node_idx;
 };
 
 /**
- * \brief NI-Tower skip component discovery list structure
+ * \brief NoC S3 skip component discovery list structure
  */
-struct ni_tower_skip_component_discovery_list {
+struct noc_s3_skip_component_discovery_list {
     /*
      * List of all skip node data to be skipped during discovery as specified
-     * in struct \ref ni_tower_skip_component_discovery_list_node.
+     * in struct \ref noc_s3_skip_component_discovery_list_node.
      */
-    const struct ni_tower_skip_component_discovery_node_data *skip_node_data;
+    const struct noc_s3_skip_component_discovery_node_data *skip_node_data;
     /* Number of component nodes to be skipped */
     const uint32_t skip_node_count;
 };
 
 /**
- * \brief NI-Tower device structure
+ * \brief NoC S3 device structure
  */
-struct ni_tower_dev {
-    /* NI-Tower periphbase address, same as CFGNI0 address */
+struct noc_s3_dev {
+    /* NoC S3 periphbase address, same as CFGNI0 address */
     const uintptr_t periphbase;
     /*
-     * The memory-mapped registers of NI-Tower are organized in a series of
-     * 4KB or 64KB regions. Specify whether NI-Tower has 4KB or 64KB config
+     * The memory-mapped registers of NoC S3 are organized in a series of
+     * 4KB or 64KB regions. Specify whether NoC S3 has 4KB or 64KB config
      * nodes.
      */
-    const enum ni_tower_granularity config_node_granularity;
+    const enum noc_s3_granularity config_node_granularity;
     /*
      * Pointer to skip component discovery node list structure. This includes
      * list of all component nodes to be skipped during the discovery process.
      * This can be updated during runtime since the discovery reach of a
      * component node can depend on state of the host system.
      */
-    struct ni_tower_skip_component_discovery_list *skip_discovery_list;
+    struct noc_s3_skip_component_discovery_list *skip_discovery_list;
     /*
      * Address space offset for the current chip. This is typically updated
      * during the boot time by reading the current chip id (in case of RSE
@@ -122,7 +122,7 @@ struct ni_tower_dev {
      * flag.
      */
     uint64_t chip_addr_offset;
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
     /* Function to fetch xSNI labels for log prints by passing the xSNI id */
     const char* (*get_xSNI_label)(uint64_t xSNI_id);
     /* Function to fetch xMNI labels for log prints by passing the xMNI id */
@@ -130,16 +130,16 @@ struct ni_tower_dev {
 #endif
 };
 
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
 /**
- * \brief NI-Tower device data structure for a subfeature
+ * \brief NoC S3 device data structure for a subfeature
  */
-struct ni_tower_dev_data {
-    /* Pointer to the NI-Tower device where the subfeature exists */
-    struct ni_tower_dev const* ni_tower_dev;
+struct noc_s3_dev_data {
+    /* Pointer to the NoC S3 device where the subfeature exists */
+    struct noc_s3_dev const* noc_s3_dev;
     /* Pointer to the component node where the subfeature exists */
-    struct ni_tower_component_node const* component;
+    struct noc_s3_component_node const* component;
 };
 #endif
 
-#endif /* __NI_TOWER_DRV_H__ */
+#endif /* __NOC_S3_DRV_H__ */

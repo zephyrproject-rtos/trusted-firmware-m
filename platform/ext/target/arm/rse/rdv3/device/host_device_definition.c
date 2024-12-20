@@ -26,8 +26,8 @@
 
 #include <stddef.h>
 
-#ifdef RD_SYSCTRL_NI_TOWER
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef RD_SYSCTRL_NOC_S3
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
 const char* sysctrl_xSNI_labels[] = {
     [SYSCTRL_APP_ASNI_ID     ] = "SYSCTRL_APP_ASNI",
     [SYSCTRL_LCP_ASNI_ID     ] = "SYSCTRL_LCP_ASNI",
@@ -74,21 +74,21 @@ const char* get_sysctrl_xMNI_label(uint64_t xMNI_id)
 }
 #endif
 
-/* System Control NI-Tower device */
-struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
-    .periphbase = HOST_NI_TOWER_BASE,
-    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+/* System Control NoC S3 device */
+struct noc_s3_dev SYSCTRL_NOC_S3_DEV = {
+    .periphbase = HOST_NOC_S3_BASE,
+    .config_node_granularity = NOC_S3_64KB_CONFIG_NODES,
     .skip_discovery_list = NULL,
     .chip_addr_offset = 0, /* Updated at boot time */
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
     .get_xSNI_label = get_sysctrl_xSNI_label,
     .get_xMNI_label = get_sysctrl_xMNI_label,
 #endif
 };
 #endif
 
-#ifdef RD_PERIPH_NI_TOWER
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef RD_PERIPH_NOC_S3
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
 const char* periph_xMNI_labels[] = {
     [PERIPH_RAM_AMNI_ID        ] = "PERIPH_RAM_AMNI_ID",
     [PERIPH_ECCREG_PMNI_ID     ] = "PERIPH_ECCREG_PMNI_ID",
@@ -112,13 +112,13 @@ const char* get_periph_xMNI_labels(uint64_t xMNI_id)
 }
 #endif
 
-/* Peripheral NI-Tower device */
-struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
-    .periphbase = HOST_NI_TOWER_BASE,
-    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+/* Peripheral NoC S3 device */
+struct noc_s3_dev PERIPH_NOC_S3_DEV = {
+    .periphbase = HOST_NOC_S3_BASE,
+    .config_node_granularity = NOC_S3_64KB_CONFIG_NODES,
     .skip_discovery_list = NULL,
     .chip_addr_offset = 0, /* Updated at boot time */
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
     .get_xSNI_label = NULL,
     .get_xMNI_label = get_periph_xMNI_labels,
 #endif

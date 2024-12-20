@@ -35,18 +35,18 @@
 /* AP Memory Expansion region 1 end address */
 #define HOST_AP_MEM_EXP_1_PHYS_LIMIT                0x00FFFFFFFULL
 
-/* System Control block NI-Tower base address */
-#define HOST_SYSCTRL_NI_TOWER_PHYS_BASE             0x020000000ULL
-/* System Control block NI-Tower end address */
-#define HOST_SYSCTRL_NI_TOWER_PHYS_LIMIT            0x020FFFFFFULL
-/* System Fabric NI-Tower base address */
-#define HOST_FABRIC_NI_TOWER_PHYS_BASE              0x021000000ULL
-/* System Fabric NI-Tower end address */
-#define HOST_FABRIC_NI_TOWER_PHYS_LIMIT             0x021FFFFFFULL
-/* Peripheral block NI-Tower base address */
-#define HOST_PERIPH_NI_TOWER_PHYS_BASE              0x022000000ULL
-/* Peripheral block NI-Tower end address */
-#define HOST_PERIPH_NI_TOWER_PHYS_LIMIT             0x022FFFFFFULL
+/* System Control block NoC S3 base address */
+#define HOST_SYSCTRL_NOC_S3_PHYS_BASE               0x020000000ULL
+/* System Control block NoC S3 end address */
+#define HOST_SYSCTRL_NOC_S3_PHYS_LIMIT              0x020FFFFFFULL
+/* System Fabric NoC S3 base address */
+#define HOST_FABRIC_NOC_S3_PHYS_BASE                0x021000000ULL
+/* System Fabric NoC S3 end address */
+#define HOST_FABRIC_NOC_S3_PHYS_LIMIT               0x021FFFFFFULL
+/* Peripheral block NoC S3 base address */
+#define HOST_PERIPH_NOC_S3_PHYS_BASE                0x022000000ULL
+/* Peripheral block NoC S3 end address */
+#define HOST_PERIPH_NOC_S3_PHYS_LIMIT               0x022FFFFFFULL
 
 /* Non-secure Uart peripheral base address */
 #define HOST_NS_UART_PHYS_BASE                      0x02A400000ULL

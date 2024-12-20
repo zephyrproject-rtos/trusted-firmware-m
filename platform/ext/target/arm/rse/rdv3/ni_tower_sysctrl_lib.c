@@ -22,69 +22,69 @@ enum rse_supported_chip_ids {
 
 #define MHU_SEND_FRAME_SIZE     (RSE_MAX_SUPPORTED_CHIPS - 1)
 
-/* System Control NI-Tower component nodes */
-const struct ni_tower_component_node sysctrl_rse_main_asni  = {
-    .type = NI_TOWER_ASNI,
+/* System Control NoC S3 component nodes */
+const struct noc_s3_component_node sysctrl_rse_main_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_RSE_MAIN_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_scp_asni  = {
-    .type = NI_TOWER_ASNI,
+const struct noc_s3_component_node sysctrl_scp_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_SCP_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_mcp_asni  = {
-    .type = NI_TOWER_ASNI,
+const struct noc_s3_component_node sysctrl_mcp_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_MCP_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_rse_scp_asni  = {
-    .type = NI_TOWER_ASNI,
+const struct noc_s3_component_node sysctrl_rse_scp_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_RSE_SCP_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_app_asni  = {
-    .type = NI_TOWER_ASNI,
+const struct noc_s3_component_node sysctrl_app_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_APP_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_lcp_asni  = {
-    .type = NI_TOWER_ASNI,
+const struct noc_s3_component_node sysctrl_lcp_asni  = {
+    .type = NOC_S3_ASNI,
     .id = SYSCTRL_LCP_ASNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_rsm_amni  = {
-    .type = NI_TOWER_AMNI,
+const struct noc_s3_component_node sysctrl_rsm_amni  = {
+    .type = NOC_S3_AMNI,
     .id = SYSCTRL_RSM_AMNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_rsm_pmni  = {
-    .type = NI_TOWER_PMNI,
+const struct noc_s3_component_node sysctrl_rsm_pmni  = {
+    .type = NOC_S3_PMNI,
     .id = SYSCTRL_RSM_PMNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_rse_scp_amni  = {
-    .type = NI_TOWER_AMNI,
+const struct noc_s3_component_node sysctrl_rse_scp_amni  = {
+    .type = NOC_S3_AMNI,
     .id = SYSCTRL_RSE_SCP_AMNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_rse_mcp_amni  = {
-    .type = NI_TOWER_AMNI,
+const struct noc_s3_component_node sysctrl_rse_mcp_amni  = {
+    .type = NOC_S3_AMNI,
     .id = SYSCTRL_RSE_MCP_AMNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_app_amni  = {
-    .type = NI_TOWER_AMNI,
+const struct noc_s3_component_node sysctrl_app_amni  = {
+    .type = NOC_S3_AMNI,
     .id = SYSCTRL_APP_AMNI_ID,
 };
 
-const struct ni_tower_component_node sysctrl_lcp_amni  = {
-    .type = NI_TOWER_AMNI,
+const struct noc_s3_component_node sysctrl_lcp_amni  = {
+    .type = NOC_S3_AMNI,
     .id = SYSCTRL_LCP_AMNI_ID,
 };
 
 /*
- * System Control NI-Tower is the interconnect between the AXI interfaces of
+ * System Control NoC S3 is the interconnect between the AXI interfaces of
  * RSE, SCP/MCP and the CMN interconnect. Following block diagram depicts an
  * abstract overview of the routing map for these interfaces.
  *
@@ -156,7 +156,7 @@ const struct ni_tower_component_node sysctrl_lcp_amni  = {
  *                             |     |
  *                             +-----+
  *
- * The following matrix shows the connections within System Control NI-Tower.
+ * The following matrix shows the connections within System Control NoC S3.
  *
  * +------------+---------------+----------+----------+--------------+----------+----------+
  * |            | rse_main_axis | scp_axis | mcp_axis | rse_scp_axis | app_axis | lcp_axis |
@@ -190,26 +190,26 @@ const struct ni_tower_component_node sysctrl_lcp_amni  = {
  * Request originating from RSE ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info rse_main_axis_0_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info rse_main_axis_0_psam[] = {
     /* Shared SRAM + AP Memory Expansion 1 */
     {
         HOST_AP_SHARED_SRAM_PHYS_BASE,
         HOST_AP_MEM_EXP_1_PHYS_LIMIT,
         SYSCTRL_APP_AMNI_ID
     },
-    /* System Control Block NI-Tower */
+    /* System Control Block NoC S3 */
     {
-        HOST_SYSCTRL_NI_TOWER_PHYS_BASE,
-        HOST_SYSCTRL_NI_TOWER_PHYS_LIMIT,
+        HOST_SYSCTRL_NOC_S3_PHYS_BASE,
+        HOST_SYSCTRL_NOC_S3_PHYS_LIMIT,
         SYSCTRL_CONFIG_SPACE_ID
     },
     /*
-     * System Fabric NI-Tower + Peripheral Block NI-Tower + Debug Block NCI GPV
-     * + UART Peripherals + Generic refclk + AP Watchdog peripherals + SID + ECC
+     * System Fabric NoC S3 + Peripheral Block NoC S3 + Debug Block NCI GPV +
+     * UART Peripherals + Generic refclk + AP Watchdog peripherals + SID + ECC
      * error record registers
      */
     {
-        HOST_FABRIC_NI_TOWER_PHYS_BASE,
+        HOST_FABRIC_NOC_S3_PHYS_BASE,
         HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
         SYSCTRL_APP_AMNI_ID
     },
@@ -301,7 +301,7 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_0_psam[] = {
  * Request coming from RSE ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info rse_main_axis_1_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info rse_main_axis_1_psam[] = {
     /*
      * PCIe NCI Memory space 2 + PCIe NCI Memory space 3 + DRAM +
      * AP Memory Expansion 3
@@ -331,7 +331,7 @@ static const struct ni_tower_psam_reg_cfg_info rse_main_axis_1_psam[] = {
  * following address map for RSE chip-to-chip MHU send frame between the
  * current chip and other 3 chips.
  */
-static const struct ni_tower_psam_reg_cfg_info
+static const struct noc_s3_psam_reg_cfg_info
         rse_main_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
 {
     [RSE_CHIP_ID_0] = {
@@ -420,7 +420,7 @@ static const struct ni_tower_psam_reg_cfg_info
  * Request originating from SCP ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info scp_axis_0_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info scp_axis_0_psam[] = {
     /* Shared SRAM + AP Memory Expansion 1 */
     {
         HOST_AP_SHARED_SRAM_PHYS_BASE,
@@ -499,7 +499,7 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_0_psam[] = {
  * Request coming from SCP ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info scp_axis_1_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info scp_axis_1_psam[] = {
     /*
      * PCIe NCI Memory space 2 + PCIe NCI Memory space 3 + DRAM +
      * AP Memory Expansion 3
@@ -517,7 +517,7 @@ static const struct ni_tower_psam_reg_cfg_info scp_axis_1_psam[] = {
  * following address map for SCP chip-to-chip MHU send frame between the
  * current chip and other 3 chips.
  */
-static const struct ni_tower_psam_reg_cfg_info
+static const struct noc_s3_psam_reg_cfg_info
             scp_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
 {
     [RSE_CHIP_ID_0] = {
@@ -606,7 +606,7 @@ static const struct ni_tower_psam_reg_cfg_info
  * Request originating from MCP ATU is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info mcp_axis_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info mcp_axis_psam[] = {
     /* Shared SRAM */
     {
         HOST_AP_SHARED_SRAM_PHYS_BASE,
@@ -657,7 +657,7 @@ static const struct ni_tower_psam_reg_cfg_info mcp_axis_psam[] = {
  * following address map for MCP chip-to-chip MHU send frame between the
  * current chip and other 3 chips.
  */
-static const struct ni_tower_psam_reg_cfg_info
+static const struct noc_s3_psam_reg_cfg_info
             mcp_axis_psam_mhu_send_frame[][MHU_SEND_FRAME_SIZE] =
 {
     [RSE_CHIP_ID_0] = {
@@ -746,10 +746,10 @@ static const struct ni_tower_psam_reg_cfg_info
  * Accesses from RSE and SCP targeting LCP address space are handled by a
  * NIC-400 which then forwards only the bottom [20:0] address bits of the
  * request to rse_scp_axis interface. The bottom [20:0] address bits
- * (range: 0x0 - 0x1FFFFF) are sent from NIC-400 to System Control NI-Tower
- * for APU filtering of request from RSE/SCP to LCPs.
+ * (range: 0x0 - 0x1FFFFF) are sent from NIC-400 to System Control NoC S3 for
+ * APU filtering of request from RSE/SCP to LCPs.
  */
-static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info rse_scp_axis_psam[] = {
     {
         HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_BASE,
         HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
@@ -761,7 +761,7 @@ static const struct ni_tower_psam_reg_cfg_info rse_scp_axis_psam[] = {
  * Request originating from AP is mapped to targets based on following
  * address map.
  */
-static const struct ni_tower_psam_reg_cfg_info app_axis_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info app_axis_psam[] = {
     /*
      * Generic refclk + AP Watchdog peripherals + SID + ECC error record
      * registers
@@ -798,7 +798,7 @@ static const struct ni_tower_psam_reg_cfg_info app_axis_psam[] = {
 };
 
 /* Request from LCP is targeted completely to LCP_SCP_AXIM */
-static const struct ni_tower_psam_reg_cfg_info lcp_axis_psam[] = {
+static const struct noc_s3_psam_reg_cfg_info lcp_axis_psam[] = {
     {
         HOST_LCP_MMAP_PHYS_BASE,
         HOST_LCP_MMAP_PHYS_LIMIT,
@@ -810,111 +810,111 @@ static const struct ni_tower_psam_reg_cfg_info lcp_axis_psam[] = {
  * Requester side MCP AXIS APU to check access permission targeting Generic
  * refclk in SCP and shared RSM SRAM
  */
-static const struct ni_tower_apu_reg_cfg_info mcp_axis_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info mcp_axis_apu[] = {
     /* Root read-write permission : Generic refclk registers */
     INIT_APU_REGION(HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
                     HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Full permission : Shared RSM SRAM */
     INIT_APU_REGION(HOST_RSM_SRAM_PHYS_BASE,
                     HOST_RSM_SRAM_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
 };
 
 /*
  * Completer side RSM AXIM APU to check access permission targeting Shared RAM
  * between RSE, SCP and MCP
  */
-static const struct ni_tower_apu_reg_cfg_info rsm_axim_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info rsm_axim_apu[] = {
     INIT_APU_REGION(HOST_RSM_SRAM_PHYS_BASE,
                     HOST_RSM_SRAM_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
 };
 
 /*
  * RSM APBM APU to check the ECC Error record register block for Shared RAM
  * between RSE, SCP and MCP
  */
-static const struct ni_tower_apu_reg_cfg_info rsm_apbm_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info rsm_apbm_apu[] = {
     INIT_APU_REGION(HOST_RSE_S_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_RSE_S_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_RSE_NS_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_RSE_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_SCP_S_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_SCP_S_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_SCP_NS_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_SCP_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_MCP_S_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_MCP_S_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_MCP_NS_RSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_MCP_NS_RSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
 };
 
 /*
  * Completer side RSE-SCP AXIM APU to check access permission targeting the SCP
  */
-static const struct ni_tower_apu_reg_cfg_info rse_scp_axim_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info rse_scp_axim_apu[] = {
     INIT_APU_REGION(HOST_SCP_PHYS_BASE,
                     HOST_SCP_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
 };
 
 /*
  * Completer side RSE-MCP AXIM APU to check access permission targeting the MCP
  */
-static const struct ni_tower_apu_reg_cfg_info rse_mcp_axim_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info rse_mcp_axim_apu[] = {
     INIT_APU_REGION(HOST_MCP_PHYS_BASE,
                     HOST_MCP_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
 };
 
 /*
  * Requester side APP AXIS APU to check access permission targeting the
  * peripherals in SCP, MCP and RSE
  */
-static const struct ni_tower_apu_reg_cfg_info app_axis_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info app_axis_apu[] = {
     /* Root read-write permission : Generic refclk registers */
     INIT_APU_REGION(HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
                     HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Full permission : AP Watchdog peripheral */
     INIT_APU_REGION(HOST_AP_NS_WDOG_PHYS_BASE,
                     HOST_AP_NS_WDOG_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Root read-write permission : AP Watchdog peripheral */
     INIT_APU_REGION(HOST_AP_RT_WDOG_PHYS_BASE,
                     HOST_AP_RT_WDOG_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Secure read-write permission : AP Watchdog peripheral */
     INIT_APU_REGION(HOST_AP_S_WDOG_PHYS_BASE,
                     HOST_AP_S_WDOG_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
     /* Full permission : SID */
     INIT_APU_REGION(HOST_SID_PHYS_BASE,
                     HOST_SID_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Secure read-write permission : AP ECC error record */
     INIT_APU_REGION(HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
     /* Full permission : AP ECC error record */
     INIT_APU_REGION(HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Root read-write permission : AP ECC error record */
     INIT_APU_REGION(HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Realm read-write permission : AP ECC error record */
     INIT_APU_REGION(HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
-                    NI_T_REALM_RW),
+                    NOC_S3_REALM_RW),
     /*
      * Secure & Root read-write permission : SCP/MCP/RSE ECC error record +
      * SCP/MCP/RSE RSM ECC error record + Generic refclk registers +
@@ -922,54 +922,54 @@ static const struct ni_tower_apu_reg_cfg_info app_axis_apu[] = {
      */
     INIT_APU_REGION(HOST_SCP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
                     HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
     /* Full permission : AP<->SCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_NS_SCP_MHUV3_PHYS_BASE,
                     HOST_AP_NS_SCP_MHUV3_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Secure & Root read-write permission : AP<->SCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_S_SCP_MHUV3_PHYS_BASE,
                     HOST_AP_S_SCP_MHUV3_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     /* Root read-write permission : AP<->SCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_RT_SCP_MHUV3_PHYS_BASE,
                     HOST_AP_RT_SCP_MHUV3_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Full permission : AP<->MCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_NS_MCP_MHUV3_SEND_BASE,
                     HOST_AP_NS_MCP_MHUV3_SEND_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Secure read-write permission : AP<->MCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_S_MCP_MHUV3_PHYS_BASE,
                     HOST_AP_S_MCP_MHUV3_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
     /* Root read-write permission : AP<->MCP MHUv3 registers */
     INIT_APU_REGION(HOST_AP_RT_MCP_MHUV3_PHYS_BASE,
                     HOST_AP_RT_MCP_MHUV3_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Full permission : AP<->RSE MHUv3 registers */
     INIT_APU_REGION(HOST_AP_NS_RSE_MHUV3_PHYS_BASE,
                     HOST_AP_NS_RSE_MHUV3_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Secure read-write permission : AP<->RSE MHUv3 registers */
     INIT_APU_REGION(HOST_AP_S_RSE_MHUV3_PHYS_BASE,
                     HOST_AP_S_RSE_MHUV3_PHYS_LIMIT,
-                    NI_T_SEC_RW),
+                    NOC_S3_SEC_RW),
     /* Root read-write permission : AP<->RSE MHUv3 registers */
     INIT_APU_REGION(HOST_AP_RT_RSE_MHUV3_PHYS_BASE,
                     HOST_AP_RT_RSE_MHUV3_PHYS_LIMIT,
-                    NI_T_ROOT_RW),
+                    NOC_S3_ROOT_RW),
     /* Root & Realm read-write permission : AP<->RSE MHUv3 registers */
     INIT_APU_REGION(HOST_AP_RL_RSE_MHUV3_PHYS_BASE,
                     HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
-                    NI_T_ROOT_RW | NI_T_REALM_RW),
+                    NOC_S3_ROOT_RW | NOC_S3_REALM_RW),
 };
 
 /*
  * Completer side APP AXIM APU to check access permission targeting the IO
  * block and the memory controller + MPE registers space
  */
-static const struct ni_tower_apu_reg_cfg_info app_axim_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info app_axim_apu[] = {
     /*
      * Full permission for the entire AP address expect for the following
      * regions:
@@ -980,44 +980,44 @@ static const struct ni_tower_apu_reg_cfg_info app_axim_apu[] = {
      */
     INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
                     HOST_CMN_GPV_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_IO_BLOCK_PHYS_BASE,
                     HOST_IO_NCI_GPV_PHYS_LIMIT(0),
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(0),
                     HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(0),
-                    NI_T_ROOT_RW | NI_T_SEC_RW),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
     INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(0),
                     HOST_IO_NCI_GPV_PHYS_LIMIT(1),
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(1),
                     HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(1),
-                    NI_T_ROOT_RW | NI_T_SEC_RW),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
     INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(1),
                     HOST_IO_PCIE_CTRL_EXP_PHYS_LIMIT(1),
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_IO_NCI_GPV_PHYS_BASE(2),
                     HOST_IO_NCI_GPV_PHYS_LIMIT(2),
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_IO_NCI_GPV_PHYS_BASE(3),
                     HOST_IO_NCI_GPV_PHYS_LIMIT(3),
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     INIT_APU_REGION(HOST_SYSCTRL_SMMU_PHYS_BASE,
                     HOST_AP_MEM_EXP_3_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
     /* Allow only for RSE, SCP and AP */
     INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_MPE_PHYS_BASE,
                                        HOST_MPE_PHYS_LIMIT,
                                        /* mcp_perm */ 0,
-                                       /* scp_perm */ NI_T_ALL_PERM,
-                                       /* rse_perm */ NI_T_ALL_PERM,
+                                       /* scp_perm */ NOC_S3_ALL_PERM,
+                                       /* rse_perm */ NOC_S3_ALL_PERM,
                                        /* dap_perm */ 0),
     /* Allow only for RSE, SCP and AP */
     INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_CLUST_UTIL_PHYS_BASE,
                                        HOST_CLUST_UTIL_PHYS_LIMIT,
                                        /* mcp_perm */ 0,
-                                       /* scp_perm */ NI_T_ALL_PERM,
-                                       /* rse_perm */ NI_T_ALL_PERM,
+                                       /* scp_perm */ NOC_S3_ALL_PERM,
+                                       /* rse_perm */ NOC_S3_ALL_PERM,
                                        /* dap_perm */ 0),
 };
 
@@ -1025,42 +1025,42 @@ static const struct ni_tower_apu_reg_cfg_info app_axim_apu[] = {
  * Completer side LCP AXIM APU to check access permission targeting the Cluster
  * Utility space.
  */
-static const struct ni_tower_apu_reg_cfg_info lcp_axim_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info lcp_axim_apu[] = {
     INIT_APU_REGION(HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_BASE,
                     HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_BASE,
                     HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_BASE,
                     HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_BASE,
                     HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_LIMIT,
-                    NI_T_N_SEC_RW | NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_N_SEC_RW | NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
     INIT_APU_REGION(HOST_CLUS_UTIL_RAS_OFF_ADDR_PHYS_BASE,
                     HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
-                    NI_T_SEC_RW | NI_T_ROOT_RW),
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
 };
 
 /* Requester side LCP AXIS APU to check access permission targeting the SCP */
-static const struct ni_tower_apu_reg_cfg_info lcp_axis_apu[] = {
+static const struct noc_s3_apu_reg_cfg_info lcp_axis_apu[] = {
     INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
                     HOST_AP_MEM_EXP_3_PHYS_LIMIT,
-                    NI_T_ALL_PERM),
+                    NOC_S3_ALL_PERM),
 };
 
 /*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
- * its target ID for each requester in the System Control NI-Tower for nodes
- * under AON domain.
+ * its target ID for each requester in the System Control NoC S3 for nodes under
+ * AON domain.
  */
 static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
 
     /* Populates all address maps into a table array to enable desired PSAMs */
-    const struct ni_tower_psam_cfgs psam_table[] = {
+    const struct noc_s3_psam_cfgs psam_table[] = {
         {
             .component = &sysctrl_rse_main_asni,
             .nh_region_count = ARRAY_SIZE(rse_main_axis_0_psam),
@@ -1114,9 +1114,9 @@ static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
         },
     };
 
-    err = ni_tower_program_psam_table(&SYSCTRL_NI_TOWER_DEV, psam_table,
+    err = noc_s3_program_psam_table(&SYSCTRL_NOC_S3_DEV, psam_table,
             ARRAY_SIZE(psam_table));
-    if (err != NI_TOWER_SUCCESS) {
+    if (err != NOC_S3_SUCCESS) {
         return -1;
     }
 
@@ -1125,18 +1125,18 @@ static int32_t program_sysctrl_psam_aon(uint32_t chip_id)
 
 /*
  * Configure Access Protection Unit (APU) to setup access permission for each
- * memory region based on its target in System Control NI-Tower for nodes
- * under AON domain.
+ * memory region based on its target in System Control NoC S3 for nodes under
+ * AON domain.
  */
 static int32_t program_sysctrl_apu_aon(void)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
 
     /*
      * Populates all APU entry into a table array to confgiure and enable
      * desired APUs
      */
-    const struct ni_tower_apu_cfgs apu_table[] = {
+    const struct noc_s3_apu_cfgs apu_table[] = {
         {
             .component = &sysctrl_mcp_asni,
             .region_count = ARRAY_SIZE(mcp_axis_apu),
@@ -1169,9 +1169,9 @@ static int32_t program_sysctrl_apu_aon(void)
         },
     };
 
-    err = ni_tower_program_apu_table(&SYSCTRL_NI_TOWER_DEV, apu_table,
+    err = noc_s3_program_apu_table(&SYSCTRL_NOC_S3_DEV, apu_table,
             ARRAY_SIZE(apu_table));
-    if (err != NI_TOWER_SUCCESS) {
+    if (err != NOC_S3_SUCCESS) {
         return -1;
     }
 
@@ -1180,15 +1180,15 @@ static int32_t program_sysctrl_apu_aon(void)
 
 /*
  * Configure Programmable System Address Map (PSAM) to setup the memory map and
- * its target ID for each requester in the System Control NI-Tower for nodes
- * under SYSTOP domain.
+ * its target ID for each requester in the System Control NoC S3 for nodes under
+ * SYSTOP domain.
  */
 static int32_t program_sysctrl_psam_systop(void)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
 
     /* Populates all address maps into a table array to enable desired PSAMs */
-    const struct ni_tower_psam_cfgs psam_table[] = {
+    const struct noc_s3_psam_cfgs psam_table[] = {
         {
             .component = &sysctrl_app_asni,
             .nh_region_count = ARRAY_SIZE(app_axis_psam),
@@ -1203,9 +1203,9 @@ static int32_t program_sysctrl_psam_systop(void)
         },
     };
 
-    err = ni_tower_program_psam_table(&SYSCTRL_NI_TOWER_DEV, psam_table,
+    err = noc_s3_program_psam_table(&SYSCTRL_NOC_S3_DEV, psam_table,
                                                     ARRAY_SIZE(psam_table));
-    if (err != NI_TOWER_SUCCESS) {
+    if (err != NOC_S3_SUCCESS) {
         return -1;
     }
 
@@ -1214,18 +1214,18 @@ static int32_t program_sysctrl_psam_systop(void)
 
 /*
  * Configure Access Protection Unit (APU) to setup access permission for each
- * memory region based on its target in System Control NI-Tower for nodes
- * under SYSTOP domain.
+ * memory region based on its target in System Control NoC S3 for nodes under
+ * SYSTOP domain.
  */
 static int32_t program_sysctrl_apu_systop(void)
 {
-    enum ni_tower_err err;
+    enum noc_s3_err err;
 
     /*
      * Populates all APU entry into a table array to configure and enable
      * desired APUs
      */
-    const struct ni_tower_apu_cfgs apu_table[] = {
+    const struct noc_s3_apu_cfgs apu_table[] = {
         {
             .component = &sysctrl_app_asni,
             .region_count = ARRAY_SIZE(app_axis_apu),
@@ -1252,16 +1252,16 @@ static int32_t program_sysctrl_apu_systop(void)
         },
     };
 
-    err = ni_tower_program_apu_table(&SYSCTRL_NI_TOWER_DEV, apu_table,
+    err = noc_s3_program_apu_table(&SYSCTRL_NOC_S3_DEV, apu_table,
                                                         ARRAY_SIZE(apu_table));
-    if (err != NI_TOWER_SUCCESS) {
+    if (err != NOC_S3_SUCCESS) {
         return -1;
     }
 
     return 0;
 }
 
-int32_t program_sysctrl_ni_tower_aon(uint32_t chip_id)
+int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id)
 {
     if (chip_id >= RSE_MAX_SUPPORTED_CHIPS) {
         return -1;
@@ -1278,7 +1278,7 @@ int32_t program_sysctrl_ni_tower_aon(uint32_t chip_id)
     return 0;
 }
 
-int32_t program_sysctrl_ni_tower_systop(void)
+int32_t program_sysctrl_noc_s3_systop(void)
 {
     if (program_sysctrl_psam_systop() != 0) {
         return -1;

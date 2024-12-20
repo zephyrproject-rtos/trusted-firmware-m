@@ -14,7 +14,7 @@ set(TFM_ATTESTATION_SCHEME              "CCA"    CACHE STRING  "Attestation sche
 set(PLATFORM_HAS_BOOT_DMA               OFF      CACHE BOOL    "Enable dma support for memory transactions for bootloader")
 set(PLATFORM_HOST_HAS_SCP               ON       CACHE BOOL    "Enable SCP support")
 set(PLATFORM_HOST_HAS_MCP               ON       CACHE BOOL    "Enable MCP support")
-set(PLATFORM_HAS_NI_TOWER               ON       CACHE BOOL    "Enable NI-Tower support")
+set(PLATFORM_HAS_NOC_S3                 ON       CACHE BOOL    "Enable NoC S3 support")
 set(PLATFORM_HAS_SMMU_V3                ON       CACHE BOOL    "Enable SMMU V3 support")
 
 # This sub-platform uses a mix of MHUv2 in BL1 and MHUv3 in other firmware.

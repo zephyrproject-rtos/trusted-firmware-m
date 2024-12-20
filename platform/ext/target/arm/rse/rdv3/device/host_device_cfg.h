@@ -26,11 +26,11 @@
 #define MHU_RSE_TO_SCP_DEV        MHU4_SENDER_DEV_S
 #define MHU_SCP_TO_RSE_DEV        MHU4_RECEIVER_DEV_S
 
-/* NI-Tower */
-#ifdef PLATFORM_HAS_NI_TOWER
-#define RD_SYSCTRL_NI_TOWER
-#define RD_PERIPH_NI_TOWER
-#endif /* PLATFORM_HAS_NI_TOWER */
+/* NoC S3 */
+#ifdef PLATFORM_HAS_NOC_S3
+#define RD_SYSCTRL_NOC_S3
+#define RD_PERIPH_NOC_S3
+#endif /* PLATFORM_HAS_NOC_S3 */
 
 /* MSCP */
 #ifdef PLATFORM_HOST_HAS_SCP

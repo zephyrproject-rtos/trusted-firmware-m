@@ -14,45 +14,45 @@
 #include "host_system.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_plat_otp.h"
-#ifdef RD_SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NOC_S3
 #include "ni_tower_lib.h"
 
-#define NI_TOWER_SYSCTRL_SYSTOP_PARENT_TYPE      NI_TOWER_VD
-#define NI_TOWER_SYSCTRL_SYSTOP_PARENT_ID        (0)
-#define NI_TOWER_SYSCTRL_SYSTOP_IDX              (1)
+#define NOC_S3_SYSCTRL_SYSTOP_PARENT_TYPE      NOC_S3_VD
+#define NOC_S3_SYSCTRL_SYSTOP_PARENT_ID        (0)
+#define NOC_S3_SYSCTRL_SYSTOP_IDX              (1)
 #endif
 
 static struct host_system_t host_system_data = {0};
 
-#if defined(RD_SYSCTRL_NI_TOWER) || defined(RD_PERIPH_NI_TOWER)
+#if defined(RD_SYSCTRL_NOC_S3) || defined(RD_PERIPH_NOC_S3)
 /*
- * Initializes the ATU region before configuring the NI-Tower. This function
- * maps the physical base address of the NI-Tower instance received as the
- * parameter to a logical address HOST_NI_TOWER_BASE.
+ * Initializes the ATU region before configuring the NoC S3. This function
+ * maps the physical base address of the NoC S3 instance received as the
+ * parameter to a logical address HOST_NOC_S3_BASE.
  */
-static int ni_tower_pre_init(uint64_t ni_tower_phys_address)
+static int noc_s3_pre_init(uint64_t noc_s3_phys_address)
 {
     enum atu_error_t atu_err;
     enum atu_roba_t roba_value;
 
     atu_err = atu_initialize_region(
                 &ATU_DEV_S,
-                HOST_NI_TOWER_ATU_ID,
-                HOST_NI_TOWER_BASE,
-                ni_tower_phys_address,
-                HOST_NI_TOWER_SIZE);
+                HOST_NOC_S3_ATU_ID,
+                HOST_NOC_S3_BASE,
+                noc_s3_phys_address,
+                HOST_NOC_S3_SIZE);
     if (atu_err != ATU_ERR_NONE) {
         return -1;
     }
 
     roba_value = ATU_ROBA_SET_1;
-    atu_err = set_axnsc(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
+    atu_err = set_axnsc(&ATU_DEV_S, roba_value, HOST_NOC_S3_ATU_ID);
     if (atu_err != ATU_ERR_NONE) {
         return -1;
     }
 
     roba_value = ATU_ROBA_SET_0;
-    atu_err = set_axprot1(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
+    atu_err = set_axprot1(&ATU_DEV_S, roba_value, HOST_NOC_S3_ATU_ID);
     if (atu_err != ATU_ERR_NONE) {
         return -1;
     }
@@ -60,12 +60,12 @@ static int ni_tower_pre_init(uint64_t ni_tower_phys_address)
     return 0;
 }
 
-/* Un-initializes the ATU region after configuring the NI-Tower */
-static int ni_tower_post_init(void)
+/* Un-initializes the ATU region after configuring the NoC S3 */
+static int noc_s3_post_init(void)
 {
     enum atu_error_t atu_err;
 
-    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_NI_TOWER_ATU_ID);
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_NOC_S3_ATU_ID);
     if (atu_err != ATU_ERR_NONE) {
         return -1;
     }
@@ -74,15 +74,15 @@ static int ni_tower_post_init(void)
 }
 #endif
 
-#ifdef RD_SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NOC_S3
 /* Voltage domain - 0 is the parent node of SYSTOP Power domain */
-const struct ni_tower_component_node systop_parent_node = {
-    .type = NI_TOWER_SYSCTRL_SYSTOP_PARENT_TYPE,
-    .id = NI_TOWER_SYSCTRL_SYSTOP_PARENT_ID,
+const struct noc_s3_component_node systop_parent_node = {
+    .type = NOC_S3_SYSCTRL_SYSTOP_PARENT_TYPE,
+    .id = NOC_S3_SYSCTRL_SYSTOP_PARENT_ID,
 };
 
 /* List of node data to be skipped during AON discovery */
-const struct ni_tower_skip_component_discovery_node_data
+const struct noc_s3_skip_component_discovery_node_data
     skip_aon_discovery_data[] = {
     /*
      * Skip discovery of SYSTOP power domain node since the node is
@@ -98,39 +98,39 @@ const struct ni_tower_skip_component_discovery_node_data
      */
     {
         .parent_node = &systop_parent_node,
-        .node_idx = NI_TOWER_SYSCTRL_SYSTOP_IDX,
+        .node_idx = NOC_S3_SYSCTRL_SYSTOP_IDX,
     },
 };
 
 /*
- * Programs the System control NI-Tower for nodes under Always-On (AON) domain.
+ * Programs the System control NoC S3 for nodes under Always-On (AON) domain.
  */
-static int ni_tower_sysctrl_aon_init(void)
+static int noc_s3_sysctrl_aon_init(void)
 {
     int err;
 
-    err = ni_tower_pre_init(host_system_data.info.chip_ap_phys_base +
-                            HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_SYSCTRL_NOC_S3_PHYS_BASE);
     if (err != 0) {
         return err;
     }
 
-    SYSCTRL_NI_TOWER_DEV.skip_discovery_list =
-        &(struct ni_tower_skip_component_discovery_list ){
+    SYSCTRL_NOC_S3_DEV.skip_discovery_list =
+        &(struct noc_s3_skip_component_discovery_list ){
             .skip_node_data = skip_aon_discovery_data,
             .skip_node_count = ARRAY_SIZE(skip_aon_discovery_data),
         };
 
-    SYSCTRL_NI_TOWER_DEV.chip_addr_offset =
+    SYSCTRL_NOC_S3_DEV.chip_addr_offset =
             host_system_data.info.chip_ap_phys_base;
-    err = program_sysctrl_ni_tower_aon(host_system_data.info.chip_id);
+    err = program_sysctrl_noc_s3_aon(host_system_data.info.chip_id);
     if (err != 0) {
         return err;
     }
 
-    SYSCTRL_NI_TOWER_DEV.skip_discovery_list = NULL;
+    SYSCTRL_NOC_S3_DEV.skip_discovery_list = NULL;
 
-    err = ni_tower_post_init();
+    err = noc_s3_post_init();
     if (err != 0) {
         return err;
     }
@@ -139,26 +139,26 @@ static int ni_tower_sysctrl_aon_init(void)
 }
 
 /*
- * Programs the System control NI-Tower for nodes under SYSTOP domain.
+ * Programs the System control NoC S3 for nodes under SYSTOP domain.
  */
-static int ni_tower_sysctrl_systop_init(void)
+static int noc_s3_sysctrl_systop_init(void)
 {
     int err;
 
-    err = ni_tower_pre_init(host_system_data.info.chip_ap_phys_base +
-                            HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_SYSCTRL_NOC_S3_PHYS_BASE);
     if (err != 0) {
         return err;
     }
 
-    SYSCTRL_NI_TOWER_DEV.chip_addr_offset =
+    SYSCTRL_NOC_S3_DEV.chip_addr_offset =
             host_system_data.info.chip_ap_phys_base;
-    err = program_sysctrl_ni_tower_systop();
+    err = program_sysctrl_noc_s3_systop();
     if (err != 0) {
         return err;
     }
 
-    err = ni_tower_post_init();
+    err = noc_s3_post_init();
     if (err != 0) {
         return err;
     }
@@ -167,28 +167,28 @@ static int ni_tower_sysctrl_systop_init(void)
 }
 #endif
 
-#ifdef RD_PERIPH_NI_TOWER
+#ifdef RD_PERIPH_NOC_S3
 /*
- * Programs the Peripheral NI-Tower.
+ * Programs the Peripheral NoC S3.
  */
-static int ni_tower_periph_init(void)
+static int noc_s3_periph_init(void)
 {
     int err;
 
-    err = ni_tower_pre_init(host_system_data.info.chip_ap_phys_base +
-                            HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_PERIPH_NOC_S3_PHYS_BASE);
     if (err != 0) {
         return err;
     }
 
-    PERIPH_NI_TOWER_DEV.chip_addr_offset =
+    PERIPH_NOC_S3_DEV.chip_addr_offset =
         host_system_data.info.chip_ap_phys_base;
-    err = program_periph_ni_tower();
+    err = program_periph_noc_s3();
     if (err != 0) {
         return err;
     }
 
-    err = ni_tower_post_init();
+    err = noc_s3_post_init();
     if (err != 0) {
         return err;
     }
@@ -197,26 +197,26 @@ static int ni_tower_periph_init(void)
 }
 
 /*
- * Programs the Peripheral NI-Tower for ram_axim AP_BL1_RO region.
+ * Programs the Peripheral NoC S3 for ram_axim AP_BL1_RO region.
  */
-static int32_t ni_tower_periph_init_ap_bl1_post_load(void)
+static int32_t noc_s3_periph_init_ap_bl1_post_load(void)
 {
     int32_t err;
 
-    err = ni_tower_pre_init(host_system_data.info.chip_ap_phys_base +
-                            HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_PERIPH_NOC_S3_PHYS_BASE);
     if (err != 0) {
         return err;
     }
 
-    PERIPH_NI_TOWER_DEV.chip_addr_offset =
+    PERIPH_NOC_S3_DEV.chip_addr_offset =
         host_system_data.info.chip_ap_phys_base;
-    err = program_periph_ni_tower_post_ap_bl1_load();
+    err = program_periph_noc_s3_post_ap_bl1_load();
     if (err != 0) {
         return err;
     }
 
-    err = ni_tower_post_init();
+    err = noc_s3_post_init();
     if (err != 0) {
         return err;
     }
@@ -328,11 +328,11 @@ int host_system_get_info(struct host_system_info_t **info)
 
 int host_system_prepare_mscp_access(void)
 {
-#ifdef RD_SYSCTRL_NI_TOWER
+#ifdef RD_SYSCTRL_NOC_S3
     int res;
 
-    /* Configure System Control NI-Tower for nodes under AON power domain */
-    res = ni_tower_sysctrl_aon_init();
+    /* Configure System Control NoC S3 for nodes under AON power domain */
+    res = noc_s3_sysctrl_aon_init();
     if (res != 0) {
         return res;
     }
@@ -354,9 +354,9 @@ int host_system_prepare_ap_access(void)
         __WFE();
     }
 
-#ifdef RD_SYSCTRL_NI_TOWER
-    /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
-    res = ni_tower_sysctrl_systop_init();
+#ifdef RD_SYSCTRL_NOC_S3
+    /* Configure System Control NoC S3 for nodes under SYSTOP power domain */
+    res = noc_s3_sysctrl_systop_init();
     if (res != 0) {
         return 1;
     }
@@ -370,9 +370,9 @@ int host_system_prepare_ap_access(void)
     }
 #endif
 
-#ifdef RD_PERIPH_NI_TOWER
-    /* Configure Peripheral NI-Tower */
-    res = ni_tower_periph_init();
+#ifdef RD_PERIPH_NOC_S3
+    /* Configure Peripheral NoC S3 */
+    res = noc_s3_periph_init();
     if (res != 0) {
         return 1;
     }
@@ -392,9 +392,9 @@ int host_system_finish(void)
 
     (void)res;
 
-#ifdef RD_PERIPH_NI_TOWER
+#ifdef RD_PERIPH_NOC_S3
     /* Limit AP BL1 load region to read-only and lock the APU region */
-    res = ni_tower_periph_init_ap_bl1_post_load();
+    res = noc_s3_periph_init_ap_bl1_post_load();
     if (res != 0) {
         return 1;
     }

@@ -5,18 +5,18 @@
  *
  */
 
-#ifndef __NI_TOWER_DISCOVERY_DRV_H__
-#define __NI_TOWER_DISCOVERY_DRV_H__
+#ifndef __NOC_S3_DISCOVERY_DRV_H__
+#define __NOC_S3_DISCOVERY_DRV_H__
 
 #include "ni_tower_drv.h"
 
 #include <stdint.h>
 
 /**
- * \brief NI-Tower Discovery node structure.
+ * \brief NoC S3 Discovery node structure.
  */
-struct ni_tower_discovery_node {
-    enum ni_tower_node_type_value node_type;
+struct noc_s3_discovery_node {
+    enum noc_s3_node_type_value node_type;
     uint32_t node_id;
     uint32_t node_off_addr;
 };
@@ -25,27 +25,27 @@ struct ni_tower_discovery_node {
  * \brief Does a discovery flow search and returns subfeature offset address
  *        based on the parent component ID and type.
  *
- * \param[in]   dev                  NI-Tower struct \ref ni_tower_dev.
+ * \param[in]   dev                  NoC S3 struct \ref noc_s3_dev.
  * \param[in]   cfg_node             Root discovery node to perform discovery
- *                                   struct \ref ni_tower_discovery_node.
+ *                                   struct \ref noc_s3_discovery_node.
  * \param[in]   component_node_type  Specify the parent component type of the
  *                                   subfeature enum \ref
- *                                   ni_tower_node_type_value.
+ *                                   noc_s3_node_type_value.
  * \param[in]   component_node_id    Specify the parent component id of the
  *                                   subfeature.
  * \param[in]   subfeature_node_type Specify the type of the subfeature node
- *                                   enum \ref ni_tower_subfeature_type_value.
+ *                                   enum \ref noc_s3_subfeature_type_value.
  * \param[out]  ret_address          Fetched offset address for the specified
  *                                   node.
  *
- * \return Returns error code as specified in enum \ref ni_tower_err.
+ * \return Returns error code as specified in enum \ref noc_s3_err.
  */
-enum ni_tower_err ni_tower_discover_offset(
-    const struct ni_tower_dev *dev,
-    const struct ni_tower_discovery_node *cfg_node,
-    const enum ni_tower_node_type_value component_node_type,
+enum noc_s3_err noc_s3_discover_offset(
+    const struct noc_s3_dev *dev,
+    const struct noc_s3_discovery_node *cfg_node,
+    const enum noc_s3_node_type_value component_node_type,
     const uint32_t component_node_id,
-    const enum ni_tower_subfeature_type_value subfeature_node_type,
+    const enum noc_s3_subfeature_type_value subfeature_node_type,
     uint32_t *ret_off_addr);
 
-#endif /* __NI_TOWER_DISCOVERY_DRV_H__ */
+#endif /* __NOC_S3_DISCOVERY_DRV_H__ */

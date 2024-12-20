@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __NI_TOWER_RSE_DRV_H__
-#define __NI_TOWER_RSE_DRV_H__
+#ifndef __NOC_S3_RSE_DRV_H__
+#define __NOC_S3_RSE_DRV_H__
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,61 +17,61 @@
 #include "psam/ni_tower_psam_drv.h"
 
 /**
- * \brief NI-Tower PSAM config structure
+ * \brief NoC S3 PSAM config structure
  */
-struct ni_tower_psam_cfgs {
+struct noc_s3_psam_cfgs {
     /* Pointer to the PSAM device configuration */
-    const struct ni_tower_component_node* component;
+    const struct noc_s3_component_node* component;
     /* Number of non-hashed regions that needs to be configured */
     const uint32_t nh_region_count;
     /* List of all region configuration information */
-    const struct ni_tower_psam_reg_cfg_info* regions;
+    const struct noc_s3_psam_reg_cfg_info* regions;
     /* Whether to add chip address offset to the memory map regions */
     const bool add_chip_addr_offset;
 };
 
 /**
- * \brief NI-Tower APU config structure
+ * \brief NoC S3 APU config structure
  */
-struct ni_tower_apu_cfgs {
+struct noc_s3_apu_cfgs {
     /* Pointer to the APU device configuration */
-    const struct ni_tower_component_node* component;
+    const struct noc_s3_component_node* component;
     /* Number of address regions that needs to be configured */
     const uint32_t region_count;
     /* List of all region configuration information */
-    const struct ni_tower_apu_reg_cfg_info* regions;
+    const struct noc_s3_apu_reg_cfg_info* regions;
     /* Whether to add chip address offset to the memory map regions */
     const bool add_chip_addr_offset;
 };
 
 /**
- * \brief Program NI-Tower PSAM from PSAM configs
+ * \brief Program NoC S3 PSAM from PSAM configs
  *
- * \param[in]   dev               NI-Tower struct \ref ni_tower_dev.
+ * \param[in]   dev               NoC S3 struct \ref noc_s3_dev.
  * \param[in]   psam_table        Array of all PSAM configs for a particular
- *                                NI-Tower \ref ni_tower_psam_cfgs.
+ *                                NoC S3 \ref noc_s3_psam_cfgs.
  * \param[in]   psam_table_count  Number of PSAM that needs to be configured.
  *
- * \return Returns error code as specified in \ref ni_tower_err
+ * \return Returns error code as specified in \ref noc_s3_err
  */
-enum ni_tower_err ni_tower_program_psam_table(
-    const struct ni_tower_dev *dev,
-    const struct ni_tower_psam_cfgs psam_table[],
+enum noc_s3_err noc_s3_program_psam_table(
+    const struct noc_s3_dev *dev,
+    const struct noc_s3_psam_cfgs psam_table[],
     const uint32_t psam_table_count);
 
 /**
- * \brief Program NI-Tower APU from APU configs
+ * \brief Program NoC S3 APU from APU configs
  *
- * \param[in]   dev               NI-Tower struct \ref ni_tower_dev.
+ * \param[in]   dev               NoC S3 struct \ref noc_s3_dev.
  * \param[in]   apu_table         Array of all APU configs for a particular
- *                                NI-Tower \ref ni_tower_apu_cfgs.
+ *                                NoC S3 \ref noc_s3_apu_cfgs.
  * \param[in]   apu_table_count   Number of APUs that needs to be configured.
  *
- * \return Returns error code as specified in \ref ni_tower_err
+ * \return Returns error code as specified in \ref noc_s3_err
  */
-enum ni_tower_err ni_tower_program_apu_table(
-    const struct ni_tower_dev *dev,
-    const struct ni_tower_apu_cfgs apu_table[],
+enum noc_s3_err noc_s3_program_apu_table(
+    const struct noc_s3_dev *dev,
+    const struct noc_s3_apu_cfgs apu_table[],
     const uint32_t apu_table_count);
 
-#endif /* __NI_TOWER_RSE_DRV_H__ */
+#endif /* __NOC_S3_RSE_DRV_H__ */

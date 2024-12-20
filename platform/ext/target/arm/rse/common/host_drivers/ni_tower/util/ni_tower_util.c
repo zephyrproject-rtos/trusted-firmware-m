@@ -8,9 +8,9 @@
 
 #include <stdbool.h>
 
-#ifdef NI_TOWER_PRETTY_PRINT_LOG_ENABLED
-enum ni_tower_err ni_tower_sorted_add_entry(
-        struct ni_tower_sorted_region_list *list,
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+enum noc_s3_err noc_s3_sorted_add_entry(
+        struct noc_s3_sorted_region_list *list,
         uint32_t region,
         uint64_t address)
 {
@@ -32,22 +32,22 @@ enum ni_tower_err ni_tower_sorted_add_entry(
     list->sorted_regions[r_idx].address = address;
     list->sorted_region_count += 1;
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }
 #endif
 
-enum ni_tower_err ni_tower_check_region_overlaps(uint64_t region_base_1,
-                                                 uint64_t region_end_1,
-                                                 uint64_t region_base_2,
-                                                 uint64_t region_end_2)
+enum noc_s3_err noc_s3_check_region_overlaps(uint64_t region_base_1,
+                                             uint64_t region_end_1,
+                                             uint64_t region_base_2,
+                                             uint64_t region_end_2)
 {
     if (region_base_2 > region_end_1) {
-        return NI_TOWER_SUCCESS;
+        return NOC_S3_SUCCESS;
     } else if (region_base_2 >= region_base_1) {
-        return NI_TOWER_ERR_REGION_OVERLAPS;
+        return NOC_S3_ERR_REGION_OVERLAPS;
     } else if (region_end_2 >= region_base_1) {
-        return NI_TOWER_ERR_REGION_OVERLAPS;
+        return NOC_S3_ERR_REGION_OVERLAPS;
     }
 
-    return NI_TOWER_SUCCESS;
+    return NOC_S3_SUCCESS;
 }

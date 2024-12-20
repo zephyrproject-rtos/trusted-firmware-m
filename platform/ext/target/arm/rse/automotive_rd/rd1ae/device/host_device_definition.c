@@ -26,24 +26,24 @@
 #include "host_base_address.h"
 #include "platform_base_address.h"
 
-#ifdef PLATFORM_HAS_NI_TOWER
-/* System Control NI-Tower device */
-struct ni_tower_dev SYSCTRL_NI_TOWER_DEV = {
-    .periphbase = HOST_NI_TOWER_BASE,
-    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+#ifdef PLATFORM_HAS_NOC_S3
+/* System Control NoC S3 device */
+struct noc_s3_dev SYSCTRL_NOC_S3_DEV = {
+    .periphbase = HOST_NOC_S3_BASE,
+    .config_node_granularity = NOC_S3_64KB_CONFIG_NODES,
     .skip_discovery_list = NULL,
     .chip_addr_offset = 0,
 };
 
-/* Peripheral NI-Tower device */
-const struct ni_tower_dev PERIPH_NI_TOWER_DEV = {
-    .periphbase = HOST_NI_TOWER_BASE,
-    .config_node_granularity = NI_TOWER_64KB_CONFIG_NODES,
+/* Peripheral NoC S3 device */
+const struct noc_s3_dev PERIPH_NOC_S3_DEV = {
+    .periphbase = HOST_NOC_S3_BASE,
+    .config_node_granularity = NOC_S3_64KB_CONFIG_NODES,
     .skip_discovery_list = NULL,
     .chip_addr_offset = 0,
 };
 
-#endif /* PLATFORM_HAS_NI_TOWER */
+#endif /* PLATFORM_HAS_NOC_S3 */
 
 #ifdef PLATFORM_HOST_HAS_SCP
 struct mscp_dev_t HOST_SCP_DEV = {

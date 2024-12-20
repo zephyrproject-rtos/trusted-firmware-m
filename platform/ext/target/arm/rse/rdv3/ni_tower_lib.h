@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __NI_TOWER_LIB_H__
-#define __NI_TOWER_LIB_H__
+#ifndef __NOC_S3_LIB_H__
+#define __NOC_S3_LIB_H__
 
 #include "ni_tower_rse_drv.h"
 
@@ -16,24 +16,24 @@
 
 /*
  * Platform specific apu region initialization macro wrapper. This macros
- * returns 'struct ni_tower_apu_reg_cfg_info' definition by providing
+ * returns 'struct noc_s3_apu_reg_cfg_info' definition by providing
  * the base and end address of APU region and the associated access permission.
  */
 #define INIT_APU_REGION(base, end, perm)        \
     {                                           \
         .base_addr = base,                      \
         .end_addr = end,                        \
-        .background = NI_T_FOREGROUND,          \
+        .background = NOC_S3_FOREGROUND,        \
         .permissions = { perm, 0, 0, 0 },       \
         .entity_ids = { 0, 0, 0, 0 },           \
-        .id_valid = NI_T_ID_VALID_NONE,         \
-        .region_enable = NI_T_REGION_ENABLE,    \
-        .lock = NI_T_LOCK                       \
+        .id_valid = NOC_S3_ID_VALID_NONE,       \
+        .region_enable = NOC_S3_REGION_ENABLE,  \
+        .lock = NOC_S3_LOCK                     \
     }
 
 /*
  * Platform specific apu region initialization macro wrapper with APU ID
- * Filtering. This macro returns 'struct ni_tower_apu_reg_cfg_info' definition
+ * Filtering. This macro returns 'struct noc_s3_apu_reg_cfg_info' definition
  * by providing the base and end address of APU region and the associated
  * access permission for all four enitities.
  */
@@ -42,18 +42,18 @@
     {                                                                     \
         .base_addr = base,                                                \
         .end_addr = end,                                                  \
-        .background = NI_T_FOREGROUND,                                    \
+        .background = NOC_S3_FOREGROUND,                                  \
         .permissions = { mcp_perm, scp_perm, rse_perm, dap_perm },        \
         .entity_ids = { SYSCTRL_MCP_APU_ID, SYSCTRL_SCP_APU_ID,           \
                         SYSCTRL_RSE_APU_ID, SYSCTRL_DAP_APU_ID },         \
-        .id_valid = NI_T_ID_VALID_ALL,                                    \
-        .region_enable = NI_T_REGION_ENABLE,                              \
-        .lock = NI_T_LOCK                                                 \
+        .id_valid = NOC_S3_ID_VALID_ALL,                                  \
+        .region_enable = NOC_S3_REGION_ENABLE,                            \
+        .lock = NOC_S3_LOCK                                               \
     }
 
 /*
  * Platform specific apu region initialization macro wrapper without locking
- * the region. This macros returns 'struct ni_tower_apu_reg_cfg_info'
+ * the region. This macros returns 'struct noc_s3_apu_reg_cfg_info'
  * definition by providing the base and end address of APU region and the
  * associated access permission.
  */
@@ -61,12 +61,12 @@
     {                                               \
         .base_addr = base,                          \
         .end_addr = end,                            \
-        .background = NI_T_FOREGROUND,              \
+        .background = NOC_S3_FOREGROUND,            \
         .permissions = { perm, 0, 0, 0 },           \
         .entity_ids = { 0, 0, 0, 0 },               \
-        .id_valid = NI_T_ID_VALID_NONE,             \
-        .region_enable = NI_T_REGION_ENABLE,        \
-        .lock = NI_T_UNLOCK                         \
+        .id_valid = NOC_S3_ID_VALID_NONE,           \
+        .region_enable = NOC_S3_REGION_ENABLE,      \
+        .lock = NOC_S3_UNLOCK                       \
     }
 
 /* Interface ID of xSNI components - completer interfaces */
@@ -109,7 +109,7 @@ enum sysctrl_xMNI_ids {
     SYSCTRL_RSM_PMNI_ID,
     /* Targets SYSCTRL SMMU registers */
     SYSCTRL_TCU_PMNI_ID,
-    /* Targets the System Control NI-Tower registers (default target) */
+    /* Targets the System Control NoC S3 registers (default target) */
     SYSCTRL_CONFIG_SPACE_ID = 0xF
 };
 
@@ -148,34 +148,34 @@ enum periph_xMNI_ids {
 };
 
 /**
- * \brief Programs System Control block NI-Tower PSAM and APU for AON domain
+ * \brief Programs System Control block NoC S3 PSAM and APU for AON domain
  *
  * \param[in] chip_id  Current Chip ID
  *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_sysctrl_ni_tower_aon(uint32_t chip_id);
+int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id);
 
 /**
- * \brief Programs System Control block NI-Tower PSAM and APU for SYSTOP domain
+ * \brief Programs System Control block NoC S3 PSAM and APU for SYSTOP domain
  *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_sysctrl_ni_tower_systop(void);
+int32_t program_sysctrl_noc_s3_systop(void);
 
 /**
- * \brief Program NI-Tower peripheral block APU
+ * \brief Program NoC S3 peripheral block APU
  *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_periph_ni_tower(void);
+int32_t program_periph_noc_s3(void);
 
 /**
- * \brief Program NI-Tower peripheral block APU to lock ram region after
+ * \brief Program NoC S3 peripheral block APU to lock ram region after
  *        limiting the region as read only.
  *
  * \return Returns -1 if there is an error, else 0.
  */
-int32_t program_periph_ni_tower_post_ap_bl1_load(void);
+int32_t program_periph_noc_s3_post_ap_bl1_load(void);
 
-#endif /* __NI_TOWER_LIB_H__ */
+#endif /* __NOC_S3_LIB_H__ */

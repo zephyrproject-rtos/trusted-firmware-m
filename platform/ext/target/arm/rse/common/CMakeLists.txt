@@ -285,11 +285,11 @@ target_sources(platform_bl2
         device/source/device_definition.c
         $<$<BOOL:${RSE_DEFAULT_CLOCK_CONFIG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/rse_clocks.c>
         device/source/system_core_init.c
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/apu/ni_tower_apu_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/discovery/ni_tower_discovery_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/util/ni_tower_util.c>
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rse_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/apu/ni_tower_apu_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/discovery/ni_tower_discovery_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/util/ni_tower_util.c>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rse_drv.c>
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3/smmu_v3_drv.c>
         $<$<OR:$<BOOL:${PLATFORM_HOST_HAS_MCP}>,$<BOOL:${PLATFORM_HOST_HAS_SCP}>>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/mscp_drv/mscp_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${PLATFORM_DIR}/ext/target/arm/drivers/dma/dma350/dma350_lib.c>
@@ -326,7 +326,7 @@ target_include_directories(platform_bl2
         device/config
         device/include
         device/source/armclang
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower>
         $<$<OR:$<BOOL:${PLATFORM_HOST_HAS_MCP}>,$<BOOL:${PLATFORM_HOST_HAS_SCP}>>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/mscp_drv>
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/smmu_v3>
         native_drivers
@@ -360,7 +360,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSE_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:CMSIS_device_header="rse.h">
-        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:PLATFORM_HAS_NI_TOWER>
+        $<$<BOOL:${PLATFORM_HAS_NOC_S3}>:PLATFORM_HAS_NOC_S3>
         $<$<BOOL:${PLATFORM_HAS_SMMU_V3}>:PLATFORM_HAS_SMMU_V3>
         $<$<BOOL:${PLATFORM_HOST_HAS_MCP}>:PLATFORM_HOST_HAS_MCP>
         $<$<BOOL:${PLATFORM_HOST_HAS_SCP}>:PLATFORM_HOST_HAS_SCP>
