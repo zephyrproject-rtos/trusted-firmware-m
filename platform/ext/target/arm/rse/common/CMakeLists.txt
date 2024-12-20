@@ -238,6 +238,7 @@ target_sources(platform_s
         soft_crc/soft_crc.c
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_debug_after_reset.c>
         ./rse_permanently_disable_device.c
+        ./rse_zero_count.c
 )
 
 target_link_libraries(platform_s
@@ -346,6 +347,7 @@ target_sources(platform_bl2
         $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/staged_boot.c>
         $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash_memcpy.c>
         ./rse_permanently_disable_device.c
+        ./rse_zero_count.c
 )
 
 target_include_directories(platform_bl2
@@ -455,6 +457,7 @@ target_sources(platform_bl1_1
         ./device/source/device_definition.c
         ./bl1/bl1_1_debug.c
         ./rse_permanently_disable_device.c
+        ./rse_zero_count.c
 )
 
 target_compile_definitions(platform_bl1_1

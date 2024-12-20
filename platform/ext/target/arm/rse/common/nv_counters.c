@@ -20,6 +20,7 @@
 #include "rse_nv_counter_mapping.h"
 #include "rse_otp_layout.h"
 #include "rse_permanently_disable_device.h"
+#include "rse_zero_count.h"
 
 #include <limits.h>
 #include <string.h>
@@ -42,45 +43,6 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
 }
 
 #ifdef RSE_BIT_PROGRAMMABLE_OTP
-#ifdef INTEGRITY_CHECKER_S
-static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
-                                           uint32_t *zero_bits)
-{
-    enum integrity_checker_error_t ic_err;
-
-    ic_err = integrity_checker_compute_value(&INTEGRITY_CHECKER_DEV_S,
-                                             INTEGRITY_CHECKER_MODE_ZERO_COUNT,
-                                             addr, len, zero_bits, sizeof(uint32_t),
-                                             NULL);
-
-    if (ic_err != INTEGRITY_CHECKER_ERROR_NONE) {
-        return (enum tfm_plat_err_t)ic_err;
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-#else
-static enum tfm_plat_err_t count_zero_bits(const uint32_t *addr, uint32_t len,
-                                           uint32_t *zero_bits)
-{
-    uint32_t idx;
-    uint32_t word;
-    uint32_t bit_index;
-
-    *zero_bits = 0;
-
-    for (idx = 0; idx < len / sizeof(uint32_t); idx ++) {
-        word = addr[idx];
-
-        for (bit_index = 0; bit_index < sizeof(word) * 8; bit_index++) {
-            *zero_bits += 1 - ((word >> bit_index) & 1);
-        }
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-#endif /* INTEGRITY_CHECKER_DEV_S */
-
 static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
                                             uint8_t *val)
 {
@@ -102,7 +64,7 @@ static enum tfm_plat_err_t read_otp_counter(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    err = count_zero_bits(counter_value, counter_size, &count);
+    err = rse_count_zero_bits((uint8_t *)counter_value, counter_size, &count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

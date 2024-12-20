@@ -25,17 +25,6 @@ static const struct rse_dm_provisioning_values_t *values =
     &((const struct rse_combined_provisioning_values_t *)PROVISIONING_BUNDLE_VALUES_START)->dm;
 #endif
 
-static uint32_t calc_uint32_zero_count(uint32_t val)
-{
-    uint32_t zero_bits = 0;
-
-    for (uint32_t bit_index = 0; bit_index < sizeof(uint32_t) * 8; bit_index++) {
-        zero_bits += 1 - ((val >> bit_index) & 1);
-    }
-
-    return zero_bits;
-}
-
 #ifndef RSE_COMBINED_PROVISIONING_BUNDLES
 __attribute__((section("DO_PROVISION"))) enum tfm_plat_err_t do_provision(void) {
 #else
@@ -74,7 +63,13 @@ enum tfm_plat_err_t do_dm_provision(void) {
     if (lcm_err != LCM_ERROR_NONE) {
         return (enum tfm_plat_err_t)lcm_err;
     }
-    zero_count = calc_uint32_zero_count(P_RSE_OTP_HEADER->dm_area_info.raw_data);
+    err = rse_count_zero_bits((uint32_t *)&P_RSE_OTP_HEADER->dm_area_info,
+                              sizeof(P_RSE_OTP_HEADER->dm_area_info),
+                              &zero_count);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     lcm_err = lcm_otp_write(&LCM_DEV_S,
                             offsetof(struct rse_otp_header_area_t, dm_area_info_zero_count),
                             sizeof(zero_count),
@@ -91,7 +86,13 @@ enum tfm_plat_err_t do_dm_provision(void) {
     if (lcm_err != LCM_ERROR_NONE) {
         return (enum tfm_plat_err_t)lcm_err;
     }
-    zero_count = calc_uint32_zero_count(P_RSE_OTP_HEADER->dynamic_area_info.raw_data);
+    err = rse_count_zero_bits((uint32_t *)&P_RSE_OTP_HEADER->dynamic_area_info,
+                              sizeof(P_RSE_OTP_HEADER->dynamic_area_info),
+                              &zero_count);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     lcm_err = lcm_otp_write(&LCM_DEV_S,
                             offsetof(struct rse_otp_header_area_t, dynamic_area_info_zero_count),
                             sizeof(zero_count),
