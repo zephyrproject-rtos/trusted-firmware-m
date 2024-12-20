@@ -176,12 +176,6 @@ static void add_points(cc3xx_ec_curve_t *curve, cc3xx_ec_point_projective *p,
         return cc3xx_lowlevel_ec_copy_projective_point(p, res);
     }
 
-    if ((p->x == q->x || cc3xx_lowlevel_pka_are_equal(p->x, q->x))
-     && (p->y == q->y || cc3xx_lowlevel_pka_are_equal(p->y, q->y))
-     && (p->z == q->z || cc3xx_lowlevel_pka_are_equal(p->z, q->z))) {
-        return double_point(curve, p, res);
-    }
-
     cc3xx_pka_reg_id_t tmp_u1 = cc3xx_lowlevel_pka_allocate_reg();
     cc3xx_pka_reg_id_t tmp_u2 = cc3xx_lowlevel_pka_allocate_reg();
     cc3xx_pka_reg_id_t tmp_s1 = cc3xx_lowlevel_pka_allocate_reg();
@@ -206,6 +200,34 @@ static void add_points(cc3xx_ec_curve_t *curve, cc3xx_ec_point_projective *p,
     cc3xx_lowlevel_pka_mod_mul(p->z, p->z, tmp_s2);
     cc3xx_lowlevel_pka_mod_mul(tmp_s2, p->z, tmp_s2);
     cc3xx_lowlevel_pka_mod_mul(tmp_s2, q->y, tmp_s2);
+
+    if (cc3xx_lowlevel_pka_are_equal(tmp_u1, tmp_u2)) {
+        /* P == Q iff U1 == U2 && S1 == S2 */
+        if (cc3xx_lowlevel_pka_are_equal(tmp_s1, tmp_s2)) {
+
+            cc3xx_lowlevel_pka_free_reg(tmp_s2);
+            cc3xx_lowlevel_pka_free_reg(tmp_s1);
+            cc3xx_lowlevel_pka_free_reg(tmp_u2);
+            cc3xx_lowlevel_pka_free_reg(tmp_u1);
+
+            /* If P == Q, P + Q = 2P */
+            return double_point(curve, p, res);
+        }
+        /* P == -Q iff U1 == U2 && S1 == -S2*/
+        cc3xx_lowlevel_pka_mod_neg(tmp_s2, tmp_s2);
+        if (cc3xx_lowlevel_pka_are_equal(tmp_s1, tmp_s2)) {
+
+            cc3xx_lowlevel_pka_free_reg(tmp_s2);
+            cc3xx_lowlevel_pka_free_reg(tmp_s1);
+            cc3xx_lowlevel_pka_free_reg(tmp_u2);
+            cc3xx_lowlevel_pka_free_reg(tmp_u1);
+
+            /* if P == -Q, P + Q = 0, i.e. the infinity point */
+            return cc3xx_lowlevel_ec_projective_point_make_infinity(res);
+        }
+        /* Restore the original value of S2 */
+        cc3xx_lowlevel_pka_mod_neg(tmp_s2, tmp_s2);
+    }
 
     /* tmp_u2 is never used after this point, so we can use it to store the h
      * intermediate value
