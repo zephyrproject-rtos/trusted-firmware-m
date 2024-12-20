@@ -59,7 +59,7 @@ bool cc3xx_lowlevel_ec_projective_point_is_infinity(cc3xx_ec_point_projective *p
 /**
  * @brief                        Convert an affine point to a Jacobian-form
  *                               projective point. Xa = Xj / Zj^2,
- *                               Ya = Yj / Zj^2. Should not be used on secret
+ *                               Ya = Yj / Zj^3. Should not be used on secret
  *                               data.
  *
  * @param[in]  curve             A pointer to an initialized curve object
@@ -73,7 +73,7 @@ void cc3xx_lowlevel_ec_affine_to_jacobian(cc3xx_ec_curve_t *curve,
 /**
  * @brief                        Convert an affine point to a Jacobian-form
  *                               projective point, with a random Z coordinate.
- *                               Xa = Xj / Zj^2, Ya = Yj / Zj^2.
+ *                               Xa = Xj / Zj^2, Ya = Yj / Zj^3.
  *
  * @note                         If DPA mitigations are disabled by config, this
  *                               function falls back to having a Z coordinate of
@@ -90,7 +90,7 @@ void cc3xx_lowlevel_ec_affine_to_jacobian_with_random_z(cc3xx_ec_curve_t *curve,
 /**
  * @brief                        Convert a Jacobian-form projective point to an
  *                               Affine point.
- *                               Xa = Xj / Zj^2, Ya = Yj / Zj^2.
+ *                               Xa = Xj / Zj^2, Ya = Yj / Zj^3.
  *
  * @param[in]  curve             A pointer to an initialized curve object
  * @param[in]  p                 A pointer to the Jacobian point to convert.
