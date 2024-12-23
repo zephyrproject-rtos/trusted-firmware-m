@@ -5,5 +5,4 @@
 #
 #-------------------------------------------------------------------------------
 
-include(${MPS4_COMMON_DIR}/check_config.cmake)
-tfm_invalid_config(NOT ETHOSU_ARCH MATCHES "U65")
+include(${CORSTONE300_COMMON_DIR}/check_config.cmake)
