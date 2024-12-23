@@ -10,6 +10,12 @@
 
 #include <stdint.h>
 
+#if TFM_UNIQUE_ERROR_CODES == 1
+#include "error_codes_mapping.h"
+#else
+#define CC3XX_ERROR_BASE 0x1u
+#endif /* TFM_UNIQUE_ERROR_CODES */
+
 typedef int cc3xx_err_t;
 
 #ifdef __cplusplus
@@ -17,7 +23,7 @@ extern "C" {
 #endif
 enum cc3xx_error {
     CC3XX_ERR_SUCCESS = 0,
-    CC3XX_ERR_FAULT_DETECTED,
+    CC3XX_ERR_FAULT_DETECTED = CC3XX_ERROR_BASE,
     CC3XX_ERR_BUFFER_OVERFLOW,
     CC3XX_ERR_INVALID_LCS,
     CC3XX_ERR_INVALID_DATA,

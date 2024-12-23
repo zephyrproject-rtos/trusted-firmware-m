@@ -44,4 +44,8 @@
 #define INTEGRITY_CHECKER_ERROR_BASE 0x90000000
 #endif
 
+#ifndef CC3XX_ERROR_BASE
+#define CC3XX_ERROR_BASE 0xb0000000
+#endif
+
 #endif /* __ERROR_CODES_MAPPING_H__ */

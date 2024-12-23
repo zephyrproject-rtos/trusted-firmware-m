@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-
+#include <stdio.h>
 #include "cc3xx_test_ecdsa.h"
 
 #include "cc3xx_ecdsa.h"
@@ -3354,8 +3354,10 @@ static const char * const curve_names[_CURVE_ID_MAX] = {
 #undef X
 
 #define X(name) [CC3XX_ERR_##name] = #name,
-static const char * const err_names[_ERROR_MAX] = {
+static const char * const err_names[] = {
     X(SUCCESS)
+#undef X
+#define X(name) [CC3XX_ERR_##name - (CC3XX_ERR_FAULT_DETECTED - 1)] = #name,
     X(FAULT_DETECTED)
     X(BUFFER_OVERFLOW)
     X(INVALID_LCS)
@@ -3387,6 +3389,19 @@ static const char * const err_names[_ERROR_MAX] = {
     X(DCU_MASK_MISMATCH)
 };
 #undef X
+
+static inline const char *get_err_name(cc3xx_err_t err)
+{
+#if TFM_UNIQUE_ERROR_CODES == 1
+    if (err == CC3XX_ERR_SUCCESS) {
+        return err_names[0];
+    }
+
+    return err_names[err - (CC3XX_ERROR_BASE - 1)];
+#else
+    return err_names[err];
+#endif
+}
 
 static int curve_id_to_name(cc3xx_ec_curve_id_t curve_id, const char **curve_name)
 {
@@ -3668,7 +3683,7 @@ int cc3xx_test_ecdsa_getpub(void)
             case 3:
                 if (err != CC3XX_ERR_ECDSA_INVALID_KEY) {
                     printf("%s case %d expected ECDSA_INVALID_KEY, returned %s\r\n",
-                                curve_name, j, err < _ERROR_MAX ? err_names[err] : NULL);
+                                curve_name, j, err < _ERROR_MAX ? get_err_name(err) : NULL);
                     observed_mismatches++;
                 }
                 break;
@@ -3676,7 +3691,7 @@ int cc3xx_test_ecdsa_getpub(void)
             case 2:
                 if (err != CC3XX_ERR_SUCCESS) {
                     printf("%s case %d expected SUCCESS, returned %s\r\n",
-                                curve_name, j, err < _ERROR_MAX ? err_names[err] : NULL);
+                                curve_name, j, err < _ERROR_MAX ? get_err_name(err) : NULL);
                     observed_mismatches++;
                 };
                 break;
