@@ -49,6 +49,13 @@ void cc3xx_lowlevel_ec_copy_projective_point(cc3xx_ec_point_projective *p,
     cc3xx_lowlevel_pka_copy(p->z, res->z);
 }
 
+void cc3xx_lowlevel_ec_projective_point_make_infinity(cc3xx_ec_point_projective *res)
+{
+    cc3xx_lowlevel_pka_clear(res->x);                  /* x = 0 */
+    cc3xx_lowlevel_pka_set_to_power_of_two(res->y, 0); /* y = 2^0 = 1 */
+    cc3xx_lowlevel_pka_clear(res->z);                  /* z = 0 */
+}
+
 void cc3xx_lowlevel_ec_affine_to_jacobian_with_random_z(cc3xx_ec_curve_t *curve,
                                                         cc3xx_ec_point_affine *p,
                                                         cc3xx_ec_point_projective *res)

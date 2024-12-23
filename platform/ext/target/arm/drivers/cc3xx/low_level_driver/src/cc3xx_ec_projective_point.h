@@ -45,6 +45,16 @@ void cc3xx_lowlevel_ec_free_projective_point(cc3xx_ec_point_projective *p);
  */
 void cc3xx_lowlevel_ec_copy_projective_point(cc3xx_ec_point_projective *p,
                                              cc3xx_ec_point_projective *res);
+/**
+ * @brief                        Make a projective EC point equal to infinity,
+ *                               i.e. (0, 1, 0)
+ *
+ * @note                         Using (0, 1, 0) ensures the point is on the curve
+ *
+ * @param[out] res               A pointer to the projective point to make equal to
+ *                               the infinity point
+ */
+void cc3xx_lowlevel_ec_projective_point_make_infinity(cc3xx_ec_point_projective *res);
 
 /**
  * @brief                        Test if a projective point is infinity.
