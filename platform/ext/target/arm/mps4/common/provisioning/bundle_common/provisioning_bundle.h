@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,7 +40,6 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
     union __attribute__((__packed__)) {
         struct __attribute__((__packed__)) cm_provisioning_data {
             uint8_t bl1_2_image_hash[32];
-            uint8_t bl2_image_hash[32];
             uint8_t bl1_2_image[BL1_2_CODE_SIZE];
             uint32_t sam_config[OTP_SAM_CONFIGURATION_SIZE_BYTES];
             uint8_t guk[32];

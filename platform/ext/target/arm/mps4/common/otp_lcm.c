@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -57,7 +57,6 @@ __PACKED_STRUCT plat_user_area_layout_t {
              */
                 uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE_BYTES];
                 uint32_t cca_system_properties;
-                uint32_t bl2_image_hash[8];
 
                 uint32_t cm_config_flags;
             } cm_locked;
@@ -194,7 +193,6 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_OFFSET(bl1_2_image),
     [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
-    [PLAT_OTP_ID_BL2_IMAGE_HASH] = USER_AREA_OFFSET(cm_locked.bl2_image_hash),
     [PLAT_OTP_ID_BL1_2_IMAGE_HASH] = OTP_OFFSET(rotpk),
     [PLAT_OTP_ID_BL1_ROTPK_0] = USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
 
@@ -291,7 +289,6 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_SIZE(bl1_2_image),
     [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_SIZE(cm_locked.bl1_2_image_len),
-    [PLAT_OTP_ID_BL2_IMAGE_HASH] = USER_AREA_SIZE(cm_locked.bl2_image_hash),
     [PLAT_OTP_ID_BL1_2_IMAGE_HASH] = OTP_SIZE(rotpk),
     [PLAT_OTP_ID_BL1_ROTPK_0] = USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
 

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,7 +28,6 @@ parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument("--provisioning_bundle_axf", help="the input provisioning bundle elf/axf", required=True)
 parser.add_argument("--magic", help="the magic constant to insert at the start and end", required=True)
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=False)
-parser.add_argument("--bl2_signed_hash_input_file", help="the hash of the final bl2 image", required=False)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=False)
 parser.add_argument("--tp_mode", help="the test or production mode", required=True)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=False)
@@ -73,12 +72,6 @@ else:
 with open(args.key_file, "rb") as in_file:
     input_key = in_file.read()
 
-if args.bl2_signed_hash_input_file:
-    with open(args.bl2_signed_hash_input_file, "rb") as in_file:
-        bl2_signed_hash = in_file.read()
-else:
-    bl2_signed_hash = bytes(0)
-
 if args.bl1_2_padded_hash_input_file:
     with open(args.bl1_2_padded_hash_input_file, "rb") as in_file:
         bl1_2_padded_hash = in_file.read()
@@ -93,7 +86,6 @@ else:
 
 patch_bundle = struct_pack([
     bl1_2_padded_hash,
-    bl2_signed_hash,
     bl1_2,
 ])
 

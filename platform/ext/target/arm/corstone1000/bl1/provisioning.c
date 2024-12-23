@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +24,6 @@ __PACKED_STRUCT bl1_assembly_and_test_provisioning_data_t {
     uint8_t bl2_encryption_key[32];
     uint8_t guk[32];
     uint8_t bl1_2_image_hash[32];
-    uint8_t bl2_image_hash[32];
     uint8_t bl1_2_image[BL1_2_CODE_SIZE];
     uint8_t bl1_2_image_len[4];
     uint8_t bl1_rotpk_0[56];
@@ -88,13 +87,6 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
     err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_BL2_ENCRYPTION,
                              sizeof(bl1_assembly_and_test_prov_data->bl2_encryption_key),
                              bl1_assembly_and_test_prov_data->bl2_encryption_key);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
-        return err;
-    }
-
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_IMAGE_HASH,
-                             sizeof(bl1_assembly_and_test_prov_data->bl2_image_hash),
-                             bl1_assembly_and_test_prov_data->bl2_image_hash);
     if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
         return err;
     }

@@ -104,13 +104,11 @@ get_target_property(bin_dir bl2 RUNTIME_OUTPUT_DIRECTORY)
 add_custom_target(bl2_signed_bin
     ALL
     SOURCES bl2_signed.bin
-    SOURCES bl2_signed_hash.bin
     SOURCES ${bin_dir}/bl2_signed.bin
-    SOURCES ${bin_dir}/bl2_signed_hash.bin
 )
 
-add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
-    OUTPUT ${bin_dir}/bl2_signed.bin ${bin_dir}/bl2_signed_hash.bin
+add_custom_command(OUTPUT bl2_signed.bin
+    OUTPUT ${bin_dir}/bl2_signed.bin
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/bl2_image_config.pickle
     DEPENDS bl2_bin

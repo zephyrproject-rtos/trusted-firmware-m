@@ -439,7 +439,6 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
     DEPENDS ${TFM_BL2_ENCRYPTION_KEY_PATH}
     DEPENDS ${TFM_GUK_PATH}
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
-    DEPENDS $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
     bl1_2_padded_bin bl2_signed_bin
     DEPENDS ${CMAKE_SOURCE_DIR}/bl1/bl1_1/scripts/create_provisioning_bundle.py
@@ -448,7 +447,6 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
                     --bl2_signing_key_input_file ${TFM_BL1_2_CM_SIGNING_KEY_PATH}
                     --guk_input_file ${TFM_GUK_PATH}
                     --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
-                    --bl2_signed_hash_input_file $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
                     --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
                     --bundle_output_file bl1_provisioning_bundle.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl1_provisioning_bundle.bin $<TARGET_FILE_DIR:bl1_1>

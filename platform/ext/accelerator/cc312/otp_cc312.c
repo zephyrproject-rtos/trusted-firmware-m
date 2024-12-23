@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -226,7 +226,6 @@ __PACKED_STRUCT plat_otp_layout_t {
 #ifdef PLATFORM_DEFAULT_BL1
             uint16_t bl2_encryption_key_zero_bits;
             uint16_t bl1_2_image_hash_zero_bits;
-            uint16_t bl2_image_hash_zero_bits;
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
             uint16_t secure_debug_pk_zero_bits;
@@ -252,7 +251,6 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t bl2_encryption_key[32];
         uint8_t bl1_2_image_hash[32];
-        uint8_t bl2_image_hash[32];
 
         uint8_t bl1_2_image[BL1_2_CODE_SIZE];
         uint8_t bl1_2_image_len[4];
@@ -587,13 +585,6 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-    err = verify_zero_bits_count(otp->bl2_image_hash,
-                                 sizeof(otp->bl2_image_hash),
-                                 (uint8_t*)&otp->bl2_image_hash_zero_bits);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
 
@@ -759,9 +750,6 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
         return otp_read(otp->bl1_2_image_hash,
                         sizeof(otp->bl1_2_image_hash), out_len, out);
-    case PLAT_OTP_ID_BL2_IMAGE_HASH:
-        return otp_read(otp->bl2_image_hash,
-                        sizeof(otp->bl2_image_hash), out_len, out);
     case PLAT_OTP_ID_BL1_2_IMAGE:
         return otp_read(otp->bl1_2_image,
                         sizeof(otp->bl1_2_image), out_len, out);
@@ -999,10 +987,6 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->bl1_2_image_hash,
                          sizeof(otp->bl1_2_image_hash), in_len, in,
                          (uint8_t*)&otp->bl1_2_image_hash_zero_bits);
-    case PLAT_OTP_ID_BL2_IMAGE_HASH:
-        return otp_write(otp->bl2_image_hash,
-                         sizeof(otp->bl2_image_hash), in_len, in,
-                         (uint8_t*)&otp->bl2_image_hash_zero_bits);
     case PLAT_OTP_ID_BL1_2_IMAGE:
         return otp_write(otp->bl1_2_image,
                          sizeof(otp->bl1_2_image), in_len, in, NULL);
@@ -1127,9 +1111,6 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         break;
     case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
         *size = sizeof(otp->bl1_2_image_hash);
-        break;
-    case PLAT_OTP_ID_BL2_IMAGE_HASH:
-        *size = sizeof(otp->bl2_image_hash);
         break;
     case PLAT_OTP_ID_BL1_2_IMAGE:
         *size = sizeof(otp->bl1_2_image);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -72,13 +72,6 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
                                        sizeof(generated_key_buf));
     if (int_err != 0) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_IMAGE_HASH,
-                             sizeof(data.bl2_image_hash),
-                             data.bl2_image_hash);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
     }
 
     new_lcs = PLAT_OTP_LCS_PSA_ROT_PROVISIONING;

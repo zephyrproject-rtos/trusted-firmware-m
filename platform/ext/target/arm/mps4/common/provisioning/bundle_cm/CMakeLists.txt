@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -95,14 +95,12 @@ add_custom_command(OUTPUT cm_provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
     bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
-    DEPENDS $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../create_provisioning_bundle.py
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf cm_provisioning_bundle.axf
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../create_provisioning_bundle.py
                     --provisioning_bundle_axf $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
                     --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                     --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
-                    --bl2_signed_hash_input_file $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
                     --bundle_output_file cm_provisioning_bundle.bin
                     --magic "0xC0DEFEED"
                     --tp_mode ${TP_MODE}

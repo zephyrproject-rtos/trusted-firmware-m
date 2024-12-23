@@ -25,7 +25,6 @@ parser.add_argument("--bl2_encryption_key_input_file", help="the key that BL2 wa
 parser.add_argument("--bl2_signing_key_input_file", help="the key that BL2 was signed with", required=False)
 parser.add_argument("--guk_input_file", help="the GUK", required=True)
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=True)
-parser.add_argument("--bl2_signed_hash_input_file", help="the hash of the final bl2 image", required=True)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=True)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=True)
 args = parser.parse_args()
@@ -38,9 +37,6 @@ with open(args.guk_input_file, "rb") as in_file:
 
 with open(args.bl1_2_padded_hash_input_file, "rb") as in_file:
     bl1_2_padded_hash = in_file.read()
-
-with open(args.bl2_signed_hash_input_file, "rb") as in_file:
-    bl2_signed_hash = in_file.read()
 
 with open(args.bl1_2_input_file, "rb") as in_file:
     bl1_2 = in_file.read()
@@ -59,7 +55,6 @@ bundle = struct_pack([
     bl1_2_encryption_key,
     guk,
     bl1_2_padded_hash,
-    bl2_signed_hash,
     bl1_2,
     bl1_2_image_len,
     bl1_rotpk_0
