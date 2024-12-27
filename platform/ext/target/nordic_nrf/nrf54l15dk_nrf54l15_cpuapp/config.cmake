@@ -8,5 +8,5 @@
 include(${PLATFORM_PATH}/common/nrf54l15/config.cmake)
 
 set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secure UART1" FORCE)
-set(SECURE_UART30                       OFF         CACHE BOOL      "Enable secure UART1" FORCE)
-set(BL2                                 OFF         CACHE BOOL      "Enable secure UART1" FORCE)
+set(SECURE_UART30                       OFF         CACHE BOOL      "Enable secure UART30" FORCE)
+set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2" FORCE)
