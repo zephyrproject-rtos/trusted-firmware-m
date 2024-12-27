@@ -31,18 +31,20 @@ target_add_scatter_file(cm_provisioning_bundle
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.ld>
     $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.icf>
+    $<$<C_COMPILER_ID:Clang>:${CMAKE_CURRENT_SOURCE_DIR}/../bundle_common/provisioning_bundle.ldc>
 )
 
 target_link_options(cm_provisioning_bundle
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/cm_provisioning_bundle.map>
-        $<$<C_COMPILER_ID:ARMClang>:--map>
+        $<$<C_COMPILER_ID:ARMClang>:--map --entry=do_provision>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/cm_provisioning_bundle.map>
+        $<$<C_COMPILER_ID:Clang>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/cm_provisioning_bundle.map>
 )
 
 target_link_options(cm_provisioning_bundle
     PRIVATE
-        --entry=do_provision
+        $<$<NOT:$<C_COMPILER_ID:Clang>>:--entry=do_provision>
 )
 
 target_sources(cm_provisioning_bundle

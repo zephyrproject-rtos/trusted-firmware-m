@@ -26,6 +26,7 @@ target_link_options(bl1_2
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl1_2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl1_2.map>
+        $<$<C_COMPILER_ID:Clang>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl1_2.map>
 )
 
 target_compile_options(bl1_2
@@ -87,6 +88,7 @@ target_compile_options(signing_layout_bl2
         $<$<C_COMPILER_ID:GNU>:-E\;-xc>
         $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
         $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_bl2>>
+        $<$<C_COMPILER_ID:Clang>:-E\;-xc>
 )
 target_link_libraries(signing_layout_bl2
     PRIVATE
@@ -106,7 +108,7 @@ add_custom_target(bl2_signed_bin
 
 add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
     OUTPUT ${bin_dir}/bl2_signed.bin ${bin_dir}/bl2_signed_hash.bin
-    DEPENDS $<TARGET_FILE_DIR:bl2>/bl2.bin bl2_bin signing_layout_bl2
+    DEPENDS bl2_bin signing_layout_bl2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
                     --input_file $<TARGET_FILE_DIR:bl2>/bl2.bin

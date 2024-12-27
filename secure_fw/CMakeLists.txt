@@ -95,6 +95,7 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
     COMPILE_FLAGS $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
+    COMPILE_FLAGS $<$<C_COMPILER_ID:Clang>:-Wno-unused-parameter>
 )
 
 target_sources(tfm_sprt

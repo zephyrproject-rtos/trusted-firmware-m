@@ -33,6 +33,7 @@ if(${PLATFORM_DEFAULT_PROV_LINKER_SCRIPT})
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ld>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.icf>
+        $<$<C_COMPILER_ID:Clang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_bundle.ldc>
     )
 endif()
 
@@ -41,6 +42,7 @@ target_link_options(provisioning_bundle
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/provisioning_bundle.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/provisioning_bundle.map>
+        $<$<C_COMPILER_ID:Clang>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/provisioning_bundle.map>
 )
 
 target_link_options(provisioning_bundle

@@ -66,10 +66,10 @@ else()
 endif()
 
 set(BL1_COMPILER_CP_FLAG -mfloat-abi=soft)
-set(BL1_LINKER_CP_OPTION -mfloat-abi=soft)
+set(BL1_LINKER_CP_OPTION -mfloat-abi=soft -lcrt0 -ldummyhost)
 
 set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
-set(BL2_LINKER_CP_OPTION -mfloat-abi=soft)
+set(BL2_LINKER_CP_OPTION -mfloat-abi=soft -lcrt0 -ldummyhost)
 
 add_compile_options(
      -Wno-ignored-optimization-argument
@@ -204,7 +204,7 @@ macro(target_link_shared_code target)
         # ${symbol_provider}_shared_symbols - a custom target is always considered out-of-date
         # To only link when necessary, depend on ${symbol_provider} instead
         set_property(TARGET ${target} APPEND PROPERTY LINK_DEPENDS $<TARGET_OBJECTS:${symbol_provider}>)
-        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
+        target_link_options(${target} PRIVATE LINKER:--just-symbols $<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}${CODE_SHARING_INPUT_FILE_SUFFIX})
     endforeach()
 endmacro()
 
