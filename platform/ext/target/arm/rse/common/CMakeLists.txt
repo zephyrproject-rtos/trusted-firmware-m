@@ -60,6 +60,7 @@ target_sources(tfm_s
 target_add_scatter_file(tfm_s
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_s.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_s.ld>
+        $<$<C_COMPILER_ID:Clang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/llvm/tfm_isolation_s.ld>
 )
 
 target_sources(bl2
@@ -71,6 +72,7 @@ target_sources(bl2
 target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_bl2.sct>
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
+        $<$<C_COMPILER_ID:Clang>:${PLATFORM_DIR}/ext/common/llvm/tfm_common_bl2.ld>
 )
 
 target_compile_options(bl2_scatter
@@ -90,6 +92,7 @@ target_sources(bl1_1
 target_add_scatter_file(bl1_1
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rse_bl1_1.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/rse_bl1_1.ld>
+        $<$<C_COMPILER_ID:Clang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/llvm/rse_bl1_1.ld>
 )
 
 target_sources(bl1_2
@@ -99,6 +102,7 @@ target_sources(bl1_2
 target_add_scatter_file(bl1_2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rse_bl1_2.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/rse_bl1_2.ld>
+        $<$<C_COMPILER_ID:Clang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/llvm/rse_bl1_2.ld>
 )
 
 
@@ -652,7 +656,6 @@ if (RSE_XIP)
     )
 
     add_custom_command(OUTPUT bin/tfm_s_sic_tables.bin
-        DEPENDS $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         DEPENDS tfm_s_bin
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl2/create_xip_tables.py
             --input_image $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
@@ -673,6 +676,7 @@ if (RSE_XIP)
             $<$<C_COMPILER_ID:GNU>:-E\;-xc>
             $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
             $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_s>>
+            $<$<C_COMPILER_ID:Clang>:-E\;-xc>
     )
     target_compile_definitions(signing_layout_s
         PRIVATE

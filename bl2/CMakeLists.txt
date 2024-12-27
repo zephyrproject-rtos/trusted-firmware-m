@@ -159,7 +159,7 @@ target_link_options(bl2
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl2.map>
-        $<$<C_COMPILER_ID:Clang>:-lcrt0 -Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
+        $<$<C_COMPILER_ID:Clang>:LINKER:-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
         ${BL2_LINKER_CP_OPTION}
 )
 

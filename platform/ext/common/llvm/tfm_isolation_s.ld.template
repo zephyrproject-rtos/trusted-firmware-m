@@ -509,7 +509,7 @@ SECTIONS
     {% endif %}
 {% endfor %}
 
-    .TFM_DATA ALIGN(4) :
+    .TFM_DATA ALIGN(8) :
     {
         *(SORT_BY_ALIGNMENT(.data*))
 
