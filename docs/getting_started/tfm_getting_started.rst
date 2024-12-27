@@ -238,6 +238,32 @@ versions are:
 
                     set PATH=<IAR_COMPILER_PATH>\bin;%PATH%
 
+    - LLVM Embedded Toolchain for Arm v18.1.3+
+
+      .. tabs::
+
+          .. group-tab:: Linux
+
+              - Download the LLVM Embedded Toolchain for Arm from `here <https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm>`__.
+              - Add LLVM Embedded into environment:
+
+                .. code-block:: bash
+
+                    export PATH=<LLVM_PATH>/bin:$PATH
+
+          .. group-tab:: Windows
+
+              - Download the LLVM Embedded Toolchain for Arm from `here <https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm>`__.
+              - Add LLVM Embedded into environment:
+
+                .. code-block:: bash
+
+                    set PATH=<LLVM_PATH>\bin;%PATH%
+
+      .. note::
+
+          Not all platforms support this toolchain. Please refer to a platform documentation or check with the platform owner.
+
 #############################
 Build AN521 regression sample
 #############################

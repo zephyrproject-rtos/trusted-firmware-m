@@ -97,11 +97,12 @@ Note::
 
 Toolchains
 ----------
-TF-M supports 3 toolchains for cross-compiling and building the project binaries:
+TF-M supports 4 toolchains for cross-compiling and building the project binaries:
 
 - GNU - **default**
 - ArmClang
 - IAR
+- LLVM Embedded Toolchain for Arm
 
 Each toolchain has a configuration file for the compiler and linker.
 They are located at the root directory of TF-M.
