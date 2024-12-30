@@ -10,3 +10,4 @@ pyhsslms ~= 2.0.0
 ecdsa
 kconfiglib
 networkx ~= 3.1
+pyelftools
