@@ -19,9 +19,9 @@ add_dependencies(tfm_psa_rot_partition_ns_agent_mailbox manifest_tool)
 
 target_sources(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/tfm_rpc.c
         $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:tfm_spe_mailbox.c>
         ns_agent_mailbox.c
+        ns_agent_mailbox_rpc.c
         tfm_multi_core_client_id.c
 )
 

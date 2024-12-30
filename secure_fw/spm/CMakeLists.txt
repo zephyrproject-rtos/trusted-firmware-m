@@ -56,6 +56,7 @@ target_sources(tfm_spm
         core/psa_api.c
         core/psa_call_api.c
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/mailbox_agent_api.c>
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/tfm_rpc.c>
         core/psa_version_api.c
         core/psa_read_write_skip_api.c
         $<$<BOOL:${PSA_FRAMEWORK_HAS_MM_IOVEC}>:core/psa_mmiovec_api.c>
