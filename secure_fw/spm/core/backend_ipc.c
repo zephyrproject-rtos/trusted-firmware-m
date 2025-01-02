@@ -35,6 +35,10 @@
 #include "internal_status_code.h"
 #include "sprt_partition_metadata_indicator.h"
 
+#if TFM_PARTITION_NS_AGENT_MAILBOX == 1
+#include "psa_manifest/ns_agent_mailbox.h"
+#endif
+
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
 
@@ -403,6 +407,41 @@ psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals
     return ret;
 }
 
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE == TFM_HYBRID_PLAT_SCHED_NSPE)
+static void backend_assert_hybridplat_signal(
+    struct partition_t *p_pt, psa_signal_t signal)
+{
+    const struct irq_load_info_t *irq_info;
+    uint32_t irq_info_idx;
+    uint32_t nirqs;
+
+    if (IS_NS_AGENT_MAILBOX(p_pt->p_ldinf)) {
+        nirqs = p_pt->p_ldinf->nirqs;
+        irq_info = LOAD_INFO_IRQ(p_pt->p_ldinf);
+        for (irq_info_idx = 0; irq_info_idx < nirqs; irq_info_idx++) {
+            if (irq_info == NULL) {
+                tfm_core_panic();
+            }
+            if (irq_info[irq_info_idx].signal == signal) {
+                break;
+            }
+        }
+
+        if (irq_info_idx < nirqs) {
+            /*
+             * The incoming signal is found in the irq_load_info_t,
+             * do not assert the signal now.
+             * NSPE will drive the processing for this request via the mailbox
+             * dedicated auxiliary service.
+             */
+            return;
+        }
+    }
+
+    p_pt->signals_asserted |= signal;
+}
+#endif
+
 psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
@@ -413,7 +452,12 @@ psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal
     }
 
     CRITICAL_SECTION_ENTER(cs_signal);
+
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE == TFM_HYBRID_PLAT_SCHED_NSPE)
+    backend_assert_hybridplat_signal(p_pt, signal);
+#else
     p_pt->signals_asserted |= signal;
+#endif
 
     if (p_pt->signals_asserted & p_pt->signals_waiting) {
         ret = STATUS_NEED_SCHEDULE;
