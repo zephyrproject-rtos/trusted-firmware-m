@@ -33,18 +33,31 @@ function(convert_normal_cmake_config_to_kconfig cmake_file out_var)
     # Exclude lines of comments (started with "#")
     set(CONTENTS_WITHOUT_COMMENTS "")
 
-    foreach(LINE ${CONTENTS})
-        string(REGEX MATCH "^#.*" OUT_STRING ${LINE})
+    set(INDEX "0")
+    list(LENGTH CONTENTS LINE_COUNT)
+    while(LINE_COUNT GREATER INDEX)
+        list(GET CONTENTS ${INDEX} LINE)
+        string(REGEX MATCH "^#.*" OUT_STRING "${LINE}")
         if(NOT OUT_STRING)
             string(APPEND CONTENTS_WITHOUT_COMMENTS "${LINE}\n")
         endif()
 
-        string(REGEX MATCH "^include\\((.*)\\)$" OUT_STRING ${LINE})
+        string(REGEX MATCH "^include\\((.*)\\)$" OUT_STRING "${LINE}")
         if(OUT_STRING AND CMAKE_MATCH_COUNT EQUAL 1)
-            message(FATAL_ERROR "Including another file in config file is not supported yet: ${LINE}")
-        endif()
-    endforeach()
+            string(REGEX MATCH "^.*/" CURRENT_FILE_PATH ${cmake_file})
+            string(REPLACE "include(" "" INCLUDE_FILE_PATH ${LINE})
+            string(REPLACE ")" "" INCLUDE_FILE_PATH ${INCLUDE_FILE_PATH})
+            string(REPLACE "\${CMAKE_CURRENT_LIST_DIR}/" "${CURRENT_FILE_PATH}" INCLUDE_FILE_PATH ${INCLUDE_FILE_PATH})
 
+            # Expand any referenced variables (${VAR}) in the path of the file to be included
+            string(CONFIGURE "${INCLUDE_FILE_PATH}" INCLUDE_FILE_PATH)
+
+            file(STRINGS ${INCLUDE_FILE_PATH} INCLUDE_STRING)
+            string(APPEND CONTENTS "${INCLUDE_STRING}\n")
+        endif()
+        math(EXPR INDEX "${INDEX} + 1")
+        list(LENGTH CONTENTS LINE_COUNT)
+    endwhile()
     # Search for strings match set(_VAR_ _VALUE_) with support of multi-line format
     string(REGEX MATCHALL
            "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*\\)"
@@ -167,7 +180,7 @@ set(CACHE_VAR_CONFIG_FILE ${KCONFIG_OUTPUT_DIR}/.cache_var_config)
 file(REMOVE ${CACHE_VAR_CONFIG_FILE})
 
 if(NOT EXISTS ${PLATFORM_KCONFIG} AND NOT EXISTS ${DOTCONFIG_FILE})
-    # Parse platform's preload.cmake and config.cmake to get config options.
+    # Parse platform's cpuarch.cmake and config.cmake to get config options.
     set(PLATFORM_KCONFIG_OPTIONS "")
     set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
 
