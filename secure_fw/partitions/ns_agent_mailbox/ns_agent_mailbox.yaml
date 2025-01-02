@@ -19,6 +19,17 @@
   "stack_size": "NS_AGENT_MAILBOX_STACK_SIZE",
   "client_id_base": "-0x0400ffff",
   "client_id_limit": "-0x04000000",
+  "services": [
+    {
+      "name": "NS_AGENT_MBOX_PROCESS_NEW_MSG",
+      "sid": "0x0000F901",
+      "connection_based": false,
+      "non_secure_clients": true,
+      "stateless_handle": 30,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+  ],
   "irqs": [
     {
       "source": "MAILBOX_IRQ",

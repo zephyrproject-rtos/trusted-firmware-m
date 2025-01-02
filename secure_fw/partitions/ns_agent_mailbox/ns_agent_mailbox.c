@@ -19,6 +19,8 @@
 #include "tfm_rpc.h"
 #include "tfm_sp_log.h"
 
+#include "compiler_ext_defs.h"
+
 static void boot_ns_core(void)
 {
     /* Boot up non-secure core */
@@ -50,6 +52,30 @@ void ns_agent_mailbox_entry(void)
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         } else if (signals & ASYNC_MSG_REPLY) {
             tfm_rpc_client_call_reply();
+#endif
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE != TFM_HYBRID_PLAT_SCHED_OFF)
+        } else if (signals & NS_AGENT_MBOX_PROCESS_NEW_MSG_SIGNAL) {
+            psa_status_t status;
+            psa_msg_t msg;
+            uint32_t nr_msg;
+
+            status = psa_get(NS_AGENT_MBOX_PROCESS_NEW_MSG_SIGNAL, &msg);
+            if (status != PSA_SUCCESS) {
+                continue;
+            }
+
+            if (msg.type != PSA_IPC_CALL) {
+                status = PSA_ERROR_NOT_SUPPORTED;
+            } else if (msg.out_size[0] != 4) {
+                status = PSA_ERROR_PROGRAMMER_ERROR;
+            } else {
+                status = (psa_status_t)tfm_rpc_client_process_new_msg(&nr_msg);
+                if (status == PSA_SUCCESS) {
+                    psa_write(msg.handle, 0, (const void *)&nr_msg, msg.out_size[0]);
+                }
+            }
+
+            psa_reply(msg.handle, status);
 #endif
         } else {
             psa_panic();
