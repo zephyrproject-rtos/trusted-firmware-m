@@ -64,6 +64,8 @@ void ns_agent_mailbox_entry(void)
                 continue;
             }
 
+            tfm_multi_core_clear_mbox_irq();
+
             if (msg.type != PSA_IPC_CALL) {
                 status = PSA_ERROR_NOT_SUPPORTED;
             } else if (msg.out_size[0] != 4) {

@@ -23,6 +23,7 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
         ns_agent_mailbox.c
         ns_agent_mailbox_rpc.c
         tfm_multi_core_client_id.c
+        tfm_multi_core_mbox.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox

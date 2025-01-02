@@ -1,0 +1,33 @@
+/*
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ */
+/***********{{utilities.donotedit_warning}}***********/
+
+#ifndef __NS_AGENT_MAILBOX_SIGNAL_H__
+#define __NS_AGENT_MAILBOX_SIGNAL_H__
+
+#include <stdbool.h>
+#include <stdint.h>
+#include "psa_manifest/ns_agent_mailbox.h"
+#include "psa/service.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**********************************************************************/
+/* Defines the count of the NS Agent Mailbox interrupts               */
+/**********************************************************************/
+
+{% set cnt_irq = 0 %}
+{% for partition in partitions %}
+    {% if partition.manifest.ns_agent %}
+        {% if partition.manifest.irqs %}
+            {% set cnt_irq = cnt_irq + 1 %}
+#define MAILBOX_INTERRUPT_IRQ_COUNT {{"%s"|format(cnt_irq)}}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+#endif /* __NS_AGENT_MAILBOX_SIGNAL_H__ */

@@ -9,6 +9,7 @@
 #define __TFM_MULTI_CORE_H__
 
 #include <stdint.h>
+#include "load/interrupt_defs.h"
 
 #define CLIENT_ID_OWNER_MAGIC           (void *)0xFFFFFFFF
 
@@ -56,5 +57,18 @@ int32_t tfm_multi_core_register_client_id_range(void *owner,
 int32_t tfm_multi_core_hal_client_id_translate(void *owner,
                                                int32_t client_id_in,
                                                int32_t *client_id_out);
+
+/**
+ * \brief Record a mailbox interrupt that will be completed later on.
+ *
+ * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to record
+ */
+void tfm_multi_core_set_mbox_irq(const struct irq_load_info_t *p_ildi);
+
+/**
+ * \brief Clear all the mailbox interrupts that are to be processed.
+ *
+ */
+void tfm_multi_core_clear_mbox_irq(void);
 
 #endif /* __TFM_MULTI_CORE_H__ */
