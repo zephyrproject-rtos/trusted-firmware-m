@@ -11,6 +11,8 @@
 #ifndef __CONFIG_BASE_H__
 #define __CONFIG_BASE_H__
 
+#include "tfm_hybrid_platform.h"
+
 /* Platform Partition Configs */
 
 /* Size of input buffer in platform service */
@@ -303,6 +305,33 @@
 /* Disable the doorbell APIs */
 #ifndef CONFIG_TFM_DOORBELL_API
 #define CONFIG_TFM_DOORBELL_API                 0
+#endif
+
+/*
+ * Scheduling type for Hybrid Platforms (Currently in Experimental Stage)
+ * Options can be found in spm/include/tfm_hybrid_platform.h
+ */
+#ifndef CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE
+#define CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE   TFM_HYBRID_PLAT_SCHED_OFF
+#else
+
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE == TFM_HYBRID_PLAT_SCHED_OFF)
+    /* default, nothing to do, no overrides */
+#endif
+
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE == TFM_HYBRID_PLAT_SCHED_SPE)
+    #ifndef CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED
+    #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 1
+    #define CONFIG_TFM_SPM_BACKEND_IPC 1
+    #endif
+#endif
+#if (CONFIG_TFM_HYBRID_PLAT_SCHED_TYPE == TFM_HYBRID_PLAT_SCHED_NSPE)
+    #ifndef CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED
+    #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 0
+    #define CONFIG_TFM_SPM_BACKEND_IPC 1
+    #endif
+#endif
+
 #endif
 
 /* Do not run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
