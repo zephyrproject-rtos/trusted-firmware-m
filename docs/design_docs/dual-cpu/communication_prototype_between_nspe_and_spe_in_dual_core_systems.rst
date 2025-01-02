@@ -79,6 +79,12 @@ application.
 Step 3 ~ step 5 are covered in `PSA client call handling flow in TF-M`_ in
 detail.
 
+.. note::
+  This document is partially complete since the introduction of the Hybrid
+  Platform Scheduling support, which extends the operation of the mailbox
+  communication between local and remote NSPEs with SPE described here.
+  For more details see :doc:`/design_docs/dual-cpu/hybrid_platform_solution`.
+
 *************************************
 Requirements on mailbox communication
 *************************************

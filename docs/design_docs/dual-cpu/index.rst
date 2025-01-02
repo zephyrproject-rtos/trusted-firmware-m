@@ -9,7 +9,8 @@ Dual-CPU
     Mailbox                  <mailbox_design_on_dual_core_system.rst>
     Mailbox update           <mailbox_ns_agent_update.rst>
     Memory Access Check      <tfm_multi_core_access_check.rst>
+    Hybrid Platform Topology <hybrid_platform_solution.rst>
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2024, Arm Limited. All rights reserved.*

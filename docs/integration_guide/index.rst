@@ -135,6 +135,11 @@ situation, which can be done by setting
 NSPE is known to be a simple, single-threaded application or if non-secure
 interrupts cannot preempt the SPE, for example.
 
+Note that scheduling also depends on the system topology. If your system has
+multiple cores running multiple NSPEs, then refer to
+:doc:`Scheduling Hybrid Platforms </design_docs/dual-cpu/hybrid_platform_solution>`
+for more details.
+
 **********************************
 Integration with non-Cmake systems
 **********************************

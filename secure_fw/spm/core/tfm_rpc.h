@@ -42,6 +42,8 @@
  *                        mailbox message source according to irq_src.
  * process_new_msg()    - OPTIONAL: Process a message awaiting in the mailbox.
  *                        Returns the number messages that have been processed.
+ *                        If the platform does not use support for Hybrid
+ *                        Platform, then this handler must be set to NULL.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);

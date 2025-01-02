@@ -33,6 +33,13 @@ dual-core system. The mailbox functionalities include the initialization of
 mailbox in NSPE and SPE, and the transfer of PSA Client requests and replies
 between NSPE and SPE.
 
+.. note::
+  This document is partially complete since the introduction of the Hybrid
+  Platform Scheduling support, which extends the operation of the mailbox
+  communication between local and remote NSPEs with SPE described here.
+  For more details see :doc:`/design_docs/dual-cpu/hybrid_platform_solution`.
+
+
 Data types and mailbox APIs are defined in this document.
 
 Some details of interactions between mailbox and other modules are specified in
