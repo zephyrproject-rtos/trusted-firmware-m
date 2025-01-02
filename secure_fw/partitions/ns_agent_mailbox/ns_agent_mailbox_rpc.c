@@ -31,10 +31,16 @@ static void default_handle_req_irq_src(uint32_t irq_src)
     psa_panic();
 }
 
+static int32_t default_process_new_msg(uint32_t *nr_msg)
+{
+    return PSA_SUCCESS;
+}
+
 static struct tfm_rpc_ops_t rpc_ops = {
     .handle_req = default_handle_req,
     .reply      = default_mailbox_reply,
     .handle_req_irq_src = default_handle_req_irq_src,
+    .process_new_msg = default_process_new_msg,
 };
 
 int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr)
@@ -56,6 +62,9 @@ int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr)
     rpc_ops.handle_req = ops_ptr->handle_req;
     rpc_ops.reply = ops_ptr->reply;
     rpc_ops.handle_req_irq_src = default_handle_req_irq_src;
+    if (ops_ptr->process_new_msg != NULL) {
+        rpc_ops.process_new_msg = ops_ptr->process_new_msg;
+    }
 
     return TFM_RPC_SUCCESS;
 }
@@ -79,6 +88,9 @@ int32_t tfm_rpc_register_ops_multi_srcs(const struct tfm_rpc_ops_t *ops_ptr)
     rpc_ops.handle_req = default_handle_req;
     rpc_ops.reply = ops_ptr->reply;
     rpc_ops.handle_req_irq_src = ops_ptr->handle_req_irq_src;
+    if (ops_ptr->process_new_msg != NULL) {
+        rpc_ops.process_new_msg = ops_ptr->process_new_msg;
+    }
 
     return TFM_RPC_SUCCESS;
 }
@@ -88,6 +100,7 @@ void tfm_rpc_unregister_ops(void)
     rpc_ops.handle_req = default_handle_req;
     rpc_ops.reply = default_mailbox_reply;
     rpc_ops.handle_req_irq_src = default_handle_req_irq_src;
+    rpc_ops.process_new_msg = default_process_new_msg;
 }
 
 void tfm_rpc_client_call_handler(psa_signal_t signal)
@@ -123,3 +136,8 @@ void tfm_rpc_client_call_reply(void)
     }
 }
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
+
+int32_t tfm_rpc_client_process_new_msg(uint32_t *nr_msg)
+{
+    return rpc_ops.process_new_msg(nr_msg);
+}

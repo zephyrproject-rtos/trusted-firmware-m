@@ -40,11 +40,14 @@
  *                        client call.
  * handle_req_irq_src() - Handle PSA client call request from NSPE and identify
  *                        mailbox message source according to irq_src.
+ * process_new_msg()    - OPTIONAL: Process a message awaiting in the mailbox.
+ *                        Returns the number messages that have been processed.
  */
 struct tfm_rpc_ops_t {
     void (*handle_req)(void);
     void (*reply)(const void *owner, int32_t ret);
     void (*handle_req_irq_src)(uint32_t irq_src);
+    int32_t (*process_new_msg)(uint32_t *nr_msg);
 };
 
 /**
@@ -181,5 +184,17 @@ void tfm_rpc_client_call_handler(psa_signal_t signal);
  */
 void tfm_rpc_client_call_reply(void);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
+
+/**
+ * \brief Handling PSA client request to process new messages
+ *
+ * \param[out] nr_msg       The number of messages processed
+ *
+ * \return                  The number of messages processed or an error
+ * \retval PSA_SUCCESS      The handler processed successfully the request
+ * \retval Other error code The request failed
+ */
+int32_t tfm_rpc_client_process_new_msg(uint32_t *nr_msg);
+
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */
