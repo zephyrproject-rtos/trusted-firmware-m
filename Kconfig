@@ -38,6 +38,7 @@ if TEST_PSA_API != ""
     rsource "$(TFM_SOURCE_DIR)/config/tests/Kconfig.test_psa_api"
 endif
 
+osource "$(PLATFORM_PATH)/Kconfig.comp"
 rsource "secure_fw/spm/Kconfig.comp"
 
 menu "Secure Partitions component configs"

@@ -103,6 +103,42 @@ function(convert_normal_cmake_config_to_kconfig cmake_file out_var)
     set(${out_var} ${local_var} PARENT_SCOPE)
 endfunction()
 
+# This function parses the input ${header_file} to get C Header constants and their values in the
+# format of "#define _CONST_ _VALUE_ " and converts them to Kconfig options
+function(convert_header_config_to_kconfig header_file out_var)
+    # Operate on a local var and write back to the "out_var" later.
+    set(local_var "")
+
+    # Read out the strings of the file. Binary data in the file are ignored
+    file(STRINGS ${header_file} CONTENTS)
+
+    # Exclude lines of comments (started with "/*", or "*" if within multi-line comment)
+    set(CONTENTS_WITHOUT_COMMENTS "")
+
+    foreach(LINE ${CONTENTS})
+        string(REGEX MATCH "^.\\*.*" OUT_STRING ${LINE})
+        if(NOT OUT_STRING)
+            string(APPEND CONTENTS_WITHOUT_COMMENTS "${LINE}\n")
+        endif()
+    endforeach()
+
+    # Search for strings matching #define _CONST_ _VALUE_
+    string(REGEX MATCHALL
+    "#define[ \t\r\n]+([A-Za-z0-9_]+)[ \t\r\n]+([A-Za-z0-9_]+)"
+    OUT_STRINGS ${CONTENTS_WITHOUT_COMMENTS})
+
+    # Convert each matching C Header constant into a Kconfig option
+    foreach(MATCHED_CONST ${OUT_STRINGS})
+        string(REGEX REPLACE
+            "#define[ \t\r\n]+([A-Za-z0-9_]+)[ \t\r\n]+([A-Za-z0-9_]+)"
+            "config \\1\n default \\2\n"
+            MATCHED_CONST ${MATCHED_CONST})
+        string(APPEND local_var ${MATCHED_CONST})
+    endforeach()
+
+    set(${out_var} ${local_var} PARENT_SCOPE)
+endfunction()
+
 # This function goes through the CMake cache variables and convert them to .config format.
 # The function distinguishes command-line variables and other ones and it can only handle one of
 # them in the same time.
@@ -180,9 +216,18 @@ set(CACHE_VAR_CONFIG_FILE ${KCONFIG_OUTPUT_DIR}/.cache_var_config)
 file(REMOVE ${CACHE_VAR_CONFIG_FILE})
 
 if(NOT EXISTS ${PLATFORM_KCONFIG} AND NOT EXISTS ${DOTCONFIG_FILE})
-    # Parse platform's cpuarch.cmake and config.cmake to get config options.
+    # Parse platform's config_tfm_target.h, cpuarch.cmake and config.cmake to get config options.
     set(PLATFORM_KCONFIG_OPTIONS "")
     set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
+
+    set(PLATFORM_KCONFIG_COMP_OPTIONS "")
+    set(PLATFORM_KCONFIG_COMP ${KCONFIG_OUTPUT_DIR}/platform/Kconfig.comp)
+
+    if(EXISTS ${TARGET_PLATFORM_PATH}/config_tfm_target.h)
+        # Convert constants from config_tfm_target.h into Kconfig options and save them in component options Kconfig file
+        convert_header_config_to_kconfig(${TARGET_PLATFORM_PATH}/config_tfm_target.h PLATFORM_KCONFIG_COMP_OPTIONS)
+        file(WRITE ${PLATFORM_KCONFIG_COMP} ${PLATFORM_KCONFIG_COMP_OPTIONS})
+    endif()
 
     convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/cpuarch.cmake PLATFORM_KCONFIG_OPTIONS)
     file(WRITE ${PLATFORM_KCONFIG} ${PLATFORM_KCONFIG_OPTIONS})
