@@ -120,7 +120,7 @@ struct cc3xx_aes_state_t {
  * @param[in]  key               If key_id is set to CC3XX_AES_KEY_ID_USER_KEY,
  *                               this buffer contains the key material.
  * @param[in]  key_size          The size of the key being used.
- * @param[in]  iv                The inital IV/CTR value for the mode. For modes
+ * @param[in]  iv                The initial IV/CTR value for the mode. For modes
  *                               without an IV/CTR, this may be NULL.
  * @param[in]  iv_len            The size of the IV input.
  *
@@ -144,8 +144,8 @@ void cc3xx_lowlevel_aes_get_state(struct cc3xx_aes_state_t *state);
  * @brief                        Set the current state of the AES operation.
  *                               Allows for restartable AES operations.
  *
- * @note                         This funtion initializes the hardware, there is
- *                               no need to seperately call cc3xx_aes_init.
+ * @note                         This function initializes the hardware, there is
+ *                               no need to separately call cc3xx_aes_init.
 
  * @param[in]  state            The cc3xx_aes_state_t to read the state from.
  *
@@ -155,7 +155,7 @@ void cc3xx_lowlevel_aes_get_state(struct cc3xx_aes_state_t *state);
 cc3xx_err_t cc3xx_lowlevel_aes_set_state(const struct cc3xx_aes_state_t *state);
 
 /**
- * @brief                        Set the length of the tag produced or verfied
+ * @brief                        Set the length of the tag produced or verified
  *                               by AEAD/MAC modes.
  *
  * @note                         This function is a no-op in non-AEAD/MAC modes.

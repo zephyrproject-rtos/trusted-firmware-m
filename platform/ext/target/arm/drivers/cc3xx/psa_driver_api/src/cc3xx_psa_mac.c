@@ -119,7 +119,7 @@ static psa_status_t cmac_setup(struct cc3xx_aes_state_t *state,
     return PSA_SUCCESS;
 }
 
-/** @brief Update a multipart CMAC operation with new inut data
+/** @brief Update a multipart CMAC operation with new input data
  *
  */
 static psa_status_t cmac_update(struct cc3xx_aes_state_t *state,

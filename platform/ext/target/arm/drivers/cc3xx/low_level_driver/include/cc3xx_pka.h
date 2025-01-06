@@ -228,7 +228,7 @@ void cc3xx_lowlevel_pka_set_to_power_of_two(cc3xx_pka_reg_id_t r0, uint32_t powe
  * @param[in]  r0               The register ID to set.
  * @param[in]  bit_len          Amount of bits of randomness to input. Must not
  *                              be larger than the size the PKA operation was
- *                              instanciated with.
+ *                              instantiated with.
  *
  * @return                      CC3XX_ERR_SUCCESS on success, another
  *                              cc3xx_err_t on error.

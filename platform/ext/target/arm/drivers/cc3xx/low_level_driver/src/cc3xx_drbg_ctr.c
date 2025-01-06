@@ -115,7 +115,7 @@ cc3xx_err_t cc3xx_lowlevel_drbg_ctr_init(
     size_t idx;
 
     /* The entropy must be equal to 256 bit. The spec allows for a lower
-     * amout of entropy to be passed during instantiation, then using a
+     * amount of entropy to be passed during instantiation, then using a
      * derivation function at this point to reach 256 bit. But this implementation
      * focuses on lower complexity hence the derivation function is not used
      */

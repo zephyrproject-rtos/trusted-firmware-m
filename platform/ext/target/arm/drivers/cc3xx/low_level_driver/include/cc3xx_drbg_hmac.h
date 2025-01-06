@@ -20,7 +20,7 @@ extern "C" {
 /**
  * @brief The assumption is that it will be a multiple of 4. It depends on the
  *        underlying hash function being used, which for the cc3xx driver is
- *        retricted to SHA-256
+ *        restricted to SHA-256
  */
 #define CC3XX_DRBG_HMAC_OUTLEN SHA256_OUTPUT_SIZE
 

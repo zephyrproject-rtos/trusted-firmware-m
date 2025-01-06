@@ -49,7 +49,7 @@ static psa_status_t get_pkcs_padding(
     padding_len = buf[buf_size - 1]; /* Assume the last byte contains the pad value */
     *out_len = buf_size - padding_len; /* The value of the actual payload */
 
-    /* Keep the flow branchless, i.e. costant time */
+    /* Keep the flow branchless, i.e. constant time */
     bad |= padding_len > buf_size; /* Can't be greater than the buffer itself */
     bad |= padding_len == 0; /* At least 1 byte of padding */
 

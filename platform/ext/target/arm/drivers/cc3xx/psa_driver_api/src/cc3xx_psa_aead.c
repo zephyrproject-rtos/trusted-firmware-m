@@ -480,7 +480,7 @@ psa_status_t cc3xx_aead_update(
             /* input_length and output_length are the same by construction */
             cc3xx_lowlevel_poly1305_update(bufs[0], *output_length);
         }
-        /* Manually increment the crypted length counter */
+        /* Manually increment the encrypted length counter */
         operation->chacha.crypted_len += *output_length;
         cc3xx_lowlevel_poly1305_get_state(&(operation->chacha.poly_state));
 #endif /* defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) */

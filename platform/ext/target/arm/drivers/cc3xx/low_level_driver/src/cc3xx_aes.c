@@ -347,7 +347,7 @@ static cc3xx_err_t init_from_state(void)
     /* Set the crypto engine to the AES engine */
     cc3xx_lowlevel_set_engine(CC3XX_ENGINE_AES);
 
-    /* If tunnelling is disabled, DFA mitigations are contolled by the
+    /* If tunnelling is disabled, DFA mitigations are controlled by the
      * HOST_FORCE_DFA_ENABLE switch. If tunnelling is enabled, then they are
      * controlled here, and enabled for all non-tunnelling modes.
      */
@@ -903,7 +903,7 @@ cc3xx_err_t cc3xx_lowlevel_aes_update(const uint8_t* in, size_t in_len)
 
 #ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
         /* For the authed data, CCM uses non-tunnelling CBC_MAC mode. Now we're
-         * switching to tunnelling for the crypted data, we need to copy the
+         * switching to tunnelling for the encrypted data, we need to copy the
          * current state of the CBC_MAC to the tunnel 1 IV, since tunnel 0 will
          * now be used for the CTR mode operation
          */

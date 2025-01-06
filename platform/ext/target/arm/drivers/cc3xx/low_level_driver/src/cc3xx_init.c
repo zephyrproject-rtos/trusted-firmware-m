@@ -131,7 +131,7 @@ cc3xx_err_t cc3xx_lowlevel_init(void)
      * been chosen by config */
     check_features();
 
-    /* Configure entire system to litte endian */
+    /* Configure entire system to little endian */
     P_CC3XX->host_rgf.host_rgf_endian = 0x0U;
 
     err = setup_dfa_countermeasures();

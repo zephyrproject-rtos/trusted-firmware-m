@@ -89,8 +89,8 @@ void cc3xx_lowlevel_chacha20_get_state(struct cc3xx_chacha_state_t *state);
  * @brief                        Set the current state of the CHACHA operation.
  *                               Allows for restartable CHACHA operations.
  *
- * @note                         This funtion initializes the hardware, there is
- *                               no need to seperately call cc3xx_chacha20_init.
+ * @note                         This function initializes the hardware, there is
+ *                               no need to separately call cc3xx_chacha20_init.
 
  * @param[in]  state            The cc3xx_chacha20_state_t to read the state
  *                              from.

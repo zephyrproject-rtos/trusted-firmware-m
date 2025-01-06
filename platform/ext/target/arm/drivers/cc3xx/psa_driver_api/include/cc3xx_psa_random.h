@@ -27,7 +27,7 @@ extern "C" {
  * @brief Initializes the RNG.
  *
  * @note  This function provides to seed itself on initialization requiring
- *        the expected amout of initial entropy from the TRNG as expected by
+ *        the expected amount of initial entropy from the TRNG as expected by
  *        the underlying DRBG mechanism configured at build time, before
  *        instantiating the DRBG. External initial_entropy_size property
  *        should be equal to 0.
@@ -61,7 +61,7 @@ psa_status_t cc3xx_add_entropy(
  *        cc3xx_psa_config.h header
  *
  * @note  This function provides to reseed itself transparently from the
- *        calle when it detects that the underlying DRBG mechanism requires
+ *        caller when it detects that the underlying DRBG mechanism requires
  *        reseeding. External reseed_entropy_size property should be equal
  *        to 0.
  *

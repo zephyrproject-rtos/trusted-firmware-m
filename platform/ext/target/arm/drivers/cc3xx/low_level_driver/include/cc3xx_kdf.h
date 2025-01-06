@@ -24,7 +24,7 @@ extern "C" {
  *                               using the CMAC mode of operation as per NIST
  *                               SP800-38B.
  *
- * @note                         This funtion only outputs keys whose size is a
+ * @note                         This function only outputs keys whose size is a
  *                               multiple of the output size of the AES-CMAC
  *                               operation (16 bytes).
  *

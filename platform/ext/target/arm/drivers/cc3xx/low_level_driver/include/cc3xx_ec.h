@@ -99,7 +99,7 @@ void cc3xx_lowlevel_ec_free_point(cc3xx_ec_point_affine *p);
  * @param[in]  curve             A pointer to an initialized curve object
  * @param[in]  p                 A pointer to the first affine point object to
  *                               add.
- * @param[in]  q                 A pointer to the secnd affine point object to
+ * @param[in]  q                 A pointer to the second affine point object to
  *                               add.
  * @param[out] res               A pointer to the affine point object which the
  *                               result will be written to.

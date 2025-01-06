@@ -416,7 +416,7 @@ void cc3xx_lowlevel_pka_read_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, uint32_t
 }
 
 /* Calculate the Barrett Tag (https://en.wikipedia.org/wiki/Barrett_reduction)
- * to enable reduction modulo N. If this tag is not calulated, reduction
+ * to enable reduction modulo N. If this tag is not calculated, reduction
  * operations will fail. doi:10.1007/3-540-47721-7_24 is good reference.
  *
  * We are attempting to calculate 2^k / N. In the reference the value k = 2 * n

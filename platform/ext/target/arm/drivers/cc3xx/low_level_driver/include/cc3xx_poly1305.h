@@ -77,8 +77,8 @@ void cc3xx_lowlevel_poly1305_get_state(struct cc3xx_poly1305_state_t *state);
  * @brief                        Set the current state of the poly1305 operation.
  *                               Allows for restartable poly1305 operations.
  *
- * @note                         This funtion initializes the operation, there
- *                               is no need to seperately call
+ * @note                         This function initializes the operation, there
+ *                               is no need to separately call
  *                               cc3xx_poly1305_init.
 
  * @param[in]  state            The cc3xx_poly1305_state_t to read the state
