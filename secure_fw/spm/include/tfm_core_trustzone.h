@@ -29,7 +29,7 @@
 #define TFM_BASIC_FP_CONTEXT_WORDS      18
 
 /*
- * The numbers in 32bit words while addtional FP involved in preempted context:
+ * The numbers in 32bit words while additional FP involved in preempted context:
  * S16 - S31
  */
 #define TFM_ADDTIONAL_FP_CONTEXT_WORDS  16

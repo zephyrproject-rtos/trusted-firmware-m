@@ -74,7 +74,7 @@ static inline uint32_t its_init_dblock_start(struct its_flash_fs_ctx_t *fs_ctx)
 }
 
 /**
- * \brief Gets the number of blocks that are dedicated wholely for data, for the
+ * \brief Gets the number of blocks that are dedicated wholly for data, for the
  *        current context.
  *
  * \param[in,out] fs_ctx  Filesystem context
@@ -925,7 +925,7 @@ static psa_status_t its_init_get_active_metablock(
 
     /* First two blocks are reserved for metadata */
 
-    /* Read the header of both the metdata blocks. If the read succeeds, then
+    /* Read the header of both the metadata blocks. If the read succeeds, then
      * attempt to validate the metadata header, otherwise assume that the block
      * update was incomplete
      */

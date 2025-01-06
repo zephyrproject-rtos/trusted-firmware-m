@@ -20,7 +20,7 @@ target_sources(tfm_partitions
 
 set(ARM_V80M_ARCH armv8-m.base armv8-m.main)
 
-# Trustzone NS Agent is tighly coupled with SPM
+# Trustzone NS Agent is tightly coupled with SPM
 target_sources(tfm_spm
     PRIVATE
         "$<$<IN_LIST:${TFM_SYSTEM_ARCHITECTURE},${ARM_V80M_ARCH}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_agent_tz_v80m.c>"

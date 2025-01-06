@@ -58,7 +58,7 @@ static psa_status_t its_flash_ram_flush(const struct its_flash_fs_config_t *cfg,
 
 {
     /* Nothing needs to be done for flash emulated in RAM, as writes are
-     * commited immediately.
+     * committed immediately.
      */
     (void)cfg;
     (void)block_id;

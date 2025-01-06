@@ -16,7 +16,7 @@ void tfm_idle_thread(void)
 {
     while (1) {
         /*
-         * There could be other Partitions becoming RUNABLE after wake up.
+         * There could be other Partitions becoming RUNNABLE after wake up.
          * This is a dummy psa_wait to let SPM check possible scheduling.
          * It does not expect any signals.
          */
@@ -35,7 +35,7 @@ void tfm_idle_thread(void)
 
     while (1) {
         /*
-         * There could be other Partitions becoming RUNABLE after wake up.
+         * There could be other Partitions becoming RUNNABLE after wake up.
          * This is a dummy psa_wait to let SPM check possible scheduling.
          * It does not expect any signals.
          */

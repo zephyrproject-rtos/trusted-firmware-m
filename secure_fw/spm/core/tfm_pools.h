@@ -69,7 +69,7 @@ psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
 /**
  * \brief Allocate a memory from pool.
  *
- * \param[in] pool              pool pointer decleared by \ref TFM_POOL_DECLARE
+ * \param[in] pool              pool pointer declared by \ref TFM_POOL_DECLARE
  *
  * \retval buffer pointer       Success.
  * \retval NULL                 Failed.
@@ -79,7 +79,7 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool);
 /**
  * \brief Free the allocated memory.
  *
- * \param[in] pool              pool pointer decleared by \ref TFM_POOL_DECLARE
+ * \param[in] pool              pool pointer declared by \ref TFM_POOL_DECLARE
  *
  * \param[in] ptr               Buffer pointer want to free.
  */

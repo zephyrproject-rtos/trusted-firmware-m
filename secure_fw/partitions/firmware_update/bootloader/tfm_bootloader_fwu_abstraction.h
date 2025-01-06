@@ -85,7 +85,7 @@ psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
  * The components are in CANDIDATE state. Check the authenticity and integrity of
  * the staged image in the components. If a reboot is required to complete the
  * check, then mark this image as a candidate so that the next time bootloader
- * runs it will take this image as a candidate one to bootup. Return the error
+ * runs it will take this image as a candidate one to boot-up. Return the error
  * code PSA_SUCCESS_REBOOT.
  *
  * \param[in] candidates A list of components in CANDIDATE state.
@@ -112,7 +112,7 @@ psa_status_t fwu_bootloader_install_image(const psa_fwu_component_t *candidates,
  * \brief Mark the TRIAL(running) image in component as confirmed.
  *
  * Call this API to mark the running images as permanent/accepted to avoid
- * revert when next time bootup. Usually, this API is called after the running
+ * revert when next time boot-up. Usually, this API is called after the running
  * images have been verified as valid.
  *
  * \param[in] candidates A list of components in TRIAL state.
@@ -131,7 +131,7 @@ psa_status_t fwu_bootloader_mark_image_accepted(const psa_fwu_component_t *trial
  * \brief Uninstall the staged image in the component.
  *
  * The component is in STAGED state. Uninstall the staged image in the component
- * so that this image will not be treated as a candidate next time bootup.
+ * so that this image will not be treated as a candidate next time boot-up.
  *
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INSUFFICIENT_MEMORY

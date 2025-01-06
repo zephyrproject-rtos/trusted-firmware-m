@@ -122,7 +122,7 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
             }
         }
 
-        /* Read the last data item if there is still remaing data. */
+        /* Read the last data item if there is still remaining data. */
         if (remaining_len) {
             ret = flash_dev->driver->ReadData(addr + read_length,
                                               temp_buffer, 1);

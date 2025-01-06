@@ -138,8 +138,8 @@ struct context_flih_ret_t {
     struct tfm_additional_context_t addi_ctx;
     uint32_t exc_return;                  /* exception return value on SVC_PREPARE_DEPRIV_FLIH */
     uint32_t dummy;                       /* dummy value for 8 bytes aligned                   */
-    uint32_t psp;                         /* PSP when interrupt exception ocurrs               */
-    uint32_t psplim;                      /* PSPLIM when interrupt exception ocurrs when       */
+    uint32_t psp;                         /* PSP when interrupt exception occurs               */
+    uint32_t psplim;                      /* PSPLIM when interrupt exception occurs when       */
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH                    */
 };
 
@@ -322,7 +322,7 @@ uint32_t arch_attempt_schedule(void);
  * target PSA API to avoid using up the Secure Partitions' stacks. The NS agent
  * shares the stack with the SPM so it doesn't need to switch.
  *
- * The stack check process destroyes the caller registers so the input args and
+ * The stack check process destroys the caller registers so the input args and
  * the target PSA API address are stored in the caller stack at the beginning.
  * They are loaded again before the PSA API is called. This function is
  * non-preemptive except for the target PSA API execution.

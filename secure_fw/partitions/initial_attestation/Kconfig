@@ -16,7 +16,7 @@ config SYMMETRIC_INITIAL_ATTESTATION
     bool "Symmetric key algorithm based Initial Attestation"
     default n
     help
-      Use symmetric crypto for inital attestation
+      Use symmetric crypto for initial attestation
 
 config ATTEST_INCLUDE_TEST_CODE
     bool "Include test code"

@@ -33,7 +33,7 @@
  * +---------+--+--+---+---+----------+
  *
  * Field                Desc                        Value
- * Priority, bits[7:0]:  Partition Priority          Lowest, low, normal, high, hightest
+ * Priority, bits[7:0]:  Partition Priority          Lowest, low, normal, high, highest
  * A/P, bit[8]:          ARoT or PRoT domain         1: PRoT              0: ARoT
  * I/S, bit[9]:          IPC or SFN typed partition  1: IPC               0: SFN
  * MB,  bit[10]:         NS Agent Mailbox or not     1: NS Agent mailbox  0: Not

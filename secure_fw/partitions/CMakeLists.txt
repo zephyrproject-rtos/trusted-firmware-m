@@ -34,7 +34,7 @@ endif()
 
 list(APPEND TEMP_TFM_EXTRA_PARTITION_PATHS ${TFM_EXTRA_PARTITION_PATHS})
 
-# Remove any duplicate entries to prevent same path appended twice in case of mulitiple runs
+# Remove any duplicate entries to prevent same path appended twice in case of multiple runs
 list(REMOVE_DUPLICATES TEMP_TFM_EXTRA_PARTITION_PATHS)
 
 if (TEMP_TFM_EXTRA_PARTITION_PATHS)

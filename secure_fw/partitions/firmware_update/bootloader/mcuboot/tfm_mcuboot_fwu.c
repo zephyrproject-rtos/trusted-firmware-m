@@ -385,7 +385,7 @@ psa_status_t fwu_bootloader_mark_image_accepted(const psa_fwu_component_t *trial
      * does not need to be confirmed explicitly in these two upgrade strategies.
      * Image revert is supported in SWAP upgrade strategy and DIRECT_XIP upgrade
      * strategy when MCUBOOT_DIRECT_XIP_REVERT is true. In these cases, the
-     * image needs to be set as a permanent image explicitly. Then the accpeted
+     * image needs to be set as a permanent image explicitly. Then the accepted
      * image can still be selected as the running image during next time reboot
      * up. Otherwise, the image will be reverted and the previous one will be
      * chosen as the running image.

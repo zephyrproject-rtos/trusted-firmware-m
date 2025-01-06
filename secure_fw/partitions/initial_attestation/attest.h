@@ -49,7 +49,7 @@ enum psa_attest_err_t {
  *
  * \param[in]   major_type  Major type of TLV entries to copy
  * \param[out]  ptr         Pointer to the buffer to store the boot data
- * \parma[in]   len         Size of the buffer to store the boot data
+ * \param[in]   len         Size of the buffer to store the boot data
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
  */

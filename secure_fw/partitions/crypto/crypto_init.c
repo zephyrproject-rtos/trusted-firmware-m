@@ -377,7 +377,7 @@ static psa_status_t tfm_crypto_module_init(void)
 }
 
 /*!
- * \defgroup init This group implements the partition initilisation
+ * \defgroup init This group implements the partition initialisation
  *                function to be called during TF-M boot, and the SFN
  *                servicing call to be called when a SFN request needs
  *                to be handled by the SPM. When built in IPC mode, the

@@ -107,7 +107,7 @@ static psa_status_t flash_read_unaligned(
         }
     }
 
-    /* Read the last data item if there is still remaing data. */
+    /* Read the last data item if there is still remaining data. */
     if (remaining_len) {
         ret = ((ARM_DRIVER_FLASH *)cfg->flash_dev)->ReadData(
                                                             addr + read_length,
@@ -161,7 +161,7 @@ static psa_status_t its_flash_nor_write(const struct its_flash_fs_config_t *cfg,
 static psa_status_t its_flash_nor_flush(const struct its_flash_fs_config_t *cfg,
                                         uint32_t block_id)
 {
-    /* Nothing needs to be done for NOR flash, as writes are commited to flash
+    /* Nothing needs to be done for NOR flash, as writes are committed to flash
      * immediately.
      */
     (void)cfg;

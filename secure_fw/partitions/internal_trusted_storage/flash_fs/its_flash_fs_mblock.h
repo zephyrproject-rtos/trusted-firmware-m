@@ -89,7 +89,7 @@ struct its_metadata_block_header_t {
 /*!
  * \struct its_metadata_block_header_comp_t
  *
- * \brief The struture of metadata block header in
+ * \brief The structure of metadata block header in
  *        ITS_BACKWARD_SUPPORTED_VERSION.
  *
  * \note The active_swap_count must be the last member to allow it to be
@@ -278,7 +278,7 @@ psa_status_t its_flash_fs_mblock_meta_update_finalize(
  * \note The files data in the logical block 0 is stored in same physical
  *       block where the metadata is stored. A change in the metadata requires a
  *       swap of physical blocks. So, the files data stored in the current
- *       medadata block needs to be copied in the scratch block, unless
+ *       metadata block needs to be copied in the scratch block, unless
  *       the data of the file processed is located in the logical block 0.
  *
  * \param[in,out] fs_ctx  Filesystem context

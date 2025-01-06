@@ -10,7 +10,7 @@
 #include "tfm_ns_ctx.h"
 
 /*
- * Definiton of NS Client Token
+ * Definition of NS Client Token
  * bit[0:7] - Thread ID
  * bit[8:15] - Group ID
  * bit[16:23] - Context identifier

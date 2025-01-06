@@ -109,7 +109,7 @@ bool release_ns_ctx(uint8_t gid, uint8_t tid, uint8_t idx)
      */
     if (idx == active_ns_ctx_index) {
         if (ns_ctx_data[idx].tid == tid) {
-            /* Release the currrent active thread */
+            /* Release the current active thread */
             if (ns_ctx_data[idx].ref_cnt > 0) {
                 ns_ctx_data[idx].ref_cnt--;
             }

@@ -116,7 +116,7 @@ int main(void)
     FIH_LABEL_CRITICAL_POINT();
 
     /*
-     * Prioritise secure exceptions to avoid NS being able to pre-empt
+     * Prioritise secure exceptions to avoid NS being able to preempt
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
     tfm_arch_set_secure_exception_priorities();

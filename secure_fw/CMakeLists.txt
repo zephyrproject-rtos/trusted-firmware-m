@@ -115,7 +115,7 @@ if(CONFIG_TFM_USE_TRUSTZONE)
     )
 
     # Since s_veneers.o doesn't exist when this is evaluated by cmake we need to
-    # explicity specify what language it will use.
+    # explicitly specify what language it will use.
     set_target_properties(tfm_s_veneers
         PROPERTIES
             LINKER_LANGUAGE C

@@ -20,9 +20,9 @@
 /**
  * \brief Fills the AEAD additional data used for the encryption/decryption
  *
- * \details The additional data are not encypted their integrity is checked.
+ * \details The additional data are not encrypted their integrity is checked.
  *          For the ITS encryption we use the file id, the file flags and the
- *          data size of the file as addditional data.
+ *          data size of the file as additional data.
  *
  * \param[out]  add       Additional data
  * \param[in]   add_size  Additional data size in bytes
@@ -32,7 +32,7 @@
  * \param[in]   data_size Data size in bytes
  *
  * \retval PSA_SUCCESS                On success
- * \retval PSA_ERROR_INVALID_ARGUMENT When the addditional data buffer does not
+ * \retval PSA_ERROR_INVALID_ARGUMENT When the additional data buffer does not
  *                                    have the correct size of the add/fid
  *                                    buffers are NULL
  *

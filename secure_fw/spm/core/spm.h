@@ -179,7 +179,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
  * \param[in] partition_id  The Partition ID of the partition to get
  *
  * \retval NULL             Failed
- * \retval "Not NULL"       Return the parttion context pointer
+ * \retval "Not NULL"       Return the partition context pointer
  *                          \ref partition_t structures
  */
 struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
