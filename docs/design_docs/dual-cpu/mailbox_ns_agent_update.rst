@@ -93,7 +93,7 @@ support identifying the represented non-secure client. SPM sets the non-secure
 going to be sent. Before this point, SPM performs the call based on the
 agent's ID.
 
-This specifc ``Agent API`` is non-blocking, unlike the standard FF-M Client
+This specific ``Agent API`` is non-blocking, unlike the standard FF-M Client
 APIs. This can improve the communication efficiency between NS clients and
 mailbox NS agents. With this mechanism, extra signals and APIs for message
 acknowledges are also required.

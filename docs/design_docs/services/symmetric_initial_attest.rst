@@ -345,7 +345,7 @@ Set signing key
 ---------------
 
 ``t_cose_mac0_set_signing_key()`` sets the key used in ``COSE_Mac0`` signing.
-Optional ``kid``, as a key identifer, will be encoded into ``COSE_Mac0`` Header
+Optional ``kid``, as a key identifier, will be encoded into ``COSE_Mac0`` Header
 unprotected bucket.
 
 .. code-block:: c

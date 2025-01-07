@@ -98,7 +98,7 @@ assigned and returned. If the initialization is failed, `0` should be returned.
   uint32_t tfm_nsce_acquire_ctx(uint8_t group_id, uint8_t thread_id)
 
 This function allocates a context for the NS client connection. The `gid` and
-`tid` are the input paramemters. A token will be returned to the NSPE if TF-M
+`tid` are the input parameters. A token will be returned to the NSPE if TF-M
 has an available context slot. Otherwise, `TFM_NS_CLIENT_INVALID_TOKEN` is
 returned.
 It is the responsibility of NSPE RTOS to assign gid and tid for each NS client.
@@ -244,7 +244,7 @@ Integration notes
   within a group.
 
 - `gid` and `tid` management: It is the responsibility of NSPE RTOS to manage
-  the assignment of `gid` and `tid`. Based on the explaination above, the `gid`
+  the assignment of `gid` and `tid`. Based on the explanation above, the `gid`
   could be assigned as a constant value. And, the `tid` can be increased
   globally when calling `tfm_nsce_acquire_ctx()` for a new task. Just notice
   `tid` may overflow.

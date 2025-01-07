@@ -10,7 +10,7 @@ This document describes how to enable an interrupt in TF-M. The target audiences
 are mainly platform integrators and Secure Partition developers.
 
 This document assumes that you have read the PSA Firmware Framework (FF-M) v1.0
-[1]_ and the FF-M v1.1 extensions [2]_ thus have knowlege on the terminologies
+[1]_ and the FF-M v1.1 extensions [2]_ thus have knowledge on the terminologies
 such as Secure Partitions and manifests.
 
 ************************
@@ -177,7 +177,7 @@ Granting Permissions to Devices for Secure Partitions
 =====================================================
 
 A secure partition shall be granted two parts of permissions to access a device.
-One is the Memory Maped I/O (MMIO) region of the device. The other is the driver
+One is the Memory Mapped I/O (MMIO) region of the device. The other is the driver
 codes to access the device.
 
 The MMIO Regions

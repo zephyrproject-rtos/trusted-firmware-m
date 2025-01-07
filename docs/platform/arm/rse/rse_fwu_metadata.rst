@@ -1,11 +1,11 @@
-###############
-RSE FWU Metdata
-###############
+################
+RSE FWU Metadata
+################
 
 As per the PSA firmware update architecture specification `_DEN0118
 <https://developer.arm.com/documentation/den0118/latest/>`_ , fwu metadata and
-private metdata is a collection of fields that primarily serves as an information
-exchange channel between the firwmare update agent and the early stage bootloader.
+private metadata is a collection of fields that primarily serves as an information
+exchange channel between the firmware update agent and the early stage bootloader.
 Current code implements version 2 of the metadata as per the spec section A3.2.2.
 
 For RSE, if option ``RSE_GPT_SUPPORT`` is enabled, then the firmware store

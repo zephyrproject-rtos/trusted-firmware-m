@@ -133,7 +133,7 @@ with specific constraints, it may be desirable to run the scheduler in this
 situation, which can be done by setting
 ``CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED`` to 1. This could be done if the
 NSPE is known to be a simple, single-threaded application or if non-secure
-interrupts cannot pre-empt the SPE, for example.
+interrupts cannot preempt the SPE, for example.
 
 **********************************
 Integration with non-Cmake systems

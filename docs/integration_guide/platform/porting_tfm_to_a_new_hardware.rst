@@ -11,9 +11,11 @@ exist on the platform for TF-M (S and NS) to run on this new platform.
 *************
 Prerequisites
 *************
-Building environnement
-======================
-Make sure you have a working build environnement and that you can build
+
+Building environment
+====================
+
+Make sure you have a working build environment and that you can build
 TF-M on AN521 following the
 :doc:`Build instructions </building/tfm_build_instruction>`.
 
@@ -24,6 +26,7 @@ Please follow the :doc:`Getting started guide </getting_started/tfm_getting_star
 
 CMSIS Drivers
 =============
+
 The TF-M stack requires at least two CMSIS HAL implementations:
 
     - `USART <https://www.keil.com/pack/doc/CMSIS/Driver/html/group__usart__interface__gr.html>`_
@@ -127,7 +130,7 @@ information will be mandatory for the build system to build working firmware.
 Please note that platform folder provides source for building both :term:`SPE`
 and :term:`NSPE` parts. The SPE builds directly from the source tree while files
 necessary for NSPE platform support are installed to ``<Artifact folder>``
-for building TF-M application as decribed in the
+for building TF-M application as described in the
 :doc:`Build instructions </building/tfm_build_instruction>`.
 
 Questions to be answered:
@@ -213,7 +216,7 @@ CMakeLists.txt :
         - Install all files required for building the platform in the Non-secure application [INSTALL_]
 
     The installation section expands the common installation script with the platform specific files.
-    The following predefined variables are availble to address the respective subfolders
+    The following predefined variables are available to address the respective subfolders
     of the target ``<Artifact folder>``.
 
     +-------------------------------------+------------------------------------------------------------+
@@ -262,7 +265,7 @@ config.cmake:
     +=====================================+============================================================+
     |PLATFORM_HAS_ISOLATION_L3_SUPPORT    | Whether the platform has isolation level 3 support         |
     +-------------------------------------+------------------------------------------------------------+
-    |PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT | Wheter the platform has firmware update support            |
+    |PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT | Whether the platform has firmware update support           |
     +-------------------------------------+------------------------------------------------------------+
     |PSA_API_TEST_TARGET                  | The target platform name of PSA API test                   |
     +-------------------------------------+------------------------------------------------------------+
@@ -406,7 +409,7 @@ region_defs.h:
     from another platform (e.g. arm/mps2/an521) and update the following entries.
 
     General advice: if you don't know beforehand the size you will want for
-    these elements you will have to make it iterative from an abitrary value
+    these elements you will have to make it iterative from an arbitrary value
     taken from another platform (e.g. arm/mps2/an521)
 
     Note: all size are in bytes
@@ -471,7 +474,7 @@ CMSIS_Driver/Config/RTE_Device.h:
 
     (location as defined in CMakeLists.txt)
 
-    This is the Run-Time Environnement file from CMSIS, which is there to allow
+    This is the Run-Time Environment file from CMSIS, which is there to allow
     enabling or disabling drivers prior to building. If your platform is
     designed as a general use platform, this file should contain all the
     available CMSIS drivers, and you should provide a recommended configuration.

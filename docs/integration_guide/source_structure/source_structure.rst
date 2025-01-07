@@ -7,7 +7,7 @@ Source Structure
 TF-M is designed to provide a user-friendly source structure to ease
 integration and service development. This document introduces the source
 structure and its design intention of TF-M. Additionally, the folders below are
-important for TF-M integration and descibed in a separate documents:
+important for TF-M integration and described in a separate documents:
 
 .. toctree::
     :maxdepth: 1

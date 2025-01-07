@@ -443,7 +443,7 @@ The following commands build Profile Medium with regression test cases on
 
 .. Note::
 
- - For devices with more contrained memory and flash requirements, it is
+ - For devices with more constrained memory and flash requirements, it is
    possible to build with either only TEST_S enabled or only TEST_NS enabled.
    This will decrease the size of the test images. Note that both test suites
    must still be run to ensure correct operation.

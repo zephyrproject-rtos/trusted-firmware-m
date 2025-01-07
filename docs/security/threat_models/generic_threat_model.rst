@@ -762,7 +762,7 @@ send response data back to NS memory.
   |               |                                                            |
   |               | **Transferred**: If RoT services can directly access NS    |
   |               | memory and read NS input data multiple times during data   |
-  |               | processing, then the RoT service implementor must review   |
+  |               | processing, then the RoT service implementer must review   |
   |               | and confirm the implementation of the RoT service copies   |
   |               | NS input data into SPE memory area before it processes the |
   |               | data. TF-M-provided RoT services implement this            |
@@ -805,7 +805,7 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | **Transferred**: The RoT service implementor must not      |
+  | Mitigation    | **Transferred**: The RoT service implementer must not      |
   |               | embed memory addresses into a single input/output vector.  |
   |               | If more than 4 memory addresses are required in a RoT      |
   |               | service request, it is recommended to split this request   |
@@ -850,7 +850,7 @@ send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Information disclosure                                     |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | **Transferred**: The RoT service implementor must not      |
+  | Mitigation    | **Transferred**: The RoT service implementer must not      |
   |               | embed memory addresses into a single input/output vector.  |
   |               | If more than 4 memory addresses are required in a RoT      |
   |               | service request, it is recommended to split this request   |

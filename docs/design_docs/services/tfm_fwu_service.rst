@@ -47,7 +47,7 @@ The structure of the TF-M Firmware Update service is listed below:
    |                             | the NSPE(i.e. to the applications).                           |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | IPC request handlers        | This module handles all the secure requests in IPC model.     | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
-   |                             | It maitains the image state context and calls the image ID    |                                                                                       |
+   |                             | It maintains the image state context and calls the image ID   |                                                                                       |
    |                             | converter to achieve the firmware update functionalities.     |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | Shim layer between FWU and  | This module provides the APIs with the functionality of       | ``./secure_fw/partitions/firmware_update/bootloader/tfm_bootloader_fwu_abstraction.h``|
@@ -159,7 +159,7 @@ fwu_bootloader_install_image(function)
 
 Check the authenticity and integrity of the image. If a reboot is required to
 complete the check, then mark this image as a candidate so that the next time
-bootloader runs it will take this image as a candidate one to bootup. Return
+bootloader runs it will take this image as a candidate one to boot-up. Return
 the error code PSA_SUCCESS_REBOOT.
 
 **Parameters**
@@ -179,7 +179,7 @@ fwu_bootloader_mark_image_accepted(function)
 **Description**
 
 Call this API to mark the TRIAL(running) image in component as confirmed to avoid
-revert when next time bootup. Usually, this API is called after the running
+revert when next time boot-up. Usually, this API is called after the running
 images have been verified as valid.
 
 **Parameters**
@@ -198,7 +198,7 @@ fwu_bootloader_reject_staged_image(function)
 **Description**
 
 The component is in STAGED state. Call this API to Uninstall the staged image in the
-component so that this image will not be treated as a candidate next time bootup.
+component so that this image will not be treated as a candidate next time boot-up.
 
 **Parameters**
 
@@ -361,7 +361,7 @@ analysis above.
 Reference
 *********
 
-.. [1] `PSA Firwmare Update API <https://arm-software.github.io/psa-api/fwu/1.0/>`_
+.. [1] `PSA Firmware Update API <https://arm-software.github.io/psa-api/fwu/1.0/>`_
 
 --------------
 

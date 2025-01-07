@@ -26,7 +26,7 @@ Glossary of terms and abbreviations
         in a Secure Partition.
 
     NSPE
-        Non Secure Processing Enviroment:
+        Non Secure Processing Environment:
         `PSA term`_. In TF-M this means non secure domain typically running an
         OS using services provided by TF-M.
 

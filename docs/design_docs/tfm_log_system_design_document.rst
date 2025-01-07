@@ -198,7 +198,7 @@ These log device interfaces are abstracted into HAL APIs.
 
 .. note::
 
-  It is not recommended to re-use the same HAL for both SPM and SP log
+  It is not recommended to reuse the same HAL for both SPM and SP log
   outputting especially when SPM and SP run under different privileged level,
   which makes them have a different information confidential level. Unless:
 

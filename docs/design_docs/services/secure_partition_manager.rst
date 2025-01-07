@@ -193,7 +193,7 @@ on sequence, then `SPM` takes over the execution to perform these operations:
 
 .. note::
   These procedures and their sub-routines are recommended to be applied with
-  execution measurement mechansim to mitigate the `Hardware Fault Injection`
+  execution measurement mechanism to mitigate the `Hardware Fault Injection`
   attack.
 
 Preparation initialization
@@ -626,7 +626,7 @@ implementation can be straight like:
 - The SVC handler calls SPM internal routines, and eventually back to the
   handler before an exit.
 
-Under the IPC model implementation, to re-use `ABI 2` in `No-cross-boundary`,
+Under the IPC model implementation, to reuse `ABI 2` in `No-cross-boundary`,
 a software ABI needs to be provided.
 
 While under the SFN model plus isolation level 1, both `ABI 1` and `ABI 2` can

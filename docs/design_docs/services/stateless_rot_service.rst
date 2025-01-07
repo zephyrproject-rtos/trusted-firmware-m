@@ -86,7 +86,7 @@ Changes in Programming API
 ==========================
 
 This chapter describes the changes in programming API for stateless services.
-The following APIs' behavious and message data structure members are updated to
+The following APIs' behaviours and message data structure members are updated to
 support the stateless service.
 
 psa_connect()

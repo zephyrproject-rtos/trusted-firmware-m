@@ -59,7 +59,7 @@ Secure and non-secure libraries are compiled with ``COMPILER_CP_FLAG`` and
 linked with ``LINKER_CP_OPTION`` for different FP ABI types. All those
 libraries shall be built with ``COMPLIER_CP_FLAG``.
 
-If FP ABI types mismatch error is generated during build, pleae check whether
+If FP ABI types mismatch error is generated during build, please check whether
 the library is compiled with ``COMPILER_CP_FLAG``.
 Example:
 

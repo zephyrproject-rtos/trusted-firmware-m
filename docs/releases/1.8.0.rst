@@ -56,7 +56,7 @@ All modules are measured in bytes. Some minor modules are not shown in the table
 
 .. note::
 
-  Profile `Medium-ARoT-less` built with disabled Firmware Update service to algin with other
+  Profile `Medium-ARoT-less` built with disabled Firmware Update service to align with other
   TF-M Profiles.
 
 +----------------------+---------------+---------------+---------------+---------------+---------------+

@@ -345,7 +345,7 @@ memory access check shall be performed based on boundary.
 Memory Access Attributes
 ------------------------
 The memory access attributes are encoded as bit fields, you can logic OR them to
-have a combination of the atrributes, for example
+have a combination of the attributes, for example
 ``TFM_HAL_ACCESS_UNPRIVILEGED | TFM_HAL_ACCESS_READABLE`` is unprivileged
 readable. The data type is `uint32_t`.
 
@@ -782,7 +782,7 @@ Platforms can have extra initializations as well.
 **Note**
 
 Please refer to the
-:doc: `IRQ intergration guide<tfm_secure_irq_integration_guide>`
+:doc: `IRQ integration guide<tfm_secure_irq_integration_guide>`
 for more information.
 
 ************************************

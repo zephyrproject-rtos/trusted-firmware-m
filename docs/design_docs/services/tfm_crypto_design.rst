@@ -334,7 +334,7 @@ exported in the Kconfig menus.
    | `CRYPTO_SINGLE_PART_FUNCS_DISABLED`| CMake build               | When enabled, only the multipart, i.e. non-integrated APIs will| Not defined (Profile default)                                            |
    |                                    | configuration parameter   | be available in the service                                    |                                                                          |
    +------------------------------------+---------------------------+----------------------------------------------------------------+--------------------------------------------------------------------------+
-   | `CRYPTO_*_MODULE_ENABLED`          | CMake build               | When enabled, the correspoding shim layer module and relative  | Defined (Profile default)                                                |
+   | `CRYPTO_*_MODULE_ENABLED`          | CMake build               | When enabled, the corresponding shim layer module and relative | Defined (Profile default)                                                |
    |                                    | configuration parameters  | APIs are available in the service                              |                                                                          |
    +------------------------------------+---------------------------+----------------------------------------------------------------+--------------------------------------------------------------------------+
    | `MBEDTLS_CONFIG_FILE`              | Configuration header      | The Mbed TLS library can be configured to support different    | ``lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h`` |

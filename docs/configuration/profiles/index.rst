@@ -82,7 +82,7 @@ in the links below.
 +----------------------------------------+--------+--------+---------+--------+--------+
 
 1. `MCUBOOT_IMAGGE_NUMBER` value is taken from MCUBoot default configuration,
-   execept profile Small.
+   except profile Small.
 2. Many platforms redefine `ITS_BUF_SIZE` value.
 
 Each profile has predefined configuration for cryptographic library, located in

@@ -29,7 +29,7 @@ Existing key handling solution
 MCUBoot code contains a compile-time built-in key array which can store any
 number of key(s) for firmware verification: ``bl2/ext/mcuboot/keys.c``. These
 public key(s) must be available when MCUBoot image is built. There is a script
-``bl2/ext/mcuboot/scipt/imgtool.py`` which can generate a new key pair, and
+``bl2/ext/mcuboot/scripts/imgtool.py`` which can generate a new key pair, and
 extract the public key part in the expected ASN.1 format and encode it as C
 structure. The script is also capable of signing the image with the private key.
 In order to identify and validate the corresponding public key during image
@@ -75,9 +75,9 @@ Design proposal
 HW key(s) might stored in OTP memory which is an expensive resource, so
 storing a large key (such as RSA) is inefficient. Therefore, it is assumed that
 only the hash of the ROTPK will be stored in the HW. If only the hash of the
-public key is stored in the HW then the whole public key must be transfered to
+public key is stored in the HW then the whole public key must be transferred to
 the device, because it must be available during image verification. This
-transfer can be done in the same way as how the hash of the key is transfered
+transfer can be done in the same way as how the hash of the key is transferred
 to the device with the current solution. A new TLV type (TLV_KEY) can be
 introduced to carry the whole public key. The corresponding public key will be
 appended to the image itself in the manifest area. It has the drawback that the
@@ -147,7 +147,7 @@ compatibility.
 Tooling
 -------
 
-``bl2/ext/mcuboot/scipt/imgtool.py`` will be modified to include the whole
+``bl2/ext/mcuboot/scripts/imgtool.py`` will be modified to include the whole
 public key to the TLV area (instead of the hash).
 
 Table to compare the current and proposed solution::

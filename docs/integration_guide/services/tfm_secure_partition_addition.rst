@@ -92,7 +92,7 @@ allocate resources within the SPE. The manifest includes the following:
 
 .. Note::
    The users can use LOW, NORMAL and HIGH to determine the priority of the Secure Partition
-   in manifest. They are replaced by 01, 02 and 03 auotmatically when parsing manifest
+   in manifest. They are replaced by 01, 02 and 03 automatically when parsing manifest
    lists for section naming.
 
 Here is a manifest reference example for the IPC model:
@@ -452,7 +452,7 @@ And add it to ``<TF-M base folder>/secure_fw/partitions/Kconfig``
 .. Note::
 
   The Secure Partition building should be skipped if it is not enabled.
-  This should be done by adding the following code at the begining of its ``CMakeLists.txt``
+  This should be done by adding the following code at the beginning of its ``CMakeLists.txt``
 
   .. code-block:: cmake
 
@@ -747,7 +747,7 @@ below. Please note those input shall be wrapped with double quotes.
    ``TFM_EXTRA_PARTITION_PATHS``. The orders don't matter either.
 
    ``TFM_EXTRA_MANIFEST_LIST_FILES`` and ``TFM_EXTRA_PARTITION_PATHS`` can be
-   configurated in multiple extra sources. It is recommended to use CMake list
+   configured in multiple extra sources. It is recommended to use CMake list
    ``APPEND`` method to avoid unexpected override.
 
 Further Notes

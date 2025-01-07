@@ -3,7 +3,7 @@ Documentation Contribution Guidelines
 #####################################
 
 The Trusted Firmware-M project uses `Sphinx`_ to generate the Official
-Documentation from `Restructed Text`_ `.rst` source files,
+Documentation from `reStructuredText`_ `.rst` source files,
 
 The aim is to align as much as possible with the official
 `Python Documentation Guidelines`_ while keeping the consistency with the
@@ -125,7 +125,7 @@ A list of compatible lexers can be found at `Pygments Lexers`_
         print("Hello TF-M")
 
 
-Restructured Text supports implicit code-blocks by indenting a section of text,
+reStructuredText supports implicit code-blocks by indenting a section of text,
 surrounded by new lines. While this formatting is
 allowed, it should be avoided if possible.
 
@@ -194,7 +194,7 @@ External links should be placed in the bottom of a document.
     *Copyright (c) XYZ *
 
 Creating in-line links is permitted, but should be avoided if possible. It
-should be only used for consistency purposes or for a small ammount
+should be only used for consistency purposes or for a small amount
 of short links.
 
 .. code-block:: restructuredtext
@@ -236,7 +236,7 @@ using the `doc:` notation is preferred and helps to avoid broken cross-reference
 the document changes.
 
 For example, to get this: :doc:`Adding TF-M Regression Test Suite
-<TF-M-Tests:tfm_test_suites_addition>`; the Restructed Text would look like this:
+<TF-M-Tests:tfm_test_suites_addition>`; the reStructuredText would look like this:
 
 .. code-block:: restructuredtext
 
@@ -291,13 +291,13 @@ References
 ==========
 
 #. `Sphinx`_
-#. `Restructed Text`_
+#. `reStructuredText`_
 #. `Python Documentation Guidelines`_
 #. `Pygments Lexers`_
 #. `Intersphinx`_
 
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
-.. _Restructed Text: https://docutils.sourceforge.io/rst.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 .. _Python Documentation Guidelines: https://devguide.python.org/documentation/style-guide/
 .. _Pygments Lexers: https://pygments.org/docs/api/#lexers
 .. _Intersphinx: https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
@@ -305,4 +305,4 @@ References
 
 --------------
 
-*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2025, Arm Limited. All rights reserved.*

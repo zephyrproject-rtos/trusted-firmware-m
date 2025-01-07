@@ -43,7 +43,7 @@ To build S and NS application along with a BL2, run the following commands:
 1.3 Building TF-M regression tests
 ==================================
 
-To buld the S and NS regression tests without BL2, run the following commands:
+To build the S and NS regression tests without BL2, run the following commands:
 
 .. code:: bash
 

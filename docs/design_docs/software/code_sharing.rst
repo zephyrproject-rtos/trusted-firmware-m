@@ -280,7 +280,7 @@ If MCUboot image encryption support is enabled then saving could be up to
 
 
 *************************
-Useability considerations
+Usability considerations
 *************************
 Functions that only use local variables can be shared easily. However, functions
 that rely on global variables are a bit tricky. They can still be shared, but

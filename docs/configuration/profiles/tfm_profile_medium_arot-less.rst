@@ -131,9 +131,9 @@ The default configurations in ``config/profile/profile_medium_arotless`` are sho
    | ``CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED``     | ``OFF``                                                                                             | Enable Crypto asymmetric            |
    |                                            |                                                                                                     | encryption operations               |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Re-use Profile Medium configuration |
+   | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Reuse Profile Medium configuration  |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``  | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_medium.h``         | Re-use Profile Medium configuration |
+   | ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``  | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_medium.h``         | Reuse Profile Medium configuration  |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                                                                                              | Enable Initial Attestation service  |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+

@@ -176,7 +176,7 @@ partitions can be configured dynamically while scheduling. Since there is only
 one running at a time and all others are deactivated, the SPM needs to set up
 necessary regions for each asset type in one partition only.
 
-There is re-usable code like the C-Runtime and RoT Service API which are same
+There is reusable code like the C-Runtime and RoT Service API which are same
 across different partitions. TF-M creates a Secure Partition Runtime Library
 (SPRTL) as a specific library shared by the Secure Partition. Please refer to
 :doc:`Secure Partition Runtime Library </design_docs/services/secure_partition_runtime_library>`

@@ -110,7 +110,7 @@ The MPS3 board tested is HBI0309C.
 #. Copy ``bl2.bin`` and ``tfm_s_ns_signed.bin`` files from
    build dir to ``<MPS3 device name>/SOFTWARE/``
 #. Rename ``tfm_s_ns_signed.bin`` to ``tfm.bin`` (Filename should not be longer
-   than 8 charachters.)
+   than 8 characters.)
 #. Open ``<MPS3 device name>/MB/HBI0309C/AN547/images.txt``
 #. Update the ``images.txt`` file as follows::
 
@@ -176,7 +176,7 @@ The MPS3 board tested is HBI0309C.
 #. Copy ``bl2.bin`` and ``tfm_s_ns_signed.bin`` files from
    build dir to ``<MPS3 device name>/SOFTWARE/``
 #. Rename ``tfm_s_ns_signed.bin`` to ``tfm.bin`` (Filename should not be longer
-   than 8 charachters.)
+   than 8 characters.)
 #. Open ``<MPS3 device name>/MB/HBI0309C/AN552/images.txt``
 #. Update the ``images.txt`` file as follows::
 

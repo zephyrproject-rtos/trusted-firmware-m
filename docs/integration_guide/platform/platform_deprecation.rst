@@ -15,7 +15,7 @@ process for removing platform support from TF-M.
     2. The merit of the proposal will be considered by the maintainers for a
        period of 4 weeks and community can express their opinion on the same
        during this time window. The platform owner can veto the proposal and
-       incase of multiple platform owners with differing opinion or community
+       in case of multiple platform owners with differing opinion or community
        having interest in the platform, then the project maintainer can work
        with the platform owner and use their discretion to decide on the
        proposal.

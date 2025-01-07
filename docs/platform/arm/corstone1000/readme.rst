@@ -23,7 +23,7 @@ top of the RSE communication protocol. The Corstone-1000 supports only the
 `Embed protocol`, and the ATU support is removed.
 
 The secure enclave subsystem has ARM's CC-312 (Crypto Cell) hardware to
-accelerate cryptographic operations. Additionaly, platform supports Secure Debug
+accelerate cryptographic operations. Additionally, platform supports Secure Debug
 using SDC-600 as the communication interface between host debugger and platform
 target. The platform has the build option to enable secure debug protocol to
 unlock debug ports during boot time. The protocol is based on ARM's ADAC
@@ -83,10 +83,10 @@ Secure Test
 
 This section can be used to test the secure enclave software independently from
 the host. The below configuration builds the secure enclave binaries with regression test
-frame integrated. On boot, secure enclave softwares stack is brought up, and
+frame integrated. On boot, secure enclave software stack is brought up, and
 regression tests starts executing at the end of the initialization process. In the
 below configuration, host software support is disabled, and meant only
-to test/verify the secure enclave softwares.
+to test/verify the secure enclave software.
 
 Follow the instructions in :doc:`Building instructions </building/tests_build_instruction>`.
 

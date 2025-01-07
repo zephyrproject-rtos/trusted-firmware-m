@@ -172,7 +172,7 @@ enable single-part operations by toggling Profile Small default configuration.
 It may increase latency and overall time cost to implement cryptography
 functionality with single-part operations, compared to with multi-part ones.
 Users can enable single-part operations if the usage scenario requires
-single-part opreations to meet its perfermance metrics.
+single-part operations to meet its performance metrics.
 
 Secure Storage
 ==============
