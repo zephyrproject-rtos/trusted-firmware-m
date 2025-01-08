@@ -167,6 +167,60 @@ static int noc_s3_sysctrl_systop_init(void)
 }
 #endif
 
+#ifdef HOST_SMMU
+/*
+ * Initialize and bypass Granule Protection Check (GPC) to allow RSE and SCP
+ * to access HOST AP peripheral regions.
+ */
+static int32_t sysctrl_smmu_init(void)
+{
+    enum atu_roba_t roba_value;
+    enum atu_error_t atu_err;
+    enum smmu_error_t smmu_err;
+
+    atu_err = atu_initialize_region(&ATU_DEV_S,
+                                    HOST_SYSCTRL_SMMU_ATU_ID,
+                                    HOST_SYSCTRL_SMMU_BASE,
+                                    (host_system_data.info.chip_ap_phys_base +
+                                        HOST_SYSCTRL_SMMU_PHYS_BASE),
+                                    HOST_SYSCTRL_SMMU_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+
+    /* Allow Root PAS to the ATU region*/
+    roba_value = ATU_ROBA_SET_1;
+    atu_err = set_axnsc(&ATU_DEV_S, roba_value, HOST_SYSCTRL_SMMU_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+
+    roba_value = ATU_ROBA_SET_0;
+    atu_err = set_axprot1(&ATU_DEV_S, roba_value, HOST_SYSCTRL_SMMU_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+
+    /* Disable GPC */
+    smmu_err = smmu_gpc_disable(&HOST_SYSCTRL_SMMU_DEV);
+    if (smmu_err != SMMU_ERR_NONE){
+        return -1;
+    }
+
+    /* Allow Access via SMMU */
+    smmu_err = smmu_access_enable(&HOST_SYSCTRL_SMMU_DEV);
+    if (smmu_err != SMMU_ERR_NONE){
+        return -1;
+    }
+
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_SYSCTRL_SMMU_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+    return 0;
+}
+#endif
+
 /* Read Chip ID from OTP */
 static int read_chip_id(uint32_t *chip_id)
 {
@@ -246,6 +300,14 @@ int host_system_prepare_ap_access(void)
 #ifdef RD_SYSCTRL_NOC_S3
     /* Configure System Control NoC S3 for nodes under SYSTOP power domain */
     res = noc_s3_sysctrl_systop_init();
+    if (res != 0) {
+        return 1;
+    }
+#endif
+
+#ifdef HOST_SMMU
+    /* Initialize the SYSCTRL SMMU for boot time */
+    res = sysctrl_smmu_init();
     if (res != 0) {
         return 1;
     }
