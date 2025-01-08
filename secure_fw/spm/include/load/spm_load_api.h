@@ -32,10 +32,10 @@
      ((pldinf)->nirqs * sizeof(struct irq_load_info_t)))
 
 /* 'Allocate' stack based on load info */
-#define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)(pldinf + 1)))
+#define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)((pldinf) + 1)))
 
 #define LOAD_INFO_DEPS(pldinf)                                         \
-    ((const uint32_t *)((uintptr_t)(pldinf + 1) + ((LOAD_INFO_EXT_LENGTH) * sizeof(uintptr_t))))
+    ((const uint32_t *)((uintptr_t)((pldinf) + 1) + ((LOAD_INFO_EXT_LENGTH) * sizeof(uintptr_t))))
 #define LOAD_INFO_SERVICE(pldinf)                                      \
     ((const struct service_load_info_t *)((uintptr_t)LOAD_INFO_DEPS(pldinf) + \
      ((pldinf)->ndeps * sizeof(uint32_t))))
