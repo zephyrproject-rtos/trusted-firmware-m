@@ -50,6 +50,24 @@
         .lock = NOC_S3_LOCK                                               \
     }
 
+/*
+ * Platform specific apu region initialization macro wrapper without locking
+ * the region. This macros returns 'struct noc_s3_apu_reg_cfg_info'
+ * definition by providing the base and end address of APU region and the
+ * associated access permission.
+ */
+#define INIT_APU_REGION_UNLOCKED(base, end, perm)   \
+    {                                               \
+        .base_addr = base,                          \
+        .end_addr = end,                            \
+        .background = NOC_S3_FOREGROUND,            \
+        .permissions = { perm, 0, 0, 0 },           \
+        .entity_ids = { 0, 0, 0, 0 },               \
+        .id_valid = NOC_S3_ID_VALID_NONE,           \
+        .region_enable = NOC_S3_REGION_ENABLE,      \
+        .lock = NOC_S3_UNLOCK                       \
+    }
+
 /* Interface ID of xSNI components - completer interfaces */
 enum sysctrl_xSNI_ids {
     /* Request from AP */
@@ -104,6 +122,32 @@ enum sysctrl_apu_filter_ids {
     SYSCTRL_DAP_APU_ID = 0x3F,
 };
 
+/* Interface ID of Peripheral xMNI components */
+enum periph_xMNI_ids {
+    /* Targets ARSM SRAM */
+    PERIPH_RAM_AMNI_ID = 0x0,
+    /* Targets Secure SRAM Error record block for the shared ARSM SRAM */
+    PERIPH_ECCREG_PMNI_ID,
+    /* Targets AP Generic Timer Control Frame */
+    PERIPH_GTIMERCTRL_PMNI_ID,
+    /* Targets AP Non-secure WatchDog */
+    PERIPH_NSGENWDOG_PMNI_ID,
+    /* Targets AP Non-secure Generic Timer Control Base Frame */
+    PERIPH_NSGTIMER_PMNI_ID,
+    /* Targets AP Non-secure UART */
+    PERIPH_NSUART0_PMNI_ID,
+    /* Targets AP Non-secure UART for RMM debug */
+    PERIPH_NSUART1_PMNI_ID,
+    /* Targets AP root WatchDog */
+    PERIPH_ROOTGENWDOG_PMNI_ID,
+    /* Targets AP Secure WatchDog */
+    PERIPH_SECGENWDOG_PMNI_ID,
+    /* Targets AP Secure Generic Timer Control Base Frame */
+    PERIPH_SECGTIMER_PMNI_ID,
+    /* Targets AP Secure UART */
+    PERIPH_SECUART_PMNI_ID
+};
+
 /**
  * \brief Programs System Control block NoC S3 PSAM and APU for AON domain
  *
@@ -119,5 +163,20 @@ int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id);
  * \return Returns -1 if there is an error, else 0.
  */
 int32_t program_sysctrl_noc_s3_systop(void);
+
+/**
+ * \brief Program NoC S3 peripheral block APU
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_periph_noc_s3(void);
+
+/**
+ * \brief Program NoC S3 peripheral block APU to lock ram region after
+ *        limiting the region as read only.
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_periph_noc_s3_post_ap_bl1_load(void);
 
 #endif /* __NOC_S3_LIB_H__ */

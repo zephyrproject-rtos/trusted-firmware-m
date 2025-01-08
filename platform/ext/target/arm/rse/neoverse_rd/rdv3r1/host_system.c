@@ -167,6 +167,64 @@ static int noc_s3_sysctrl_systop_init(void)
 }
 #endif
 
+#ifdef RD_PERIPH_NOC_S3
+/*
+ * Programs the Peripheral NoC S3.
+ */
+static int noc_s3_periph_init(void)
+{
+    int err;
+
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_PERIPH_NOC_S3_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    PERIPH_NOC_S3_DEV.chip_addr_offset =
+        host_system_data.info.chip_ap_phys_base;
+    err = program_periph_noc_s3();
+    if (err != 0) {
+        return err;
+    }
+
+    err = noc_s3_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+
+/*
+ * Programs the Peripheral NoC S3 for ram_axim AP_BL1_RO region.
+ */
+static int32_t noc_s3_periph_init_ap_bl1_post_load(void)
+{
+    int32_t err;
+
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_PERIPH_NOC_S3_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    PERIPH_NOC_S3_DEV.chip_addr_offset =
+        host_system_data.info.chip_ap_phys_base;
+    err = program_periph_noc_s3_post_ap_bl1_load();
+    if (err != 0) {
+        return err;
+    }
+
+    err = noc_s3_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+#endif
+
 #ifdef HOST_SMMU
 /*
  * Initialize and bypass Granule Protection Check (GPC) to allow RSE and SCP
@@ -313,6 +371,14 @@ int host_system_prepare_ap_access(void)
     }
 #endif
 
+#ifdef RD_PERIPH_NOC_S3
+    /* Configure Peripheral NoC S3 */
+    res = noc_s3_periph_init();
+    if (res != 0) {
+        return 1;
+    }
+#endif
+
     return 0;
 }
 
@@ -326,6 +392,14 @@ int host_system_finish(void)
     int res;
 
     (void)res;
+
+#ifdef RD_PERIPH_NOC_S3
+    /* Limit AP BL1 load region to read-only and lock the APU region */
+    res = noc_s3_periph_init_ap_bl1_post_load();
+    if (res != 0) {
+        return 1;
+    }
+#endif
 
     return 0;
 }
