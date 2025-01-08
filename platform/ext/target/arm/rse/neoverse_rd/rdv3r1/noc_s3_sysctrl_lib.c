@@ -40,6 +40,16 @@ static const struct noc_s3_component_node sysctrl_rse_scp_asni  = {
     .id = SYSCTRL_RSE_SCP_ASNI_ID,
 };
 
+static const struct noc_s3_component_node sysctrl_app_asni  = {
+    .type = NOC_S3_ASNI,
+    .id = SYSCTRL_APP_ASNI_ID,
+};
+
+static const struct noc_s3_component_node sysctrl_lcp_asni  = {
+    .type = NOC_S3_ASNI,
+    .id = SYSCTRL_LCP_ASNI_ID,
+};
+
 static const struct noc_s3_component_node sysctrl_rsm_amni  = {
     .type = NOC_S3_AMNI,
     .id = SYSCTRL_RSM_AMNI_ID,
@@ -58,6 +68,16 @@ static const struct noc_s3_component_node sysctrl_rse_scp_amni  = {
 static const struct noc_s3_component_node sysctrl_rse_mcp_amni  = {
     .type = NOC_S3_AMNI,
     .id = SYSCTRL_RSE_MCP_AMNI_ID,
+};
+
+static const struct noc_s3_component_node sysctrl_app_amni  = {
+    .type = NOC_S3_AMNI,
+    .id = SYSCTRL_APP_AMNI_ID,
+};
+
+static const struct noc_s3_component_node sysctrl_lcp_amni  = {
+    .type = NOC_S3_AMNI,
+    .id = SYSCTRL_LCP_AMNI_ID,
 };
 
 /*
@@ -90,40 +110,76 @@ static const struct noc_s3_component_node sysctrl_rse_mcp_amni  = {
  *                                           |     |---| APU |---> rsm_apbm
  *                             +-----+       |     |   +-----+
  *                             |     |       |     |
+ *                             |     |------>|     |   +-----+
+ *                             |     |       |     |---| APU |---> app_axim
+ *                             |     |       |     |   +-----+
+ *                  +-----+    |     |       +-----+
+ *      mcp_axis ---| APU |--->|     |
+ *                  +-----+    |     |
+ *                             |     |       +-----+
+ *                             |     |       |     |
+ *                             |     |------>|     |
+ *                             |     |       |     |
+ *                             +-----+       |     |
+ *                                           |     |
+ *                                           |     |-------------> app_scp_axim
+ *                             +-----+       |     |
+ *                             |     |       |     |
  *                             |     |------>|     |
  *                             |     |       |     |
  *                             |     |       |     |
  *                  +-----+    |     |       +-----+
- *      mcp_axis ---| APU |--->|     |
+ *      app_axis ---| APU |--->|     |
  *                  +-----+    |     |
  *                             |     |
  *                             |     |
- *                             |     |
+ *                             |     |---------------------------> app_mcp_axim
  *                             |     |
  *                             +-----+
  *
+ *                             +-----+
+ *                             |     |
+ *                  +-----+    |     |
+ *      lcp_axis ---| APU |--->|     |---------------------------> lcp_scp_axim
+ *                  +-----+    |     |
+ *                             |     |
+ *                             +-----+
+ *
+ *                             +-----+
+ *                             |     |
+ *                             |     |          +-----+
+ *  rse_scp_axis ------------->|     |----------| APU |---------> lcp_axim
+ *                             |     |          +-----+
+ *                             |     |
+ *                             +-----+
  *
  * The following matrix shows the connections within System Control NoC S3.
  *
- * +------------+---------------+----------+----------+--------------+
- * |            | rse_main_axis | scp_axis | mcp_axis | rse_scp_axis |
- * +============+===============+==========+==========+==============+
- * |rse_scp_axim|       X       |          |          |              |
- * +------------+---------------+----------+----------+--------------+
- * |rse_mcp_axim|       X       |          |          |              |
- * +------------+---------------+----------+----------+--------------+
- * |  rsm_axim  |       X       |    X     |    X     |              |
- * +------------+---------------+----------+----------+--------------+
- * |  rsm_apbm  |       X       |    X     |    X     |              |
- * +------------+---------------+----------+----------+--------------+
- * |  cmn_apbm  |       X       |    X     |    X     |              |
- * +------------+---------------+----------+----------+--------------+
- * |  tcu_apbm  |       X       |          |          |              |
- * +------------+---------------+----------+----------+--------------+
- * |app_scp_axim|               |          |    X     |              |
- * +------------+---------------+----------+----------+--------------+
- * |app_mcp_axim|               |          |          |              |
- * +------------+---------------+----------+----------+--------------+
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |            | rse_main_axis | scp_axis | mcp_axis | rse_scp_axis | app_axis | lcp_axis |
+ * +============+===============+==========+==========+==============+==========+==========+
+ * |rse_scp_axim|       X       |          |          |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |rse_mcp_axim|       X       |          |          |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  rsm_axim  |       X       |    X     |    X     |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  rsm_apbm  |       X       |    X     |    X     |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  cmn_apbm  |       X       |    X     |    X     |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  tcu_apbm  |       X       |          |          |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  lcp_axim  |               |          |          |      X       |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |  app_axim  |       X       |    X     |    X     |              |          |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |app_scp_axim|               |          |    X     |              |    X     |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |app_mcp_axim|               |          |          |              |    X     |          |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
+ * |lcp_scp_axim|               |          |          |              |          |    X     |
+ * +------------+---------------+----------+----------+--------------+----------+----------+
  *  NOTE: 'X' means there is a connection.
  */
 
@@ -708,6 +764,55 @@ static const struct noc_s3_psam_reg_cfg_info rse_scp_axis_psam[] = {
 };
 
 /*
+ * Request originating from AP is mapped to targets based on following
+ * address map.
+ */
+static const struct noc_s3_psam_reg_cfg_info app_axis_psam[] = {
+    /*
+     * Generic refclk + AP Watchdog peripherals + SID + ECC error record
+     * registers
+     */
+    {
+        HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
+        HOST_RSE_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* Refclk registers */
+    {
+        HOST_GENERIC_REFCLK_CNTREAD_PHYS_BASE,
+        HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* AP<->SCP MHUv3 registers */
+    {
+        HOST_AP_NS_SCP_MHUV3_PHYS_BASE,
+        HOST_AP_RT_SCP_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+    /* AP<->MCP MHUv3 registers */
+    {
+        HOST_AP_NS_MCP_MHUV3_SEND_BASE,
+        HOST_AP_RT_MCP_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_MCP_AMNI_ID
+    },
+    /* AP<->RSE MHUv3 registers */
+    {
+        HOST_AP_NS_RSE_MHUV3_PHYS_BASE,
+        HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
+        SYSCTRL_APP_SCP_AMNI_ID
+    },
+};
+
+/* Request from LCP is targeted completely to LCP_SCP_AXIM */
+static const struct noc_s3_psam_reg_cfg_info lcp_axis_psam[] = {
+    {
+        HOST_LCP_MMAP_PHYS_BASE,
+        HOST_LCP_MMAP_PHYS_LIMIT,
+        SYSCTRL_LCP_SCP_AMNI_ID
+    },
+};
+
+/*
  * Requester side MCP AXIS APU to check access permission targeting Generic
  * refclk in SCP and shared RSM SRAM
  */
@@ -772,6 +877,182 @@ static const struct noc_s3_apu_reg_cfg_info rse_scp_axim_apu[] = {
 static const struct noc_s3_apu_reg_cfg_info rse_mcp_axim_apu[] = {
     INIT_APU_REGION(HOST_MCP_PHYS_BASE,
                     HOST_MCP_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+};
+
+/*
+ * Requester side APP AXIS APU to check access permission targeting the
+ * peripherals in SCP, MCP and RSE
+ */
+static const struct noc_s3_apu_reg_cfg_info app_axis_apu[] = {
+    /* Root read-write permission : Generic refclk registers */
+    INIT_APU_REGION(HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_BASE,
+                    HOST_GENERIC_REFCLK_CNTCONTROL_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Full permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_NS_WDOG_PHYS_BASE,
+                    HOST_AP_NS_WDOG_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Root read-write permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_RT_WDOG_PHYS_BASE,
+                    HOST_AP_RT_WDOG_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Secure read-write permission : AP Watchdog peripheral */
+    INIT_APU_REGION(HOST_AP_S_WDOG_PHYS_BASE,
+                    HOST_AP_S_WDOG_PHYS_LIMIT,
+                    NOC_S3_SEC_RW),
+    /* Full permission : SID */
+    INIT_APU_REGION(HOST_SID_PHYS_BASE,
+                    HOST_SID_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Secure read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_S_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NOC_S3_SEC_RW),
+    /* Full permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_NS_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Root read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RT_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Realm read-write permission : AP ECC error record */
+    INIT_APU_REGION(HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_RL_ARSM_RAM_ECC_REC_PHYS_LIMIT,
+                    NOC_S3_REALM_RW),
+    /*
+     * Secure & Root read-write permission : SCP/MCP/RSE ECC error record +
+     * SCP/MCP/RSE RSM ECC error record + Generic refclk registers +
+     * AP refclk registers
+     */
+    INIT_APU_REGION(HOST_SCP_S_ARSM_RAM_ECC_REC_PHYS_BASE,
+                    HOST_AP_NS_REFCLK_CNTBASE1_PHYS_LIMIT,
+                    NOC_S3_SEC_RW),
+    /* Full permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_NS_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_NS_SCP_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Secure & Root read-write permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_S_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_S_SCP_MHUV3_PHYS_LIMIT,
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+    /* Root read-write permission : AP<->SCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RT_SCP_MHUV3_PHYS_BASE,
+                    HOST_AP_RT_SCP_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Full permission : AP<->MCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_NS_MCP_MHUV3_SEND_BASE,
+                    HOST_AP_NS_MCP_MHUV3_SEND_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Secure read-write permission : AP<->MCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_S_MCP_MHUV3_PHYS_BASE,
+                    HOST_AP_S_MCP_MHUV3_PHYS_LIMIT,
+                    NOC_S3_SEC_RW),
+    /* Root read-write permission : AP<->MCP MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RT_MCP_MHUV3_PHYS_BASE,
+                    HOST_AP_RT_MCP_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Full permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_NS_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_NS_RSE_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Secure read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_S_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_S_RSE_MHUV3_PHYS_LIMIT,
+                    NOC_S3_SEC_RW),
+    /* Root read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RT_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_RT_RSE_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW),
+    /* Root & Realm read-write permission : AP<->RSE MHUv3 registers */
+    INIT_APU_REGION(HOST_AP_RL_RSE_MHUV3_PHYS_BASE,
+                    HOST_AP_RL_RSE_MHUV3_PHYS_LIMIT,
+                    NOC_S3_ROOT_RW | NOC_S3_REALM_RW),
+};
+
+/*
+ * Completer side APP AXIM APU to check access permission targeting the IO
+ * block and the memory controller + MPE registers space
+ */
+static const struct noc_s3_apu_reg_cfg_info app_axim_apu[] = {
+    /*
+     * Full permission for the entire AP address expect for the following
+     * regions:
+     * 1. Root & Secure read-write permission for IO integration control
+     *    registers.
+     * 2. Deny full access to MCP for Memory Controller, MPE register
+     *    space, LCP peripherals and Cluster Utility region.
+     */
+    INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
+                    HOST_CMN_GPV_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_BLOCK_PHYS_BASE,
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(0),
+                    NOC_S3_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(0),
+                    HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(0),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
+    INIT_APU_REGION(HOST_IO_RAS_AGENT_PHYS_BASE(0),
+                    HOST_IO_RAS_AGENT_PHYS_LIMIT(0),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
+    INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(0),
+                    HOST_IO_NCI_GPV_PHYS_LIMIT(1),
+                    NOC_S3_ALL_PERM),
+    INIT_APU_REGION(HOST_IO_INTEGRATION_CTRL_PHYS_BASE(1),
+                    HOST_IO_INTEGRATION_CTRL_PHYS_LIMIT(1),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
+    INIT_APU_REGION(HOST_IO_RAS_AGENT_PHYS_BASE(1),
+                    HOST_IO_RAS_AGENT_PHYS_LIMIT(1),
+                    NOC_S3_ROOT_RW | NOC_S3_SEC_RW),
+    INIT_APU_REGION(HOST_IO_EXP_INTERFACE_PHYS_BASE(1),
+                    HOST_IO_PCIE_CTRL_EXP_PHYS_LIMIT(1),
+                    NOC_S3_ALL_PERM),
+    INIT_APU_REGION(HOST_SYSCTRL_SMMU_PHYS_BASE,
+                    HOST_AP_MEM_EXP_3_PHYS_LIMIT,
+                    NOC_S3_ALL_PERM),
+    /* Allow only for RSE, SCP and AP */
+    INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_MPE_PHYS_BASE,
+                                       HOST_MPE_PHYS_LIMIT,
+                                       /* mcp_perm */ 0,
+                                       /* scp_perm */ NOC_S3_ALL_PERM,
+                                       /* rse_perm */ NOC_S3_ALL_PERM,
+                                       /* dap_perm */ 0),
+    /* Allow only for RSE, SCP and AP */
+    INIT_APU_REGION_WITH_ALL_ID_FILTER(HOST_CLUST_UTIL_PHYS_BASE,
+                                       HOST_CLUST_UTIL_PHYS_LIMIT,
+                                       /* mcp_perm */ 0,
+                                       /* scp_perm */ NOC_S3_ALL_PERM,
+                                       /* rse_perm */ NOC_S3_ALL_PERM,
+                                       /* dap_perm */ 0),
+};
+
+/*
+ * Completer side LCP AXIM APU to check access permission targeting the Cluster
+ * Utility space.
+ */
+static const struct noc_s3_apu_reg_cfg_info lcp_axim_apu[] = {
+    INIT_APU_REGION(HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_LCP_SMCF_OFF_ADDR_PHYS_LIMIT,
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_CLUS_CTRL_OFF_ADDR_PHYS_LIMIT,
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_PPU_OFF_ADDR_PHYS_LIMIT,
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_AMU_OFF_ADDR_PHYS_LIMIT,
+                    NOC_S3_N_SEC_RW | NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+    INIT_APU_REGION(HOST_CLUS_UTIL_RAS_OFF_ADDR_PHYS_BASE,
+                    HOST_CLUS_UTIL_MPMM_OFF_ADDR_PHYS_LIMIT,
+                    NOC_S3_SEC_RW | NOC_S3_ROOT_RW),
+};
+
+/* Requester side LCP AXIS APU to check access permission targeting the SCP */
+static const struct noc_s3_apu_reg_cfg_info lcp_axis_apu[] = {
+    INIT_APU_REGION(HOST_AP_SHARED_SRAM_PHYS_BASE,
+                    HOST_AP_MEM_EXP_3_PHYS_LIMIT,
                     NOC_S3_ALL_PERM),
 };
 
@@ -907,6 +1188,93 @@ static int32_t program_sysctrl_apu_aon(void)
     return 0;
 }
 
+/*
+ * Configure Programmable System Address Map (PSAM) to setup the memory map and
+ * its target ID for each requester in the System Control NoC S3 for nodes
+ * under SYSTOP domain.
+ */
+static int32_t program_sysctrl_psam_systop(void)
+{
+    enum noc_s3_err err;
+
+#ifdef NOC_S3_PRETTY_PRINT_LOG_ENABLED
+    noc_s3_print_discovery_tree(&SYSCTRL_NOC_S3_DEV, "Sysctrl NOC_S3 - SYSTOP");
+#endif
+
+    /* Populates all address maps into a table array to enable desired PSAMs */
+    const struct noc_s3_psam_cfgs psam_table[] = {
+        {
+            .component = &sysctrl_app_asni,
+            .nh_region_count = ARRAY_SIZE(app_axis_psam),
+            .regions = app_axis_psam,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_lcp_asni,
+            .nh_region_count = ARRAY_SIZE(lcp_axis_psam),
+            .regions = lcp_axis_psam,
+            .add_chip_addr_offset = false,
+        },
+    };
+
+    err = noc_s3_program_psam_table(&SYSCTRL_NOC_S3_DEV, psam_table,
+                                                    ARRAY_SIZE(psam_table));
+    if (err != NOC_S3_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Configure Access Protection Unit (APU) to setup access permission for each
+ * memory region based on its target in System Control NoC S3 for nodes
+ * under SYSTOP domain.
+ */
+static int32_t program_sysctrl_apu_systop(void)
+{
+    enum noc_s3_err err;
+
+    /*
+     * Populates all APU entry into a table array to configure and enable
+     * desired APUs
+     */
+    const struct noc_s3_apu_cfgs apu_table[] = {
+        {
+            .component = &sysctrl_app_asni,
+            .region_count = ARRAY_SIZE(app_axis_apu),
+            .regions = app_axis_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_app_amni,
+            .region_count = ARRAY_SIZE(app_axim_apu),
+            .regions = app_axim_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_lcp_amni,
+            .region_count = ARRAY_SIZE(lcp_axim_apu),
+            .regions = lcp_axim_apu,
+            .add_chip_addr_offset = false,
+        },
+        {
+            .component = &sysctrl_lcp_asni,
+            .region_count = ARRAY_SIZE(lcp_axis_apu),
+            .regions = lcp_axis_apu,
+            .add_chip_addr_offset = false,
+        },
+    };
+
+    err = noc_s3_program_apu_table(&SYSCTRL_NOC_S3_DEV, apu_table,
+                                                        ARRAY_SIZE(apu_table));
+    if (err != NOC_S3_SUCCESS) {
+        return -1;
+    }
+
+    return 0;
+}
+
 int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id)
 {
     if (chip_id >= RSE_MAX_SUPPORTED_CHIPS) {
@@ -918,6 +1286,19 @@ int32_t program_sysctrl_noc_s3_aon(uint32_t chip_id)
     }
 
     if (program_sysctrl_apu_aon() != 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int32_t program_sysctrl_noc_s3_systop(void)
+{
+    if (program_sysctrl_psam_systop() != 0) {
+        return -1;
+    }
+
+    if (program_sysctrl_apu_systop() != 0) {
         return -1;
     }
 

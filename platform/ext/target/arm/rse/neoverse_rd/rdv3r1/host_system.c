@@ -137,6 +137,34 @@ static int noc_s3_sysctrl_aon_init(void)
 
     return 0;
 }
+
+/*
+ * Programs the System control NoC S3 for nodes under SYSTOP domain.
+ */
+static int noc_s3_sysctrl_systop_init(void)
+{
+    int err;
+
+    err = noc_s3_pre_init(host_system_data.info.chip_ap_phys_base +
+                            HOST_SYSCTRL_NOC_S3_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    SYSCTRL_NOC_S3_DEV.chip_addr_offset =
+            host_system_data.info.chip_ap_phys_base;
+    err = program_sysctrl_noc_s3_systop();
+    if (err != 0) {
+        return err;
+    }
+
+    err = noc_s3_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
 #endif
 
 /* Read Chip ID from OTP */
@@ -214,6 +242,14 @@ int host_system_prepare_ap_access(void)
     while (host_system_data.status.scp_systop_ready == false) {
         __WFE();
     }
+
+#ifdef RD_SYSCTRL_NOC_S3
+    /* Configure System Control NoC S3 for nodes under SYSTOP power domain */
+    res = noc_s3_sysctrl_systop_init();
+    if (res != 0) {
+        return 1;
+    }
+#endif
 
     return 0;
 }
