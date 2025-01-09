@@ -24,9 +24,14 @@
 #include "load/partition_defs.h"
 #include "load/interrupt_defs.h"
 
-#define TFM_HANDLE_STATUS_IDLE          0 /* Handle created             */
-#define TFM_HANDLE_STATUS_ACTIVE        1 /* Handle in use              */
-#define TFM_HANDLE_STATUS_TO_FREE       2 /* Free the handle            */
+enum connection_status {
+    TFM_HANDLE_STATUS_IDLE = 0,     /* Handle created, idle */
+    TFM_HANDLE_STATUS_ACTIVE = 1,   /* Handle in use */
+    TFM_HANDLE_STATUS_TO_FREE = 2,  /* Handle to be freed */
+    TFM_HANDLE_STATUS_MAX = 3,
+
+    _TFM_HANDLE_STATUS_PAD = UINT32_MAX,
+};
 
 /* The mask used for timeout values */
 #define PSA_TIMEOUT_MASK        PSA_BLOCK
@@ -71,13 +76,7 @@
 
 /* RoT connection handle list */
 struct connection_t {
-    uint32_t status;                         /*
-                                              * Status of handle, three valid
-                                              * options:
-                                              * TFM_HANDLE_STATUS_ACTIVE,
-                                              * TFM_HANDLE_STATUS_IDLE and
-                                              * TFM_HANDLE_STATUS_TO_FREE
-                                              */
+    enum connection_status status;
     struct partition_t *p_client;            /* Caller partition               */
     const struct service_t *service;         /* RoT service pointer            */
     psa_msg_t msg;                           /* PSA message body               */
