@@ -59,6 +59,7 @@ target_include_directories(platform_s
         retarget
         cmsis_core
         native_drivers/timer_cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/..
 )
 
@@ -73,7 +74,7 @@ target_sources(platform_s
         retarget/platform_retarget_dev.c
         cmsis_core/system_core_init.c
         native_drivers/mpc_sie200_drv.c
-        native_drivers/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
         native_drivers/ppc_sse200_drv.c
         native_drivers/arm_uart_drv.c
