@@ -225,11 +225,13 @@ static bool is_erase_aligned(struct arm_flash_dev_t *flash_dev,
   * \return       Returns true if param is aligned to sector_unit, false
   *               otherwise.
   */
+#if defined (FLASH_BANK_2)
 static uint32_t bank_number(struct arm_flash_dev_t *flash_dev,
                             uint32_t param)
 {
-  return ((param >= (FLASH_TOTAL_SIZE / 2)) ? 2 : 1);
+  return ((param >= (FLASH_TOTAL_SIZE / 2)) ? FLASH_BANK_2 : FLASH_BANK_1);
 }
+#endif /*FLASH_BANK_2*/
 
 /**
   * \brief        compute page number.
@@ -552,14 +554,14 @@ static int32_t Flash_EraseSector(uint32_t addr)
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   if (is_range_secure(&ARM_FLASH0_DEV, addr, 4))
   {
-#if defined(STM32H573xx)
+#if defined(FLASH_TYPEERASE_SECTORS)
     EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
 #else
     EraseInit.TypeErase = FLASH_TYPEERASE_PAGES;
 #endif
   }
   else
-#if defined(STM32H573xx)
+#if defined(FLASH_TYPEERASE_SECTORS_NS)
     EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS_NS;
 #else
     EraseInit.TypeErase = FLASH_TYPEERASE_PAGES_NS;
@@ -569,14 +571,18 @@ static int32_t Flash_EraseSector(uint32_t addr)
 #endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
   /*  fix me assume dual bank, reading DBANK in OPTR in Flash init is better */
   /*  flash size in  DB256K in OPTR */
+#if defined (FLASH_BANK_2)
+  /*  fix me assume dual bank, reading DBANK in OPTR in Flash init is better */
+  /*  flash size in  DB256K in OPTR */
   EraseInit.Banks = bank_number(&ARM_FLASH0_DEV, addr);
+#endif /*FLASH_BANK_2*/
 
-#if defined(STM32H573xx)
+#if defined(FLASH_SECTOR_SIZE)
     EraseInit.NbSectors = FLASH0_SECTOR_SIZE / FLASH_SECTOR_SIZE;
 #else
     EraseInit.NbPages = FLASH0_SECTOR_SIZE / FLASH_PAGE_SIZE;
 #endif
-#if defined(STM32H573xx)
+#if defined(FLASH_SECTOR_SIZE)
     EraseInit.Sector = page_number(&ARM_FLASH0_DEV, addr);
 #else
     EraseInit.Page = page_number(&ARM_FLASH0_DEV, addr);
