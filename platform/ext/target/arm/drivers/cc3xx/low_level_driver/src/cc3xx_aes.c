@@ -30,6 +30,9 @@ struct cc3xx_aes_state_t aes_state;
 
 static inline size_t get_key_size_bytes(cc3xx_aes_keysize_t key_size)
 {
+    assert(key_size == CC3XX_AES_KEYSIZE_128
+        || key_size == CC3XX_AES_KEYSIZE_192
+        || key_size == CC3XX_AES_KEYSIZE_256);
     return 16 + key_size * 8;
 }
 
