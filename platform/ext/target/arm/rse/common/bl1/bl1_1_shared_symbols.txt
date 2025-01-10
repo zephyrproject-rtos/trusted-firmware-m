@@ -18,6 +18,7 @@ bl1_hash_update
 bl1_trng_generate_random
 bl_fih_memeql
 cc3xx_lowlevel_uninit
+cc3xx_lowlevel_kdf_cmac
 computed_bl1_2_hash
 dm_area_info
 dpa_hardened_word_copy
@@ -34,8 +35,10 @@ kmu_set_key_export_config_locked
 kmu_export_key
 lcm_otp_write
 lcm_get_lcs
+lcm_get_tp_mode
 pq_crypto_verify
 pq_crypto_get_pub_key_hash
+rse_check_zero_bit_count
 rse_setup_cpak_seed
 rse_setup_dak_seed
 rse_setup_rot_cdi
