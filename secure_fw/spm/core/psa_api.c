@@ -289,8 +289,10 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         }
         break;
     case PSA_IPC_DISCONNECT:
-        /* Service handle is not used anymore */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+        /* Service handle will be freed in the backend */
         handle->status = TFM_HANDLE_STATUS_TO_FREE;
+#endif
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
