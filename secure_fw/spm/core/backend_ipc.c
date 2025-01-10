@@ -95,6 +95,10 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
         if ((retval_signals ==  ASYNC_MSG_REPLY) &&
             ((p_pt->signals_allowed & ASYNC_MSG_REPLY) != ASYNC_MSG_REPLY)) {
             p_pt->signals_asserted &= ~ASYNC_MSG_REPLY;
+#ifndef NDEBUG
+            SPM_ASSERT(p_pt->p_replied->status < TFM_HANDLE_STATUS_MAX);
+#endif
+
             *p_retval = (uint32_t)p_pt->reply_value;
         } else {
             *p_retval = retval_signals;
