@@ -11,10 +11,6 @@
 #include "mpu_armv8m_drv.h"
 #include "tfm_hal_device_header.h"
 
-/*
- * FixMe:
- * This is a beta quality driver for MPU in v8M. To be finalized.
- */
 FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_enable(
                                           struct mpu_armv8m_dev_t *dev,
                                           uint32_t privdef_en,
@@ -24,14 +20,6 @@ FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_enable(
 
     MPU_Type *mpu = (MPU_Type *)dev->base;
 
-    /*
-     * FixMe: Set 3 pre-defined MAIR_ATTR for memory. The attributes come
-     * from default memory map, need to check if fine-tune is necessary.
-     *
-     * MAIR0_0: Peripheral, Device-nGnRE.
-     * MAIR0_1: Code, WT RA. Same attr for Outer and Inner.
-     * MAIR0_2: SRAM, WBWA RA. Same attr for Outer and Inner.
-     */
     mpu->MAIR0 = (MPU_ARMV8M_MAIR_ATTR_DEVICE_VAL << MPU_MAIR0_Attr0_Pos) |
                  (MPU_ARMV8M_MAIR_ATTR_CODE_VAL << MPU_MAIR0_Attr1_Pos) |
                  (MPU_ARMV8M_MAIR_ATTR_DATA_VAL << MPU_MAIR0_Attr2_Pos);
@@ -71,7 +59,6 @@ FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_enable(
     uint32_t base_cfg;
     uint32_t limit_cfg;
 
-    /* FIXME : Add region-overlap error check */
     if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
         FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
     }
@@ -128,8 +115,6 @@ FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_disable(
     MPU_Type *mpu = (MPU_Type *)dev->base;
     uint32_t ctrl_before;
 
-    /*FIXME : Add complete error checking*/
-
     ctrl_before = mpu->CTRL;
     mpu->CTRL = 0;
 
@@ -152,6 +137,9 @@ enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev)
 
     while (i > 0) {
         FIH_CALL(mpu_armv8m_region_disable, fih_rc, dev, i - 1);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            return MPU_ARMV8M_ERROR;
+        }
         i--;
     }
 

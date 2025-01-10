@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,8 +31,8 @@ struct mpu_armv8m_dev_t {
 };
 
 enum mpu_armv8m_error_t {
-    MPU_ARMV8M_OK,
-    MPU_ARMV8M_ERROR
+    MPU_ARMV8M_OK = 0x0,
+    MPU_ARMV8M_ERROR = 0x3C5A
 };
 
 enum mpu_armv8m_attr_exec_t {
