@@ -98,6 +98,10 @@ static uint32_t query_state(const struct thread_t *p_thrd, uint32_t *p_retval)
             ((p_pt->signals_allowed & ASYNC_MSG_REPLY) != ASYNC_MSG_REPLY)) {
             p_pt->signals_asserted &= ~ASYNC_MSG_REPLY;
 
+#ifndef NDEBUG
+            SPM_ASSERT(p_pt->p_replied->status < TFM_HANDLE_STATUS_MAX);
+#endif
+
             /*
              * For FF-M Secure Partition, the reply is synchronous and only one
              * replied handle node should be mounted. Take the reply value from
