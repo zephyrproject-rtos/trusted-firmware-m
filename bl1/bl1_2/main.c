@@ -5,6 +5,9 @@
  *
  */
 
+#include <assert.h>
+#include <string.h>
+
 #include "crypto.h"
 #include "otp.h"
 #include "boot_hal.h"
@@ -21,12 +24,10 @@
 #include "pq_crypto.h"
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_otp.h"
-#include <string.h>
 
 #if defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
 #include "bl1_2_suites.h"
 #endif /* defined(TEST_BL1_1) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION) */
-
 
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
