@@ -28,6 +28,13 @@ static bool read_saved_debug_state(void)
     return (reg_value & (1 << SWSYN_DEBUG_STATE_IN_BOOT_BIT_POS));
 }
 
+static void clear_debug_state(void)
+{
+    struct rse_sysctrl_t *sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
+
+    sysctrl->reset_syndrome &= ~(1 << SWSYN_DEBUG_STATE_IN_BOOT_BIT_POS);
+}
+
 static int get_permissions_mask_from_shared_sram_area(uint8_t *permissions_mask,
                                                       size_t mask_len)
 {
@@ -80,6 +87,9 @@ int32_t b1_1_platform_debug_init(void)
         if (rc != 0) {
             return rc;
         }
+
+        /* Clear debug state notification once mask is read */
+        clear_debug_state();
 
         /* Apply required debug permissions */
         rc = tfm_plat_apply_debug_permissions(permissions_mask);
