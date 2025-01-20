@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2025, Arm Limited. All rights reserved.
  * Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -277,7 +277,7 @@
 /* DPE tests require larger test partition stack */
 #define SECURE_TEST_PARTITION_STACK_SIZE        0x3000
 #else
-#define SECURE_TEST_PARTITION_STACK_SIZE        0x0D00
+#define SECURE_TEST_PARTITION_STACK_SIZE        0x0F00
 #endif
 
 /* SPM Configs */
