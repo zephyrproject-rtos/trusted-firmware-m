@@ -22,6 +22,14 @@ endif()
 
 ####################### export headers #########################################
 
+if (BL1 AND PLATFORM_DEFAULT_BL1)
+    install(DIRECTORY   ${BL1_1_CONFIG_DIR}/
+            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/bl1_1_config)
+
+    install(DIRECTORY   ${BL1_2_CONFIG_DIR}/
+            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/bl1_2_config)
+endif()
+
 install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
                     ${INTERFACE_INC_DIR}/psa/error.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
