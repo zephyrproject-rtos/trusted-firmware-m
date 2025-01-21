@@ -53,20 +53,29 @@ static void output_str(tfm_log_output_str output_func, void *priv, const char *s
 }
 
 static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
-                        uint16_t num_padding, bool zero_padding)
+                        uint16_t num_padding, bool zero_padding, uint8_t base, bool signed_specifier)
 {
     uint8_t digit, chars_to_print;
     uint16_t i;
-    char buf[9];
+    /* uint32_t has maximum value of 4,294,967,295. Require enough space in buffer
+     * for 10 digits + null terminator */
+    char buf[11];
     char *const buf_end = &buf[sizeof(buf) - 1];
     char *buf_ptr = buf_end;
     const char pad_char = zero_padding ? '0' : ' ';
+    const char negative_char = '-';
+    bool negative = false;
+
+    if (signed_specifier && ((int32_t)val < 0)) {
+        val = -val;
+        negative = true;
+    }
 
     /* Ensure buffer ends with NULL character */
     *buf_ptr-- = '\0';
 
     do {
-        digit = val & 0xf;
+        digit = val % base;
 
         if (digit < 10) {
             *buf_ptr-- = '0' + digit;
@@ -74,18 +83,28 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
             *buf_ptr-- = 'a' + digit - 10;
         }
 
-        val >>= 4;
+        val /= base;
     } while (val);
 
-    chars_to_print = (buf_end - 1) - buf_ptr;
+    chars_to_print = (uint8_t)negative + (buf_end - 1) - buf_ptr;
     if (num_padding > chars_to_print) {
         num_padding -= chars_to_print;
     } else {
         num_padding = 0;
     }
 
+    /* - before 0 */
+    if (negative && zero_padding) {
+        output_char(output_func, priv, negative_char);
+    }
+
     for (i = 0; i < num_padding; i++) {
         output_char(output_func, priv, pad_char);
+    }
+
+    /* - after ' ' */
+    if (negative && !zero_padding) {
+        output_char(output_func, priv, negative_char);
     }
 
     output_str(output_func, priv, buf_ptr + 1);
@@ -93,6 +112,8 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
 
 /* Basic vprintf, understands:
  * %s: output string
+ * %u: output uint32_t in decimal
+ * %d: output int32_t in decimal
  * %x: output uint32_t in hex
  */
 static void tfm_vprintf_internal(tfm_log_output_str output_func,
@@ -121,8 +142,14 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
         switch (c) {
         case 'l':
             continue;
+        case 'u':
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 10, false);
+            break;
+        case 'd':
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 10, true);
+            break;
         case 'x':
-            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding);
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 16, false);
             break;
         case 's':
             output_str(output_func, priv, va_arg(args, char *));
