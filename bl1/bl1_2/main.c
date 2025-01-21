@@ -279,7 +279,7 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
-    INFO("Starting TF-M bl1_2\n");
+    INFO("Starting TF-M BL1_2\n");
 
 #if defined(TEST_BL1_2) && defined(PLATFORM_DEFAULT_BL1_TEST_EXECUTION)
     run_bl1_2_testsuite();
