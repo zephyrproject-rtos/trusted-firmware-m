@@ -40,13 +40,16 @@ static void output_char(tfm_log_output_str output_func, void *priv, char c)
     output_func(priv, &c, 1);
 }
 
-static void output_str(tfm_log_output_str output_func, void *priv, const char *str)
+static void output_str(tfm_log_output_str output_func, void *priv,
+                        const char *str, uint32_t len, bool calculate_length)
 {
-    uint32_t len = 0;
     const char *str_ptr = str;
 
-    while (*str_ptr++ != '\0') {
-        len++;
+    if (calculate_length) {
+        len = 0;
+        while (*str_ptr++ != '\0') {
+            len++;
+        }
     }
 
     output_func(priv, str, len);
@@ -58,8 +61,8 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
     uint8_t digit, chars_to_print;
     uint16_t i;
     /* uint32_t has maximum value of 4,294,967,295. Require enough space in buffer
-     * for 10 digits + null terminator */
-    char buf[11];
+     * for 10 digits + null terminator + '-' */
+    char buf[12];
     char *const buf_end = &buf[sizeof(buf) - 1];
     char *buf_ptr = buf_end;
     const char pad_char = zero_padding ? '0' : ' ';
@@ -86,28 +89,26 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
         val /= base;
     } while (val);
 
-    chars_to_print = (uint8_t)negative + (buf_end - 1) - buf_ptr;
+    if (negative) {
+        if (!zero_padding) {
+            *buf_ptr-- = negative_char;
+        } else {
+            output_char(output_func, priv, negative_char);
+        }
+    }
+
+    chars_to_print = (buf_end - 1) - buf_ptr;
     if (num_padding > chars_to_print) {
         num_padding -= chars_to_print;
     } else {
         num_padding = 0;
     }
 
-    /* - before 0 */
-    if (negative && zero_padding) {
-        output_char(output_func, priv, negative_char);
-    }
-
     for (i = 0; i < num_padding; i++) {
         output_char(output_func, priv, pad_char);
     }
 
-    /* - after ' ' */
-    if (negative && !zero_padding) {
-        output_char(output_func, priv, negative_char);
-    }
-
-    output_str(output_func, priv, buf_ptr + 1);
+    output_str(output_func, priv, buf_ptr + 1, chars_to_print, false);
 }
 
 /* Basic vprintf, understands:
@@ -152,7 +153,7 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
             output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 16, false);
             break;
         case 's':
-            output_str(output_func, priv, va_arg(args, char *));
+            output_str(output_func, priv, va_arg(args, char *), 0, true);
             break;
         case '0':
             if (num_padding == 0) {
@@ -176,7 +177,7 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
             output_char(output_func, priv, '%');
             break;
         default:
-            output_str(output_func, priv, "[Unsupported]");
+            output_str(output_func, priv, "[Unsupported]", 0, true);
         }
 
         formatting = false;
@@ -192,7 +193,7 @@ void tfm_vprintf(tfm_log_output_str output_func, void *priv, const char *fmt, va
     log_level = fmt[0];
     fmt++;
 
-    output_str(output_func, priv, get_log_prefix(log_level));
+    output_str(output_func, priv, get_log_prefix(log_level), 0, true);
     output_char(output_func, priv, spacer);
 
     tfm_vprintf_internal(output_func, priv, fmt, args);
