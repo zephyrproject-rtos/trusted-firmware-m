@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018 Nordic Semiconductor ASA
  * Copyright (c) 2015 Runtime Inc
- * Copyright (c) 2019-2024, Arm Limited.
+ * Copyright (c) 2019-2025, Arm Limited.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -74,31 +74,6 @@ int flash_area_id_to_image_slot(int area_id)
 uint8_t flash_area_erased_val(const struct flash_area *fap)
 {
     return DRV_FLASH_AREA(fap)->GetInfo()->erased_value;
-}
-
-int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
-        void *dst, uint32_t len)
-{
-    uint32_t i;
-    uint8_t *u8dst;
-    int rc;
-
-    BOOT_LOG_DBG("read_is_empty area=%d, off=%#x, len=%#x",
-                 fa->fa_id, off, len);
-    rc = flash_area_read(fa, off, dst, len);
-    if (rc) {
-        return -1;
-    }
-
-    u8dst = (uint8_t*)dst;
-
-    for (i = 0; i < len; i++) {
-        if (u8dst[i] != flash_area_erased_val(fa)) {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
