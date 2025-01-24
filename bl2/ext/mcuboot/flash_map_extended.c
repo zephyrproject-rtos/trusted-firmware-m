@@ -12,6 +12,7 @@
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
  */
 
+#include <assert.h>
 #include <errno.h>
 #include "target.h"
 #include "tfm_hal_device_header.h"
@@ -28,6 +29,9 @@ __WEAK int flash_device_base(uint8_t fd_id, uintptr_t *ret)
                      fd_id, FLASH_DEVICE_ID);
         return -1;
     }
+
+    assert(ret != NULL);
+
     *ret = FLASH_DEVICE_BASE;
     return 0;
 }
@@ -73,12 +77,16 @@ int flash_area_id_to_image_slot(int area_id)
 
 uint8_t flash_area_erased_val(const struct flash_area *fap)
 {
+    assert(fap != NULL);
+
     return DRV_FLASH_AREA(fap)->GetInfo()->erased_value;
 }
 
 int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
                           struct flash_sector *sector)
 {
+    assert ((fa != NULL) && (sector != NULL));
+
     sector->fs_off = (off / DRV_FLASH_AREA(fa)->GetInfo()->sector_size) *
                      DRV_FLASH_AREA(fa)->GetInfo()->sector_size;
     sector->fs_size = DRV_FLASH_AREA(fa)->GetInfo()->sector_size;
