@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, The TrustedFirmware-M Contributors. All rights reserved.
+ * Copyright (c) 2021-2025, The TrustedFirmware-M Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +10,7 @@
 #include "cc3xx_error.h"
 #include "cc3xx_dev.h"
 #include "cc3xx_stdlib.h"
+#include "cc3xx_drbg_hmac.h"
 
 #include <assert.h>
 #include <stdint.h>
@@ -34,6 +35,12 @@ static uint32_t lfsr_buf[sizeof(uint64_t) / sizeof(uint32_t)];
 static size_t lfsr_buf_used_idx = sizeof(lfsr_buf);
 static uint32_t entropy_buf[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
 static size_t entropy_buf_used_idx = sizeof(entropy_buf);
+
+/* Static state context of DRBG_HMAC */
+static struct {
+    struct cc3xx_drbg_hmac_state_t state;
+    bool seed_done;
+} g_drbg_hmac = {0};
 
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 static cc3xx_err_t trng_init(void)
@@ -177,16 +184,50 @@ static cc3xx_err_t lfsr_get_random(uint32_t* buf, size_t word_count)
     return CC3XX_ERR_SUCCESS;
 }
 
+static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
+{
+    cc3xx_err_t err;
+    uint32_t entropy[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
+
+    if (!g_drbg_hmac.seed_done) {
+
+        /* Get a 24-byte seed from the TRNG */
+        trng_init();
+
+        trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
+
+        trng_finish();
+
+        /* Call the seeding API of the drbg_hmac */
+        err = cc3xx_lowlevel_drbg_hmac_instantiate(&g_drbg_hmac.state,
+                    (const uint8_t *)entropy, sizeof(entropy), NULL, 0, NULL, 0);
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* Clear the seed from the stack */
+        memset(entropy, 0, sizeof(entropy));
+
+        g_drbg_hmac.seed_done = true;
+    }
+
+    /* The DRBG requires the number of bits to generate, aligned to byte-sizes */
+    err = cc3xx_lowlevel_drbg_hmac_generate(&g_drbg_hmac.state, length * 8, buf, NULL, 0);
+
+    return err;
+}
+
 cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
                                           enum cc3xx_rng_quality_t quality)
 {
     uint32_t *random_buf;
     size_t *used_idx;
     size_t max_buf_size;
+    /* Different values of cc3xx_rng_quality_t use a different generation function */
     cc3xx_err_t (*random_fn)(uint32_t *, size_t);
 
     size_t copy_size;
-    bool request_is_word_aligned = ((uintptr_t)buf & 0x3) == 0 && (length & 0x3) == 0;
+    const bool request_is_word_aligned = ((uintptr_t)buf & 0x3) == 0 && (length & 0x3) == 0;
     bool rng_required;
     cc3xx_err_t err;
 
@@ -203,6 +244,12 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
         max_buf_size = sizeof(lfsr_buf);
         random_fn = lfsr_get_random;
         break;
+    case CC3XX_RNG_DRBG_HMAC:
+        /* When using a DRBG, buffering entropy is not suppported, hence just return
+         * the generated bits without any special handling of saved bits from previous
+         * iterations
+         */
+        return drbg_hmac_get_random(buf, length);
     default:
         return CC3XX_ERR_RNG_INVALID_RNG;
     }
@@ -217,7 +264,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
     /* Check if we need to initialize the RNG, or if we can just serve the
      * request from the buffered entropy.
      */
-    rng_required = max_buf_size - *used_idx < length;
+    rng_required = (max_buf_size - *used_idx) < length;
 
     if (rng_required && quality == CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE) {
         err = trng_init();
@@ -355,6 +402,8 @@ void cc3xx_lowlevel_rng_get_random_permutation(uint8_t *permutation_buf, size_t 
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     fisher_yates_shuffle(permutation_buf, len, quality);
-#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
+#else
+    (void)quality;
+#endif
 }
 #endif /* CC3XX_CONFIG_RNG_ENABLE */
