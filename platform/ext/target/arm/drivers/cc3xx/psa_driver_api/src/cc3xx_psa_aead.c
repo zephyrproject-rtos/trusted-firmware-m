@@ -19,7 +19,9 @@
 #include "cc3xx_stdlib.h"
 #include "cc3xx_internal_cipher.h"
 #include "cc3xx_aes.h"
+#if defined(PSA_WANT_ALG_CHACHA20_POLY1305)
 #include "cc3xx_poly1305.h"
+#endif /* PSA_WANT_ALG_CHACHA20_POLY1305 */
 #include "cc3xx_chacha.h"
 #include "cc3xx_rng.h"
 
@@ -108,7 +110,7 @@ static psa_status_t aead_crypt(
     }
 
     switch (key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
     {
         uint32_t initial_counter = 0;
@@ -159,7 +161,7 @@ static psa_status_t aead_crypt(
         }
     }
     break;
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1305 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
     {
@@ -309,13 +311,13 @@ psa_status_t cc3xx_aead_set_lengths(
 
     /* cc3xx_aead_operation_t is just an alias to cc3xx_cipher_operation_t */
     switch (operation->key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
         /* Chacha20-Poly1305 does not require to set the lengths
          * in advance nor setting the tag length which is fixed
          */
         return PSA_SUCCESS;
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1305 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
@@ -353,14 +355,14 @@ psa_status_t cc3xx_aead_update_ad(
 
     /* cc3xx_aead_operation_t is just an alias to cc3xx_cipher_operation_t */
     switch (operation->key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
 
 #if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
         cc3xx_lowlevel_poly1305_update(input, input_size);
 #else
         cc3xx_lowlevel_chacha20_update_authed_data(input, input_size);
-#endif /* defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) */
+#endif /* CC3XX_CONFIG_ENABLE_STREAM_CIPHER */
 
         cc3xx_lowlevel_chacha20_get_state(&operation->chacha);
 
@@ -368,11 +370,11 @@ psa_status_t cc3xx_aead_update_ad(
         /* Manually increment the authed length counter */
         operation->chacha.authed_len += input_size;
         cc3xx_lowlevel_poly1305_get_state(&(operation->chacha.poly_state));
-#endif
+#endif /* CC3XX_CONFIG_ENABLE_STREAM_CIPHER */
 
         cc3xx_lowlevel_chacha20_uninit();
         return PSA_SUCCESS;
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1305 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
@@ -417,7 +419,7 @@ psa_status_t cc3xx_aead_update(
     /* cc3xx_aead_operation_t is just an alias to cc3xx_cipher_operation_t */
     last_output_num_bytes = operation->last_output_num_bytes;
     switch (operation->key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
     {
         size_t processed_length;
@@ -491,7 +493,7 @@ out_chacha20:
         cc3xx_lowlevel_chacha20_uninit();
         return status;
     }
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1350 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
@@ -558,7 +560,7 @@ psa_status_t cc3xx_aead_finish(
 
     /* cc3xx_aead_operation_t is just an alias to cc3xx_cipher_operation_t */
     switch (operation->key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
 #if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
         cc3xx_lowlevel_poly1305_set_state(&(operation->chacha.poly_state));
@@ -605,7 +607,7 @@ out_chacha20:
         cc3xx_lowlevel_chacha20_uninit();
 #endif /* !defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) */
         return status;
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1305 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
@@ -672,7 +674,7 @@ psa_status_t cc3xx_aead_verify(
 
     /* cc3xx_aead_operation_t is just an alias to cc3xx_cipher_operation_t */
     switch (operation->key_type) {
-#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
     case PSA_KEY_TYPE_CHACHA20:
     {
 #if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
@@ -737,7 +739,7 @@ out_chacha20:
 #endif /* !defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) */
         return status;
     }
-#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_CHACHA20_POLY1305 */
 #if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 

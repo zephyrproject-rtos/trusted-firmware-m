@@ -411,7 +411,7 @@ psa_status_t cc3xx_internal_cipher_setup_complete(
                 return cc3xx_to_psa_err(err);
             }
 
-#if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
+#if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
             if (operation->alg == PSA_ALG_CHACHA20_POLY1305) {
                 cc3xx_lowlevel_poly1305_init(poly_key_r, poly_key_s);
             }
@@ -457,7 +457,7 @@ psa_status_t cc3xx_internal_cipher_setup_complete(
 #if defined(PSA_WANT_KEY_TYPE_CHACHA20)
         case PSA_KEY_TYPE_CHACHA20:
             cc3xx_lowlevel_chacha20_set_state(&(operation->chacha));
-#if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER)
+#if defined(CC3XX_CONFIG_ENABLE_STREAM_CIPHER) && defined(PSA_WANT_ALG_CHACHA20_POLY1305)
             if (operation->alg == PSA_ALG_CHACHA20_POLY1305) {
                 cc3xx_lowlevel_poly1305_set_state(&(operation->chacha.poly_state));
             }
