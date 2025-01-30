@@ -11,6 +11,12 @@
 #include "cc3xx_hmac.h"
 #include "cc3xx_drbg_hmac.h"
 
+#ifndef CC3XX_CONFIG_FILE
+#include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
+
 #define BITS_TO_BYTES(x) (((x) + 7)/8)
 #define BYTES_TO_BITS(x) ((x)*8)
 
@@ -153,6 +159,13 @@ cc3xx_err_t cc3xx_lowlevel_drbg_hmac_generate(
     size_t idx;
     size_t last_hmac_update_num = 0;
     const cc3xx_hash_alg_t alg = CC3XX_HASH_ALG_SHA256;
+    /* Special handling of aligned requests into aligned buffer. This allows
+     * HW with particular alignment requirements to directly generate
+     * random numbers into its buffers without need for temporary buffers, i.e.
+     * generating integer number of random words into word-aligned buffers
+     */
+    const bool request_is_word_aligned =
+            ((uintptr_t)returned_bits & 0x3) == 0 && (BITS_TO_BYTES(len_bits) & 0x3) == 0;
 
     if (state->reseed_counter == UINT32_MAX) {
         /* When we reach 2^32 invocations we must reseed */
@@ -170,8 +183,9 @@ cc3xx_err_t cc3xx_lowlevel_drbg_hmac_generate(
 
     /* While len(temp) < requested_number_of_bits, as per spec */
     while (generated_bits < len_bits) {
-        uint32_t temp[CC3XX_DRBG_HMAC_OUTLEN/4];
+        uint32_t temp[CC3XX_DRBG_HMAC_OUTLEN / sizeof(uint32_t)];
         size_t bytes_to_copy;
+
         /* V = HMAC(K, V) */
         err = cc3xx_lowlevel_hmac_set_key(&state->h,
                                  (const uint8_t *)state->key_k,
@@ -191,8 +205,17 @@ cc3xx_err_t cc3xx_lowlevel_drbg_hmac_generate(
 
         bytes_to_copy = len_bits - generated_bits < BYTES_TO_BITS(CC3XX_DRBG_HMAC_OUTLEN) ?
                         BITS_TO_BYTES(len_bits - generated_bits) : CC3XX_DRBG_HMAC_OUTLEN;
-        memcpy(&returned_bits[BITS_TO_BYTES(generated_bits)], temp, bytes_to_copy);
 
+        if (request_is_word_aligned) {
+            uint32_t *base_ptr = (uint32_t *)&returned_bits[BITS_TO_BYTES(generated_bits)];
+            for (size_t i = 0; i < bytes_to_copy / sizeof(uint32_t); i++) {
+                base_ptr[i] = temp[i];
+            }
+        } else {
+            memcpy(&returned_bits[BITS_TO_BYTES(generated_bits)], temp, bytes_to_copy);
+        }
+
+        /* The increment in the generated bits always happens to the full 256 bits per generation */
         generated_bits += BYTES_TO_BITS(CC3XX_DRBG_HMAC_OUTLEN);
 
         memcpy(state->block_v, temp, CC3XX_DRBG_HMAC_OUTLEN);
