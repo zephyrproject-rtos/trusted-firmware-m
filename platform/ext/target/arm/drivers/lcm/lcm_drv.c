@@ -146,11 +146,13 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
 
     err = lcm_get_lcs(dev, &lcs);
     if (err != LCM_ERROR_NONE) {
+        lcm_set_fatal_error(&LCM_DEV_S);
         return err;
     }
 
     if (lcs == LCM_LCS_SE) {
         if (p_lcm->key_err) {
+            lcm_set_fatal_error(&LCM_DEV_S);
             FATAL_ERR(LCM_ERROR_INIT_INVALID_KEY);
             return LCM_ERROR_INIT_INVALID_KEY;
         }
@@ -823,7 +825,7 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
 
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         if (p_buf_word[idx] != (p_buf_word[idx] | p_lcm->raw_otp[(offset / sizeof(uint32_t)) + idx])) {
-            NONFATAL_ERR(LCM_ERROR_OTP_WRITE_WRITE_VERIFY_FAIL);
+            NONFATAL_ERR(LCM_ERROR_OTP_WRITE_INVALID_WRITE);
             return LCM_ERROR_OTP_WRITE_INVALID_WRITE;
         }
     }

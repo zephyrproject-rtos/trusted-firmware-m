@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -768,6 +768,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     }
 
     if (unset_tracking_bits == 0) {
+        lcm_set_fatal_error(&LCM_DEV_S);
         return TFM_PLAT_ERR_NOT_PERMITTED;
     }
 
