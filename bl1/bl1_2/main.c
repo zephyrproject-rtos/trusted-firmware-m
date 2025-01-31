@@ -342,7 +342,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
     fih_int fih_rc = FIH_FAILURE;
 #endif
 
-#ifdef TFM_BL1_2_MEMORY_MAPPED_FLASH
+#ifdef TFM_BL1_MEMORY_MAPPED_FLASH
     /* If we have memory-mapped flash, we can do the decrypt directly from the
      * flash and output to the SRAM. This is significantly faster if the AES
      * invocation calls through to a crypto accelerator with a DMA, and slightly
@@ -365,7 +365,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
         FIH_RET(fih_rc);
     }
     image_to_decrypt = image;
-#endif /* TFM_BL1_2_MEMORY_MAPPED_FLASH */
+#endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
 
     /* As the security counter is an attacker controlled parameter, bound the
      * values to a sensible range. In this case, we choose 1024 as the bound as
@@ -407,14 +407,14 @@ fih_int copy_image(uint32_t image_id, struct bl1_2_image_t *image)
 {
     struct bl1_2_image_t *image_to_copy;
 
-#ifdef TFM_BL1_2_MEMORY_MAPPED_FLASH
+#ifdef TFM_BL1_MEMORY_MAPPED_FLASH
     image_to_copy = (struct bl1_2_image_t *)(FLASH_BL1_BASE_ADDRESS +
                        bl1_image_get_flash_offset(image_id));
 
     memcpy(image, image_to_copy, sizeof(struct bl1_2_image_t));
 #else
     bl1_image_copy_to_sram(image_id, (uint8_t *)image);
-#endif /* TFM_BL1_2_MEMORY_MAPPED_FLASH */
+#endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
 
     FIH_RET(FIH_SUCCESS);
 }

@@ -99,7 +99,7 @@ fih_int sha256_finish(uint8_t *hash,
     fih_int fih_rc;
     int rc;
 
-    if (hash_length < 48) {
+    if (hash_length < 32) {
         fih_rc = FIH_FAILURE;
         goto out;
     }
@@ -111,7 +111,7 @@ fih_int sha256_finish(uint8_t *hash,
     }
 
     if (hash_size != NULL) {
-        *hash_size = 48;
+        *hash_size = 32;
     }
 
 out:
@@ -394,6 +394,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         }
     } else {
         input_key = key_material;
+        key_size = 32;
     }
 
 

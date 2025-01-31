@@ -59,7 +59,17 @@ def symmetric_kdf_hkdf(input_key : bytes,
                        hkdf_hash_alg,
                        **kwargs,
                        ):
-    hkdf = HKDF(hkdf_hash_alg(), length, context, label.encode("ascii") + bytes(1))
+    state = struct_pack([
+                        # C keeps the null byte, python removes it, so we add
+                        # it back manually.
+                        label.encode("ascii") + bytes(1),
+                        context
+                        ])
+    hkdf = HKDF(
+        algorithm=hkdf_hash_alg(),
+        length=length,
+        salt=None,
+        info=state)
     return hkdf.derive(input_key)
 
 kdf_funcs = {
