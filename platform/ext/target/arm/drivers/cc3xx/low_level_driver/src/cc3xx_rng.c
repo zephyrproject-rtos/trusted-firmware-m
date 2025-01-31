@@ -211,9 +211,28 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
         g_drbg_hmac.seed_done = true;
     }
 
+    /* Add re-seeding capabilities */
+    if (g_drbg_hmac.state.reseed_counter == UINT32_MAX) {
+
+        /* Get a 24-byte seed from the TRNG */
+        trng_init();
+
+        trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
+
+        trng_finish();
+
+        err = cc3xx_lowlevel_drbg_hmac_reseed(&g_drbg_hmac.state,
+                    (const uint8_t *)entropy, sizeof(entropy), NULL, 0);
+
+        if (err != CC3XX_ERR_SUCCESS) {
+            goto cleanup;
+        }
+    }
+
     /* The DRBG requires the number of bits to generate, aligned to byte-sizes */
     err = cc3xx_lowlevel_drbg_hmac_generate(&g_drbg_hmac.state, length * 8, buf, NULL, 0);
 
+cleanup:
     return err;
 }
 
