@@ -43,7 +43,21 @@ static struct {
 } g_drbg_hmac = {0};
 
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
-static cc3xx_err_t trng_init(void)
+/**
+ * @brief Object describing a TRNG configuration. Default values are set at
+ *        build time, but can be overridden by calling \a cc3xx_lowlevel_rng_set_config.
+ *        The TRNG config holds the parameters for a ring oscillator (ROSC) from
+ *        which entropy is collected by consecutive sampling
+ */
+static struct {
+    uint32_t subsampling_rate;   /*!< Number of rng_clk cycles between consecutive
+                                      ROSC samples */
+    enum cc3xx_rng_rosc_id_t id; /*!< Selected ring oscillator (ROSC)*/
+} g_rosc_config = {
+    .subsampling_rate = CC3XX_CONFIG_RNG_SUBSAMPLING_RATE,
+    .id = CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID};
+
+static cc3xx_err_t trng_init(enum cc3xx_rng_rosc_id_t rosc_id, uint32_t rosc_subsampling_rate)
 {
     /* Enable clock */
     P_CC3XX->rng.rng_clk_enable = 0x1U;
@@ -60,9 +74,9 @@ static cc3xx_err_t trng_init(void)
         P_CC3XX->rng.rng_clk_enable = 0x1U;
 
         /* Set subsampling ratio */
-        P_CC3XX->rng.sample_cnt1 = CC3XX_CONFIG_RNG_SUBSAMPLING_RATE;
+        P_CC3XX->rng.sample_cnt1 = rosc_subsampling_rate;
 
-    } while (P_CC3XX->rng.sample_cnt1 != CC3XX_CONFIG_RNG_SUBSAMPLING_RATE);
+    } while (P_CC3XX->rng.sample_cnt1 != rosc_subsampling_rate);
 
     /* Temporarily disable the random source */
     P_CC3XX->rng.rnd_source_enable = 0x0U;
@@ -74,7 +88,7 @@ static cc3xx_err_t trng_init(void)
     P_CC3XX->rng.rng_imr = 0x3EU;
 
     /* Select the oscillator ring (And set SOP_SEL to 0x1 as is mandatory) */
-    P_CC3XX->rng.trng_config = CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID | (0x1U << 2);
+    P_CC3XX->rng.trng_config = rosc_id | (0x1U << 2);
 
     /* Set debug control register to no bypasses */
     P_CC3XX->rng.trng_debug_control = 0x0U;
@@ -192,7 +206,7 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
     if (!g_drbg_hmac.seed_done) {
 
         /* Get a 24-byte seed from the TRNG */
-        trng_init();
+        trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
 
         trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
 
@@ -215,7 +229,7 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
     if (g_drbg_hmac.state.reseed_counter == UINT32_MAX) {
 
         /* Get a 24-byte seed from the TRNG */
-        trng_init();
+        trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
 
         trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
 
@@ -234,6 +248,29 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
 
 cleanup:
     return err;
+}
+
+cc3xx_err_t cc3xx_lowlevel_rng_set_config(enum cc3xx_rng_rosc_id_t rosc_id,
+                                          uint32_t subsampling_rate)
+{
+#ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
+    if ((rosc_id < CC3XX_RNG_ROSC_ID_0) || (rosc_id > CC3XX_RNG_ROSC_ID_3)) {
+        FATAL_ERR(CC3XX_ERR_RNG_INVALID_TRNG_CONFIG);
+        return CC3XX_ERR_RNG_INVALID_TRNG_CONFIG;
+    }
+
+    g_rosc_config.id = rosc_id;
+    g_rosc_config.subsampling_rate = subsampling_rate;
+#else
+
+    /* If CC3XX_CONFIG_RNG_EXTERNAL_TRNG is defined, then this function does nothing,
+     * or it could be extended to provide the external TRNG specific configuration items,
+     * but in that case it's likely a change of prototype will be required
+     */
+
+#endif
+
+    return CC3XX_ERR_SUCCESS;
 }
 
 cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
@@ -286,7 +323,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
     rng_required = (max_buf_size - *used_idx) < length;
 
     if (rng_required && quality == CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE) {
-        err = trng_init();
+        err = trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }
