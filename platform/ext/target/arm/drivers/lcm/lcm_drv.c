@@ -41,14 +41,7 @@
 #ifdef INTEGRITY_CHECKER_S
  __ALIGNED(INTEGRITY_CHECKER_REQUIRED_ALIGNMENT)
 #endif
-static uint8_t dummy_key_value[32] = {0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04,
-                                      0x01, 0x02, 0x03, 0x04};
+static const uint32_t dummy_key_value[] = {[0 ... 7] = 0x04030201UL};
 
 struct _lcm_reg_map_t {
     volatile uint32_t lcs_value;
