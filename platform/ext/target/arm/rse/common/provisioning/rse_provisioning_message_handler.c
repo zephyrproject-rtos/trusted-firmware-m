@@ -240,15 +240,13 @@ static enum tfm_plat_err_t decrypt_secret_values(const struct rse_provisioning_m
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-typedef enum tfm_plat_err_t (*setup_aes_key_t)(const struct rse_provisioning_message_blob_t *, uint32_t *);
-
 static enum tfm_plat_err_t aes_generic_blob_operation(cc3xx_aes_mode_t mode,
                                                       const struct rse_provisioning_message_blob_t *blob,
                                                       uint8_t *iv, size_t iv_len,
                                                       void *code_output, size_t code_output_size,
                                                       void *data_output, size_t data_output_size,
                                                       void *values_output, size_t values_output_size,
-                                                      setup_aes_key_t setup_aes_key)
+                                                      setup_aes_key_func_t setup_aes_key)
 {
     enum tfm_plat_err_t err;
     enum cc3xx_error cc_err;
@@ -346,7 +344,7 @@ static enum tfm_plat_err_t aes_decrypt_and_unpack_blob(const struct rse_provisio
                                                         void *code_output, size_t code_output_size,
                                                         void *data_output, size_t data_output_size,
                                                         void *values_output, size_t values_output_size,
-                                                        setup_aes_key_t setup_aes_key)
+                                                        setup_aes_key_func_t setup_aes_key)
 {
     uint8_t iv[AES_IV_LEN] = {0};
 
@@ -363,7 +361,7 @@ static enum tfm_plat_err_t aes_validate_and_unpack_blob(const struct rse_provisi
                                                         void *code_output, size_t code_output_size,
                                                         void *data_output, size_t data_output_size,
                                                         void *values_output, size_t values_output_size,
-                                                        setup_aes_key_t setup_aes_key)
+                                                        setup_aes_key_func_t setup_aes_key)
 {
     uint8_t iv[AES_IV_LEN] = {0};
 
@@ -423,14 +421,12 @@ static enum tfm_plat_err_t hash_blob(const struct rse_provisioning_message_blob_
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-typedef enum tfm_plat_err_t (*get_rotpk_t)(uint32_t **, size_t *, uint32_t **, size_t *);
-
 static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob,
                                                           void *code_output, size_t code_output_size,
                                                           void *data_output, size_t data_output_size,
                                                           void *values_output, size_t values_output_size,
-                                                          setup_aes_key_t setup_aes_key,
-                                                          get_rotpk_t get_rotpk)
+                                                          setup_aes_key_func_t setup_aes_key,
+                                                          get_rotpk_func_t get_rotpk)
 {
     enum tfm_plat_err_t err;
     cc3xx_err_t cc_err;
@@ -476,7 +472,7 @@ static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provi
 }
 
 static enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rse_provisioning_message_blob_t *blob,
-                                                                 get_rotpk_t get_rotpk)
+                                                                 get_rotpk_func_t get_rotpk)
 {
     enum tfm_plat_err_t err;
     cc3xx_err_t cc_err;
@@ -517,8 +513,8 @@ static enum tfm_plat_err_t validate_and_unpack_blob(const struct rse_provisionin
                                                     void *code_output, size_t code_output_size,
                                                     void *data_output, size_t data_output_size,
                                                     void *values_output, size_t values_output_size,
-                                                    setup_aes_key_t setup_aes_key,
-                                                    get_rotpk_t get_rotpk)
+                                                    setup_aes_key_func_t setup_aes_key,
+                                                    get_rotpk_func_t get_rotpk)
 {
     size_t blob_payload_size = blob->code_size + blob->data_size + blob->secret_values_size;
     enum rse_provisioning_blob_signature_config_t sig_config;
