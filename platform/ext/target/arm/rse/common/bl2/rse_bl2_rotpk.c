@@ -24,7 +24,11 @@ static enum tfm_plat_err_t get_rotpk_hash(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    alg = rse_rotpk_get_hash_alg(id, &alg);
+    err = rse_rotpk_get_hash_alg(id, &alg);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     *rotpk_hash_size = RSE_ROTPK_SIZE_FROM_ALG(alg);
 
     return TFM_PLAT_ERR_SUCCESS;

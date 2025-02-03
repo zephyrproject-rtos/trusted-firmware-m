@@ -37,7 +37,10 @@ static enum tfm_plat_err_t read_bl1_rotpk(uint8_t *key_buf, size_t key_buf_len,
 
     if (key_size != NULL) {
 #ifdef TFM_BL1_2_EMBED_ROTPK_IN_IMAGE
-        alg = rse_rotpk_get_hash_alg(otp_id, &alg);
+        err = rse_rotpk_get_hash_alg(otp_id, &alg);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
         *key_size = RSE_ROTPK_SIZE_FROM_ALG(alg);
 #else
         err = tfm_plat_otp_get_size(otp_id, key_size);
