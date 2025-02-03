@@ -457,7 +457,7 @@ static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provi
         return err;
     }
 
-    err = get_rotpk(&public_key_x, &public_key_x_size, &public_key_y, &public_key_y_size);
+    err = get_rotpk(blob, &public_key_x, &public_key_x_size, &public_key_y, &public_key_y_size);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
@@ -494,7 +494,7 @@ static enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rs
         return err;
     }
 
-    err = get_rotpk(&public_key_x, &public_key_x_size, &public_key_y, &public_key_y_size);
+    err = get_rotpk(blob, &public_key_x, &public_key_x_size, &public_key_y, &public_key_y_size);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

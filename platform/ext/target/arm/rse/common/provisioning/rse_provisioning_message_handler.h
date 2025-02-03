@@ -19,7 +19,8 @@ extern "C" {
 #endif
 
 typedef enum tfm_plat_err_t (*setup_aes_key_func_t)(const struct rse_provisioning_message_blob_t *, uint32_t *);
-typedef enum tfm_plat_err_t (*get_rotpk_func_t)(uint32_t **, size_t *, uint32_t **, size_t *);
+typedef enum tfm_plat_err_t (*get_rotpk_func_t)(const struct rse_provisioning_message_blob_t *,
+                             uint32_t **, size_t *, uint32_t **, size_t *);
 
 struct default_blob_handler_ctx_t {
     setup_aes_key_func_t setup_aes_key;

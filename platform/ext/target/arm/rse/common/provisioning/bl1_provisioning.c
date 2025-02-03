@@ -86,6 +86,18 @@ static enum tfm_plat_err_t aes_setup_key(const struct rse_provisioning_message_b
     return rse_setup_provisioning_key(label, label_len, NULL, 0);
 }
 
+static enum tfm_plat_err_t rotpk_get(const struct rse_provisioning_message_blob_t *blob,
+                                     uint32_t **public_key_x,
+                                     size_t *public_key_x_size,
+                                     uint32_t **public_key_y,
+                                     size_t *public_key_y_size)
+{
+    return provisioning_rotpk_get(public_key_x,
+                                  public_key_x_size,
+                                  public_key_y,
+                                  public_key_y_size);
+}
+
 void tfm_plat_provisioning_check_for_dummy_keys(void)
 {
 }
@@ -119,7 +131,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     struct default_blob_handler_ctx_t ctx = {
         .setup_aes_key = aes_setup_key,
 #ifdef RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES
-        .get_rotpk = provisioning_rotpk_get,
+        .get_rotpk = rotpk_get,
 #endif
         .blob_is_chainloaded = false,
     };
