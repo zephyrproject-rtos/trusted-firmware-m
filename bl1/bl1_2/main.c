@@ -411,7 +411,7 @@ fih_int copy_image(uint32_t image_id, struct bl1_2_image_t *image)
     image_to_copy = (struct bl1_2_image_t *)(FLASH_BL1_BASE_ADDRESS +
                        bl1_image_get_flash_offset(image_id));
 
-    memcpy(image, image_to_copy, sizeof(struct bl1_2_image_t));
+    memcpy(image, image_to_copy, BL2_CODE_SIZE + BL2_HEADER_SIZE);
 #else
     bl1_image_copy_to_sram(image_id, (uint8_t *)image);
 #endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
