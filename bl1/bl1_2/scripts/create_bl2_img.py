@@ -49,7 +49,7 @@ def parse_args(args : argparse.Namespace,
         out["signer_{}_args".format(i)] = sign_data.parse_args(args,
                                                                prefix="signer_{}".format(i))
 
-    out |= bl2_image_config.parse_args(args, prefix)
+    out.update(bl2_image_config.parse_args(args, prefix))
 
     return out
 
@@ -114,7 +114,7 @@ def create_bl2_img(bl2_image_config : BL2_image_config,
 
 
         curve = convert_curve_define(getattr(config, "TFM_BL1_2_ECDSA_CURVE"), "TFM_BL1_CURVE")
-        sign_args |= {"curve": curve}
+        sign_args.update({"curve": curve})
 
         if "sig_{}".format(i) not in kwargs.keys():
             sig = sign_data.sign_data(data = image.protected_values.to_bytes(),
@@ -137,10 +137,10 @@ def create_bl2_img(bl2_image_config : BL2_image_config,
     if hasattr(config, "TFM_BL1_2_IMAGE_ENCRYPTION"):
         if (not encrypted_data):
             if (encrypt_args["kdf_args"]):
-                encrypt_args["kdf_args"] |= {
+                encrypt_args["kdf_args"].update({
                     "context" : image.protected_values.security_counter.to_bytes(),
                     "label" : "BL2_DECRYPTION_KEY",
-                }
+                })
             iv, encrypted_data = encrypt_data.encrypt_data(get_data_to_encrypt(bl2_image_config),
                                                            **encrypt_args)
 

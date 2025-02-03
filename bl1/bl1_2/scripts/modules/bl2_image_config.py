@@ -35,7 +35,7 @@ class BL2_image_config:
         self.defines = defines
         self.defines._definitions = {k:v for k,v in self.defines._definitions.items() if not callable(v)}
         self.defines.__dict__ = {k:v for k,v in self.defines.__dict__.items() if not callable(v)}
-        self.__dict__ |= self.defines._definitions
+        self.__dict__.update( self.defines._definitions)
 
     @staticmethod
     def from_h_file(h_file_path, includes, defines):
