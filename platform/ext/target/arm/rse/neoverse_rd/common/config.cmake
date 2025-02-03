@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2024, Arm Limited. All rights reserved.
+# Copyright (c) 2023-2025, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,6 +31,8 @@ set(RSE_HAS_EXPANSION_PERIPHERALS       ON       CACHE BOOL    "Whether RSE has 
 set(RSE_LOAD_NS_IMAGE                   OFF      CACHE BOOL    "Whether to load an NS image")
 set(CONFIG_TFM_SPM_BACKEND              IPC      CACHE STRING  "The SPM backend")
 set(TFM_MANIFEST_LIST                   "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
+
+set(RSE_OTP_HAS_RSE_ID                  ON       CACHE BOOL    "Use RSE ID")
 
 # Once all cache options are set, set common options as fallback
 include(${CMAKE_CURRENT_LIST_DIR}/../../common/config.cmake)
