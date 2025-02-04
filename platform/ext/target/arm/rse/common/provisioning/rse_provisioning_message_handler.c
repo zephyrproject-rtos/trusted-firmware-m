@@ -646,10 +646,17 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
     }
 
     if (is_blob_personalized(blob)) {
+#ifdef RSE_OTP_HAS_SOC_AREA
         if (memcmp(blob->soc_uid, (void *)P_RSE_OTP_SOC->unique_id, sizeof(P_RSE_OTP_SOC->unique_id)) != 0) {
             FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_INVALID_BLOB_PERSONALIZATION);
             return TFM_PLAT_ERR_PROVISIONING_INVALID_BLOB_PERSONALIZATION;
         }
+#else
+        /* Cannot accept personalized blobs for OTP without SoC Area*/
+        FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_INVALID_BLOB_PERSONALIZATION);
+        return TFM_PLAT_ERR_PROVISIONING_INVALID_BLOB_PERSONALIZATION;
+#endif /* RSE_OTP_HAS_SOC_AREA */
+
     } else {
 #if RSE_CM_REQUIRES_PERSONALIZED_BLOBS
         if (lcs == LCM_LCS_CM) {

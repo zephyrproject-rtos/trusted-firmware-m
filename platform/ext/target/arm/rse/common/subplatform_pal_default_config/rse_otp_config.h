@@ -21,7 +21,8 @@
 #define RSE_OTP_HAS_BL1_2
 #define RSE_OTP_HAS_DM_AREA
 #define RSE_OTP_HAS_DYNAMIC_AREA
-#define RSE_OTP_HAS_SOC_AREA
+/* Enable the below definition if specific RSE platform OTP has SoC area */
+/* #define RSE_OTP_HAS_SOC_AREA */
 #define RSE_OTP_HAS_KRTL_USAGE_COUNTER
 #define RSE_OTP_HAS_LFT_COUNTER
 
