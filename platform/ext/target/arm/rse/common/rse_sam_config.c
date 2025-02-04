@@ -171,8 +171,21 @@ static const enum sam_response_t rse_responses[RSE_SAM_EVENT_COUNT] = {
     [RSE_SAM_EVENT_INTEGRITY_CHECKER_ALARM] = SAM_RESPONSE_NMI,
 };
 
-static void rse_enable_sam_interrupts(void)
+static enum sam_error_t rse_enable_sam_interrupts(void)
 {
+    enum lcm_error_t lcm_err;
+    enum lcm_lcs_t lcs;
+
+    lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return SAM_ERROR_GENERIC_ERROR;
+    }
+
+    if (lcs != LCM_LCS_SE) {
+        /* Do not enable interrupts */
+        return SAM_ERROR_NONE;
+    }
+
     /* Enable SAM interrupts. Set SAM critical security fault to the highest
      * priority and other SAM faults to one lower priority.
      */
@@ -185,6 +198,8 @@ static void rse_enable_sam_interrupts(void)
     NVIC_EnableIRQ(SAM_Sec_Fault_S_IRQn);
     NVIC_EnableIRQ(SRAM_TRAM_ECC_Err_S_IRQn);
     NVIC_EnableIRQ(SRAM_ECC_Partial_Write_S_IRQn);
+
+    return SAM_ERROR_NONE;
 }
 
 uint32_t rse_sam_init(bool setup_handlers_only)
@@ -241,9 +256,7 @@ uint32_t rse_sam_init(bool setup_handlers_only)
     /* Enable the SAM interrupts. At this point, all pending events will be
      * handled.
      */
-    rse_enable_sam_interrupts();
-
-    return 0;
+    return rse_enable_sam_interrupts();
 }
 
 void rse_sam_finish(void)
