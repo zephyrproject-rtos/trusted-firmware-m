@@ -111,8 +111,9 @@ enum rse_provisioning_blob_personalization_config_t {
 
 struct __attribute__((__packed__)) rse_provisioning_message_blob_t {
     uint32_t signature_size;
-    uint8_t signature[96];
-
+    uint8_t signature[96]; /*!< In the case of ECDSA signature, this is held as a raw format
+                            * (r,s)
+                            */
     uint32_t metadata;
     uint32_t purpose;
 
@@ -127,6 +128,10 @@ struct __attribute__((__packed__)) rse_provisioning_message_blob_t {
     uint32_t data_size;
     uint32_t secret_values_size;
 
+    uint8_t public_key[96];  /*!< In the case of ECDSA key, this contains the raw key
+                              * in uncompressed (x,y) format without the 0x04 prefix
+                              * byte
+                              */
     uint8_t code_and_data_and_secret_values[];
 };
 
