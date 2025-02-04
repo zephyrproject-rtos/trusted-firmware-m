@@ -661,11 +661,14 @@ if (RSE_XIP)
 
     add_custom_command(OUTPUT bin/tfm_s_sic_tables.bin
         DEPENDS tfm_s_bin
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl2/create_xip_tables.py
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+        ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl2/create_xip_tables.py
             --input_image $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
+            --bl1_2_hash ${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
             --table_output_file tfm_s_sic_tables.bin
             --encrypted_image_output_file tfm_s_encrypted.bin
             --image_version ${MCUBOOT_SECURITY_COUNTER_S}
+            --label "RUNTIME_SECURE_ENCRYPTION_KEY"
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_sic_tables.bin $<TARGET_FILE_DIR:tfm_s>
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_encrypted.bin $<TARGET_FILE_DIR:tfm_s>
     )
@@ -736,6 +739,10 @@ if (RSE_XIP)
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
 
     install(FILES       bl2/create_xip_tables.py
+            FILES       bl2/kce_dm_dummy_encryption_key.bin
+            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/scripts)
+
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/tools/modules
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/scripts)
 
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/scripts

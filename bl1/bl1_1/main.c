@@ -38,7 +38,7 @@ static void collect_boot_measurement(void)
     struct boot_measurement_metadata bl1_2_metadata = {
         .measurement_type = TFM_BL1_1_MEASUREMENT_HASH_ALG,
         .signer_id = { 0 },
-        .signer_id_size = 0,
+        .signer_id_size = computed_bl1_2_hash_size,
         .sw_type = "BL1_2",
         .sw_version = { 0 },
     };
@@ -48,7 +48,7 @@ static void collect_boot_measurement(void)
      * - signer ID: the BL1_2 image is not signed.
      */
     if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL1_2, computed_bl1_2_hash,
-                               sizeof(computed_bl1_2_hash_size), &bl1_2_metadata, true)) {
+                               computed_bl1_2_hash_size, &bl1_2_metadata, true)) {
         WARN("Failed to store boot measurement of BL1_2\n");
     }
 }
