@@ -41,7 +41,7 @@ static void set_modulus_to_curve_order(cc3xx_ec_curve_t *curve)
     cc3xx_lowlevel_pka_set_modulus(curve->order, false, CC3XX_PKA_REG_NP);
 }
 
-/* Using the procedure from appendix D.1 of NIST SP800-168 */
+/* Using the procedure from appendix D.1 of NIST SP800-186 */
 static bool validate_point(cc3xx_ec_curve_t *curve,
                            cc3xx_ec_point_affine *p)
 {
