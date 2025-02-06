@@ -141,7 +141,13 @@ set(RSE_DM_BLOB_VERSION                     0          CACHE STRING "Version of 
 
 set(RSE_SYMMETRIC_PROVISIONING              ON         CACHE BOOL "Whether provisioning should be symmetric or asymmetric")
 
+set(RSE_PROVISIONING_EMBED_SIGNING_KEY      OFF        CACHE BOOL "Whether to embed the signing key (whose hash is in the CM ROTPK) in the blob")
+set(RSE_PROVISIONING_EMBED_SIGNING_KEY_CM_IDX   2      CACHE STRING "The index of the CM ROTPK hash to use when embedding the signing key")
+
 if (RSE_SYMMETRIC_PROVISIONING)
+    if (RSE_PROVISIONING_EMBED_SIGNING_KEY)
+        message(FATAL_ERROR "Only asymmetric provisioning is supported when embedding signing key in blob")
+    endif()
     set(RSE_PROVISIONING_SIGN_ALG           AES_CCM    CACHE STRING "Algorithm used to validate blobs")
     set(RSE_PROVISIONING_ENABLE_AES_SIGNATURES ON      CACHE BOOL "Allow AES signatures")
 else()

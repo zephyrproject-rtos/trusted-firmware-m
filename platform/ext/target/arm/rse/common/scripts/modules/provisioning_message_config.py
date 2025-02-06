@@ -14,6 +14,7 @@ import sys
 from c_struct import C_enum
 from secrets import token_bytes
 import arg_utils
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 
 import sign_then_encrypt_data
 import argparse
@@ -60,6 +61,10 @@ def add_arguments(parser : argparse.ArgumentParser,
                                              help="Whether SP mode is required to be enabled for the blob to be run",
                                              required=required)
 
+        arg_utils.add_prefixed_argument(parser, "sign_key_cm_rotpk", prefix,
+                                                help="CM ROTPK to use when embedding key in bundle",
+                                                type=int, required=False)
+
         arg_utils.add_prefixed_argument(parser, "soc_id", prefix,
                                                 help="ID of SOC to use for personalization",
                                                 type=arg_utils.arg_type_bytes, required=False)
@@ -98,7 +103,7 @@ def parse_args(args : argparse.Namespace,
         out = arg_utils.parse_args_automatically(args, ["provisioning_message_config"], prefix)
 
     out |= arg_utils.parse_args_automatically(args, ["valid_lcs", "tp_mode", "sp_mode",
-                                                     "soc_id", "version",
+                                                     "sign_key_cm_rotpk", "soc_id", "version",
                                                      "encrypt_code_and_data",
                                                      "encrypt_secret_values"], prefix)
 
@@ -134,6 +139,7 @@ class Provisioning_message_config:
             'rse_provisioning_blob_valid_lcs_mask_t',
             'rse_provisioning_blob_code_and_data_decryption_config_t',
             'rse_provisioning_blob_secret_values_decryption_config_t',
+            'rse_provisioning_blob_non_rom_pk_type_config_t',
             'rse_provisioning_blob_signature_config_t',
             'rse_provisioning_blob_personalization_config_t',
         ]
@@ -156,6 +162,7 @@ class Provisioning_message_config:
 def get_blob_details(provisioning_message_config : Provisioning_message_config,
                      encrypt_code_and_data : bool,
                      encrypt_secret_values : bool,
+                     sign_key_cm_rotpk : int,
                      encrypt_alg : str = None,
                      sign_alg : str = None,
                      sign_and_encrypt_alg : str = None,
@@ -179,7 +186,9 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_OFFSET, 0)
 
-    if sign_and_encrypt_alg and sign_and_encrypt_alg == "AES_CCM":
+    if sign_key_cm_rotpk is not None:
+        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM.get_value()
+    elif sign_and_encrypt_alg and sign_and_encrypt_alg == "AES_CCM":
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE.get_value()
     elif sign_alg and sign_alg == "ECDSA":
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM.get_value()
@@ -187,6 +196,14 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
         assert False, "Signature algorithm cannot be represented by blob header"
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SIGNATURE_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SIGNATURE_OFFSET, 0)
+
+    if sign_key_cm_rotpk is not None:
+        details_val |= (provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_CM_ROTPK.get_value() \
+                        & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_MASK, 0)) \
+                        << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_OFFSET, 0)
+        details_val |= (sign_key_cm_rotpk \
+                        & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_MASK, 0)) \
+                        << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_OFFSET, 0)
 
     if soc_id:
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_TYPE_PERSONALIZED.get_value()
@@ -230,11 +247,30 @@ def get_header(provisioning_message_config : Provisioning_message_config):
     unsigned_size = message.blob.signature_size.get_size() + message.blob.signature.get_size()
     return message.blob.to_bytes()[unsigned_size:-message.blob.code_and_data_and_secret_values.get_size()]
 
+def get_blob_pubkey(sign_alg : str = None,
+                    sign_key : str = None,
+                    sign_and_encrypt_alg : str = None,
+                    sign_and_encrypt_key: str = None,
+                    **kwargs : dict):
+    if not sign_alg:
+        sign_alg = sign_and_encrypt_alg
+    if not sign_key:
+        sign_key = sign_and_encrypt_key
+
+    with open(sign_key, "rb") as f:
+        key_data = f.read()
+
+    priv_key = load_pem_private_key(key_data, password=None)
+    pub_key = priv_key.public_key().public_bytes(Encoding.X962, PublicFormat.UncompressedPoint)
+    # Drop 0x04
+    return pub_key[1:]
+
 def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_message_config,
                                  code : bytes,
                                  encrypt_code_and_data : bool,
                                  encrypt_secret_values : bool,
                                  version : int,
+                                 sign_key_cm_rotpk : int,
                                  sign_and_encrypt_kwargs : dict,
                                  data : bytes = bytes(0),
                                  secret_values = bytes(0),
@@ -280,11 +316,15 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
     metadata = get_blob_details(provisioning_message_config=provisioning_message_config,
                                 encrypt_code_and_data=encrypt_code_and_data,
                                 encrypt_secret_values=encrypt_secret_values,
+                                sign_key_cm_rotpk=sign_key_cm_rotpk,
                                 soc_id=soc_id, **sign_and_encrypt_kwargs)
     message.blob.metadata.set_value(metadata)
 
     purpose = get_blob_purpose(provisioning_message_config=provisioning_message_config, **kwargs)
     message.blob.purpose.set_value(purpose)
+
+    if sign_key_cm_rotpk is not None:
+        message.blob.public_key.set_value_from_bytes(get_blob_pubkey(**sign_and_encrypt_kwargs))
 
     plaintext = bytes(0)
     aad = get_header(provisioning_message_config)
@@ -303,6 +343,7 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
 def create_blob_message(provisioning_message_config : Provisioning_message_config,
                         sign_and_encrypt_kwargs : dict,
                         soc_id : bytes = None,
+                        sign_key_cm_rotpk : bytes = None,
                         **kwargs : dict,
                         ):
     message = provisioning_message_config.message
@@ -313,6 +354,7 @@ def create_blob_message(provisioning_message_config : Provisioning_message_confi
 
     plaintext, aad = get_data_to_encrypt_and_sign(provisioning_message_config,
                                                   sign_and_encrypt_kwargs=sign_and_encrypt_kwargs,
+                                                  sign_key_cm_rotpk=sign_key_cm_rotpk,
                                                   soc_id=soc_id,
                                                   **kwargs)
 
