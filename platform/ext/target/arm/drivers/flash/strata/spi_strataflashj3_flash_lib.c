@@ -220,7 +220,8 @@ enum strataflashj3_error_t cfi_strataflashj3_read(
     return STRATAFLASHJ3_ERR_NONE;
 }
 
-static enum strataflashj3_error_t cfi_strataflashj3_verify_id(
+/* This is marked inline to suppress -Wunused-function warnings */
+static inline enum strataflashj3_error_t cfi_strataflashj3_verify_id(
                                 struct cfi_strataflashj3_dev_t* dev)
 {
     uint32_t base_addr;

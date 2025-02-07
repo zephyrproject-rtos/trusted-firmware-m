@@ -598,6 +598,9 @@ out:
     return err;
 }
 
+/* Despite the name, this might or might not use the Shamir trick, as that
+ * is controlled eventually by CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE
+ */
 cc3xx_err_t cc3xx_lowlevel_ec_shamir_multiply_points_by_scalars_and_add(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p1,

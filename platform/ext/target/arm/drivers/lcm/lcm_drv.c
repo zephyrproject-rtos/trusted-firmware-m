@@ -422,7 +422,7 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, huk), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }
@@ -435,7 +435,7 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, guk), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }
@@ -448,7 +448,7 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, kp_cm), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }
@@ -461,7 +461,7 @@ static enum lcm_error_t cm_to_dm(struct lcm_dev_t *dev, uint16_t gppc_val)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, kce_cm), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }
@@ -520,7 +520,7 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, kp_dm), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }
@@ -533,7 +533,7 @@ static enum lcm_error_t dm_to_se(struct lcm_dev_t *dev)
     }
     if (zero_bits == 256) {
         err = lcm_otp_write(dev, offsetof(struct lcm_otp_layout_t, kce_dm), 32,
-                            dummy_key_value);
+                            (const uint8_t *)dummy_key_value);
         if (err != LCM_ERROR_NONE) {
             return err;
         }

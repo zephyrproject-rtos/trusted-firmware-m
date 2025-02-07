@@ -62,6 +62,7 @@ void __NO_RETURN sam_handle_fast_attack_counter_increment(void)
     sam_handle_all_events(&SAM_DEV_S);
 
     tfm_hal_system_reset();
+    __builtin_unreachable();
 }
 
 static void read_and_write_address(enum sam_event_id_t event_id)

@@ -19,6 +19,19 @@
 
 #include "fatal_error.h"
 
+#if defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE)     \
+    && !defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE)   \
+    && !defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) \
+    && !defined(CC3XX_CONFIG_ECDH_ENABLE)
+/**
+ * @brief When it is defined, the driver is configured in such
+ *        a way that the scalar multiplication does not operate
+ *        on a secret, i.e. on a private key. In this case, we
+ *        can use an unprotected way for performing the scalar
+ *        multiplication, i.e. the Shamir trick
+ */
+#define SCALAR_MULT_NO_SECRET
+#endif
 bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
                                                   cc3xx_ec_point_affine *p)
 {
@@ -67,17 +80,6 @@ bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
     cc3xx_lowlevel_pka_free_reg(equation_left_side);
 
     return validate_succeeded;
-}
-
-static void negate_point(cc3xx_ec_point_projective *p,
-                         cc3xx_ec_point_projective *res)
-{
-    if (p != res) {
-        cc3xx_lowlevel_pka_copy(p->x, res->x);
-        cc3xx_lowlevel_pka_copy(p->z, res->z);
-    }
-
-    cc3xx_lowlevel_pka_mod_neg(p->y, res->y);
 }
 
 void cc3xx_lowlevel_ec_weierstrass_negate_point(cc3xx_ec_point_affine *p,
@@ -307,6 +309,18 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_add_points(cc3xx_ec_curve_t *curve,
     return err;
 }
 
+#if !defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE) || !defined(SCALAR_MULT_NO_SECRET)
+static void negate_point(cc3xx_ec_point_projective *p,
+                         cc3xx_ec_point_projective *res)
+{
+    if (p != res) {
+        cc3xx_lowlevel_pka_copy(p->x, res->x);
+        cc3xx_lowlevel_pka_copy(p->z, res->z);
+    }
+
+    cc3xx_lowlevel_pka_mod_neg(p->y, res->y);
+}
+
 static cc3xx_err_t multiply_point_by_scalar_side_channel_protected(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p,
@@ -438,7 +452,9 @@ static cc3xx_err_t multiply_point_by_scalar_side_channel_protected(
 
     return err;
 }
+#endif /* !CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE */
 
+#if defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE)
 static cc3xx_err_t shamir_multiply_points_by_scalars_and_add(
                                              cc3xx_ec_curve_t *curve,
                                              cc3xx_ec_point_affine *p1,
@@ -521,6 +537,7 @@ static cc3xx_err_t shamir_multiply_points_by_scalars_and_add(
 
     return err;
 }
+#endif /* CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE */
 
 cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(
                                              cc3xx_ec_curve_t *curve,
@@ -531,15 +548,12 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_multiply_point_by_scalar(
     /* If we only ever handle non-secret data, we can save some code size by
      * using the Shamir trick exponentiation with a zero as the second scalar
      */
-#if defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE) && defined(CC3XX_CONFIG_ECDSA_VERIFY_ENABLE) \
-    && !defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE) && !defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) \
-    && !defined(CC3XX_CONFIG_ECDH_ENABLE) /* If ECDH is enabled we treat secret data in the multiplication */
-    cc3xx_err_t err = CC3XX_ERR_SUCCESS;
+#if defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE) && defined(SCALAR_MULT_NO_SECRET)
     cc3xx_pka_reg_id_t zero_reg = cc3xx_lowlevel_pka_allocate_reg();
 
     cc3xx_lowlevel_pka_clear(zero_reg);
-    err = shamir_multiply_points_by_scalars_and_add(curve, p, scalar,
-                                                    p, zero_reg, res);
+    cc3xx_err_t err = shamir_multiply_points_by_scalars_and_add(curve, p, scalar,
+                                                               p, zero_reg, res);
 
     cc3xx_lowlevel_pka_free_reg(zero_reg);
     return err;
@@ -556,7 +570,7 @@ cc3xx_err_t cc3xx_lowlevel_ec_weierstrass_shamir_multiply_points_by_scalars_and_
                                              cc3xx_pka_reg_id_t    scalar2,
                                              cc3xx_ec_point_affine *res)
 {
-#ifdef CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE
+#if defined(CC3XX_CONFIG_EC_SHAMIR_TRICK_ENABLE)
     return shamir_multiply_points_by_scalars_and_add(curve,
                                                      p1, scalar1,
                                                      p2, scalar2, res);
