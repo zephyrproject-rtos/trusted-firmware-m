@@ -1102,7 +1102,9 @@ static void mpc_configure_override(NRF_MPC_Type *mpc, struct mpc_region_override
 	nrf_mpc_override_endaddr_set(mpc, override->index, override->endaddr);
 	nrf_mpc_override_perm_set(mpc, override->index, override->perm);
 	nrf_mpc_override_permmask_set(mpc, override->index, override->permmask);
+#if defined(NRF_MPC_HAS_OVERRIDE_OWNERID) && NRF_MPC_HAS_OVERRIDE_OWNERID
 	nrf_mpc_override_ownerid_set(mpc, override->index, override->owner_id);
+#endif
 	nrf_mpc_override_config_set(mpc, override->index, &override->config);
 }
 
