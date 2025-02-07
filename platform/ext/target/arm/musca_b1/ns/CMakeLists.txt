@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 # This file is exported to NS side during CMake installation phase and renamed
-# to CMakeLists.txt. It instructs how to build a platform on non-secture side.
+# to CMakeLists.txt. It instructs how to build a platform on non-secure side.
 # The structure and sources list are fully platform specific.
 
 add_library(platform_ns)
