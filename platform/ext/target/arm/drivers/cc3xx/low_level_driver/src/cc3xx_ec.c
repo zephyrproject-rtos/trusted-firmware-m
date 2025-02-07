@@ -41,6 +41,27 @@ static void set_modulus_to_curve_order(cc3xx_ec_curve_t *curve)
     cc3xx_lowlevel_pka_set_modulus(curve->order, false, CC3XX_PKA_REG_NP);
 }
 
+/**
+ * @brief Checks if modulus needs to switch to curve_modulus, and switch it then
+ *
+ * @param[in] curve Structure containing the parameters of the curve being used
+ *
+ * @return    true  The modulus has been switched to the prime field
+ * @return    false The modulus already contained the prime field
+ *
+ */
+static bool check_and_set_modulus_to_curve_modulus(cc3xx_ec_curve_t *curve)
+{
+    const bool modulus_already_set =
+        cc3xx_lowlevel_pka_are_equal(curve->field_modulus, CC3XX_PKA_REG_NP);
+
+    if (!modulus_already_set) {
+        set_modulus_to_curve_modulus(curve);
+    }
+
+    return !modulus_already_set;
+}
+
 /* Using the procedure from appendix D.1 of NIST SP800-186 */
 static bool validate_point(cc3xx_ec_curve_t *curve,
                            cc3xx_ec_point_affine *p)
@@ -64,7 +85,16 @@ static bool validate_point(cc3xx_ec_curve_t *curve,
     switch (curve->type) {
 #ifdef CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE
     case CC3XX_EC_CURVE_TYPE_WEIERSTRASS:
-        return cc3xx_lowlevel_ec_weierstrass_validate_point(curve, p);
+    {
+        const bool restore_previous = check_and_set_modulus_to_curve_modulus(curve);
+        /* Procedure described in NIST SP800-186 D.1, uses prime_field size as modulus */
+        const bool ret = cc3xx_lowlevel_ec_weierstrass_validate_point(curve, p);
+        if (restore_previous) {
+            set_modulus_to_curve_order(curve);
+        }
+
+        return ret;
+    }
 #endif /* CC3XX_CONFIG_EC_CURVE_TYPE_WEIERSTRASS_ENABLE */
     default:
         return false;

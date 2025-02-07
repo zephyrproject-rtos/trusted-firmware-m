@@ -42,7 +42,12 @@ bool cc3xx_lowlevel_ec_weierstrass_validate_point(cc3xx_ec_curve_t *curve,
     validate_succeeded = cc3xx_lowlevel_pka_are_equal(equation_left_side,
                                                       equation_right_side);
 
+    /* If the curve has a cofactor different than 1, it means that it has multiple
+     * subgroups hence we need to also check that nP = 0 to confirm that P belongs
+     * to the subgroup of order n
+     */
     if (curve->cofactor != 1) {
+
         /* This performs affine-to-projective conversion, which includes a check
          * that that nP != infinity in the corresponding projective to affine
          * conversion. The result of the multiplication isn't used.
