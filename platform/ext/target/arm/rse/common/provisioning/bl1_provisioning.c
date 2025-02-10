@@ -24,12 +24,6 @@
 
 #include <string.h>
 
-#define PROVISIONING_MESSAGE_START (VM0_BASE_S + OTP_DMA_ICS_SIZE)
-#define RSE_PROVISIONING_MESSAGE_MAX_SIZE (VM1_BASE_S - PROVISIONING_MESSAGE_START)
-
-static const struct rse_provisioning_message_t *provisioning_message =
-(const struct rse_provisioning_message_t *)PROVISIONING_MESSAGE_START;
-
 static inline bool blob_is_combined(const struct rse_provisioning_message_blob_t *blob)
 {
     return (((blob->purpose >> RSE_PROVISIONING_BLOB_PURPOSE_TYPE_OFFSET)
@@ -114,6 +108,8 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
     INFO("Beginning RSE provisioning\n");
     enum tfm_plat_err_t err;
     size_t msg_len;
+    const struct rse_provisioning_message_t *provisioning_message =
+    (const struct rse_provisioning_message_t *)PROVISIONING_MESSAGE_START;
 
     struct provisioning_message_handler_config config = {
         .blob_handler = &default_blob_handler,

@@ -307,6 +307,13 @@
 #define PROVISIONING_BUNDLE_DATA_START   (VM1_BASE_S)
 #define PROVISIONING_BUNDLE_DATA_SIZE    (VM1_SIZE - RSE_OTP_EMULATION_SRAM_SIZE)
 
+/* Fixed address to use to store the current provisioning message in memory. This
+ * allows for both pre-loading of the provisioning message into the memory in the
+ * case where we do not use the comms HAL, and also an unused block of memory
+ * where the comms HAL can load the message to when we are */
+#define PROVISIONING_MESSAGE_START (VM0_BASE_S + OTP_DMA_ICS_SIZE)
+#define RSE_PROVISIONING_MESSAGE_MAX_SIZE (VM1_BASE_S - PROVISIONING_MESSAGE_START)
+
 #define RSE_TESTS_HEAP_SIZE      0x1000
 #define RSE_TESTS_MSP_STACK_SIZE 0x1800
 
