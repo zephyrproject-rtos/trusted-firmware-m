@@ -9,6 +9,7 @@
 #define __RSE_PROVISIONING_ROTPK_H__
 
 #include "tfm_plat_defs.h"
+#include "rse_provisioning_message.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -17,7 +18,8 @@
 extern "C" {
 #endif
 
-enum tfm_plat_err_t provisioning_rotpk_get(uint32_t **public_key_x,
+enum tfm_plat_err_t provisioning_rotpk_get(const struct rse_provisioning_message_blob_t *blob,
+                                           uint32_t **public_key_x,
                                            size_t *public_key_x_size,
                                            uint32_t **public_key_y,
                                            size_t *public_key_y_size);
