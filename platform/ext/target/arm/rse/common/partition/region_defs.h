@@ -307,6 +307,12 @@
 #define PROVISIONING_BUNDLE_DATA_START   (VM1_BASE_S)
 #define PROVISIONING_BUNDLE_DATA_SIZE    (VM1_SIZE - RSE_OTP_EMULATION_SRAM_SIZE)
 
+/* Blob chainloading requires us to limit the size of the blob
+ * to allow for loading two blobs simultaneously. It is simpler just
+ * to always limit the main blob size and it should still have
+ * plenty of space */
+#define MAIN_BUNDLE_CODE_SIZE (PROVISIONING_BUNDLE_CODE_SIZE / 2)
+
 /* Fixed address to use to store the current provisioning message in memory. This
  * allows for both pre-loading of the provisioning message into the memory in the
  * case where we do not use the comms HAL, and also an unused block of memory

@@ -158,6 +158,7 @@ class Provisioning_message_config:
             'rse_provisioning_blob_non_rom_pk_type_config_t',
             'rse_provisioning_blob_signature_config_t',
             'rse_provisioning_blob_personalization_config_t',
+            'rse_provisioning_blob_sequencing_config_t',
         ]
 
         enums = {x : create_enum(x) for x in enum_names}
@@ -225,6 +226,8 @@ def get_blob_purpose(provisioning_message_config : Provisioning_message_config,
                      tp_mode : C_enum,
                      sp_mode : C_enum,
                      valid_lcs : [C_enum],
+                     signature_config : C_enum,
+                     non_rom_pk_config : C_enum,
                      **kwargs,
                      ):
     purpose_val = 0;
@@ -245,6 +248,12 @@ def get_blob_purpose(provisioning_message_config : Provisioning_message_config,
         val = l.get_value()
         purpose_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_PURPOSE_LCS_MASK_MASK, 0)) \
                         << int(provisioning_message_config.RSE_PROVISIONING_BLOB_PURPOSE_LCS_MASK_OFFSET, 0)
+
+    if signature_config.name == "RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM" and \
+        non_rom_pk_config.name == "RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_PREVIOUS_BLOB":
+        purpose_val |= (provisioning_message_config.RSE_PROVISIONING_BLOB_CHAINED.get_value() \
+                        & int(provisioning_message_config.RSE_PROVISIONING_BLOB_PURPOSE_SEQUENCING_MASK, 0)) \
+                        << int(provisioning_message_config.RSE_PROVISIONING_BLOB_PURPOSE_SEQUENCING_OFFSET, 0)
 
     return purpose_val
 
@@ -332,7 +341,8 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
                                 soc_uid=soc_uid, **sign_and_encrypt_kwargs)
     message.blob.metadata.set_value(metadata)
 
-    purpose = get_blob_purpose(provisioning_message_config=provisioning_message_config, **kwargs)
+    purpose = get_blob_purpose(provisioning_message_config=provisioning_message_config, signature_config=signature_config,
+                                non_rom_pk_config=non_rom_pk_config, **kwargs)
     message.blob.purpose.set_value(purpose)
 
     if signature_config.name == "RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM" and \

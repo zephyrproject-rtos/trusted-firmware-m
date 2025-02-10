@@ -24,30 +24,41 @@
 
 MEMORY
 {
-    CODE (rx) : ORIGIN = PROVISIONING_BUNDLE_CODE_START, LENGTH = MAIN_BUNDLE_CODE_SIZE
+    CODE (rx) : ORIGIN = PROVISIONING_BUNDLE_CODE_START, LENGTH = PROVISIONING_BUNDLE_CODE_SIZE
     DATA (rw) : ORIGIN = PROVISIONING_BUNDLE_DATA_START, LENGTH = PROVISIONING_BUNDLE_DATA_SIZE
     VALUES (r) : ORIGIN = PROVISIONING_BUNDLE_VALUES_START, LENGTH = PROVISIONING_BUNDLE_VALUES_SIZE
 }
 
-ENTRY(do_provisioning)
+ENTRY(do_jump)
 
 SECTIONS
 {
     CODE :
     {
+        /* In the case of the chained provisioing flow, shift the chainloader blob to the
+         * end of the ITCM and place a jump instruction to this at the start
+         */
+        *_provisioning_code.o(DO_JUMP)
+        . = MAIN_BUNDLE_CODE_SIZE;
         *_provisioning_code.o(DO_PROVISION)
         *(EXCLUDE_FILE (*_provisioning_data.o) .rodata*)
         *(.text*)
     } > CODE
 
+    /* Both these sections cannot be used as they will be
+     * overwritten when we chainload the next blob */
     DATA :
     {
         *(COMMON .data* .bss*)
     } > DATA
 
+    ASSERT(SIZEOF(DATA) == 0, "DATA section must be empty")
+
     VALUES :
     {
         *_provisioning_data.o(.rodata.data)
     } > VALUES
+
+    ASSERT(SIZEOF(VALUES) == 0, "VALUES section must be empty")
 
 }

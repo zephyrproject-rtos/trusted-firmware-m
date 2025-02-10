@@ -1,0 +1,49 @@
+/*
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "region_defs.h"
+
+/* Both these sections cannot be used as they will be
+ * overwritten when we chainload the next blob */
+LR_VALUES PROVISIONING_BUNDLE_VALUES_START {
+    VALUES PROVISIONING_BUNDLE_VALUES_START PROVISIONING_BUNDLE_VALUES_SIZE {
+        *_provisioning_data.o (+RO)
+    }
+}
+
+ASSERT (ImageLength(LR_VALUES) == 0, "LR_VALUES must be empty")
+
+LR_DATA PROVISIONING_BUNDLE_DATA_START {
+    DATA PROVISIONING_BUNDLE_DATA_START PROVISIONING_BUNDLE_DATA_SIZE {
+        * (+RW +ZI +RO-DATA)
+    }
+}
+
+ASSERT (ImageLength(LR_DATA) == 0, "LR_DATA must be empty")
+
+LR_CODE PROVISIONING_BUNDLE_CODE_START {
+     /* In the case of the chained provisioing flow, shift the chainloader blob to the
+      * end of the ITCM and place a jump instruction to this at the start
+      */
+    CODE PROVISIONING_BUNDLE_CODE_START MAIN_BUNDLE_CODE_SIZE {
+        * (DO_JUMP +First)
+    }
+
+    CODE (PROVISIONING_BUNDLE_CODE_START + MAIN_BUNDLE_CODE_SIZE) MAIN_BUNDLE_CODE_SIZE {
+        * (DO_PROVISION +First)
+        * (+RO-CODE)
+    }
+}

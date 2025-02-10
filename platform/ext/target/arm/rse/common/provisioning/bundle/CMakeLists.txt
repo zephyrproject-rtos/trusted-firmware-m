@@ -58,21 +58,11 @@ macro(create_provisioning_code_target target)
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin
     )
 
-    target_add_scatter_file(${target}_provisioning_code
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_code.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_code.ld>
-    )
-
     target_link_options(${target}_provisioning_code
         PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/bin/${target}_provisioning_code.map>
             $<$<C_COMPILER_ID:ARMClang>:--map>
             $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_CURRENT_BINARY_DIR}/bin/${target}_provisioning_code.map>
-    )
-
-    target_link_options(${target}_provisioning_code
-        PRIVATE
-            --entry=do_provision
     )
 
     target_sources(${target}_provisioning_code
@@ -103,9 +93,26 @@ macro(create_provisioning_code_target target)
     )
 endmacro()
 
+macro(add_default_provisioning_code_link_options target)
+    target_add_scatter_file(${target}_provisioning_code
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_code.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/provisioning_code.ld>
+    )
+
+    target_link_options(${target}_provisioning_code
+        PRIVATE
+            --entry=do_provision
+    )
+endmacro()
+
 create_provisioning_code_target(cm)
+add_default_provisioning_code_link_options(cm)
+
 create_provisioning_code_target(dm)
+add_default_provisioning_code_link_options(dm)
+
 create_provisioning_code_target(combined)
+add_default_provisioning_code_link_options(combined)
 
 target_sources(cm_provisioning_code
     PRIVATE
@@ -128,6 +135,26 @@ target_sources(combined_provisioning_code
         ./cm_provisioning_code.c
         ./dm_provisioning_code.c
 )
+
+if (RSE_DM_CHAINED_PROVISIONING)
+    create_provisioning_code_target(dm_chained)
+
+    target_add_scatter_file(dm_chained_provisioning_code
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/dm_chained_provisioning_code.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/dm_chained_provisioning_code.ld>
+    )
+
+    target_link_options(dm_chained_provisioning_code
+        PRIVATE
+            --entry=do_jump
+    )
+
+    target_sources(dm_chained_provisioning_code
+        PRIVATE
+            ./dm_chained_provisioning_code.c
+            ./../rse_provisioning_tci_key.c
+    )
+endif()
 
 if (TFM_DUMMY_PROVISIONING)
 
@@ -225,6 +252,16 @@ if (TFM_DUMMY_PROVISIONING)
         SOURCES ${CMAKE_BINARY_DIR}/bin/provisioning/dm_provisioning_message.bin
     )
 
+    if (RSE_DM_CHAINED_PROVISIONING)
+        set(MAIN_DM_BUNDLE_SIGNATURE_CONFIG ROTPK_NOT_IN_ROM)
+        set(MAIN_DM_BUNDLE_NOT_IN_ROM_SIGNATURE_CONFIG PREVIOUS_BLOB)
+    else()
+        set(MAIN_DM_BUNDLE_SIGNATURE_CONFIG ${RSE_PROVISIONING_DM_SIGNATURE_CONFIG})
+        if (MAIN_DM_BUNDLE_SIGNATURE_CONFIG STREQUAL "ROTPK_NOT_IN_ROM")
+            set(MAIN_DM_BUNDLE_NOT_IN_ROM_SIGNATURE_CONFIG CM_ROTPK)
+        endif()
+    endif()
+
     add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/provisioning/dm_provisioning_message.bin
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_dm_provisioning_bundle.py
         DEPENDS otp_config
@@ -249,14 +286,15 @@ if (TFM_DUMMY_PROVISIONING)
 
             $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin>
             $<$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>:--sign_and_encrypt_alg=${RSE_PROVISIONING_SIGN_ALG}>
-            --signature_config=RSE_PROVISIONING_BLOB_SIGNATURE_${RSE_PROVISIONING_DM_SIGNATURE_CONFIG}
+            --signature_config=RSE_PROVISIONING_BLOB_SIGNATURE_${MAIN_DM_BUNDLE_SIGNATURE_CONFIG}
+            $<$<STREQUAL:${MAIN_DM_BUNDLE_NOT_IN_ROM_SIGNATURE_CONFIG},PREVIOUS_BLOB>:--non_rom_pk_config=RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_PREVIOUS_BLOB>
 
             $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_key=${RSE_CM_PROVISIONING_SIGNING_KEY}>
             $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_alg=${RSE_PROVISIONING_SIGN_ALG}>
             $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--sign_hash_alg=${RSE_PROVISIONING_HASH_ALG}>
             $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin>
             $<$<NOT:$<BOOL:${RSE_SYMMETRIC_PROVISIONING}>>:--encrypt_alg=${RSE_PROVISIONING_ENCRYPTION_ALG}>
-            $<$<STREQUAL:${RSE_PROVISIONING_DM_SIGNATURE_CONFIG},ROTPK_NOT_IN_ROM>:--sign_key_cm_rotpk=${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX}>
+            $<$<STREQUAL:${MAIN_DM_BUNDLE_NOT_IN_ROM_SIGNATURE_CONFIG},CM_ROTPK>:--sign_key_cm_rotpk=${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX}>
 
             $<$<BOOL:${RSE_PROVISIONING_DM_ENCRYPT_CODE_DATA}>:--encrypt_code_and_data=RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES>
             $<$<BOOL:${RSE_PROVISIONING_DM_ENCRYPT_SECRET_VALUES}>:--encrypt_secret_values=RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES>
@@ -265,6 +303,48 @@ if (TFM_DUMMY_PROVISIONING)
 
             ${DM_BUNDLE_SCRIPT_ARGS}
     )
+
+    if (RSE_DM_CHAINED_PROVISIONING)
+            add_custom_target(dm_chained_provisioning_message
+                ALL
+                SOURCES ${CMAKE_BINARY_DIR}/bin/provisioning/dm_chained_provisioning_message.bin
+            )
+
+            add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/bin/provisioning/dm_chained_provisioning_message.bin
+                DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_dm_chained_provisioning_bundle.py
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
+                DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bin/dm_chained_provisioning_code.axf
+                DEPENDS ${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
+                DEPENDS dm_chained_provisioning_code
+                DEPENDS dm_provisioning_key
+                COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
+                    ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/create_dm_chained_provisioning_bundle.py
+                    --provisioning_message_config=${CMAKE_CURRENT_BINARY_DIR}/config/message_config.pickle
+                    --provisioning_code_elf=${CMAKE_CURRENT_BINARY_DIR}/bin/dm_chained_provisioning_code.axf
+                    --bundle_output_file ${CMAKE_BINARY_DIR}/bin/provisioning/dm_chained_provisioning_message.bin
+
+                    --tp_mode=RSE_PROVISIONING_BLOB_REQUIRES_TP_MODE_${RSE_TP_MODE}
+                    --version=${RSE_CM_BLOB_VERSION}
+
+                    --signature_config=RSE_PROVISIONING_BLOB_SIGNATURE_${RSE_PROVISIONING_DM_SIGNATURE_CONFIG}
+
+                    --sign_key=${RSE_CM_PROVISIONING_SIGNING_KEY}
+                    --sign_alg=${RSE_PROVISIONING_SIGN_ALG}
+                    --sign_hash_alg=${RSE_PROVISIONING_HASH_ALG}
+                    --encrypt_key=${CMAKE_BINARY_DIR}/bin/keys/kprov_dm.bin
+                    --encrypt_alg=${RSE_PROVISIONING_ENCRYPTION_ALG}
+                    $<$<STREQUAL:${RSE_PROVISIONING_DM_SIGNATURE_CONFIG},ROTPK_NOT_IN_ROM>:--sign_key_cm_rotpk=${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX}>
+
+                    $<$<BOOL:${RSE_PROVISIONING_DM_ENCRYPT_CODE_DATA}>:--encrypt_code_and_data=RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES>
+                    # No secret values in chained blob to encrypt
+                    --encrypt_secret_values=RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_BY_BLOB
+
+                    --sp_mode RSE_PROVISIONING_BLOB_REQUIRES_SP_MODE_ENABLED
+
+                    --valid_lcs=RSE_PROVISIONING_BLOB_VALID_IN_DM_LCS
+            )
+    endif()
 
     add_custom_target(combined_provisioning_message
         ALL
