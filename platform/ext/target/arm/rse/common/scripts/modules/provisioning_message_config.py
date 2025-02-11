@@ -63,7 +63,7 @@ def add_arguments(parser : argparse.ArgumentParser,
 
         arg_utils.add_prefixed_argument(parser, "sign_key_cm_rotpk", prefix,
                                                 help="CM ROTPK to use when embedding key in bundle",
-                                                type=int, required=False)
+                                                type=int, required=False, default=0)
 
         arg_utils.add_prefixed_argument(parser, "soc_uid", prefix,
                                                 help="ID of SOC to use for personalization",
@@ -72,6 +72,21 @@ def add_arguments(parser : argparse.ArgumentParser,
         arg_utils.add_prefixed_argument(parser, "version", prefix,
                                                 help="Version of provisioning blob",
                                                 type=int, required=required)
+
+        arg_utils.add_prefixed_enum_argument(parser=parser,
+                                             enum=provisioning_message_config.enums['rse_provisioning_blob_signature_config_t'],
+                                             prefix=prefix,
+                                             arg_name="signature_config",
+                                             help="Configuration of the blob signature",
+                                             required=required)
+
+        arg_utils.add_prefixed_enum_argument(parser=parser,
+                                             enum=provisioning_message_config.enums['rse_provisioning_blob_non_rom_pk_type_config_t'],
+                                             prefix=prefix,
+                                             arg_name="non_rom_pk_config",
+                                             help="Configuration of the blob signature when the PK is not in the ROM",
+                                             default="RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_CM_ROTPK",
+                                             required=False)
 
         arg_utils.add_prefixed_enum_argument(parser=parser,
                                              enum=provisioning_message_config.enums['rse_provisioning_blob_code_and_data_decryption_config_t'],
@@ -103,6 +118,7 @@ def parse_args(args : argparse.Namespace,
         out = arg_utils.parse_args_automatically(args, ["provisioning_message_config"], prefix)
 
     out |= arg_utils.parse_args_automatically(args, ["valid_lcs", "tp_mode", "sp_mode",
+                                                     "signature_config", "non_rom_pk_config",
                                                      "sign_key_cm_rotpk", "soc_uid", "version",
                                                      "encrypt_code_and_data",
                                                      "encrypt_secret_values"], prefix)
@@ -162,6 +178,8 @@ class Provisioning_message_config:
 def get_blob_details(provisioning_message_config : Provisioning_message_config,
                      encrypt_code_and_data : C_enum,
                      encrypt_secret_values : C_enum,
+                     signature_config : C_enum,
+                     non_rom_pk_config : C_enum,
                      sign_key_cm_rotpk : int,
                      encrypt_alg : str = None,
                      sign_alg : str = None,
@@ -180,24 +198,18 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_OFFSET, 0)
 
-    if sign_key_cm_rotpk is not None:
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM.get_value()
-    elif sign_and_encrypt_alg and sign_and_encrypt_alg == "AES_CCM":
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE.get_value()
-    elif sign_alg and sign_alg == "ECDSA":
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM.get_value()
-    else:
-        assert False, "Signature algorithm cannot be represented by blob header"
+    val = signature_config.get_value()
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SIGNATURE_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SIGNATURE_OFFSET, 0)
 
-    if sign_key_cm_rotpk is not None:
-        details_val |= (provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_CM_ROTPK.get_value() \
-                        & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_MASK, 0)) \
+    if signature_config.name == "RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM":
+        val = non_rom_pk_config.get_value()
+        details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_MASK, 0)) \
                         << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_OFFSET, 0)
-        details_val |= (sign_key_cm_rotpk \
-                        & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_MASK, 0)) \
-                        << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_OFFSET, 0)
+        if non_rom_pk_config.name == "RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_CM_ROTPK":
+            details_val |= (sign_key_cm_rotpk \
+                            & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_MASK, 0)) \
+                            << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_OFFSET, 0)
 
     if soc_uid:
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_TYPE_PERSONALIZED.get_value()
@@ -264,6 +276,8 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
                                  encrypt_code_and_data : C_enum,
                                  encrypt_secret_values : C_enum,
                                  version : int,
+                                 signature_config : C_enum,
+                                 non_rom_pk_config : C_enum,
                                  sign_key_cm_rotpk : int,
                                  sign_and_encrypt_kwargs : dict,
                                  data : bytes = bytes(0),
@@ -312,6 +326,8 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
     metadata = get_blob_details(provisioning_message_config=provisioning_message_config,
                                 encrypt_code_and_data=encrypt_code_and_data,
                                 encrypt_secret_values=encrypt_secret_values,
+                                signature_config=signature_config,
+                                non_rom_pk_config=non_rom_pk_config,
                                 sign_key_cm_rotpk=sign_key_cm_rotpk,
                                 soc_uid=soc_uid, **sign_and_encrypt_kwargs)
     message.blob.metadata.set_value(metadata)
@@ -319,7 +335,8 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
     purpose = get_blob_purpose(provisioning_message_config=provisioning_message_config, **kwargs)
     message.blob.purpose.set_value(purpose)
 
-    if sign_key_cm_rotpk is not None:
+    if signature_config.name == "RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM" and \
+        non_rom_pk_config.name == "RSE_PROVISIONING_BLOB_DETAILS_NON_ROM_PK_TYPE_CM_ROTPK":
         message.blob.public_key.set_value_from_bytes(get_blob_pubkey(**sign_and_encrypt_kwargs))
 
     plaintext = bytes(0)
@@ -338,6 +355,8 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
 
 def create_blob_message(provisioning_message_config : Provisioning_message_config,
                         sign_and_encrypt_kwargs : dict,
+                        signature_config : C_enum,
+                        non_rom_pk_config : C_enum,
                         soc_uid : bytes = None,
                         sign_key_cm_rotpk : bytes = None,
                         **kwargs : dict,
@@ -350,6 +369,7 @@ def create_blob_message(provisioning_message_config : Provisioning_message_confi
 
     plaintext, aad = get_data_to_encrypt_and_sign(provisioning_message_config,
                                                   sign_and_encrypt_kwargs=sign_and_encrypt_kwargs,
+                                                  signature_config=signature_config, non_rom_pk_config=non_rom_pk_config,
                                                   sign_key_cm_rotpk=sign_key_cm_rotpk,
                                                   soc_uid=soc_uid,
                                                   **kwargs)
