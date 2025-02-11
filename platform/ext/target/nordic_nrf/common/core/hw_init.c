@@ -10,7 +10,9 @@
 #include "array.h"
 
 #include <nrfx.h>
+#if defined(RTC_PRESENT)
 #include <hal/nrf_rtc.h>
+#endif
 #include <hal/nrf_uarte.h>
 #include <hal/nrf_clock.h>
 #include <hal/nrf_dppi.h>
