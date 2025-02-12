@@ -37,8 +37,12 @@ fih_int bl1_image_copy_to_sram(uint32_t image_id, uint8_t *out)
     fih_int fih_rc;
 
     flash_offset = bl1_image_get_flash_offset(image_id);
-    fih_rc = fih_int_encode(FLASH_DEV_NAME_BL1.ReadData(flash_offset, out,
-                                                        BL2_CODE_SIZE + BL2_HEADER_SIZE));
+
+    fih_rc = fih_int_encode_zero_equality(
+                fih_not_eq(BL2_CODE_SIZE + BL2_HEADER_SIZE,
+                           (FLASH_DEV_NAME_BL1.ReadData(flash_offset,
+                                                        out,
+                                                        BL2_CODE_SIZE + BL2_HEADER_SIZE))));
 
     FIH_RET(fih_rc);
 }
