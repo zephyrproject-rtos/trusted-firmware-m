@@ -61,7 +61,7 @@ static enum tfm_plat_err_t software_zero_count_compute(uint8_t *buf, size_t buf_
 }
 
 static enum tfm_plat_err_t software_zero_count_check(uint8_t *buf, size_t buf_len,
-                                                       uint32_t *expected_zero_count)
+                                                       uint32_t expected_zero_count)
 {
     uint32_t zero_count;
     enum tfm_plat_err_t err;
@@ -71,7 +71,7 @@ static enum tfm_plat_err_t software_zero_count_check(uint8_t *buf, size_t buf_le
         return err;
     }
 
-    if (zero_count == *expected_zero_count) {
+    if (zero_count == expected_zero_count) {
         return TFM_PLAT_ERR_SUCCESS;
     } else {
         NONFATAL_ERR(TFM_PLAT_ERR_ZERO_COUNT_MISMATCH);
@@ -122,7 +122,7 @@ enum tfm_plat_err_t rse_count_zero_bits(uint8_t *buf, size_t buf_len,
 }
 
 enum tfm_plat_err_t rse_check_zero_bit_count(uint8_t *buf, size_t buf_len,
-                                             uint32_t *expected_zero_count)
+                                             uint32_t expected_zero_count)
 {
 #ifdef INTEGRITY_CHECKER_S
     if (is_aligned((uintptr_t)buf) && is_aligned(buf_len) &&
@@ -130,7 +130,7 @@ enum tfm_plat_err_t rse_check_zero_bit_count(uint8_t *buf, size_t buf_len,
         return (enum tfm_plat_err_t)integrity_checker_check_value(&INTEGRITY_CHECKER_DEV_S,
                                                                   INTEGRITY_CHECKER_MODE_ZERO_COUNT,
                                                                   (uint32_t *)buf, buf_len,
-                                                                  expected_zero_count, sizeof(uint32_t));
+                                                                  &expected_zero_count, sizeof(expected_zero_count));
     }
 #endif
 

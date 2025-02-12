@@ -91,7 +91,7 @@ enum tfm_plat_err_t do_cm_provision(void) {
 
     zero_count = 8 * values->cm_area_info.size;
     err = rse_check_zero_bit_count((uint8_t *)(OTP_BASE_S + values->cm_area_info.offset),
-                                   values->cm_area_info.size, &zero_count);
+                                   values->cm_area_info.size, zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_MODIFIED_BEFORE_CM_PROVISIONING);
         return TFM_PLAT_ERR_PROVISIONING_CM_TAMPERING_DETECTED;

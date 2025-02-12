@@ -18,7 +18,7 @@ enum tfm_plat_err_t rse_count_zero_bits(uint8_t *buf, size_t buf_len,
                                         uint32_t *zero_count);
 
 enum tfm_plat_err_t rse_check_zero_bit_count(uint8_t *buf, size_t buf_len,
-                                             uint32_t *expected_zero_count);
+                                             uint32_t expected_zero_count);
 
 #ifdef __cplusplus
 }

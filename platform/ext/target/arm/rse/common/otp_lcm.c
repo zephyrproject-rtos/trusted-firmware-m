@@ -406,7 +406,7 @@ static enum tfm_plat_err_t setup_rotpk_info(enum lcm_lcs_t lcs) {
 
     err = rse_check_zero_bit_count((uint8_t *)&P_RSE_OTP_CM_ROTPK->zero_count + sizeof(uint32_t),
                                    cm_rotpk_area_info.size - sizeof(uint32_t),
-                                   (uint32_t *)&P_RSE_OTP_CM_ROTPK->zero_count);
+                                   P_RSE_OTP_CM_ROTPK->zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         cm_rotpk_area_info.raw_data = 0;
     } else {
@@ -442,7 +442,7 @@ static enum tfm_plat_err_t setup_rotpk_info(enum lcm_lcs_t lcs) {
 
     err = rse_check_zero_bit_count(((uint8_t *)&P_RSE_OTP_DM_ROTPK->zero_count) + sizeof(uint32_t),
                                    dm_rotpk_area_info.size - sizeof(uint32_t),
-                                   (uint32_t *)&P_RSE_OTP_DM_ROTPK->zero_count);
+                                   P_RSE_OTP_DM_ROTPK->zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         dm_rotpk_area_info.raw_data = 0;
     } else {
@@ -498,7 +498,7 @@ static enum tfm_plat_err_t check_areas_for_tampering(enum lcm_lcs_t lcs)
 #ifdef RSE_OTP_HAS_CM_AREA
     err = rse_check_zero_bit_count((uint8_t *)&P_RSE_OTP_CM->zero_count + sizeof(uint32_t),
                                    cm_area_info.size - sizeof(uint32_t) - sizeof(P_RSE_OTP_CM->rotpk_areas),
-                                   (uint32_t *)&P_RSE_OTP_CM->zero_count);
+                                   P_RSE_OTP_CM->zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_INTEGRITY_CHECK_FAILURE);
         FATAL_ERR(TFM_PLAT_ERR_OTP_INIT_CM_ZERO_COUNT_ERR);
@@ -509,7 +509,7 @@ static enum tfm_plat_err_t check_areas_for_tampering(enum lcm_lcs_t lcs)
 #ifdef RSE_OTP_HAS_BL1_2
     err = rse_check_zero_bit_count((uint8_t *)&P_RSE_OTP_BL1_2->zero_count + sizeof(uint32_t),
                                    bl1_2_area_info.size - sizeof(uint32_t),
-                                   (uint32_t *)&P_RSE_OTP_BL1_2->zero_count);
+                                   P_RSE_OTP_BL1_2->zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_INTEGRITY_CHECK_FAILURE);
         FATAL_ERR(TFM_PLAT_ERR_OTP_INIT_BL1_2_ZERO_COUNT_ERR);
@@ -520,7 +520,7 @@ static enum tfm_plat_err_t check_areas_for_tampering(enum lcm_lcs_t lcs)
 #ifdef RSE_OTP_HAS_SOC_AREA
     err = rse_check_zero_bit_count((uint8_t *)&P_RSE_OTP_SOC->unique_id,
                                    sizeof(P_RSE_OTP_SOC->unique_id),
-                                   (uint32_t *)&P_RSE_OTP_SOC->zero_count);
+                                   P_RSE_OTP_SOC->zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_INTEGRITY_CHECK_FAILURE);
         FATAL_ERR(TFM_PLAT_ERR_OTP_INIT_SOC_ZERO_COUNT_ERR);
@@ -536,7 +536,7 @@ static enum tfm_plat_err_t check_areas_for_tampering(enum lcm_lcs_t lcs)
 #ifdef RSE_OTP_HAS_DM_AREA
     err = rse_check_zero_bit_count((uint8_t *)&P_RSE_OTP_DM->zero_count + sizeof(uint32_t),
                                    dm_area_info.size - sizeof(uint32_t) - sizeof(P_RSE_OTP_DM->rotpk_areas),
-                                   (uint32_t *)&P_RSE_OTP_DM->zero_count);
+                                   P_RSE_OTP_DM->zero_count);
     if ((err != TFM_PLAT_ERR_SUCCESS)
         && (P_RSE_OTP_DM->zero_count != 8 * sizeof(uint32_t))) {
         rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_INTEGRITY_CHECK_FAILURE);
