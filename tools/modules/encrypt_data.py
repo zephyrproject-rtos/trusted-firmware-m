@@ -67,8 +67,6 @@ def encrypt_data(data : bytes,
     assert(encrypt_alg)
 
     if kdf_args:
-        # FixMe: If RSE_SYMMETRIC_PROVISIONING is OFF, should we use directly
-        #        the encrypt_key without deriving another one?
         encrypt_key = key_derivation.derive_symmetric_key(**kdf_args,
                                                           input_key = encrypt_key,
                                                           length = 32

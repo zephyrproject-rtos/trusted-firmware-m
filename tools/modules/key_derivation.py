@@ -56,7 +56,7 @@ def symmetric_kdf_hkdf(input_key : bytes,
                        context : bytes,
                        label : str,
                        length : int,
-                       hkdf_hash_alg,
+                       hkdf_hash_alg : str = "SHA256",
                        **kwargs,
                        ):
     state = struct_pack([
@@ -66,7 +66,7 @@ def symmetric_kdf_hkdf(input_key : bytes,
                         context
                         ])
     hkdf = HKDF(
-        algorithm=hkdf_hash_alg(),
+        algorithm=hkdf_hashes[hkdf_hash_alg](),
         length=length,
         salt=None,
         info=state)
@@ -88,7 +88,7 @@ def add_arguments(parser : argparse.ArgumentParser,
                   required : bool = True,
                   ) -> None:
     add_prefixed_argument(parser, "kdf_alg", prefix, help="key deriation algorithm", choices=kdf_funcs, required=required)
-    add_prefixed_argument(parser, "hkdf_hash_alg", prefix, help="hkdf hash function", choices = hkdf_hashes, default=hashes.SHA256, required=False)
+    add_prefixed_argument(parser, "hkdf_hash_alg", prefix, help="hkdf hash function", choices=hkdf_hashes, required=False)
 
 def parse_args(args : argparse.Namespace,
                prefix : str = "",
