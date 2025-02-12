@@ -10,6 +10,7 @@
 
 #include "device_definition.h"
 #include "rse_provisioning_config.h"
+#include "rse_provisioning_tci_key.h"
 #include "crypto.h"
 #include "cc3xx_drv.h"
 #include "rse_rotpk_policy.h"
@@ -17,63 +18,13 @@
 
 #ifdef RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES
 
-#if defined(RSE_PROVISIONING_CURVE_P384)
-/* bl2/ext/mcuboot/root-EC-P384.pem */
-const uint8_t __ALIGNED(sizeof(uint32_t)) tci_rotpk_x[] = {
-    0x0c, 0x76, 0xca, 0xae, 0x72, 0x3a, 0xa5, 0xe8,
-    0xf0, 0xd4, 0xf1, 0x16, 0xb5, 0x02, 0xef, 0x77,
-    0xa1, 0x1b, 0x93, 0x61, 0x78, 0xc0, 0x09, 0x26,
-    0x7b, 0x3b, 0x40, 0x9c, 0xee, 0x49, 0x85, 0xe0,
-    0xc9, 0x4f, 0xe7, 0xf2, 0xba, 0x97, 0x6c, 0xf3,
-    0x82, 0x65, 0x14, 0x2c, 0xf5, 0x0c, 0x73, 0x33,
-};
-
-const uint8_t __ALIGNED(sizeof(uint32_t)) tci_rotpk_y[] = {
-    0x4d, 0x32, 0xe7, 0x9b, 0xd3, 0x42, 0xcc, 0x95,
-    0x5a, 0xe5, 0xe2, 0xf5, 0xf4, 0x6e, 0x45, 0xe0,
-    0xed, 0x20, 0x35, 0x5c, 0xaf, 0x52, 0x35, 0x81,
-    0xd4, 0xdc, 0x9c, 0xe3, 0x9e, 0x22, 0x3e, 0xfb,
-    0x3f, 0x22, 0x10, 0xda, 0x70, 0x03, 0x37, 0xad,
-    0xa8, 0xf2, 0x48, 0xfe, 0x3a, 0x60, 0x69, 0xa5
-};
-#elif defined(RSE_PROVISIONING_CURVE_P256)
-const uint8_t __ALIGNED(sizeof(uint32_t)) tci_rotpk_x[] = {
-  0x2a, 0xcb, 0x40, 0x3c, 0xe8, 0xfe, 0xed, 0x5b,
-  0xa4, 0x49, 0x95, 0xa1, 0xa9, 0x1d, 0xae, 0xe8,
-  0xdb, 0xbe, 0x19, 0x37, 0xcd, 0x14, 0xfb, 0x2f,
-  0x24, 0x57, 0x37, 0xe5, 0x95, 0x39, 0x88, 0xd9,
-};
-
-const uint8_t __ALIGNED(sizeof(uint32_t)) tci_rotpk_y[] = {
-  0x94, 0xb9, 0xd6, 0x5a, 0xeb, 0xd7, 0xcd, 0xd5,
-  0x30, 0x8a, 0xd6, 0xfe, 0x48, 0xb2, 0x4a, 0x6a,
-  0x81, 0x0e, 0xe5, 0xf0, 0x7d, 0x8b, 0x68, 0x34,
-  0xcc, 0x3a, 0x6a, 0xfc, 0x53, 0x8e, 0xfa, 0xc1
-};
-#else
-#error No key data for provisioning curve
-#endif
-
-const size_t tci_rotpk_x_len = sizeof(tci_rotpk_x);
-const size_t tci_rotpk_y_len = sizeof(tci_rotpk_y);
-
-#ifdef TFM_DUMMY_PROVISIONING
-
-/* bl2/ext/mcuboot/root-EC-P384.pem */
-const uint8_t *pci_rotpk_x = tci_rotpk_x;
-const uint8_t *pci_rotpk_y = tci_rotpk_y;
-const size_t pci_rotpk_x_len = sizeof(tci_rotpk_x);
-const size_t pci_rotpk_y_len = sizeof(tci_rotpk_y);
-
-#else
-
+#ifndef TFM_DUMMY_PROVISIONING
 extern const uint8_t pci_rotpk_x[];
 extern const uint8_t pci_rotpk_y[];
 
 extern const size_t pci_rotpk_x_len;
 extern const size_t pci_rotpk_y_len;
-
-#endif
+#endif /* TFM_DUMMY_PROVISIONING */
 
 static inline bool use_cm_rotpk(const struct rse_provisioning_message_blob_t *blob)
 {
@@ -290,6 +241,12 @@ static enum tfm_plat_err_t get_rom_rotpk(uint32_t **public_key_x,
                                         uint32_t **public_key_y,
                                         size_t *public_key_y_size)
 {
+#ifdef TFM_DUMMY_PROVISIONING
+    *public_key_x = (uint32_t *)tci_rotpk_x;
+    *public_key_y = (uint32_t *)tci_rotpk_y;
+    *public_key_x_size = tci_rotpk_x_len;
+    *public_key_y_size = tci_rotpk_y_len;
+#else
     enum lcm_tp_mode_t tp_mode;
 
     lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
@@ -300,14 +257,16 @@ static enum tfm_plat_err_t get_rom_rotpk(uint32_t **public_key_x,
         *public_key_y = (uint32_t *)tci_rotpk_y;
         *public_key_x_size = tci_rotpk_x_len;
         *public_key_y_size = tci_rotpk_y_len;
-        return TFM_PLAT_ERR_SUCCESS;
+        break;
     default:
         *public_key_x = (uint32_t *)pci_rotpk_x;
         *public_key_y = (uint32_t *)pci_rotpk_y;
         *public_key_x_size = pci_rotpk_x_len;
         *public_key_y_size = pci_rotpk_y_len;
-        return TFM_PLAT_ERR_SUCCESS;
     }
+#endif /* TFM_DUMMY_PROVISIONING */
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 enum tfm_plat_err_t provisioning_rotpk_get(const struct rse_provisioning_message_blob_t *blob,

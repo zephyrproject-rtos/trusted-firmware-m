@@ -25,6 +25,7 @@ target_sources(platform_bl1_1
         ./rse_provisioning_comms.c
         ./rse_provisioning_message_handler.c
         ./rse_provisioning_rotpk.c
+        ./rse_provisioning_tci_key.c
 )
 
 target_link_libraries(platform_bl1_1
