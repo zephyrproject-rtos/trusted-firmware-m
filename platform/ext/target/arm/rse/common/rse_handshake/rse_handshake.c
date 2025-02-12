@@ -511,6 +511,10 @@ static enum tfm_plat_err_t rse_handshake_server(uint32_t *vhuk_seeds_buf)
 
 enum tfm_plat_err_t rse_handshake(uint32_t *vhuk_seeds_buf)
 {
+#ifndef RSE_OTP_HAS_ROUTING_TABLES
+    /* The handshake can't be supported without routing tables in OTP */
+    return TFM_PLAT_ERR_UNSUPPORTED;
+#else
     uint32_t rse_id;
     enum tfm_plat_err_t plat_err;
 
@@ -537,9 +541,9 @@ enum tfm_plat_err_t rse_handshake(uint32_t *vhuk_seeds_buf)
         dpa_hardened_word_copy(vhuk_seeds_buf + VHUK_SEED_WORD_SIZE * rse_id,
                                vhuk_seeds_buf, VHUK_SEED_WORD_SIZE);
 #endif /* RSE_SERVER_ID != 0 */
-
         return rse_handshake_server(vhuk_seeds_buf);
     } else {
         return rse_handshake_client(rse_id, vhuk_seeds_buf);
     }
+#endif /* RSE_OTP_HAS_ROUTING_TABLES */
 }
