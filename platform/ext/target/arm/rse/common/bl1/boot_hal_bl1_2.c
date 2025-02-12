@@ -39,6 +39,8 @@
 #include "rse_sam_config.h"
 #if RSE_AMOUNT > 1
 #include "rse_handshake.h"
+#include "rse_otp_dev.h"
+#include "rse_otp_layout.h"
 #endif
 #include "bl1_2_debug.h"
 

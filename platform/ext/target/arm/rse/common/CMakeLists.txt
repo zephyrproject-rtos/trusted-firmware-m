@@ -564,6 +564,10 @@ target_sources(platform_bl1_2
         ./sam_interrupts.c
 )
 
+if (RSE_AMOUNT GREATER 1)
+    target_sources(platform_bl1_2 PRIVATE ./otp_lcm.c)
+endif()
+
 target_include_directories(platform_bl1_2
     PRIVATE
         .
