@@ -17,7 +17,7 @@ set(TFM_PARTITION_PLATFORM                 ON          CACHE BOOL      "Enable p
 set(MCUBOOT_BOOTSTRAP                      ON          CACHE BOOL      "Allow initial state with images in secondary slots(empty primary slots)")
 set(MCUBOOT_ENC_IMAGES                     ON          CACHE BOOL      "Enable encrypted image upgrade support")
 set(MCUBOOT_ENCRYPT_RSA                    ON          CACHE BOOL      "Use RSA for encrypted image upgrade support")
-
+set(MCUBOOT_DATA_SHARING                   ON          CACHE BOOL      "Enable Data Sharing")
 ################################## Dependencies ################################################################################################
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON          CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_CRYPTO                   ON          CACHE BOOL      "Enable Crypto partition")
@@ -42,8 +42,4 @@ set(TFM_CONFIG_FWU_MAX_WRITE_SIZE          1024        CACHE STRING    "The maxi
 set(TFM_CONFIG_FWU_MAX_MANIFEST_SIZE       0           CACHE STRING    "The maximum permitted size for manifest in psa_fwu_start(), in bytes.")
 set(FWU_DEVICE_CONFIG_FILE                 ""          CACHE STRING    "The device configuration file for Firmware Update partition")
 set(DMCUBOOT_UPGRADE_STRATEGY              SWAP_USING_MOVE)
-set(MCUBOOT_DATA_SHARING                  ON           CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
-set(MCUBOOT_PATH      "C:/Users/eljouaia/TFM/mcuboot"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(TEST_S_FWU                            ON)
-set(TEST_NS_FWU                           ON)
 set(DEFAULT_MCUBOOT_FLASH_MAP             ON           CACHE BOOL     "Whether to use the default flash map defined by TF-M project")

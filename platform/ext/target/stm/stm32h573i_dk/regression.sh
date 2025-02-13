@@ -19,7 +19,7 @@ fi
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
 # remove write protection
-connect="-c port=SWD ap=1 "$sn_option" mode=UR --hardRst"
+connect="-c port=SWD ap=1 "$sn_option" mode=UR"
 connect_no_reset="-c port=SWD ap=1 "$sn_option" mode=HotPlug"
 echo "Regression platforme H5"
 product_state="-ob PRODUCT_STATE=0xED  TZEN=0xB4"
