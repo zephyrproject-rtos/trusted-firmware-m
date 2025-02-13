@@ -100,6 +100,7 @@ static enum tfm_plat_err_t rotpk_get(const struct rse_provisioning_message_blob_
 
 void tfm_plat_provisioning_check_for_dummy_keys(void)
 {
+    /* FixMe: Check for dummy key must be implemented */
 }
 
 int tfm_plat_provisioning_is_required(void)
