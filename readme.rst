@@ -1,6 +1,11 @@
 ##################
 Trusted Firmware-M
 ##################
+
+.. image:: https://scan.coverity.com/projects/22164/badge.svg
+   :alt: Coverity Scan Build Status
+   :target: https://scan.coverity.com/projects/trusted-firmware-m-35b064f0-65c2-4afb-9ba9-24aa432fb7fa
+
 The Trusted Firmware-M software implementation contained in this project is
 designed to be a reference implementation of the
 `Platform Security Architecture`_ (PSA) for `ARMv7-M and Armv8-M`_.
@@ -51,4 +56,4 @@ Feedback can be submitted via email to
 .. _git.trustedfirmware.org: https://git.trustedfirmware.org/
 .. _GitHub: https://github.com/TrustedFirmware-M
 
-*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2025, Arm Limited. All rights reserved.*
