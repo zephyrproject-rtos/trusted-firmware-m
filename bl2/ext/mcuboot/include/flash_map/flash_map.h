@@ -160,6 +160,11 @@ int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len);
 uint32_t flash_area_align(const struct flash_area *area);
 
 /*
+ * Return sector parameters at specified offset of flash area,
+ */
+int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
+                          struct flash_sector *sector);
+/*
  * Given flash area ID, return info about sectors within the area.
  */
 int flash_area_get_sectors(int fa_id, uint32_t *count,

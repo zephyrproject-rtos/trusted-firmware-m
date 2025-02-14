@@ -377,6 +377,26 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     return 0;
 }
 
+int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
+                          struct flash_sector *sector)
+{
+    if (fa == NULL || sector == NULL) {
+        return -1;
+    }
+
+    if (off >= fa->fa_size) {
+        return -1;
+    }
+
+    sector->fs_off = off & ~(FLASH_AREA_IMAGE_SECTOR_SIZE - 1);
+    sector->fs_size = FLASH_AREA_IMAGE_SECTOR_SIZE;
+
+    BOOT_LOG_DBG("area %d: offset=0x%x to sector=0x%x, size=0x%x, length=0x%x",
+                 fa->fa_id, off, sector->fs_off, sector->fs_size);
+
+    return 0;
+}
+
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)
 {
     ARM_FLASH_INFO *flash_info;
