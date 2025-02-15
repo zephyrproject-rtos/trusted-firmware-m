@@ -211,7 +211,6 @@ static int tc_scp_release_reset(void)
 {
     struct rse_sysctrl_t *sysctrl;
 
-#ifdef TC_RELEASE_RESET_USE_SCP_CPUWAIT
     int err;
 
     err = atu_initialize_region(&ATU_DEV_S,
@@ -234,10 +233,6 @@ static int tc_scp_release_reset(void)
     if (err != ATU_ERR_NONE) {
         return err;
     }
-#else
-    sysctrl = (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
-    sysctrl->gretreg &= ~(1U << 0);
-#endif /* TC_RELEASE_RESET_USE_SCP_CPUWAIT */
 
     return 0;
 }
