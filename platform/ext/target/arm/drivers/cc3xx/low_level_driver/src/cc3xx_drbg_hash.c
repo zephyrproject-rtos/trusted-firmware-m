@@ -163,6 +163,7 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
 {
     cc3xx_err_t err;
     size_t idx;
+    size_t remaining_bytes;
     size_t gen_num_m = CEIL(out_len_bits, SHA256_OUTPUT_SIZE * 8); /* Number of hash generations */
     uint32_t data[(CC3XX_DRBG_HASH_SEEDLEN + 1) / sizeof(uint32_t)];
     uint32_t partial_last_block[SHA256_OUTPUT_SIZE / sizeof(uint32_t)];
@@ -193,7 +194,9 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
             /* We need to discriminate the case where the last generation is for a whole
              * block or a partial block
              */
-            if (out_len_bits % (SHA256_OUTPUT_SIZE * 8)) {
+            remaining_bytes = (out_len_bits / 8) % SHA256_OUTPUT_SIZE;
+
+            if (remaining_bytes > 0) {
                 p_output_buf = partial_last_block;
             } else {
                 p_output_buf = (uint32_t *)returned_bits;
@@ -209,8 +212,8 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
 
     returned_bits -= SHA256_OUTPUT_SIZE;
 
-    if (out_len_bits % (SHA256_OUTPUT_SIZE * 8)) {
-        memcpy(returned_bits, partial_last_block, out_len_bits % (SHA256_OUTPUT_SIZE * 8));
+    if (remaining_bytes > 0) {
+        memcpy(returned_bits, partial_last_block, remaining_bytes);
     }
 
     return CC3XX_ERR_SUCCESS;
