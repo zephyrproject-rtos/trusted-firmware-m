@@ -94,7 +94,7 @@ int main(void)
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        boot_platform_error_state(fih_rc);
+        boot_platform_error_state(fih_int_decode(fih_rc));
     }
 
     INFO("Starting TF-M BL1_1\n");
@@ -107,7 +107,7 @@ int main(void)
         fih_rc = fih_int_encode_zero_equality(tfm_plat_provisioning_perform());
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             ERROR("BL1 provisioning failed\n");
-            boot_platform_error_state(fih_rc);
+            boot_platform_error_state(fih_int_decode(fih_rc));
         }
     }
 
@@ -115,19 +115,19 @@ int main(void)
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_init());
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        boot_platform_error_state(fih_rc);
+        boot_platform_error_state(fih_int_decode(fih_rc));
     }
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        boot_platform_error_state(fih_rc);
+        boot_platform_error_state(fih_int_decode(fih_rc));
     }
 
     do {
         /* Copy BL1_2 from OTP into SRAM*/
         FIH_CALL(bl1_read_bl1_2_image, fih_rc, (uint8_t *)BL1_2_CODE_START);
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            boot_platform_error_state(fih_rc);
+            boot_platform_error_state(fih_int_decode(fih_rc));
         }
 
         FIH_CALL(bl1_1_validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
@@ -137,14 +137,14 @@ int main(void)
 
             recovery_succeeded = fih_int_encode_zero_equality(boot_initiate_recovery_mode(0));
             if (fih_not_eq(recovery_succeeded, FIH_SUCCESS)) {
-                boot_platform_error_state(recovery_succeeded);
+                boot_platform_error_state(fih_int_decode(recovery_succeeded));
             }
         }
     } while (fih_not_eq(fih_rc, FIH_SUCCESS));
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        boot_platform_error_state(fih_rc);
+        boot_platform_error_state(fih_int_decode(fih_rc));
     }
 
 #ifdef TFM_MEASURED_BOOT_API
