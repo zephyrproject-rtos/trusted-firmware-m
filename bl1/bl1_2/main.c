@@ -338,7 +338,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
     struct bl1_2_image_t *image_to_decrypt;
     uint8_t key_buf[32];
     uint8_t label[] = "BL2_DECRYPTION_KEY";
-#ifndef TFM_BL1_2_MEMORY_MAPPED_FLASH
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     fih_int fih_rc = FIH_FAILURE;
 #endif
 
