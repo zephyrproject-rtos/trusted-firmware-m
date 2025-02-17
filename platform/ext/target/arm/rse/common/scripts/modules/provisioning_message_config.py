@@ -160,8 +160,8 @@ class Provisioning_message_config:
             pickle.dump(self, f)
 
 def get_blob_details(provisioning_message_config : Provisioning_message_config,
-                     encrypt_code_and_data : bool,
-                     encrypt_secret_values : bool,
+                     encrypt_code_and_data : C_enum,
+                     encrypt_secret_values : C_enum,
                      sign_key_cm_rotpk : int,
                      encrypt_alg : str = None,
                      sign_alg : str = None,
@@ -172,17 +172,11 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
                      ) -> int:
     details_val = 0
 
-    if encrypt_code_and_data:
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES.get_value()
-    else:
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_NONE.get_value()
+    val = encrypt_code_and_data.get_value()
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CODE_DATA_DECRYPTION_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CODE_DATA_DECRYPTION_OFFSET, 0)
 
-    if encrypt_secret_values:
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES.get_value()
-    else:
-        val = provisioning_message_config.RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_BY_BLOB.get_value()
+    val = encrypt_secret_values.get_value()
     details_val |= (val & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_MASK, 0)) \
                    << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_OFFSET, 0)
 
@@ -267,8 +261,8 @@ def get_blob_pubkey(sign_alg : str = None,
 
 def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_message_config,
                                  code : bytes,
-                                 encrypt_code_and_data : bool,
-                                 encrypt_secret_values : bool,
+                                 encrypt_code_and_data : C_enum,
+                                 encrypt_secret_values : C_enum,
                                  version : int,
                                  sign_key_cm_rotpk : int,
                                  sign_and_encrypt_kwargs : dict,
@@ -280,7 +274,9 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
     message = provisioning_message_config.message
     message.header.type.set_value(provisioning_message_config.RSE_PROVISIONING_MESSAGE_TYPE_BLOB.get_value())
 
-    assert not (encrypt_code_and_data and not encrypt_secret_values)
+    # Cannot enable code and data encryption without secret values encryption
+    assert not ((encrypt_code_and_data.name ==  "RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES") \
+                and (encrypt_secret_values.name != "RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES"))
 
     if len(code) % 16 != 0:
         code += bytes(16 - (len(code) % 16))
@@ -329,12 +325,12 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
     plaintext = bytes(0)
     aad = get_header(provisioning_message_config)
 
-    if encrypt_code_and_data:
+    if encrypt_code_and_data.name == "RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES":
         plaintext += code_and_data
     else:
         aad += code_and_data
 
-    if encrypt_secret_values:
+    if encrypt_secret_values.name == "RSE_PROVISIONING_BLOB_SECRET_VALUES_DECRYPTION_AES":
         plaintext += secret_values
     else:
         aad += secret_values
