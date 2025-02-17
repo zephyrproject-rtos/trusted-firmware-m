@@ -31,6 +31,8 @@ extern "C" {
 typedef enum {
     CC3XX_AES_DIRECTION_ENCRYPT = 0b0U,
     CC3XX_AES_DIRECTION_DECRYPT = 0b1U,
+
+    _CC3XX_AES_DIRECTION_PAD    = UINT32_MAX
 } cc3xx_aes_direction_t;
 
 typedef enum {
@@ -40,12 +42,16 @@ typedef enum {
     CC3XX_AES_MODE_GCM      = 0b1010U,
     CC3XX_AES_MODE_CMAC     = 0b0111U,
     CC3XX_AES_MODE_CCM      = 0b1011U,
+
+    _CC3XX_AES_MODE_PAD     = UINT32_MAX
 } cc3xx_aes_mode_t;
 
 typedef enum {
-    CC3XX_AES_KEYSIZE_128 = 0b00U,
-    CC3XX_AES_KEYSIZE_192 = 0b01U,
-    CC3XX_AES_KEYSIZE_256 = 0b10U,
+    CC3XX_AES_KEYSIZE_128  = 0b00U,
+    CC3XX_AES_KEYSIZE_192  = 0b01U,
+    CC3XX_AES_KEYSIZE_256  = 0b10U,
+
+    _CC3XX_AES_KEYSIZE_PAD = UINT32_MAX
 } cc3xx_aes_keysize_t;
 
 typedef enum {
@@ -57,6 +63,8 @@ typedef enum {
     CC3XX_AES_KEY_ID_KCEICV   = 0x5U,  /*!< CM code encryption key */
     CC3XX_AES_KEY_ID_GUK      = 0xFU,  /*!< Group unique key. See CCA spec for information */
     CC3XX_AES_KEY_ID_USER_KEY = 0xFFU, /*!< Key input into registers manually */
+
+    _CC3XX_AES_KEY_ID_PAD     = UINT32_MAX
 } cc3xx_aes_key_id_t;
 
 /* Note that parts of the AES state that can be reconstructed without the data
