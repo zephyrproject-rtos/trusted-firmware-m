@@ -406,6 +406,8 @@ class C_variable:
         return [self.name]
 
     def get_field(self, field_path):
+        if field_path != self.name:
+            raise KeyError
         return self
 
     def to_bytes(self):
