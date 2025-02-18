@@ -28,9 +28,6 @@ endif()
 
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE PATH "Path to platform directory")
 
-# Skip "up-to-date" prints to avoid flooding the build output. Just print "installing"
-set(CMAKE_INSTALL_MESSAGE LAZY)
-
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
 #====================== CMSIS stack override interface ========================#
