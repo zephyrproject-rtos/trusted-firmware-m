@@ -37,12 +37,12 @@ cc3xx_err_t cc3xx_lowlevel_hmac_compute(
 
     assert(tag_size >= tag_len);
 
-    err = cc3xx_lowlevel_hash_init(alg);
-    if (err != CC3XX_ERR_SUCCESS) {
-        return err;
-    }
-
     if (key_size > CC3XX_HMAC_BLOCK_SIZE) {
+        err = cc3xx_lowlevel_hash_init(alg);
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
+
         /* hash the key to L bytes */
         err = cc3xx_lowlevel_hash_update(key, key_size);
         if (err != CC3XX_ERR_SUCCESS) {
@@ -50,9 +50,9 @@ cc3xx_err_t cc3xx_lowlevel_hmac_compute(
         }
         p_key = (const uint8_t *)hash_key_output;
         key_length = CC3XX_HASH_LENGTH(alg);
-    }
 
-    cc3xx_lowlevel_hash_finish(hash_key_output, sizeof(hash_key_output));
+        cc3xx_lowlevel_hash_finish(hash_key_output, sizeof(hash_key_output));
+    }
 
     /* K ^ ipad */
     for (idx = 0; idx < key_length; idx++) {
