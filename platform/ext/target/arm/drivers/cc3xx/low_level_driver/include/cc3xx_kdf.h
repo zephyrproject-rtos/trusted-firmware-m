@@ -16,8 +16,6 @@
 extern "C" {
 #endif
 
-/*
- */
 /**
  * @brief                        This is a counter-mode KDF complying with NIST
  *                               SP800-108 where the PRF is a the AES cipher
@@ -39,7 +37,7 @@ extern "C" {
  *                               operation.
  * @param[in]  context_length    The length of the context.
  * @param[out] output_key        The buffer to output the key into.
- * @param[in] out_length         The size of the key to derive.
+ * @param[in]  out_length        The size in bytes of the key to derive.
  *
  * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
