@@ -27,6 +27,10 @@ extern "C" {
 #define BL2_ENCRYPTION_KEY_SIZE (32)
 #endif /* BL2_ENCRYPTION_KEY_SIZE */
 
+/**
+ * @brief Key IDs associated to usable keys by BL1
+ *
+ */
 enum tfm_bl1_key_id_t {
     TFM_BL1_KEY_HUK,
     TFM_BL1_KEY_GUK,

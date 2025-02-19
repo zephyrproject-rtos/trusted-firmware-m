@@ -423,9 +423,45 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
         return fih_int_decode(fih_rc);
     }
 
+    /* All the relevant secret keys for input are 256-bit */
     cc_err = cc3xx_lowlevel_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
                                      CC3XX_AES_KEYSIZE_256, label, label_length, context,
                                      context_length, (uint32_t *)output_key, output_length);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return cc_err;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+int32_t bl1_ecc_derive_key(
+    enum tfm_bl1_ecdsa_curve_t curve, enum tfm_bl1_key_id_t key_id,
+    const uint8_t *label, size_t label_length,
+    const uint8_t *context, size_t context_length,
+    uint32_t *output_key, size_t output_size)
+{
+    const cc3xx_ec_curve_id_t cc_curve = bl1_curve_to_cc3xx_curve(curve);
+    enum kmu_hardware_keyslot_t kmu_key_slot;
+    uint32_t key_buf[32 / sizeof(uint32_t)];
+    uint8_t *input_key = (uint8_t *)key_buf;
+    fih_int fih_rc;
+    cc3xx_err_t cc_err;
+
+    if (CC3XX_IS_CURVE_ID_INVALID(cc_curve)) {
+        return CC3XX_ERR_EC_CURVE_NOT_SUPPORTED;
+    }
+
+    fih_rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key, sizeof(key_buf));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return fih_int_decode(fih_rc);
+    }
+
+    /* All the relevant secret keys for input are 256-bit */
+    cc_err = cc3xx_lowlevel_ecdsa_derivkey(
+                 cc_curve, kmu_key_slot, (uint32_t *)input_key,
+                 CC3XX_AES_KEYSIZE_256, label, label_length, context,
+                 context_length, output_key, output_size, NULL);
+
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }

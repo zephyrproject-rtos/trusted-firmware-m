@@ -118,3 +118,44 @@ def derive_symmetric_key(input_key: bytes,
         input_key, context, label_bytes, length, **kdf_args)
 
     return output_key
+
+
+# Curve Parameters
+CURVES = {
+    "P-256": {  # secp256r1
+        "order": int("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551", 16),
+        "key_size": 256,  # Bits
+        "recommended_bits_for_generation": 352
+    },
+    "P-384": {  # secp384r1
+        "order": int("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973", 16),
+        "key_size": 384,  # Bits
+        "recommended_bits_for_generation": 384
+    }
+}
+
+
+def derive_ecc_key(input_key: bytes,
+                   context: bytes,
+                   label: str,
+                   curve: str = "P-256",
+                   **kdf_args: dict
+                   ):
+    """
+    Derives an ECC key following recommendation of FIPS 186-5 A.2.1
+
+    Args:
+        input_key (bytes): Input secret key material for derivation
+        context (bytes): Context bytes
+        label (str): Label string
+        curve (str, optional): _description_. Defaults to "P-256".
+    """
+
+    l_bytes = (CURVES[curve]["recommended_bits_for_generation"] + 7) // 8
+    align16 = lambda num: (num + 15) & ~15
+
+    # Derive a key using SP 800-108 with AES-CMAC as PRF in Counter mode
+    derived_key = derive_symmetric_key(input_key, context, label, align16(l_bytes))
+
+    # Perform modular reduction using the desired curve order
+    return int.from_bytes(derived_key, byteorder="big") % CURVES[curve]["order"]

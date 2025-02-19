@@ -136,10 +136,12 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 uint8_t *plaintext);
 /**
  * @brief Derives a key using a cryptographic method which depends on the underlying
- *        platform capabilities. For example, it can be KDF in counter mode as per
- *        NIST SP800-108 with AES-CMAC used as PRF
+ *        platform capabilities
  *
- * @param[in]  input_key      Input secret key from which to derive material
+ * @note  An example is the usage of AES-CMAC as PRF in a KDF in Counter mode as per
+ *        NIST SP800-108r1-upd1
+ *
+ * @param[in]  key_id         ID of the input key from which to derive material
  * @param[in]  label          Label to associated to the derivation. NULL terminated string
  * @param[in]  label_length   Size in bytes of the string comprising of the terminator
  * @param[in]  context        Context bytes to associate to the derivation
@@ -149,10 +151,36 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
  *
  * @return int32_t 0 on success, non-zero on error
  */
-int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
+int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
                        size_t context_length, uint8_t *output_key,
                        size_t output_length);
+/**
+ * @brief Derives an ECC (private) key for the specified curve. The key derivation
+ *        procedure must follow a recommended procedure to generate a uniform number
+ *        over the interval [1, n-1] where n is the order of the specified curve
+ *
+ * @note  An example is the recommendation for ECC private key generation as described in
+ *        FIPS 186-5 A.2.1
+ *
+ * @param[in]  curve          Curve for which we want to derive a private key, of type
+ *                            \ref tfm_bl1_ecdsa_curve_t
+ * @param[in]  key_id         ID of the input key from which to derive material
+ * @param[in]  label          Label to associated to the derivation. NULL terminated string
+ * @param[in]  label_length   Size in bytes of the string comprising of the terminator
+ * @param[in]  context        Context bytes to associate to the derivation
+ * @param[in]  context_length Size in bytes of the \p context parameter
+ * @param[out] output_key     Derived key material, naturally encoded as a Big Endian number
+ * @param[in]  output_size    Size in bytes of the \p output_key parameter. It must enough to
+ *                            accommodate a private key for the desired \p curve, e.g. 32
+ *                            bytes for P-256 or 48 bytes for P-384
+ *
+ * @return int32_t 0 on success, a \ref tfm_plat_err_t error code otherwise
+ */
+int32_t bl1_ecc_derive_key(enum tfm_bl1_ecdsa_curve_t curve, enum tfm_bl1_key_id_t key_id,
+                           const uint8_t *label, size_t label_length,
+                           const uint8_t *context, size_t context_length,
+                           uint32_t *output_key, size_t output_size);
 /**
  * @brief Verifies that the provided signature is a valid signature of the input
  *        hash using ECDSA and the selected curve
