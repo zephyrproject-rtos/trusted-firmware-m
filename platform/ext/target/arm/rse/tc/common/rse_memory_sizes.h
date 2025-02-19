@@ -16,6 +16,8 @@
 
 #define OTP_DMA_ICS_SIZE   0x400 /* 1 KiB*/
 
+#define ROM_DMA_ICS_SIZE   0x1000 /* 4 KiB */
+
 /*
  * The size of the SRAM which is allocated to NS. This may be increased
  * depending on the layout.
