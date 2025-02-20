@@ -502,13 +502,6 @@ those flags. The list of flags are:
   on the value of this flag. Default value: OFF.
 - ``SYMMETRIC_INITIAL_ATTESTATION``: Select symmetric initial attestation.
   Default value: OFF.
-- ``ATTEST_INCLUDE_TEST_CODE``: The initial attestation implementation is
-  instrumented with additional test code. This is required in order to run
-  some of the initial attestation regression tests.
-  These tests are not required to be run by platform integrators, and are
-  only meant to be used for development or modification of the initial
-  attestation implementation.
-  Default value: OFF.
 - ``ATTEST_STACK_SIZE``- Defines the stack size of the Initial Attestation
   Partition. This value mainly depends on the build type(debug, release and
   minisizerel) and compiler.
@@ -653,4 +646,6 @@ that user has license for DS-5 and FVP models:
 
 --------------
 
-*Copyright (c) 2018-2024, Arm Limited. All rights reserved.*
+*SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*
+
+*SPDX-License-Identifier: BSD-3-Clause*

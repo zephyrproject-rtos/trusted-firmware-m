@@ -156,8 +156,6 @@ Initial Attestation
 +-------------------------------------+-----------+-------------+
 |SYMMETRIC_INITIAL_ATTESTATION        | Build     |   OFF       |
 +-------------------------------------+-----------+-------------+
-|ATTEST_INCLUDE_TEST_CODE             | Build     |   OFF       |
-+-------------------------------------+-----------+-------------+
 |ATTEST_KEY_BITS                      | Build     |   256       |
 +-------------------------------------+-----------+-------------+
 |ATTEST_TOKEN_PROFILE                 | Component | "PSA_IOT_1" |
@@ -298,6 +296,9 @@ Secure Partition Manager
 
 --------------
 
-*Copyright (c) 2022,2024, Arm Limited. All rights reserved.*
+*SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors*
+
 *Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
+
+*SPDX-License-Identifier: BSD-3-Clause*

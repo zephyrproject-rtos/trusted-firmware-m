@@ -2,7 +2,8 @@
  * attest_token_encode.c
  *
  * Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
- * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -95,7 +96,6 @@ static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
  */
 enum attest_token_err_t
 attest_token_encode_start(struct attest_token_encode_ctx *me,
-                          uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
@@ -108,7 +108,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     struct q_useful_buf_c attest_key_id;
 
     /* Remember some of the configuration values */
-    me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
     t_cose_mac_compute_init(&(me->mac_ctx), 0, cose_alg_id);
@@ -227,7 +226,6 @@ Done:
  */
 enum attest_token_err_t
 attest_token_encode_start(struct attest_token_encode_ctx *me,
-                          uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
@@ -239,7 +237,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
     /* Remember some of the configuration values */
-    me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
     attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);

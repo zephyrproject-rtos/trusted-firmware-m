@@ -1,6 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
-#
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
@@ -17,14 +16,6 @@ config SYMMETRIC_INITIAL_ATTESTATION
     default n
     help
       Use symmetric crypto for initial attestation
-
-config ATTEST_INCLUDE_TEST_CODE
-    bool "Include test code"
-    depends on TEST_NS_ATTESTATION || TEST_S_ATTESTATION
-    default n
-    help
-      Include minimal development tests in the initial attestation regression
-      test suite
 
 config ATTEST_KEY_BITS
     int "Key bit width"

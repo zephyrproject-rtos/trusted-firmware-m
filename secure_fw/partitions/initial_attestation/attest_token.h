@@ -2,7 +2,8 @@
  * attest_token.h
  *
  * Copyright (c) 2018-2019, Laurence Lundblade.
- * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
+ *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,7 +34,7 @@ extern "C" {
  * token. The steps are roughly:
  *
  *   -# Create and initialize an attest_token_encode_ctx indicating the
- *   options, key and such using attest_token_encode_start().
+ *   key, algorithm and such using attest_token_encode_start().
  *
  *   -# Use various add methods to fill in the payload with claims. The
  *   encoding context can also be borrowed for more rich payloads.
@@ -95,14 +96,6 @@ enum attest_token_err_t {
 };
 
 /**
- * Request that the claims internally generated not be added to the
- * token.  This is a test mode that results in a static token that
- * never changes. Only the nonce is included. The nonce is under
- * the callers control unlike the other claims.
- */
-#define TOKEN_OPT_OMIT_CLAIMS        0x40000000
-
-/**
  * The context for creating an attestation token.  The caller of
  * attest_token_encode must create one of these and pass it to the functions
  * here. It is small enough that it can go on the stack. It is most of
@@ -111,12 +104,11 @@ enum attest_token_err_t {
  *
  * The structure is opaque for the caller.
  *
- * This is roughly 148 + 8 + 32 = 188 bytes
+ * This is roughly 148 + 4 + 32 = 184 bytes
  */
 struct attest_token_encode_ctx {
     /* Private data structure */
     QCBOREncodeContext           cbor_enc_ctx;
-    uint32_t                     opt_flags;
     int32_t                      key_select;
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
     struct t_cose_mac_calculate_ctx  mac_ctx;
@@ -129,8 +121,6 @@ struct attest_token_encode_ctx {
  * \brief Initialize a token creation context.
  *
  * \param[in] me          The token creation context to be initialized.
- * \param[in] opt_flags   Flags to select different custom options,
- *                        for example \ref TOKEN_OPT_OMIT_CLAIMS.
  * \param[in] key_select  Selects which attestation key to sign with.
  * \param[in] cose_alg_id The algorithm to sign with. The IDs are
  *                        defined in [COSE (RFC 8152)]
@@ -156,7 +146,6 @@ struct attest_token_encode_ctx {
  */
 enum attest_token_err_t
 attest_token_encode_start(struct attest_token_encode_ctx *me,
-                          uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf);
