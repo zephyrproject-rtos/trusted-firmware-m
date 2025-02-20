@@ -127,6 +127,84 @@ cleanup:
     return;
 }
 
+void pka_test_add_unaligned(struct test_result_t *ret)
+{
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t res;
+    const uint32_t val0[] = {0xefff9cd3, 0x7f85739e, 0xf1ff20a0, 0x639ab327,
+                             0xcd187f};
+    const uint32_t val1[] = {0x40b6abae, 0x8466b5f5, 0xc929521c, 0xab512b42,
+                             0x16e09b};
+    const uint32_t expected[] = {0x30b64881, 0x03ec2994, 0xbb2872bd,
+                                 0x0eebde6a, 0x00e3f91b};
+    uint32_t readback[sizeof(expected) / 4] = {0};
+
+    const size_t aligned_bytes = sizeof(val0) - sizeof(uint32_t);
+    const size_t n_unaligned_bytes = 3; /* Tweakable from 1 to 3 */
+    const size_t operand_size = aligned_bytes + n_unaligned_bytes;
+
+    cc3xx_lowlevel_pka_init(sizeof(val0) * 8);
+
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
+    r1 = cc3xx_lowlevel_pka_allocate_reg();
+    res = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg(r0, (const uint32_t *) val0, operand_size);
+    cc3xx_lowlevel_pka_write_reg(r1, (const uint32_t *) val1, operand_size);
+
+    cc3xx_lowlevel_pka_add(r0, r1, res);
+
+    cc3xx_lowlevel_pka_read_reg(res, readback, sizeof(readback));
+
+    TEST_ASSERT(memcmp(&expected, &readback, sizeof(expected)) == 0,
+            "readback not equal to expected val");
+
+    ret->val = TEST_PASSED;
+cleanup:
+    cc3xx_lowlevel_pka_uninit();
+}
+
+void pka_test_add_unaligned_be(struct test_result_t *ret)
+{
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t res;
+    const uint32_t val0[] = {0xefff9cd3, 0x7f85739e, 0xf1ff20a0, 0x639ab327,
+                             0xcd187f};
+    const uint32_t val1[] = {0x40b6abae, 0x8466b5f5, 0xc929521c, 0xab512b42,
+                             0x16e09b};
+    const uint32_t expected[] = {0xb6488201, 0xec289430, 0x2973bc03,
+                                 0xecde69ba, 0xe3f81a0f};
+    uint32_t readback[sizeof(expected) / 4] = {0};
+
+    const size_t aligned_bytes = sizeof(val0) - sizeof(uint32_t);
+    const size_t n_unaligned_bytes = 3; /* Tweakable from 1 to 3 */
+    const size_t operand_size = aligned_bytes + n_unaligned_bytes;
+
+    cc3xx_lowlevel_pka_init(sizeof(val0) * 8);
+
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
+    r1 = cc3xx_lowlevel_pka_allocate_reg();
+    res = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg_swap_endian(r0, (const uint32_t *) val0,
+                                operand_size);
+    cc3xx_lowlevel_pka_write_reg_swap_endian(r1, (const uint32_t *) val1,
+                                operand_size);
+
+    cc3xx_lowlevel_pka_add(r0, r1, res);
+
+    cc3xx_lowlevel_pka_read_reg_swap_endian(res, readback, sizeof(readback));
+
+    TEST_ASSERT(memcmp(&expected, &readback, sizeof(expected)) == 0,
+            "readback not equal to expected val");
+
+    ret->val = TEST_PASSED;
+cleanup:
+    cc3xx_lowlevel_pka_uninit();
+}
+
 void pka_test_sub(struct test_result_t *ret)
 {
     uint32_t r0;
@@ -1105,6 +1183,16 @@ static struct test_t pka_tests[] = {
         &pka_test_add,
         "CC3XX_PKA_TEST_ADD",
         "CC3XX PKA addition test",
+    },
+    {
+        &pka_test_add_unaligned,
+        "CC3XX_PKA_TEST_ADD_UNALIGNED",
+        "CC3XX PKA addition test unaligned",
+    },
+    {
+        &pka_test_add_unaligned_be,
+        "CC3XX_PKA_TEST_ADD_UNALIGNED_BE",
+        "CC3XX PKA addition test unaligned Big Endian",
     },
     {
         &pka_test_sub,
