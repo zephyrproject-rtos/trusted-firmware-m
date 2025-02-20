@@ -316,14 +316,13 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
                           size_t len, bool swap_endian)
 {
     size_t idx;
+    size_t unaligned_bytes = len & (sizeof(uint32_t) - 1);
 
 #ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     /* Check alignment */
     assert(((uintptr_t)data & (sizeof(uint32_t) - 1)) == 0);
-#endif
-
-    /* Check length */
     assert((len & (sizeof(uint32_t) - 1)) == 0);
+#endif
 
     /* Check slot */
     assert(reg_id < pka_reg_am_max);
@@ -345,12 +344,48 @@ static void pka_write_reg(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
         P_CC3XX->pka.memory_map[virt_reg_phys_reg[reg_id]];
     while(!P_CC3XX->pka.pka_done) {}
 
+#ifndef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
+    if (swap_endian && (unaligned_bytes > 0)) {
+        uint32_t word;
+
+        /* len = 4 is covered outside this scope */
+        while(len > sizeof(uint32_t)) {
+            uint8_t *data_b = (uint8_t *) data + len - sizeof(uint32_t);
+
+            word = data_b[0] << 24 | data_b[1] << 16 | data_b[2] << 8 | data_b[3];
+            P_CC3XX->pka.pka_sram_wdata = word;
+            while(!P_CC3XX->pka.pka_done) {}
+            len -= sizeof(uint32_t);
+        }
+
+        /* Last unaligned word */
+        word = bswap_32(data[0]);
+        word >>= (8 * (sizeof(uint32_t) - unaligned_bytes));
+
+        P_CC3XX->pka.pka_sram_wdata = word;
+        while(!P_CC3XX->pka.pka_done) {}
+
+        return;
+    }
+#endif
+
     /* Write data */
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         P_CC3XX->pka.pka_sram_wdata = swap_endian ? bswap_32(data[(len / sizeof(uint32_t) - 1) - idx])
                                                   : data[idx];
         while(!P_CC3XX->pka.pka_done) {}
     }
+
+#ifndef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
+    /* Unaligned and little endian */
+    if (unaligned_bytes > 0) {
+        uint32_t word = 0;
+        memcpy(&word, data + len / sizeof(uint32_t), unaligned_bytes);
+
+        P_CC3XX->pka.pka_sram_wdata = word;
+        while(!P_CC3XX->pka.pka_done) {}
+    }
+#endif
 }
 
 void cc3xx_lowlevel_pka_write_reg_swap_endian(cc3xx_pka_reg_id_t reg_id, const uint32_t *data,
