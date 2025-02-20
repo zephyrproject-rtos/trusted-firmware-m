@@ -665,6 +665,7 @@ if (RSE_XIP)
 
     add_custom_command(OUTPUT bin/tfm_s_sic_tables.bin
         DEPENDS tfm_s_bin
+        DEPENDS ${CMAKE_BINARY_DIR}/bin/bl1_2_padded_hash.bin
         COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_SOURCE_DIR}/tools/modules
         ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl2/create_xip_tables.py
             --input_image $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
