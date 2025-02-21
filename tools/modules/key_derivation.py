@@ -6,7 +6,6 @@
 #
 # -----------------------------------------------------------------------------
 
-from struct_pack import struct_pack
 from arg_utils import *
 from cryptography.hazmat.primitives import cmac
 from cryptography.hazmat.primitives.ciphers import algorithms
@@ -14,6 +13,7 @@ from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
+import struct
 import argparse
 import logging
 logger = logging.getLogger("TF-M")
@@ -21,7 +21,7 @@ logger = logging.getLogger("TF-M")
 
 def symmetric_kdf_sp800_108_cmac(input_key: bytes,
                                  context: bytes,
-                                 label: str,
+                                 label: bytes,
                                  length: int,
                                  **kwargs: dict,
                                  ):
@@ -33,7 +33,7 @@ def symmetric_kdf_sp800_108_cmac(input_key: bytes,
     Args:
         input_key (bytes): Ki from which to derive a Ko
         context (bytes): Context bytes
-        label (str): A string used as a label for the derivation
+        label (bytes): label bytes
         length (int): Size in bytes of the Ko to be derived
     """
     def prf_cmac(x: bytes, key: bytes):
@@ -41,52 +41,35 @@ def symmetric_kdf_sp800_108_cmac(input_key: bytes,
         c.update(x)
         return c.finalize()
 
-    L_bits = 8 * length
-
     # K(0) = PRF(K_in, Label || 0x00 || Context || [L]2)
-    state = struct_pack([label.encode('ascii') +
-                         bytes(1) if label else bytes(0),
-                         bytes(1),
-                         context if context else bytes(0),
-                         L_bits.to_bytes(4, byteorder='big')])
-
-    k0 = prf_cmac(state, input_key)
+    state = label + bytes(1) + context + struct.pack(">I", 8 * length)
+    K0 = prf_cmac(state, input_key)
 
     output_key = bytes(0)
-    # The KDF outputs 16 bytes per iteration, so we need 2 for an AES-256 key
     # K(i) = PRF(K_in, [i]2 || Label || 0x00 || Context || [L]2 || K(0))
     for i in range((length // 16) + 1):
-        state = struct_pack([(i + 1).to_bytes(4, byteorder='big'),
-                             # C keeps the null byte, python removes it,
-                             # so we add it back manually.
-                             label.encode('ascii') +
-                             bytes(1) if label else bytes(0),
-                             bytes(1),
-                             context if context else bytes(0),
-                             L_bits.to_bytes(4, byteorder='big'),
-                             k0])
+        state = struct.pack(">I", i + 1) + label + bytes(1) + \
+            context + struct.pack(">I", 8 * length) + K0
         output_key += prf_cmac(state, input_key)
+
     return output_key[:length]
 
 
 def symmetric_kdf_hkdf(input_key: bytes,
                        context: bytes,
-                       label: str,
+                       label: bytes,
                        length: int,
                        hkdf_hash_alg: str = "SHA256",
                        **kwargs: dict,
                        ):
-    state = struct_pack([
-                        # C keeps the null byte, python removes it,
-                        # so we add it back manually.
-                        label.encode("ascii") + bytes(1),
-                        context
-                        ])
+    state = label + context
+
     hkdf = HKDF(
         algorithm=hkdf_hashes[hkdf_hash_alg](),
         length=length,
         salt=None,
         info=state)
+
     return hkdf.derive(input_key)
 
 
@@ -128,6 +111,10 @@ def derive_symmetric_key(input_key: bytes,
                          kdf_alg: str = "sp800-108_cmac",
                          **kdf_args: dict
                          ):
+    # C keeps the null byte, python removes it, so we add it back manually.
+    label_bytes = label.encode('ascii') + bytes(1) if label else bytes(0)
+
     output_key = kdf_funcs[kdf_alg](
-        input_key, context, label, length, **kdf_args)
+        input_key, context, label_bytes, length, **kdf_args)
+
     return output_key
