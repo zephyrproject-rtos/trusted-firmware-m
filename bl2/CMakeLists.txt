@@ -7,6 +7,8 @@
 
 cmake_minimum_required(VERSION 3.21)
 
+find_package(Python3)
+
 project("Bootloader" VERSION 0.1.0 LANGUAGES C ASM)
 
 ############################### BL2_CRYPTO_CONFIG ##############################
