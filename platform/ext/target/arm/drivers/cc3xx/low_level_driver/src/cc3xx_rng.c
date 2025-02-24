@@ -241,6 +241,9 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
         if (err != CC3XX_ERR_SUCCESS) {
             goto cleanup;
         }
+
+        /* Clear the seed from the stack */
+        memset(entropy, 0, sizeof(entropy));
     }
 
     /* The DRBG requires the number of bits to generate, aligned to byte-sizes */
