@@ -89,6 +89,8 @@ set(PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   0x800      CACHE STRING    "The maximum 
 set(RSE_SUPPORT_ROM_LIB_RELOCATION      OFF        CACHE BOOL "Whether shared ROM code supports being copied to SRAM and then executed")
 set(RSE_USE_ROM_LIB_FROM_SRAM           OFF        CACHE BOOL "Whether shared ROM code will be used XIP from ROM or copied to SRAM and then executed")
 
+set(RSE_USE_OTP_EMULATION_IN_SRAM       OFF        CACHE BOOL "Whether to use the OTP emulation in the SRAM instead of the OTP itself")
+
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON         CACHE BOOL     "Whether BL1 can directly access flash content")
 
 set(TFM_BL1_1_MEASUREMENT_HASH_ALG ${MEASURED_BOOT_HASH_ALG} CACHE STRING "Algorithm to use for measurement")
