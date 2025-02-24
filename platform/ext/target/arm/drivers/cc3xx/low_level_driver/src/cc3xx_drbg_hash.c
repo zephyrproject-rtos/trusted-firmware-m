@@ -163,7 +163,7 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
 {
     cc3xx_err_t err;
     size_t idx;
-    size_t remaining_bytes;
+    size_t remaining_bytes = 0;
     size_t gen_num_m = CEIL(out_len_bits, SHA256_OUTPUT_SIZE * 8); /* Number of hash generations */
     uint32_t data[(CC3XX_DRBG_HASH_SEEDLEN + 1) / sizeof(uint32_t)];
     uint32_t partial_last_block[SHA256_OUTPUT_SIZE / sizeof(uint32_t)];
