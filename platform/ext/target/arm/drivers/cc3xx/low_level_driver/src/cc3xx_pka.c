@@ -368,15 +368,13 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
                          bool swap_endian)
 {
     size_t idx;
-
+    size_t unaligned_bytes = len & (sizeof(uint32_t) - 1);
 
 #ifdef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
     /* Check alignment */
     assert(((uintptr_t)data & (sizeof(uint32_t) - 1)) == 0);
-#endif
-
-    /* Check length */
     assert((len & (sizeof(uint32_t) - 1)) == 0);
+#endif
 
     /* Check slot */
     assert(reg_id < pka_reg_am_max);
@@ -395,7 +393,28 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
         P_CC3XX->pka.memory_map[virt_reg_phys_reg[reg_id]];
     while(!P_CC3XX->pka.pka_done) {}
 
-    /* Read data */
+#ifndef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
+    if (swap_endian && (unaligned_bytes > 0)) {
+        uint32_t word;
+
+        /* len = 4 is covered outside this scope */
+        while(len > sizeof(uint32_t)) {
+            uint8_t *data_b = (uint8_t *) data + len - sizeof(uint32_t);
+
+            word = bswap_32(P_CC3XX->pka.pka_sram_rdata);
+            memcpy(data_b, &word, sizeof(uint32_t));
+            len -= sizeof(uint32_t);
+        }
+
+        /* Last unaligned word */
+        word = bswap_32(P_CC3XX->pka.pka_sram_rdata);
+        memcpy(data, ((uint8_t *) &word) + (sizeof(uint32_t) - unaligned_bytes), unaligned_bytes);
+
+        return;
+    }
+#endif
+
+    /* Copy aligned words */
     for (idx = 0; idx < len / sizeof(uint32_t); idx++) {
         if (swap_endian) {
             data[(len / sizeof(uint32_t) -1) - idx] = bswap_32(P_CC3XX->pka.pka_sram_rdata);
@@ -403,6 +422,14 @@ static void pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len,
             data[idx] = P_CC3XX->pka.pka_sram_rdata;
         }
     }
+
+#ifndef CC3XX_CONFIG_STRICT_UINT32_T_ALIGNMENT
+    /* Copy remaining unaligned bytes for little endian */
+    if (unaligned_bytes > 0) {
+        uint32_t word = P_CC3XX->pka.pka_sram_rdata;
+        memcpy(data + len / sizeof(uint32_t), &word, unaligned_bytes);
+    }
+#endif
 }
 
 void cc3xx_lowlevel_pka_read_reg(cc3xx_pka_reg_id_t reg_id, uint32_t *data, size_t len)
