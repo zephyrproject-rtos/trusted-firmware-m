@@ -1,5 +1,9 @@
 * text=auto
 
+# Explicitly declare text files to make sure possible local wrong config
+# of git does not override them on checkout
+*.patch text eol=lf
+
 # Binary files that should not be normalized
 *.pdf binary
 *.png binary
