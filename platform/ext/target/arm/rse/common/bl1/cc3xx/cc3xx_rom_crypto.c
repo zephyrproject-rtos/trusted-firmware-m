@@ -269,6 +269,9 @@ static fih_int bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
         *cc3xx_key_type = KMU_HW_SLOT_KCE_CM;
         *key_buf = NULL;
         break;
+    case TFM_BL1_KEY_USER:
+        FIH_RET(FIH_FAILURE);
+
     default:
         FIH_CALL(bl1_otp_read_key, fih_rc, key_id, *key_buf, key_buf_size, NULL);
         *cc3xx_key_type = 0;
@@ -390,7 +393,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         }
     } else {
         input_key = (uint8_t *)key_material;
-        kmu_key_slot = 0;
+        kmu_key_slot = KMU_INVALID_SLOT;
     }
 
     cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
