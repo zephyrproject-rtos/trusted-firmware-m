@@ -95,3 +95,6 @@ handle_provisioning_message
 provisioning_comms_return_status
 rse_setup_master_key
 rse_setup_provisioning_key
+fih_delay_platform
+FIH_FAILURE
+FIH_SUCCESS

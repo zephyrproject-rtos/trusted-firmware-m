@@ -37,7 +37,6 @@ target_sources(bl1_1_shared_lib
 target_link_libraries(bl1_1_shared_lib
     PUBLIC
         bl1_1_shared_lib_interface
-        tfm_fih
         tfm_log
     PRIVATE
         platform_bl1_1
@@ -53,7 +52,8 @@ target_compile_options(bl1_1_shared_lib_interface
 target_compile_definitions(bl1_1_shared_lib_interface
     INTERFACE
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
-        MCUBOOT_FIH_PROFILE_HIGH
+        $<$<BOOL:${TFM_BL1_FIH_ENABLE}>:TFM_FIH_PROFILE_ON>
+        $<$<BOOL:${TFM_BL1_FIH_ENABLE}>:TFM_FIH_PROFILE_CUSTOM_FILE="bl1_fih_config.h">
 )
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)

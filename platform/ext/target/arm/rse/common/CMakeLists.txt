@@ -444,6 +444,7 @@ target_sources(platform_bl1_1
         ./cc3xx/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSE_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bringup_helpers/rse_bringup_helpers.c>
         ./bl1/rse_kmu_keys.c
+        $<$<BOOL:${TFM_BL1_FIH_ENABLE}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/rse_fih.c>
         ./rse_boot_state.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
