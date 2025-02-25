@@ -13,6 +13,7 @@
 #include "cc3xx_drv.h"
 #include "tfm_log.h"
 #include "rse_zero_count.h"
+#include "rse_permanently_disable_device.h"
 
 #ifndef RSE_COMBINED_PROVISIONING_BUNDLES
 static const struct rse_cm_provisioning_values_t *values =
@@ -84,6 +85,7 @@ enum tfm_plat_err_t do_cm_provision(void) {
     uint32_t zero_count;
 
     if (P_RSE_OTP_HEADER->device_status != 0) {
+        rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_MODIFIED_BEFORE_CM_PROVISIONING);
         return TFM_PLAT_ERR_PROVISIONING_DEVICE_STATUS_TAMPERING_DETECTED;
     }
 
@@ -91,6 +93,7 @@ enum tfm_plat_err_t do_cm_provision(void) {
     err = rse_check_zero_bit_count((uint8_t *)(OTP_BASE_S + values->cm_area_info.offset),
                                    values->cm_area_info.size, &zero_count);
     if (err != TFM_PLAT_ERR_SUCCESS) {
+        rse_permanently_disable_device(RSE_PERMANENT_ERROR_OTP_MODIFIED_BEFORE_CM_PROVISIONING);
         return TFM_PLAT_ERR_PROVISIONING_CM_TAMPERING_DETECTED;
     }
 
