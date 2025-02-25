@@ -65,7 +65,7 @@ def add_arguments(parser : argparse.ArgumentParser,
                                                 help="CM ROTPK to use when embedding key in bundle",
                                                 type=int, required=False)
 
-        arg_utils.add_prefixed_argument(parser, "soc_id", prefix,
+        arg_utils.add_prefixed_argument(parser, "soc_uid", prefix,
                                                 help="ID of SOC to use for personalization",
                                                 type=arg_utils.arg_type_bytes, required=False)
 
@@ -103,7 +103,7 @@ def parse_args(args : argparse.Namespace,
         out = arg_utils.parse_args_automatically(args, ["provisioning_message_config"], prefix)
 
     out |= arg_utils.parse_args_automatically(args, ["valid_lcs", "tp_mode", "sp_mode",
-                                                     "sign_key_cm_rotpk", "soc_id", "version",
+                                                     "sign_key_cm_rotpk", "soc_uid", "version",
                                                      "encrypt_code_and_data",
                                                      "encrypt_secret_values"], prefix)
 
@@ -166,7 +166,7 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
                      encrypt_alg : str = None,
                      sign_alg : str = None,
                      sign_and_encrypt_alg : str = None,
-                     soc_id : bytes = None,
+                     soc_uid : bytes = None,
                      valid_lcs : [str] = None,
                      **kwargs
                      ) -> int:
@@ -199,7 +199,7 @@ def get_blob_details(provisioning_message_config : Provisioning_message_config,
                         & int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_MASK, 0)) \
                         << int(provisioning_message_config.RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_OFFSET, 0)
 
-    if soc_id:
+    if soc_uid:
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_TYPE_PERSONALIZED.get_value()
     else:
         val = provisioning_message_config.RSE_PROVISIONING_BLOB_TYPE_STATIC.get_value()
@@ -268,7 +268,7 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
                                  sign_and_encrypt_kwargs : dict,
                                  data : bytes = bytes(0),
                                  secret_values = bytes(0),
-                                 soc_id : bytes = None,
+                                 soc_uid : bytes = None,
                                  **kwargs : dict,
                         ):
     message = provisioning_message_config.message
@@ -306,14 +306,14 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
 
     if version:
         message.blob.version.set_value(version)
-    if soc_id:
-        message.blob.soc_id.set_value_from_bytes(soc_id)
+    if soc_uid:
+        message.blob.soc_uid.set_value_from_bytes(soc_uid)
 
     metadata = get_blob_details(provisioning_message_config=provisioning_message_config,
                                 encrypt_code_and_data=encrypt_code_and_data,
                                 encrypt_secret_values=encrypt_secret_values,
                                 sign_key_cm_rotpk=sign_key_cm_rotpk,
-                                soc_id=soc_id, **sign_and_encrypt_kwargs)
+                                soc_uid=soc_uid, **sign_and_encrypt_kwargs)
     message.blob.metadata.set_value(metadata)
 
     purpose = get_blob_purpose(provisioning_message_config=provisioning_message_config, **kwargs)
@@ -338,7 +338,7 @@ def get_data_to_encrypt_and_sign(provisioning_message_config : Provisioning_mess
 
 def create_blob_message(provisioning_message_config : Provisioning_message_config,
                         sign_and_encrypt_kwargs : dict,
-                        soc_id : bytes = None,
+                        soc_uid : bytes = None,
                         sign_key_cm_rotpk : bytes = None,
                         **kwargs : dict,
                         ):
@@ -351,7 +351,7 @@ def create_blob_message(provisioning_message_config : Provisioning_message_confi
     plaintext, aad = get_data_to_encrypt_and_sign(provisioning_message_config,
                                                   sign_and_encrypt_kwargs=sign_and_encrypt_kwargs,
                                                   sign_key_cm_rotpk=sign_key_cm_rotpk,
-                                                  soc_id=soc_id,
+                                                  soc_uid=soc_uid,
                                                   **kwargs)
 
     _, ciphertext, signature = sign_then_encrypt_data.sign_then_encrypt_data(**sign_and_encrypt_kwargs,
