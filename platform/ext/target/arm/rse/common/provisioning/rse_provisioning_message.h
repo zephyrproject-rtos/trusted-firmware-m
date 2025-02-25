@@ -129,7 +129,7 @@ struct __attribute__((__packed__)) rse_provisioning_message_blob_t {
     uint32_t version;
 
     uint8_t iv[8];
-    uint8_t soc_uid[8];
+    uint8_t soc_uid[12];
     uint32_t batch_id;
     uint32_t dm_number;
 
