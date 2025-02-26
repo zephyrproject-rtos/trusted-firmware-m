@@ -278,10 +278,9 @@ static enum tfm_plat_err_t load_area_info(enum lcm_lcs_t lcs)
     }
 #endif
 
-    /* In RMA AND CM mode, we either don't have these provisioned or we don't
-     * care about checking them.
+    /* In CM mode, we don't have these provisioned
      */
-    if (lcs == LCM_LCS_CM || lcs == LCM_LCS_RMA) {
+    if (lcs == LCM_LCS_CM) {
         return TFM_PLAT_ERR_SUCCESS;
     }
 
