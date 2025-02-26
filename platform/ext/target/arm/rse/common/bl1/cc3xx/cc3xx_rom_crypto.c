@@ -412,7 +412,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
 
 int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
-                       size_t context_length, uint8_t *output_key,
+                       size_t context_length, uint32_t *output_key,
                        size_t output_length)
 {
     enum kmu_hardware_keyslot_t kmu_key_slot;
@@ -429,7 +429,7 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
     /* All the relevant secret keys for input are 256-bit */
     cc_err = cc3xx_lowlevel_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
                                      CC3XX_AES_KEYSIZE_256, label, label_length, context,
-                                     context_length, (uint32_t *)output_key, output_length);
+                                     context_length, output_key, output_length);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }

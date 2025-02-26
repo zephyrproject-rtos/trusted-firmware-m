@@ -31,7 +31,7 @@ static void mbedtls_init(uint8_t mbedtls_memory_buf[], size_t size)
 
 int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
-                       size_t context_length, uint8_t *output_key,
+                       size_t context_length, uint32_t *output_key,
                        size_t output_length)
 {
     int rc = 0;
@@ -63,7 +63,7 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
 
     rc = mbedtls_hkdf(sha256_info, NULL, 0, key_buf,
                       key_size, state, state_len,
-                      output_key, output_length);
+                      (uint8_t *)output_key, output_length);
 
     return rc;
 }

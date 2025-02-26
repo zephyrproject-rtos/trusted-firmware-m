@@ -336,7 +336,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
 {
     int rc;
     struct bl1_2_image_t *image_to_decrypt;
-    uint8_t key_buf[32];
+    uint32_t key_buf[32 / sizeof(uint32_t)];
     uint8_t label[] = "BL2_DECRYPTION_KEY";
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     fih_int fih_rc = FIH_FAILURE;
@@ -384,7 +384,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id, struct bl1_2_image_t *image)
         FIH_RET(fih_int_encode_zero_equality(rc));
     }
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, key_buf,
+    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, (uint8_t *)key_buf,
                                  image->header.ctr_iv,
                                  (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
                                  sizeof(image->protected_values.encrypted_data),

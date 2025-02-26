@@ -276,6 +276,9 @@ static int32_t bl1_key_to_cc3xx_key(enum tfm_bl1_key_id_t key_id,
     case TFM_BL1_KEY_GUK:
         *cc3xx_key_type = CC3XX_AES_KEY_ID_GUK;
         break;
+    case TFM_BL1_KEY_USER:
+        return -1;
+
     default:
         *cc3xx_key_type = CC3XX_AES_KEY_ID_USER_KEY;
         rc = bl1_otp_read_key(key_id, key_buf, key_buf_size, NULL);
@@ -382,7 +385,7 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
  */
 int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
-                       size_t context_length, uint8_t *output_key,
+                       size_t context_length, uint32_t *output_key,
                        size_t output_length)
 {
     cc3xx_aes_key_id_t key_type;
@@ -398,7 +401,7 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
 
     err = cc3xx_lowlevel_kdf_cmac(key_type, (uint32_t *)input_key,
                                   CC3XX_AES_KEYSIZE_256, label, label_length, context,
-                                  context_length, (uint32_t *)output_key, output_length);
+                                  context_length, output_key, output_length);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
     }

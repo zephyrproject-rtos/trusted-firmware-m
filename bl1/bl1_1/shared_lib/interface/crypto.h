@@ -153,7 +153,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
  */
 int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
-                       size_t context_length, uint8_t *output_key,
+                       size_t context_length, uint32_t *output_key,
                        size_t output_length);
 /**
  * @brief Derives an ECC (private) key for the specified curve. The key derivation
