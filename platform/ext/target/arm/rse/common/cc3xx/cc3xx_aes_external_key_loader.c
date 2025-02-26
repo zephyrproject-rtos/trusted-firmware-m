@@ -30,7 +30,7 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
 
 #ifdef RSE_OTP_HAS_KRTL_USAGE_COUNTER
-    if (key_id == (cc3xx_aes_key_id_t)KMU_HW_SLOT_KRTL) {
+    if ((key == NULL) && (key_id == (cc3xx_aes_key_id_t)KMU_HW_SLOT_KRTL)) {
         const enum tfm_plat_err_t plat_err = tfm_plat_increment_nv_counter(PLAT_NV_COUNTER_KRTL_USAGE);
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             return (cc3xx_err_t)plat_err;
