@@ -28,7 +28,6 @@ target_link_libraries(bl1_1_shared_lib_interface
 target_sources(bl1_1_shared_lib
     PRIVATE
         $<$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>:crypto/crypto_mbedcrypto.c>
-        $<$<BOOL:${TFM_BL1_DUMMY_TRNG}>:trng/trng_dummy.c>
         ./util.c
         $<$<BOOL:${TFM_BL1_DEFAULT_OTP}>:./otp/otp_default.c>
         $<$<BOOL:${TFM_BL1_2_ENABLE_LMS}>:./pq_crypto/pq_crypto_psa.c>

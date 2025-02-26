@@ -61,12 +61,6 @@ config TFM_BL1_SOFTWARE_CRYPTO
     help
       Whether BL1_1 will use software crypto
 
-config TFM_BL1_DUMMY_TRNG
-    bool
-    default y
-    help
-      Whether BL1_1 will use dummy TRNG
-
 config TFM_BL1_2_ENABLE_LMS
     bool "Enable LMS PQ crypto for BL2 verification."
     default n

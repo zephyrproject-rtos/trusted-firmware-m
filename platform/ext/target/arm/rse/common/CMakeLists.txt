@@ -446,8 +446,8 @@ target_sources(platform_bl1_1
         ${PLATFORM_DIR}/ext/target/arm/drivers/gpio/pl061/gpio_pl061_drv.c
         ./platform_fatal_error.c
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
-        $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+        ${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c
+        $<$<BOOL:${RSE_OTP_TRNG}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
         ${PLATFORM_DIR}/ext/target/arm/drivers/sam/sam_drv.c
         ./rse_sam_config.c
         ./rse_attack_tracking_counter.c
@@ -541,8 +541,8 @@ endif()
 target_sources(bl1_1_shared_lib
     PRIVATE
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_crypto.c>
-        $<$<AND:$<NOT:$<BOOL:${RSE_OTP_TRNG}>>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
-        $<$<AND:$<BOOL:${RSE_OTP_TRNG}>,$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
+        $<$<NOT:$<BOOL:${RSE_OTP_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc3xx/cc3xx_rom_trng.c>
+        $<$<BOOL:${RSE_OTP_TRNG}>:${CMAKE_CURRENT_SOURCE_DIR}/rse_trng.c>
 )
 
 target_sources(bl1_1

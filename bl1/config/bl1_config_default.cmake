@@ -42,7 +42,6 @@ set(TFM_BL1_LOG_LEVEL                   LOG_LEVEL_INFO CACHE STRING "The level o
 set(TFM_BL1_DEFAULT_OTP                 ON          CACHE BOOL      "Whether BL1_1 will use default OTP memory")
 set(TFM_BL1_DEFAULT_PROVISIONING        ON          CACHE BOOL      "Whether BL1_1 will use default provisioning")
 set(TFM_BL1_SOFTWARE_CRYPTO             ON          CACHE BOOL      "Whether BL1_1 will use software crypto")
-set(TFM_BL1_DUMMY_TRNG                  ON          CACHE BOOL      "Whether BL1_1 will use dummy TRNG")
 set(TFM_BL1_FIH_ENABLE                  OFF         CACHE BOOL      "Whether BL1 enables FIH config items from bl1_fih_config.h")
 
 if (TFM_BL1_2_CM_SIGNING_ALG STREQUAL "LMS")

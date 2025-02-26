@@ -346,7 +346,6 @@ target_link_libraries(platform_bl1_1
 target_sources(bl1_1_shared_lib
     PRIVATE
         $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_LIST_DIR}/bl1/cc312_rom_crypto.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_LIST_DIR}/bl1/cc312_rom_trng.c>
 )
 #========================= Platform BL1_2 =====================================#
 
