@@ -22,11 +22,3 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
 
     return cc3xx_lowlevel_rng_get_random(output, output_size, CC3XX_RNG_DRBG_HMAC);
 }
-
-unsigned char fih_delay_random_uchar(void) {
-    /* Perform a hardware delay here, then return 0 so no software delay is
-     * used.
-     */
-    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
-    return 0;
-}

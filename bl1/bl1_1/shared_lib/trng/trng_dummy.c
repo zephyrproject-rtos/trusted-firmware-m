@@ -21,8 +21,3 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
     memset(output, 4, output_size);
     return 0;
 }
-
-unsigned char fih_delay_random_uchar(void)
-{
-    return 4;
-}
