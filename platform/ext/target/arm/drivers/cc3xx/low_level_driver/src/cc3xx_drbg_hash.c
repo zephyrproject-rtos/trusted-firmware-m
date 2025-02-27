@@ -167,6 +167,14 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
     size_t gen_num_m = CEIL(out_len_bits, SHA256_OUTPUT_SIZE * 8); /* Number of hash generations */
     uint32_t data[(CC3XX_DRBG_HASH_SEEDLEN + 1) / sizeof(uint32_t)];
     uint32_t partial_last_block[SHA256_OUTPUT_SIZE / sizeof(uint32_t)];
+
+    /* Special handling of aligned requests into aligned buffer. This allows
+     * HW with particular alignment requirements to directly generate
+     * random numbers into its buffers without need for temporary buffers, i.e.
+     * generating integer number of random words into word-aligned buffers
+     */
+    const bool request_is_word_aligned =
+            !((uintptr_t) returned_bits & 0x3) && !((out_len_bits / 8) & 0x3);
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     size_t num_words_to_copy = sizeof(data) / sizeof(uint32_t);
     cc3xx_dpa_hardened_word_copy((uint32_t *)data, (uint32_t *)block_v, num_words_to_copy);
@@ -206,10 +214,19 @@ static cc3xx_err_t hash_gen_process(uint8_t *block_v, size_t out_len_bits, uint8
 
     returned_bits -= SHA256_OUTPUT_SIZE;
 
-    if (remaining_bytes > 0) {
+    if (remaining_bytes == 0) {
+        goto finish;
+    }
+
+    if (request_is_word_aligned) {
+        for (idx = 0; idx < remaining_bytes / sizeof(uint32_t); idx++) {
+            ((uint32_t *) returned_bits)[idx] = partial_last_block[idx];
+        }
+    } else {
         memcpy(returned_bits, partial_last_block, remaining_bytes);
     }
 
+finish:
     return CC3XX_ERR_SUCCESS;
 }
 
