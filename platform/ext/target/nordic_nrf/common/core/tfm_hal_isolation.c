@@ -50,9 +50,16 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
 
+#if NRF_SPU_HAS_MEMORY
     if (spu_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
+#else
+    /* If the SPU doesn't configure MEMORY on this platform then the NRF_MPC does */
+    if (nrf_mpc_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+#endif
 
     if (spu_periph_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
@@ -124,7 +131,7 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
             continue;
         }
 
-        spu_peripheral_config_secure(NRFX_PERIPHERAL_ID_GET(plat_data_ptr->periph_start),
+        spu_peripheral_config_secure(plat_data_ptr->periph_start,
                                      SPU_LOCK_CONF_LOCKED);
 
         /*

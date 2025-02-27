@@ -24,8 +24,21 @@
 
 #include <nrf.h>
 
+#ifdef __NRF_TFM__
+#include <zephyr/autoconf.h>
+#endif
+
 #if defined(NRF_NVMC_S)
 #include <nrfx_nvmc.h>
+#elif defined(NRF_RRAMC_S)
+#include <nrfx_rramc.h>
+
+#if CONFIG_NRF_RRAM_WRITE_BUFFER_SIZE > 0
+#define WRITE_BUFFER_SIZE CONFIG_NRF_RRAM_WRITE_BUFFER_SIZE
+#else
+#define WRITE_BUFFER_SIZE 0
+#endif
+
 #else
 #error "Unrecognized platform"
 #endif
@@ -87,6 +100,30 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
     ARG_UNUSED(cb_event);
 
 
+#ifdef RRAMC_PRESENT
+	nrfx_rramc_config_t config = NRFX_RRAMC_DEFAULT_CONFIG(WRITE_BUFFER_SIZE);
+
+	config.mode_write = true;
+
+#if CONFIG_NRF_RRAM_READYNEXT_TIMEOUT_VALUE > 0
+	config.preload_timeout_enable = true;
+	config.preload_timeout = CONFIG_NRF_RRAM_READYNEXT_TIMEOUT_VALUE;
+#else
+	config.preload_timeout_enable = false;
+	config.preload_timeout = 0;
+#endif
+
+	/* Don't use an event handler until it's understood whether we
+	 * want it or not
+	 */
+	nrfx_rramc_evt_handler_t handler = NULL;
+
+	nrfx_err_t err = nrfx_rramc_init(&config, handler);
+
+	if(err != NRFX_SUCCESS && err != NRFX_ERROR_ALREADY) {
+		return err;
+	}
+#endif /* RRAMC_PRESENT */
     return ARM_DRIVER_OK;
 }
 
@@ -127,18 +164,37 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
+#ifdef NRF_NVMC_S
     nrfx_nvmc_words_write(addr, data, cnt);
+#else
+	nrf_rramc_config_t rramc_config;
+	nrf_rramc_config_get(NRF_RRAMC, &rramc_config);
+	const nrf_rramc_config_t orig_rramc_config = rramc_config;
+	rramc_config.write_buff_size = 0;
+	nrf_rramc_config_set(NRF_RRAMC, &rramc_config);
+
+	nrfx_rramc_words_write(addr, data, cnt);
+
+	nrf_rramc_config_set(NRF_RRAMC, &orig_rramc_config);
+#endif
 
     return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)
 {
+#ifdef NRF_NVMC_S
     nrfx_err_t err_code = nrfx_nvmc_page_erase(addr);
 
     if (err_code != NRFX_SUCCESS) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
+#else
+    /*
+     * Erasure is not needed on RRAM.
+     * Save lifetime and execution time by not emulating a flash erase.
+     */
+#endif
 
     return ARM_DRIVER_OK;
 }

@@ -34,11 +34,11 @@
 #define NS_STACK_SIZE           (0x000001E0)
 
 /* Size of nRF SPU (Nordic IDAU) regions */
-#define SPU_FLASH_REGION_SIZE   (0x00004000)
+#define SPU_FLASH_REGION_SIZE   (0x00008000)
 #define SPU_SRAM_REGION_SIZE    (0x00002000)
 
 /*
- * SPU flash region granularity is 16 KB on nRF5340. Alignment
+ * SPU flash region granularity is 32 KB on nRF91. Alignment
  * of partitions is defined in accordance with this constraint.
  */
 #ifdef NRF_NS_SECONDARY
@@ -103,10 +103,13 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
-#define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)
+/* Assign to SPE the minimum amount of RAM (aligned to the SPU region boundary)
+ * that is needed for the most demanding configuration, which turns out to be
+ * the RegressionIPC one. */
+#define S_DATA_SIZE     0x16000 /* 88 KB */
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
-#define S_CODE_VECTOR_TABLE_SIZE (0x154)
+#define S_CODE_VECTOR_TABLE_SIZE (0x144)
 
 #if defined(NULL_POINTER_EXCEPTION_DETECTION) && S_CODE_START == 0
 /* If this image is placed at the beginning of flash make sure we
@@ -190,6 +193,9 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
+#define SHARED_BOOT_MEASUREMENT_BASE BOOT_TFM_SHARED_DATA_BASE
+#define SHARED_BOOT_MEASUREMENT_SIZE BOOT_TFM_SHARED_DATA_SIZE
+#define SHARED_BOOT_MEASUREMENT_LIMIT BOOT_TFM_SHARED_DATA_LIMIT
 
 /* Regions used by psa-arch-tests to keep state */
 #define PSA_TEST_SCRATCH_AREA_SIZE (0x400)

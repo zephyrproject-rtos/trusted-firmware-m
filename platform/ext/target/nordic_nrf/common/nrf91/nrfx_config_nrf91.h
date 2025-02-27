@@ -36,6 +36,17 @@
 #error "This file should not be included directly. Include nrfx_config.h instead."
 #endif
 
+/*
+ * The MDK for nRF9120 used in the nRF9161 target doesn't define the Secure FPU
+ * as it doesn't exist, but for other platforms like the 9160 it has a dummy
+ * define.
+ * Therefore we define it here manually until it is fixed in the MDK.
+ * See: NCSDK-23046
+ */
+#ifdef NRF9120_XXAA
+#define NRF_FPU_S    1
+#endif
+
 #define NRF_CLOCK        NRF_PERIPH(NRF_CLOCK)
 #define NRF_DPPIC        NRF_PERIPH(NRF_DPPIC)
 #define NRF_EGU0         NRF_PERIPH(NRF_EGU0)
