@@ -9,6 +9,7 @@
 #include "cc3xx_ecdsa.h"
 
 #include "cc3xx_ec.h"
+#include "cc3xx_kdf.h"
 #ifndef CC3XX_CONFIG_FILE
 #include "cc3xx_config.h"
 #else
@@ -19,6 +20,9 @@
 #include <stddef.h>
 
 #include "fatal_error.h"
+
+#define BITS_TO_BYTES(bits) (((bits) + 7u) / 8u)
+#define ALIGN_CMAC_OUTPUT(bytes) (((bytes) + 15) & ~15)
 
 #if defined(CC3XX_CONFIG_ECDSA_KEYGEN_ENABLE) || defined(CC3XX_CONFIG_ECDSA_SIGN_ENABLE)
 /**
@@ -90,9 +94,88 @@ cc3xx_err_t cc3xx_lowlevel_ecdsa_genkey(cc3xx_ec_curve_id_t curve_id,
     /* Destroy private key register */
     cc3xx_lowlevel_pka_set_to_random(private_key_reg, curve.modulus_size * 8);
 
-    *private_key_size = curve.modulus_size;
+    if (private_key_size != NULL) {
+        *private_key_size = curve.modulus_size;
+    }
+
 out:
     cc3xx_lowlevel_ec_uninit();
+
+    return err;
+}
+
+cc3xx_err_t cc3xx_lowlevel_ecdsa_derive_key(
+    cc3xx_ec_curve_id_t curve_id,
+    cc3xx_aes_key_id_t key_id, const uint32_t *key,
+    cc3xx_aes_keysize_t key_size,
+    const uint8_t *label, size_t label_length,
+    const uint8_t *context, size_t context_length,
+    uint32_t *output_key, size_t out_size, size_t *out_length)
+{
+    cc3xx_err_t err;
+    cc3xx_pka_reg_id_t private_key_reg;
+    cc3xx_pka_reg_id_t order_reg, barrett_tag;
+    const cc3xx_ec_curve_data_t *curve_data = cc3xx_lowlevel_ec_get_curve_data(curve_id);
+
+    if (curve_data == NULL) {
+        return CC3XX_ERR_EC_CURVE_NOT_SUPPORTED;
+    }
+
+    const size_t bytes_required_for_unbiased_key =
+        ALIGN_CMAC_OUTPUT(BITS_TO_BYTES(curve_data->recommended_bits_for_generation));
+    uint32_t kdf_output[bytes_required_for_unbiased_key / sizeof(uint32_t)];
+
+    if (bytes_required_for_unbiased_key == 0) {
+        return CC3XX_ERR_EC_CURVE_NOT_SUPPORTED;
+    }
+
+    if (out_size < curve_data->modulus_size) {
+        return CC3XX_ERR_BUFFER_OVERFLOW;
+    }
+
+    err = cc3xx_lowlevel_kdf_cmac(key_id, key, key_size, label, label_length,
+        context, context_length, kdf_output, sizeof(kdf_output));
+    if (err != CC3XX_ERR_SUCCESS) {
+        return err;
+    }
+
+    cc3xx_lowlevel_pka_init(sizeof(kdf_output));
+
+    private_key_reg = cc3xx_lowlevel_pka_allocate_reg();
+    order_reg = cc3xx_lowlevel_pka_allocate_reg();
+    barrett_tag = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg(
+        barrett_tag, curve_data->barrett_tag, curve_data->barrett_tag_size);
+
+    cc3xx_lowlevel_pka_write_reg(
+        order_reg, curve_data->order, curve_data->modulus_size);
+
+    /* The derived key is treated as a number hence when storing
+     * it in the PKA as LE we need to swap the endianess of the
+     * memory buffer that holds the key when writing it
+     */
+    cc3xx_lowlevel_pka_write_reg_swap_endian(
+        private_key_reg, kdf_output, sizeof(kdf_output));
+
+    /* This should never happen in normal operation */
+    if (!cc3xx_lowlevel_pka_greater_than_si(private_key_reg, 0)) {
+        err = CC3XX_ERR_ECDSA_INVALID_KEY;
+        goto out;
+    }
+
+    cc3xx_lowlevel_pka_set_modulus(order_reg, false, barrett_tag);
+
+    cc3xx_lowlevel_pka_reduce(private_key_reg);
+
+    cc3xx_lowlevel_pka_read_reg_swap_endian(private_key_reg, output_key, curve_data->modulus_size);
+
+    if (out_length != NULL) {
+        *out_length = curve_data->modulus_size;
+    }
+
+out:
+    cc3xx_lowlevel_pka_uninit();
 
     return err;
 }

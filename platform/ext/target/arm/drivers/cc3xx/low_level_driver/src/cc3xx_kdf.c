@@ -12,13 +12,6 @@
 
 #include <assert.h>
 
-/* This is a NIST SP800-108 counter mode KDF with CMAC as the PRF (pseudo-random
- * function), using the modified input [i]2 || Label || 0x00 || Context || [L]2 || K(0)
- * construction where K(0) = PRF(K_in, Label || 0x00 || Context || [L]2), and [i]2 is
- * a counter variable initialised to 1. Assumes that r, the length in bits of the encoding
- * of i is 32 bits. It sets the encoding of L as well on 32-bits. This implements the
- * enhanced input construction described in SP800-108r1-upd1 section 4.1.
- */
 cc3xx_err_t cc3xx_lowlevel_kdf_cmac(
     cc3xx_aes_key_id_t key_id, const uint32_t *key,
     cc3xx_aes_keysize_t key_size,
