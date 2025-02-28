@@ -149,9 +149,6 @@ typedef struct
   uint32_t RadioSlpTimClockSelection; /*!< Specifies Radio Sleep Timer clock source.
                                            This parameter can be a value of @ref RCC_RadioSleepTimer_Clock_Source */
 } RCC_PeriphCLKInitTypeDef;
-/**
-  * @}
-  */
 
 #if defined(RCC_CCIPR2_ASSEL)
 /**
@@ -168,10 +165,10 @@ uint32_t AutoReloadValue;             /*!< Auto-reload value.
 uint32_t CompareValue;                /*!< Compare value.
                                            This parameter can be a value between 0 and 0xFFFFF*/
 } RCC_AudioSyncConfigTypeDef;
+#endif /* RCC_CCIPR2_ASSEL */
 /**
   * @}
   */
-#endif /* RCC_CCIPR2_ASSEL */
 
 /* Exported constants --------------------------------------------------------*/
 /** @defgroup RCCEx_Exported_Constants RCCEx Exported Constants
@@ -357,7 +354,7 @@ uint32_t CompareValue;                /*!< Compare value.
   */
 #define RCC_TIMICCLKSOURCE_HSI              0x00000000U             /*!< HSI selected for Timer16/17 and LPTimer2 */
 #define RCC_TIMICCLKSOURCE_HSI_DIV256       RCC_CCIPR1_TIMICSEL     /*!< HSI/256 selected for Timer16/17 and LPTimer2 */
-/*
+/**
   * @}
   */
 
@@ -986,11 +983,11 @@ uint32_t CompareValue;                /*!< Compare value.
   */
 
 /* Exported functions --------------------------------------------------------*/
-/** @addtogroup RCCEx_Exported_Functions
+/** @defgroup RCCEx_Exported_Functions RCCEx Exported Functions
   * @{
   */
 
-/** @addtogroup RCCEx_Exported_Functions_Group1
+/** @defgroup RCCEx_Exported_Functions_Group1 Extended Peripheral Control functions
   * @{
   */
 HAL_StatusTypeDef HAL_RCCEx_PeriphCLKConfig(const RCC_PeriphCLKInitTypeDef *PeriphClkInit);
@@ -1000,7 +997,7 @@ uint32_t          HAL_RCCEx_GetPeriphCLKFreq(uint32_t PeriphClk);
   * @}
   */
 
-/** @addtogroup RCCEx_Exported_Functions_Group2
+/** @defgroup RCCEx_Exported_Functions_Group2 Extended Clock management functions
   * @{
   */
 void              HAL_RCCEx_EnableLSECSS(void);
@@ -1019,7 +1016,7 @@ void              HAL_RCCEx_LSI2GetConfig(RCC_LSIConfigTypeDef *pConfig);
   * @}
   */
 
-/** @addtogroup RCCEx_Exported_Functions_Group3
+/** @defgroup RCCEx_Exported_Functions_Group3 Radio Clock management functions
   * @{
   */
 void              HAL_RCCEx_EnableRadioBBClock(void);
@@ -1032,7 +1029,7 @@ uint32_t          HAL_RCCEx_GetRadioBusClockReadiness(void);
   */
 
 #if defined(RCC_CCIPR2_ASSEL)
-/** @addtogroup RCCEx_Exported_Functions_Group4
+/** @defgroup RCCEx_Exported_Functions_Group4 Audio Synchronization management functions
   * @{
   */
 void              HAL_RCCEx_EnableAudioSyncClock(void);
@@ -1049,17 +1046,12 @@ uint32_t          HAL_RCCEx_GetAudioSyncCaptureValue(void);
 /**
   * @}
   */
-/** @addtogroup RCCEx_Private_Constants
+
+/** @defgroup RCCEx_Private_Constants Private Constants
   * @{
   */
 /* Define used for IS_RCC_* macros below */
-#if defined (STM32WBA20xx) || defined (STM32WBA22xx) || defined (STM32WBA24xx) || defined (STM32WBA25xx)
-#define RCC_PERIPHCLOCK_ALL             (RCC_PERIPHCLK_USART1  | RCC_PERIPHCLK_I2C1    | RCC_PERIPHCLK_LPTIM2 | \
-                                         RCC_PERIPHCLK_SYSTICK | RCC_PERIPHCLK_TIMIC   | RCC_PERIPHCLK_SAI1   | \
-                                         RCC_PERIPHCLK_RNG     | RCC_PERIPHCLK_LPUART1 | RCC_PERIPHCLK_SPI3   | \
-                                         RCC_PERIPHCLK_I2C3    | RCC_PERIPHCLK_LPTIM1  | RCC_PERIPHCLK_ADC    | \
-                                         RCC_PERIPHCLK_RTC     | RCC_PERIPHCLK_RADIOST | RCC_PERIPHCLK_AUDIOSYNC)
-#elif defined (STM32WBA54xx) || defined (STM32WBA55xx) || defined(STM32WBA5Mxx)
+#if   defined (STM32WBA54xx) || defined (STM32WBA55xx) || defined(STM32WBA5Mxx)
 #if !defined (STM32WBAXX_SI_CUT1_0)
 #define RCC_PERIPHCLOCK_ALL             (RCC_PERIPHCLK_USART1  | RCC_PERIPHCLK_USART2 | RCC_PERIPHCLK_I2C1    | \
                                          RCC_PERIPHCLK_LPTIM2  | RCC_PERIPHCLK_SPI1   | RCC_PERIPHCLK_SYSTICK | \
@@ -1111,7 +1103,7 @@ uint32_t          HAL_RCCEx_GetAudioSyncCaptureValue(void);
   */
 
 /* Private macros ------------------------------------------------------------*/
-/** @addtogroup RCCEx_Private_Macros
+/** @defgroup RCCEx_Private_Macros Private Macros
   * @{
   */
 #define IS_RCC_PERIPHCLOCK(__SELECTION__)         ((((__SELECTION__) & RCC_PERIPHCLOCK_ALL) != 0x00u) && \
@@ -1282,10 +1274,6 @@ uint32_t          HAL_RCCEx_GetAudioSyncCaptureValue(void);
 /**
   * @}
   */
-
-/**
-* @}
-*/
 
 #ifdef __cplusplus
 }
