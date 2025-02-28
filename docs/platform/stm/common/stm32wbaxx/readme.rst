@@ -10,7 +10,7 @@ Directory content
 ^^^^^^^^^^^^^^^^^
 
 - stm/common/stm32wbaxx/stm32wbaxx_hal:
-   Content from https://github.com/STMicroelectronics/stm32wbaxx_hal_driver (HAL version - Tags V1.4.0 )
+   Content from https://github.com/STMicroelectronics/stm32wbaxx_hal_driver (HAL version - Tags V1.6.0 )
 
 - stm/common/stm32wbaxx/Device:
    Content from https://github.com/STMicroelectronics/cmsis_device_wba

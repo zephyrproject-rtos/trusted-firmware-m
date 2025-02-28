@@ -43,11 +43,11 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 
-/** @defgroup RCCEx_Exported_Functions RCCEx Exported Functions
+/** @addtogroup RCCEx_Exported_Functions
   * @{
   */
 
-/** @defgroup RCCEx_Exported_Functions_Group1 Extended Peripheral Control functions
+/** @addtogroup RCCEx_Exported_Functions_Group1
   *  @brief  Extended Peripheral Control functions
   *
 @verbatim
@@ -1409,7 +1409,7 @@ uint32_t HAL_RCCEx_GetPeriphCLKFreq(uint32_t PeriphClk)
   * @}
   */
 
-/** @defgroup RCCEx_Exported_Functions_Group2 Extended Clock management functions
+/** @addtogroup RCCEx_Exported_Functions_Group2
   *  @brief  Extended Clock management functions
   *
 @verbatim
@@ -1566,7 +1566,7 @@ void HAL_RCCEx_LSI2GetConfig(RCC_LSIConfigTypeDef *pConfig)
   * @}
   */
 
-/** @defgroup RCCEx_Exported_Functions_Group3 Radio clock management functions
+/** @addtogroup RCCEx_Exported_Functions_Group3
   *  @brief  Radio clock management functions
   *
 @verbatim
@@ -1633,7 +1633,7 @@ uint32_t HAL_RCCEx_GetRadioBusClockReadiness(void)
   */
 
 #if defined(RCC_CCIPR2_ASSEL)
-/** @defgroup RCCEx_Exported_Functions_Group4 Radio clock management functions
+/** @addtogroup RCCEx_Exported_Functions_Group4
   *  @brief  Radio clock management functions
   *
 @verbatim

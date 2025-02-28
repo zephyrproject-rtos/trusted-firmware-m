@@ -743,11 +743,11 @@ uint32_t             HAL_DMA_GetError(DMA_HandleTypeDef const *const hdma);
   * @}
   */
 
+#if defined (DMA_PRIVCFGR_PRIV0)
 /** @defgroup DMA_Exported_Functions_Group4 DMA Attributes Functions
   * @brief    DMA Attributes Functions
   * @{
   */
-#if defined (DMA_PRIVCFGR_PRIV0)
 HAL_StatusTypeDef HAL_DMA_ConfigChannelAttributes(DMA_HandleTypeDef *const hdma,
                                                   uint32_t ChannelAttributes);
 HAL_StatusTypeDef HAL_DMA_GetConfigChannelAttributes(DMA_HandleTypeDef const *const hdma,
@@ -760,10 +760,10 @@ HAL_StatusTypeDef HAL_DMA_GetLockChannelAttributes(DMA_HandleTypeDef const *cons
                                                    uint32_t *const pLockState);
 
 #endif /* DMA_RCFGLOCKR_LOCK0 */
-#endif /* DMA_PRIVCFGR_PRIV0 */
 /**
   * @}
   */
+#endif /* DMA_PRIVCFGR_PRIV0 */
 
 /**
   * @}
