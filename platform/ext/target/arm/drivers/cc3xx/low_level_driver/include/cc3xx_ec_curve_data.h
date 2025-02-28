@@ -117,6 +117,7 @@ typedef struct {
     size_t modulus_size;
     size_t barrett_tag_size;
     size_t register_size;
+    size_t recommended_bits_for_generation; /*!< as per FIPS 186-5 Table A.2 */
 
     uint32_t field_modulus[CC3XX_EC_MAX_POINT_SIZE / sizeof(uint32_t)];
     uint32_t barrett_tag[CC3XX_EC_MAX_BARRETT_TAG_SIZE / sizeof(uint32_t)];

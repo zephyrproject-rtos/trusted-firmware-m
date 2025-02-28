@@ -71,6 +71,7 @@ const cc3xx_ec_curve_data_t secp_224_r1 = {
               0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF},
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 224,
 };
 #endif
 
@@ -101,6 +102,7 @@ const cc3xx_ec_curve_data_t secp_256_r1 = {
               0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF},
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 352,
 };
 #endif
 
@@ -137,6 +139,7 @@ const cc3xx_ec_curve_data_t secp_384_r1 = {
               0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF},
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 384,
 };
 #endif
 
@@ -185,6 +188,7 @@ const cc3xx_ec_curve_data_t secp_521_r1 = {
               0x000001FF},
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 521,
 };
 #endif
 
@@ -331,6 +335,7 @@ const cc3xx_ec_curve_data_t brainpoolp_224_r1 = {
               0x2a183025, 0x26436686, 0xd7c134aa, },
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 224,
 };
 #endif
 
@@ -359,6 +364,7 @@ const cc3xx_ec_curve_data_t brainpoolp_256_r1 = {
               0x9d838d71, 0x3e660a90, 0xa1eea9bc, 0xa9fb57db, },
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 352,
 };
 #endif
 
@@ -427,6 +433,7 @@ const cc3xx_ec_curve_data_t brainpoolp_384_r1 = {
               0x50e641df, 0x0f5d6f7e, 0xa3386d28, 0x8cb91e82, },
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 384,
 };
 #endif
 
@@ -495,29 +502,34 @@ const cc3xx_ec_curve_data_t frp_256_v1 = {
               0xce42435b, 0x10126de8, 0x0b3ad58f, 0xf1fd178c, },
 
     .cofactor = 1,
+    .recommended_bits_for_generation = 352,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_25519_ENABLE
 const cc3xx_ec_curve_data_t curve_25519 = {
     .type = CC3XX_EC_CURVE_TYPE_MONTGOMERY,
+    .recommended_bits_for_generation = 252,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_448_ENABLE
 const cc3xx_ec_curve_data_t curve_448 = {
     .type = CC3XX_EC_CURVE_TYPE_MONTGOMERY,
+    .recommended_bits_for_generation = 446,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_ED25519_ENABLE
 const cc3xx_ec_curve_data_t ed25519 = {
     .type = CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
+    .recommended_bits_for_generation = 252,
 };
 #endif
 
 #ifdef CC3XX_CONFIG_EC_CURVE_ED448_ENABLE
 const cc3xx_ec_curve_data_t ed448 = {
     .type = CC3XX_EC_CURVE_TYPE_TWISTED_EDWARDS,
+    .recommended_bits_for_generation = 446,
 };
 #endif
