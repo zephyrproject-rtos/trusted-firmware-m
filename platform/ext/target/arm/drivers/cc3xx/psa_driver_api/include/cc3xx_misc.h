@@ -32,15 +32,6 @@ extern "C" {
  */
 #define CEIL_ALLOC_SZ(a,b) (((a) + (b) - 1) / (b))
 
-/**
- * @brief A macro to check if the curve_id is invalid. A curve ID is invalid if the
- *        driver does not support it, or if an invalid translation from a PSA type
- *        has been performed
- */
-#define CC3XX_IS_CURVE_ID_INVALID(curve_id)                  \
-    (((curve_id) >= _CURVE_ID_MAX) ||                        \
-     (cc3xx_lowlevel_ec_get_curve_data(curve_id) == NULL))
-
 #if defined(CC3XX_CONFIG_ASSERT_ENABLE)
 
 #define CC3XX_ASSERT(x) assert(x)
