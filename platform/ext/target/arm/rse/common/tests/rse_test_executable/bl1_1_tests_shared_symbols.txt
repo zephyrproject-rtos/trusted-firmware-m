@@ -1,12 +1,9 @@
 bl1_read_bl1_2_image
 bl1_1_validate_image_at_addr
-validate_and_unpack_encrypted_bundle
 setup_key_from_rng
+rse_setup_master_key
+rse_setup_provisioning_key
 kmu_set_slot_invalid
-setup_provisioning_key
-set_tp_mode
-provision_assembly_and_test
-provision_psa_rot
 lcm_get_sp_enabled
 lcm_set_sp_enabled
 lcm_get_lcs
@@ -16,6 +13,9 @@ lcm_set_tp_mode
 tfm_hal_system_reset
 tfm_plat_otp_secure_provisioning_start
 tfm_plat_provisioning_is_required
+validate_and_unpack_blob
+default_blob_handler
+handle_provisioning_message
 cc3xx_lowlevel_aes_finish
 cc3xx_lowlevel_aes_get_current_output_size
 cc3xx_lowlevel_aes_get_state

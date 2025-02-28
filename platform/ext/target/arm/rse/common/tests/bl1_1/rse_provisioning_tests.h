@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,8 +26,11 @@ void rse_bl1_provisioning_test_0202(struct test_result_t *ret);
 
 void rse_bl1_provisioning_test_0301(struct test_result_t *ret);
 void rse_bl1_provisioning_test_0302(struct test_result_t *ret);
-void rse_bl1_provisioning_test_0303(struct test_result_t *ret);
-void rse_bl1_provisioning_test_0304(struct test_result_t *ret);
+
+void rse_bl1_provisioning_test_0401(struct test_result_t *ret);
+void rse_bl1_provisioning_test_0402(struct test_result_t *ret);
+void rse_bl1_provisioning_test_0403(struct test_result_t *ret);
+void rse_bl1_provisioning_test_0404(struct test_result_t *ret);
 
 #ifdef __cplusplus
 }

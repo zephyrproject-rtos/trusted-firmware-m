@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,6 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
-
 static struct conditional_test_t provisioning_tests[] = {
     {
         .any_tp_mode = true,
@@ -22,7 +21,7 @@ static struct conditional_test_t provisioning_tests[] = {
         .test = {
             &rse_bl1_provisioning_test_0001,
             "RSE_BL1_1_PROVISIONING_TEST_0001",
-            "Provisioning basic bundle validation test"
+            "Provisioning basic blob validation test"
         },
     },
     {
@@ -32,7 +31,7 @@ static struct conditional_test_t provisioning_tests[] = {
         .test = {
             &rse_bl1_provisioning_test_0002,
             "RSE_BL1_1_PROVISIONING_TEST_0002",
-            "Provisioning negative bundle validation test"
+            "Provisioning negative blob validation test"
         },
     },
     {
@@ -86,43 +85,63 @@ static struct conditional_test_t provisioning_tests[] = {
         },
     },
     {
-        .any_tp_mode = true,
-        .any_lcs = true,
-        .sp_enabled = LCM_FALSE,
+        .tp_mode = LCM_TP_MODE_PCI,
+        .lcs = LCM_LCS_CM,
+        .any_sp_state = true,
         .test = {
             &rse_bl1_provisioning_test_0301,
             "RSE_BL1_1_PROVISIONING_TEST_0301",
-            "Provisioning integration negative key setup test"
+            "Provisioning integration CM invalid blob LCS test"
         },
     },
     {
-        .any_tp_mode = true,
-        .any_lcs = true,
-        .sp_enabled = LCM_TRUE,
+        .tp_mode = LCM_TP_MODE_PCI,
+        .lcs = LCM_LCS_DM,
+        .any_sp_state = true,
         .test = {
             &rse_bl1_provisioning_test_0302,
             "RSE_BL1_1_PROVISIONING_TEST_0302",
-            "Provisioning integration negative authentication test"
+            "Provisioning integration DM invalid blob LCS test"
         },
     },
     {
-        .any_tp_mode = true,
+        .tp_mode = LCM_TP_MODE_PCI,
         .any_lcs = true,
         .sp_enabled = LCM_TRUE,
         .test = {
-            &rse_bl1_provisioning_test_0303,
-            "RSE_BL1_1_PROVISIONING_TEST_0303",
-            "Provisioning integration negative tag test"
+            &rse_bl1_provisioning_test_0401,
+            "RSE_BL1_1_PROVISIONING_TEST_0401",
+            "Provisioning integration PCI negative authentication test"
         },
     },
     {
-        .any_tp_mode = true,
+        .tp_mode = LCM_TP_MODE_TCI,
         .any_lcs = true,
         .sp_enabled = LCM_TRUE,
         .test = {
-            &rse_bl1_provisioning_test_0304,
-            "RSE_BL1_1_PROVISIONING_TEST_0304",
-            "Provisioning integration return value test"
+            &rse_bl1_provisioning_test_0402,
+            "RSE_BL1_1_PROVISIONING_TEST_0402",
+            "Provisioning integration TCI negative authentication test"
+        },
+    },
+    {
+        .tp_mode = LCM_TP_MODE_PCI,
+        .any_lcs = true,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0403,
+            "RSE_BL1_1_PROVISIONING_TEST_0403",
+            "Provisioning integration PCI positive test"
+        },
+    },
+    {
+        .tp_mode = LCM_TP_MODE_TCI,
+        .any_lcs = true,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0404,
+            "RSE_BL1_1_PROVISIONING_TEST_0404",
+            "Provisioning integration TCI positive test"
         },
     },
 };

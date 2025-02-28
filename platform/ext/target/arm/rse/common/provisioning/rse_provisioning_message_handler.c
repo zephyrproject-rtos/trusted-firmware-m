@@ -22,6 +22,14 @@
 
 #include <string.h>
 
+#ifdef TEST_BL1_1
+#define TEST_STATIC
+#define TEST_STATIC_INLINE
+#else
+#define TEST_STATIC static
+#define TEST_STATIC_INLINE static inline
+#endif
+
 static bool rse_debug_is_disabled(void)
 {
     enum lcm_error_t lcm_err;
@@ -142,8 +150,8 @@ static enum tfm_plat_err_t disable_debug_before_running_blob(
     }
 }
 
-static inline bool blob_needs_code_data_decryption(
-        const struct rse_provisioning_message_blob_t *blob)
+TEST_STATIC_INLINE bool
+blob_needs_code_data_decryption(const struct rse_provisioning_message_blob_t *blob)
 {
     enum rse_provisioning_blob_code_and_data_decryption_config_t decryption_config =
         (blob->metadata >> RSE_PROVISIONING_BLOB_DETAILS_CODE_DATA_DECRYPTION_OFFSET)
@@ -152,8 +160,8 @@ static inline bool blob_needs_code_data_decryption(
     return (decryption_config == RSE_PROVISIONING_BLOB_CODE_DATA_DECRYPTION_AES);
 }
 
-static inline bool blob_needs_secret_decryption(
-        const struct rse_provisioning_message_blob_t *blob)
+TEST_STATIC_INLINE bool
+blob_needs_secret_decryption(const struct rse_provisioning_message_blob_t *blob)
 {
     enum rse_provisioning_blob_secret_values_decryption_config_t decryption_config =
         (blob->metadata >> RSE_PROVISIONING_BLOB_DETAILS_SECRET_VALUES_DECRYPTION_OFFSET)
@@ -508,13 +516,11 @@ static enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rs
     return cc_err;
 }
 
-static enum tfm_plat_err_t validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob,
-                                                    size_t msg_size,
-                                                    void *code_output, size_t code_output_size,
-                                                    void *data_output, size_t data_output_size,
-                                                    void *values_output, size_t values_output_size,
-                                                    setup_aes_key_func_t setup_aes_key,
-                                                    get_rotpk_func_t get_rotpk)
+TEST_STATIC enum tfm_plat_err_t
+validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob, size_t msg_size,
+                         void *code_output, size_t code_output_size, void *data_output,
+                         size_t data_output_size, void *values_output, size_t values_output_size,
+                         setup_aes_key_func_t setup_aes_key, get_rotpk_func_t get_rotpk)
 {
     size_t blob_payload_size = blob->code_size + blob->data_size + blob->secret_values_size;
     enum rse_provisioning_blob_signature_config_t sig_config;
