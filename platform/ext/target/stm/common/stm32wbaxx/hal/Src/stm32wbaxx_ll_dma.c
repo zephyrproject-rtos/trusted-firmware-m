@@ -966,7 +966,6 @@ uint32_t LL_DMA_CreateLinkNode(const LL_DMA_InitNodeTypeDef *DMA_InitNodeStruct,
     reg_counter++;
   }
 
-
   /* Check if CLLR register update is enabled */
   if ((DMA_InitNodeStruct->UpdateRegisters & LL_DMA_UPDATE_CLLR) == LL_DMA_UPDATE_CLLR)
   {

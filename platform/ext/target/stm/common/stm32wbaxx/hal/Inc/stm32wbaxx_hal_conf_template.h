@@ -161,7 +161,7 @@ extern "C" {
 #define  USE_HAL_COMP_REGISTER_CALLBACKS       0U /* COMP register callback disabled      */
 #define  USE_HAL_CRYP_REGISTER_CALLBACKS       0U /* CRYP register callback disabled      */
 #define  USE_HAL_HASH_REGISTER_CALLBACKS       0U /* HASH register callback disabled      */
-#define  USE_HAL_HCD_REGISTER_CALLBACKS        0U /* PCD register callback disabled       */
+#define  USE_HAL_HCD_REGISTER_CALLBACKS        0U /* HCD register callback disabled       */
 #define  USE_HAL_I2C_REGISTER_CALLBACKS        0U /* I2C register callback disabled       */
 #define  USE_HAL_IRDA_REGISTER_CALLBACKS       0U /* IRDA register callback disabled      */
 #define  USE_HAL_IWDG_REGISTER_CALLBACKS       0U /* IWDG register callback disabled      */
