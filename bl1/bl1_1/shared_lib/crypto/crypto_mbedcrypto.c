@@ -29,11 +29,12 @@ static void mbedtls_init(uint8_t mbedtls_memory_buf[], size_t size)
                                      size);
 }
 
-int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
+fih_int bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
                        size_t context_length, uint32_t *output_key,
                        size_t output_length)
 {
+    fih_int fih_rc;
     int rc = 0;
     uint8_t state[64] = {0};
     uint8_t key_buf[32] = {0};
@@ -42,7 +43,7 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
     const mbedtls_md_info_t *sha256_info = NULL;
 
     if (state_len > sizeof(state)) {
-        return -1;
+        FIH_RET(FIH_FAILURE);
     }
 
     memcpy(state, label, label_length);
@@ -53,11 +54,10 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
         mbedtls_is_initialised = 1;
     }
 
-    rc = bl1_otp_read_key(input_key, key_buf, sizeof(key_buf), &key_size);
-    if (rc) {
-        return rc;
+    FIH_CALL(bl1_otp_read_key, fih_rc, input_key, key_buf, sizeof(key_buf), &key_size);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
     }
-
 
     sha256_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
 
@@ -65,7 +65,8 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
                       key_size, state, state_len,
                       (uint8_t *)output_key, output_length);
 
-    return rc;
+    fih_rc = fih_int_encode_zero_equality(rc);
+    FIH_RET(fih_rc);
 }
 
 fih_int sha256_init()
@@ -213,7 +214,6 @@ out:
     FIH_RET(fih_rc);
 }
 
-
 static fih_int sha256_compute(const uint8_t *data,
                            size_t data_length,
                            uint8_t *hash, size_t hash_len, size_t *hash_size)
@@ -309,43 +309,60 @@ out:
 
 fih_int bl1_hash_init(enum tfm_bl1_hash_alg_t alg)
 {
+    fih_int fih_rc;
+
     switch(alg) {
     case TFM_BL1_HASH_ALG_SHA256:
-        FIH_RET(sha256_init());
+        FIH_CALL(sha256_init, fih_rc);
+        break;
     case TFM_BL1_HASH_ALG_SHA384:
-        FIH_RET(sha384_init());
+        FIH_CALL(sha384_init, fih_rc);
+        break;
     default:
-        FIH_RET(FIH_FAILURE);
+        fih_rc = FIH_FAILURE;
     }
+
+    FIH_RET(fih_rc);
 }
 
 fih_int bl1_hash_finish(uint8_t *hash,
                         size_t hash_length,
                         size_t *hash_size)
 {
+    fih_int fih_rc;
+
     switch(multipart_alg) {
     case TFM_BL1_HASH_ALG_SHA256:
-        FIH_RET(sha256_finish(hash, hash_length, hash_size));
+        FIH_CALL(sha256_finish, fih_rc, hash, hash_length, hash_size);
+        break;
     case TFM_BL1_HASH_ALG_SHA384:
-        FIH_RET(sha384_finish(hash, hash_length, hash_size));
+        FIH_CALL(sha384_finish, fih_rc, hash, hash_length, hash_size);
+        break;
     default:
-        FIH_RET(FIH_FAILURE);
+        fih_rc = FIH_FAILURE;
     }
+
+    FIH_RET(fih_rc);
 }
 
 fih_int bl1_hash_update(const uint8_t *data,
                         size_t data_length)
 {
+    fih_int fih_rc;
+
     switch(multipart_alg) {
     case TFM_BL1_HASH_ALG_SHA256:
-        FIH_RET(sha256_update(data, data_length));
+        FIH_CALL(sha256_update, fih_rc, data, data_length);
+        break;
     case TFM_BL1_HASH_ALG_SHA384:
-        FIH_RET(sha384_update(data, data_length));
+        FIH_CALL(sha384_update, fih_rc, data, data_length);
+        break;
     default:
-        FIH_RET(FIH_FAILURE);
+        fih_rc = FIH_FAILURE;
     }
-}
 
+    FIH_RET(fih_rc);
+}
 
 fih_int bl1_hash_compute(enum tfm_bl1_hash_alg_t alg,
                          const uint8_t *data,
@@ -354,23 +371,30 @@ fih_int bl1_hash_compute(enum tfm_bl1_hash_alg_t alg,
                          size_t hash_length,
                          size_t *hash_size)
 {
+    fih_int fih_rc;
+
     switch(alg) {
     case TFM_BL1_HASH_ALG_SHA256:
-        FIH_RET(sha256_compute(data, data_length, hash, hash_length, hash_size));
+        FIH_CALL(sha256_compute, fih_rc, data, data_length, hash, hash_length, hash_size);
+        break;
     case TFM_BL1_HASH_ALG_SHA384:
-        FIH_RET(sha384_compute(data, data_length, hash, hash_length, hash_size));
+        FIH_CALL(sha384_compute, fih_rc, data, data_length, hash, hash_length, hash_size);
+        break;
     default:
-        FIH_RET(FIH_FAILURE);
+        fih_rc = FIH_FAILURE;
     }
+
+    FIH_RET(fih_rc);
 }
 
-int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
+fih_int bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 const uint8_t *key_material,
                                 uint8_t *counter,
                                 const uint8_t *ciphertext,
                                 size_t ciphertext_length,
                                 uint8_t *plaintext)
 {
+    fih_int fih_rc;
     int rc = 0;
     uint8_t stream_block[16];
     uint8_t key_buf[32];
@@ -380,17 +404,17 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
     const uint8_t *input_key = key_buf;
 
     if (ciphertext_length == 0) {
-        return 0;
+        FIH_RET(FIH_SUCCESS);
     }
 
-    if (ciphertext == NULL || plaintext == NULL || counter == NULL) {
-        return -2;
+    if ((ciphertext == NULL) || (plaintext == NULL) || (counter == NULL)) {
+        FIH_RET(FIH_FAILURE);
     }
 
     if (key_material == NULL) {
-        rc = bl1_otp_read_key(key_id, key_buf, sizeof(key_buf), &key_size);
-        if (rc) {
-            return rc;
+        FIH_CALL(bl1_otp_read_key, fih_rc, key_id, key_buf, sizeof(key_buf), &key_size);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            FIH_RET(fih_rc);
         }
     } else {
         input_key = key_material;
@@ -406,15 +430,14 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
     mbedtls_aes_init(&ctx);
 
     rc = mbedtls_aes_setkey_enc(&ctx, input_key, key_size * 8);
-    if (rc) {
+    fih_rc = fih_int_encode_zero_equality(rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         goto out;
     }
 
     rc = mbedtls_aes_crypt_ctr(&ctx, ciphertext_length, &nc_off, counter,
                                stream_block, ciphertext, plaintext);
-    if (rc) {
-        goto out;
-    }
+    fih_rc = fih_int_encode_zero_equality(rc);
 
 out:
     mbedtls_aes_free(&ctx);
@@ -422,5 +445,5 @@ out:
     memset(key_buf, 0, 32);
     memset(stream_block, 0, 16);
 
-    return rc;
+    FIH_RET(fih_rc);
 }

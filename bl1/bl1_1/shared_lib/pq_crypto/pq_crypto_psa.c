@@ -21,10 +21,13 @@ psa_status_t psa_hash_setup(
     psa_hash_operation_t *operation,
     psa_algorithm_t alg)
 {
+    fih_int fih_rc;
     (void)operation;
     (void)alg;
 
-    return fih_int_decode(bl1_hash_init(TFM_BL1_HASH_ALG_SHA256));
+    FIH_CALL(bl1_hash_init, fih_rc, TFM_BL1_HASH_ALG_SHA256);
+
+    return fih_int_decode(fih_rc);
 }
 
 psa_status_t psa_hash_update(
@@ -32,9 +35,12 @@ psa_status_t psa_hash_update(
     const uint8_t *input,
     size_t input_length)
 {
+    fih_int fih_rc;
     (void)operation;
 
-    return fih_int_decode(bl1_hash_update((unsigned char *)input, input_length));
+    FIH_CALL(bl1_hash_update, fih_rc, (unsigned char *)input, input_length);
+
+    return fih_int_decode(fih_rc);
 }
 
 psa_status_t psa_hash_finish(
@@ -43,10 +49,13 @@ psa_status_t psa_hash_finish(
     size_t hash_size,
     size_t *hash_length)
 {
+    fih_int fih_rc;
     (void)operation;
     (void)hash_size;
 
-    return fih_int_decode(bl1_hash_finish(hash, hash_size, hash_length));
+    FIH_CALL(bl1_hash_finish, fih_rc, hash, hash_size, hash_length);
+
+    return fih_int_decode(fih_rc);
 }
 
 psa_status_t psa_hash_abort(
@@ -96,13 +105,13 @@ int pq_crypto_get_pub_key_hash(enum tfm_bl1_key_id_t key,
         return -1;
     }
 
-    fih_rc = bl1_otp_read_key(key, key_buf, sizeof(key_buf), &key_size);
+    FIH_CALL(bl1_otp_read_key, fih_rc, key, key_buf, sizeof(key_buf), &key_size);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return fih_int_decode(fih_rc);
     }
 
-    fih_rc = bl1_hash_compute(TFM_BL1_HASH_ALG_SHA256, key_buf, sizeof(key_buf),
-                              hash, sizeof(hash), hash_length);
+    FIH_CALL(bl1_hash_compute, fih_rc, TFM_BL1_HASH_ALG_SHA256, key_buf, sizeof(key_buf),
+                                       hash, sizeof(hash), hash_length);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return fih_int_decode(fih_rc);
     }

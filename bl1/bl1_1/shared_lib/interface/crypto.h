@@ -128,7 +128,7 @@ fih_int bl1_hash_finish(uint8_t *hash,
  *
  * @return int32_t 0 on success, non-zero on error
  */
-int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
+fih_int bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 const uint8_t *key_material,
                                 uint8_t *counter,
                                 const uint8_t *ciphertext,
@@ -149,9 +149,9 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
  * @param[out] output_key     Derived key material
  * @param[in]  output_length  Size in bytes of the key to be derived
  *
- * @return int32_t 0 on success, non-zero on error
+ * @return FIH_SUCCESS on success, non-zero on error
  */
-int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
+fih_int bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
                        size_t context_length, uint32_t *output_key,
                        size_t output_length);
@@ -175,9 +175,9 @@ int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
  *                            accommodate a private key for the desired \p curve, e.g. 32
  *                            bytes for P-256 or 48 bytes for P-384
  *
- * @return int32_t 0 on success, a \ref tfm_plat_err_t error code otherwise
+ * @return FIH_SUCCESS on success, non-zero on error
  */
-int32_t bl1_ecc_derive_key(enum tfm_bl1_ecdsa_curve_t curve, enum tfm_bl1_key_id_t key_id,
+fih_int bl1_ecc_derive_key(enum tfm_bl1_ecdsa_curve_t curve, enum tfm_bl1_key_id_t key_id,
                            const uint8_t *label, size_t label_length,
                            const uint8_t *context, size_t context_length,
                            uint32_t *output_key, size_t output_size);
@@ -193,7 +193,7 @@ int32_t bl1_ecc_derive_key(enum tfm_bl1_ecdsa_curve_t curve, enum tfm_bl1_key_id
  * @param[in] signature      Signature to verify in raw format (r,s)
  * @param[in] signature_size Size in bytes of the \p signature to verify
  *
- * @return fih_int 0 on success, non-zero on error
+ * @return FIH_SUCCESS on success, non-zero on error
  */
 fih_int bl1_ecdsa_verify(enum tfm_bl1_ecdsa_curve_t curve,
                          uint8_t *key, size_t key_size,
