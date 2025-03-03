@@ -138,13 +138,16 @@ Ruchika Gupta
     :email: `ruchika.gupta_1@nxp.com <ruchika.gupta_1@nxp.com>`__
     :github: `ruchi393 <https://github.com/ruchi393>`__
 
-STM Platforms: DISCO_L562QE, NUCLEO_L552ZE_Q
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+STM Platforms
+~~~~~~~~~~~~~
 
 Michel JAOUEN
     :email: `Michel.Jaouen@st.com <michel.jaouen@st.com>`__
     :github: `jamike <https://github.com/jamike>`__
 
+Ahmad EL JOUAID
+    :email: `ahmad.eljouaid@st.com <ahmad.eljouaid@st.com>`__
+    :github: `ahmadstm <https://github.com/ahmadstm>`__
 
 Infineon/Cypress Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -153,8 +156,8 @@ Chris Brand
     :email: `Chris Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
 
-Laird Connectivity Platforms:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Laird Connectivity Platforms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Greg Leach
     :email: `Greg.Leach@lairdconnect.com <greg.leach@lairdconnect.com>`__
@@ -168,23 +171,23 @@ Georgios Vasilakis
     :github: `Vge0rge <https://github.com/Vge0rge>`__
 
 
-Nuvoton Platform:
-~~~~~~~~~~~~~~~~~
+Nuvoton Platform
+~~~~~~~~~~~~~~~~
 
 WS Chang
     :email: `MS20 WSChang0@nuvoton.com <wschang0@nuvoton.com>`__
     :github: `wschang0 <https://github.com/wschang0>`__
 
 
-ArmChina Platform:
-~~~~~~~~~~~~~~~~~~
+ArmChina Platform
+~~~~~~~~~~~~~~~~~
 
 Jidong Mei
     :email: `Jidong.Mei@armchina.com <Jidong.Mei@armchina.com>`__
     :github: `JidongMei <https://github.com/JidongMei>`__
 
-Raspberry Pi Platform:
-~~~~~~~~~~~~~~~~~~~~~~
+Raspberry Pi Platform
+~~~~~~~~~~~~~~~~~~~~~
 
 William Vinnicombe
     :email: `William.Vinnicombe@raspberrypi.com <william.vinnicombe@raspberrypi.com>`__
@@ -194,4 +197,4 @@ William Vinnicombe
 
 .. _Project Maintenance Process: https://trusted-firmware-docs.readthedocs.io/en/latest/generic_processes/project_maintenance_process.html
 
-*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2025, Arm Limited. All rights reserved.*
