@@ -67,12 +67,21 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef TFM_FIH_PROFILE_ON
+
+/*
+ * Label for interacting with FIH testing tool. Can be parsed from the elf file
+ * after compilation. Does not require debug symbols.
+ */
+#define FIH_LABEL(str) __asm volatile ("FIH_LABEL_" str "_0_%=:" ::)
+#define FIH_LABEL_CRITICAL_POINT() FIH_LABEL("FIH_CRITICAL_POINT")
+
+/* Undefine the options as they are set through profiles */
 #undef FIH_ENABLE_GLOBAL_FAIL
 #undef FIH_ENABLE_CFI
 #undef FIH_ENABLE_DOUBLE_VARS
 #undef FIH_ENABLE_DELAY
 
-#ifdef TFM_FIH_PROFILE_ON
 #if defined(TFM_FIH_PROFILE_LOW)
 #define FIH_ENABLE_GLOBAL_FAIL
 #define FIH_ENABLE_CFI
@@ -89,7 +98,9 @@ extern "C" {
 #define FIH_ENABLE_CFI
 
 #else
-#error "Invalid FIH Profile configuration"
+
+#include TFM_FIH_PROFILE_CUSTOM_FILE
+
 #endif /* TFM_FIH_PROFILE */
 
 #define FIH_TRUE              0xC35A
@@ -407,13 +418,6 @@ void fih_cfi_decrement(void);
 #define FIH_CFI_STEP_DECREMENT()
 #define FIH_CFI_STEP_ERR_RESET()
 #endif /* FIH_ENABLE_CFI */
-
-/*
- * Label for interacting with FIH testing tool. Can be parsed from the elf file
- * after compilation. Does not require debug symbols.
- */
-#define FIH_LABEL(str) __asm volatile ("FIH_LABEL_" str "_0_%=:" ::)
-#define FIH_LABEL_CRITICAL_POINT() FIH_LABEL("FIH_CRITICAL_POINT")
 
 /*
  * Main FIH calling macro. return variable is second argument. Does some setup
