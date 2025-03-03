@@ -155,10 +155,27 @@ __attribute__((noinline)) __attribute__((used)) void fih_panic_loop(void);
  * to skip.
  */
 #ifdef FIH_ENABLE_DELAY
+
 /**
  * @brief Set up the RNG for use with random delays. Called once at startup.
  */
 void fih_delay_init(void);
+
+#ifdef FIH_ENABLE_DELAY_PLATFORM
+
+/**
+ * @brief when @def FIH_ENABLE_DELAY_PLATFORM is set, the platform must provide
+ *        its own implementation of the \a fih_delay function implementing a
+ *        \a fih_delay_platform with the same prototype
+ */
+int fih_delay_platform(void);
+__attribute__((always_inline)) inline
+int fih_delay(void)
+{
+    return fih_delay_platform();
+}
+
+#else
 
 /**
  * Get a random uint8_t value from an RNG seeded with an entropy source.
@@ -194,7 +211,10 @@ int fih_delay(void)
 
     return 1;
 }
+#endif /* FIH_ENABLE_DELAY_PLATFORM */
+
 #else /* FIH_ENABLE_DELAY */
+
 #define fih_delay_init()
 
 #define fih_delay()     1
