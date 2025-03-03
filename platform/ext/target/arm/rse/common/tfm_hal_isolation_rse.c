@@ -11,7 +11,7 @@
 /* RSE uses this function to lock down security-critical registers once the
  * static isolation boundaries have been set up.
  */
-enum tfm_hal_status_t tfm_hal_post_partition_init_hook(void)
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_post_partition_init_hook(void)
 {
     struct cpu0_secctrl_t *secctrl = (struct cpu0_secctrl_t *)CPU0_SECCTRL_BASE_S;
     uint32_t cpuseccfg_val = secctrl->cpuseccfg;
@@ -26,5 +26,5 @@ enum tfm_hal_status_t tfm_hal_post_partition_init_hook(void)
 
     secctrl->cpuseccfg = cpuseccfg_val;
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
