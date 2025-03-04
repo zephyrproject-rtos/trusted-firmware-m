@@ -350,6 +350,7 @@ target_sources(platform_bl2
         $<$<BOOL:${RSE_BL2_ENABLE_IMAGE_STAGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash_memcpy.c>
         ./rse_permanently_disable_device.c
         ./rse_zero_count.c
+        ./cc3xx/cc3xx_aes_external_key_loader.c
 )
 
 target_include_directories(platform_bl2
