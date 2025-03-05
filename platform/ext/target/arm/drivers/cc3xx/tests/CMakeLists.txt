@@ -21,6 +21,7 @@ target_sources(${CC3XX_TEST_TARGET_NAME}
         ./src/cc3xx_test_pka.c
         ./src/cc3xx_test_ecc.c
         ./src/cc3xx_test_ecdsa.c
+        ./src/cc3xx_test_drbg.c
         ./src/cc3xx_test_utils.c
 )
 

@@ -23,5 +23,6 @@ void add_cc3xx_tests_to_testsuite(struct test_suite_t *p_ts, uint32_t ts_size)
     add_cc3xx_pka_tests_to_testsuite(p_ts, ts_size);
     add_cc3xx_ecc_tests_to_testsuite(p_ts, ts_size);
     add_cc3xx_ecdsa_tests_to_testsuite(p_ts, ts_size);
+    add_cc3xx_drbg_tests_to_testsuite(p_ts, ts_size);
 #endif /* TEST_CC3XX */
 }
