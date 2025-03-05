@@ -22,7 +22,7 @@ void rse_test_virgin_to_tci_or_pci(struct test_result_t *ret)
     uint32_t random_word;
 
     cc_err = cc3xx_lowlevel_rng_get_random(&random_word, sizeof(random_word),
-                                           CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                           CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         TEST_FAIL("RNG coin flip failed");
         return;

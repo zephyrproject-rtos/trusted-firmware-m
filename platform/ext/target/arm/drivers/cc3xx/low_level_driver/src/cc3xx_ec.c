@@ -409,7 +409,7 @@ static cc3xx_err_t blind_scalar(cc3xx_ec_curve_t *curve, cc3xx_pka_reg_id_t scal
     cc3xx_lowlevel_pka_clear(zero_reg);
 
     err = cc3xx_lowlevel_rng_get_random_uint(CC3XX_CONFIG_EC_DPA_MAX_BLIND_MULTIPLE,
-                                             &rand, CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                             &rand, CC3XX_RNG_DRBG_HMAC);
     /* res = scalar + n * rand */
     cc3xx_lowlevel_pka_add(scalar, curve->order, res);
     for (idx = 1; idx < CC3XX_CONFIG_EC_DPA_MAX_BLIND_MULTIPLE; idx++) {

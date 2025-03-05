@@ -97,7 +97,7 @@ static enum tfm_plat_err_t header_init(struct rse_handshake_msg *msg,
 
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)&msg->header.ccm_iv,
                                            sizeof(msg->header.ccm_iv),
-                                           CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                           CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }
@@ -278,7 +278,7 @@ static enum tfm_plat_err_t calculate_session_key_client(uint32_t rse_id)
     /* Calculate our session key */
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)session_key_iv,
                                            SESSION_KEY_IV_SIZE,
-                                           CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                           CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }
@@ -323,7 +323,7 @@ static enum tfm_plat_err_t exchange_vhuk_seeds_client(uint32_t rse_id, uint32_t 
     /* Calculate our VHUK contribution key */
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)vhuk_seed,
                                            VHUK_SEED_SIZE,
-                                           CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                           CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }
@@ -388,7 +388,7 @@ static enum tfm_plat_err_t calculate_session_key_server()
     /* Calculate the session key for RSE 0 */
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)session_key_ivs,
                                            SESSION_KEY_IV_SIZE,
-                                           CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                           CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         return cc_err;
     }

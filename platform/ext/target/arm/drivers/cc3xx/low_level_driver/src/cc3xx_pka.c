@@ -794,7 +794,7 @@ cc3xx_err_t cc3xx_lowlevel_pka_set_to_random(cc3xx_pka_reg_id_t r0, size_t bit_l
     cc3xx_err_t err;
 
     err = cc3xx_lowlevel_rng_get_random((uint8_t *)random_buf, word_size * sizeof(uint32_t),
-                                        CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                        CC3XX_RNG_DRBG_HMAC);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
