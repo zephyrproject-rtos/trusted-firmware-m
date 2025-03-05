@@ -206,11 +206,10 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
     if (!g_drbg_hmac.seed_done) {
 
         /* Get a 24-byte seed from the TRNG */
-        trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
-
-        trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
-
-        trng_finish();
+        err = cc3xx_lowlevel_rng_get_entropy(entropy, sizeof(entropy));
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
 
         /* Call the seeding API of the drbg_hmac */
         err = cc3xx_lowlevel_drbg_hmac_instantiate(&g_drbg_hmac.state,
@@ -229,11 +228,10 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
     if (g_drbg_hmac.state.reseed_counter == UINT32_MAX) {
 
         /* Get a 24-byte seed from the TRNG */
-        trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
-
-        trng_get_random(entropy, sizeof(entropy) / sizeof(uint32_t));
-
-        trng_finish();
+        err = cc3xx_lowlevel_rng_get_entropy(entropy, sizeof(entropy));
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
 
         err = cc3xx_lowlevel_drbg_hmac_reseed(&g_drbg_hmac.state,
                     (const uint8_t *)entropy, sizeof(entropy), NULL, 0);
