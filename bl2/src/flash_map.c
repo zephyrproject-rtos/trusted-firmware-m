@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -132,6 +132,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     if (!is_range_valid(area, off, len)) {
         return -1;
     }
+
     remaining_len = len;
 
     /* CMSIS ARM_FLASH_ReadData API requires the `addr` data type size aligned.
@@ -180,42 +181,45 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
         remaining_len -= read_length;
     }
 
+    if (remaining_len == 0) {
+        return 0;
+    }
+
     /* The `cnt` parameter in CMSIS ARM_FLASH_ReadData indicates number of data
      * items to read.
      */
-    if (remaining_len) {
-        item_number = remaining_len / data_width;
-        if (item_number) {
-            ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + off + i,
-                                                (uint8_t *)dst + i,
-                                                item_number);
-            if (ret < 0) {
-                return ret;
-            }
-            remaining_len -= item_number * data_width;
-        }
-    }
-    if (remaining_len) {
-        ret = DRV_FLASH_AREA(area)->ReadData(
-                            area->fa_off + off + i + (item_number * data_width),
-                            temp_buffer,
-                            1);
+    item_number = remaining_len / data_width;
+    if (item_number) {
+        ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + off + i,
+                                            (uint8_t *)dst + i,
+                                            item_number);
         if (ret < 0) {
             return ret;
         }
-        for (j = 0; j < remaining_len; j++) {
-            ((uint8_t *)dst)[i + (item_number * data_width) + j] = temp_buffer[j];
+        remaining_len -= item_number * data_width;
+
+        if (remaining_len == 0) {
+            return 0;
         }
     }
+
+    ret = DRV_FLASH_AREA(area)->ReadData(
+                        area->fa_off + off + i + (item_number * data_width),
+                        temp_buffer,
+                        1);
 
     /* CMSIS ARM_FLASH_ReadData can return the number of data items read or
      * Status Error Codes which are negative for failures.
      */
     if (ret < 0) {
         return ret;
-    } else {
-        return 0;
     }
+
+    for (j = 0; j < remaining_len; j++) {
+        ((uint8_t *)dst)[i + (item_number * data_width) + j] = temp_buffer[j];
+    }
+
+    return 0;
 }
 
 /* Writes `len` bytes of flash memory at `off` from the buffer at `src`.
