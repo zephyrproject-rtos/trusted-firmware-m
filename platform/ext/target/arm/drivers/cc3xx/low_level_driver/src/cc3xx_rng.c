@@ -178,7 +178,10 @@ static cc3xx_err_t trng_get_random(uint32_t *buf, size_t word_count) {
 /* See https://en.wikipedia.org/wiki/Xorshift#xorshift+ */
 static uint64_t xorshift_plus_128_lfsr(void)
 {
-    static uint64_t state[2] = {0};
+    static union {
+        uint64_t state[2];
+        uint32_t entropy[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
+    } lfsr = {0};
     uint64_t temp0;
     uint64_t temp1;
 
@@ -186,20 +189,19 @@ static uint64_t xorshift_plus_128_lfsr(void)
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
-        cc3xx_lowlevel_rng_get_random((uint8_t *)&state, sizeof(state),
-                                      CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+        cc3xx_lowlevel_rng_get_entropy(lfsr.entropy, sizeof(lfsr.entropy));
         g_lfsr.seed_done = true;
     }
 
-    temp0 = state[0];
-    temp1 = state[1];
-    state[0] = state[1];
+    temp0 = lfsr.state[0];
+    temp1 = lfsr.state[1];
+    lfsr.state[0] = lfsr.state[1];
 
     temp0 ^= temp0 << 23;
     temp0 ^= temp0 >> 18;
     temp0 ^= temp1 ^ (temp1 >> 5);
 
-    state[1] = temp0;
+    lfsr.state[1] = temp0;
 
     return temp0 + temp1;
 }
