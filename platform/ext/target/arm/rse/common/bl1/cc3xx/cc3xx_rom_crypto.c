@@ -460,7 +460,7 @@ int32_t bl1_ecc_derive_key(
     }
 
     /* All the relevant secret keys for input are 256-bit */
-    cc_err = cc3xx_lowlevel_ecdsa_derivkey(
+    cc_err = cc3xx_lowlevel_ecdsa_derive_key(
                  cc_curve, kmu_key_slot, (uint32_t *)input_key,
                  CC3XX_AES_KEYSIZE_256, label, label_length, context,
                  context_length, output_key, output_size, NULL);
