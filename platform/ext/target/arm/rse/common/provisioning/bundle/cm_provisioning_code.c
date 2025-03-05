@@ -26,6 +26,7 @@ static const struct rse_cm_provisioning_values_t *values =
     &((const struct rse_combined_provisioning_values_t *)PROVISIONING_BUNDLE_VALUES_START)->cm;
 #endif
 
+#if !defined(RSE_CM_PROVISION_GUK) || !defined(RSE_CM_PROVISION_KP_CM) || !defined(RSE_CM_PROVISION_KCE_CM)
 static enum tfm_plat_err_t provision_derived_key(enum kmu_hardware_keyslot_t input_key,
                                                  uint32_t *input_key_buf,
                                                  uint8_t *label, size_t label_len,
@@ -68,6 +69,7 @@ out:
 
     return err;
 }
+#endif /* !RSE_CM_PROVISION_GUK || !RSE_CM_PROVISION_KP_CM || ! !RSE_CM_PROVISION_KCE_CM */
 
 #ifndef RSE_COMBINED_PROVISIONING_BUNDLES
 __attribute__((section("DO_PROVISION"))) enum tfm_plat_err_t do_provision(void) {
@@ -199,7 +201,7 @@ enum tfm_plat_err_t do_cm_provision(void) {
 
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)generated_key_buf,
                                       sizeof(generated_key_buf),
-                                      CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+                                      CC3XX_RNG_DRBG_HMAC);
     if (cc_err != CC3XX_ERR_SUCCESS) {
       return (enum tfm_plat_err_t)cc_err;
     }
