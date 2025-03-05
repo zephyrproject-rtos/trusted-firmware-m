@@ -35,6 +35,13 @@ target_include_directories(${CC3XX_TEST_TARGET_NAME}
 target_compile_definitions(${CC3XX_TEST_TARGET_NAME}
     INTERFACE
         $<$<BOOL:${TEST_CC3XX}>:TEST_CC3XX>
+        $<$<BOOL:${TEST_CC3XX_HASH}>:TEST_CC3XX_HASH>
+        $<$<BOOL:${TEST_CC3XX_AES}>:TEST_CC3XX_AES>
+        $<$<BOOL:${TEST_CC3XX_CHACHA}>:TEST_CC3XX_CHACHA>
+        $<$<BOOL:${TEST_CC3XX_PKA}>:TEST_CC3XX_PKA>
+        $<$<BOOL:${TEST_CC3XX_ECC}>:TEST_CC3XX_ECC>
+        $<$<BOOL:${TEST_CC3XX_ECDSA}>:TEST_CC3XX_ECDSA>
+        $<$<BOOL:${TEST_CC3XX_DRBG}>:TEST_CC3XX_DRBG>
 )
 
 target_link_libraries(${CC3XX_TEST_TARGET_NAME}
