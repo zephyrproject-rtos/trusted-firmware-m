@@ -30,11 +30,26 @@ static inline uint32_t round_up(uint32_t num, uint32_t boundary)
     return (num + boundary - 1) - ((num + boundary - 1) % boundary);
 }
 
-static bool lfsr_seed_done = false;
-static uint32_t lfsr_buf[sizeof(uint64_t) / sizeof(uint32_t)];
-static size_t lfsr_buf_used_idx = sizeof(lfsr_buf);
 static uint32_t entropy_buf[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
 static size_t entropy_buf_used_idx = sizeof(entropy_buf);
+
+/* Define a function pointer to associate to generator functions for
+ * enum cc3xx_rng_quality_t that supports buffering random values
+ */
+typedef cc3xx_err_t (*random_fn_t)(uint32_t *, size_t);
+
+/* Static context of the LFSR */
+static cc3xx_err_t lfsr_get_random(uint32_t* buf, size_t word_count);
+
+static struct {
+    uint32_t buf[sizeof(uint64_t) / sizeof(uint32_t)];
+    size_t buf_used_idx;
+    bool seed_done;
+    random_fn_t fn;
+} g_lfsr = {
+    .buf_used_idx = sizeof(uint64_t),
+    .seed_done = false,
+    .fn = lfsr_get_random};
 
 /* Static state context of DRBG_HMAC */
 static struct {
@@ -167,13 +182,13 @@ static uint64_t xorshift_plus_128_lfsr(void)
     uint64_t temp0;
     uint64_t temp1;
 
-    if (!lfsr_seed_done) {
+    if (!g_lfsr.seed_done) {
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
         cc3xx_lowlevel_rng_get_random((uint8_t *)&state, sizeof(state),
                                       CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
-        lfsr_seed_done = true;
+        g_lfsr.seed_done = true;
     }
 
     temp0 = state[0];
@@ -303,7 +318,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
     size_t *used_idx;
     size_t max_buf_size;
     /* Different values of cc3xx_rng_quality_t use a different generation function */
-    cc3xx_err_t (*random_fn)(uint32_t *, size_t);
+    random_fn_t random_fn;
 
     size_t copy_size;
     const bool request_is_word_aligned = ((uintptr_t)buf & 0x3) == 0 && (length & 0x3) == 0;
@@ -318,13 +333,13 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
         random_fn = trng_get_random;
         break;
     case CC3XX_RNG_FAST:
-        random_buf = lfsr_buf;
-        used_idx = &lfsr_buf_used_idx;
-        max_buf_size = sizeof(lfsr_buf);
-        random_fn = lfsr_get_random;
+        random_buf = g_lfsr.buf;
+        used_idx = &g_lfsr.buf_used_idx;
+        max_buf_size = sizeof(g_lfsr.buf);
+        random_fn = g_lfsr.fn;
         break;
     case CC3XX_RNG_DRBG_HMAC:
-        /* When using a DRBG, buffering entropy is not suppported, hence just return
+        /* When using a DRBG, buffering random values is not suppported, hence just return
          * the generated bits without any special handling of saved bits from previous
          * iterations
          */
