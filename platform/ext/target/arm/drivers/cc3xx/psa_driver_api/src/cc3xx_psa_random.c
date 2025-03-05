@@ -18,6 +18,7 @@
 #endif
 
 #include "cc3xx_psa_random.h"
+#include "cc3xx_psa_entropy.h"
 #include "cc3xx_misc.h"
 #include "cc3xx_error.h"
 #include "cc3xx_drbg.h"
@@ -58,7 +59,7 @@ psa_status_t cc3xx_init_random(cc3xx_random_context_t *context)
     cc3xx_err_t err;
     const struct random_context_params_t conf = {
 #if defined(CC3XX_CONFIG_ENABLE_RANDOM_CTR_DRBG)
-    .type = CC3XX_DRBG_CTR, .initial_entropy_size = 32, .reseed_entropy_size = 32
+    .type = CC3XX_DRBG_CTR, .initial_entropy_size = CC3XX_DRBG_CTR_SEEDLEN, .reseed_entropy_size = CC3XX_DRBG_CTR_SEEDLEN
 #elif defined(CC3XX_CONFIG_ENABLE_RANDOM_HMAC_DRBG)
     .type = CC3XX_DRBG_HMAC, .initial_entropy_size = 32, .reseed_entropy_size = 32
 #elif defined(CC3XX_CONFIG_ENABLE_RANDOM_HASH_DRBG)
@@ -69,8 +70,7 @@ psa_status_t cc3xx_init_random(cc3xx_random_context_t *context)
 
     CC3XX_ASSERT(context != NULL);
 
-    err = cc3xx_lowlevel_rng_get_random(initial_entropy, sizeof(initial_entropy),
-                                        CC3XX_RNG_DRBG_HMAC);
+    err = cc3xx_get_entropy(0, NULL, initial_entropy, sizeof(initial_entropy));
     if (err != CC3XX_ERR_SUCCESS) {
         return cc3xx_to_psa_err(err);
     }
@@ -91,7 +91,7 @@ psa_status_t cc3xx_add_entropy(
     size_t entropy_size)
 {
 #ifdef CC3XX_CONFIG_ENABLE_RANDOM_CTR_DRBG
-    if (entropy_size != 32) {
+    if (entropy_size != CC3XX_DRBG_CTR_SEEDLEN) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 #endif

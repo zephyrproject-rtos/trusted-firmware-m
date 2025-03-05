@@ -29,20 +29,36 @@ psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
                                uint8_t *output, size_t output_size)
 {
     cc3xx_err_t err;
+    /* Integer multiple of entropy size*/
+    const size_t int_mult = (output_size / CC3XX_RNG_ENTROPY_SIZE) * CC3XX_RNG_ENTROPY_SIZE;
 
     CC3XX_ASSERT(output != NULL);
-    CC3XX_ASSERT(estimate_bits != NULL);
     CC3XX_ASSERT(output_size != 0);
 
-    *estimate_bits = 0;
+    if (estimate_bits != NULL) {
+        *estimate_bits = 0;
+    }
 
-    err = cc3xx_lowlevel_rng_get_random(output, output_size,
-                                        CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE);
+    /* Get a multiple of CC3XX_RNG_ENTROPY_SIZE bytes of entropy */
+    err = cc3xx_lowlevel_rng_get_entropy((uint32_t *)output, int_mult);
+
     if (err != CC3XX_ERR_SUCCESS) {
         return cc3xx_to_psa_err(err);
     }
 
-    *estimate_bits = output_size * 8;
+    if ((output_size % CC3XX_RNG_ENTROPY_SIZE) != 0) {
+        uint32_t last[CC3XX_RNG_ENTROPY_SIZE / sizeof(uint32_t)];
+        err = cc3xx_lowlevel_rng_get_entropy(last, sizeof(last));
+        if (err != CC3XX_ERR_SUCCESS) {
+            return cc3xx_to_psa_err(err);
+        }
+        memcpy(&output[int_mult], last, output_size - int_mult);
+    }
+
+    if (estimate_bits != NULL) {
+        /* The TRNG returns full entropy */
+        *estimate_bits = PSA_BYTES_TO_BITS(output_size);
+    }
 
     return PSA_SUCCESS;
 }
