@@ -276,6 +276,28 @@ cc3xx_err_t cc3xx_lowlevel_rng_set_config(enum cc3xx_rng_rosc_id_t rosc_id,
     return CC3XX_ERR_SUCCESS;
 }
 
+cc3xx_err_t cc3xx_lowlevel_rng_get_entropy(uint32_t *entropy, size_t entropy_len)
+{
+    cc3xx_err_t err;
+    size_t num_words = 0;
+
+    assert((entropy_len % sizeof(P_CC3XX->rng.ehr_data)) == 0);
+
+    trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
+
+    for (size_t i = 0; i < entropy_len / sizeof(P_CC3XX->rng.ehr_data); i++) {
+        err = trng_get_random(&entropy[num_words], sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t));
+        if (err != CC3XX_ERR_SUCCESS) {
+            break;
+        }
+        num_words += sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t);
+    }
+
+    trng_finish();
+
+    return err;
+}
+
 cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
                                           enum cc3xx_rng_quality_t quality)
 {
