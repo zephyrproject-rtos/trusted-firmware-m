@@ -30,9 +30,6 @@ static inline uint32_t round_up(uint32_t num, uint32_t boundary)
     return (num + boundary - 1) - ((num + boundary - 1) % boundary);
 }
 
-static uint32_t entropy_buf[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
-static size_t entropy_buf_used_idx = sizeof(entropy_buf);
-
 /* Define a function pointer to associate to generator functions for
  * enum cc3xx_rng_quality_t that supports buffering random values
  */
@@ -328,12 +325,6 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
     cc3xx_err_t err;
 
     switch (quality) {
-    case CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE:
-        random_buf = entropy_buf;
-        used_idx = &entropy_buf_used_idx;
-        max_buf_size = sizeof(entropy_buf);
-        random_fn = trng_get_random;
-        break;
     case CC3XX_RNG_FAST:
         random_buf = g_lfsr.buf;
         used_idx = &g_lfsr.buf_used_idx;
@@ -362,18 +353,11 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
      */
     rng_required = (max_buf_size - *used_idx) < length;
 
-    if (rng_required && quality == CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE) {
-        err = trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
-        if (err != CC3XX_ERR_SUCCESS) {
-            return err;
-        }
-    }
-
     while(length > 0) {
         if (*used_idx == max_buf_size) {
             err = random_fn(random_buf, max_buf_size / sizeof(uint32_t));
             if (err != CC3XX_ERR_SUCCESS) {
-                goto out;
+                return err;
             }
             *used_idx = 0;
         }
@@ -396,18 +380,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
         *used_idx += copy_size;
     }
 
-    err = CC3XX_ERR_SUCCESS;
-out:
-    /* If we started the RNG, shut it down */
-    if (rng_required && quality == CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE) {
-        err = trng_finish();
-
-        if (err != CC3XX_ERR_SUCCESS) {
-            return err;
-        }
-    }
-
-    return err;
+    return CC3XX_ERR_SUCCESS;
 }
 
 /* As per NIST SP800-90A A.5.1 */

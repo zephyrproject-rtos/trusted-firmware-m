@@ -32,9 +32,8 @@ extern "C" {
  *
  */
 enum cc3xx_rng_quality_t {
-    CC3XX_RNG_CRYPTOGRAPHICALLY_SECURE, /*!< Generates random numbers accessing the TRNG */
-    CC3XX_RNG_FAST,                     /*!< Generates random numbers using an LFSR based algo */
-    CC3XX_RNG_DRBG_HMAC,                /*!< Generates random numbers using the DRBG_HMAC algo */
+    CC3XX_RNG_FAST,          /*!< Generates random numbers using an LFSR based algo */
+    CC3XX_RNG_DRBG_HMAC,     /*!< Generates random numbers using the DRBG_HMAC algo */
 };
 
 /**
