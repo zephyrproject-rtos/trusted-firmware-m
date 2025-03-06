@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -62,9 +62,10 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
     uint16_t i;
     /* uint32_t has maximum value of 4,294,967,295. Require enough space in buffer
      * for 10 digits + null terminator + '-' */
-    char buf[12];
+    char buf[12] = { 0 };
     char *const buf_end = &buf[sizeof(buf) - 1];
-    char *buf_ptr = buf_end;
+    /* Leaving space for NULL terminator */
+    char *buf_ptr = buf_end - 1;
     const char pad_char = zero_padding ? '0' : ' ';
     const char negative_char = '-';
     bool negative = false;
@@ -73,9 +74,6 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
         val = -val;
         negative = true;
     }
-
-    /* Ensure buffer ends with NULL character */
-    *buf_ptr-- = '\0';
 
     do {
         digit = val % base;
