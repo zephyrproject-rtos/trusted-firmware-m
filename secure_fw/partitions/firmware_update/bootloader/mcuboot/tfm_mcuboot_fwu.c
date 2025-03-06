@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -509,7 +509,7 @@ static psa_status_t util_img_hash(const struct flash_area *fap,
     psa_status_t status;
     uint8_t tmpbuf[BOOT_TMPBUF_SZ];
     uint32_t tmp_buf_sz = BOOT_TMPBUF_SZ;
-    uint32_t blk_sz;
+    uint32_t blk_sz = 0;
     uint32_t off;
 
     /* Setup the hash object for the desired hash. */
