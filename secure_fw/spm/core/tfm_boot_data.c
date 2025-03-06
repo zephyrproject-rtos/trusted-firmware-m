@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -150,7 +150,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uint8_t *ptr;
     struct shared_data_tlv_entry tlv_entry;
     uintptr_t tlv_end, offset;
-    size_t next_tlv_offset;
+    size_t next_tlv_offset = 0;
 #endif /* BOOT_DATA_AVAILABLE */
     const struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
