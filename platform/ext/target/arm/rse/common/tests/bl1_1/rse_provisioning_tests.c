@@ -15,10 +15,13 @@
 #include "region_defs.h"
 #include "rse_provisioning_message.h"
 #include "rse_provisioning_message_handler.h"
+#include "rse_provisioning_rotpk.h"
 #include "rse_kmu_keys.h"
 #include "cc3xx_aes.h"
 #include "device_definition.h"
 #include "tfm_plat_provisioning.h"
+#include "crypto.h"
+#include "cc3xx_drv.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
@@ -61,8 +64,19 @@ struct rse_provisioning_message_blob_with_data_t {
     uint8_t __data[CODE_DATA_SECRET_VALUES_SIZE];
 };
 
+struct rse_provisioning_ecdsa_gen_key_data_t {
+    uint32_t private_key[48 / sizeof(uint32_t)];
+    uint32_t public_key_x[48 / sizeof(uint32_t)];
+    uint32_t public_key_y[48 / sizeof(uint32_t)];
+    size_t private_key_len;
+    size_t public_key_x_len;
+    size_t public_key_y_len;
+};
+
 static struct rse_provisioning_message_blob_with_data_t __test_blob_with_data;
 static struct rse_provisioning_message_blob_t *const test_blob = &__test_blob_with_data.blob;
+
+static struct rse_provisioning_ecdsa_gen_key_data_t ecdsa_public_key_data;
 
 static struct kmu_key_export_config_t aes_key0_export_config = {
     .export_address = CC3XX_BASE_S + 0x400, /* CC3XX AES_KEY_0 register */
@@ -92,6 +106,12 @@ static struct kmu_key_export_config_t aes_128_key0_export_config = {
     .destination_port_data_writes_code = KMU_DESTINATION_PORT_WIDTH_4_WRITES, /* Perform 8 writes (total 256 bits) */
     .new_mask_for_next_key_writes = true,  /* refresh the masking */
     .write_mask_disable = false, /* Don't disable the masking */
+};
+
+static const uint8_t __ALIGNED(sizeof(uint32_t)) ecdsa_rom_private_key[48] = {
+    0xbc, 0x65, 0x05, 0xa3, 0xa2, 0x80, 0x82, 0x68, 0xb4, 0x09, 0xf4, 0x32, 0x4d, 0x28, 0xcc, 0x8f,
+    0xa1, 0x4a, 0x05, 0x72, 0xa1, 0xa5, 0xb9, 0x71, 0xae, 0xd7, 0x76, 0x5f, 0xe7, 0x6e, 0x91, 0x5f,
+    0xa4, 0xdd, 0x46, 0x19, 0xe4, 0x13, 0x1b, 0x4b, 0xd5, 0x3e, 0xdf, 0x0b, 0x5d, 0xe7, 0xdf, 0x60
 };
 
 static inline size_t get_blob_size(struct rse_provisioning_message_blob_t *blob)
@@ -175,8 +195,9 @@ static enum tfm_plat_err_t setup_correct_key(bool is_cm)
     return rse_setup_provisioning_key(label, label_len, NULL, 0);
 }
 
-static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_slot_id_t key,
-                                           struct rse_provisioning_message_blob_t *blob)
+static enum tfm_plat_err_t aes_sign_encrypt_test_image(cc3xx_aes_mode_t mode,
+                                                       enum rse_kmu_slot_id_t key,
+                                                       struct rse_provisioning_message_blob_t *blob)
 {
     enum cc3xx_error cc_err;
     size_t data_size_to_encrypt = 0;
@@ -262,10 +283,109 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
         if (cc_err != CC3XX_ERR_SUCCESS) {
             return (enum tfm_plat_err_t)cc_err;
         }
+    }
+
+    if (mode == CC3XX_AES_MODE_CCM) {
         blob->signature_size = AES_TAG_MAX_LEN;
     }
 
     return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t hash_test_image(struct rse_provisioning_message_blob_t *blob,
+                                           uint8_t *hash, size_t *hash_size)
+{
+    fih_int fih_rc;
+    const uint32_t authed_header_offset =
+        offsetof(struct rse_provisioning_message_blob_t, metadata);
+    const size_t authed_header_size =
+        offsetof(struct rse_provisioning_message_blob_t, code_and_data_and_secret_values) -
+        authed_header_offset;
+
+    fih_rc = bl1_hash_compute(RSE_PROVISIONING_HASH_ALG, (uint8_t *)blob + authed_header_offset,
+                              authed_header_size + blob->code_size + blob->data_size +
+                                  blob->secret_values_size,
+                              hash, RSE_PROVISIONING_HASH_MAX_SIZE, hash_size);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return (enum tfm_plat_err_t)fih_rc;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t ecdsa_sign_test_image(struct rse_provisioning_message_blob_t *blob,
+                                                 const uint32_t *private_key,
+                                                 size_t private_key_size)
+{
+    enum tfm_plat_err_t err;
+    cc3xx_err_t cc_err;
+    uint32_t hash[RSE_PROVISIONING_HASH_MAX_SIZE / sizeof(uint32_t)];
+    size_t hash_size, point_size, r_size, s_size;
+
+    err = hash_test_image(blob, (uint8_t *)hash, &hash_size);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    point_size = cc3xx_lowlevel_ec_get_modulus_size_from_curve(RSE_PROVISIONING_CURVE);
+    blob->signature_size = point_size * 2;
+
+    cc_err = cc3xx_lowlevel_ecdsa_sign(RSE_PROVISIONING_CURVE, private_key, private_key_size, hash,
+                                       hash_size, (uint32_t *)blob->signature, point_size, &r_size,
+                                       (uint32_t *)(blob->signature + point_size), point_size,
+                                       &s_size);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return (enum tfm_plat_err_t)cc_err;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t ecdsa_generate_public_private_key_pair(
+    uint32_t *private_key, size_t private_key_len, size_t *private_key_size, uint32_t *public_key_x,
+    size_t public_key_x_len, size_t *public_key_x_size, uint32_t *public_key_y,
+    size_t public_key_y_len, size_t *public_key_y_size)
+{
+    cc3xx_err_t cc_err;
+
+    cc_err = cc3xx_lowlevel_ecdsa_genkey(RSE_PROVISIONING_CURVE, private_key, private_key_len,
+                                         private_key_size);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return (enum tfm_plat_err_t)cc_err;
+    }
+
+    cc_err = cc3xx_lowlevel_ecdsa_getpub(RSE_PROVISIONING_CURVE, private_key, private_key_len,
+                                         public_key_x, public_key_x_len, public_key_x_size,
+                                         public_key_y, public_key_y_len, public_key_y_size);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return (enum tfm_plat_err_t)cc_err;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t
+ecdsa_initialise_key_data(struct rse_provisioning_ecdsa_gen_key_data_t *data)
+{
+    return ecdsa_generate_public_private_key_pair(
+        data->private_key, sizeof(data->private_key), &data->private_key_len, data->public_key_x,
+        sizeof(data->public_key_x), &data->public_key_x_len, data->public_key_y,
+        sizeof(data->public_key_y), &data->public_key_y_len);
+}
+
+static enum tfm_plat_err_t
+ecdsa_sign_then_encrypt_test_image(const uint32_t *private_key, size_t private_key_len,
+                                   enum rse_kmu_slot_id_t key,
+                                   struct rse_provisioning_message_blob_t *blob)
+{
+    enum tfm_plat_err_t err;
+
+    err = ecdsa_sign_test_image(blob, private_key, private_key_len);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    return aes_sign_encrypt_test_image(CC3XX_AES_MODE_CTR, key, blob);
 }
 
 static void init_test_image(struct rse_provisioning_message_blob_t *blob,
@@ -330,8 +450,21 @@ setup_provisioning_aes_key(const struct rse_provisioning_message_blob_t *blob, u
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+static enum tfm_plat_err_t get_global_public_key(const struct rse_provisioning_message_blob_t *blob,
+                                                 uint32_t **public_key_x, size_t *public_key_x_size,
+                                                 uint32_t **public_key_y, size_t *public_key_y_size)
+{
+    *public_key_x = ecdsa_public_key_data.public_key_x;
+    *public_key_x_size = ecdsa_public_key_data.public_key_x_len;
+    *public_key_y = ecdsa_public_key_data.public_key_y;
+    *public_key_y_size = ecdsa_public_key_data.public_key_y_len;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 static enum tfm_plat_err_t
 init_test_image_sign_random_key(struct rse_provisioning_message_blob_t *blob,
+                                struct rse_provisioning_ecdsa_gen_key_data_t *ecdsa_data,
                                 enum rse_provisioning_blob_signature_config_t signature_config,
                                 size_t code_size, size_t data_size, size_t secret_size,
                                 bool encrypt_code_data, bool encrypt_secret)
@@ -352,7 +485,17 @@ init_test_image_sign_random_key(struct rse_provisioning_message_blob_t *blob,
         return err;
     }
 
-    return sign_test_image(CC3XX_AES_MODE_CCM, RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    switch (signature_config) {
+    case RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE:
+        return aes_sign_encrypt_test_image(CC3XX_AES_MODE_CCM, RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    case RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM:
+    case RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM:
+        return ecdsa_sign_then_encrypt_test_image(ecdsa_data->private_key,
+                                                  ecdsa_data->private_key_len,
+                                                  RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    default:
+        return TFM_PLAT_ERR_PROVISIONING_SIGNATURE_TYPE_NOT_SUPPORTED;
+    }
 }
 
 void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
@@ -361,21 +504,39 @@ void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
 
     bool code_data_encrypted[] = { false, true };
 
+    enum rse_provisioning_blob_signature_config_t signature_config[] = {
+        RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE,
+        RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM,
+    };
+
+    TEST_SETUP(ecdsa_initialise_key_data(&ecdsa_public_key_data));
+
     for (int encryption_idx = 0; encryption_idx < ARRAY_SIZE(code_data_encrypted);
          encryption_idx++) {
-        TEST_SETUP(init_test_image_sign_random_key(
-            test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32,
-            code_data_encrypted[encryption_idx], true));
+        for (int signature_idx = 0; signature_idx < ARRAY_SIZE(signature_config); signature_idx++) {
+            TEST_LOG(" > signature validation test %s %s: ",
+                     signature_config[signature_idx] ==
+                             RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE ?
+                         "AES" :
+                         "ECDSA",
+                     code_data_encrypted[encryption_idx] ? "encrypted" : "not encrypted");
 
-        plat_err = validate_and_unpack_blob(
-            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
-            PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
-            PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
-            PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, NULL);
+            TEST_SETUP(init_test_image_sign_random_key(test_blob, &ecdsa_public_key_data,
+                                                       signature_config[signature_idx], 32, 32, 32,
+                                                       code_data_encrypted[encryption_idx], true));
 
-        TEST_ASSERT(plat_err == TFM_PLAT_ERR_SUCCESS, "Signature validation failed");
+            plat_err = validate_and_unpack_blob(
+                test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
+                PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
+                PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
+                PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, get_global_public_key);
 
-        TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+            TEST_LOG("\r");
+
+            TEST_ASSERT(plat_err == TFM_PLAT_ERR_SUCCESS, "\nSignature validation failed");
+
+            TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+        }
     }
 
     ret->val = TEST_PASSED;
@@ -400,36 +561,49 @@ void rse_bl1_provisioning_test_0002(struct test_result_t *ret)
         (uint8_t *)(test_blob->code_and_data_and_secret_values + code_size + values_size),
     };
 
+    enum rse_provisioning_blob_signature_config_t signature_config[] = {
+        RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE,
+        RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM,
+    };
+
+    TEST_SETUP(ecdsa_initialise_key_data(&ecdsa_public_key_data));
+
     for (int idx = 0; idx < ARRAY_SIZE(corruption_ptrs); idx++) {
-        TEST_SETUP(init_test_image_sign_random_key(
-            test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, code_size, values_size,
-            secret_size, false, true));
+        for (int signature_idx = 0; signature_idx < ARRAY_SIZE(signature_config); signature_idx++) {
+            TEST_SETUP(init_test_image_sign_random_key(test_blob, &ecdsa_public_key_data,
+                                                       signature_config[signature_idx], code_size,
+                                                       values_size, secret_size, false, true));
 
-        *(uint32_t *)corruption_ptrs[idx] ^= 0xDEADBEEF;
+            *(uint32_t *)corruption_ptrs[idx] ^= 0xDEADBEEF;
 
-        TEST_LOG(" > testing corruption at offset %d (%d of %d): ",
-                 (uintptr_t)corruption_ptrs[idx] - (uintptr_t)&test_blob, idx + 1,
-                 ARRAY_SIZE(corruption_ptrs));
+            TEST_LOG(" > %s signature: testing corruption at offset %d (%d of %d): ",
+                     signature_config[signature_idx] ==
+                             RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE ?
+                         "AES" :
+                         "ECDSA",
+                     (uintptr_t)corruption_ptrs[idx] - (uintptr_t)&test_blob, idx + 1,
+                     ARRAY_SIZE(corruption_ptrs));
 
-        plat_err = validate_and_unpack_blob(
-            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
-            PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
-            PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
-            PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, NULL);
+            plat_err = validate_and_unpack_blob(
+                test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
+                PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
+                PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
+                PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, get_global_public_key);
 
-        TEST_LOG("\r");
+            TEST_LOG("\r");
 
-        TEST_ASSERT(plat_err != TFM_PLAT_ERR_SUCCESS,
-                    "\nSignature validation succeeded when it should have failed");
+            TEST_ASSERT(plat_err != TFM_PLAT_ERR_SUCCESS,
+                        "\nSignature validation succeeded when it should have failed");
 
-        TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+            TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+        }
     }
 
     ret->val = TEST_PASSED;
     return;
 }
 
-static const enum rse_kmu_slot_id_t invalid_keys[] = {
+static const enum rse_kmu_slot_id_t invalid_kmu_keys[] = {
     26, /* Size mismatch */
     28, /* Not locked */
     _RSE_KMU_AEAD_RESERVED_SLOT_PROVISIONING_KEY, /* No valid AEAD key in next slot */
@@ -442,7 +616,7 @@ static enum tfm_plat_err_t setup_invalid_aes_key(const struct rse_provisioning_m
 {
     static size_t counter;
 
-    *key_id = invalid_keys[counter++];
+    *key_id = invalid_kmu_keys[counter++];
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -453,23 +627,23 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
     volatile uint32_t *slot_ptr;
     size_t slot_size;
 
-    TEST_SETUP(setup_key_from_rng(invalid_keys[0], &aes_128_key0_export_config,
+    TEST_SETUP(setup_key_from_rng(invalid_kmu_keys[0], &aes_128_key0_export_config,
                                   &aes_key1_export_config, true));
-    TEST_SETUP(kmu_get_key_buffer_ptr(&KMU_DEV_S, invalid_keys[0], &slot_ptr, &slot_size));
+    TEST_SETUP(kmu_get_key_buffer_ptr(&KMU_DEV_S, invalid_kmu_keys[0], &slot_ptr, &slot_size));
     for (int idx = slot_size / sizeof(uint32_t); idx < 8; idx++) {
         slot_ptr[idx] = 0xDEADBEEF;
     }
 
-    TEST_SETUP(setup_key_from_rng(invalid_keys[1], &aes_key0_export_config, &aes_key1_export_config,
-                                  true));
-    TEST_SETUP(kmu_set_key_locked(&KMU_DEV_S, invalid_keys[1]));
+    TEST_SETUP(setup_key_from_rng(invalid_kmu_keys[1], &aes_key0_export_config,
+                                  &aes_key1_export_config, true));
+    TEST_SETUP(kmu_set_key_locked(&KMU_DEV_S, invalid_kmu_keys[1]));
 
     TEST_SETUP(init_test_image_sign_random_key(
-        test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32, false, true));
+        test_blob, NULL, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32, false, true));
 
-    for (int idx = 0; idx < ARRAY_SIZE(invalid_keys); idx++) {
-        TEST_LOG(" > testing invalid key %d (%d of %d): ", invalid_keys[idx],
-                                                           idx + 1, ARRAY_SIZE(invalid_keys));
+    for (int idx = 0; idx < ARRAY_SIZE(invalid_kmu_keys); idx++) {
+        TEST_LOG(" > testing invalid key %d (%d of %d): ", invalid_kmu_keys[idx], idx + 1,
+                 ARRAY_SIZE(invalid_kmu_keys));
 
         plat_err = validate_and_unpack_blob(
             test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
@@ -482,7 +656,7 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
         TEST_ASSERT(plat_err == (enum tfm_plat_err_t)CC3XX_ERR_KEY_IMPORT_FAILED,
                     "\nKey loading succeeded when it should have failed");
 
-        TEST_TEARDOWN(test_teardown(invalid_keys[idx], NULL));
+        TEST_TEARDOWN(test_teardown(invalid_kmu_keys[idx], NULL));
     }
 
     TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
@@ -491,7 +665,62 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
     return;
 }
 
+static struct rse_provisioning_ecdsa_gen_key_data_t invalid_ecdsa_keys[2];
+
+enum tfm_plat_err_t get_invalid_public_key(const struct rse_provisioning_message_blob_t *blob,
+                                           uint32_t **public_key_x, size_t *public_key_x_size,
+                                           uint32_t **public_key_y, size_t *public_key_y_size)
+{
+    static size_t counter;
+    struct rse_provisioning_ecdsa_gen_key_data_t *ecdsa_data = &invalid_ecdsa_keys[counter++];
+
+    *public_key_x = ecdsa_data->public_key_x;
+    *public_key_x_size = ecdsa_data->public_key_x_len;
+    *public_key_y = ecdsa_data->public_key_y;
+    *public_key_y_size = ecdsa_data->public_key_y_len;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 void rse_bl1_provisioning_test_0004(struct test_result_t *ret)
+{
+    enum tfm_plat_err_t plat_err;
+
+    /* Not setup at all */
+    memset(&invalid_ecdsa_keys[0], 0, sizeof(invalid_ecdsa_keys[0]));
+
+    /* Setup to valid but different ECDSA key */
+    TEST_SETUP(ecdsa_initialise_key_data(&invalid_ecdsa_keys[1]));
+
+    TEST_SETUP(ecdsa_initialise_key_data(&ecdsa_public_key_data));
+
+    TEST_SETUP(init_test_image_sign_random_key(test_blob, &ecdsa_public_key_data,
+                                               RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM, 32, 32,
+                                               32, false, true));
+
+    for (int idx = 0; idx < ARRAY_SIZE(invalid_ecdsa_keys); idx++) {
+        TEST_LOG(" > testing invalid key %d (%d of %d): ", invalid_ecdsa_keys[idx], idx + 1,
+                 ARRAY_SIZE(invalid_ecdsa_keys));
+
+        plat_err = validate_and_unpack_blob(
+            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
+            PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
+            PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
+            PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, get_invalid_public_key);
+
+        TEST_LOG("\r");
+
+        TEST_ASSERT(plat_err == (enum tfm_plat_err_t)CC3XX_ERR_ECDSA_SIGNATURE_INVALID,
+                    "\nSignature check succeeded when it should have failed");
+    }
+
+    TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+
+    ret->val = TEST_PASSED;
+    return;
+}
+
+void rse_bl1_provisioning_test_0005(struct test_result_t *ret)
 {
     bool provisioning_is_required;
     enum lcm_lcs_t lcs;
@@ -637,6 +866,7 @@ static enum tfm_plat_err_t provision_blob(struct rse_provisioning_message_blob_t
 
     ctx.blob_is_chainloaded = false;
     ctx.setup_aes_key = setup_provisioning_aes_key;
+    ctx.get_rotpk = provisioning_rotpk_get;
 
     config.blob_handler = default_blob_handler;
 
@@ -748,7 +978,17 @@ create_complete_signed_blob(struct rse_provisioning_message_blob_t *blob, uintpt
         return plat_err;
     }
 
-    return sign_test_image(CC3XX_AES_MODE_CCM, RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    switch (signature_config) {
+    case RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE:
+        return aes_sign_encrypt_test_image(CC3XX_AES_MODE_CCM, RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    case RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM:
+    case RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_NOT_IN_ROM:
+        return ecdsa_sign_then_encrypt_test_image((uint32_t *)ecdsa_rom_private_key,
+                                                  sizeof(ecdsa_rom_private_key),
+                                                  RSE_KMU_SLOT_PROVISIONING_KEY, blob);
+    default:
+        return TFM_PLAT_ERR_PROVISIONING_SIGNATURE_TYPE_NOT_SUPPORTED;
+    }
 }
 
 static void provisioning_test_complete_valid_blob(struct test_result_t *ret,
@@ -765,23 +1005,42 @@ static void provisioning_test_complete_valid_blob(struct test_result_t *ret,
 
     bool code_data_encrypted[] = { false, true };
 
+    enum rse_provisioning_blob_signature_config_t signature_config[] = {
+        RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE,
+        RSE_PROVISIONING_BLOB_SIGNATURE_ROTPK_IN_ROM,
+    };
+
     enum lcm_lcs_t valid_lcs[] = { LCM_LCS_CM, LCM_LCS_DM, LCM_LCS_SE, LCM_LCS_RMA };
 
     for (int test_payload_idx = 0; test_payload_idx < ARRAY_SIZE(test_payload_pointers);
          test_payload_idx++) {
         for (int encryption_idx = 0; encryption_idx < ARRAY_SIZE(code_data_encrypted);
              encryption_idx++) {
-            TEST_SETUP(create_complete_signed_blob(
-                test_blob, test_payload_pointers[test_payload_idx], tp_mode, valid_lcs,
-                ARRAY_SIZE(valid_lcs), true, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE,
-                code_data_encrypted[encryption_idx], true));
+            for (int signature_idx = 0; signature_idx < ARRAY_SIZE(signature_config);
+                 signature_idx++) {
+                TEST_LOG(" > provisioning blob test %s %s payload 0x%x: ",
+                         signature_config[signature_idx] ==
+                                 RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE ?
+                             "AES" :
+                             "ECDSA",
+                         code_data_encrypted[encryption_idx] ? "encrypted" : "not encrypted",
+                         test_payload_return_values[test_payload_idx]);
 
-            plat_err = provision_blob(test_blob);
-            TEST_ASSERT(plat_err == test_payload_return_values[test_payload_idx],
-                        "Provisioning should return with the value the blob returns");
+                TEST_SETUP(create_complete_signed_blob(
+                    test_blob, test_payload_pointers[test_payload_idx], tp_mode, valid_lcs,
+                    ARRAY_SIZE(valid_lcs), true, signature_config[signature_idx],
+                    code_data_encrypted[encryption_idx], true));
 
-            TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
-            TEST_TEARDOWN(kmu_set_slot_invalid(&KMU_DEV_S, RSE_KMU_SLOT_MASTER_KEY))
+                plat_err = provision_blob(test_blob);
+
+                TEST_LOG("\r");
+
+                TEST_ASSERT(plat_err == test_payload_return_values[test_payload_idx],
+                            "\nProvisioning should return with the value the blob returns");
+
+                TEST_TEARDOWN(test_teardown(RSE_KMU_SLOT_PROVISIONING_KEY, test_blob));
+                TEST_TEARDOWN(kmu_set_slot_invalid(&KMU_DEV_S, RSE_KMU_SLOT_MASTER_KEY));
+            }
         }
     }
 

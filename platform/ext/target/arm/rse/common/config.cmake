@@ -139,6 +139,14 @@ set(RSE_PROVISIONING_REQUIRE_AUTHENTICATION_FOR_TCI OFF   CACHE BOOL "Whether TC
 set(RSE_CM_BLOB_VERSION                     0          CACHE STRING "Version of CM blob")
 set(RSE_DM_BLOB_VERSION                     0          CACHE STRING "Version of DM blob")
 
+# Specific BL1_1 provisioning tests configuration
+if (TEST_BL1_1)
+    set(RSE_PROVISIONING_ENABLE_AES_SIGNATURES     ON     CACHE BOOL "Allow AES signatures")
+    set(RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES   ON     CACHE BOOL "Allow ECDSA signatures")
+    set(RSE_PROVISIONING_CURVE                     P384   CACHE STRING "Curve used to validate blobs")
+    set(RSE_PROVISIONING_HASH_ALG                  SHA384 CACHE STRING "Hash algorithm used to validate blobs")
+endif()
+
 set(RSE_SYMMETRIC_PROVISIONING              ON         CACHE BOOL "Whether provisioning should be symmetric or asymmetric")
 
 if (RSE_SYMMETRIC_PROVISIONING)

@@ -41,7 +41,7 @@ static struct conditional_test_t provisioning_tests[] = {
         .test = {
             &rse_bl1_provisioning_test_0003,
             "RSE_BL1_1_PROVISIONING_TEST_0003",
-            "Provisioning invalid key test"
+            "Provisioning AES invalid key test"
         },
     },
     {
@@ -51,6 +51,16 @@ static struct conditional_test_t provisioning_tests[] = {
         .test = {
             &rse_bl1_provisioning_test_0004,
             "RSE_BL1_1_PROVISIONING_TEST_0004",
+            "Provisioning ECDSA invalid key test"
+        },
+    },
+    {
+        .any_tp_mode = true,
+        .any_lcs = true,
+        .any_sp_state = true,
+        .test = {
+            &rse_bl1_provisioning_test_0005,
+            "RSE_BL1_1_PROVISIONING_TEST_0005",
             "Provisioning required test"
         },
     },
