@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,12 @@
 #include "psa/protected_storage.h"
 #include "psa_manifest/sid.h"
 #include "tfm_ps_defs.h"
+
+struct rot_psa_ps_storage_info_t {
+    rot_size_t capacity;
+    rot_size_t size;
+    psa_storage_create_flags_t flags;
+};
 
 psa_status_t psa_ps_set(psa_storage_uid_t uid,
                         size_t data_length,
@@ -36,15 +42,21 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
                         size_t *p_data_length)
 {
     psa_status_t status;
+    rot_size_t data_offset_param;
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) },
-        { .base = &data_offset, .len = sizeof(data_offset) }
+        { .base = &data_offset_param, .len = sizeof(data_offset_param) }
     };
 
     psa_outvec out_vec[] = {
         { .base = p_data, .len = data_size }
     };
+
+    if (data_offset > ROT_SIZE_MAX) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    data_offset_param = (rot_size_t)data_offset;
 
     if (p_data_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -62,17 +74,26 @@ psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
                              struct psa_storage_info_t *p_info)
 {
     psa_status_t status;
+    struct rot_psa_ps_storage_info_t info_param = {0};
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) }
     };
 
     psa_outvec out_vec[] = {
-        { .base = p_info, .len = sizeof(*p_info) }
+        { .base = &info_param, .len = sizeof(info_param) }
     };
+
+    if (p_info == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_GET_INFO,
                       in_vec, IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
+
+    p_info->capacity = info_param.capacity;
+    p_info->size = info_param.size;
+    p_info->flags = info_param.flags;
 
     return status;
 }

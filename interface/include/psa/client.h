@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,13 @@ extern "C" {
 #ifndef IOVEC_LEN
 #define IOVEC_LEN(arr) ((uint32_t)(sizeof(arr)/sizeof(arr[0])))
 #endif
+
+/**
+ * Type definitions equivalent to size_t as defined in the RoT Service
+ * environment.
+ */
+typedef uint32_t rot_size_t;
+#define ROT_SIZE_MAX UINT32_MAX
 
 /*********************** PSA Client Macros and Types *************************/
 

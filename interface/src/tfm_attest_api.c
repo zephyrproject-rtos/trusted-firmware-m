@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,16 +42,30 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
                                   size_t *token_size)
 {
     psa_status_t status;
+    rot_size_t challenge_size_param;
+    rot_size_t token_size_param = 0;
+
     psa_invec in_vec[] = {
-        {&challenge_size, sizeof(challenge_size)}
+        {&challenge_size_param, sizeof(challenge_size_param)}
     };
     psa_outvec out_vec[] = {
-        {token_size, sizeof(size_t)}
+        {&token_size_param, sizeof(token_size_param)}
     };
+
+    if (challenge_size > ROT_SIZE_MAX) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    challenge_size_param = (rot_size_t)challenge_size;
+
+    if (token_size == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     status = psa_call(TFM_ATTESTATION_SERVICE_HANDLE, TFM_ATTEST_GET_TOKEN_SIZE,
                       in_vec, IOVEC_LEN(in_vec),
                       out_vec, IOVEC_LEN(out_vec));
+
+    *token_size = token_size_param;
 
     return status;
 }
