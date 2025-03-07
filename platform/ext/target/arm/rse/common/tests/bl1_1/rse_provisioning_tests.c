@@ -181,7 +181,7 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
     enum cc3xx_error cc_err;
     size_t data_size_to_encrypt = 0;
     size_t data_size_to_auth = 0;
-    uint8_t iv[mode == CC3XX_AES_MODE_CCM ? 8 : AES_IV_LEN];
+    uint8_t iv[AES_IV_LEN] = { 0 };
     const uint32_t authed_header_offset =
         offsetof(struct rse_provisioning_message_blob_t, metadata);
     const size_t authed_header_size =
@@ -194,7 +194,7 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
     assert(((blob->code_size % 16) == 0) && ((blob->data_size % 16) == 0) &&
            ((blob->secret_values_size % 16) == 0));
 
-    memcpy(iv, (uint8_t *)blob->iv, sizeof(iv));
+    memcpy(iv, (uint8_t *)blob->iv, sizeof(blob->iv));
 
     if (blob_needs_code_data_decryption(blob)) {
         data_size_to_encrypt += blob->code_size;
@@ -209,7 +209,8 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
 
     if ((mode == CC3XX_AES_MODE_CCM) || (data_size_to_encrypt != 0)) {
         cc_err = cc3xx_lowlevel_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, mode, (cc3xx_aes_key_id_t)key,
-                                         NULL, CC3XX_AES_KEYSIZE_256, (uint32_t *)iv, sizeof(iv));
+                                         NULL, CC3XX_AES_KEYSIZE_256, (uint32_t *)iv,
+                                         mode == CC3XX_AES_MODE_CCM ? 8 : AES_IV_LEN);
         if (cc_err != CC3XX_ERR_SUCCESS) {
             return (enum tfm_plat_err_t)cc_err;
         }
