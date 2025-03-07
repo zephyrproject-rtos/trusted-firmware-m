@@ -178,6 +178,10 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
                                     blob->code_size + blob->data_size + blob->secret_values_size;
     bool encrypt_code_data = false, encrypt_secret = false;
 
+    /* All sizes must be multiples of 16 bytes */
+    assert(((blob->code_size % 16) == 0) && ((blob->data_size % 16) == 0) &&
+           ((blob->secret_values_size % 16) == 0));
+
     memcpy(iv, (uint8_t *)blob->iv, sizeof(iv));
 
     if (blob_needs_code_data_decryption(blob)) {
@@ -345,7 +349,7 @@ void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
     for (int encryption_idx = 0; encryption_idx < ARRAY_SIZE(code_data_encrypted);
          encryption_idx++) {
         TEST_SETUP(init_test_image_sign_random_key(
-            test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 30, 30, 30,
+            test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32,
             code_data_encrypted[encryption_idx], true));
 
         blob_size = sizeof(struct rse_provisioning_message_blob_t) + test_blob->code_size +
@@ -370,7 +374,7 @@ void rse_bl1_provisioning_test_0002(struct test_result_t *ret)
 {
     enum tfm_plat_err_t plat_err;
     size_t blob_size;
-    const size_t code_size = 30, values_size = 30, secret_size = 30;
+    const size_t code_size = 32, values_size = 32, secret_size = 32;
 
     uint8_t *corruption_ptrs[] = {
         (uint8_t *)&test_blob->metadata,
@@ -454,7 +458,7 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
     TEST_SETUP(kmu_set_key_locked(&KMU_DEV_S, invalid_keys[1]));
 
     TEST_SETUP(init_test_image_sign_random_key(
-        test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 30, 30, 30, false, true));
+        test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32, false, true));
 
     for (int idx = 0; idx < ARRAY_SIZE(invalid_keys); idx++) {
         TEST_LOG(" > testing invalid key %d (%d of %d): ", invalid_keys[idx],
@@ -722,13 +726,14 @@ create_complete_signed_blob(struct rse_provisioning_message_blob_t *blob, uintpt
     enum tfm_plat_err_t plat_err;
     enum lcm_error_t lcm_err;
     enum lcm_lcs_t lcs;
-    const size_t code_size = sizeof(uint32_t); /* 2 x 2 byte instructions */
+    const size_t code_size = 16; /* Pad out to 16 bytes */
 
     setup_blob_with_provisioning_config(blob, tp_mode, valid_lcs, num_lcs, sp_required);
 
-    memcpy(blob->code_and_data_and_secret_values, (void *)(func_ptr & ~0x1), code_size);
+    memcpy(blob->code_and_data_and_secret_values, (void *)(func_ptr & ~0x1),
+           sizeof(uint32_t) /* 2 x 2 byte instructions */);
 
-    init_test_image(blob, signature_config, code_size, 30, 30, encrypt_code_data, encrypt_secret);
+    init_test_image(blob, signature_config, code_size, 32, 32, encrypt_code_data, encrypt_secret);
 
     lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (lcm_err != LCM_ERROR_NONE) {
