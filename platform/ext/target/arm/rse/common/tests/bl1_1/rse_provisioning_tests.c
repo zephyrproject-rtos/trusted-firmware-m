@@ -33,6 +33,14 @@
 
 #define CODE_DATA_SECRET_VALUES_SIZE (100)
 
+/* Arbitrary IV value */
+#define IV_RANDOM_BYTES "\xDE\xAD\xBE\xEF\xEF\xBE\xAD\xDE"
+
+/* Arbitrary distinct values for code, data and values */
+#define CODE_RANDOM_BYTES "\x6D\xFF\x9A\x63\x16\x42\x78\xAC\x5E\xD1"
+#define DATA_RANDOM_BYTES "\x56\xB6\x03\xD7\xD2\x8F\xA1\x4C\x37\x92"
+#define VALUES_RANDOM_BYTES "\xF8\x0C\x28\x38\x38\xDD\x7A\x65\x9B\xC4"
+
 /* These functions are part of the provisioning code. They are usually static
  * functions, but enabling the provisioning tests makes them non-static. Because
  * they're usually static, they are not included in any header, so in order to
@@ -259,9 +267,6 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-/* Arbitrary IV value */
-#define IV_RANDOM_BYTES "\xDE\xAD\xBE\xEF\xEF\xBE\xAD\xDE"
-
 static void init_test_image(struct rse_provisioning_message_blob_t *blob,
                             enum rse_provisioning_blob_signature_config_t signature_config,
                             size_t code_size, size_t data_size, size_t secret_size,
@@ -334,6 +339,12 @@ init_test_image_sign_random_key(struct rse_provisioning_message_blob_t *blob,
 
     init_test_image(blob, signature_config, code_size, data_size, secret_size, encrypt_code_data,
                     encrypt_secret);
+
+    memcpy(blob->code_and_data_and_secret_values, CODE_RANDOM_BYTES, sizeof(CODE_RANDOM_BYTES) - 1);
+    memcpy(blob->code_and_data_and_secret_values + blob->code_size, DATA_RANDOM_BYTES,
+           sizeof(DATA_RANDOM_BYTES) - 1);
+    memcpy(blob->code_and_data_and_secret_values + blob->code_size + blob->data_size,
+           VALUES_RANDOM_BYTES, sizeof(VALUES_RANDOM_BYTES) - 1);
 
     err = setup_random_key(RSE_KMU_SLOT_PROVISIONING_KEY);
     if (err != TFM_PLAT_ERR_SUCCESS) {
