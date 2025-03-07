@@ -86,6 +86,11 @@ static struct kmu_key_export_config_t aes_128_key0_export_config = {
     .write_mask_disable = false, /* Don't disable the masking */
 };
 
+static inline size_t get_blob_size(struct rse_provisioning_message_blob_t *blob)
+{
+    return sizeof(*blob) + blob->code_size + blob->data_size + blob->secret_values_size;
+}
+
 static enum tfm_plat_err_t setup_random_key(enum rse_kmu_slot_id_t key)
 {
     enum tfm_plat_err_t plat_err;
@@ -174,8 +179,7 @@ static enum tfm_plat_err_t sign_test_image(cc3xx_aes_mode_t mode, enum rse_kmu_s
     const size_t authed_header_size =
         offsetof(struct rse_provisioning_message_blob_t, code_and_data_and_secret_values) -
         authed_header_offset;
-    const size_t actual_blob_size = sizeof(struct rse_provisioning_message_blob_t) +
-                                    blob->code_size + blob->data_size + blob->secret_values_size;
+    const size_t actual_blob_size = get_blob_size(blob);
     bool encrypt_code_data = false, encrypt_secret = false;
 
     /* All sizes must be multiples of 16 bytes */
@@ -342,7 +346,6 @@ init_test_image_sign_random_key(struct rse_provisioning_message_blob_t *blob,
 void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
 {
     enum tfm_plat_err_t plat_err;
-    size_t blob_size;
 
     bool code_data_encrypted[] = { false, true };
 
@@ -352,11 +355,8 @@ void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
             test_blob, RSE_PROVISIONING_BLOB_SIGNATURE_KRTL_DERIVATIVE, 32, 32, 32,
             code_data_encrypted[encryption_idx], true));
 
-        blob_size = sizeof(struct rse_provisioning_message_blob_t) + test_blob->code_size +
-                    test_blob->data_size + test_blob->secret_values_size;
-
         plat_err = validate_and_unpack_blob(
-            test_blob, blob_size, (void *)PROVISIONING_BUNDLE_CODE_START,
+            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
             PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
             PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
             PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, NULL);
@@ -373,7 +373,6 @@ void rse_bl1_provisioning_test_0001(struct test_result_t *ret)
 void rse_bl1_provisioning_test_0002(struct test_result_t *ret)
 {
     enum tfm_plat_err_t plat_err;
-    size_t blob_size;
     const size_t code_size = 32, values_size = 32, secret_size = 32;
 
     uint8_t *corruption_ptrs[] = {
@@ -400,11 +399,8 @@ void rse_bl1_provisioning_test_0002(struct test_result_t *ret)
                  (uintptr_t)corruption_ptrs[idx] - (uintptr_t)&test_blob, idx + 1,
                  ARRAY_SIZE(corruption_ptrs));
 
-        blob_size = sizeof(struct rse_provisioning_message_blob_t) + test_blob->code_size +
-                    test_blob->data_size + test_blob->secret_values_size;
-
         plat_err = validate_and_unpack_blob(
-            test_blob, blob_size, (void *)PROVISIONING_BUNDLE_CODE_START,
+            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
             PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
             PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
             PROVISIONING_BUNDLE_VALUES_SIZE, setup_provisioning_aes_key, NULL);
@@ -444,7 +440,6 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
     enum tfm_plat_err_t plat_err;
     volatile uint32_t *slot_ptr;
     size_t slot_size;
-    size_t blob_size;
 
     TEST_SETUP(setup_key_from_rng(invalid_keys[0], &aes_128_key0_export_config,
                                   &aes_key1_export_config, true));
@@ -464,11 +459,8 @@ void rse_bl1_provisioning_test_0003(struct test_result_t *ret)
         TEST_LOG(" > testing invalid key %d (%d of %d): ", invalid_keys[idx],
                                                            idx + 1, ARRAY_SIZE(invalid_keys));
 
-        blob_size = sizeof(struct rse_provisioning_message_blob_t) + test_blob->code_size +
-                    test_blob->data_size + test_blob->secret_values_size;
-
         plat_err = validate_and_unpack_blob(
-            test_blob, blob_size, (void *)PROVISIONING_BUNDLE_CODE_START,
+            test_blob, get_blob_size(test_blob), (void *)PROVISIONING_BUNDLE_CODE_START,
             PROVISIONING_BUNDLE_CODE_SIZE, (void *)PROVISIONING_BUNDLE_DATA_START,
             PROVISIONING_BUNDLE_DATA_SIZE, (void *)PROVISIONING_BUNDLE_VALUES_START,
             PROVISIONING_BUNDLE_VALUES_SIZE, setup_invalid_aes_key, NULL);
@@ -625,8 +617,7 @@ static enum tfm_plat_err_t provision_blob(struct rse_provisioning_message_blob_t
     struct provisioning_message_handler_config config;
     struct rse_provisioning_message_t *message = &message_with_data.message;
 
-    blob_size = sizeof(struct rse_provisioning_message_blob_t) + blob->code_size + blob->data_size +
-                blob->secret_values_size;
+    blob_size = get_blob_size(blob);
 
     message->header.type = RSE_PROVISIONING_MESSAGE_TYPE_BLOB;
     message->header.data_length = blob_size;
