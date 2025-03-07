@@ -348,6 +348,7 @@ static enum tfm_plat_err_t aes_generic_blob_operation(cc3xx_aes_mode_t mode,
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+#ifdef RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES
 static enum tfm_plat_err_t aes_decrypt_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob,
                                                         void *code_output, size_t code_output_size,
                                                         void *data_output, size_t data_output_size,
@@ -364,6 +365,7 @@ static enum tfm_plat_err_t aes_decrypt_and_unpack_blob(const struct rse_provisio
                                       values_output, values_output_size,
                                       setup_aes_key);
 }
+#endif /* RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES */
 
 static enum tfm_plat_err_t aes_validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob,
                                                         void *code_output, size_t code_output_size,
@@ -429,6 +431,7 @@ static enum tfm_plat_err_t hash_blob(const struct rse_provisioning_message_blob_
     return TFM_PLAT_ERR_SUCCESS;
 }
 
+#ifdef RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES
 static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob,
                                                           void *code_output, size_t code_output_size,
                                                           void *data_output, size_t data_output_size,
@@ -478,8 +481,10 @@ static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provi
                                          (uint32_t *)(blob->signature + sig_point_len), sig_point_len);
     return cc_err;
 }
+#endif /* RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES */
 
-static enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rse_provisioning_message_blob_t *blob,
+/* This is marked inline to suppress -Wunused-function warnings */
+static inline enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rse_provisioning_message_blob_t *blob,
                                                                  get_rotpk_func_t get_rotpk)
 {
     enum tfm_plat_err_t err;
