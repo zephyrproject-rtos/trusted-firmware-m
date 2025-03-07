@@ -1,4 +1,15 @@
 Driver_FLASH0
+ARM_Flash_GetVersion
+ARM_Driver_GetCapabilities
+Driver_FLASH0_Initialize
+ARM_Flash_Uninitialize
+ARM_Flash_PowerControl
+Driver_FLASH0_ReadData
+Driver_FLASH0_ProgramData
+Driver_FLASH0_EraseSector
+Driver_FLASH0_EraseChip
+ARM_Flash_GetStatus
+Driver_FLASH0_GetInfo
 SystemInit
 bl1_aes_256_ctr_decrypt
 bl1_derive_key
