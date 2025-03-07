@@ -125,8 +125,10 @@ static enum tfm_plat_err_t set_tp_mode(void)
 
     lcm_err = lcm_set_tp_mode(&LCM_DEV_S, tp_mode);
     if (lcm_err != LCM_ERROR_NONE) {
-        return lcm_err;
+        return (enum tfm_plat_err_t)lcm_err;
     }
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 static enum tfm_plat_err_t setup_correct_key(bool is_cm)
