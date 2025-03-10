@@ -16,6 +16,8 @@ tfm_plat_provisioning_is_required
 validate_and_unpack_blob
 default_blob_handler
 handle_provisioning_message
+provisioning_rotpk_get
+get_asn1_from_raw_ec
 cc3xx_lowlevel_aes_finish
 cc3xx_lowlevel_aes_get_current_output_size
 cc3xx_lowlevel_aes_get_state

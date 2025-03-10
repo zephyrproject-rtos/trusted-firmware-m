@@ -145,6 +145,7 @@ if (TEST_BL1_1)
     set(RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES   ON     CACHE BOOL "Allow ECDSA signatures")
     set(RSE_PROVISIONING_CURVE                     P384   CACHE STRING "Curve used to validate blobs")
     set(RSE_PROVISIONING_HASH_ALG                  SHA384 CACHE STRING "Hash algorithm used to validate blobs")
+    set(RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_HASH_ALG ${RSE_PROVISIONING_HASH_ALG} CACHE STRING "Algorithm to use for DM provisioning ROTPK comparison")
 endif()
 
 set(RSE_SYMMETRIC_PROVISIONING              ON         CACHE BOOL "Whether provisioning should be symmetric or asymmetric")

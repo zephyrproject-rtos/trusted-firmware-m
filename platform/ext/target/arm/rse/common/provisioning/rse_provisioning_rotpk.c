@@ -26,6 +26,12 @@ extern const size_t pci_rotpk_x_len;
 extern const size_t pci_rotpk_y_len;
 #endif /* TFM_DUMMY_PROVISIONING */
 
+#ifdef TEST_BL1_1
+#define TEST_STATIC
+#else
+#define TEST_STATIC static
+#endif
+
 static inline bool use_cm_rotpk(const struct rse_provisioning_message_blob_t *blob)
 {
     bool rotpk_not_in_rom, use_cm_rotpk;
@@ -64,11 +70,10 @@ static enum tfm_plat_err_t get_key_hash_from_otp(enum tfm_otp_element_id_t id,
 #define OID_SECP256R1        "\x2A\x86\x48\xCE\x3D\x03\x01\x07"  /* 1.2.840.10045.3.1.7 (P-256) */
 #define OID_SECP384R1        "\x2B\x81\x04\x00\x22"  /* 1.3.132.0.34 (P-384) */
 
-static enum tfm_plat_err_t get_asn1_from_raw_ec(const uint8_t *x, size_t x_size,
-                                                const uint8_t *y, size_t y_size,
-                                                cc3xx_ec_curve_id_t curve_id,
-                                                uint8_t *asn1_key,
-                                                size_t *len)
+TEST_STATIC
+enum tfm_plat_err_t get_asn1_from_raw_ec(const uint8_t *x, size_t x_size, const uint8_t *y,
+                                         size_t y_size, cc3xx_ec_curve_id_t curve_id,
+                                         uint8_t *asn1_key, size_t *len)
 {
     uint8_t *key_ptr = asn1_key;
     const uint8_t *oid_curve;

@@ -5,6 +5,7 @@
  *
  */
 
+#include "lcm_drv.h"
 #include "rse_test_common.h"
 
 #include "cc3xx_tests.h"
@@ -152,6 +153,36 @@ static struct conditional_test_t provisioning_tests[] = {
             &rse_bl1_provisioning_test_0404,
             "RSE_BL1_1_PROVISIONING_TEST_0404",
             "Provisioning integration TCI positive test"
+        },
+    },
+    {
+        .any_tp_mode = true,
+        .lcs = LCM_LCS_CM,
+        .any_sp_state = true,
+        .test = {
+            &rse_bl1_provisioning_test_0405,
+            "RSE_BL1_1_PROVISIONING_TEST_0405",
+            "Provisioning ECDSA key in blob test setup"
+        },
+    },
+    {
+        .tp_mode = LCM_TP_MODE_PCI,
+        .lcs = LCM_LCS_DM,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0406,
+            "RSE_BL1_1_PROVISIONING_TEST_0406",
+            "Provisioning ECDSA key in blob PCI positive test"
+        },
+    },
+    {
+        .tp_mode = LCM_TP_MODE_TCI,
+        .lcs = LCM_LCS_DM,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0407,
+            "RSE_BL1_1_PROVISIONING_TEST_0407",
+            "Provisioning ECDSA key in blob TCI positive test"
         },
     },
 };
