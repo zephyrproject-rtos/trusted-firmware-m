@@ -321,6 +321,9 @@ SECTIONS
         *libflash_drivers*:(SORT_BY_ALIGNMENT(.text*))
         *libflash_drivers*:(SORT_BY_ALIGNMENT(.rodata*))
         KEEP(*(.ramfunc))
+#if defined(S_RAM_CODE_EXTRA_SECTION_NAME)
+        KEEP(*(S_RAM_CODE_EXTRA_SECTION_NAME))
+#endif
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
 
