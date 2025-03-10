@@ -150,7 +150,9 @@ cc3xx_err_t cc3xx_lowlevel_hmac_set_key(
         state->key[idx] = p_key[idx] ^ ipad;
     }
 
-    memset(&state->key[key_length], ipad, CC3XX_HMAC_BLOCK_SIZE - key_length);
+    if (key_length < CC3XX_HMAC_BLOCK_SIZE) {
+        memset(&state->key[key_length], ipad, CC3XX_HMAC_BLOCK_SIZE - key_length);
+    }
 
     /* H(K ^ ipad) */
     err = cc3xx_lowlevel_hash_init(alg);
