@@ -125,8 +125,6 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    __etext = ALIGN(4);
-
     .tfm_bl2_shared_data : ALIGN(32)
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
@@ -134,9 +132,11 @@ SECTIONS
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
+    PROVIDE(__etext = LOADADDR(.data));
+
     . = BL1_1_DATA_START;
     Image$$BL1_1_ER_DATA_START$$Base = .;
-    .data : AT (__etext)
+    .data : ALIGN(4)
     {
         __data_start__ = .;
         __got_start__ = .;
@@ -153,7 +153,7 @@ SECTIONS
         /* All data end */
         __data_end__ = .;
 
-    } > RAM
+    } > RAM AT> FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
 
     .bss :
