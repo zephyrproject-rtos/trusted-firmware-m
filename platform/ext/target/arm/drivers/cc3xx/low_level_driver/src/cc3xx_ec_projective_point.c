@@ -62,8 +62,7 @@ void cc3xx_lowlevel_ec_affine_to_jacobian_with_random_z(cc3xx_ec_curve_t *curve,
 {
 #ifndef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     return cc3xx_lowlevel_ec_affine_to_jacobian(curve, p, res);
-#endif
-
+#else
     cc3xx_pka_reg_id_t temp = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Z is random, between 0 and N-1. Realistically, the RNG will never output
@@ -86,6 +85,7 @@ void cc3xx_lowlevel_ec_affine_to_jacobian_with_random_z(cc3xx_ec_curve_t *curve,
     cc3xx_lowlevel_pka_mod_mul(p->y, temp, res->y);
 
     cc3xx_lowlevel_pka_free_reg(temp);
+#endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 }
 
 void cc3xx_lowlevel_ec_affine_to_jacobian(cc3xx_ec_curve_t *curve,
