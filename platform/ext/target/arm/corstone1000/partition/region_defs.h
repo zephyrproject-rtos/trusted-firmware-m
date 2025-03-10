@@ -93,7 +93,7 @@
 
 /* SE BL1 regions */
 #define BL1_1_CODE_START    (0)
-#define BL1_1_CODE_SIZE     (0x0000C000)     /* 48 KiB */
+#define BL1_1_CODE_SIZE     (0x0000C800)     /* 50 KiB */
 #define BL1_1_CODE_LIMIT    (BL1_1_CODE_START + BL1_1_CODE_SIZE - 1)
 
 #define PROVISIONING_DATA_START (BL1_1_CODE_START + BL1_1_CODE_SIZE)
