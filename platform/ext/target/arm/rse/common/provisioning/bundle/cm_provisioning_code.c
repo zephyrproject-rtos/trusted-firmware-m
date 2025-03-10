@@ -204,9 +204,9 @@ enum tfm_plat_err_t do_cm_provision(void) {
 
     cc_err = cc3xx_lowlevel_rng_get_random((uint8_t *)generated_key_buf,
                                       sizeof(generated_key_buf),
-                                      CC3XX_RNG_DRBG_HMAC);
+                                      CC3XX_RNG_DRBG);
     if (cc_err != CC3XX_ERR_SUCCESS) {
-      return (enum tfm_plat_err_t)cc_err;
+        return (enum tfm_plat_err_t)cc_err;
     }
 
     INFO("Provisioning HUK\n");

@@ -74,6 +74,19 @@
 /* Whether RNG is enabled */
 #define CC3XX_CONFIG_RNG_ENABLE
 
+/* Whether RNG uses HMAC_DRBG when RNG_DRBG is selected */
+#define CC3XX_CONFIG_RNG_DRBG_HMAC
+/* Whether RNG uses CTR_DRBG when RNG_DRBG is selected */
+/* #define CC3XX_CONFIG_RNG_DRBG_CTR */
+/* Whether RNG uses HASH_DRBG when RNG_DRBG is selected */
+/* #define CC3XX_CONFIG_RNG_DRBG_HASH */
+
+#if ((defined(CC3XX_CONFIG_RNG_DRBG_HMAC) + \
+     defined(CC3XX_CONFIG_RNG_DRBG_CTR)  + \
+     defined(CC3XX_CONFIG_RNG_DRBG_HASH)) != 1)
+#error "cc3xx_config: RNG config must select a single DRBG"
+#endif /* CC3XX_CONFIG_RNG_DRBG_HMAC + CC3XX_CONFIG_RNG_DRBG_CTR + CC3XX_CONFIG_RNG_DRBG_HASH */
+
 /* Whether an external TRNG should be used in place of the standard CC3XX TRNG */
 /* #define CC3XX_CONFIG_RNG_EXTERNAL_TRNG */
 

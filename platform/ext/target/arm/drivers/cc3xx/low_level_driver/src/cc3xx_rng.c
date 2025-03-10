@@ -7,10 +7,22 @@
 
 #include "cc3xx_rng.h"
 
+#ifndef CC3XX_CONFIG_FILE
+#include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
+
 #include "cc3xx_error.h"
 #include "cc3xx_dev.h"
 #include "cc3xx_stdlib.h"
+#if defined(CC3XX_CONFIG_RNG_DRBG_HMAC)
 #include "cc3xx_drbg_hmac.h"
+#elif defined(CC3XX_CONFIG_RNG_DRBG_HASH)
+#include "cc3xx_drbg_hash.h"
+#elif defined(CC3XX_CONFIG_RNG_DRBG_CTR)
+#include "cc3xx_drbg_ctr.h"
+#endif /* CC3XX_CONFIG_RNG_DRBG_HMAC */
 
 #include <assert.h>
 #include <stdint.h>
@@ -35,6 +47,29 @@ static inline uint32_t round_up(uint32_t num, uint32_t boundary)
  */
 typedef cc3xx_err_t (*random_fn_t)(uint32_t *, size_t);
 
+/* Define function pointers to generically access DRBG functionalities */
+#if defined(CC3XX_CONFIG_RNG_DRBG_HMAC)
+typedef struct cc3xx_drbg_hmac_state_t drbg_state_t;
+#elif defined(CC3XX_CONFIG_RNG_DRBG_CTR)
+typedef struct cc3xx_drbg_ctr_state_t drbg_state_t;
+#elif defined(CC3XX_CONFIG_RNG_DRBG_HASH)
+typedef struct cc3xx_drbg_hash_state_t drbg_state_t;
+#endif /* CC3XX_CONFIG_RNG_DRBG_HMAC */
+
+typedef cc3xx_err_t (*drbg_init_fn_t)(
+    drbg_state_t *state,
+    const uint8_t *entropy, size_t entropy_len,
+    const uint8_t *nonce, size_t nonce_len,
+    const uint8_t *personalization, size_t personalization_len);
+typedef cc3xx_err_t (*drbg_generate_fn_t)(
+    drbg_state_t *state,
+    size_t len_bits, uint8_t *returned_bits,
+    const uint8_t *additional_input, size_t additional_input_len);
+typedef cc3xx_err_t (*drbg_reseed_fn_t)(
+    drbg_state_t *state,
+    const uint8_t *entropy, size_t entropy_len,
+    const uint8_t *additional_input, size_t additional_input_len);
+
 /* Static context of the LFSR */
 static cc3xx_err_t lfsr_get_random(uint32_t* buf, size_t word_count);
 
@@ -48,11 +83,27 @@ static struct {
     .seed_done = false,
     .fn = lfsr_get_random};
 
-/* Static state context of DRBG_HMAC */
+/* Static state context of DRBG */
 static struct {
-    struct cc3xx_drbg_hmac_state_t state;
+    drbg_state_t state;
     bool seed_done;
-} g_drbg_hmac = {0};
+    const drbg_init_fn_t init;
+    const drbg_generate_fn_t generate;
+    const drbg_reseed_fn_t reseed;
+} g_drbg = {.seed_done =  false,
+#if defined(CC3XX_CONFIG_RNG_DRBG_HMAC)
+    .init = cc3xx_lowlevel_drbg_hmac_instantiate,
+    .generate = cc3xx_lowlevel_drbg_hmac_generate,
+    .reseed = cc3xx_lowlevel_drbg_hmac_reseed};
+#elif defined(CC3XX_CONFIG_RNG_DRBG_CTR)
+    .init = cc3xx_lowlevel_drbg_ctr_init,
+    .generate = cc3xx_lowlevel_drbg_ctr_generate,
+    .reseed = cc3xx_lowlevel_drbg_ctr_reseed};
+#elif defined(CC3XX_CONFIG_RNG_DRBG_HASH)
+    .init = cc3xx_lowlevel_drbg_hash_init,
+    .generate = cc3xx_lowlevel_drbg_hash_generate,
+    .reseed = cc3xx_lowlevel_drbg_hash_reseed};
+#endif /* CC3XX_CONFIG_RNG_DRBG_HMAC */
 
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 /**
@@ -212,12 +263,12 @@ static cc3xx_err_t lfsr_get_random(uint32_t* buf, size_t word_count)
     return CC3XX_ERR_SUCCESS;
 }
 
-static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
+static cc3xx_err_t drbg_get_random(uint8_t *buf, size_t length)
 {
     cc3xx_err_t err;
     uint32_t entropy[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
 
-    if (!g_drbg_hmac.seed_done) {
+    if (!g_drbg.seed_done) {
 
         /* Get a 24-byte seed from the TRNG */
         err = cc3xx_lowlevel_rng_get_entropy(entropy, sizeof(entropy));
@@ -226,7 +277,7 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
         }
 
         /* Call the seeding API of the drbg_hmac */
-        err = cc3xx_lowlevel_drbg_hmac_instantiate(&g_drbg_hmac.state,
+        err = g_drbg.init(&g_drbg.state,
                     (const uint8_t *)entropy, sizeof(entropy), NULL, 0, NULL, 0);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
@@ -235,11 +286,11 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
         /* Clear the seed from the stack */
         memset(entropy, 0, sizeof(entropy));
 
-        g_drbg_hmac.seed_done = true;
+        g_drbg.seed_done = true;
     }
 
     /* Add re-seeding capabilities */
-    if (g_drbg_hmac.state.reseed_counter == UINT32_MAX) {
+    if (g_drbg.state.reseed_counter == UINT32_MAX) {
 
         /* Get a 24-byte seed from the TRNG */
         err = cc3xx_lowlevel_rng_get_entropy(entropy, sizeof(entropy));
@@ -247,7 +298,7 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
             return err;
         }
 
-        err = cc3xx_lowlevel_drbg_hmac_reseed(&g_drbg_hmac.state,
+        err = g_drbg.reseed(&g_drbg.state,
                     (const uint8_t *)entropy, sizeof(entropy), NULL, 0);
 
         if (err != CC3XX_ERR_SUCCESS) {
@@ -259,7 +310,7 @@ static cc3xx_err_t drbg_hmac_get_random(uint8_t *buf, size_t length)
     }
 
     /* The DRBG requires the number of bits to generate, aligned to byte-sizes */
-    err = cc3xx_lowlevel_drbg_hmac_generate(&g_drbg_hmac.state, length * 8, buf, NULL, 0);
+    err = g_drbg.generate(&g_drbg.state, length * 8, buf, NULL, 0);
 
 cleanup:
     return err;
@@ -331,12 +382,12 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
         max_buf_size = sizeof(g_lfsr.buf);
         random_fn = g_lfsr.fn;
         break;
-    case CC3XX_RNG_DRBG_HMAC:
+    case CC3XX_RNG_DRBG:
         /* When using a DRBG, buffering random values is not suppported, hence just return
          * the generated bits without any special handling of saved bits from previous
          * iterations
          */
-        return drbg_hmac_get_random(buf, length);
+        return drbg_get_random(buf, length);
     default:
         return CC3XX_ERR_RNG_INVALID_RNG;
     }
