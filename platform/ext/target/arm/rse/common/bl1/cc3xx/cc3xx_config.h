@@ -99,14 +99,10 @@
 #endif /* CC3XX_CONFIG_RNG_MAX_ATTEMPTS */
 
 /* This is the number of cycles between consecutive samples of the oscillator
- * output. It needs to be set to a _reasonably_ large number, though It's
- * unclear exactly what sort of number is reasonable. In general, if the
- * statistical tests keep failing then increase it, if the RNG is too slow then
- * decrease it.  A sensible default is set here, and has worked correctly with a
- * variety of cc3xx implementations.
+ * output.
  */
 #ifndef CC3XX_CONFIG_RNG_SUBSAMPLING_RATE
-#define CC3XX_CONFIG_RNG_SUBSAMPLING_RATE 0x1337
+#define CC3XX_CONFIG_RNG_SUBSAMPLING_RATE 500
 #endif /* !CC_RNG_SUBSAMPLING_RATE */
 
 /* Between 0 and 3 inclusive. 0 should be the fastest oscillator ring */
