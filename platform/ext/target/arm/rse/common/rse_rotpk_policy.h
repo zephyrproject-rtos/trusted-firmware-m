@@ -25,9 +25,9 @@ enum rse_rotpk_hash_alg {
     RSE_ROTPK_HASH_ALG_SHA384 = 0b01,
 };
 
-#define RSE_ROTPK_SIZE_FROM_ALG(x) (alg == RSE_ROTPK_HASH_ALG_SHA256 ? 32 : \
-                                    alg == RSE_ROTPK_HASH_ALG_SHA384 ? 48 : \
-                                    0)
+#define RSE_ROTPK_SIZE_FROM_ALG(_alg) ((_alg) == RSE_ROTPK_HASH_ALG_SHA256 ? 32 : \
+                                       (_alg) == RSE_ROTPK_HASH_ALG_SHA384 ? 48 : \
+                                       0)
 
 #ifdef __cplusplus
 }
