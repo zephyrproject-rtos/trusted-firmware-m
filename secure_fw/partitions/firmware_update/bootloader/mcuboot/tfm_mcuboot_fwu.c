@@ -49,13 +49,6 @@ typedef struct tfm_fwu_mcuboot_ctx_s {
 static tfm_fwu_mcuboot_ctx_t mcuboot_ctx[FWU_COMPONENT_NUMBER];
 static fwu_image_info_data_t __attribute__((aligned(4))) boot_shared_data;
 
-static psa_status_t fwu_bootloader_get_shared_data(void)
-{
-    return tfm_core_get_boot_data(TLV_MAJOR_FWU,
-                                  (struct tfm_boot_data *)&boot_shared_data,
-                                  sizeof(boot_shared_data));
-}
-
 static psa_status_t get_active_image_version(psa_fwu_component_t component,
                                              struct image_version *image_ver)
 {
@@ -94,9 +87,17 @@ static psa_status_t get_active_image_version(psa_fwu_component_t component,
 
 psa_status_t fwu_bootloader_init(void)
 {
-    if (fwu_bootloader_get_shared_data() != PSA_SUCCESS) {
+    psa_status_t ret;
+
+    /* Get shared bootloader data */
+    ret = tfm_core_get_boot_data(TLV_MAJOR_FWU,
+                                 (struct tfm_boot_data *)&boot_shared_data,
+                                 sizeof(boot_shared_data));
+
+    if (ret != PSA_SUCCESS) {
         return PSA_ERROR_STORAGE_FAILURE;
     }
+
     /* add Init of specific flash driver */
     flash_area_driver_init();
     return PSA_SUCCESS;
