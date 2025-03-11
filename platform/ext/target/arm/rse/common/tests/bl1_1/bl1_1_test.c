@@ -185,6 +185,26 @@ static struct conditional_test_t provisioning_tests[] = {
             "Provisioning ECDSA key in blob TCI positive test"
         },
     },
+    {
+        .tp_mode = LCM_TP_MODE_PCI,
+        .lcs = LCM_LCS_DM,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0408,
+            "RSE_BL1_1_PROVISIONING_TEST_0408",
+            "Provisioning invalid ECDSA key in blob PCI test"
+        },
+    },
+    {
+        .tp_mode = LCM_TP_MODE_TCI,
+        .lcs = LCM_LCS_DM,
+        .sp_enabled = LCM_TRUE,
+        .test = {
+            &rse_bl1_provisioning_test_0409,
+            "RSE_BL1_1_PROVISIONING_TEST_0409",
+            "Provisioning invalid ECDSA key in blob TCI test"
+        },
+    },
 };
 
 static struct conditional_test_t state_transitions[] = {

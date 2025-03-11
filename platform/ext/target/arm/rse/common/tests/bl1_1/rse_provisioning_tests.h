@@ -35,6 +35,8 @@ void rse_bl1_provisioning_test_0404(struct test_result_t *ret);
 void rse_bl1_provisioning_test_0405(struct test_result_t *ret);
 void rse_bl1_provisioning_test_0406(struct test_result_t *ret);
 void rse_bl1_provisioning_test_0407(struct test_result_t *ret);
+void rse_bl1_provisioning_test_0408(struct test_result_t *ret);
+void rse_bl1_provisioning_test_0409(struct test_result_t *ret);
 
 #ifdef __cplusplus
 }
