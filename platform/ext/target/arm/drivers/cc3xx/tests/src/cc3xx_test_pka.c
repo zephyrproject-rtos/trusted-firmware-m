@@ -127,6 +127,35 @@ cleanup:
     return;
 }
 
+void pka_test_add_si_neg(struct test_result_t *ret)
+{
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t res;
+    uint32_t val0 = 16;
+    int32_t val1 = -15;
+    uint32_t readback;
+
+    cc3xx_lowlevel_pka_init(16);
+
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
+    res = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg(r0, (uint32_t *)&val0, sizeof(val0));
+
+    cc3xx_lowlevel_pka_add_si(r0, val1, res);
+
+    cc3xx_lowlevel_pka_read_reg(res, (uint32_t *)&readback, sizeof(readback));
+
+    TEST_ASSERT(readback == val0 + val1, "readback not equal to val0 + val1");
+
+    ret->val = TEST_PASSED;
+cleanup:
+    cc3xx_lowlevel_pka_uninit();
+
+    return;
+}
+
 void pka_test_add_unaligned(struct test_result_t *ret)
 {
     uint32_t r0;
@@ -243,6 +272,35 @@ void pka_test_sub_si(struct test_result_t *ret)
     uint32_t res;
     uint32_t val0 = 16;
     int32_t val1 = 6;
+    uint32_t readback;
+
+    cc3xx_lowlevel_pka_init(16);
+
+    r0 = cc3xx_lowlevel_pka_allocate_reg();
+    res = cc3xx_lowlevel_pka_allocate_reg();
+
+    cc3xx_lowlevel_pka_write_reg(r0, (uint32_t *)&val0, sizeof(val0));
+
+    cc3xx_lowlevel_pka_sub_si(r0, val1, res);
+
+    cc3xx_lowlevel_pka_read_reg(res, (uint32_t *)&readback, sizeof(readback));
+
+    TEST_ASSERT(readback == val0 - val1, "readback not equal to val0 - val1");
+
+    ret->val = TEST_PASSED;
+cleanup:
+    cc3xx_lowlevel_pka_uninit();
+
+    return;
+}
+
+void pka_test_sub_si_neg(struct test_result_t *ret)
+{
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t res;
+    uint32_t val0 = 16;
+    int32_t val1 = -6;
     uint32_t readback;
 
     cc3xx_lowlevel_pka_init(16);
@@ -1205,9 +1263,19 @@ static struct test_t pka_tests[] = {
         "CC3XX PKA addition (signed immediate) test",
     },
     {
+        &pka_test_add_si_neg,
+        "CC3XX_PKA_TEST_ADD_SI_NEG",
+        "CC3XX PKA addition (signed negative immediate) test",
+    },
+    {
         &pka_test_sub_si,
         "CC3XX_PKA_TEST_SUB_SI",
         "CC3XX PKA subtraction (signed immediate) test",
+    },
+    {
+        &pka_test_sub_si_neg,
+        "CC3XX_PKA_TEST_SUB_SI_NEG",
+        "CC3XX PKA subtraction (signed negative immediate) test",
     },
     {
         &pka_test_neg,
