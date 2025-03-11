@@ -175,6 +175,11 @@ if (RSE_PROVISIONING_SIGN_ALG STREQUAL ECDSA)
         set(RSE_PROVISIONING_HASH_ALG           SHA256     CACHE STRING "Hash algorithm used to validate blobs")
     endif()
 
+    # Use same ROTPK hash algorithm as provisioning hash algorithm by default
+    if (${RSE_PROVISIONING_DM_SIGNATURE_CONFIG} STREQUAL "ROTPK_NOT_IN_ROM")
+        set(RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_HASH_ALG  ${RSE_PROVISIONING_HASH_ALG}    CACHE STRING "Algorithm to use for DM provisioning ROTPK comparison")
+    endif()
+
     if (RSE_TP_MODE STREQUAL TCI OR TFM_DUMMY_PROVISIONING)
         set(RSE_CM_PROVISIONING_SIGNING_KEY "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-EC-${RSE_PROVISIONING_CURVE}.pem" CACHE FILEPATH "Path to provisioning root key")
     endif()
