@@ -389,12 +389,16 @@ static enum psa_attest_err_t
 attest_add_hash_algo_claim(struct attest_token_encode_ctx *token_ctx)
 {
     struct q_useful_buf_c hash_algo;
-    uint8_t buf[PLATFORM_HASH_ALGO_ID_MAX_SIZE];
-    uint32_t size = sizeof(buf);
+    const char *buf = NULL;
+    uint32_t size = 0;
     enum tfm_plat_err_t err;
 
-    err = tfm_attest_hal_get_platform_hash_algo(&size, buf);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
+    err = tfm_attest_hal_get_platform_hash_algo(&size, &buf);
+    if (err != TFM_PLAT_ERR_SUCCESS && buf == NULL) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    if ((tfm_strnlen(buf, PLATFORM_HASH_ALGO_ID_MAX_SIZE) != size) || (size == 0)) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 

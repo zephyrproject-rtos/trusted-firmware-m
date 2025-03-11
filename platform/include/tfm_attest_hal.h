@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -129,17 +129,15 @@ tfm_attest_hal_get_platform_config(uint32_t *size, uint8_t *buf);
  * According to IANA hash algorithm registry:
  *   - https://www.iana.org/assignments/hash-function-text-names/hash-function-text-names.xml
  *
- * \param[in/out] size  As an input value it indicates the size of the caller
- *                      allocated buffer (in bytes) to store the platform
- *                      hash algo. At return its value is updated with the
- *                      exact size of the platform hahs algo string.
- * \param[out]    buf   Pointer to the buffer to store the platform
+ * \param[out] size     At return its value is updated with the
+ *                      exact size of the platform hash algo string.
+ * \param[out] buf      Double pointer to the buffer to store the platform
  *                      hash algo string.
  *
  * \return  Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t
-tfm_attest_hal_get_platform_hash_algo(uint32_t *size, uint8_t *buf);
+tfm_attest_hal_get_platform_hash_algo(uint32_t *size, const char **buf);
 
 #ifdef __cplusplus
 }
