@@ -42,32 +42,19 @@ static inline bool use_cm_rotpk(const struct rse_provisioning_message_blob_t *bl
 
 static enum tfm_plat_err_t get_key_hash_from_otp(enum tfm_otp_element_id_t id,
                                                  uint8_t *cm_rotpk_hash,
-                                                 size_t *cm_rotpk_hash_size)
+                                                 enum rse_rotpk_hash_alg *alg)
 {
     enum tfm_plat_err_t err;
-    enum rse_rotpk_hash_alg alg;
-    bool is_valid_alg;
 
-    err = tfm_plat_otp_read(id, RSE_PROVISIONING_HASH_SIZE, cm_rotpk_hash);
+    err = tfm_plat_otp_read(id, RSE_ROTPK_MAX_SIZE, cm_rotpk_hash);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    err = rse_rotpk_get_hash_alg(id, &alg);
+    err = rse_rotpk_get_hash_alg(id, alg);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
-
-    /* Algorithm should match that used for provisioning */
-    is_valid_alg = ((alg == RSE_ROTPK_HASH_ALG_SHA256)
-                   && (RSE_PROVISIONING_HASH_ALG == TFM_BL1_HASH_ALG_SHA256))
-                   || ((alg == RSE_ROTPK_HASH_ALG_SHA384)
-                   && (RSE_PROVISIONING_HASH_ALG == TFM_BL1_HASH_ALG_SHA384));
-    if (!is_valid_alg) {
-        return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_HASH_ALG;
-    }
-
-    *cm_rotpk_hash_size = RSE_ROTPK_SIZE_FROM_ALG(alg);
 
     return err;
 }
@@ -148,16 +135,15 @@ static enum tfm_plat_err_t get_asn1_from_raw_ec(const uint8_t *x, size_t x_size,
 }
 
 static enum tfm_plat_err_t
-calc_key_hash_from_blob(const struct rse_provisioning_message_blob_t *blob,
-                        uint8_t *key_hash,
-                        size_t *key_hash_size,
-                        size_t point_size)
+calc_key_hash_from_blob(const struct rse_provisioning_message_blob_t *blob, uint8_t *key_hash,
+                        enum rse_rotpk_hash_alg alg, size_t point_size)
 {
     fih_int fih_rc;
     enum tfm_plat_err_t err;
     /* Max size is 120 bytes */
     uint8_t asn1_key[120];
     size_t len;
+    enum tfm_bl1_hash_alg_t bl1_hash_alg;
 
     /* Currently keys stored in CM ROTPK are in the form of hashed DER encoded,
      * ASN.1 format keys. Therefore we need to convert the key we have found
@@ -173,12 +159,19 @@ calc_key_hash_from_blob(const struct rse_provisioning_message_blob_t *blob,
         return err;
     }
 
-    FIH_CALL(bl1_hash_compute, fih_rc, RSE_PROVISIONING_HASH_ALG,
-                                       asn1_key,
-                                       len,
-                                       key_hash,
-                                       RSE_PROVISIONING_HASH_SIZE,
-                                       key_hash_size);
+    switch (alg) {
+    case RSE_ROTPK_HASH_ALG_SHA256:
+        bl1_hash_alg = TFM_BL1_HASH_ALG_SHA256;
+        break;
+    case RSE_ROTPK_HASH_ALG_SHA384:
+        bl1_hash_alg = TFM_BL1_HASH_ALG_SHA384;
+        break;
+    default:
+        return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_HASH_ALG;
+    }
+
+    FIH_CALL(bl1_hash_compute, fih_rc, bl1_hash_alg, asn1_key, len, key_hash, RSE_ROTPK_MAX_SIZE,
+             &len);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return (enum tfm_plat_err_t)fih_rc;
     }
@@ -195,10 +188,10 @@ static enum tfm_plat_err_t get_check_hash_cm_rotpk(const struct rse_provisioning
     uint16_t cm_rotpk_num;
     enum tfm_otp_element_id_t id;
     enum tfm_plat_err_t err;
-    uint8_t key_hash_from_otp[RSE_PROVISIONING_HASH_SIZE];
-    uint8_t key_hash_from_blob[RSE_PROVISIONING_HASH_SIZE];
+    uint8_t key_hash_from_otp[RSE_ROTPK_MAX_SIZE];
+    uint8_t key_hash_from_blob[RSE_ROTPK_MAX_SIZE];
     uint32_t point_size;
-    size_t key_hash_from_otp_size, key_hash_from_blob_size;
+    enum rse_rotpk_hash_alg hash_alg;
 
     cm_rotpk_num = (blob->metadata >> RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_OFFSET)
                    & RSE_PROVISIONING_BLOB_DETAILS_CM_ROTPK_NUMBER_MASK;
@@ -210,21 +203,17 @@ static enum tfm_plat_err_t get_check_hash_cm_rotpk(const struct rse_provisioning
 
     point_size = cc3xx_lowlevel_ec_get_modulus_size_from_curve(RSE_PROVISIONING_CURVE);
 
-    err = get_key_hash_from_otp(id, key_hash_from_otp, &key_hash_from_otp_size);
+    err = get_key_hash_from_otp(id, key_hash_from_otp, &hash_alg);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    err = calc_key_hash_from_blob(blob, key_hash_from_blob, &key_hash_from_blob_size, point_size);
+    err = calc_key_hash_from_blob(blob, key_hash_from_blob, hash_alg, point_size);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    if (key_hash_from_otp_size != key_hash_from_blob_size) {
-        return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_HASH_SIZE;
-    }
-
-    if (memcmp(key_hash_from_otp, key_hash_from_blob, key_hash_from_otp_size)) {
+    if (memcmp(key_hash_from_otp, key_hash_from_blob, RSE_ROTPK_SIZE_FROM_ALG(hash_alg))) {
         return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_HASH_VALUE;
     }
 
