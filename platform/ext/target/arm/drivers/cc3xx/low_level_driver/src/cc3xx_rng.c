@@ -257,7 +257,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_set_config(enum cc3xx_rng_rosc_id_t rosc_id,
                                           uint32_t subsampling_rate)
 {
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
-    if ((rosc_id < CC3XX_RNG_ROSC_ID_0) || (rosc_id > CC3XX_RNG_ROSC_ID_3)) {
+    if (!((rosc_id >= CC3XX_RNG_ROSC_ID_0) && (rosc_id <= CC3XX_RNG_ROSC_ID_3))) {
         FATAL_ERR(CC3XX_ERR_RNG_INVALID_TRNG_CONFIG);
         return CC3XX_ERR_RNG_INVALID_TRNG_CONFIG;
     }
