@@ -188,16 +188,6 @@ wrap_up:
     return status;
 }
 
-static psa_status_t builtin_key_copy_to_buffer(
-        struct tfm_builtin_key_t *key_slot, uint8_t *key_buffer,
-        size_t key_buffer_size, size_t *key_buffer_length)
-{
-    memcpy(key_buffer, key_slot->key, key_slot->key_len);
-    *key_buffer_length = key_slot->key_len;
-
-    return PSA_SUCCESS;
-}
-
 /*!
  * \defgroup tfm_builtin_key_loader
  *
@@ -342,8 +332,8 @@ psa_status_t tfm_builtin_key_loader_get_builtin_key(
                                         key_buffer, key_buffer_size,
                                         key_buffer_length);
     } else {
-        err = builtin_key_copy_to_buffer(key_slot, key_buffer, key_buffer_size,
-                                         key_buffer_length);
+        memcpy(key_buffer, key_slot->key, key_slot->key_len);
+        *key_buffer_length = key_slot->key_len;
     }
 
 wrap_up:
