@@ -441,7 +441,7 @@ static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provi
 {
     enum tfm_plat_err_t err;
     cc3xx_err_t cc_err;
-    uint32_t blob_hash[RSE_PROVISIONING_HASH_MAX_SIZE / sizeof(uint32_t)];
+    uint32_t blob_hash[RSE_PROVISIONING_HASH_SIZE / sizeof(uint32_t)];
     uint32_t *public_key_x;
     uint32_t *public_key_y;
     size_t public_key_x_size;
@@ -489,7 +489,7 @@ static inline enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const st
 {
     enum tfm_plat_err_t err;
     cc3xx_err_t cc_err;
-    uint32_t blob_hash[RSE_PROVISIONING_HASH_MAX_SIZE / sizeof(uint32_t)];
+    uint32_t blob_hash[RSE_PROVISIONING_HASH_SIZE / sizeof(uint32_t)];
     uint32_t *public_key_x;
     uint32_t *public_key_y;
     size_t public_key_x_size;

@@ -305,7 +305,7 @@ static enum tfm_plat_err_t hash_test_image(struct rse_provisioning_message_blob_
     fih_rc = bl1_hash_compute(RSE_PROVISIONING_HASH_ALG, (uint8_t *)blob + authed_header_offset,
                               authed_header_size + blob->code_size + blob->data_size +
                                   blob->secret_values_size,
-                              hash, RSE_PROVISIONING_HASH_MAX_SIZE, hash_size);
+                              hash, RSE_PROVISIONING_HASH_SIZE, hash_size);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         return (enum tfm_plat_err_t)fih_rc;
     }
@@ -319,7 +319,7 @@ static enum tfm_plat_err_t ecdsa_sign_test_image(struct rse_provisioning_message
 {
     enum tfm_plat_err_t err;
     cc3xx_err_t cc_err;
-    uint32_t hash[RSE_PROVISIONING_HASH_MAX_SIZE / sizeof(uint32_t)];
+    uint32_t hash[RSE_PROVISIONING_HASH_SIZE / sizeof(uint32_t)];
     size_t hash_size, point_size, r_size, s_size;
 
     err = hash_test_image(blob, (uint8_t *)hash, &hash_size);
