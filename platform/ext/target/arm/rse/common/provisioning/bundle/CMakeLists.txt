@@ -182,6 +182,16 @@ if (TFM_DUMMY_PROVISIONING)
             --valid_lcs=RSE_PROVISIONING_BLOB_VALID_IN_CM_LCS
     )
 
+    if (${RSE_PROVISIONING_DM_SIGNATURE_CONFIG} STREQUAL "ROTPK_NOT_IN_ROM")
+        set(CM_BUNDLE_SCRIPT_ARGS
+                ${CM_BUNDLE_SCRIPT_ARGS}
+                --cm:cm.rotpk_areas_0.rotpk_${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX}=${RSE_CM_PROVISIONING_SIGNING_KEY}
+                --cm:cm.rotpk_areas_0.rotpk_policy_${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX} RSE_ROTPK_POLICY_SIG_REQUIRED
+                --cm:cm.rotpk_areas_0.rotpk_type_${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX} RSE_ROTPK_TYPE_${RSE_PROVISIONING_SIGN_ALG}
+                --cm:cm.rotpk_areas_0.rotpk_hash_alg_${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_IDX} RSE_ROTPK_HASH_ALG_${RSE_PROVISIONING_DM_SIGN_KEY_CM_ROTPK_HASH_ALG}
+        )
+    endif()
+
     set(DM_BUNDLE_SCRIPT_ARGS
             $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_0=${TFM_BL1_2_DM_SIGNING_KEY_PATH}>
             $<$<EQUAL:${TFM_BL1_2_SIGNER_AMOUNT},2>:--dm:dm.rotpk_areas_0.rotpk_policy_0=RSE_ROTPK_POLICY_SIG_OPTIONAL>
