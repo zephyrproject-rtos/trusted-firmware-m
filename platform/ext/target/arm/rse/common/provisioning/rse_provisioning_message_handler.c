@@ -30,16 +30,16 @@
 #define TEST_STATIC_INLINE static inline
 #endif
 
-static bool rse_debug_is_disabled(void)
+static bool rse_debug_is_enabled(void)
 {
     enum lcm_error_t lcm_err;
     uint32_t dcu_values[LCM_DCU_WIDTH_IN_BYTES / sizeof(uint32_t)];
 
     lcm_err = lcm_dcu_get_enabled(&LCM_DEV_S, (uint8_t *)dcu_values);
     if (lcm_err != LCM_ERROR_NONE) {
-        FATAL_ERR(false);
+        FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_DEBUG_DISABLED_CHECK_FAILED);
         /* Assume the least secure case if there is an error */
-        return false;
+        return true;
     }
 
     /* FIXME remove this once the FVP is fixed */
@@ -47,12 +47,13 @@ static bool rse_debug_is_disabled(void)
         return false;
     }
 
-    return (dcu_values[0] & 0x55555555) == 0;
+    return (dcu_values[0] & 0x55555555) != 0;
 }
 
 static bool rse_disable_debug_and_reset(void)
 {
     /* FixMe: Use the reset debug disable mechanism */
+    assert(false);
     return false;
 }
 
@@ -133,21 +134,6 @@ static inline bool is_blob_personalized(const struct rse_provisioning_message_bl
     return (((blob->metadata >> RSE_PROVISIONING_BLOB_DETAILS_PERSONALIZATION_OFFSET)
             & RSE_PROVISIONING_BLOB_DETAILS_PERSONALIZATION_MASK)
             == RSE_PROVISIONING_BLOB_TYPE_PERSONALIZED);
-}
-
-
-static enum tfm_plat_err_t disable_debug_before_running_blob(
-                            const struct rse_provisioning_message_blob_t *blob,
-                            enum lcm_lcs_t lcs, enum lcm_tp_mode_t tp_mode)
-{
-    if ((tp_mode != LCM_TP_MODE_VIRGIN) &&
-	((lcs == LCM_LCS_CM) || (lcs == LCM_LCS_DM)) &&
-	is_sp_mode_required_for_blob(blob)) {
-        return tfm_plat_otp_secure_provisioning_start();
-    } else {
-        /* FixMe: this has a bool return but the function returns tfm_plat_err_t */
-        return rse_disable_debug_and_reset();
-    }
 }
 
 TEST_STATIC_INLINE bool
@@ -632,13 +618,25 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
         return err;
     }
 
-    if (!rse_debug_is_disabled()) {
-        err = disable_debug_before_running_blob(blob, lcs, tp_mode);
+    lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
+    if (is_sp_mode_required_for_blob(blob) && (sp_mode_enabled == LCM_FALSE)) {
+        err = tfm_plat_otp_secure_provisioning_start();
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
 
-        tfm_hal_system_reset();
+        /* This function returning (and not resetting) is an error */
+        FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_START_FAILED);
+        return TFM_PLAT_ERR_PROVISIONING_START_FAILED;
+    } else if (rse_debug_is_enabled()){
+        err = rse_disable_debug_and_reset();
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
+        /* This function returning (and not resetting) is an error */
+        FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_DEBUG_DISABLE_FAILED);
+        return TFM_PLAT_ERR_PROVISIONING_DEBUG_DISABLE_FAILED;
     }
 
     lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
