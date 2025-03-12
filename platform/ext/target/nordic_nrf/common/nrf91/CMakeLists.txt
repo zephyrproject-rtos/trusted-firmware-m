@@ -64,5 +64,6 @@ install(FILES       nrfx_config_nrf91.h
 )
 
 install(DIRECTORY    tests
+                     partition
         DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
 )
