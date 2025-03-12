@@ -961,6 +961,12 @@ enum lcm_error_t lcm_dcu_set_enabled(struct lcm_dev_t *dev, uint8_t *val)
         }
     }
 
+    /* The __ISB() ensures a Context Synchronisation Event (CSE) happens
+     * after all the memory accesses have completed using __DSB()
+     */
+    __DSB();
+    __ISB();
+
     return LCM_ERROR_NONE;
 }
 
