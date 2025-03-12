@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifndef __PACKED_ENUM
 #define __PACKED_ENUM enum __attribute__((packed))
@@ -49,6 +50,26 @@ __PACKED_ENUM cc3xx_rng_rosc_id_t {
     CC3XX_RNG_ROSC_ID_2,     /*!< ROSC ID 2 */
     CC3XX_RNG_ROSC_ID_3,     /*!< ROSC ID 3 */
 };
+
+/**
+ * @brief                       SP800-90B section 4.4 recommends two continuous health tests
+ *                              to be performed at startup and during normal operation of the
+ *                              noise source to verify the quality ot the entropy bits produced,
+ *                              namely the Repetition Count Test (4.4.1) and Adaptive Proportion
+ *                              Test (4.4.2)
+ *
+ * @note                        If an external TRNG is used then this function does nothing
+ *
+ * @param[in] enable            Set to \a true to enable continuous health tests as
+ *                              recommended by SP800-90B
+ *
+ * @return cc3xx_err_t          CC3XX_ERR_SUCCESS on success, or
+ *                              CC3XX_ERR_NOT_IMPLEMENTED in case the firmware is built
+ *                              without support for the continuous health tests, i.e.
+ *                              \a CC3XX_CONFIG_RNG_CONTINUOUS_HEALTH_TESTS_ENABLE is not
+ *                              set in the CC3XX configuration \a cc3xx_config.h
+ */
+cc3xx_err_t cc3xx_lowlevel_rng_sp800_90b_mode(bool enable);
 
 /**
  * @brief                       Sets the configuration (ROSC_ID, subsampling rate) for

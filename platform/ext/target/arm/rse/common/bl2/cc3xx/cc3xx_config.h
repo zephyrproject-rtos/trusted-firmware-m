@@ -79,6 +79,9 @@
 /* Whether RNG is enabled */
 #define CC3XX_CONFIG_RNG_ENABLE
 
+/* Whether the Continuous Health Tests as per SP800-90B are enabled */
+/* #define CC3XX_CONFIG_RNG_CONTINUOUS_HEALTH_TESTS_ENABLE */
+
 /* Whether RNG uses HMAC_DRBG when RNG_DRBG is selected */
 #define CC3XX_CONFIG_RNG_DRBG_HMAC
 /* Whether RNG uses CTR_DRBG when RNG_DRBG is selected */
