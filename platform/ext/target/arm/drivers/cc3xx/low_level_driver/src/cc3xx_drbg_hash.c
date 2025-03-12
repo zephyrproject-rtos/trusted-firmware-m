@@ -37,19 +37,19 @@ static void long_acc(uint8_t *acc, const uint8_t *val, size_t acc_size, size_t v
     r0 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Initialize the accumulator register with the current value of acc */
-    cc3xx_lowlevel_pka_write_reg(r0, (const uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
+    cc3xx_lowlevel_pka_write_reg_swap_endian(r0, (const uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Request another register for the value to accumulate */
     r1 = cc3xx_lowlevel_pka_allocate_reg();
 
     /* Write the value to accumulate into the register */
-    cc3xx_lowlevel_pka_write_reg(r1, (const uint32_t *)val, val_size);
+    cc3xx_lowlevel_pka_write_reg_swap_endian(r1, (const uint32_t *)val, val_size);
 
     /* Perform the actual operation */
     cc3xx_lowlevel_pka_add(r0, r1, r0);
 
     /* Read back the accumulator register */
-    cc3xx_lowlevel_pka_read_reg(r0, (uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
+    cc3xx_lowlevel_pka_read_reg_swap_endian(r0, (uint32_t *)acc, CC3XX_DRBG_HASH_SEEDLEN);
 
     /* Uninit the engine */
     cc3xx_lowlevel_pka_uninit();
