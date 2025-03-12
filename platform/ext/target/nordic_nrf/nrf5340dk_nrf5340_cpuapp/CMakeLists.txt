@@ -14,7 +14,7 @@ add_subdirectory(../common/nrf5340 nrf5340)
 
 target_include_directories(platform_region_defs
     INTERFACE
-        partition
+        ../common/nrf5340/partition
 )
 
 target_sources(platform_s
@@ -25,14 +25,14 @@ target_sources(platform_s
 target_include_directories(platform_s
     PUBLIC
         .
-        partition
+        ../common/nrf5340/partition
         services/include
 )
 
 if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
-            partition
+            ../common/nrf5340/partition
         PRIVATE
             .
     )
@@ -64,7 +64,7 @@ install(FILES       RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(DIRECTORY   partition
+install(DIRECTORY   ../common/nrf5340/partition
                     tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
