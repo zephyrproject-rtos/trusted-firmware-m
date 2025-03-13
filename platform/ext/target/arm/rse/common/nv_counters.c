@@ -128,7 +128,7 @@ static enum tfm_plat_err_t get_otp_id(enum tfm_nv_counter_t counter_id,
     }
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-    if (counter_id >= PLAT_NV_COUNTER_PS_0 && counter_id < PLAT_NV_COUNTER_PS_2) {
+    if (counter_id >= PLAT_NV_COUNTER_PS_0 && counter_id <= PLAT_NV_COUNTER_PS_2) {
         *otp_id = rse_get_ps_counter(counter_id - PLAT_NV_COUNTER_PS_0);
     }
 #endif
