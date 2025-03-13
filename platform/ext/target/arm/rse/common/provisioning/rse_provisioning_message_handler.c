@@ -609,8 +609,8 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
         }
 #endif
 
-        FATAL_ERR(TFM_PLAT_ERR_PROVISINING_INVALID_TP_MODE);
-        return TFM_PLAT_ERR_PROVISINING_INVALID_TP_MODE;
+        FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_INVALID_TP_MODE);
+        return TFM_PLAT_ERR_PROVISIONING_INVALID_TP_MODE;
     }
 
     err = is_blob_valid_for_lcs(blob, lcs);
