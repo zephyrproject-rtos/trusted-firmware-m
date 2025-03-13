@@ -16,10 +16,9 @@
 #include "cc3xx_test_utils.h"
 
 /* Test data are inspired from DRBGVS test framework */
-#define DRBG_HASH_RANDOM_BITS   1024
-#define DRBG_HMAC_RANDOM_BITS   1024
-#define DRBG_CTR_RANDOM_BITS    512
 
+#ifdef CC3XX_CONFIG_DRBG_HASH_ENABLE
+#define DRBG_HASH_RANDOM_BITS   1024
 void drbg_hash_test(struct test_result_t *ret)
 {
     cc3xx_err_t err;
@@ -82,7 +81,10 @@ cleanup:
 
     return;
 }
+#endif /* CC3XX_CONFIG_DRBG_HASH_ENABLE */
 
+#ifdef CC3XX_CONFIG_DRBG_HMAC_ENABLE
+#define DRBG_HMAC_RANDOM_BITS   1024
 void drbg_hmac_test(struct test_result_t *ret)
 {
     cc3xx_err_t err;
@@ -145,7 +147,10 @@ cleanup:
 
     return;
 }
+#endif /* CC3XX_CONFIG_DRBG_HMAC_ENABLE */
 
+#ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
+#define DRBG_CTR_RANDOM_BITS    512
 void drbg_ctr_test(struct test_result_t *ret)
 {
     cc3xx_err_t err;
@@ -198,29 +203,38 @@ cleanup:
 
     return;
 }
+#endif /* CC3XX_CONFIG_DRBG_CTR_ENABLE */
 
 static struct test_t drbg_ctr_tests[] = {
     /* df = derivative function, pr = prediction resistance */
+#ifdef CC3XX_CONFIG_DRBG_HASH_ENABLE
     {
         &drbg_hash_test,
         "CC3XX_DRBG_HASH_TEST",
         "CC3XX DRBG HASH test pr=False",
     },
+#endif /* CC3XX_CONFIG_DRBG_HASH_ENABLE */
+#ifdef CC3XX_CONFIG_DRBG_HMAC_ENABLE
     {
         &drbg_hmac_test,
         "CC3XX_DRBG_HMAC_TEST",
         "CC3XX DRBG HMAC test pr=False",
     },
+#endif /* CC3XX_CONFIG_DRBG_HMAC_ENABLE */
+#ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
     {
         &drbg_ctr_test,
         "CC3XX_DRBG_CTR_TEST",
         "CC3XX DRBG CTR test df=False pr=False",
     },
+#endif /* CC3XX_CONFIG_DRBG_CTR_ENABLE */
 };
 
 void add_cc3xx_drbg_tests_to_testsuite(struct test_suite_t *p_ts, uint32_t ts_size)
 {
-#ifdef CC3XX_CONFIG_DRBG_CTR_ENABLE
+#if defined(CC3XX_CONFIG_DRBG_HASH_ENABLE) || \
+    defined(CC3XX_CONFIG_DRBG_HMAC_ENABLE) || \
+    defined(CC3XX_CONFIG_DRBG_CTR_ENABLE)
     cc3xx_add_tests_to_testsuite(drbg_ctr_tests, ARRAY_SIZE(drbg_ctr_tests), p_ts, ts_size);
 #endif
 }
