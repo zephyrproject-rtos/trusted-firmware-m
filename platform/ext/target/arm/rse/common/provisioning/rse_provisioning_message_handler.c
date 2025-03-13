@@ -596,7 +596,9 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
             if (lcm_err != LCM_ERROR_NONE) {
                 return (enum tfm_plat_err_t)lcm_err;
             }
+#ifdef RSE_PROVISIONING_ISSUE_SELF_RESET
             tfm_hal_system_reset();
+#endif
         }
 
 #if !(defined(RSE_PROVISIONING_CM_DEBUG_CLOSED) && defined(RSE_PROVISIONING_REQUIRE_AUTHENTICATION_FOR_TCI))
@@ -605,7 +607,9 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
             if (lcm_err != LCM_ERROR_NONE) {
                 return (enum tfm_plat_err_t)lcm_err;
             }
+#ifdef RSE_PROVISIONING_ISSUE_SELF_RESET
             tfm_hal_system_reset();
+#endif
         }
 #endif
 
