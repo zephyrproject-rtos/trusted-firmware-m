@@ -11,6 +11,16 @@
 
 struct nrf_exception_info {
     uint32_t events;
+    union{
+        struct {
+            uint32_t address;
+        } periphaccerr;
+
+        struct {
+            uint32_t address;
+            uint32_t info;
+        } memaccerr;
+    };
 };
 
 void nrf_exception_info_store_context(void);
