@@ -175,8 +175,15 @@ William Vinnicombe
     :email: `William.Vinnicombe@raspberrypi.com <william.vinnicombe@raspberrypi.com>`__
     :github: `Raspberry Pi <https://github.com/raspberrypi>`__
 
+Analog Devices Platform:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sadik Ozer
+    :email: `Sadik.Ozer@analog.com`__
+    :github: `ozersa <https://github.com/ozersa>`__
+
 =============
 
 .. _Project Maintenance Process: https://trusted-firmware-docs.readthedocs.io/en/latest/generic_processes/project_maintenance_process.html
 
-*Copyright (c) 2017-2024, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2025, Arm Limited. All rights reserved.*
