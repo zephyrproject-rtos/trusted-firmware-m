@@ -283,20 +283,35 @@ static struct {
 
 #ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 /**
- * @brief Object describing a TRNG configuration. Default values are set at
- *        build time, but can be overridden by calling \a cc3xx_lowlevel_rng_set_config.
- *        The TRNG config holds the parameters for a ring oscillator (ROSC) from
- *        which entropy is collected by consecutive sampling
+ * @brief The ROSC config holds the parameters for a ring oscillator (ROSC) from
+ *        which entropy is collected by consecutive sampling. It holds the ID of
+ *        the ROSC from which to sample and the interval in number of cycles for
+ *        consecutive samples
  */
-static struct {
+struct rosc_config_t {
     uint32_t subsampling_rate;   /*!< Number of rng_clk cycles between consecutive
                                       ROSC samples */
-    enum cc3xx_rng_rosc_id_t id; /*!< Selected ring oscillator (ROSC)*/
-} g_rosc_config = {
-    .subsampling_rate = CC3XX_CONFIG_RNG_SUBSAMPLING_RATE,
-    .id = CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID};
+    enum cc3xx_rng_rosc_id_t id; /*!< Selected ring oscillator (ROSC) */
+};
 
-static cc3xx_err_t trng_init(enum cc3xx_rng_rosc_id_t rosc_id, uint32_t rosc_subsampling_rate)
+/**
+ * @brief Object describing a TRNG configuration. Default values are set at
+ *        build time, but can be overridden by calling \a cc3xx_lowlevel_rng_set_config
+ *        for the ROSC config, and \a cc3xx_lowlevel_rng_set_debug_control to set
+ *        the \a TRNG_DEBUG_CONTROL
+ */
+static struct {
+    struct rosc_config_t rosc;   /*!< The Ring OSCillator configuration    */
+    uint32_t debug_control;      /*!< The TRNG_DEBUG_CONTROL configuration */
+} g_trng_config = {
+    .rosc.subsampling_rate = CC3XX_CONFIG_RNG_SUBSAMPLING_RATE,
+    .rosc.id = CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID,
+    .debug_control = 0x0UL};
+
+static cc3xx_err_t trng_init(
+    enum cc3xx_rng_rosc_id_t rosc_id,
+    uint32_t rosc_subsampling_rate,
+    uint32_t trng_debug_control)
 {
     /* Enable clock */
     P_CC3XX->rng.rng_clk_enable = 0x1U;
@@ -329,8 +344,8 @@ static cc3xx_err_t trng_init(enum cc3xx_rng_rosc_id_t rosc_id, uint32_t rosc_sub
     /* Select the oscillator ring (And set SOP_SEL to 0x1 as is mandatory) */
     P_CC3XX->rng.trng_config = rosc_id | (0x1U << 2);
 
-    /* Set debug control register to no bypasses */
-    P_CC3XX->rng.trng_debug_control = 0x0U;
+    /* Set debug control register for desired bypasses */
+    P_CC3XX->rng.trng_debug_control = trng_debug_control;
 
     /* Enable the random source */
     P_CC3XX->rng.rnd_source_enable = 0x1U;
@@ -507,9 +522,9 @@ cleanup:
     return err;
 }
 
+#ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 cc3xx_err_t cc3xx_lowlevel_rng_sp800_90b_mode(bool enable)
 {
-#ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 #if defined(CC3XX_CONFIG_RNG_CONTINUOUS_HEALTH_TESTS_ENABLE)
     if (enable) {
         g_trng_tests = (struct health_tests_ctx_t){.startup = true};
@@ -519,41 +534,42 @@ cc3xx_err_t cc3xx_lowlevel_rng_sp800_90b_mode(bool enable)
 
     g_trng_tests.continuous = enable;
 
+    cc3xx_lowlevel_rng_set_hw_test_bypass(true, false, true);
+
     return CC3XX_ERR_SUCCESS;
 #else
     return CC3XX_ERR_NOT_IMPLEMENTED;
 #endif /* CC3XX_CONFIG_RNG_CONTINUOUS_HEALTH_TESTS_ENABLE */
-#else
-    /* If CC3XX_CONFIG_RNG_EXTERNAL_TRNG is defined, then this function does nothing,
-     * or it could be extended to provide the external TRNG specific ways to configure
-     * SP800-90B compliant mode
-     */
-    return CC3XX_ERR_NOT_IMPLEMENTED;
-#endif
 }
 
 cc3xx_err_t cc3xx_lowlevel_rng_set_config(enum cc3xx_rng_rosc_id_t rosc_id,
                                           uint32_t subsampling_rate)
 {
-#ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
     if (!((rosc_id >= CC3XX_RNG_ROSC_ID_0) && (rosc_id <= CC3XX_RNG_ROSC_ID_3))) {
         FATAL_ERR(CC3XX_ERR_RNG_INVALID_TRNG_CONFIG);
         return CC3XX_ERR_RNG_INVALID_TRNG_CONFIG;
     }
 
-    g_rosc_config.id = rosc_id;
-    g_rosc_config.subsampling_rate = subsampling_rate;
+    g_trng_config.rosc.id = rosc_id;
+    g_trng_config.rosc.subsampling_rate = subsampling_rate;
 
     return CC3XX_ERR_SUCCESS;
-#else
-
-    /* If CC3XX_CONFIG_RNG_EXTERNAL_TRNG is defined, then this function does nothing,
-     * or it could be extended to provide the external TRNG specific configuration items,
-     * but in that case it's likely a change of prototype will be required
-     */
-    return CC3XX_ERR_NOT_IMPLEMENTED;
-#endif
 }
+
+void cc3xx_lowlevel_rng_set_hw_test_bypass(
+    bool bypass_autocorr,
+    bool bypass_crngt,
+    bool bypass_vnc)
+{
+    uint32_t hw_entropy_tests_control = 0x0UL;
+
+    hw_entropy_tests_control |= bypass_autocorr ? (1UL << 3) : 0x0UL;
+    hw_entropy_tests_control |= bypass_crngt ? (1UL << 2) : 0x0UL;
+    hw_entropy_tests_control |= bypass_vnc ? (1UL << 1) : 0x0UL;
+
+    g_trng_config.debug_control = hw_entropy_tests_control;
+}
+#endif /* !CC3XX_CONFIG_RNG_EXTERNAL_TRNG */
 
 cc3xx_err_t cc3xx_lowlevel_rng_get_entropy(uint32_t *entropy, size_t entropy_len)
 {
@@ -562,7 +578,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_entropy(uint32_t *entropy, size_t entropy_len
 
     assert((entropy_len % sizeof(P_CC3XX->rng.ehr_data)) == 0);
 
-    trng_init(g_rosc_config.id, g_rosc_config.subsampling_rate);
+    trng_init(g_trng_config.rosc.id, g_trng_config.rosc.subsampling_rate, g_trng_config.debug_control);
 
     /* This is guarded by the continuous tests define because that is the
      * only type of testing that is being implemented by the startup_test

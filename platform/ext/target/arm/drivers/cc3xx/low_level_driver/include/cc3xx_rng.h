@@ -58,10 +58,10 @@ __PACKED_ENUM cc3xx_rng_rosc_id_t {
  *                              namely the Repetition Count Test (4.4.1) and Adaptive Proportion
  *                              Test (4.4.2)
  *
- * @note                        If an external TRNG is used then this function does nothing
+ * @note                        If an external TRNG is used then this function is not available
  *
- * @param[in] enable            Set to \a true to enable continuous health tests as
- *                              recommended by SP800-90B
+ * @param[in] enable            Set to \a true to put the TRNG in SP800-90B compatible mode, i.e.
+ *                              enable continuous health tests as recommended by SP800-90B
  *
  * @return cc3xx_err_t          CC3XX_ERR_SUCCESS on success, or
  *                              CC3XX_ERR_NOT_IMPLEMENTED in case the firmware is built
@@ -79,7 +79,7 @@ cc3xx_err_t cc3xx_lowlevel_rng_sp800_90b_mode(bool enable);
  *                              (CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID,
  *                              CC3XX_CONFIG_RNG_SUBSAMPLING_RATE)
  *
- * @note                        If an external TRNG is used then this function does nothing
+ * @note                        If an external TRNG is used then this function is not available
  *
  * @param[in] rosc_id           ROSC ID to be used, a number between 0 and 3
  * @param[in] subsampling_rate  Specifies the number of rng_clk cycles between collection
@@ -91,6 +91,19 @@ cc3xx_err_t cc3xx_lowlevel_rng_sp800_90b_mode(bool enable);
  */
 cc3xx_err_t cc3xx_lowlevel_rng_set_config(enum cc3xx_rng_rosc_id_t rosc_id,
                                           uint32_t subsampling_rate);
+/**
+ * @brief                       Sets the TRNG_DEBUG_CONTROL register to bypass mode for the
+ *                              respective HW tests
+ *
+ * @note                        If an external TRNG is used then this function is not available
+ *
+ * @param[in] bypass_autocorr   Set to \a true to bypass the AUTOCORR test
+ * @param[in] bypass_crngt      Set to \a true to bypass the CRNGT test
+ * @param[in] bypass_vnc        Set to \a true to bypass the Von Neumann balancer test
+ *
+ */
+void cc3xx_lowlevel_rng_set_hw_test_bypass(bool bypass_autocorr, bool bypass_crngt, bool bypass_vnc);
+
 /**
  * @brief                        Requires an amount of entropy from the TRNG
  *
