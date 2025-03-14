@@ -8,11 +8,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include "config_tfm.h"
 #include "tfm_attest_hal.h"
 #include "tfm_plat_boot_seed.h"
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_otp.h"
-#include "tfm_strnlen.h"
 
 static enum tfm_security_lifecycle_t map_otp_lcs_to_tfm_slc(enum plat_otp_lcs_t lcs)
 {
@@ -47,24 +47,16 @@ enum tfm_security_lifecycle_t tfm_attest_hal_get_security_lifecycle(void)
 enum tfm_plat_err_t
 tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
 {
-    enum tfm_plat_err_t err;
-    size_t otp_size;
-    size_t copy_size;
+    /* TODO: Put some sensible URL here */
+    const char verification_service [] = "none";
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_VERIFICATION_SERVICE_URL, *size, buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+    if (*size < sizeof(verification_service) - 1) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_VERIFICATION_SERVICE_URL, &otp_size);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
-    /* String content */
-    *size = tfm_strnlen((char*)buf, copy_size);
+    /* Not including the null-terminator. */
+     memcpy(buf, verification_service, sizeof(verification_service) - 1);
+    *size = sizeof(verification_service) - 1;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -72,24 +64,23 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
 enum tfm_plat_err_t
 tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf)
 {
-    enum tfm_plat_err_t err;
-    size_t otp_size;
-    size_t copy_size;
+#if ATTEST_TOKEN_PROFILE_ARM_CCA
+    const char profile [] = "tag:arm.com,2023:cca_platform#1.0.0";
+#elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
+    const char profile [] = "tag:psacertified.org,2023:psa#tfm";
+#else
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+   #error "Attestation token profile is incorrect"
+#endif
+#endif
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_PROFILE_DEFINITION, *size, buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+    if (*size < sizeof(profile) - 1) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_PROFILE_DEFINITION, &otp_size);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
-    /* String content */
-    *size = tfm_strnlen((char*)buf, copy_size);
+    /* Not including the null-terminator. */
+     memcpy(buf, profile, sizeof(profile) - 1);
+    *size = sizeof(profile) - 1;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -102,24 +93,15 @@ enum tfm_plat_err_t tfm_plat_get_boot_seed(uint32_t size, uint8_t *buf)
 enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
                                                    uint8_t  *buf)
 {
-    enum tfm_plat_err_t err;
-    size_t otp_size;
-    size_t copy_size;
+    /* TODO: Read SoC Family ID from SoC Identification Area */
+    uint32_t dummy_implementation_id = 0xACDCABBA;
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IMPLEMENTATION_ID, *size, buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+    if (*size < sizeof(dummy_implementation_id)) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_IMPLEMENTATION_ID, &otp_size);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Actually copied data is always the smaller */
-    copy_size = *size < otp_size ? *size : otp_size;
-    /* String content */
-    *size = copy_size;
+     memcpy(buf, &dummy_implementation_id, sizeof(dummy_implementation_id));
+     *size = sizeof(dummy_implementation_id);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
