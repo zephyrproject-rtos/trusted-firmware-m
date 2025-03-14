@@ -74,17 +74,25 @@ To install the J-Link Software and documentation pack, follow the steps below:
 #. When connecting a J-Link-enabled board such as a BL5340 DVK, a serial port
 should come up
 
-nRF Command-Line Tools Installation
-***********************************
+nRF Util Installation
+*********************
 
-The nRF Command-line Tools allow you to control your BL5340 module from the
+nRF Util allows you to control your BL5340 module from the
 command line, including resetting it, erasing or programming the flash memory
 and more.
 
-To install them, visit `nRF Command-Line Tools`_ and select your operating
-system.
+To install nRF Util:
 
-After installing, make sure that ``nrfjprog`` is somewhere in your executable
+1. Visit `nRF Util product page`_.
+2. Download the executable.
+3. Follow the `nRF Util installation instructions`_.
+4. Install ``nrfutil device`` subcommand for programming, flashing, and erasing devices:
+
+   .. code-block:: console
+
+      nrfutil install device
+
+After installing, make sure that ``nrfutil.exe`` is somewhere in your executable
 path to be able to invoke it from anywhere.
 
 BL2, S, and NS application images can be flashed into BL5340 separately or may
@@ -95,7 +103,7 @@ Flashing the BL5340 DVK
 
 To program the flash with a compiled TF-M image (i.e. S, NS or both) after
 having followed the instructions to install the Segger J-Link Software and the
-nRF Command-Line Tools, follow the steps below:
+nRF Util, follow the steps below:
 
 Generate Intel hex files from the output binary (bin) files as follows:
 
@@ -108,27 +116,27 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --eraseall -f nrf53
+   nrfutil device erase --all -x-family nrf53
 
 * Flash the BL2 and the TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
 
-   nrfjprog --program <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/bl2.hex -f nrf53 --sectorerase
-   nrfjprog --program <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex -f nrf53 --sectorerase
+   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/bl2.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
+   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
 
 * Reset and start TF-M:
 
 .. code-block:: console
 
-   nrfjprog --reset -f nrf53
+   nrfutil device reset --x-family nrf53
 
 Flashing the BL5340 DVK (Secondary slot in QSPI, with BL2)
 **********************************************************
 
 To program the flash with a compiled TF-M image (i.e. S, NS or both) after
 having followed the instructions to install the Segger J-Link Software and the
-nRF Command-Line Tools to the secondary , follow the steps below:
+nRF Util to the secondary , follow the steps below:
 
 Generate Intel hex files from the output binary (bin) files as follows:
 
@@ -141,20 +149,20 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --eraseall -f nrf53
+   nrfutil device erase --all -x-family nrf53
 
 * Flash the BL2 and the TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
 
-   nrfjprog --program <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/bl2.hex -f nrf53 --sectorerase
-   nrfjprog --program <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex -f nrf53 --qspisectorerase
+   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/bl2.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
+   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex --options --options ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
 
 * Reset and start TF-M:
 
 .. code-block:: console
 
-   nrfjprog --reset -f nrf53
+   nrfutil device reset --x-family nrf53
 
 
 Secure UART Console on BL5340 DVK
@@ -169,7 +177,9 @@ Non-Secure console output is available via USART0.
 
     By default USART0 and USART1 outputs are routed to separate serial ports.
 
-.. _nRF Command-Line Tools: https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools
+.. _nRF Util product page: https://www.nordicsemi.com/Products/Development-tools/nRF-Util/
+
+.. _nRF Util installation instructions: https://docs.nordicsemi.com/bundle/nrfutil/page/guides/installing.html
 
 .. _J-Link Software and documentation pack: https://www.segger.com/jlink-software.html
 

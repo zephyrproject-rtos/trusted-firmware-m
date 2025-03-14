@@ -64,17 +64,25 @@ To install the J-Link Software and documentation pack, follow the steps below:
 #. When connecting a J-Link-enabled board such as an nRF9161 DK, a
    drive corresponding to a USB Mass Storage device as well as a serial port should come up
 
-nRFx Command-Line Tools Installation
-*************************************
+nRF Util Installation
+*********************
 
-The nRF Command-line Tools allow you to control your nRF9161 device from the command line,
+nRF Util allows you to control your nRF9161 device from the command line,
 including resetting it, erasing or programming the flash memory and more.
 
-To install them, visit `nRF Command-Line Tools`_ and select your operating
-system.
+To install nRF Util:
 
-After installing, make sure that ``nrfjprog`` is somewhere in your executable path
-to be able to invoke it from anywhere.
+1. Visit `nRF Util product page`_.
+2. Download the executable.
+3. Follow the `nRF Util installation instructions`_.
+4. Install ``nrfutil device`` subcommand for programming, flashing, and erasing devices:
+
+   .. code-block:: console
+
+      nrfutil install device
+
+After installing, make sure that ``nrfutil.exe`` is somewhere in your executable
+path to be able to invoke it from anywhere.
 
 BL2, S, and NS application images can be flashed into nRF9161 separately or may be merged
 together into a single binary.
@@ -98,27 +106,27 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfjprog --eraseall -f nrf91
+   nrfutil device erase --all --x-family nrf91
 
 * (Optionally) Erase the flash memory and reset flash protection and disable
    the read back protection mechanism if enabled.
 
 .. code-block:: console
 
-   nrfjprog --recover -f nrf91
+   nrfutil device recover --x-family nrf91
 
 * Flash the BL2 and TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
 
-   nrfjprog --program build_spe/bin/bl2.hex -f nrf91 --sectorerase
-   nrfjprog --program build_app/tfm_s_ns_signed.hex -f nrf91 --sectorerase
+   nrfutil device program --x-family nrf91 --firmware build_spe/bin/bl2.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
+   nrfutil device program --x-family nrf91 --firmware build_app/tfm_s_ns_signed.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
 
 * Reset and start TF-M:
 
 .. code-block:: console
 
-   nrfjprog --reset -f nrf91
+   nrfutil device reset --x-family nrf91
 
 Secure UART Console on nRF9161 DK
 **********************************
@@ -131,7 +139,9 @@ Non-Secure console output is available via USART0.
 .. note::
    By default USART0 and USART1 outputs are routed to separate serial ports.
 
-.. _nRF Command-Line Tools: https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools
+.. _nRF Util product page: https://www.nordicsemi.com/Products/Development-tools/nRF-Util/
+
+.. _nRF Util installation instructions: https://docs.nordicsemi.com/bundle/nrfutil/page/guides/installing.html
 
 .. _J-Link Software and documentation pack: https://www.segger.com/jlink-software.html
 
