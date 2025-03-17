@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
- * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -197,21 +195,6 @@ static psa_status_t tfm_its_get_encrypted(int32_t client_id,
 }
 #endif /* ITS_ENCRYPTION */
 
-/**
- * \brief Maps a pair of client id and uid to a file id.
- *
- * \param[in]  client_id  Identifier of the asset's owner (client)
- * \param[in]  uid        Identifier for the data
- * \param[out] fid        Identifier of the file
- */
-static void tfm_its_get_fid(int32_t client_id,
-                            psa_storage_uid_t uid,
-                            uint8_t *fid)
-{
-    memcpy(fid, (const void *)&client_id, sizeof(client_id));
-    memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
-}
-
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 /**
  * \brief Initialise the static ITS filesystem configurations.
@@ -387,7 +370,8 @@ static psa_status_t get_file_info(psa_storage_uid_t uid, int32_t client_id)
     }
 
     /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
+    memcpy(g_fid, (const void *)&client_id, sizeof(client_id));
+    memcpy(g_fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
 
     /* Read file info */
     return its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
