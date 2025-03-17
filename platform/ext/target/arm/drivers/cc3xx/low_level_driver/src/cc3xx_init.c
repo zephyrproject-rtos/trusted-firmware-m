@@ -146,7 +146,8 @@ cc3xx_err_t cc3xx_lowlevel_init(void)
     }
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
 
-    /* Set AHB to secure */
+    /* Set the AHB to issue secure, privileged data access transactions */
+    P_CC3XX->ahb.ahbm_hprot = 0b11U;
     P_CC3XX->ahb.ahbm_hnonsec = 0b00U;
 
     /* Reset engine to PASSTHROUGH / None */
