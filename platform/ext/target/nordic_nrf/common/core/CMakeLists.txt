@@ -78,9 +78,11 @@ target_include_directories(platform_s
         services/include
 )
 
+if(PLATFORM_DEFAULT_OTP OR TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 set(nvm_sources
-  $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c
 )
+endif()
 
 if(HAS_RRAMC)
   list(APPEND nvm_sources
