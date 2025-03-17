@@ -72,8 +72,8 @@ __PACKED_STRUCT rse_otp_header_area_t {
 
 struct rse_otp_cm_rotpk_area_t {
     uint32_t zero_count;
-    uint32_t cm_rotpk_policies;
     uint32_t _pad;
+    uint32_t cm_rotpk_policies;
     uint8_t rotpk[RSE_OTP_CM_ROTPK_AMOUNT][RSE_OTP_CM_ROTPK_SIZE];
 };
 
