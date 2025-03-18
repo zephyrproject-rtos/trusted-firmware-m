@@ -224,8 +224,9 @@ static cc3xx_err_t trng_get_random(uint32_t *buf, size_t word_count) {
 #endif /* !CC3XX_CONFIG_RNG_EXTERNAL_TRNG */
 
 /* See https://en.wikipedia.org/wiki/Xorshift#xorshift+ */
-static uint64_t xorshift_plus_128_lfsr(void)
+static cc3xx_err_t xorshift_plus_128_lfsr(uint64_t *res)
 {
+    cc3xx_err_t err;
     static union {
         uint64_t state[2];
         uint32_t entropy[sizeof(P_CC3XX->rng.ehr_data) / sizeof(uint32_t)];
@@ -237,7 +238,10 @@ static uint64_t xorshift_plus_128_lfsr(void)
         /* This function doesn't need to be perfectly random as it is only used
          * for the permutation function, so only seed once per boot.
          */
-        cc3xx_lowlevel_rng_get_entropy(lfsr.entropy, sizeof(lfsr.entropy));
+        err = cc3xx_lowlevel_rng_get_entropy(lfsr.entropy, sizeof(lfsr.entropy));
+        if (err != CC3XX_ERR_SUCCESS) {
+            return err;
+        }
         g_lfsr.seed_done = true;
     }
 
@@ -251,14 +255,20 @@ static uint64_t xorshift_plus_128_lfsr(void)
 
     lfsr.state[1] = temp0;
 
-    return temp0 + temp1;
+    *res = temp0 + temp1;
+
+    return CC3XX_ERR_SUCCESS;
 }
 
 static cc3xx_err_t lfsr_get_random(uint32_t* buf, size_t word_count)
 {
+    cc3xx_err_t err;
     assert(word_count == sizeof(uint64_t) / sizeof(uint32_t));
 
-    *(uint64_t *)buf = xorshift_plus_128_lfsr();
+    err = xorshift_plus_128_lfsr((uint64_t *) buf);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return err;
+    }
 
     return CC3XX_ERR_SUCCESS;
 }
