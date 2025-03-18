@@ -2,7 +2,8 @@
  * attest_token_encode.c
  *
  * Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ *
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,12 +14,12 @@
 #include "config_tfm.h"
 #include "qcbor/qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
-#include "t_cose_mac0_sign.h"
+#include "t_cose/t_cose_mac_compute.h"
 #else
-#include "t_cose_sign1_sign.h"
+#include "t_cose/t_cose_sign1_sign.h"
 #endif
-#include "t_cose_common.h"
-#include "q_useful_buf.h"
+#include "t_cose/t_cose_common.h"
+#include "t_cose/q_useful_buf.h"
 #include "psa/crypto.h"
 #include "attest_key.h"
 #include "tfm_crypto_defs.h"
@@ -62,7 +63,7 @@ static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
 /*
  * Outline of token creation. Much of this occurs inside
- * t_cose_mac0_encode_parameters() and t_cose_mac0_encode_tag().
+ * t_cose_mac_encode_parameters() and t_cose_mac_encode_tag().
  *
  * - Create encoder context
  * - Open the CBOR array that hold the \c COSE_Mac0
@@ -95,7 +96,6 @@ static enum attest_token_err_t t_cose_err_to_attest_err(enum t_cose_err_t err)
  */
 enum attest_token_err_t
 attest_token_encode_start(struct attest_token_encode_ctx *me,
-                          uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
@@ -104,22 +104,15 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     struct t_cose_key attest_key;
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
-    int32_t t_cose_options = 0;
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
     struct q_useful_buf_c attest_key_id;
 
     /* Remember some of the configuration values */
-    me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
-    if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
-        t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_TAG;
-    }
+    t_cose_mac_compute_init(&(me->mac_ctx), 0, cose_alg_id);
 
-    t_cose_mac0_sign_init(&(me->mac_ctx), t_cose_options, cose_alg_id);
-
-    attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
-    attest_key.k.key_handle = (uint64_t)key_handle;
+    attest_key.key.handle = (uint64_t)key_handle;
 
     attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
     if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
@@ -129,9 +122,9 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
         attest_key_id = NULL_Q_USEFUL_BUF_C;
     }
 
-    t_cose_mac0_set_signing_key(&(me->mac_ctx),
-                                attest_key,
-                                attest_key_id);
+    t_cose_mac_set_computing_key(&(me->mac_ctx),
+                                 attest_key,
+                                 attest_key_id);
 
     /* Spin up the CBOR encoder */
     QCBOREncode_Init(&(me->cbor_enc_ctx), *out_buf);
@@ -139,12 +132,17 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     /* This will cause the cose headers to be encoded and written into
      *  out_buf using me->cbor_enc_ctx
      */
-    cose_ret = t_cose_mac0_encode_parameters(&(me->mac_ctx),
-                                             &(me->cbor_enc_ctx));
+    cose_ret = t_cose_mac_encode_parameters(&(me->mac_ctx),
+                                            &(me->cbor_enc_ctx));
     if (cose_ret != T_COSE_SUCCESS) {
         return_value = t_cose_err_to_attest_err(cose_ret);
     }
 
+    /* Wrapping the content of the token (payload) into a byte string
+     * which then can be handed over as input to a hashing function
+     * as part of signing it.
+     */
+    QCBOREncode_BstrWrap(&(me->cbor_enc_ctx));
     QCBOREncode_OpenMap(&(me->cbor_enc_ctx));
 
     return return_value;
@@ -158,16 +156,19 @@ attest_token_encode_finish(struct attest_token_encode_ctx *me,
                            struct q_useful_buf_c *completed_token)
 {
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
+    struct q_useful_buf_c   payload;
     /* The completed and tagged encoded COSE_Mac0 */
     struct q_useful_buf_c   completed_token_ub;
     QCBORError              qcbor_result;
     enum t_cose_err_t       cose_return_value;
 
     QCBOREncode_CloseMap(&(me->cbor_enc_ctx));
+    QCBOREncode_CloseBstrWrap2(&(me->cbor_enc_ctx), false, &payload);
 
     /* -- Finish up the COSE_Mac0. This is where the MAC happens -- */
-    cose_return_value = t_cose_mac0_encode_tag(&(me->mac_ctx),
-                                               &(me->cbor_enc_ctx));
+    cose_return_value = t_cose_mac_encode_tag(&(me->mac_ctx),
+                                              payload,
+                                              &(me->cbor_enc_ctx));
     if (cose_return_value) {
         /* Main errors are invoking the tagging */
         return_value = t_cose_err_to_attest_err(cose_return_value);
@@ -225,36 +226,27 @@ Done:
  */
 enum attest_token_err_t
 attest_token_encode_start(struct attest_token_encode_ctx *me,
-                          uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
 {
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
-    int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
     psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
     /* Remember some of the configuration values */
-    me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
-
-    if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
-        t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_SIG;
-    } else {
-        attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
-        if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-            return ATTEST_TOKEN_ERR_GENERAL;
-        }
+    attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
+    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+        return ATTEST_TOKEN_ERR_GENERAL;
     }
 
-    t_cose_sign1_sign_init(&(me->signer_ctx), t_cose_options, cose_alg_id);
+    t_cose_sign1_sign_init(&(me->signer_ctx), 0, cose_alg_id);
 
-    attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
-    attest_key.k.key_handle = private_key;
+    attest_key.key.handle = private_key;
 
     t_cose_sign1_set_signing_key(&(me->signer_ctx),
                                  attest_key,
@@ -334,9 +326,9 @@ attest_token_encode_borrow_cbor_cntxt(struct attest_token_encode_ctx *me)
  */
 void attest_token_encode_add_integer(struct attest_token_encode_ctx *me,
                                      int32_t label,
-                                     int64_t Value)
+                                     int64_t value)
 {
-    QCBOREncode_AddInt64ToMapN(&(me->cbor_enc_ctx), label, Value);
+    QCBOREncode_AddInt64ToMapN(&(me->cbor_enc_ctx), label, value);
 }
 
 

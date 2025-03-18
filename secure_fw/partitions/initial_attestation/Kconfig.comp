@@ -35,6 +35,6 @@ endchoice
 
 config ATTEST_STACK_SIZE
     hex "Stack size"
-    default 0x700
+    default 0x800
 
 endmenu

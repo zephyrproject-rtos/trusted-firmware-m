@@ -1,6 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
-#
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
@@ -58,11 +57,11 @@ target_link_libraries(tfm_psa_rot_partition_attestation
         tfm_sprt
         tfm_boot_status
         qcbor
+        psa_crypto_config
 )
 
 target_compile_definitions(tfm_psa_rot_partition_attestation
     PRIVATE
-        $<$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>>:CLAIM_VALUE_CHECK>
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:ATTEST_KEY_BITS=${ATTEST_KEY_BITS}>

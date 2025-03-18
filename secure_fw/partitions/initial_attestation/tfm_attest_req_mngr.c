@@ -38,8 +38,8 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
     token_buff_size = msg->out_size[0];
     challenge_size = msg->in_size[0];
 
-    if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64
-        || challenge_size == 0 || token_buff_size == 0) {
+    if ((challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64)
+        || (challenge_size == 0) || (token_buff_size == 0)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -53,6 +53,7 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
                                       token_buff, token_buff_size, &token_size);
     if (status == PSA_SUCCESS) {
         psa_unmap_outvec(msg->handle, 0, token_size);
+        psa_unmap_invec(msg->handle, 0);
     }
 
     return status;
@@ -71,11 +72,11 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
     size_t token_size;
 
     challenge_size = msg->in_size[0];
-    token_buff_size = msg->out_size[0] < sizeof(token_buff) ?
+    token_buff_size = (msg->out_size[0] < sizeof(token_buff)) ?
                                           msg->out_size[0] : sizeof(token_buff);
 
-    if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64
-        || challenge_size == 0 || token_buff_size == 0) {
+    if ((challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64)
+        || (challenge_size == 0) || (token_buff_size == 0)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -104,8 +105,8 @@ static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
     size_t token_size;
     size_t bytes_read = 0;
 
-    if (msg->in_size[0] != sizeof(challenge_size)
-        || msg->out_size[0] != sizeof(token_size)) {
+    if ((msg->in_size[0] != sizeof(challenge_size))
+        || (msg->out_size[0] != sizeof(token_size))) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -136,8 +137,6 @@ psa_status_t tfm_attestation_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t attest_partition_init(void)
