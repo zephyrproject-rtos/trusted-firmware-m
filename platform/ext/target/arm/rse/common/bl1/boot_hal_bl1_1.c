@@ -16,6 +16,7 @@
 #include "uart_stdout.h"
 #include "tfm_plat_otp.h"
 #include "kmu_drv.h"
+#include "rse_kmu_keys.h"
 #include "device_definition.h"
 #include "platform_regs.h"
 #ifdef CRYPTO_HW_ACCELERATOR
@@ -122,6 +123,11 @@ int32_t boot_platform_init(void)
         cc3xx_lowlevel_dma_remap_region_init(idx, &remap_regions[idx]);
     }
 
+    plat_err = rse_setup_cc3xx_pka_sram_encryption_key();
+    if (plat_err) {
+        return plat_err;
+    }
+
     fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
@@ -132,6 +138,12 @@ int32_t boot_platform_init(void)
     }
 
     kmu_err = kmu_init(&KMU_DEV_S, prbg_seed);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return kmu_err;
+    }
+
+    /* Load the PKA encryption key, now that it is set up */
+    kmu_err = kmu_export_key(&KMU_DEV_S, RSE_KMU_SLOT_CC3XX_PKA_SRAM_ENCRYPTION_KEY);
     if (kmu_err != KMU_ERROR_NONE) {
         return kmu_err;
     }

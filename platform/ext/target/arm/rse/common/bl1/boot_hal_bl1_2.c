@@ -246,17 +246,6 @@ int32_t boot_platform_post_init(void)
         return plat_err;
     }
 
-    plat_err = rse_setup_cc3xx_pka_sram_encryption_key();
-    if (plat_err) {
-        return plat_err;
-    }
-
-    /* Load the PKA encryption key, now that it is set up */
-    kmu_err = kmu_export_key(&KMU_DEV_S, RSE_KMU_SLOT_CC3XX_PKA_SRAM_ENCRYPTION_KEY);
-    if (kmu_err != KMU_ERROR_NONE) {
-        return kmu_err;
-    }
-
     return 0;
 }
 
