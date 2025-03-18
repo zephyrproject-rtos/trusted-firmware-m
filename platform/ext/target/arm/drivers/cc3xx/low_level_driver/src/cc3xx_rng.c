@@ -382,7 +382,6 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
 
     size_t copy_size;
     const bool request_is_word_aligned = ((uintptr_t)buf & 0x3) == 0 && (length & 0x3) == 0;
-    bool rng_required;
     cc3xx_err_t err;
 
     switch (quality) {
@@ -408,11 +407,6 @@ cc3xx_err_t cc3xx_lowlevel_rng_get_random(uint8_t* buf, size_t length,
     if (request_is_word_aligned) {
         *used_idx = round_up(*used_idx, sizeof(uint32_t));
     }
-
-    /* Check if we need to initialize the RNG, or if we can just serve the
-     * request from the buffered entropy.
-     */
-    rng_required = (max_buf_size - *used_idx) < length;
 
     while(length > 0) {
         if (*used_idx == max_buf_size) {
