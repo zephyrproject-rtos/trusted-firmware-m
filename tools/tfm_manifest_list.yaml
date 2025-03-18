@@ -124,5 +124,18 @@
          ]
       }
     },
+    {
+      "description": "TFM POX Partition",
+      "manifest": "../secure_fw/partitions/proof_of_execution/tfm_pox.yaml",
+      "output_path": "secure_fw/partitions/proof_of_execution",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 290,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_pox*"
+         ]
+      }
+    }
   ]
 }
