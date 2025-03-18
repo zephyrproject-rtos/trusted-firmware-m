@@ -16,7 +16,7 @@ target_sources(tfm_app_rot_partition_pox
         pox_execute.c
         pox_handler.c
         pox_report.c
-        pox_token_encode.c
+        # pox_token_encode.c
 )
 
 # The generated sources

@@ -1,4 +1,5 @@
-#include "pox_token.h"
+#include "pox_report.h"
+#include "qcbor/qcbor.h"
 #include "psa/crypto.h"
 #include "tfm_sp_log.h" // TF-M Secure Partition Logging
 #include "psa/initial_attestation.h"
@@ -134,18 +135,18 @@ psa_status_t generate_pox_report(uint8_t *token_buf, size_t token_size, uintptr_
     status = psa_import_key(&attributes, pre_provisioned_key, sizeof(pre_provisioned_key), &key_id);
     if (status != PSA_SUCCESS)
     {
-        printf("ERROR: Failed to import the key. Status: %d\n", status);
+        LOG_ERRFMT("ERROR: Failed to import the key. Status: %d\n", status);
         return status;
     }
     // Now sign the hash using HMAC
-    uint8_t signature[SIGNATURE_BUFFER_SIZE];
-    size_t signature_len;
-    status = psa_sign_hash(key_id, PSA_ALG_HMAC(PSA_ALG_SHA_256), hash, hash_len, signature, sizeof(signature), &signature_len);
-    if (status != PSA_SUCCESS)
-    {
-        LOG_INFFMT("[Secure] ERROR: Failed to sign the report with HMAC.\n");
-        return status;
-    }
+    // uint8_t signature[SIGNATURE_BUFFER_SIZE];
+    // size_t signature_len;
+    // status = psa_sign_hash(key_id, PSA_ALG_HMAC(PSA_ALG_SHA_256), hash, hash_len, signature, sizeof(signature), &signature_len);
+    // if (status != PSA_SUCCESS)
+    // {
+    //     LOG_INFFMT("[Secure] ERROR: Failed to sign the report with HMAC.\n");
+    //     return status;
+    // }
 
     QCBOREncode_Init(&encode_ctx, buffer);
     QCBOREncode_OpenMap(&encode_ctx);
