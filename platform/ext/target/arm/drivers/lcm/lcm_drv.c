@@ -1,17 +1,8 @@
 /*
- * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * SPDX-License-Identifier: Apache-2.0
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /**
@@ -156,11 +147,24 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
     return LCM_ERROR_NONE;
 }
 
-void lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode)
+enum lcm_error_t lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+    enum lcm_tp_mode_t double_check_mode;
 
     *mode = (enum lcm_tp_mode_t)p_lcm->tp_mode;
+
+#ifdef KMU_S
+        kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+#endif /* KMU_S */
+
+    double_check_mode = (enum lcm_tp_mode_t)p_lcm->tp_mode;
+
+    if (*mode != double_check_mode) {
+        return LCM_ERROR_GET_TP_MODE_CORRUPTION_DETECTED;
+    }
+
+    return LCM_ERROR_NONE;
 }
 
 enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
@@ -182,7 +186,10 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
         return LCM_ERROR_SET_TP_MODE_INVALID_LCS;
     }
 
-    lcm_get_tp_mode(dev, &curr_mode);
+    err = lcm_get_tp_mode(dev, &curr_mode);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
 
     if(curr_mode != LCM_TP_MODE_VIRGIN) {
         FATAL_ERR(LCM_ERROR_SET_TP_MODE_INVALID_TRANSITION);
@@ -266,8 +273,12 @@ enum lcm_error_t lcm_set_sp_enabled(struct lcm_dev_t *dev)
     enum lcm_bool_t fatal_err;
     uint32_t idx;
     enum lcm_tp_mode_t tp_mode;
+    enum lcm_error_t err;
 
-    lcm_get_tp_mode(dev, &tp_mode);
+    err = lcm_get_tp_mode(dev, &tp_mode);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
 
     if (!((tp_mode == LCM_TP_MODE_PCI) || (tp_mode == LCM_TP_MODE_TCI))) {
         FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TP_MODE);
@@ -615,7 +626,11 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
         return LCM_ERROR_NONE;
     }
 
-    lcm_get_tp_mode(dev, &tp_mode);
+    err = lcm_get_tp_mode(dev, &tp_mode);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
+
     if (!(tp_mode == LCM_TP_MODE_PCI || tp_mode == LCM_TP_MODE_TCI)) {
         FATAL_ERR(LCM_ERROR_SET_LCS_INVALID_TP_MODE);
         return LCM_ERROR_SET_LCS_INVALID_TP_MODE;

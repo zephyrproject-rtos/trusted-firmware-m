@@ -578,7 +578,10 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
 
     struct default_blob_handler_ctx_t *blob_ctx = (struct default_blob_handler_ctx_t *)ctx;
 
-    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
 
     lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (lcm_err != LCM_ERROR_NONE) {

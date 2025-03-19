@@ -43,9 +43,13 @@ static enum tfm_plat_err_t get_rotpk(const struct rse_provisioning_message_blob_
     *public_key_x_size = tci_rotpk_x_len;
     *public_key_y_size = tci_rotpk_y_len;
 #else
+    enum lcm_error_t lcm_err;
     enum lcm_tp_mode_t tp_mode;
 
-    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
 
     switch(tp_mode) {
     case LCM_TP_MODE_TCI:

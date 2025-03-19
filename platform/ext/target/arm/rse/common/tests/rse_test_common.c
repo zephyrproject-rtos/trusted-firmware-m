@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,7 +29,11 @@ void add_conditional_tests_to_testsuite(struct conditional_test_t *tests, uint32
     struct conditional_test_t *test;
     bool invalid_sp_state = false;
 
-    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return;
+    }
+
     lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
 
     lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);

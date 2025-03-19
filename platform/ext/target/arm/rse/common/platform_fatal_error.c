@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,7 +27,9 @@ bool log_error_permissions_check(uint32_t err, bool is_fatal)
 
     prevent_recursion = true;
 
-    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_get_tp_mode(&LCM_DEV_S, &tp_mode) != LCM_ERROR_NONE) {
+        goto out;
+    }
 
     if (lcm_get_lcs(&LCM_DEV_S, &lcs) != LCM_ERROR_NONE) {
         goto out;

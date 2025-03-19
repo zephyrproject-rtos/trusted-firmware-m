@@ -78,6 +78,7 @@ enum lcm_error_t {
     LCM_ERROR_GET_LCS_FATAL_ERROR,
     LCM_ERROR_GET_LCS_INVALID_LCS,
     LCM_ERROR_GET_LCS_CORRUPTION_DETECTED,
+    LCM_ERROR_GET_TP_MODE_CORRUPTION_DETECTED,
     LCM_ERROR_CM_TO_DM_WRITE_VERIFY_FAIL,
     LCM_ERROR_DM_TO_SE_WRITE_VERIFY_FAIL,
     LCM_ERROR_SET_LCS_INVALID_TP_MODE,
@@ -135,8 +136,10 @@ enum lcm_error_t lcm_init(struct lcm_dev_t *dev);
  *
  * \param[in]  dev     The LCM device structure.
  * \param[out] mode    The TP mode the device is currently in.
+ *
+ * \return Returns error code as specified in \ref lcm_error_t
  */
-void lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
+enum lcm_error_t lcm_get_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t *mode);
 /**
  * \brief This function sets the TP mode
  *

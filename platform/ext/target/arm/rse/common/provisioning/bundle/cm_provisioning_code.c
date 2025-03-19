@@ -40,10 +40,15 @@ static enum tfm_plat_err_t provision_derived_key(enum kmu_hardware_keyslot_t inp
     cc3xx_err_t cc_err;
     enum lcm_tp_mode_t tp_mode;
     uint32_t all_zero_key[32 / sizeof(uint32_t)] = {0};
+    enum lcm_error_t lcm_err;
 
     /* In TCI mode the KRTL isn't available, so substitute for the all-zero key
      */
-    lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
+
     if (input_key == KMU_HW_SLOT_KRTL
      && tp_mode == LCM_TP_MODE_TCI
      && input_key_buf == NULL) {

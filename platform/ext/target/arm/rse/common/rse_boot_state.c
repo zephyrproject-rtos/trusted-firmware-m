@@ -23,6 +23,7 @@ enum tfm_plat_err_t rse_get_boot_state(uint8_t *state, size_t state_buf_len,
     cc3xx_err_t err;
 
     enum tfm_plat_err_t plat_err;
+    enum lcm_error_t lcm_err;
     enum plat_otp_lcs_t lcs;
     enum lcm_tp_mode_t tp_mode;
     uint32_t reprovisioning_bits;
@@ -43,7 +44,10 @@ enum tfm_plat_err_t rse_get_boot_state(uint8_t *state, size_t state_buf_len,
     }
 
     if (mask & RSE_BOOT_STATE_INCLUDE_TP_MODE) {
-        lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+        lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+        if (lcm_err != LCM_ERROR_NONE) {
+            return (enum tfm_plat_err_t)lcm_err;
+        }
 
         err = cc3xx_lowlevel_hash_update((uint8_t *)&tp_mode, sizeof(tp_mode));
         if (err != CC3XX_ERR_SUCCESS) {
