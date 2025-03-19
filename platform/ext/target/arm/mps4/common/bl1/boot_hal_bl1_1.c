@@ -1,9 +1,11 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * Copyright (c) 2024-2025, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+
+ #define MBEDTLS_ALLOW_PRIVATE_ACCESS
 
 #include "boot_hal.h"
 #include "region.h"
@@ -22,6 +24,8 @@
 #include "trng.h"
 #include "tfm_log.h"
 
+#include "mbedtls/hmac_drbg.h"
+
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 static int32_t pre_fsbl_flow(void);
@@ -31,6 +35,83 @@ static bool is_reset_por_or_cold(void);
 static void request_cold_reset(void);
 static void wipe_ram(void);
 static int load_sam_config(void);
+
+static mbedtls_hmac_drbg_context hmac_drbg_ctx;
+
+int32_t bl1_trng_generate_random_init(void)
+{
+    int error;
+    size_t hash_bytes_used = 0;
+    uint8_t entropy_seed[64];
+
+    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+
+    error = tfm_plat_otp_read(PLAT_OTP_ID_ENTROPY_SEED, sizeof(entropy_seed),
+                                entropy_seed);
+    if (TFM_PLAT_ERR_SUCCESS != error) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    mbedtls_hmac_drbg_init(&hmac_drbg_ctx);
+    error = mbedtls_hmac_drbg_seed_buf(&hmac_drbg_ctx, md_info, entropy_seed, sizeof(entropy_seed));
+    if (error != 0) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+int32_t bl1_trng_generate_random(uint8_t *output, size_t out_len)
+{
+    int ret = 1;
+    size_t md_len = mbedtls_md_get_size(hmac_drbg_ctx.md_ctx.md_info);
+    size_t left = out_len;
+    unsigned char *out = output;
+
+    if (output == NULL) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (out_len > MBEDTLS_HMAC_DRBG_MAX_REQUEST) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (hmac_drbg_ctx.f_entropy != NULL && /* For no-reseeding instances */
+        (hmac_drbg_ctx.prediction_resistance == MBEDTLS_HMAC_DRBG_PR_ON ||
+         hmac_drbg_ctx.reseed_counter > hmac_drbg_ctx.reseed_interval)) {
+        if ((ret = mbedtls_hmac_drbg_reseed(&hmac_drbg_ctx, NULL, 0)) != 0) {
+            return ret;
+        }
+    }
+
+    while (left != 0) {
+        size_t use_len = left > md_len ? md_len : left;
+
+        if ((ret = mbedtls_md_hmac_reset(&hmac_drbg_ctx.md_ctx)) != 0) {
+            goto exit;
+        }
+        if ((ret = mbedtls_md_hmac_update(&hmac_drbg_ctx.md_ctx,
+                                          hmac_drbg_ctx.V, md_len)) != 0) {
+            goto exit;
+        }
+        if ((ret = mbedtls_md_hmac_finish(&hmac_drbg_ctx.md_ctx, hmac_drbg_ctx.V)) != 0) {
+            goto exit;
+        }
+
+        memcpy(out, hmac_drbg_ctx.V, use_len);
+        out += use_len;
+        left -= use_len;
+    }
+
+    if ((ret = mbedtls_hmac_drbg_update(&hmac_drbg_ctx, NULL, 0)) != 0) {
+        goto exit;
+    }
+
+    hmac_drbg_ctx.reseed_counter++;
+
+exit:
+    return ret;
+}
 
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
@@ -64,12 +145,18 @@ int32_t boot_platform_init(void)
         return 1;
     }
 
-    /* Init KMU */
-    result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
-    if (result != 0) {
+    /* Init the random generator */
+    result = bl1_trng_generate_random_init();
+    if (result != TFM_PLAT_ERR_SUCCESS) {
         return result;
     }
 
+    result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
+    if (result != TFM_PLAT_ERR_SUCCESS) {
+        return result;
+    }
+
+    /* Init KMU */
     result = kmu_init(&KMU_DEV_S, prbg_seed);
     if (result != KMU_ERROR_NONE) {
         return result;

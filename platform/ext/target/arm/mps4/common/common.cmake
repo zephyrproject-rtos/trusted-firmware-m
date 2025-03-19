@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2024, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2025, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -305,6 +305,7 @@ target_compile_options(bl1_1
 
 target_sources(platform_bl1_1
     PRIVATE
+        ${MBEDCRYPTO_PATH}/library/hmac_drbg.c
         ${CMAKE_CURRENT_LIST_DIR}/nv_counters.c
         ${CMAKE_CURRENT_LIST_DIR}/otp_lcm.c
         ${CMAKE_CURRENT_LIST_DIR}/cmsis_drivers/Driver_USART.c
@@ -319,6 +320,11 @@ target_sources(platform_bl1_1
 target_compile_options(platform_bl1_1
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_bl1_1
+    PUBLIC
+        MBEDTLS_HMAC_DRBG_C
 )
 
 # If this is not added to the bl1_1 it will not correctly override the weak
