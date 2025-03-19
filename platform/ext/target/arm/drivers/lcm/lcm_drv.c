@@ -336,6 +336,7 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
     enum lcm_bool_t fatal_err;
+    enum lcm_lcs_t double_check_lcs;
 
     lcm_get_fatal_error(dev, &fatal_err);
 
@@ -344,8 +345,17 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
         return LCM_ERROR_GET_LCS_FATAL_ERROR;
     }
 
-
     *lcs = (enum lcm_lcs_t)p_lcm->lcs_value;
+
+#ifdef KMU_S
+        kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+#endif /* KMU_S */
+
+    double_check_lcs = (enum lcm_lcs_t)p_lcm->lcs_value;
+
+    if (*lcs != double_check_lcs) {
+        return LCM_ERROR_GET_LCS_CORRUPTION_DETECTED;
+    }
 
     if (*lcs == LCM_LCS_INVALID) {
         return LCM_ERROR_GET_LCS_INVALID_LCS;
