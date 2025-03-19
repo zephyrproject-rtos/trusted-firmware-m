@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 #include "array.h"
+#include "config_tfm.h"
 #include "internal_status_code.h"
 #include "ns_mailbox_client_id.h"
 #include "tfm_plat_defs.h"
@@ -42,15 +43,23 @@ int32_t tfm_multi_core_hal_client_id_translate(void *owner,
 {
     size_t i;
     int32_t base, limit;
-    int32_t min_client_id;
+    int32_t min_client_id, client_id = 0;
     const size_t nr_ranges = ARRAY_SIZE(ns_mailbox_client_id_range_owner);
 
     if ((owner == NULL) || (client_id_out == NULL)) {
         return SPM_ERROR_BAD_PARAMETERS;
     }
+
+#if MAILBOX_SUPPORT_NS_CLIENT_ID_ZERO
+    /* Accept client_id_in == 0 as a valid offset */
+    if (client_id_in > 0) {
+        return SPM_ERROR_BAD_PARAMETERS;
+    }
+#else
     if (client_id_in >= 0) {
         return SPM_ERROR_BAD_PARAMETERS;
     }
+#endif
 
     for (i = 0; i < nr_ranges; i++) {
         if (ns_mailbox_client_id_range_owner[i] == owner) {
@@ -86,6 +95,18 @@ int32_t tfm_multi_core_hal_client_id_translate(void *owner,
      * 1 is added before client_id_in, so that no underflow happens even if
      * limit + client_id_in == INT32_MIN - 1
      */
-    *client_id_out = (limit + 1) + client_id_in;
+    client_id = (limit + 1) + client_id_in;
+
+    /*
+     * A final check.
+     * No further validation after this translation function returns.
+     * It is harmless to check the final output again, in case any corner case
+     * is not spotted in earlier checks.
+     */
+    if (client_id >= 0) {
+        return SPM_ERROR_GENERIC;
+    }
+
+    *client_id_out = client_id;
     return SPM_SUCCESS;
 }

@@ -272,6 +272,17 @@
 #define MAILBOX_IS_UNCACHED_NS                 1
 #endif
 
+/*
+ * Whether the client ID translation can accept NS client ID == 0.
+ * NS client ID from NSPE is calculated as an offset of the client ID range in
+ * NS Agent mailbox client ID translation.
+ * Select this option to allow platforms to accept NS client ID == 0 as a valid
+ * offset.
+ */
+#ifndef MAILBOX_SUPPORT_NS_CLIENT_ID_ZERO
+#define MAILBOX_SUPPORT_NS_CLIENT_ID_ZERO      0
+#endif
+
 /* Secure Test Partition Configs */
 #ifdef TFM_PARTITION_DPE
 /* DPE tests require larger test partition stack */
