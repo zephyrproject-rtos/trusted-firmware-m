@@ -625,7 +625,11 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
         return err;
     }
 
-    lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
+    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
+
     if (is_sp_mode_required_for_blob(blob) && (sp_mode_enabled == LCM_FALSE)) {
         err = tfm_plat_otp_secure_provisioning_start();
         if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -646,7 +650,11 @@ enum tfm_plat_err_t default_blob_handler(const struct rse_provisioning_message_b
         return TFM_PLAT_ERR_PROVISIONING_DEBUG_DISABLE_FAILED;
     }
 
-    lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
+    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_mode_enabled);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
+
     if (is_sp_mode_required_for_blob(blob) != (sp_mode_enabled == LCM_TRUE)) {
         FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_INVALID_SP_MODE);
         return TFM_PLAT_ERR_PROVISIONING_INVALID_SP_MODE;

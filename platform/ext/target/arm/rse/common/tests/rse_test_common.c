@@ -34,7 +34,10 @@ void add_conditional_tests_to_testsuite(struct conditional_test_t *tests, uint32
         return;
     }
 
-    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return;
+    }
 
     lcm_err = lcm_get_lcs(&LCM_DEV_S, &lcs);
     if (lcm_err != LCM_ERROR_NONE) {

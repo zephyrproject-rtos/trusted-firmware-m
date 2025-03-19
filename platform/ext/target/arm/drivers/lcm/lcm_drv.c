@@ -236,11 +236,24 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
     return LCM_ERROR_NONE;
 }
 
-void lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled)
+enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+    enum lcm_bool_t double_check_sp_mode;
 
     *enabled = (enum lcm_bool_t)p_lcm->sp_enable;
+
+#ifdef KMU_S
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+#endif /* KMU_S */
+
+    double_check_sp_mode = (enum lcm_bool_t)p_lcm->sp_enable;
+
+    if (double_check_sp_mode != *enabled) {
+        return LCM_ERROR_GET_SP_ENABLED_CORRUPTION_DETECTED;
+    }
+
+    return LCM_ERROR_NONE;
 }
 
 static inline void mask_dcus_for_sp_enable(struct lcm_dev_t *dev)
@@ -359,7 +372,7 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
     *lcs = (enum lcm_lcs_t)p_lcm->lcs_value;
 
 #ifdef KMU_S
-        kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 #endif /* KMU_S */
 
     double_check_lcs = (enum lcm_lcs_t)p_lcm->lcs_value;
@@ -636,7 +649,10 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
         return LCM_ERROR_SET_LCS_INVALID_TP_MODE;
     }
 
-    lcm_get_sp_enabled(dev, &sp_enable);
+    err = lcm_get_sp_enabled(dev, &sp_enable);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
     if (sp_enable != LCM_TRUE) {
         err = lcm_set_sp_enabled(dev);
         if (err != LCM_ERROR_NONE) {
@@ -645,7 +661,10 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
     }
 
     do {
-        lcm_get_sp_enabled(dev, &sp_enable);
+        err = lcm_get_sp_enabled(dev, &sp_enable);
+        if (err != LCM_ERROR_NONE) {
+            return err;
+        }
         lcm_get_fatal_error(dev, &fatal_err);
     } while (sp_enable == LCM_FALSE && fatal_err == LCM_FALSE);
 

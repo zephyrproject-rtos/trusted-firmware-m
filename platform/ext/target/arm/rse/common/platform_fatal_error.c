@@ -35,7 +35,9 @@ bool log_error_permissions_check(uint32_t err, bool is_fatal)
         goto out;
     }
 
-    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    if (lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled) != LCM_ERROR_NONE) {
+        goto out;
+    }
 
     if (tp_mode == LCM_TP_MODE_TCI || (lcs != LCM_LCS_SE && sp_enabled != LCM_TRUE)) {
         prevent_recursion = false;

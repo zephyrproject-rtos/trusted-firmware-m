@@ -1012,8 +1012,12 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 enum tfm_plat_err_t tfm_plat_otp_secure_provisioning_start(void)
 {
     enum lcm_bool_t sp_enabled;
+    enum lcm_error_t lcm_err;
 
-    lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    lcm_err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return (enum tfm_plat_err_t)lcm_err;
+    }
 
     if (sp_enabled != LCM_TRUE) {
         lcm_set_sp_enabled(&LCM_DEV_S);

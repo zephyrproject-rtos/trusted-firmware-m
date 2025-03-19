@@ -79,6 +79,7 @@ enum lcm_error_t {
     LCM_ERROR_GET_LCS_INVALID_LCS,
     LCM_ERROR_GET_LCS_CORRUPTION_DETECTED,
     LCM_ERROR_GET_TP_MODE_CORRUPTION_DETECTED,
+    LCM_ERROR_GET_SP_ENABLED_CORRUPTION_DETECTED,
     LCM_ERROR_CM_TO_DM_WRITE_VERIFY_FAIL,
     LCM_ERROR_DM_TO_SE_WRITE_VERIFY_FAIL,
     LCM_ERROR_SET_LCS_INVALID_TP_MODE,
@@ -156,8 +157,10 @@ enum lcm_error_t lcm_set_tp_mode(struct lcm_dev_t *dev, enum lcm_tp_mode_t mode)
  * \param[in]  dev         The LCM device structure.
  * \param[out] enabled     Whether secure provisioning mode is enabled.
  *
+ * \return Returns error code as specified in \ref lcm_error_t
  */
-void lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
+enum lcm_error_t lcm_get_sp_enabled(struct lcm_dev_t *dev, enum lcm_bool_t *enabled);
+
 /**
  * \brief This function enables secure provisioning mode.
  *
