@@ -60,6 +60,9 @@ if(BL2)
             ${HAL_ADI_PERIPH_SRC_DIR}/SYS/pins_me30.c
             ${HAL_ADI_PERIPH_SRC_DIR}/ICC/icc_me30.c
             ${HAL_ADI_PERIPH_SRC_DIR}/ICC/icc_reva.c
+
+            ${HAL_ADI_PERIPH_SRC_DIR}/DMA/dma_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/DMA/dma_reva.c
     )
 
     target_compile_definitions(platform_bl2
@@ -91,6 +94,23 @@ target_include_directories(platform_s
     PUBLIC
         ${HAL_ADI_PERIPH_INC_DIR}
         ${HAL_ADI_CMSIS_INC_DIR}
+
+        ${HAL_ADI_PERIPH_SRC_DIR}/SYS
+        ${HAL_ADI_PERIPH_SRC_DIR}/AES
+        ${HAL_ADI_PERIPH_SRC_DIR}/CRC
+        ${HAL_ADI_PERIPH_SRC_DIR}/DMA
+        ${HAL_ADI_PERIPH_SRC_DIR}/FLC
+        ${HAL_ADI_PERIPH_SRC_DIR}/GPIO
+        ${HAL_ADI_PERIPH_SRC_DIR}/I3C
+        ${HAL_ADI_PERIPH_SRC_DIR}/ICC
+        ${HAL_ADI_PERIPH_SRC_DIR}/LP
+        ${HAL_ADI_PERIPH_SRC_DIR}/RTC
+        ${HAL_ADI_PERIPH_SRC_DIR}/SPI
+        ${HAL_ADI_PERIPH_SRC_DIR}/TRNG
+        ${HAL_ADI_PERIPH_SRC_DIR}/TMR
+        ${HAL_ADI_PERIPH_SRC_DIR}/UART
+        ${HAL_ADI_PERIPH_SRC_DIR}/WDT
+        ${HAL_ADI_PERIPH_SRC_DIR}/WUT
 )
 
 target_sources(platform_s
@@ -118,4 +138,73 @@ target_sources(platform_s
 
         ${HAL_ADI_PERIPH_SRC_DIR}/ICC/icc_me30.c
         ${HAL_ADI_PERIPH_SRC_DIR}/ICC/icc_reva.c
+
+        ${HAL_ADI_PERIPH_SRC_DIR}/DMA/dma_me30.c
+        ${HAL_ADI_PERIPH_SRC_DIR}/DMA/dma_reva.c
+
+        ${HAL_ADI_PERIPH_SRC_DIR}/TRNG/trng_me30.c
+        ${HAL_ADI_PERIPH_SRC_DIR}/TRNG/trng_revb.c
+
+        ${HAL_ADI_PERIPH_SRC_DIR}/AES/aes_me30.c
+        ${HAL_ADI_PERIPH_SRC_DIR}/AES/aes_revb.c
+
+        ${HAL_ADI_PERIPH_SRC_DIR}/CRC/crc_me30.c
+        ${HAL_ADI_PERIPH_SRC_DIR}/CRC/crc_reva.c
 )
+
+if(NOT ADI_NS_PRPH_I3C)
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/I3C/i3c_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/I3C/i3c_reva.c
+    )
+endif()
+
+if(NOT ADI_NS_PRPH_SPI)
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/SPI/spi_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/SPI/spi_reva1.c
+    )
+endif()
+
+if(NOT ADI_NS_PRPH_WDT)
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/WDT/wdt_common.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/WDT/wdt_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/WDT/wdt_revb.c
+    )
+endif()
+
+if(NOT ADI_NS_PRPH_RTC)
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/RTC/rtc_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/RTC/rtc_reva.c
+    )
+endif()
+
+if(NOT (ADI_NS_PRPH_WUT0 AND ADI_NS_PRPH_WUT1))
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/WUT/wut_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/WUT/wut_reva.c
+    )
+endif()
+
+if(NOT (    ADI_NS_PRPH_TIMER0
+        AND ADI_NS_PRPH_TIMER1
+        AND ADI_NS_PRPH_TIMER2
+        AND ADI_NS_PRPH_TIMER3
+        AND ADI_NS_PRPH_TIMER4
+        AND ADI_NS_PRPH_TIMER5
+        )
+    )
+    target_sources(platform_s
+        PRIVATE
+            ${HAL_ADI_PERIPH_SRC_DIR}/TMR/tmr_common.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/TMR/tmr_me30.c
+            ${HAL_ADI_PERIPH_SRC_DIR}/TMR/tmr_revb.c
+    )
+endif()
