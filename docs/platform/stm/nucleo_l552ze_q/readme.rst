@@ -1,8 +1,7 @@
-NUCLEO_L552ZE_Q
-^^^^^^^^^^^^^^^
+`NUCLEO_L552ZE_Q`_
+^^^^^^^^^^^^^^^^^^
 
 STM32 Nucleo-144 development board with STM32L552ZE MCU, SMPS, supports Arduino, ST Zio and morpho connectivity
-https://www.st.com/en/evaluation-tools/nucleo-l552ze-q.html
 
 Configuration and Build
 """""""""""""""""""""""
@@ -75,9 +74,10 @@ the attestation service in Isolation Level 1 on Linux.
     ninja -C . -j 8
 
 
+.. _NUCLEO_L552ZE_Q: https://www.st.com/en/evaluation-tools/nucleo-l552ze-q.html
 
 -------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2025, Arm Limited. All rights reserved.*
 *Copyright (c) 2019, STMicroelectronics. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*
