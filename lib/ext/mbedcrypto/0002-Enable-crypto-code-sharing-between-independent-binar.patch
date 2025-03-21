@@ -1,7 +1,7 @@
-From 3d59b2503307a50882e54553ea2b879f30fc1f00 Mon Sep 17 00:00:00 2001
+From 8df3803e2ab01bb5955e3a52fbd5e7ec3a601fc3 Mon Sep 17 00:00:00 2001
 From: Tamas Ban <tamas.ban@arm.com>
 Date: Tue, 27 Oct 2020 08:55:37 +0000
-Subject: [PATCH 2/6] Enable crypto code sharing between independent binaries
+Subject: [PATCH 2/7] Enable crypto code sharing between independent binaries
 
 Signed-off-by: Tamas Ban <tamas.ban@arm.com>
 ---
