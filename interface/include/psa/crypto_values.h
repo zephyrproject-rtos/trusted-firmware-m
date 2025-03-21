@@ -28,15 +28,6 @@
 #define PSA_CRYPTO_VALUES_H
 #include "mbedtls/private_access.h"
 
-#ifdef PSA_WANT_ALG_LMS
-/* Note: TF-M supports LMS as a vendor extension and requires some LMS/HMS specific
- * values to be available to properly override the PSA_ALG_IS_VENDOR_HASH_AND_SIGN
- * macro. Eventually LMS/HMS will be standardized in Mbed TLS hence dropping the
- * need to carry vendor extensions in a separate header
- */
-#include "crypto_values_lms.h"
-#endif
-
 /** \defgroup error Error codes
  * @{
  */
@@ -1673,9 +1664,7 @@
 /* Default definition, to be overridden if the library is extended with
  * more hash-and-sign algorithms that we want to keep out of this header
  * file. */
-#ifndef PSA_ALG_IS_VENDOR_HASH_AND_SIGN
 #define PSA_ALG_IS_VENDOR_HASH_AND_SIGN(alg) 0
-#endif
 
 /** Whether the specified algorithm is a signature algorithm that can be used
  * with psa_sign_hash() and psa_verify_hash().
