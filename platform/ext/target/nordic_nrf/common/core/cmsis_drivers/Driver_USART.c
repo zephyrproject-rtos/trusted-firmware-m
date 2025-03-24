@@ -28,13 +28,19 @@
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 #endif
 
+#if !(DOMAIN_NS == 1U) && defined(CONFIG_TFM_LOG_SHARE_UART) && (defined(NRF_SPU) || defined(NRF_SPU00))
+#define SPU_CONFIGURE_UART
+#include <spu.h>
+#endif
+
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  (void)arg
 #endif
 
 #define ARM_USART_DRV_VERSION  ARM_DRIVER_VERSION_MAJOR_MINOR(2, 2)
 
-#if RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3 || RTE_USART20 || RTE_USART22
+#if RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3 || \
+    RTE_UART00 || RTE_USART20 || RTE_UART21 || RTE_UART22 || RTE_USART30
 
 #define PSEL_DISCONNECTED 0xFFFFFFFFUL
 
@@ -108,6 +114,11 @@ static int32_t ARM_USARTx_Initialize(ARM_USART_SignalEvent_t cb_event,
 {
     ARG_UNUSED(cb_event);
 
+#ifdef SPU_CONFIGURE_UART
+    spu_peripheral_config_secure((uint32_t)uart_resources->uarte.p_reg, false);
+    NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET((uint32_t)uart_resources->uarte.p_reg));
+#endif
+
     nrfx_uarte_config_t uart_config = UART_CONFIG_INITIALIZER();
 
     uart_config_set_uart_pins(&uart_config,
@@ -135,6 +146,12 @@ static int32_t ARM_USARTx_Uninitialize(UARTx_Resources *uart_resources)
     nrfx_uarte_uninit(&uart_resources->uarte);
 
     uart_resources->initialized = false;
+
+#ifdef SPU_CONFIGURE_UART
+    spu_peripheral_config_non_secure((uint32_t)uart_resources->uarte.p_reg, false);
+    NVIC_SetTargetState(NRFX_IRQ_NUMBER_GET((uint32_t)uart_resources->uarte.p_reg));
+#endif
+
     return ARM_DRIVER_OK;
 }
 
@@ -422,13 +439,24 @@ DRIVER_USART(2);
 DRIVER_USART(3);
 #endif
 
-// TODO: NCSDK-25009: Support choosing an instance for TF-M
+#if RTE_USART00
+DRIVER_USART(00);
+#endif
+
 #if RTE_USART20
 DRIVER_USART(20);
+#endif
+
+#if RTE_USART21
+DRIVER_USART(21);
 #endif
 
 #if RTE_USART22
 DRIVER_USART(22);
 #endif
 
-#endif /* RTE_USART0 || RTE_USART1 || etc. */
+#if RTE_USART30
+DRIVER_USART(30);
+#endif
+
+#endif /* RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3 || RTE_USART20 || RTE_USART22 */
