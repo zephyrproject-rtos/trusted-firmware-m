@@ -114,7 +114,7 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfutil device erase --all -x-family nrf53
+   nrfutil device erase --all --x-family nrf53
 
 * (Optionally) Erase the flash memory and reset flash protection and disable
    the read back protection mechanism if enabled.

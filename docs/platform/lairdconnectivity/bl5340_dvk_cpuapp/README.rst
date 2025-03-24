@@ -116,7 +116,7 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfutil device erase --all -x-family nrf53
+   nrfutil device erase --all --x-family nrf53
 
 * Flash the BL2 and the TF-M image binaries from the sample folder of your choice:
 
@@ -149,14 +149,14 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
-   nrfutil device erase --all -x-family nrf53
+   nrfutil device erase --all --x-family nrf53
 
 * Flash the BL2 and the TF-M image binaries from the sample folder of your choice:
 
 .. code-block:: console
 
    nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/bl2.hex --options chip_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
-   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex --options --options ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
+   nrfutil device program --x-family nrf53 --firmware <sample folder>/install/outputs/LAIRDCONNECTIVITY/BL5340_DVK_CPUAPP/tfm_s_ns_signed.hex --options ext_mem_erase_mode=ERASE_RANGES_TOUCHED_BY_FIRMWARE
 
 * Reset and start TF-M:
 
