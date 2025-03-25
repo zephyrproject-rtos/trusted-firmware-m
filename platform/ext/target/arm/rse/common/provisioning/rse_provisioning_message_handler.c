@@ -469,44 +469,6 @@ static enum tfm_plat_err_t ecdsa_validate_and_unpack_blob(const struct rse_provi
 }
 #endif /* RSE_PROVISIONING_ENABLE_ECDSA_SIGNATURES */
 
-/* This is marked inline to suppress -Wunused-function warnings */
-static inline enum tfm_plat_err_t ecdsa_validate_blob_without_unpacking(const struct rse_provisioning_message_blob_t *blob,
-                                                                 get_rotpk_func_t get_rotpk)
-{
-    enum tfm_plat_err_t err;
-    cc3xx_err_t cc_err;
-    uint32_t blob_hash[RSE_PROVISIONING_HASH_SIZE / sizeof(uint32_t)];
-    uint32_t *public_key_x;
-    uint32_t *public_key_y;
-    size_t public_key_x_size;
-    size_t public_key_y_size;
-    size_t sig_point_len = blob->signature_size / 2;
-    size_t hash_size;
-
-    err = hash_blob(blob,
-                    (uint8_t *)blob->code_and_data_and_secret_values, blob->code_size,
-                    (uint8_t *)blob->code_and_data_and_secret_values + blob->code_size, blob->data_size,
-                    (uint8_t *)blob->code_and_data_and_secret_values + blob->code_size + blob->data_size,
-                    blob->secret_values_size,
-                    (uint8_t *)blob_hash, sizeof(blob_hash), &hash_size);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = get_rotpk(blob, &public_key_x, &public_key_x_size, &public_key_y, &public_key_y_size);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    cc_err = cc3xx_lowlevel_ecdsa_verify(RSE_PROVISIONING_CURVE,
-                                         public_key_x, public_key_x_size,
-                                         public_key_y, public_key_y_size,
-                                         blob_hash, hash_size,
-                                         (uint32_t *)blob->signature, sig_point_len,
-                                         (uint32_t *)(blob->signature + sig_point_len), sig_point_len);
-    return cc_err;
-}
-
 TEST_STATIC enum tfm_plat_err_t
 validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob, size_t msg_size,
                          void *code_output, size_t code_output_size, void *data_output,
