@@ -48,7 +48,7 @@ enum psa_attest_err_t {
  *        to service memory area
  *
  * \param[in]   major_type  Major type of TLV entries to copy
- * \param[out]  ptr         Pointer to the buffer to store the boot data
+ * \param[out]  boot_data   Pointer to the buffer to store the boot data
  * \param[in]   len         Size of the buffer to store the boot data
  *
  * \return Returns error code as specified in \ref psa_attest_err_t
@@ -80,12 +80,14 @@ psa_status_t attest_init(void);
 /*!
  * \brief Get initial attestation token
  *
- * \param[in]     in_vec     Pointer to in_vec array, which contains input data
- *                           to attestation service
- * \param[in]     num_invec  Number of elements in in_vec array
- * \param[in,out] out_vec    Pointer out_vec array, which contains output data
- *                           to attestation service
- * \param[in]     num_outvec Number of elements in out_vec array
+ * \param[in]     challenge_buf   Pointer to buffer where challenge input is
+ *                                stored.
+ * \param[in]     challenge_size  Size of challenge object in bytes.
+ * \param[out]    token_buf       Pointer to the buffer where attestation token
+ *                                will be stored.
+ * \param[in]     token_buf_size  Size of allocated buffer for token, in bytes.
+ * \param[out]    token_size      Size of the token that has been returned, in
+ *                                bytes.
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
@@ -97,12 +99,10 @@ initial_attest_get_token(const void *challenge_buf, size_t challenge_size,
 /**
  * \brief Get the size of the initial attestation token
  *
- * \param[in]     in_vec     Pointer to in_vec array, which contains input data
- *                           to attestation service
- * \param[in]     num_invec  Number of elements in in_vec array
- * \param[out]    out_vec    Pointer to out_vec array, which contains pointer
- *                           where to store the output data
- * \param[in]     num_outvec Number of elements in out_vec array
+ * \param[in]   challenge_size  Size of challenge object in bytes. This must be
+ *                              a supported challenge size.
+ * \param[out]  token_size      Size of the token in bytes, which is created by
+ *                              initial attestation service.
  *
  * \return Returns error code as specified in \ref psa_status_t
  */

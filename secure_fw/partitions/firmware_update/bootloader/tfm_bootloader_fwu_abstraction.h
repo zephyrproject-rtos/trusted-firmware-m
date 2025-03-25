@@ -115,7 +115,7 @@ psa_status_t fwu_bootloader_install_image(const psa_fwu_component_t *candidates,
  * revert when next time boot-up. Usually, this API is called after the running
  * images have been verified as valid.
  *
- * \param[in] candidates A list of components in TRIAL state.
+ * \param[in] trials A list of components in TRIAL state.
  * \param[in] number Number of components in TRIAL state.
  *
  * \return PSA_SUCCESS         On success
@@ -133,6 +133,8 @@ psa_status_t fwu_bootloader_mark_image_accepted(const psa_fwu_component_t *trial
  * The component is in STAGED state. Uninstall the staged image in the component
  * so that this image will not be treated as a candidate next time boot-up.
  *
+ * \param[in] component The identifier of the target component.
+ *
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INSUFFICIENT_MEMORY
  *         PSA_ERROR_INSUFFICIENT_STORAGE
@@ -147,6 +149,8 @@ psa_status_t fwu_bootloader_reject_staged_image(psa_fwu_component_t component);
  * The component is in TRIAL state. Mark the running image in the component as
  * rejected.
  *
+ * \param[in] component The identifier of the target component.
+ *
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INSUFFICIENT_MEMORY
  *         PSA_ERROR_INSUFFICIENT_STORAGE
@@ -157,6 +161,8 @@ psa_status_t fwu_bootloader_reject_trial_image(psa_fwu_component_t component);
 
 /**
  * \brief The component is in FAILED or UPDATED state. Clean the staging area of the component.
+ *
+ * \param[in] component The identifier of the target component.
  *
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INVALID_ARGUMENT    Invalid input parameter
