@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2021-2024 Arm Limited. All rights reserved.
+; * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -124,11 +124,11 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    __etext = ALIGN(4);
+    PROVIDE(__etext = LOADADDR(.data));
 
     . = BL1_1_DATA_START;
     Image$$BL1_1_ER_DATA_START$$Base = .;
-    .data : AT (__etext)
+    .data : ALIGN(4)
     {
         __data_start__ = .;
         __got_start__ = .;
@@ -145,7 +145,7 @@ SECTIONS
         /* All data end */
         __data_end__ = .;
 
-    } > RAM
+    } > RAM AT> FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
 
     .bss :
