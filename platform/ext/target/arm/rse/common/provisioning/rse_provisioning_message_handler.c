@@ -475,10 +475,12 @@ validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob, siz
                          size_t data_output_size, void *values_output, size_t values_output_size,
                          setup_aes_key_func_t setup_aes_key, get_rotpk_func_t get_rotpk)
 {
-    size_t blob_payload_size = blob->code_size + blob->data_size + blob->secret_values_size;
     enum rse_provisioning_blob_signature_config_t sig_config;
 
-    if (blob_payload_size > msg_size) {
+    /* Perform the size check stepwise in order to avoid the risk of underflowing */
+    if (blob->code_size > msg_size
+     || blob->data_size > (msg_size - blob->code_size)
+     || blob->secret_values_size > (msg_size - blob->code_size - blob->data_size)) {
         FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_SIZE);
         return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_SIZE;
     }
