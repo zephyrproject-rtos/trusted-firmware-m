@@ -477,10 +477,13 @@ validate_and_unpack_blob(const struct rse_provisioning_message_blob_t *blob, siz
 {
     enum rse_provisioning_blob_signature_config_t sig_config;
 
-    /* Perform the size check stepwise in order to avoid the risk of underflowing */
-    if (blob->code_size > msg_size
-     || blob->data_size > (msg_size - blob->code_size)
-     || blob->secret_values_size > (msg_size - blob->code_size - blob->data_size)) {
+    /* Perform the size check stepwise in order to avoid the risk of underflowing
+     * and check that msg_size is the sum of code, data, secret_values sizes + header size
+     */
+    if (msg_size < sizeof(*blob)
+     || blob->code_size > msg_size - sizeof(*blob)
+     || blob->data_size > (msg_size - sizeof(*blob) - blob->code_size)
+     || blob->secret_values_size != (msg_size - sizeof(*blob) - blob->code_size - blob->data_size)) {
         FATAL_ERR(TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_SIZE);
         return TFM_PLAT_ERR_PROVISIONING_BLOB_INVALID_SIZE;
     }
