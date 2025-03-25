@@ -69,7 +69,7 @@ void tfm_ns_mailbox_tx_stats_update(void);
  * \param[in] stats_res         The buffer to be written with
  *                              \ref ns_mailbox_stats_res_t.
  *
- * \return Return the calculation result.
+ * \return void                 Return the calculation result.
  */
 void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res);
 

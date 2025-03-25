@@ -21,10 +21,10 @@
  *                              for the signal.
  * \param[in]      signal       The signal to query for.
  *
- * \retval NULL                 if one of more the following are true:
- *                              - the \ref signal indicates more than one signal
- *                              - the \ref signal does not belong to the
- *                                partition.
+ * \retval NULL    if one of more the following are true:
+ *                 - the \ref psa_signal_t signal indicates more than one signal
+ *                 - the \ref psa_signal_t signal does not belong to the
+ *                   partition.
  * \retval Any other value      The load info pointer associated with the signal
  */
 const struct irq_load_info_t *get_irq_info_for_signal(
