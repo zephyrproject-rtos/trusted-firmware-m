@@ -6,7 +6,8 @@
  */
 
 /**
- * \file This file collects the alternative functions to replace the
+ * \file tfm_mbedcrypto_alt.c
+ *       This file collects the alternative functions to replace the
  *       implementations in mbed-crypto if the corresponding mbed-crypto
  *       MBEDTLS__FUNCTION_NAME__ALT is selected.
  *

@@ -187,7 +187,6 @@ psa_status_t psa_call(psa_handle_t handle, int32_t type,
  * \param[in] handle            A handle to an established connection, or the
  *                              null handle.
  *
- * \retval void                 Success.
  * \note The call is a PROGRAMMER ERROR if one or more of the following occurs:
  *        - An invalid handle was provided that is not the null handle.
  *        - The connection is currently handling a request.

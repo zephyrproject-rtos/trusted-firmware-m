@@ -140,9 +140,8 @@ psa_status_t psa_get(psa_signal_t signal, psa_msg_t *msg);
  * \param[in] msg_handle        Handle for the client's message.
  * \param[in] rhandle           Reverse handle allocated by the RoT Service.
  *
- * \retval void                 Success, rhandle will be provided with all
- *                              subsequent messages delivered on this
- *                              connection.
+ * \note When successful,rhandle will be provided with all subsequent messages
+ *       delivered on this connection.
  * \note The call is a "PROGRAMMER ERROR" if msg_handle is invalid.
  */
 void psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
@@ -207,7 +206,6 @@ size_t psa_skip(psa_handle_t msg_handle, uint32_t invec_idx, size_t num_bytes);
  * \param[in] num_bytes         Number of bytes to write to the client output
  *                              vector.
  *
- * \retval void                 Success
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - msg_handle is invalid.
  *        - msg_handle does not refer to a request message.
@@ -226,7 +224,6 @@ void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
  * \param[in] status            Message result value to be reported to the
  *                              client.
  *
- * \retval void                 Success.
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - msg_handle is invalid.
  *        - An invalid status code is specified for the type of message.
@@ -238,7 +235,6 @@ void psa_reply(psa_handle_t msg_handle, psa_status_t status);
  *
  * \param[in] partition_id      Secure Partition ID of the target partition.
  *
- * \retval void                 Success.
  * \note The call is a "PROGRAMMER ERROR" if partition_id does not correspond to
  *       a Secure Partition.
  */
@@ -247,7 +243,6 @@ void psa_notify(int32_t partition_id);
 /**
  * \brief Clear the PSA_DOORBELL signal.
  *
- * \retval void                 Success.
  * \note The call is a "PROGRAMMER ERROR" if the Secure Partition's doorbell
  *       signal is not currently asserted.
  */
@@ -258,7 +253,6 @@ void psa_clear(void);
  *
  * \param[in] irq_signal        The interrupt signal that has been processed.
  *
- * \retval void                 Success.
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - irq_signal is not an interrupt signal.
  *        - irq_signal indicates more than one signal.
@@ -270,8 +264,6 @@ void psa_eoi(psa_signal_t irq_signal);
 /**
  * \brief Terminate execution within the calling Secure Partition and will not
  *        return.
- *
- * \retval void         "Does not return"
  */
 void psa_panic(void);
 
@@ -283,7 +275,6 @@ void psa_panic(void);
  *                       signal value for an interrupt in the calling Secure
  *                       Partition.
  *
- * \retval void          Success.
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - \a irq_signal is not an interrupt signal.
  *        - \a irq_signal indicates more than one signal.
@@ -317,7 +308,6 @@ psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal);
  *                          currently asserted signal for an interrupt that is
  *                          defined to use FLIH handling.
  *
- * \retval void             Success.
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - \a irq_signal is not a signal for an interrupt that is specified
  *          with FLIH handling in the Secure Partition manifest.
@@ -362,7 +352,6 @@ const void *psa_map_invec(psa_handle_t msg_handle, uint32_t invec_idx);
  * \param[in] invec_idx         Index of input vector to map. Must be
  *                              less than \ref PSA_MAX_IOVEC.
  *
- * \retval void
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - msg_handle is invalid.
  *        - msg_handle does not refer to a request message.
@@ -410,7 +399,6 @@ void *psa_map_outvec(psa_handle_t msg_handle, uint32_t outvec_idx);
  *                              vector. This must be less than or equal to the
  *                              size of the output vector.
  *
- * \retval void
  * \note The call is a "PROGRAMMER ERROR" if one or more of the following occur:
  *        - msg_handle is invalid.
  *        - msg_handle does not refer to a request message.

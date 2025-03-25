@@ -25,8 +25,6 @@ uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp);
  *        Trigger svc handler to restore thread context before entering PSA API function.
  *
  * \param[in] result            PSA API function return value.
-
- * \returns void
  */
 void tfm_svc_thread_mode_spm_return(psa_status_t result);
 

@@ -160,7 +160,6 @@ psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
  *
  * \param[in] status            Standard error codes for the SPM.
  *
- * \retval void                 Success
  * \note This call will panic if the SP operation resulted in:
  *        - PSA_ERROR_PROGRAMMER_ERROR
  *        - PSA_ERROR_CONNECTION_REFUSED
