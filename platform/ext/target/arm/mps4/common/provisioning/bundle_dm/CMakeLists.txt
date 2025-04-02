@@ -52,13 +52,13 @@ target_link_options(dm_provisioning_bundle
 
 target_compile_options(dm_provisioning_bundle
     PUBLIC
-        ${COMPILER_CP_FLAG}
+        ${BL1_COMPILER_CP_FLAG}
         ${COMPILER_CMSE_FLAG}
 )
 
 target_link_options(dm_provisioning_bundle
     PUBLIC
-        ${LINKER_CP_OPTION}
+        ${BL1_LINKER_CP_OPTION}
 )
 
 target_sources(dm_provisioning_bundle
