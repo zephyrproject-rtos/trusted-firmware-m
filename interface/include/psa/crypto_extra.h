@@ -608,7 +608,12 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
  *
  * \return 1 if the PSA can handle \p hash_alg, 0 otherwise.
  */
-int psa_can_do_hash(psa_algorithm_t hash_alg);
+static inline int psa_can_do_hash(psa_algorithm_t hash_alg)
+{
+    	(void) hash_alg;
+    	/* Workaround for the legacy CryptoCell driver requiring hash during init */
+	return 1; //psa_get_drivers_initialized();
+}
 
 /**@}*/
 
