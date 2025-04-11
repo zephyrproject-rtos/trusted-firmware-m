@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,13 @@ extern "C" {
 #ifndef IOVEC_LEN
 #define IOVEC_LEN(arr) ((uint32_t)(sizeof(arr)/sizeof(arr[0])))
 #endif
+
+/**
+ * Type definitions equivalent to size_t as defined in the RoT Service
+ * environment.
+ */
+typedef uint32_t rot_size_t;
+#define ROT_SIZE_MAX UINT32_MAX
 
 /*********************** PSA Client Macros and Types *************************/
 
@@ -180,13 +187,9 @@ psa_status_t psa_call(psa_handle_t handle, int32_t type,
  * \param[in] handle            A handle to an established connection, or the
  *                              null handle.
  *
- * \retval void                 Success.
- * \retval "PROGRAMMER ERROR"   The call is a PROGRAMMER ERROR if one or more
- *                              of the following are true:
- * \arg                           An invalid handle was provided that is not
- *                                the null handle.
- * \arg                           The connection is currently handling a
- *                                request.
+ * \note The call is a PROGRAMMER ERROR if one or more of the following occurs:
+ *        - An invalid handle was provided that is not the null handle.
+ *        - The connection is currently handling a request.
  */
 void psa_close(psa_handle_t handle);
 
