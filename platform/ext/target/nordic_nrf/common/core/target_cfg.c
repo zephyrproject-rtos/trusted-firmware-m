@@ -1455,9 +1455,7 @@ static const uint32_t target_peripherals[] = {
 
     /* GPIO pin configuration */
 	uint32_t secure_pins[] = {
-#ifdef TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE
 		TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE,
-#endif
 #ifdef TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE
 		TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE,
 #endif
