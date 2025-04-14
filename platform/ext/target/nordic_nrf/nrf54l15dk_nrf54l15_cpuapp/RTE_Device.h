@@ -14,30 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef __RTE_DEVICE_H
 #define __RTE_DEVICE_H
-
-#define RTE_USART20 1
-
-#define RTE_USART20_PINS          \
-{                                 \
-        NRF_PSEL(UART_TX,  0, 36),\
-        NRF_PSEL(UART_RX,  0, 37),\
-        NRF_PSEL(UART_RTS, 0, 38),\
-        NRF_PSEL(UART_CTS, 0, 39),\
-}
-
-
-#define RTE_USART30 1
-
-#define RTE_USART30_PINS         \
-{                                \
-        NRF_PSEL(UART_TX,  0, 0),\
-        NRF_PSEL(UART_RX,  0, 1),\
-        NRF_PSEL(UART_RTS, 0, 2),\
-        NRF_PSEL(UART_CTS, 0, 3),\
-}
-
 
 #define RTE_FLASH0 1
 

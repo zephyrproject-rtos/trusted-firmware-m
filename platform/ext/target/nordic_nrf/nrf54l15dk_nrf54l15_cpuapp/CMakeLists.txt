@@ -14,7 +14,7 @@ add_subdirectory(../common/nrf54l15 nrf54l15)
 
 target_include_directories(platform_region_defs
     INTERFACE
-        ../common/nrf54l15/partition
+        partition
 )
 
 target_sources(platform_s
@@ -25,7 +25,7 @@ target_sources(platform_s
 target_include_directories(platform_s
     PUBLIC
         .
-        ../common/nrf54l15/partition
+        partition
         services/include
 )
 
@@ -33,7 +33,6 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             partition
-            ../common/nrf54l15/partition
         PRIVATE
             .
     )
@@ -65,6 +64,7 @@ install(FILES       RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(DIRECTORY   tests
+install(DIRECTORY   partition
+                    tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )

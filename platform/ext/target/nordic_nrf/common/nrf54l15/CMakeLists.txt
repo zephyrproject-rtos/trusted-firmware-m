@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -21,7 +22,6 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf54l.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/nrf54l15_init.c
 )
 
 target_compile_definitions(platform_s
