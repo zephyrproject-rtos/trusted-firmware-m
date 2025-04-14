@@ -9,11 +9,6 @@
 #include <hal/nrf_oscillators.h>
 #include <nrf_erratas.h>
 
-#ifndef BIT_MASK
-/* Use Zephyr BIT_MASK for unasigned integers */
-#define BIT_MASK(n) ((1UL << (n)) - 1UL)
-#endif
-
 /* This handler needs to be ported to the upstream TF-M project when Cracen is supported there.
  * The implementation of this is currently in sdk-nrf. We define it to avoid warnings when we build
  * the target_cfg.c file which is the same for both upsteam TF-M and sdk-nrf.
