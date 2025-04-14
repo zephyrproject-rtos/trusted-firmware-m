@@ -19,21 +19,35 @@
  * - 6..0:   Pin number (combination of port and pin).
  */
 
-/* NOTE: Keep in sync with Zephyr's nrf-pinctrl.h */
-
 /**
  * @name nRF pin configuration bit field positions and masks.
  * @{
  */
 
 /** Position of the function field. */
-#define NRF_FUN_POS 17U
+#define NRF_FUN_POS 16U
 /** Mask for the function field. */
-#define NRF_FUN_MSK 0x7FFFU
+#define NRF_FUN_MSK 0xFFFFU
+/** Position of the invert field. */
+#define NRF_INVERT_POS 14U
+/** Mask for the invert field. */
+#define NRF_INVERT_MSK 0x1U
+/** Position of the low power field. */
+#define NRF_LP_POS 13U
+/** Mask for the low power field. */
+#define NRF_LP_MSK 0x1U
+/** Position of the drive configuration field. */
+#define NRF_DRIVE_POS 9U
+/** Mask for the drive configuration field. */
+#define NRF_DRIVE_MSK 0xFU
+/** Position of the pull configuration field. */
+#define NRF_PULL_POS 7U
+/** Mask for the pull configuration field. */
+#define NRF_PULL_MSK 0x3U
 /** Position of the pin field. */
 #define NRF_PIN_POS 0U
 /** Mask for the pin field. */
-#define NRF_PIN_MSK 0x1FFU
+#define NRF_PIN_MSK 0x7FU
 
 /** @} */
 
