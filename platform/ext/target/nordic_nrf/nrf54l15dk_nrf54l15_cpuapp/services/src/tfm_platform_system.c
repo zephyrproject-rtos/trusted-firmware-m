@@ -18,9 +18,8 @@ void tfm_platform_hal_system_reset(void)
 
 
 /* These two functions need to be ported to the upstream project when support
- * for nrf54l15 and Cracen is added upstream. The implementations currently are
- * placed on in sdk-nrf. Remove these dummy implementations when these are ported.
- */
+ * for nrf54l15 is added upstream. Remove these dummy implementations when these
+ * are ported. */
 void CRACEN_IRQHandler(void){};
 int nordicsemi_nrf54l_init(void){};
 
