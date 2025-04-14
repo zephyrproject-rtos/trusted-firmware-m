@@ -766,25 +766,25 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
-static const uint32_t target_peripherals[] = {
+static const uint8_t target_peripherals[] = {
     /* The following peripherals share ID:
      * - FPU (FPU cannot be configured in NRF91 series, it's always NS)
      * - DCNF (On 53, but not 91)
      */
 #ifndef NRF91_SERIES
-    NRF_FPU_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_FPU),
 #endif
     /* The following peripherals share ID:
      * - REGULATORS
      * - OSCILLATORS
      */
-    NRF_REGULATORS_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_REGULATORS),
     /* The following peripherals share ID:
      * - CLOCK
      * - POWER
      * - RESET (On 53, but not 91)
      */
-    NRF_CLOCK_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_CLOCK),
     /* The following peripherals share ID: (referred to as Serial-Box)
      * - SPIMx
      * - SPISx
@@ -792,97 +792,97 @@ static const uint32_t target_peripherals[] = {
      * - TWISx
      * - UARTEx
      */
-    NRF_SPIM0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_SPIM0),
 #ifndef SECURE_UART1
     /* UART1 is a secure peripheral, so we need to leave Serial-Box 1 as Secure */
-    NRF_SPIM1_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_SPIM1),
 #endif
-    NRF_SPIM2_S_BASE,
-    NRF_SPIM3_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_SPIM2),
+    NRFX_PERIPHERAL_ID_GET(NRF_SPIM3),
 #ifdef NRF_SPIM4
-    NRF_SPIM4_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_SPIM4),
 #endif
-    NRF_SAADC_S_BASE,
-    NRF_TIMER0_S_BASE,
-    NRF_TIMER1_S_BASE,
-    NRF_TIMER2_S_BASE,
-    NRF_RTC0_S_BASE,
-    NRF_RTC1_S_BASE,
-    NRF_DPPIC_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_SAADC),
+    NRFX_PERIPHERAL_ID_GET(NRF_TIMER0),
+    NRFX_PERIPHERAL_ID_GET(NRF_TIMER1),
+    NRFX_PERIPHERAL_ID_GET(NRF_TIMER2),
+    NRFX_PERIPHERAL_ID_GET(NRF_RTC0),
+    NRFX_PERIPHERAL_ID_GET(NRF_RTC1),
+    NRFX_PERIPHERAL_ID_GET(NRF_DPPIC),
 #ifndef PSA_API_TEST_IPC
 #ifdef NRF_WDT0
     /* WDT0 is used as a secure peripheral in PSA FF tests */
-    NRF_WDT0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_WDT0),
 #endif
 #ifdef NRF_WDT
-    NRF_WDT_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_WDT),
 #endif
 #endif /* PSA_API_TEST_IPC */
 #ifdef NRF_WDT1
-    NRF_WDT1_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_WDT1),
 #endif
     /* The following peripherals share ID:
      * - COMP
      * - LPCOMP
      */
 #ifdef NRF_COMP
-    NRF_COMP_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_COMP),
 #endif
-    NRF_EGU0_S_BASE,
-    NRF_EGU1_S_BASE,
-    NRF_EGU2_S_BASE,
-    NRF_EGU3_S_BASE,
-    NRF_EGU4_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU0),
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU1),
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU2),
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU3),
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU4),
 #ifndef PSA_API_TEST_IPC
     /* EGU5 is used as a secure peripheral in PSA FF tests */
-    NRF_EGU5_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_EGU5),
 #endif
-    NRF_PWM0_S_BASE,
-    NRF_PWM1_S_BASE,
-    NRF_PWM2_S_BASE,
-    NRF_PWM3_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_PWM0),
+    NRFX_PERIPHERAL_ID_GET(NRF_PWM1),
+    NRFX_PERIPHERAL_ID_GET(NRF_PWM2),
+    NRFX_PERIPHERAL_ID_GET(NRF_PWM3),
 #ifdef NRF_PDM
-    NRF_PDM_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_PDM),
 #endif
 #ifdef NRF_PDM0
-    NRF_PDM0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_PDM0),
 #endif
 #ifdef NRF_I2S
-    NRF_I2S_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_I2S),
 #endif
 #ifdef NRF_I2S0
-    NRF_I2S0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_I2S0),
 #endif
-    NRF_IPC_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_IPC),
 #ifndef SECURE_QSPI
 #ifdef NRF_QSPI
-    NRF_QSPI_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_QSPI),
 #endif
 #endif
 #ifdef NRF_NFCT
-    NRF_NFCT_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_NFCT),
 #endif
 #ifdef NRF_MUTEX
-    NRF_MUTEX_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_MUTEX),
 #endif
 #ifdef NRF_QDEC0
-    NRF_QDEC0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_QDEC0),
 #endif
 #ifdef NRF_QDEC1
-    NRF_QDEC1_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_QDEC1),
 #endif
 #ifdef NRF_USBD
-    NRF_USBD_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_USBD),
 #endif
 #ifdef NRF_USBREGULATOR
-    NRF_USBREGULATOR_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_USBREGULATOR),
 #endif
-    NRF_NVMC_S_BASE,
-    NRF_P0_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_NVMC),
+    NRFX_PERIPHERAL_ID_GET(NRF_P0),
 #ifdef NRF_P1
-    NRF_P1_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_P1),
 #endif
-    NRF_VMC_S_BASE,
+    NRFX_PERIPHERAL_ID_GET(NRF_VMC),
 };
 
     for (int i = 0; i < ARRAY_SIZE(target_peripherals); i++) {
