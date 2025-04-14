@@ -249,7 +249,7 @@
 /* BL2 flash areas */
 #define FLASH_AREA_BEGIN_OFFSET         (FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE)
 
-#define FLASH_AREAS_DEVICE_ID           (FLASH_DEVICE_ID - FLASH_DEVICE_ID)
+#define FLASH_AREAS_DEVICE_ID           (FLASH_DEVICE_ID - FLASH_DEVICE_ID) 
 
 /* Secure data image primary slot */
 #if defined (FLASH_AREA_4_ID)
@@ -507,8 +507,6 @@
 /*  This area in SRAM 2 is updated BL2 and can be lock to avoid any changes */
 #define BOOT_TFM_SHARED_DATA_SIZE        (0x400)
 #define BOOT_TFM_SHARED_DATA_BASE        (0x3004fc00)
-#define SHARED_BOOT_MEASUREMENT_BASE     BOOT_TFM_SHARED_DATA_BASE
-#define SHARED_BOOT_MEASUREMENT_SIZE     BOOT_TFM_SHARED_DATA_SIZE
 
 /* OBK */
 #define OBK_HDPL0_OFFSET        (0x00U)         /* First OBkey Hdpl 0 */

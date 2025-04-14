@@ -104,7 +104,7 @@ __attribute__((section(".BL2_NoHdp_Code")))
 void TFM_LL_SECU_UpdateRunTimeProtections(void)
 {
   /* Write Protect SRAM2 */
-  apply_wrp_sram2(SHARED_BOOT_MEASUREMENT_BASE, SHARED_BOOT_MEASUREMENT_SIZE);
+  apply_wrp_sram2(BOOT_TFM_SHARED_DATA_BASE, BOOT_TFM_SHARED_DATA_SIZE);
 
   /* Enable HDP protection to hide sensible boot material */
   enable_hdp_protection();
@@ -755,8 +755,8 @@ static void lock_bl2_shared_area(void)
   /* assumption shared area in SRAM2 in the last 8 Kbytes super block */
   /*  This area in SRAM 2 is updated BL2 and can be lock to avoid any changes */
   if (
-    (SHARED_BOOT_MEASUREMENT_BASE >= S_RAM_ALIAS(_SRAM2_TOP - GTZC_MPCBB_SUPERBLOCK_SIZE))
-    && (SHARED_BOOT_MEASUREMENT_SIZE <= GTZC_MPCBB_SUPERBLOCK_SIZE))
+    (BOOT_TFM_SHARED_DATA_BASE >= S_RAM_ALIAS(_SRAM2_TOP - GTZC_MPCBB_SUPERBLOCK_SIZE))
+    && (BOOT_TFM_SHARED_DATA_SIZE <= GTZC_MPCBB_SUPERBLOCK_SIZE))
   {
 
     __HAL_RCC_GTZC_CLK_ENABLE();

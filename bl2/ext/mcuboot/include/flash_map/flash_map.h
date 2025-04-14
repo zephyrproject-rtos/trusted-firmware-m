@@ -64,11 +64,11 @@ extern "C" {
 /*
  * Shared data area between bootloader and runtime firmware.
  */
-#if (defined(SHARED_BOOT_MEASUREMENT_BASE) && defined(SHARED_BOOT_MEASUREMENT_SIZE))
-#define MCUBOOT_SHARED_DATA_BASE    SHARED_BOOT_MEASUREMENT_BASE
-#define MCUBOOT_SHARED_DATA_SIZE    SHARED_BOOT_MEASUREMENT_SIZE
+#if (defined(BOOT_TFM_SHARED_DATA_BASE) && defined(BOOT_TFM_SHARED_DATA_SIZE))
+#define MCUBOOT_SHARED_DATA_BASE    BOOT_TFM_SHARED_DATA_BASE
+#define MCUBOOT_SHARED_DATA_SIZE    BOOT_TFM_SHARED_DATA_SIZE
 #else
-#error "SHARED_BOOT_MEASUREMENT_* must be defined by target."
+#error "BOOT_TFM_SHARED_DATA_* must be defined by target."
 #endif
 
 /**

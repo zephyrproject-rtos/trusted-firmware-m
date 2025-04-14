@@ -24,7 +24,7 @@ extern const struct memory_region_limits memory_regions;
 /* FIXME:
  * Instead of TFM-customized mcuboot, at this moment psoc64 uses
  * Cypress version of it - CypressBootloader (CYBL). CYBL doesn't
- * populate SHARED_BOOT_MEASUREMENT.
+ * populate BOOT_TFM_SHARED_DATA.
  * As a temp workaround, mock mcuboot shared data to pass
  * initialization checks.
 */
@@ -46,7 +46,7 @@ void mock_tfm_shared_data(void)
         0x82482A94,    0x23489DFA,     0xA966B1EF,     0x4A6E6AEF,
         0x19197CA3,    0xC0CC1FED,     0x00000049,     0x00000000
     };
-    uint32_t *boot_data = (uint32_t*)SHARED_BOOT_MEASUREMENT_BASE;
+    uint32_t *boot_data = (uint32_t*)BOOT_TFM_SHARED_DATA_BASE;
     memcpy(boot_data, mock_data, sizeof(mock_data));
 }
 

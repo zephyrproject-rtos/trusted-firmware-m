@@ -104,7 +104,7 @@ __WEAK int32_t boot_platform_init(void)
 #endif /* TFM_BL1_2_IN_FLASH */
 
     /* Clear boot data area */
-    memset((void*)SHARED_BOOT_MEASUREMENT_BASE, 0, SHARED_BOOT_MEASUREMENT_SIZE);
+    memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
 
     return 0;
 }
@@ -175,20 +175,20 @@ static int boot_add_data_to_shared_area(uint8_t        major_type,
         return -1;
     }
 
-    boot_data = (struct tfm_boot_data *)SHARED_BOOT_MEASUREMENT_BASE;
+    boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
 
     /* Check whether the shared area needs to be initialized. */
     if ((boot_data->header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) ||
-        (boot_data->header.tlv_tot_len > SHARED_BOOT_MEASUREMENT_SIZE)) {
+        (boot_data->header.tlv_tot_len > BOOT_TFM_SHARED_DATA_SIZE)) {
 
-        memset((void *)SHARED_BOOT_MEASUREMENT_BASE, 0, SHARED_BOOT_MEASUREMENT_SIZE);
+        memset((void *)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
         boot_data->header.tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
         boot_data->header.tlv_tot_len = SHARED_DATA_HEADER_SIZE;
     }
 
     /* Get the boundaries of TLV section. */
-    tlv_end = SHARED_BOOT_MEASUREMENT_BASE + boot_data->header.tlv_tot_len;
-    offset  = SHARED_BOOT_MEASUREMENT_BASE + SHARED_DATA_HEADER_SIZE;
+    tlv_end = BOOT_TFM_SHARED_DATA_BASE + boot_data->header.tlv_tot_len;
+    offset  = BOOT_TFM_SHARED_DATA_BASE + SHARED_DATA_HEADER_SIZE;
 
     /* Check whether TLV entry is already added. Iterates over the TLV section
      * looks for the same entry if found then returns with error.
@@ -213,7 +213,7 @@ static int boot_add_data_to_shared_area(uint8_t        major_type,
         (UINT16_MAX - boot_data->header.tlv_tot_len)) {
         return -1;
     } else if ((SHARED_DATA_ENTRY_SIZE(size) + boot_data->header.tlv_tot_len) >
-               SHARED_BOOT_MEASUREMENT_SIZE) {
+               BOOT_TFM_SHARED_DATA_SIZE) {
         return -1;
     }
 

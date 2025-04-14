@@ -283,6 +283,4 @@
 /*  This area in SRAM 2 is updated BL2 and can be lock to avoid any changes */
 #define BOOT_TFM_SHARED_DATA_SIZE        (0x400)
 #define BOOT_TFM_SHARED_DATA_BASE        (0x3003fc00)
-#define SHARED_BOOT_MEASUREMENT_BASE     BOOT_TFM_SHARED_DATA_BASE
-#define SHARED_BOOT_MEASUREMENT_SIZE     BOOT_TFM_SHARED_DATA_SIZE
 #endif /* __FLASH_LAYOUT_H__ */
