@@ -882,6 +882,7 @@ static const uint32_t target_peripherals[] = {
 #ifdef NRF_P1
     NRF_P1_S_BASE,
 #endif
+    NRF_VMC_S_BASE,
 };
 
     for (int i = 0; i < ARRAY_SIZE(target_peripherals); i++) {
