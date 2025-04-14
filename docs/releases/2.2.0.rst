@@ -50,8 +50,8 @@ Deprecated platforms
 TC2: arm/rse/tc/tc2
 
 
-Tested platforms [WIP]
-======================
+Tested platforms
+================
 
 The following platforms are successfully tested in this release.
 
@@ -74,16 +74,12 @@ The following platforms are successfully tested in this release.
 
 - **STM**
 
-  - NUCLEO-L552ZE-Q - TBC
-  - STM32H573idk - TBC
-
-- **Infineon/Cypress**
-
-  - PSoC 64 - TBC
+  - NUCLEO-L552ZE-Q
+  - STM32H573idk
 
 - **NXP**
 
-  - LPCXpresso55S69 - TBC
+  - LPCXpresso55S69
 
 - **Nordic**
 
