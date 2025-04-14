@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------------
+# Copyright (c) 2024, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 #-------------------------------------------------------------------------------
 
-include(${MPS4_COMMON_DIR}/check_config.cmake)
-tfm_invalid_config(NOT ETHOSU_ARCH MATCHES "U65")
+## test incompatible compiler
+tfm_invalid_config(CMAKE_C_COMPILER MATCHES "armclang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 6.18.0)

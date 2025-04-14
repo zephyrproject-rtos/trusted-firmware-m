@@ -26,7 +26,7 @@ set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
 
 # Ethos-U NPU configurations
-set(ETHOSU_ARCH                       "U65"            CACHE STRING    "Ethos-U NPU type [U65]")
+set(ETHOSU_ARCH                       "U65")
 set(ETHOS_DRIVER_PATH                 "DOWNLOAD"  CACHE PATH      "Path to Ethos-U Core Driver (or DOWNLOAD to fetch automatically")
 set(ETHOSU_LOG_SEVERITY               "-1"        CACHE STRING    "Ethos-U Core Driver log severity")
 
