@@ -7,6 +7,9 @@
 #
 #-------------------------------------------------------------------------------
 
+# Skip "up-to-date" prints to avoid flooding the build output. Just print "installing"
+set(CMAKE_INSTALL_MESSAGE LAZY)
+
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
         DESTINATION bin
 )
