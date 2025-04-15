@@ -16,7 +16,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common/nrf91 nrf91)
 
 target_include_directories(platform_region_defs
     INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}/common/nrf91/partition
+        ${CMAKE_CURRENT_LIST_DIR}/partition
 )
 
 target_include_directories(platform_ns
