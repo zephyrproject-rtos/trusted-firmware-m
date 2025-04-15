@@ -57,11 +57,7 @@
 
 /* Flash layout configuration : begin */
 #define MCUBOOT_OVERWRITE_ONLY    /* Defined: the FW installation uses ovewrite method.
-                                     UnDefined: The FW installation uses whatever mode
-                                     is configured through the MCUBOOT_UPGRADE_STRATEGY
-                                     config item in config.cmake. FixMe: MCUboot should
-                                     be configured in a single place, i.e. config.cmake
-                                     to avoid clashes */
+                                      UnDefined: The FW installation uses swap mode. */
 
 /*#define MCUBOOT_PRIMARY_ONLY*/   /* Defined: No secondary (download) slot(s),
                                               only primary slot(s) for each image.
