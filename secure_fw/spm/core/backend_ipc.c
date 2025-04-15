@@ -126,9 +126,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     struct runtime_metadata_t *p_rt_meta;
     service_fn_t *p_sfn_table;
     uint32_t allocate_size;
-#if TFM_ISOLATION_LEVEL != 1
     FIH_RET_TYPE(bool) fih_rc;
-#endif
 
     p_pt_ldi = p_pt->p_ldinf;
     p_srv_ldi = LOAD_INFO_SERVICE(p_pt_ldi);
