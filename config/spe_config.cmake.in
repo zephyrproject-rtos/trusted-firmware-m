@@ -76,4 +76,3 @@ set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)
 
 set(RECOMMENDED_TFM_TESTS_VERSION          @TFM_TESTS_VERSION@)
-set(CHECK_TFM_TESTS_VERSION                @TFM_TESTS_REVISION_CHECKS@)

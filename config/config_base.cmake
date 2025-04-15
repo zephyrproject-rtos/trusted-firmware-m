@@ -30,8 +30,6 @@ set(INSTALL_PLATFORM_NS_DIR             ${CMAKE_INSTALL_PREFIX}/platform)
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
 
-set(TFM_TESTS_REVISION_CHECKS           ON          CACHE BOOL      "Whether to perform checks on the tf-m-tests repository revision.")
-
 set(PROJECT_CONFIG_HEADER_FILE          ""          CACHE FILEPATH  "User defined header file for TF-M config")
 
 # External libraries source and version
