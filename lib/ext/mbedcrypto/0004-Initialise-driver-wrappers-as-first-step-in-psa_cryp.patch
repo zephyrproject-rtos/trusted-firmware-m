@@ -1,7 +1,7 @@
-From f7ee76eb24a88e7168749e273f76282658da6ca9 Mon Sep 17 00:00:00 2001
+From 0803fb5aea0768c37cb027af0af9223c2f0f47a9 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Thu, 21 Mar 2024 11:58:19 +0000
-Subject: [PATCH 4/6] Initialise driver wrappers as first step in
+Subject: [PATCH 4/7] Initialise driver wrappers as first step in
  psa_crypto_init()
 
 This patch amends the order of initialisations performed in
@@ -16,10 +16,10 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 589a00e6e..d3f729320 100644
+index 95f37fe2c..451e95492 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -8341,12 +8341,12 @@ psa_status_t psa_crypto_init(void)
+@@ -8483,12 +8483,12 @@ psa_status_t psa_crypto_init(void)
          return PSA_SUCCESS;
      }
  

@@ -178,5 +178,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         return status;
     }
 
-    return backend_messaging(p_connection);
+    status = backend_messaging(p_connection);
+
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
+    return status;
 }

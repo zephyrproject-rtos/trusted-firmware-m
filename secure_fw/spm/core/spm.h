@@ -24,9 +24,14 @@
 #include "load/partition_defs.h"
 #include "load/interrupt_defs.h"
 
-#define TFM_HANDLE_STATUS_IDLE          0 /* Handle created             */
-#define TFM_HANDLE_STATUS_ACTIVE        1 /* Handle in use              */
-#define TFM_HANDLE_STATUS_TO_FREE       2 /* Free the handle            */
+enum connection_status {
+    TFM_HANDLE_STATUS_IDLE = 0,     /* Handle created, idle */
+    TFM_HANDLE_STATUS_ACTIVE = 1,   /* Handle in use */
+    TFM_HANDLE_STATUS_TO_FREE = 2,  /* Handle to be freed */
+    TFM_HANDLE_STATUS_MAX = 3,
+
+    _TFM_HANDLE_STATUS_PAD = UINT32_MAX,
+};
 
 /* The mask used for timeout values */
 #define PSA_TIMEOUT_MASK        PSA_BLOCK
@@ -71,13 +76,7 @@
 
 /* RoT connection handle list */
 struct connection_t {
-    uint32_t status;                         /*
-                                              * Status of handle, three valid
-                                              * options:
-                                              * TFM_HANDLE_STATUS_ACTIVE,
-                                              * TFM_HANDLE_STATUS_IDLE and
-                                              * TFM_HANDLE_STATUS_TO_FREE
-                                              */
+    enum connection_status status;
     struct partition_t *p_client;            /* Caller partition               */
     const struct service_t *service;         /* RoT service pointer            */
     psa_msg_t msg;                           /* PSA message body               */
@@ -97,8 +96,9 @@ struct connection_t {
     uint32_t iovec_status;                   /* MM-IOVEC status                */
 #endif
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    struct connection_t *p_handles;          /* Handle(s) link                 */
-    uintptr_t reply_value;                   /* Result of this operation, if aynchronous */
+    struct connection_t *p_reqs;             /* Request handle(s) link         */
+    struct connection_t *p_replied;          /* Replied Handle(s) link         */
+    uintptr_t replied_value;                 /* Result of this operation       */
 #endif
 };
 
@@ -112,12 +112,12 @@ struct partition_t {
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     const struct runtime_metadata_t    *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
-    struct thread_t                    thrd;            /* IPC model */
-    uintptr_t                          reply_value;
+    struct thread_t                    thrd;       /* IPC model */
+    struct connection_t                *p_replied; /* Handle(s) to record replied connections */
 #else
-    uint32_t                           state;           /* SFN model */
+    uint32_t                           state;      /* SFN model */
 #endif
-    struct connection_t                *p_handles;
+    struct connection_t                *p_reqs;    /* Handle(s) to record request connections to service. */
     struct partition_t                 *next;
 };
 
@@ -148,6 +148,14 @@ void spm_free_connection(struct connection_t *p_connection);
 /******************** Partition management functions *************************/
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+
+/*
+ * Get the replied handles in the asynchnorous reply mode. The first handle to
+ * be replied is at the tail of list. Take the handle one by one and clean the
+ * asynchronous signal after all handles are operated.
+ */
+struct connection_t *spm_get_async_replied_handle(struct partition_t *partition);
+
 /*
  * Lookup and grab the last spotted handles containing the message
  * by the given signal. Only ONE signal bit can be accepted in 'signal',
@@ -332,8 +340,6 @@ psa_handle_t connection_to_handle(struct connection_t *p_connection);
  * \brief Converts a user handle into a corresponded handle instance.
  */
 struct connection_t *handle_to_connection(psa_handle_t handle);
-
-void update_caller_outvec_len(struct connection_t *handle);
 
 
 /* Following PSA APIs are only needed by connection-based services */

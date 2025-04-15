@@ -54,7 +54,7 @@ struct bi_list_node_t {
 
 /********* Uni-directional list operations ********/
 /* Initialize the head node. */
-#define UNI_LISI_INIT_NODE(head, link) do {             \
+#define UNI_LIST_INIT_NODE(head, link) do {             \
     if ((head) != NULL) {                               \
         (head)->link = NULL;                            \
     }                                                   \

@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "async.h"
 #include "bitops.h"
 #include "config_impl.h"
 #include "config_spm.h"
@@ -49,6 +50,32 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* This API is only used in IPC backend. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+struct connection_t *spm_get_async_replied_handle(struct partition_t *partition)
+{
+    struct connection_t **pr_handle_iter, **prev = NULL, *handle = NULL;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+    /* Remove tail of the list, which is the first item added */
+    CRITICAL_SECTION_ENTER(cs_assert);
+    if (!partition->p_replied) {
+        tfm_core_panic();
+    }
+    UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
+                                partition, p_replied) {
+        prev = pr_handle_iter;
+    }
+    handle = *prev;
+    UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_replied);
+
+    /* Clear the signal if there are no more asynchronous responses waiting */
+    if (!partition->p_replied) {
+        partition->signals_asserted &= ~ASYNC_MSG_REPLY;
+    }
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return handle;
+}
+
 struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                               psa_signal_t signal)
 {
@@ -61,7 +88,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     /* Return the last found message which applies a FIFO mechanism. */
     UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, p_handle_iter,
-                                p_ptn, p_handles) {
+                                p_ptn, p_reqs) {
         if (p_handle_iter->service->p_ldinf->signal == signal) {
             last_found_handle_holder = pr_handle_iter;
             nr_found_msgs++;
@@ -70,7 +97,7 @@ struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     if (last_found_handle_holder) {
         p_handle_iter = *last_found_handle_holder;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_handles);
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_reqs);
 
         if (nr_found_msgs == 1) {
             p_ptn->signals_asserted &= ~signal;
@@ -368,8 +395,8 @@ uint32_t tfm_spm_init(void)
 
     spm_init_connection_space();
 
-    UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
-    UNI_LISI_INIT_NODE(&services_listhead, next);
+    UNI_LIST_INIT_NODE(PARTITION_LIST_ADDR, next);
+    UNI_LIST_INIT_NODE(&services_listhead, next);
 
     /* Init the nonsecure context. */
     tfm_nspm_ctx_init();
@@ -399,19 +426,4 @@ uint32_t tfm_spm_init(void)
     }
 
     return backend_system_run();
-}
-
-void update_caller_outvec_len(struct connection_t *handle)
-{
-    uint32_t i;
-
-    for (i = 0; i < PSA_MAX_IOVEC; i++) {
-        if (handle->msg.out_size[i] == 0) {
-            continue;
-        }
-
-        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec_base[i]);
-
-        handle->caller_outvec[i].len = handle->outvec_written[i];
-    }
 }

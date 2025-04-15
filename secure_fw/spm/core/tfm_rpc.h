@@ -161,6 +161,5 @@ void tfm_rpc_client_call_handler(void);
  */
 void tfm_rpc_client_call_reply(void);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
-
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */

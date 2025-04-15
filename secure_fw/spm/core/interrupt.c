@@ -71,6 +71,9 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
     if (fih_not_eq(fih_bool, fih_int_encode(false))) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_owner_sp->p_ldinf, p_owner_sp->boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
     }
 
     /*
@@ -107,6 +110,9 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     if (fih_not_eq(fih_bool, fih_int_encode(false))) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_prev_sp->p_ldinf, p_prev_sp->boundary);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
     }
 
     /*

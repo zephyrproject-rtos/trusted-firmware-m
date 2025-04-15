@@ -100,9 +100,9 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
     rom_fixed = macro_parser.evaluate_macro(layout, rom_fixed_re, 0, 1)
 
     if measured_boot_record:
-        if "_s" in layout:
+        if "_s.o" in layout:
             record_sw_type = "SPE"
-        elif "_ns" in layout:
+        elif "_ns.o" in layout:
             record_sw_type = "NSPE"
         else:
             record_sw_type = "NSPE_SPE"

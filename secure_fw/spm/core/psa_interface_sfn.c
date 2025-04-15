@@ -52,7 +52,7 @@ psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -126,7 +126,7 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -153,7 +153,7 @@ void psa_close(psa_handle_t handle)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            PSA_SUCCESS);
     } else {
         /* Execution is returned from SPM */
@@ -283,7 +283,7 @@ psa_status_t agent_psa_call(psa_handle_t handle,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -312,7 +312,7 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            stat);
     } else {
         /* Execution is returned from SPM */
@@ -339,7 +339,7 @@ psa_status_t agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
         /* Execution is returned from RoT Service */
-        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_reqs->msg.handle,
                                            PSA_SUCCESS);
     } else {
         /* Execution is returned from SPM */

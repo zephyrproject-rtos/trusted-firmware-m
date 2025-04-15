@@ -61,15 +61,19 @@
 #define IOVEC_IS_ACCESSED(handle, iovec_idx)    \
     ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
                                IOVEC_ACCESSED_BIT)
-#define SET_IOVEC_MAPPED(handle, iovec_idx)     \
-    (((handle)->iovec_status) |= (IOVEC_MAPPED_BIT <<   \
-                              ((iovec_idx) * IOVEC_STATUS_BITS)))
-#define SET_IOVEC_UNMAPPED(handle, iovec_idx)   \
-    (((handle)->iovec_status) |= (IOVEC_UNMAPPED_BIT << \
-                              ((iovec_idx) * IOVEC_STATUS_BITS)))
 #define SET_IOVEC_ACCESSED(handle, iovec_idx)   \
     (((handle)->iovec_status) |= (IOVEC_ACCESSED_BIT << \
                               ((iovec_idx) * IOVEC_STATUS_BITS)))
+#define SET_IOVEC_MAPPED(handle, iovec_idx) \
+    do { \
+        ((handle)->iovec_status) |= (IOVEC_MAPPED_BIT << ((iovec_idx) * IOVEC_STATUS_BITS)); \
+        ((handle)->iovec_status) &= ~(IOVEC_UNMAPPED_BIT << ((iovec_idx) * IOVEC_STATUS_BITS)); \
+    } while (0)
+#define SET_IOVEC_UNMAPPED(handle, iovec_idx) \
+    do { \
+        ((handle)->iovec_status) |= (IOVEC_UNMAPPED_BIT << ((iovec_idx) * IOVEC_STATUS_BITS)); \
+        ((handle)->iovec_status) &= ~(IOVEC_MAPPED_BIT << ((iovec_idx) * IOVEC_STATUS_BITS)); \
+    } while (0)
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
