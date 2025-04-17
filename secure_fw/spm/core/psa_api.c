@@ -158,26 +158,9 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
     }
 
     if (signal == ASYNC_MSG_REPLY) {
-        struct connection_t **pr_handle_iter, **prev = NULL;
-        struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-
-        /* Remove tail of the list, which is the first item added */
-        CRITICAL_SECTION_ENTER(cs_assert);
-        if (!partition->p_handles) {
-            tfm_core_panic();
-        }
-        UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
-                                    partition, p_handles) {
-            prev = pr_handle_iter;
-        }
-        handle = *prev;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_handles);
-        ret = handle->reply_value;
-        /* Clear the signal if there are no more asynchronous responses waiting */
-        if (!partition->p_handles) {
-            partition->signals_asserted &= ~ASYNC_MSG_REPLY;
-        }
-        CRITICAL_SECTION_LEAVE(cs_assert);
+        handle = spm_get_async_replied_handle(partition);
+        ret = handle->replied_value;
+        msg->rhandle = handle;
     } else {
         /*
          * Get message by signal from partition. It is a fatal error if getting
@@ -189,13 +172,61 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
         } else {
             return PSA_ERROR_DOES_NOT_EXIST;
         }
-    }
 
-    spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
+        spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
+    }
 
     return ret;
 }
 #endif
+
+static void update_caller_outvec_len(struct connection_t *handle)
+{
+    uint32_t i;
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    /*
+     * If no unmapping call was made, output vectors will report that no data
+     * has been written.
+     */
+    for (i = OUTVEC_IDX_BASE; i < (PSA_MAX_IOVEC * 2); i++) {
+        if (!IOVEC_IS_UNMAPPED(handle, i) && !IOVEC_IS_ACCESSED(handle, i)) {
+            handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
+        }
+    }
+#endif
+
+    /*
+     * The total number of bytes written to a single parameter must be reported
+     * to the client by updating the len member of the psa_outvec structure for
+     * the parameter before returning from psa_call().
+     */
+    for (i = 0; i < PSA_MAX_IOVEC; i++) {
+        if (handle->msg.out_size[i] == 0) {
+            continue;
+        }
+
+        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec_base[i]);
+
+        handle->caller_outvec[i].len = handle->outvec_written[i];
+    }
+}
+
+static inline psa_status_t psa_reply_error_connection(
+    struct connection_t *handle,
+    psa_status_t status,
+    bool *del_conn)
+{
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+    *del_conn = true;
+#else
+    (void)del_conn;
+#endif
+
+    handle->status = TFM_HANDLE_STATUS_TO_FREE;
+
+    return status;
+}
 
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
@@ -204,6 +235,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     struct connection_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    bool delete_connection = false;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_msg_handle_to_connection(msg_handle);
@@ -232,18 +264,22 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            ret = PSA_ERROR_CONNECTION_REFUSED;
-            handle->status = TFM_HANDLE_STATUS_TO_FREE;
+            ret = psa_reply_error_connection(handle, status, &delete_connection);
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
-            ret = PSA_ERROR_CONNECTION_BUSY;
+            ret = psa_reply_error_connection(handle, status, &delete_connection);
         } else {
             tfm_core_panic();
         }
         break;
     case PSA_IPC_DISCONNECT:
-        /* Service handle is not used anymore */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+        /* Service handle will be freed in the backend */
         handle->status = TFM_HANDLE_STATUS_TO_FREE;
+#else
+        /* Service handle is not used anymore */
+        delete_connection = true;
+#endif
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -252,29 +288,15 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     default:
         if (handle->msg.type >= PSA_IPC_CALL) {
-
-#if PSA_FRAMEWORK_HAS_MM_IOVEC
-            /*
-             * Any output vectors that are still mapped will report that
-             * zero bytes have been written.
-             */
-            for (int i = OUTVEC_IDX_BASE; i < PSA_MAX_IOVEC * 2; i++) {
-                if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
-                    handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
-                }
-            }
-#endif
             /* Reply to a request message. Return values are based on status */
             ret = status;
-            /*
-             * The total number of bytes written to a single parameter must be
-             * reported to the client by updating the len member of the
-             * psa_outvec structure for the parameter before returning from
-             * psa_call().
-             */
+
             update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
                 handle->status = TFM_HANDLE_STATUS_TO_FREE;
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+                delete_connection = true;
+#endif /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
             }
         } else {
             tfm_core_panic();
@@ -305,19 +327,22 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * until the response has been collected by the agent.
      */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    if (tfm_spm_is_rpc_msg(handle)) {
+    if (IS_NS_AGENT_MAILBOX(handle->p_client->p_ldinf)) {
         return ret;
     }
 #endif
 
+    if (handle->status != TFM_HANDLE_STATUS_TO_FREE) {
+        handle->status = TFM_HANDLE_STATUS_IDLE;
+    }
     /*
      * When the asynchronous agent API is not used or when in SFN model, free
      * the connection handle immediately.
      */
-    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
-        spm_free_connection(handle);
-    } else {
+    if (delete_connection) {
         handle->status = TFM_HANDLE_STATUS_IDLE;
+
+        spm_free_connection(handle);
     }
 
     return ret;

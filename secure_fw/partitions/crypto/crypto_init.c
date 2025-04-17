@@ -239,6 +239,16 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
             psa_unmap_outvec(msg->handle, i, out_vec[i].len);
         }
     }
+
+    /*
+     * Unmap from the second element because the first element is read when
+     * parsing the message, hence it is never mapped.
+     */
+    for (i = 1; i < in_len; i++) {
+        if (in_vec[i].base != NULL) {
+            psa_unmap_invec(msg->handle, i);
+        }
+    }
 #else
     /* Write into the IPC framework outputs from the scratch */
     for (i = 0; i < out_len; i++) {
