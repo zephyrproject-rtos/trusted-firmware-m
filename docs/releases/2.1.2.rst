@@ -10,7 +10,7 @@ New features
 New platforms supported
 =======================
 
-- :doc:`MAX32657 </platform/adi/max32657/readme>`
+ - :doc:`MAX32657 </platform/adi/max32657/README>`
 
 Hotfixes
 ========
