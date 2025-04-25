@@ -185,23 +185,6 @@
 
 #define FLASH_AREA_BEGIN_OFFSET         (FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE)
 
-/* Secure app image primary slot */
-#define FLASH_AREA_0_OFFSET             (FLASH_AREA_BEGIN_OFFSET)
-#define FLASH_AREA_0_SIZE               (FLASH_S_PARTITION_SIZE)
-/* Control Secure app image primary slot */
-#if (FLASH_AREA_0_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_0_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /*  (FLASH_AREA_0_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
-
-/* Non-secure app image primary slot */
-#define FLASH_AREA_1_OFFSET             (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
-#define FLASH_AREA_1_SIZE               (FLASH_NS_PARTITION_SIZE)
-/* Control Non-secure app image primary slot */
-#if (FLASH_AREA_1_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_1_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /* (FLASH_AREA_1_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0  */
-
-
 /* flash areas end offset */
 #define FLASH_AREA_END_OFFSET           (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE)
 
