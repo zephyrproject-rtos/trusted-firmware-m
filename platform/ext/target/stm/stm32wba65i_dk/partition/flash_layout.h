@@ -21,15 +21,25 @@
  *
  * Not supported
  *
- * Flash layout for stm32wba65i-dk without BL2 :
+ * Flash layout for stm32wba65i-dk:
  *
- *  0x000_0000 OTP / NV counters area (8 KB)
- *  0x000_4000 Protected Storage Area (16 KB)
- *  0x000_8000 Internal Trusted Storage Area (16 KB)
- *  0x000_c400 Secure     image  (384 KB)
- *  0x006_c400 Non-secure image primary (512 KB)
+ *  0x000_0000 Secure bootloader (data and firwmare) (96 KByte)
+ *  0x001_8000 OTP / NV counters area (16 KB)
+ *  0x001_c000 Protected Storage Area (16 KB)
+ *  0x002_0000 Internal Trusted Storage Area (16 KB)
+ *  0x002_4000 Secure primary image (384 KB)
+ *  0x008_4000 Non-secure primary image (384 KB)
+ *  0x00e_4000 Non-secure private storage (112 KB)
+ *  0x010_0000 Secure secondary image (384 KB)
+ *  0x016_0000 Non-secure secondary image (384 KB)
+ *  0x01c_0000 Non-secure private storage #2 (256 KB)
+ *
+ * Note:
+ * Secure primary image, Non-secure primary image,
+ * Secure secondary image and non-secure secondary image
+ * each include a 1kByte header and a 1kByte trialer
+ * before/after the firmware image content.
  */
-
 
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
@@ -147,7 +157,7 @@
 /* The size of S partition */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* 384 KB for S partition */
 /* The size of NS partition */
-#define FLASH_NS_PARTITION_SIZE         (0x60000) /* 512 KB for NS partition */
+#define FLASH_NS_PARTITION_SIZE         (0x60000) /* 384 KB for NS partition */
 
 /* Non Volatile Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET           (0x0000)
