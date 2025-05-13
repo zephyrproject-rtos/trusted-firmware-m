@@ -9,12 +9,13 @@
 
 #include <string.h>
 #include "tfm_spm_log.h"
+#include "cmsis_compiler.h"
 
 /*
  * CPU spin here.
  * Note: this function is used to handle PROGRAMMER ERROR.
  */
-void tfm_core_panic(void);
+__NO_RETURN void tfm_core_panic(void);
 
 /* Get container structure start address from member */
 #define TO_CONTAINER(ptr, type, member) \
