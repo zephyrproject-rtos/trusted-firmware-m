@@ -13,10 +13,13 @@ cmake_policy(SET CMP0076 NEW)
 if(NOT DEFINED PLATFORM_DIR)
     set(PLATFORM_DIR ../../.. CACHE PATH "Path to plaform dir")
 endif()
+
+if(BL2)
 target_compile_definitions(platform_bl2
     PRIVATE
         CRYPTO_HW_ACCELERATOR
 )
+endif()
 
 if (PLATFORM_DEFAULT_PROVISIONING)
     # mbedtls_accelerator_config.h is included from the profile config files and must
@@ -28,12 +31,13 @@ if (PLATFORM_DEFAULT_PROVISIONING)
     )
 
     # Same for platform_bl2
+    if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
             ${PLATFORM_DIR}/ext/target/${CRYPTO_HW_ACCELERATOR_TYPE}/common/hal/accelerator/
     )
-
+    endif()
 endif()
 
 ################################ BL2 ###########################################
