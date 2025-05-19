@@ -19,6 +19,7 @@ target_include_directories(tfm_sprt
 target_sources(tfm_sprt
     PUBLIC
         $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
     PRIVATE
         assert.c
         crt_memcmp.c

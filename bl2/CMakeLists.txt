@@ -157,6 +157,7 @@ add_executable(bl2
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
     $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:src/provisioning.c>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+    $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
 )
 
 if (${CONFIG_TFM_INCLUDE_STDLIBC})

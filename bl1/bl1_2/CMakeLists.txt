@@ -43,6 +43,7 @@ target_sources(bl1_2
         main.c
         $<$<BOOL:${TFM_BL1_2_IMAGE_BINDING}>:bl1_2_image_binding.c>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
         $<$<C_COMPILER_ID:GNU,Clang>:${CMAKE_SOURCE_DIR}/secure_fw/partitions/lib/runtime/crt_start.c>
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memset.c
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memcpy.c

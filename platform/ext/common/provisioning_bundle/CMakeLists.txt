@@ -54,6 +54,7 @@ target_sources(provisioning_bundle
         provisioning_code.c
         provisioning_data.c
         $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
 )
 
 target_include_directories(provisioning_bundle

@@ -142,7 +142,7 @@ void _sys_exit(int returncode)
  *  as per https://github.com/picolibc/picolibc/blob/main/doc/os.md
  *  'fputch()' named intentionally different from 'fputc()' from picolib
  */
-#elif defined(__clang_major__)
+#elif defined(__PICOLIBC__)
 
 int fputch(char ch, struct __file *f)
 {

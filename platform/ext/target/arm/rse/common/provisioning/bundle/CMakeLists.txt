@@ -96,6 +96,7 @@ function(create_provisioning_code_target target linker_script entry_point
     target_sources(${TARGET_NAME}
         PRIVATE
             $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+            $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
     )
 
     target_include_directories(${TARGET_NAME}

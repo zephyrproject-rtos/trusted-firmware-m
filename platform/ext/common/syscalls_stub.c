@@ -14,6 +14,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __PICOLIBC__
+__attribute__((weak))
+void _exit(int status)
+{
+    (void) status;
+    for(;;);
+}
+#else
 __attribute__((weak))
 void _close(void)
 {
@@ -53,3 +61,5 @@ __attribute__((weak))
 void _write(void)
 {
 }
+
+#endif /* !__PICOLIBC__ */

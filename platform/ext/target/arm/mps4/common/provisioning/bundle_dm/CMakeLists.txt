@@ -70,6 +70,7 @@ target_sources(dm_provisioning_bundle
         dm_provisioning_code.c
         dm_provisioning_data.c
         $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
 )
 
 target_include_directories(dm_provisioning_bundle
