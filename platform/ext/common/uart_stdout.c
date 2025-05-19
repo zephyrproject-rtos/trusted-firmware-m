@@ -69,6 +69,42 @@ int fputc(int ch, FILE *f)
     /* Return character written */
     return ch;
 }
+#elif defined(__PICOLIBC__)
+void
+_exit(int status)
+{
+    (void) status;
+    for(;;);
+}
+
+static int
+_getc(FILE *file)
+{
+	(void) file;
+	return EOF;
+}
+
+static int
+_putc(char c, FILE *file)
+{
+	(void) file;
+	(void) stdio_output_string((const unsigned char *) &c,1);
+
+	return (unsigned char) c;
+}
+
+static FILE __stdio = FDEV_SETUP_STREAM(_putc, _getc, NULL, _FDEV_SETUP_RW);
+
+#ifdef __strong_reference
+#define STDIO_ALIAS(x) __strong_reference(stdin, x);
+#else
+#define STDIO_ALIAS(x) FILE *const x = &__stdio;
+#endif
+
+FILE *const stdin = &__stdio;
+STDIO_ALIAS(stdout);
+STDIO_ALIAS(stderr);
+
 #elif defined(__GNUC__)
 /* Redirects printf to STDIO_DRIVER in case of GNUARM */
 int _write(int fd, char *str, int len)
