@@ -53,3 +53,12 @@ __attribute__((weak))
 void _write(void)
 {
 }
+
+#ifdef __PICOLIBC__
+void
+_exit(int status)
+{
+    (void) status;
+    for(;;);
+}
+#endif

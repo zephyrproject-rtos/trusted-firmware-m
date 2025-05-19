@@ -165,6 +165,9 @@ uint32_t flash_area_align(const struct flash_area *area);
 int flash_area_get_sectors(int fa_id, uint32_t *count,
   struct flash_sector *sectors);
 
+int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
+                          struct flash_sector *sector);
+
 /*
  * Similar to flash_area_get_sectors(), but return the values in an
  * array of struct flash_area instead.

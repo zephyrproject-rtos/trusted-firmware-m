@@ -182,8 +182,7 @@ if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
 endif()
 
 add_compile_options(
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
     -Wall
     -Wno-format
     -Wno-return-type
@@ -203,8 +202,8 @@ add_compile_options(
 
 add_link_options(
     --entry=Reset_Handler
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
+    -mthumb
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections
