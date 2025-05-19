@@ -153,6 +153,24 @@ SECTIONS
     } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
 
+	.tdata : /* For ld.lld:  ALIGN(__tls_align) */  ALIGN_WITH_INPUT  {
+		*(.tdata .tdata.* .gnu.linkonce.td.*)
+		PROVIDE(__data_end = .);
+		PROVIDE(__tdata_end = .);
+	} >RAM AT>FLASH
+
+	.tbss (NOLOAD) : {
+		*(.tbss .tbss.* .gnu.linkonce.tb.*)
+		*(.tcommon)
+		PROVIDE( __tls_end = . );
+		PROVIDE( __tbss_end = . );
+	} >RAM AT>RAM
+
+    .tbss_space (NOLOAD) : {
+		. = ADDR(.tbss);
+		. = . + SIZEOF(.tbss);
+	} >RAM AT>RAM
+
     .bss : ALIGN(4)
     {
         . = ALIGN(4);
@@ -161,7 +179,17 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
+		__bss_end = .;
     } > RAM
+
+	PROVIDE(__data_start = ADDR(.data));
+	PROVIDE(__data_source = LOADADDR(.data));
+	PROVIDE(__data_size = __data_end - __data_start);
+	PROVIDE( __tls_base = SIZEOF(.tdata) ? ADDR(.tdata) : ADDR(.tbss) );
+	PROVIDE( __tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)) );
+	PROVIDE( __arm32_tls_tcb_offset = MAX(8, __tls_align) );
+	PROVIDE( __bss_start = ADDR(.tbss));
+	PROVIDE( __bss_size = __bss_end - __bss_start );
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
     .msp_stack (NOLOAD) : ALIGN(32)
@@ -193,9 +221,11 @@ SECTIONS
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
+        __heap_start = .;
         . += __heap_size__;
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
+        __heap_end = .;
     } > RAM
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
