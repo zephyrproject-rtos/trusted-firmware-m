@@ -81,6 +81,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:ext/common/provisioning.c>
         $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
         $<$<BOOL:${TFM_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+        $<$<BOOL:${CONFIG_PICOLIBC}>:ext/common/picolibc.c>
         ./ext/common/tfm_fatal_error.c
 )
 
@@ -203,6 +204,7 @@ if(BL2)
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
             $<$<BOOL:${BL2_SANITIZE}>:ext/common/tfm_sanitize_handlers.c>
+            $<$<BOOL:${CONFIG_PICOLIBC}>:ext/common/picolibc.c>
             ./ext/common/tfm_fatal_error.c
     )
 
@@ -304,6 +306,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
             $<$<OR:$<BOOL:${BL1_1_SANITIZE}>,$<BOOL:${TFM_BL1_2_SANITIZE}>>:ext/common/tfm_sanitize_handlers.c>
+            $<$<BOOL:${CONFIG_PICOLIBC}>:ext/common/picolibc.c>
             ./ext/common/tfm_fatal_error.c
     )
 
@@ -359,6 +362,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+            $<$<BOOL:${CONFIG_PICOLIBC}>:ext/common/picolibc.c>
     )
 
     target_link_libraries(platform_bl1_2
