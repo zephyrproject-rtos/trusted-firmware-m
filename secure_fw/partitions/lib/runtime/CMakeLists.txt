@@ -18,6 +18,7 @@ target_include_directories(tfm_sprt
 
 target_sources(tfm_sprt
     PUBLIC
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
     PRIVATE
         crt_memcmp.c

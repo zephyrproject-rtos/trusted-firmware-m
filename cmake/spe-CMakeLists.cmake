@@ -104,6 +104,7 @@ add_subdirectory(platform)
 
 target_sources(platform_ns
     PRIVATE
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/common/picolibc.c>
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
 )
 
