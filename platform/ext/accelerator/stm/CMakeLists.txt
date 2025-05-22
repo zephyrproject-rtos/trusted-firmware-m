@@ -18,20 +18,6 @@ target_compile_definitions(platform_bl2
         CRYPTO_HW_ACCELERATOR
 )
 
-if(BL2)
-target_compile_definitions(platform_bl2
-    PRIVATE
-        CRYPTO_HW_ACCELERATOR
-)
-endif()
-
-if(BL2)
-target_compile_definitions(platform_bl2
-    PRIVATE
-        CRYPTO_HW_ACCELERATOR
-)
-endif()
-
 if (PLATFORM_DEFAULT_PROVISIONING)
     # mbedtls_accelerator_config.h is included from the profile config files and must
     # be visible in the platform_s always, due to the compilation of provisioning.c
