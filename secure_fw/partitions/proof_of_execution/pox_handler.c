@@ -38,15 +38,22 @@ psa_status_t pox_ipc_handler(psa_msg_t *msg)
         execution_output = pox_execute(stored_faddr); // Call the function from pox_execute.c
 
         // Get Initial Attestation Token
-        status = att_get_iat(stored_challenge, &token_buf, &sys_token_sz);
+        status = att_get_iat(stored_challenge, token_buf, &sys_token_sz);
+        LOG_INFFMT("[Secure] att_get_iat status: %d, token size: %d\n", status, (int)sys_token_sz);
         if (status != PSA_SUCCESS)
         {
             LOG_ERRFMT("[Secure] ERROR: Failed to get attestation token.\n");
             return PSA_ERROR_GENERIC_ERROR;
         }
 
-        // Generate PoX Report
-        status = generate_pox_report(token_buf, sys_token_sz, stored_faddr, execution_output, report_buf, &report_size);
+        // Generate PoX report
+        LOG_INFFMT("[Secure] Calling generate_pox_report with token size: %d, buffer size: %d\n", 
+                  (int)sys_token_sz, (int)report_size);
+        status = generate_pox_report(token_buf, sys_token_sz, stored_faddr, execution_output, 
+                                   report_buf, &report_size);
+        LOG_INFFMT("[Secure] generate_pox_report status: %d, output size: %d\n", 
+                  status, (int)report_size);
+        
         if (status != PSA_SUCCESS)
         {
             LOG_ERRFMT("[Secure] ERROR: Failed to generate PoX report.\n");

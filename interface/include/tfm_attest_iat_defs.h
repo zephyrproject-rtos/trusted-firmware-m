@@ -29,6 +29,9 @@ extern "C" {
 #define IAT_NONCE                          (IAT_ARM_RANGE_BASE - 8)
 #define IAT_INSTANCE_ID                    (IAT_ARM_RANGE_BASE - 9)
 #define IAT_VERIFICATION_SERVICE           (IAT_ARM_RANGE_BASE - 10)
+#define IAT_POX_IA                         (IAT_ARM_RANGE_BASE - 11)
+#define IAT_POX_FADDR                      (IAT_ARM_RANGE_BASE - 12)
+#define IAT_POX_OUT                        (IAT_ARM_RANGE_BASE - 13)
 
 /* Indicates that the boot status intentionally (i.e. the bootloader is not
  * capable of producing it) does not contain any SW components' measurement.

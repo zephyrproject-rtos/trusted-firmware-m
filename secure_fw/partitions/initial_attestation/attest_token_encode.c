@@ -23,7 +23,7 @@
 #include "psa/crypto.h"
 #include "attest_key.h"
 #include "tfm_crypto_defs.h"
-
+#include "tfm_sp_log.h"
 
 /**
  * \file attest_token_encode.c
@@ -221,6 +221,29 @@ Done:
  * - Close CBOR array holding the \c COSE_Sign1
  */
 
+ void generate_new_key(psa_key_handle_t *key_handle) {
+    SPMLOG_INFMSG("[OAK] genearting key");
+    psa_status_t status;
+
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
+    psa_set_key_algorithm(&attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
+    psa_set_key_bits(&attributes, 256);
+    psa_set_key_lifetime(&attributes, PSA_KEY_LIFETIME_PERSISTENT); // Required for IAK
+    psa_set_key_id(&attributes, 0x55);
+
+
+
+    SPMLOG_INFMSG("[OAK] genearting key2");
+    status = psa_generate_key(&attributes, key_handle);
+
+    SPMLOG_INFMSGVAL("[INF] key handle: ", *key_handle);
+    psa_reset_key_attributes(&attributes);
+
+}
+
 /*
  * Public function. See attest_token.h
  */
@@ -236,6 +259,10 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
+    psa_key_handle_t keyid;
+    generate_new_key(&keyid);
+    private_key = keyid;
+    
     /* Remember some of the configuration values */
     me->key_select = key_select;
 
@@ -283,13 +310,15 @@ attest_token_encode_finish(struct attest_token_encode_ctx *me,
     enum t_cose_err_t       cose_return_value;
 
     QCBOREncode_CloseMap(&(me->cbor_enc_ctx));
-
     /* -- Finish up the COSE_Sign1. This is where the signing happens -- */
     cose_return_value = t_cose_sign1_encode_signature(&(me->signer_ctx),
                                                       &(me->cbor_enc_ctx));
     if (cose_return_value) {
         /* Main errors are invoking the hash or signature */
         return_value = t_cose_err_to_attest_err(cose_return_value);
+        if (return_value == ATTEST_TOKEN_ERR_GENERAL){
+            LOG_ERRFMT("[ERR] HI IAM ERROR");
+        }
         goto Done;
     }
 
