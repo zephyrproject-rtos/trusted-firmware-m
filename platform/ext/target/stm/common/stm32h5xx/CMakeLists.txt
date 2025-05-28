@@ -34,9 +34,9 @@ target_add_scatter_file(tfm_s
 
 if(BL2)
     target_add_scatter_file(bl2
-        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/hal/template/gcc/bl2.ld>
-        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/hal/template/armclang/bl2.sct>
-        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/hal/template/iar/bl2.icf>
+        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/stm32h5xx/template/gcc/bl2.ld>
+        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/stm32h5xx/template/armclang/bl2.sct>
+        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/stm32h5xx/template/iar/bl2.icf>
     )
 endif()
 

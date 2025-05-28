@@ -57,9 +57,12 @@ int RNG_Init(void)
     users=0;
     return -1;
   }
-#else
+#elif defined (RCC_RNGCLKSOURCE_HSI48)
   /* Select RNG clock source */
   __HAL_RCC_RNG_CONFIG(RCC_RNGCLKSOURCE_HSI48);
+#else
+  /* Select RNG clock source for STM32WBAxx */
+  __HAL_RCC_RNG_CONFIG(RCC_RNGCLKSOURCE_HSI);
 #endif
   /* RNG Peripheral clock enable */
   __HAL_RCC_RNG_CLK_ENABLE();
