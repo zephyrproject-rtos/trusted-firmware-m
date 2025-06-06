@@ -15,6 +15,7 @@ extern "C" {
 /* Initial Attestation message types that distinguish Attest services. */
 #define TFM_ATTEST_GET_TOKEN       1001
 #define TFM_ATTEST_GET_TOKEN_SIZE  1002
+#define TFM_ATTEST_GET_POX         1003
 
 #ifdef __cplusplus
 }

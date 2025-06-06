@@ -55,3 +55,32 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
 
     return status;
 }
+
+psa_status_t
+psa_proof_of_execution_get_token(uint8_t faddr,
+                                 const uint8_t *auth_challenge,
+                                 size_t         challenge_size,
+                                 uint8_t       *token_buf,
+                                 size_t         token_buf_size,
+                                 size_t        *token_size)
+{
+    psa_status_t status;
+
+    psa_invec in_vec[] = {
+        {faddr, sizeof(faddr)},
+        {auth_challenge, challenge_size}
+    };
+    psa_outvec out_vec[] = {
+        {token_buf, token_buf_size}
+    };
+
+    status = psa_call(TFM_ATTESTATION_SERVICE_HANDLE, TFM_ATTEST_GET_POX,
+                      in_vec, IOVEC_LEN(in_vec),
+                      out_vec, IOVEC_LEN(out_vec));
+
+    if (status == PSA_SUCCESS) {
+        *token_size = out_vec[0].len;
+    }
+
+    return status;
+}

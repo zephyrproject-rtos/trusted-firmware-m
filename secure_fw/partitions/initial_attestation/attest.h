@@ -109,6 +109,23 @@ initial_attest_get_token(const void *challenge_buf, size_t challenge_size,
 psa_status_t
 initial_attest_get_token_size(size_t challenge_size, size_t *token_size);
 
+/*!
+ * \brief Get proof of execution token
+ *
+ * \param[in]     faddr         Pointer to function address to execute
+ * \param[in]     challenge_buf Pointer to challenge buffer
+ * \param[in]     challenge_size Size of challenge
+ * \param[out]    token_buf     Pointer to token buffer
+ * \param[in]     token_buf_size Size of token buffer
+ * \param[out]    token_size    Pointer to store actual token size
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t
+proof_of_execution(uintptr_t *faddr, const void *challenge_buf, size_t challenge_size,
+                   void *token_buf, size_t token_buf_size,
+                   size_t *token_size);
+
 #ifdef __cplusplus
 }
 #endif

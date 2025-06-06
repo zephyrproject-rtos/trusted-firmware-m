@@ -778,7 +778,7 @@ error:
 }
 
 static enum psa_attest_err_t
-proof_of_execute(uintptr_t faddr,
+pox_create_token(uintptr_t *faddr,
                  struct q_useful_buf_c *challenge,
                  struct q_useful_buf *token,
                  struct q_useful_buf_c *completed_token)
@@ -811,11 +811,11 @@ proof_of_execute(uintptr_t faddr,
         goto error;
     }
     
-    execute_value = ns_execute(faddr);
+    execute_value = ns_execute(*faddr);
 
     attest_err = attest_add_faddr(&attest_token_ctx,
                                   faddr);
-    attest_err = attest_add_execute_value(&attest_token_ctx,
+    attest_err = attest_add_execution_value(&attest_token_ctx,
                                           execute_value);
     attest_err = attest_add_nonce_claim(&attest_token_ctx,
                                         challenge);
@@ -843,4 +843,43 @@ proof_of_execute(uintptr_t faddr,
 
 error:
     return attest_err;
+}
+
+psa_status_t
+proof_of_execution(uintptr_t *faddr, const void *challenge_buf, size_t challenge_size,
+                         void *token_buf, size_t token_buf_size,
+                         size_t *token_size)
+{
+    enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
+    struct q_useful_buf_c challenge;
+    struct q_useful_buf token;
+    struct q_useful_buf_c completed_token;
+
+    challenge.ptr = challenge_buf;
+    challenge.len = challenge_size;
+    token.ptr = token_buf;
+    token.len = token_buf_size;
+
+    attest_err = attest_verify_challenge_size(challenge.len);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS)
+    {
+        goto error;
+    }
+
+    if (token.len == 0)
+    {
+        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
+        goto error;
+    }
+
+    attest_err = pox_create_token(faddr, &challenge, &token, &completed_token);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS)
+    {
+        goto error;
+    }
+
+    *token_size = completed_token.len;
+
+error:
+    return error_mapping_to_psa_status_t(attest_err);
 }
