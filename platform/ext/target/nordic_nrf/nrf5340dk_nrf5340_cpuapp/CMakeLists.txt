@@ -64,6 +64,7 @@ install(FILES       RTE_Device.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )
 
-install(DIRECTORY   tests
+install(DIRECTORY   ../common/nrf5340/partition
+                    tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )

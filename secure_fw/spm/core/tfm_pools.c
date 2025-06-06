@@ -41,7 +41,7 @@ psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     spm_memset(pool, 0, poolsz);
 
     /* Chain pool chunks */
-    UNI_LISI_INIT_NODE(pool, next);
+    UNI_LIST_INIT_NODE(pool, next);
 
     pchunk = (struct tfm_pool_chunk_t *)pool->chunks;
     for (i = 0; i < num; i++) {

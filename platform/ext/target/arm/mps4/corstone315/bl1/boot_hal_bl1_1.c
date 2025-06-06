@@ -75,7 +75,7 @@ int32_t boot_platform_init(void)
     }
 
     /* Clear boot data area */
-    memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
+    memset((void*)SHARED_BOOT_MEASUREMENT_BASE, 0, SHARED_BOOT_MEASUREMENT_SIZE);
 
     return 0;
 }
