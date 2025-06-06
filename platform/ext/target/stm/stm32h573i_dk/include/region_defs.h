@@ -67,7 +67,7 @@
 #define TOTAL_RAM_SIZE          (_SRAM1_SIZE_MAX +_SRAM2_SIZE_MAX)
 
 #define S_TOTAL_RAM2_SIZE       (_SRAM2_SIZE_MAX) /*! size require for Secure part */
-#define S_TOTAL_RAM1_SIZE       (0x0)
+#define S_TOTAL_RAM1_SIZE       (0x10000)
 #define S_TOTAL_RAM_SIZE        (S_TOTAL_RAM2_SIZE + S_TOTAL_RAM1_SIZE)
 #define NS_TOTAL_RAM_SIZE       (TOTAL_RAM_SIZE - S_TOTAL_RAM_SIZE)
 /*
@@ -138,7 +138,7 @@
 #define S_CODE_START                        (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE                         (IMAGE_S_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
 #define S_CODE_LIMIT                        ((S_CODE_START + S_CODE_SIZE) -0x1)
-#define S_DATA_START                        (_SRAM2_BASE_S)
+#define S_DATA_START                        (S_RAM_ALIAS(NS_TOTAL_RAM_SIZE))
 #define S_DATA_SIZE                         (S_TOTAL_RAM_SIZE)
 #define S_DATA_LIMIT                        (S_DATA_START + S_DATA_SIZE -0x1)
 
@@ -161,7 +161,7 @@
 #define NS_DATA_START                       (NS_RAM_ALIAS(0))
 #define NS_DATA_START_2                     (_SRAM3_BASE_NS)
 #define NS_NO_INIT_DATA_SIZE                (0x100)
-#define NS_DATA_SIZE                        (_SRAM1_SIZE_MAX)
+#define NS_DATA_SIZE                        (NS_TOTAL_RAM_SIZE)
 #define NS_DATA_SIZE_2                      (_SRAM3_SIZE_MAX)
 #define NS_DATA_LIMIT                       (NS_DATA_START + NS_DATA_SIZE - 1)
 #define NS_DATA_LIMIT_2                     (NS_DATA_START_2 + NS_DATA_SIZE_2 - 1)
@@ -235,8 +235,8 @@
 #define TRIGGER_LOADER_MAGIC                (0x10ADE8AD)
 
 /* TFM non volatile data (PS/ITS) region */
-#define TFM_NV_DATA_START                   (S_ROM_ALIAS(FLASH_PS_AREA_OFFSET))
-#define TFM_NV_DATA_SIZE                    (FLASH_PS_AREA_SIZE + FLASH_ITS_AREA_SIZE)
+#define TFM_NV_DATA_START                   (S_ROM_ALIAS(FLASH_OTP_NV_COUNTERS_AREA_OFFSET))
+#define TFM_NV_DATA_SIZE                    (FLASH_OTP_NV_COUNTERS_AREA_SIZE + FLASH_NV_COUNTERS_AREA_SIZE + FLASH_PS_AREA_SIZE + FLASH_ITS_AREA_SIZE)
 #define TFM_NV_DATA_LIMIT                   (TFM_NV_DATA_START + TFM_NV_DATA_SIZE - 1)
 /* Additional Check to detect flash download slot overlap or overflow */
 #define FLASH_AREA_END_OFFSET_MAX (FLASH_TOTAL_SIZE)
