@@ -245,7 +245,7 @@ Done:
 }
 
 void import_fixed_key(psa_key_handle_t key_handle) {
-    SPMLOG_INFMSG("[OAK] importing fixed key");
+    SPMLOG_INFMSG("[OAK] importing fixed key \n");
     psa_status_t status;
 
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
@@ -289,9 +289,9 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
-    psa_key_handle_t keyid;
-    import_fixed_key(&keyid);
-    private_key = keyid;
+    // psa_key_handle_t keyid;
+    // import_fixed_key(&keyid);
+    // private_key = keyid;
     
     /* Remember some of the configuration values */
     me->key_select = key_select;

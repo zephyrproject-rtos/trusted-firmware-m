@@ -57,7 +57,7 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
 }
 
 psa_status_t
-psa_proof_of_execution_get_token(uint8_t faddr,
+psa_proof_of_execution_get_token(uintptr_t *faddr,
                                  const uint8_t *auth_challenge,
                                  size_t         challenge_size,
                                  uint8_t       *token_buf,
@@ -73,7 +73,6 @@ psa_proof_of_execution_get_token(uint8_t faddr,
     psa_outvec out_vec[] = {
         {token_buf, token_buf_size}
     };
-
     status = psa_call(TFM_ATTESTATION_SERVICE_HANDLE, TFM_ATTEST_GET_POX,
                       in_vec, IOVEC_LEN(in_vec),
                       out_vec, IOVEC_LEN(out_vec));

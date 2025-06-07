@@ -194,6 +194,31 @@ psa_status_t
 psa_initial_attest_get_token_size(size_t  challenge_size,
                                   size_t *token_size);
 
+/**
+ * \brief Get proof of excution token
+ *
+ * \param[in]     faddr           Pointer to Function Address
+ * \param[in]     auth_challenge  Pointer to buffer where challenge input is
+ *                                stored. Nonce and / or hash of attested data.
+ *                                Must be always
+ *                                \ref PSA_INITIAL_ATTEST_TOKEN_SIZE bytes
+ *                                long.
+ * \param[in]     challenge_size  Size of challenge object in bytes.
+ * \param[out]    token_buf       Pointer to the buffer where attestation token
+ *                                will be stored.
+ * \param[in]     token_buf_size  Size of allocated buffer for token, in bytes.
+ * \param[out]    token_size      Size of the token that has been returned, in
+ *                                bytes.
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+psa_status_t
+psa_proof_of_execution_get_token(uintptr_t *faddr,
+                                 const uint8_t *auth_challenge,
+                                 size_t         challenge_size,
+                                 uint8_t       *token_buf,
+                                 size_t         token_buf_size,
+                                 size_t        *token_size);
 #ifdef __cplusplus
 }
 #endif
