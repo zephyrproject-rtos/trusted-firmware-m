@@ -169,23 +169,55 @@ SECTIONS
 
         KEEP(*(.jcr*))
         . = ALIGN(4);
-        /* All data end */
-        __data_end__ = .;
 
     } > RAM
+
+	.tdata : ALIGN_WITH_INPUT  {
+		*(.tdata .tdata.* .gnu.linkonce.td.*)
+		PROVIDE(__data_end = .);
+		PROVIDE(__tdata_end = .);
+        /* All data end */
+        __data_end__ = .;
+	} > RAM
+
     Image$$ER_CODE$$Base = __Vectors ;
-    Image$$ER_CODE$$Limit = __etext + + SIZEOF(.data);
+    Image$$ER_CODE$$Limit = __etext + + SIZEOF(.data) + SIZEOF(.tdata);
+
+	.tbss (NOLOAD) : {
+        . = ALIGN(4);
+        __bss_start__ = .;
+		*(.tbss .tbss.* .gnu.linkonce.tb.*)
+		*(.tcommon)
+		PROVIDE( __tls_end = . );
+		PROVIDE( __tbss_end = . );
+	} > RAM
+
+    .tbss_space (NOLOAD) : {
+		. = ADDR(.tbss);
+		. = . + SIZEOF(.tbss);
+	} > RAM
+
     .bss :
     {
         . = ALIGN(4);
-        __bss_start__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
+		PROVIDE(__bss_end = .);
     } > RAM
 
     bss_size = __bss_end__ - __bss_start__;
+
+	PROVIDE( __tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)) );
+	PROVIDE( __arm32_tls_tcb_offset = MAX(8, __tls_align) );
+	PROVIDE(__data_source = LOADADDR(.data));
+	PROVIDE(__data_start = ADDR(.data));
+	PROVIDE( __data_size = __data_end - __data_start );
+	PROVIDE( __bss_start = ADDR(.tbss));
+	PROVIDE( __bss_size = __bss_end - __bss_start );
+	PROVIDE( __tls_first = SIZEOF(.tdata) ? ADDR(.tdata) : ADDR(.tbss) );
+	PROVIDE( __tls_base = __tls_first );
 
     .msp_stack :
     {
@@ -208,4 +240,8 @@ SECTIONS
     } > RAM
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+
+    PROVIDE(__heap_start = ADDR(.heap));
+    PROVIDE(__heap_end = ADDR(.heap) + SIZEOF(.heap));
+
 }
