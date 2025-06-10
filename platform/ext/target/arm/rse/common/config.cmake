@@ -116,6 +116,8 @@ if (TFM_PARTITION_MEASURED_BOOT OR TFM_PARTITION_DPE)
     set(MCUBOOT_DATA_SHARING                        ON)
 endif()
 
+set(CONFIG_BOOT_RAM_LOAD              ON               CACHE BOOL      "Whether to enable RAM load support")
+
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
 
 set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
