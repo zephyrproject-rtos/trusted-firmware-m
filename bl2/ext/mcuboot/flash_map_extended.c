@@ -100,3 +100,13 @@ int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
 
     return 1;
 }
+
+int flash_area_get_sector(const struct flash_area *fa, uint32_t off,
+                          struct flash_sector *sector)
+{
+    sector->fs_off = (off / DRV_FLASH_AREA(fa)->GetInfo()->sector_size) *
+                     DRV_FLASH_AREA(fa)->GetInfo()->sector_size;
+    sector->fs_size = DRV_FLASH_AREA(fa)->GetInfo()->sector_size;
+
+    return 0;
+}
