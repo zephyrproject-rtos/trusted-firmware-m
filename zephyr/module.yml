@@ -1,0 +1,10 @@
+name: trusted-firmware-m
+
+build:
+  cmake-ext: True
+  kconfig-ext: True
+
+security:
+  external-references:
+    - cpe:2.3:o:arm:trusted_firmware-m:2.2.0:-:*:*:*:*:*:*
+    - pkg:generic/trusted-firmware-m@TF-Mv2.2.0?vcs_url=git%2Bhttps://review.trustedfirmware.org/TF-M/trusted-firmware-m
