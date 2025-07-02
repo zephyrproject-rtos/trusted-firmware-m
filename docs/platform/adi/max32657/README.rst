@@ -9,8 +9,6 @@ The MAX32657 microcontroller (MCU) is an advanced system-on-chip (SoC)
 featuring an Arm® Cortex®-M33 core with single-precision floating point unit (FPU)
 with digital signal processing (DSP) instructions, large flash and SRAM memories,
 and the latest generation Bluetooth® 5.4 Low Energy (LE) radio.
-This device unites processing horsepower with the connectivity required for
-continuous glucose monitoring (CGM), wearables, and other medical applications.
 The nano-power modes increase battery life substantially.
 
 MAX32657 1MB flash and 256KB RAM split to define section for MCUBoot,
@@ -111,20 +109,21 @@ Prepare the tf-m-tests repository inside the TF-M base folder.
 
     cd <TF-M base folder>/tf-m-test/tests_reg
 
-    cmake -S <TF-M base folder> -B build_spe \
+    cmake -S spe -B build_spe \
             -G"Unix Makefiles"               \
             -DTFM_PLATFORM=adi/max32657      \
-            -DTFM_TOOLCHAIN_FILE=[tf-m path]/toolchain_GNUARM.cmake \
+            -DCONFIG_TFM_SOURCE_PATH=<TF-M base folder>/trusted-firmware-m \
+            -DTFM_TOOLCHAIN_FILE=<TF-M base folder>/trusted-firmware-m/toolchain_GNUARM.cmake \
             -DTEST_S=OFF                \
             -DTEST_NS=ON               \
             -DTFM_NS_REG_TEST=ON        \
-            -DMCUBOOT_LOG_LEVEL="INFO"  \
+            -DTFM_BL2_LOG_LEVEL=LOG_LEVEL_INFO  \
             -DTFM_ISOLATION_LEVEL=1
     cmake --build build_spe -- install
 
     cmake -S . -B build_test    \
             -G"Unix Makefiles"  \
-            -DCONFIG_SPE_PATH=[tf-m-tests path]/tests_reg/build_spe/api_ns \
+            -DCONFIG_SPE_PATH=<TF-M base folder>/tf-m-tests/tests_reg/build_spe/api_ns \
             -DTFM_TOOLCHAIN_FILE=cmake/toolchain_ns_GNUARM.cmake \
             -DTFM_NS_REG_TEST=ON
     cmake --build build_test
@@ -140,6 +139,7 @@ Generate Intel hex files from the output binary (bin) files as follows:
 
 .. code-block:: console
 
+    srec_cat build_spe/bin/tfm_s_signed.bin -binary --offset 0x01010000 -o build_spe/bin/tfm_s_signed.hex -intel
     srec_cat build_test/bin/tfm_ns_signed.bin -binary --offset 0x01060000 -o build_test/bin/tfm_ns_signed.hex -intel
 
 
@@ -147,7 +147,13 @@ Merge hex files as follows:
 
 .. code-block:: console
 
-    srec_cat.exe build_spe/bin/bl2.hex -Intel build_spe/bin/tfm_s_signed.hex -Intel build_test/bin/tfm_ns_signed.hex -Intel -o tfm_merged.hex -Intel
+    srec_cat build_spe/bin/bl2.hex -Intel build_spe/bin/tfm_s_signed.hex -Intel build_test/bin/tfm_ns_signed.hex -Intel -o tfm_merged.hex -Intel
+
+Alternatively, you can merge hex files with `mergehex.py <https://github.com/zephyrproject-rtos/zephyr/blob/main/scripts/build/mergehex.py>`_
+
+.. code-block:: console
+
+    python /PATH/TO/mergehex.py -o tfm_merged.hex build_spe/bin/bl2.hex build_spe/bin/tfm_s_signed.hex build_test/bin/tfm_ns_signed.hex
 
 .. note::
 

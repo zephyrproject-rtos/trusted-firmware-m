@@ -22,7 +22,7 @@ set(ADI_NS_PRPH_TIMER5      ON         CACHE BOOL "")
 set(ADI_NS_PRPH_I3C         ON         CACHE BOOL "")
 set(ADI_NS_PRPH_UART        ON         CACHE BOOL "")
 set(ADI_NS_PRPH_SPI         ON         CACHE BOOL "")
-set(ADI_NS_PRPH_TRNG        ON         CACHE BOOL "")
+set(ADI_NS_PRPH_TRNG        OFF        CACHE BOOL "")
 set(ADI_NS_PRPH_BTLE_DBB    ON         CACHE BOOL "")
 set(ADI_NS_PRPH_BTLE_RFFE   ON         CACHE BOOL "")
 set(ADI_NS_PRPH_RSTZ        ON         CACHE BOOL "")
@@ -43,13 +43,13 @@ set(ADI_NS_SRAM_3           ON         CACHE BOOL "Size: 64KB")
 set(ADI_NS_SRAM_4           ON         CACHE BOOL "Size: 64KB")
 
 # Ramfuncs section size
-set(ADI_S_RAM_CODE_SIZE     "0x400"    CACHE STRING "Default: 1KB")
+set(ADI_S_RAM_CODE_SIZE     "0x800"    CACHE STRING "Default: 2KB")
 
 # Flash: BL2, TFM and Zephyr are contiguous sections.
 set(ADI_FLASH_AREA_BL2_SIZE        "0x10000"  CACHE STRING "Default: 64KB")
 set(ADI_FLASH_S_PARTITION_SIZE     "0x50000"  CACHE STRING "Default: 320KB")
 set(ADI_FLASH_NS_PARTITION_SIZE    "0x90000"  CACHE STRING "Default: 576KB")
-set(ADI_FLASH_PS_AREA_SIZE         "0"        CACHE STRING "Default:  0KB")
+set(ADI_FLASH_PS_AREA_SIZE         "0x4000"   CACHE STRING "Default: 16KB")
 set(ADI_FLASH_ITS_AREA_SIZE        "0x4000"   CACHE STRING "Default: 16KB")
 
 

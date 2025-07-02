@@ -195,6 +195,11 @@ install(FILES       ${TARGET_PLATFORM_PATH}/device/src/startup_${TARGET_LC}.c
 install(FILES       ${HAL_ADI_CMSIS_INC_DIR}/max32657.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/device/inc)
 
+install(FILES       ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/include/adi_psa_random.h
+                    ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/include/crypto_accelerator_config.h
+                    ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/include/mbedtls_accelerator_config.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/accelerator/include)
+
 install(FILES       ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
 
@@ -215,7 +220,7 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
 
 # Copy the S-NS peripheral & memory configuration
 install(FILES       ${TARGET_PLATFORM_PATH}/s_ns_access.cmake
-        DESTINATION ${CMAKE_BINARY_DIR}/../)
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 # Export configuration flags
 target_compile_definitions(tfm_spm
