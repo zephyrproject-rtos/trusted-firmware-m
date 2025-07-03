@@ -1,0 +1,59 @@
+From 38eb2499e1b6b4176b76014874cb6253a044d12e Mon Sep 17 00:00:00 2001
+From: Etienne Carriere <etienne.carriere@st.com>
+Date: Thu, 3 Jul 2025 10:36:46 +0200
+Subject: [PATCH 6/6] boot: bootutil: declare fih_panic_loop() as noreturn
+
+Add noreturn attribute the fih_panic_loop() and add a terminal
+endless loop in the function to prevent build warnings like
+the below one found when build MCUBOOT in TF-M:
+
+.../arm-none-eabi/include/assert.h: In function '__assert_func':
+.../trusted-firmware-m/platform/ext/common/tfm_assert.c:22:1: warning: 'noreturn' function does return
+   22 | }
+      | ^
+
+Signed-off-by: Etienne Carriere <etienne.carriere@st.com>
+---
+ boot/bootutil/include/bootutil/fault_injection_hardening.h | 2 +-
+ boot/bootutil/src/fault_injection_hardening.c              | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/boot/bootutil/include/bootutil/fault_injection_hardening.h b/boot/bootutil/include/bootutil/fault_injection_hardening.h
+index fdf01b53..497b437e 100644
+--- a/boot/bootutil/include/bootutil/fault_injection_hardening.h
++++ b/boot/bootutil/include/bootutil/fault_injection_hardening.h
+@@ -137,7 +137,7 @@ extern fih_ret FIH_BOOT_HOOK_REGULAR;
+ /* Global failure handler - more resistant to unlooping. noinline and used are
+  * used to prevent optimization
+  */
+-__attribute__((noinline)) __attribute__((used))
++__attribute__((noinline)) __attribute__((used)) __attribute__((noreturn))
+ void fih_panic_loop(void);
+ #define FIH_PANIC fih_panic_loop()
+ #else
+diff --git a/boot/bootutil/src/fault_injection_hardening.c b/boot/bootutil/src/fault_injection_hardening.c
+index 11436cfa..fbe75e87 100644
+--- a/boot/bootutil/src/fault_injection_hardening.c
++++ b/boot/bootutil/src/fault_injection_hardening.c
+@@ -63,6 +63,7 @@ void fih_cfi_decrement(void)
+  */
+ __attribute__((used))
+ __attribute__((noinline))
++__attribute__((noreturn))
+ void fih_panic_loop(void)
+ {
+     __asm volatile ("b fih_panic_loop");
+@@ -74,5 +75,10 @@ void fih_panic_loop(void)
+     __asm volatile ("b fih_panic_loop");
+     __asm volatile ("b fih_panic_loop");
+     __asm volatile ("b fih_panic_loop");
++
++    /* An infinite loop to suppress compiler warnings
++     * about the return of a noreturn function
++     */
++    while (1) {}
+ }
+ #endif /* FIH_ENABLE_GLOBAL_FAIL */
+--
+2.34.1
+
