@@ -58,7 +58,6 @@ if (BL2)
     target_link_libraries(platform_bl2
         PUBLIC
             bl2_crypto_config
-            crypto_service_crypto_hw
     )
 
     target_compile_definitions(bl2_crypto
@@ -66,7 +65,7 @@ if (BL2)
             # Uncomment when BL2 specific accelerator config files are provided, which
             # don't enable any _ALT feature which are going to be deprecated
             # MBEDTLS_ACCELERATOR_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/mbedtls_accelerator_config.h"
-            MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/crypto_accelerator_config.h"
+            # MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/crypto_accelerator_config.h"
     )
 endif()
 include(${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/CMakeLists.txt)
