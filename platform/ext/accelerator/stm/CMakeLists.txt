@@ -66,6 +66,11 @@ if (BL2)
             # don't enable any _ALT feature which are going to be deprecated
             # MBEDTLS_ACCELERATOR_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/mbedtls_accelerator_config.h"
             # MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/crypto_accelerator_config.h"
+
+            # Since TF-M 2.2.x and MCUBoot 2.2.0 require BL2 HW crypto
+            # accelerator to implement the PSA unified driver API, force
+            # disabling of use of STM HW accelerator in BL2 until they comply.
+            MBEDTLS_ACCELERATOR_PSA_CRYPTO_CONFIG_FILE="${PLATFORM_DIR}/ext/accelerator/stm/bl2_disabled_crypto_accelerator_config.h"
     )
 endif()
 include(${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/CMakeLists.txt)
