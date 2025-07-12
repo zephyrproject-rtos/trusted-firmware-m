@@ -237,6 +237,7 @@ __WEAK void boot_platform_start_next_image(struct boot_arm_vector_table *vt)
 __WEAK __NO_RETURN void boot_platform_error_state(uint32_t error)
 {
     FIH_PANIC;
+    __builtin_unreachable();
 }
 
 __WEAK int boot_platform_pre_load(uint32_t image_id)
