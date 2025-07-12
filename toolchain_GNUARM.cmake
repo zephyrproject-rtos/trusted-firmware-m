@@ -111,6 +111,7 @@ add_compile_options(
     -specs=nosys.specs
     -Wall
     -Wno-format
+    -Warray-parameter
     -Wno-unused-but-set-variable
     -c
     -fdata-sections
