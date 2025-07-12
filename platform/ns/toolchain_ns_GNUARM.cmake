@@ -181,6 +181,7 @@ add_compile_options(
     -specs=nosys.specs
     -Wall
     -Wno-format
+    -Wno-array-parameter
     -Wno-return-type
     -Wno-unused-but-set-variable
     -c
