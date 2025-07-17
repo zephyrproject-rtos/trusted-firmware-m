@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
-#
 # SPDX-License-Identifier: BSD-3-Clause
 #
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #-------------------------------------------------------------------------------
 
 # The 'TFM_VERSION_MANUAL' is used for fallback when Git tags are not available
-set(TFM_VERSION_MANUAL "2.1.2")
+set(TFM_VERSION_MANUAL "2.1.3")
 
 execute_process(COMMAND git describe --tags --always
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
