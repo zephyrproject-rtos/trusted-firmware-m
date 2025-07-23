@@ -200,6 +200,9 @@ SECTIONS
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
 
+    /* Reset current position for subsequent sections */
+    . = LOADADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+
     ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 
     Image$$ER_CODE_SRAM$$RO$$Base = ADDR(.ER_CODE_SRAM);
