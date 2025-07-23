@@ -107,13 +107,14 @@ if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
 endif()
 
 add_compile_options(
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
+    --crt0=minimal
     -Wall
     -Wno-format
     -Wno-array-parameter
     -Wno-return-type
     -Wno-unused-but-set-variable
+    -Os
     -c
     -fdata-sections
     -ffunction-sections
@@ -147,8 +148,10 @@ endif()
 
 add_link_options(
     --entry=Reset_Handler
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
+    --crt0=minimal
+    -Os
+    -mthumb
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections

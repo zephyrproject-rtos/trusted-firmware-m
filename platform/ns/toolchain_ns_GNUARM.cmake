@@ -177,8 +177,7 @@ string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>)
 
 add_compile_options(
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
     -Wall
     -Wno-format
     -Wno-array-parameter
@@ -200,8 +199,8 @@ add_compile_options(
 
 add_link_options(
     --entry=Reset_Handler
-    -specs=nano.specs
-    -specs=nosys.specs
+    -specs=picolibc.specs
+    -mthumb
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections

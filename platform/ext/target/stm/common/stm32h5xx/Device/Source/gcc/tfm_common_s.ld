@@ -295,14 +295,22 @@ SECTIONS
 
     .TFM_DATA : ALIGN(4)
     {
+        PROVIDE(__data_start = .);
         *(.data*)
 
         KEEP(*(.jcr*))
         . = ALIGN(4);
 
     } > RAM AT> FLASH
+
+    .TFM_TDATA : ALIGN_WITH_INPUT  {
+        *(.tdata .tdata.* .gnu.linkonce.td.*)
+        PROVIDE(__data_end = .);
+        PROVIDE(__tdata_end = .);
+    } > RAM AT> FLASH
+
     Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
-    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
+    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_TDATA) + SIZEOF(.TFM_TDATA);
 
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
@@ -376,10 +384,22 @@ SECTIONS
     Image$$TFM_APP_ROT_LINKER$$Base = ADDR(.TFM_APP_ROT_LINKER);
     Image$$TFM_APP_ROT_LINKER$$Limit = ADDR(.TFM_APP_ROT_LINKER) + SIZEOF(.TFM_APP_ROT_LINKER);
 
-    .TFM_BSS (NOLOAD): ALIGN(4)
-    {
+    .TFM_TBSS (NOLOAD) : {
         __bss_start__ = .;
 
+        *(.tbss .tbss.* .gnu.linkonce.tb.*)
+        *(.tcommon)
+        PROVIDE( __tls_end = . );
+        PROVIDE( __tbss_end = . );
+    } > RAM AT> RAM
+
+    .TFM_TBSS_SPACE (NOLOAD) : {
+        . = ADDR(.TFM_TBSS);
+        . = . + SIZEOF(.TFM_TBSS);
+    } > RAM AT> RAM
+
+    .TFM_BSS (NOLOAD): ALIGN(4)
+    {
         /* The runtime partition placed order is same as load partition */
         __partition_runtime_start__ = .;
         KEEP(*(.bss.part_runtime_priority_00))
@@ -400,16 +420,17 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
+        PROVIDE(__bss_end = .);
     } > RAM AT> RAM
-    Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
-    Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+    Image$$ER_TFM_DATA$$ZI$$Base = __bss_start__;
+    Image$$ER_TFM_DATA$$ZI$$Limit = __bss_end__;
     Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
     Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
     Image$$ER_SERV_RT_POOL$$ZI$$Base = __service_runtime_start__;
     Image$$ER_SERV_RT_POOL$$ZI$$Limit = __service_runtime_end__;
 
-    Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
-    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
+    Image$$ER_TFM_DATA$$Base = __data_start;
+    Image$$ER_TFM_DATA$$Limit = __bss_end;
 
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
     /* If a variable defined with __attribute__((section())) keyword the
