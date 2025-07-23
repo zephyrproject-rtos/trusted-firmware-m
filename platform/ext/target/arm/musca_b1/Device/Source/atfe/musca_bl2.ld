@@ -57,6 +57,10 @@ SECTIONS
         *libflash_drivers.o(.rodata*)
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
+
+    /* Reset current position for subsequent sections */
+    . = LOADADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+
     Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
     Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 
