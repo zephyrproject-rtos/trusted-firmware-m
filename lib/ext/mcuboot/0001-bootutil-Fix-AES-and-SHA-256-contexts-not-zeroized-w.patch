@@ -1,0 +1,73 @@
+From f732f40c7b0975822f9d1857dae37e7abadc4f78 Mon Sep 17 00:00:00 2001
+From: Thomas Altenbach <thomas.altenbach@legrand.com>
+Date: Wed, 11 Sep 2024 17:50:15 +0200
+Subject: [PATCH 1/5] bootutil: Fix AES and SHA-256 contexts not zeroized with
+ mbedTLS
+
+For some reason, the calls to mbedtls_aes_free, mbedtls_nist_kw_free and
+mbedtls_sha256_free_drop were commented out which means the AES and
+SHA-256 contexts were not properly de-initialized after usage when
+mbedTLS is used. In the case of AES-KW it seems that might lead to a
+memory leak depending on the mbedTLS configuration, but in any case and
+independently of the mbedTLS configuration, this leads to the contexts
+not be zeroized after usage.
+
+Not zeroizing a context means it stays in RAM an undefined amount of
+time, which might enable an attacker to access it and to dump the
+sensitive data it contains.
+
+Signed-off-by: Thomas Altenbach <thomas.altenbach@legrand.com>
+---
+ boot/bootutil/include/bootutil/crypto/aes_ctr.h | 4 +---
+ boot/bootutil/include/bootutil/crypto/aes_kw.h  | 4 +---
+ boot/bootutil/include/bootutil/crypto/sha.h     | 4 +---
+ 3 files changed, 3 insertions(+), 9 deletions(-)
+
+diff --git a/boot/bootutil/include/bootutil/crypto/aes_ctr.h b/boot/bootutil/include/bootutil/crypto/aes_ctr.h
+index e69b0372f..50d36a4fc 100644
+--- a/boot/bootutil/include/bootutil/crypto/aes_ctr.h
++++ b/boot/bootutil/include/bootutil/crypto/aes_ctr.h
+@@ -53,9 +53,7 @@ static inline void bootutil_aes_ctr_init(bootutil_aes_ctr_context *ctx)
+ 
+ static inline void bootutil_aes_ctr_drop(bootutil_aes_ctr_context *ctx)
+ {
+-    /* XXX: config defines MBEDTLS_PLATFORM_NO_STD_FUNCTIONS so no need to free */
+-    /* (void)mbedtls_aes_free(ctx); */
+-    (void)ctx;
++    mbedtls_aes_free(ctx);
+ }
+ 
+ static inline int bootutil_aes_ctr_set_key(bootutil_aes_ctr_context *ctx, const uint8_t *k)
+diff --git a/boot/bootutil/include/bootutil/crypto/aes_kw.h b/boot/bootutil/include/bootutil/crypto/aes_kw.h
+index cf3194f9c..34045c2da 100644
+--- a/boot/bootutil/include/bootutil/crypto/aes_kw.h
++++ b/boot/bootutil/include/bootutil/crypto/aes_kw.h
+@@ -45,9 +45,7 @@ static inline void bootutil_aes_kw_init(bootutil_aes_kw_context *ctx)
+ 
+ static inline void bootutil_aes_kw_drop(bootutil_aes_kw_context *ctx)
+ {
+-    /* XXX: config defines MBEDTLS_PLATFORM_NO_STD_FUNCTIONS so no need to free */
+-    /* (void)mbedtls_aes_free(ctx); */
+-    (void)ctx;
++    mbedtls_nist_kw_free(ctx);
+ }
+ 
+ static inline int bootutil_aes_kw_set_unwrap_key(bootutil_aes_kw_context *ctx, const uint8_t *k, uint32_t klen)
+diff --git a/boot/bootutil/include/bootutil/crypto/sha.h b/boot/bootutil/include/bootutil/crypto/sha.h
+index 9ce54bee5..704a123ea 100644
+--- a/boot/bootutil/include/bootutil/crypto/sha.h
++++ b/boot/bootutil/include/bootutil/crypto/sha.h
+@@ -126,9 +126,7 @@ static inline int bootutil_sha_init(bootutil_sha_context *ctx)
+ 
+ static inline int bootutil_sha_drop(bootutil_sha_context *ctx)
+ {
+-    /* XXX: config defines MBEDTLS_PLATFORM_NO_STD_FUNCTIONS so no need to free */
+-    /* (void)mbedtls_sha256_free(ctx); */
+-    (void)ctx;
++    mbedtls_sha256_free(ctx);
+     return 0;
+ }
+ 
+-- 
+2.34.1
+

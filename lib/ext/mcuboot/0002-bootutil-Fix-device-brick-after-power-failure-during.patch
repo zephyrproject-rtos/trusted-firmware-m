@@ -1,0 +1,72 @@
+From aebe67cb555924e12bfcdbf4879ca3beefd732e3 Mon Sep 17 00:00:00 2001
+From: Thomas Altenbach <thomas.altenbach@legrand.com>
+Date: Wed, 16 Oct 2024 20:53:47 +0200
+Subject: [PATCH 2/5] bootutil: Fix device brick after power failure during
+ swap-move revert
+
+Let's suppose after an upgrade you have a non-functional image in the
+primary slot. The image won't be confirmed, leading to a revert at next
+boot. At the beginning of the revert process, fixup_revert is invoked,
+which rewrites the trailer in the secondary slot so that the revert
+looks like a permanent upgrade. Normally, after the execution of this
+routine, the secondary slot has a valid trailer, in particular with a
+valid magic number.
+
+Let's imagine a power failure occurs during the writing of the trailer's
+magic, i.e. in boot_write_magic. The magic number in the secondary slot
+is in an undefined state and might be partially written, which implies
+at next boot it will be considered in BOOT_MAGIC_BAD state.
+
+So, at next boot, we have the following state:
+Primary slot: magic=good, copy-done=set, image-ok=unset
+Secondary slot: magic=bad, copy-done=unset, image-ok=set
+
+This doesn't match any state leading to an upgrade or revert process to
+be initiated, which means MCUboot will not perform the revert and
+attempt to boot from the primary slot, containing a non-functional
+image. Hence, the device is bricked unless it is possible to reflash the
+secondary slot without a functional image.
+
+To avoid this issue, a revert is performed no matter the state of the
+magic number in the secondary slot's trailer, provided the copy-done
+flag is set in the primary slot but the image-ok flag is not. The
+copy-done flag is set only after having completed an upgrade or
+revert process so if the copy-done flag is set but the image-ok is
+unset, it is guaranteed an upgrade has been performed but the new image
+has not been confirmed, which implies a revert is needed.
+
+Signed-off-by: Thomas Altenbach <thomas.altenbach@legrand.com>
+---
+ boot/bootutil/src/bootutil_public.c | 2 +-
+ docs/design.md                      | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/boot/bootutil/src/bootutil_public.c b/boot/bootutil/src/bootutil_public.c
+index afa601cac..ee3e50619 100644
+--- a/boot/bootutil/src/bootutil_public.c
++++ b/boot/bootutil/src/bootutil_public.c
+@@ -118,7 +118,7 @@ static const struct boot_swap_table boot_swap_tables[] = {
+     },
+     {
+         .magic_primary_slot =       BOOT_MAGIC_GOOD,
+-        .magic_secondary_slot =     BOOT_MAGIC_UNSET,
++        .magic_secondary_slot =     BOOT_MAGIC_ANY,
+         .image_ok_primary_slot =    BOOT_FLAG_UNSET,
+         .image_ok_secondary_slot =  BOOT_FLAG_ANY,
+         .copy_done_primary_slot =   BOOT_FLAG_SET,
+diff --git a/docs/design.md b/docs/design.md
+index 8539ae0d7..734f0b318 100755
+--- a/docs/design.md
++++ b/docs/design.md
+@@ -656,7 +656,7 @@ types described above via a set of tables.  These tables are reproduced below.
+     State III
+                      | primary slot | secondary slot |
+     -----------------+--------------+----------------|
+-               magic | Good         | Unset          |
++               magic | Good         | Any            |
+             image-ok | 0xff         | Any            |
+            copy-done | 0x01         | Any            |
+     -----------------+--------------+----------------'
+-- 
+2.34.1
+

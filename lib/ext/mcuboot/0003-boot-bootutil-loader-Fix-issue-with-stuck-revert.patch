@@ -1,0 +1,61 @@
+From 2d404a6daecac7415ee45aad7eae5049b5395dd2 Mon Sep 17 00:00:00 2001
+From: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+Date: Mon, 10 Feb 2025 11:56:38 +0000
+Subject: [PATCH 3/5] boot: bootutil: loader: Fix issue with stuck revert
+
+Fixes an issue (only for swap using move, unsure if it affects
+other modes) whereby a device can get into a state that there is
+a valid primary image, no secondary image but the primary image
+flag is still set to revert, which then makes loading a firmware
+update from the application impossible due to it assuming that a
+revert will happen upon device reboot
+
+Signed-off-by: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+Change-Id: I18710972e073082f62fbb074d19e9c1ab423d2d2
+---
+ boot/bootutil/src/loader.c | 22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/boot/bootutil/src/loader.c b/boot/bootutil/src/loader.c
+index bd3a7f09c..9d61b64db 100644
+--- a/boot/bootutil/src/loader.c
++++ b/boot/bootutil/src/loader.c
+@@ -978,7 +978,6 @@ boot_validate_slot(struct boot_loader_state *state, int slot,
+     hdr = boot_img_hdr(state, slot);
+     if (boot_check_header_erased(state, slot) == 0 ||
+         (hdr->ih_flags & IMAGE_F_NON_BOOTABLE)) {
+-
+ #if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE)
+         /*
+          * This fixes an issue where an image might be erased, but a trailer
+@@ -992,6 +991,27 @@ boot_validate_slot(struct boot_loader_state *state, int slot,
+          */
+         if (slot != BOOT_PRIMARY_SLOT) {
+             swap_erase_trailer_sectors(state, fap);
++
++#if defined(MCUBOOT_SWAP_USING_MOVE)
++            if (bs->swap_type == BOOT_SWAP_TYPE_REVERT ||
++                boot_swap_type_multi(BOOT_CURR_IMG(state)) == BOOT_SWAP_TYPE_REVERT) {
++                const struct flash_area *fap_pri;
++
++                rc = flash_area_open(flash_area_id_from_multi_image_slot(BOOT_CURR_IMG(state),
++                                                                         BOOT_PRIMARY_SLOT),
++                                                                         &fap_pri);
++
++                if (rc == 0) {
++                    rc = swap_erase_trailer_sectors(state, fap_pri);
++                    flash_area_close(fap_pri);
++
++                    if (rc == 0) {
++                        BOOT_LOG_INF("Cleared image %d primary slot trailer due to stuck revert",
++                                     BOOT_CURR_IMG(state));
++                    }
++                }
++            }
++#endif
+         }
+ #endif
+ 
+-- 
+2.34.1
+

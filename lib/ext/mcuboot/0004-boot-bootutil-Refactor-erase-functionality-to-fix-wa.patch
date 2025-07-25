@@ -1,0 +1,287 @@
+From 092429abba8bc16f12a0b26deca01c44ae3fa37d Mon Sep 17 00:00:00 2001
+From: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+Date: Wed, 23 Apr 2025 11:35:44 +0100
+Subject: [PATCH 4/5] boot: bootutil: Refactor erase functionality to fix
+ watchdog feeding
+
+Refactors the erase functionality in bootutil so that it can be used
+alongside feeding the watchdog. This has also optimised some
+functions out.
+
+Signed-off-by: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+Change-Id: I9f1e964f31b8018e5c134502e23ae5efc715f704
+---
+ boot/bootutil/src/bootutil_priv.h |   5 +-
+ boot/bootutil/src/loader.c        | 109 +++++++++++++++++++++++++++---
+ boot/bootutil/src/swap_misc.c     |   2 +-
+ boot/bootutil/src/swap_move.c     |   6 +-
+ boot/bootutil/src/swap_scratch.c  |  10 +--
+ 5 files changed, 112 insertions(+), 20 deletions(-)
+
+diff --git a/boot/bootutil/src/bootutil_priv.h b/boot/bootutil/src/bootutil_priv.h
+index 32f996e78..6936ec4c9 100644
+--- a/boot/bootutil/src/bootutil_priv.h
++++ b/boot/bootutil/src/bootutil_priv.h
+@@ -294,7 +294,10 @@ int boot_copy_region(struct boot_loader_state *state,
+                      const struct flash_area *fap_src,
+                      const struct flash_area *fap_dst,
+                      uint32_t off_src, uint32_t off_dst, uint32_t sz);
+-int boot_erase_region(const struct flash_area *fap, uint32_t off, uint32_t sz);
++/* Prepare for write device that requires erase prior to write. This will
++ * do nothing on devices without erase requirement.
++ */
++int boot_erase_region(const struct flash_area *fap, uint32_t off, uint32_t sz, bool backwards);
+ bool boot_status_is_reset(const struct boot_status *bs);
+ 
+ #ifdef MCUBOOT_ENC_IMAGES
+diff --git a/boot/bootutil/src/loader.c b/boot/bootutil/src/loader.c
+index 9d61b64db..81d6654f8 100644
+--- a/boot/bootutil/src/loader.c
++++ b/boot/bootutil/src/loader.c
+@@ -1180,19 +1180,108 @@ boot_validated_swap_type(struct boot_loader_state *state,
+ #endif
+ 
+ /**
+- * Erases a region of flash.
++ * Erases a region of device that requires erase prior to write; does
++ * nothing on devices without erase.
+  *
+- * @param flash_area           The flash_area containing the region to erase.
++ * @param fa                    The flash_area containing the region to erase.
+  * @param off                   The offset within the flash area to start the
+- *                                  erase.
+- * @param sz                    The number of bytes to erase.
++ *                              erase.
++ * @param size                  The number of bytes to erase.
++ * @param backwards             If set to true will erase from end to start
++ *                              addresses, otherwise erases from start to end
++ *                              addresses.
+  *
+  * @return                      0 on success; nonzero on failure.
+  */
+ int
+-boot_erase_region(const struct flash_area *fap, uint32_t off, uint32_t sz)
++boot_erase_region(const struct flash_area *fa, uint32_t off, uint32_t size, bool backwards)
+ {
+-    return flash_area_erase(fap, off, sz);
++    int rc = 0;
++
++    if (off >= flash_area_get_size(fa) || (flash_area_get_size(fa) - off) < size) {
++        rc = -1;
++        goto end;
++    } else {    /* Erase region */
++        uint32_t end_offset = 0;
++        struct flash_sector sector;
++
++        if (backwards) {
++            /* Get the lowest page offset first */
++            rc = flash_area_get_sector(fa, off, &sector);
++
++            if (rc < 0) {
++                goto end;
++            }
++
++            end_offset = flash_sector_get_off(&sector);
++
++            /* Set boundary condition, the highest probable offset to erase, within
++             * last sector to erase
++             */
++            off += size - 1;
++        } else {
++            /* Get the highest page offset first */
++            rc = flash_area_get_sector(fa, (off + size - 1), &sector);
++
++            if (rc < 0) {
++                goto end;
++            }
++
++            end_offset = flash_sector_get_off(&sector);
++        }
++
++        while (true) {
++            /* Size to read in this iteration */
++            size_t csize;
++
++            /* Get current sector and, also, correct offset */
++            rc = flash_area_get_sector(fa, off, &sector);
++
++            if (rc < 0) {
++                goto end;
++            }
++
++            /* Corrected offset and size of current sector to erase */
++            off = flash_sector_get_off(&sector);
++            csize = flash_sector_get_size(&sector);
++
++            rc = flash_area_erase(fa, off, csize);
++
++            if (rc < 0) {
++                goto end;
++            }
++
++            MCUBOOT_WATCHDOG_FEED();
++
++            if (backwards) {
++                if (end_offset >= off) {
++                    /* Reached the first offset in range and already erased it */
++                    break;
++                }
++
++                /* Move down to previous sector, the flash_area_get_sector will
++                 * correct the value to real page offset
++                 */
++                off -= 1;
++            } else {
++                /* Move up to next sector */
++                off += csize;
++
++                if (off > end_offset) {
++                    /* Reached the end offset in range and already erased it */
++                    break;
++                }
++
++                /* Workaround for flash_sector_get_off() being broken in mynewt, hangs with
++                 * infinite loop if this is not present, should be removed if bug is fixed.
++                 */
++                off += 1;
++            }
++        }
++    }
++
++end:
++    return rc;
+ }
+ 
+ #if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD)
+@@ -1393,7 +1482,7 @@ boot_copy_image(struct boot_loader_state *state, struct boot_status *bs)
+     sect_count = boot_img_num_sectors(state, BOOT_PRIMARY_SLOT);
+     for (sect = 0, size = 0; sect < sect_count; sect++) {
+         this_size = boot_img_sector_size(state, BOOT_PRIMARY_SLOT, sect);
+-        rc = boot_erase_region(fap_primary_slot, size, this_size);
++        rc = boot_erase_region(fap_primary_slot, size, this_size, false);
+         assert(rc == 0);
+ 
+ #if defined(MCUBOOT_OVERWRITE_ONLY_FAST)
+@@ -1417,7 +1506,7 @@ boot_copy_image(struct boot_loader_state *state, struct boot_status *bs)
+         sector--;
+     } while (sz < trailer_sz);
+ 
+-    rc = boot_erase_region(fap_primary_slot, off, sz);
++    rc = boot_erase_region(fap_primary_slot, off, sz, false);
+     assert(rc == 0);
+ #endif
+ 
+@@ -1479,7 +1568,7 @@ boot_copy_image(struct boot_loader_state *state, struct boot_status *bs)
+     BOOT_LOG_DBG("erasing secondary header");
+     rc = boot_erase_region(fap_secondary_slot,
+                            boot_img_sector_off(state, BOOT_SECONDARY_SLOT, 0),
+-                           boot_img_sector_size(state, BOOT_SECONDARY_SLOT, 0));
++                           boot_img_sector_size(state, BOOT_SECONDARY_SLOT, 0), false);
+     assert(rc == 0);
+ #endif
+ 
+@@ -1489,7 +1578,7 @@ boot_copy_image(struct boot_loader_state *state, struct boot_status *bs)
+                            boot_img_sector_off(state, BOOT_SECONDARY_SLOT,
+                                last_sector),
+                            boot_img_sector_size(state, BOOT_SECONDARY_SLOT,
+-                               last_sector));
++                               last_sector), false);
+     assert(rc == 0);
+ 
+     flash_area_close(fap_primary_slot);
+diff --git a/boot/bootutil/src/swap_misc.c b/boot/bootutil/src/swap_misc.c
+index 733a39744..46ed5c471 100644
+--- a/boot/bootutil/src/swap_misc.c
++++ b/boot/bootutil/src/swap_misc.c
+@@ -69,7 +69,7 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
+     do {
+         sz = boot_img_sector_size(state, slot, sector);
+         off = boot_img_sector_off(state, slot, sector);
+-        rc = boot_erase_region(fap, off, sz);
++        rc = boot_erase_region(fap, off, sz, false);
+         assert(rc == 0);
+ 
+         sector--;
+diff --git a/boot/bootutil/src/swap_move.c b/boot/bootutil/src/swap_move.c
+index 111e82f05..8a0c9b271 100644
+--- a/boot/bootutil/src/swap_move.c
++++ b/boot/bootutil/src/swap_move.c
+@@ -394,7 +394,7 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
+         assert(rc == 0);
+     }
+ 
+-    rc = boot_erase_region(fap_pri, new_off, sz);
++    rc = boot_erase_region(fap_pri, new_off, sz, false);
+     assert(rc == 0);
+ 
+     rc = boot_copy_region(state, fap_pri, fap_pri, old_off, new_off, sz);
+@@ -421,7 +421,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+     sec_off = boot_img_sector_off(state, BOOT_SECONDARY_SLOT, idx - 1);
+ 
+     if (bs->state == BOOT_STATUS_STATE_0) {
+-        rc = boot_erase_region(fap_pri, pri_off, sz);
++        rc = boot_erase_region(fap_pri, pri_off, sz, false);
+         assert(rc == 0);
+ 
+         rc = boot_copy_region(state, fap_sec, fap_pri, sec_off, pri_off, sz);
+@@ -433,7 +433,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+     }
+ 
+     if (bs->state == BOOT_STATUS_STATE_1) {
+-        rc = boot_erase_region(fap_sec, sec_off, sz);
++        rc = boot_erase_region(fap_sec, sec_off, sz, false);
+         assert(rc == 0);
+ 
+         rc = boot_copy_region(state, fap_pri, fap_sec, pri_up_off, sec_off, sz);
+diff --git a/boot/bootutil/src/swap_scratch.c b/boot/bootutil/src/swap_scratch.c
+index 66cbdce5f..ddb1143e7 100644
+--- a/boot/bootutil/src/swap_scratch.c
++++ b/boot/bootutil/src/swap_scratch.c
+@@ -552,7 +552,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+ 
+     if (bs->state == BOOT_STATUS_STATE_0) {
+         BOOT_LOG_DBG("erasing scratch area");
+-        rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch));
++        rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch), false);
+         assert(rc == 0);
+ 
+         if (bs->idx == BOOT_STATUS_IDX_0) {
+@@ -576,7 +576,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+ 
+                 /* Erase the temporary trailer from the scratch area. */
+                 rc = boot_erase_region(fap_scratch, 0,
+-                        flash_area_get_size(fap_scratch));
++                        flash_area_get_size(fap_scratch), false);
+                 assert(rc == 0);
+             }
+         }
+@@ -591,7 +591,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+     }
+ 
+     if (bs->state == BOOT_STATUS_STATE_1) {
+-        rc = boot_erase_region(fap_secondary_slot, img_off, sz);
++        rc = boot_erase_region(fap_secondary_slot, img_off, sz, false);
+         assert(rc == 0);
+ 
+         rc = boot_copy_region(state, fap_primary_slot, fap_secondary_slot,
+@@ -612,7 +612,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+     }
+ 
+     if (bs->state == BOOT_STATUS_STATE_2) {
+-        rc = boot_erase_region(fap_primary_slot, img_off, sz);
++        rc = boot_erase_region(fap_primary_slot, img_off, sz, false);
+         assert(rc == 0);
+ 
+         /* NOTE: If this is the final sector, we exclude the image trailer from
+@@ -673,7 +673,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+         BOOT_STATUS_ASSERT(rc == 0);
+ 
+         if (erase_scratch) {
+-            rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch));
++            rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch), false);
+             assert(rc == 0);
+         }
+     }
+-- 
+2.34.1
+

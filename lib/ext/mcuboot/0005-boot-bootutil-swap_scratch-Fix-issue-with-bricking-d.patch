@@ -1,0 +1,37 @@
+From 82f7df3cc5f14f7bb4671e87a047f57c07bca088 Mon Sep 17 00:00:00 2001
+From: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+Date: Wed, 30 Apr 2025 09:51:54 +0100
+Subject: [PATCH 5/5] boot: bootutil: swap_scratch: Fix issue with bricking
+ device
+
+Fixes an issue with the swap using scratch algorithm that would
+cause the image loaded into the primary slot to be corrupt and
+unbootable if a device was rebooted during an erase of the scratch
+section that had not completed
+
+Signed-off-by: Jamie McCrae <jamie.mccrae@nordicsemi.no>
+---
+ boot/bootutil/src/swap_scratch.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/boot/bootutil/src/swap_scratch.c b/boot/bootutil/src/swap_scratch.c
+index ddb1143e7..830a421c1 100644
+--- a/boot/bootutil/src/swap_scratch.c
++++ b/boot/bootutil/src/swap_scratch.c
+@@ -673,7 +673,12 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
+         BOOT_STATUS_ASSERT(rc == 0);
+ 
+         if (erase_scratch) {
+-            rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch), false);
++           /* Scratch trailers MUST be erased backwards, this is to avoid an issue whereby a
++            * device reboots in the process of erasing the scratch if it erased forwards, if that
++            * happens then the scratch which is partially erased would be wrote back to the
++            * primary slot, causing a corrupt unbootable image
++            */
++            rc = boot_erase_region(fap_scratch, 0, flash_area_get_size(fap_scratch), true);
+             assert(rc == 0);
+         }
+     }
+-- 
+2.34.1
+
