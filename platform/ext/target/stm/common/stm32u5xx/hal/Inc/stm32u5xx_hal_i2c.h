@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2021 STMicroelectronics.
+  * Copyright (c) 2021 - 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -119,8 +119,6 @@ typedef enum
   HAL_I2C_STATE_BUSY_RX_LISTEN    = 0x2AU,   /*!< Address Listen Mode and Data Reception
                                                  process is ongoing                         */
   HAL_I2C_STATE_ABORT             = 0x60U,   /*!< Abort user request ongoing                */
-  HAL_I2C_STATE_TIMEOUT           = 0xA0U,   /*!< Timeout state                             */
-  HAL_I2C_STATE_ERROR             = 0xE0U    /*!< Error                                     */
 
 } HAL_I2C_StateTypeDef;
 
@@ -814,8 +812,8 @@ uint32_t             HAL_I2C_GetError(const I2C_HandleTypeDef *hi2c);
                                                                  (I2C_CR2_START) | (I2C_CR2_AUTOEND)) & \
                                                                 (~I2C_CR2_RD_WRN)) : \
                                                      (uint32_t)((((uint32_t)(__ADDRESS__) & (I2C_CR2_SADD)) | \
-                                                                 (I2C_CR2_ADD10) | (I2C_CR2_START)) & \
-                                                                (~I2C_CR2_RD_WRN)))
+                                                                 (I2C_CR2_ADD10) | (I2C_CR2_START) | \
+                                                                 (I2C_CR2_AUTOEND)) & (~I2C_CR2_RD_WRN)))
 
 #define I2C_CHECK_FLAG(__ISR__, __FLAG__)         ((((__ISR__) & ((__FLAG__) & I2C_FLAG_MASK)) == \
                                                     ((__FLAG__) & I2C_FLAG_MASK)) ? SET : RESET)

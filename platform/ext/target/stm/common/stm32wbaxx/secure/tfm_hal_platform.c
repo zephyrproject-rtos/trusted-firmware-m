@@ -24,7 +24,6 @@ extern  struct flash_otp_nv_counters_region_t otp_stm_provision;
 #define OTP_KEEP otp_stm_provision.init_value
 
 #endif /*TFM_OTP_DEFAULT_PROVIONNING*/
-
 /*
 When BL2 is not activated, dummy SRAM shared data area is provided below.
 This is required by Firmware Update (FWU) and Initial Attestation (IAT) services.
@@ -64,9 +63,10 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
     }
 
 #ifdef TFM_OTP_DEFAULT_PROVIONNING
-
     /*  Place here to force linker to keep provision and init const */
     __IO uint32_t otp = OTP_KEEP;
+
+    (void)otp;
 #endif /*TFM_OTP_DEFAULT_PROVIONNING*/
 
 #ifdef DEFAULT_SHARED_DATA
