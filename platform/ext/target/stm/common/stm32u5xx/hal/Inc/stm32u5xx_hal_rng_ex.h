@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2021 STMicroelectronics.
+  * Copyright (c) 2021 - 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -47,7 +47,7 @@ extern "C" {
   */
 
 /**
-  * @brief RNGEX Configuration Structure definition
+  * @brief RNGEx Configuration Structure definition
   */
 
 typedef struct
@@ -56,13 +56,15 @@ typedef struct
   uint32_t        Config2;           /*!< Config2 must be a value between 0 and 0x7 */
   uint32_t        Config3;           /*!< Config3 must be a value between 0 and 0xF */
   uint32_t        ClockDivider;      /*!< Clock Divider factor.This parameter can
-                                          be a value of @ref RNGEX_Clock_Divider_Factor   */
+                                          be a value of @ref RNGEx_Clock_Divider_Factor   */
   uint32_t        NistCompliance;    /*!< NIST compliance.This parameter can be a
-                                          value of @ref RNGEX_NIST_Compliance   */
+                                          value of @ref RNGEx_NIST_Compliance   */
   uint32_t        AutoReset;         /*!< automatic reset When a noise source error occurs
-                                          value of @ref RNGEX_Auto_Reset   */
+                                          value of @ref RNGEx_Auto_Reset   */
   uint32_t        HealthTest;           /*!< RNG health test control must be a value
                                              between 0x0FFCABFF and 0x00005200 */
+  uint32_t        NoiseSource;       /*!< RNG noise source control(Oscillator Enable signals)
+                                          must be a value between 0x0 and 0x0003FFFF */
 } RNG_ConfigTypeDef;
 
 /**
@@ -70,11 +72,11 @@ typedef struct
   */
 
 /* Exported constants --------------------------------------------------------*/
-/** @defgroup RNGEX_Exported_Constants RNGEX Exported Constants
+/** @defgroup RNGEx_Exported_Constants RNGEx Exported Constants
   * @{
   */
 
-/** @defgroup RNGEX_Clock_Divider_Factor  Value used to configure an internal
+/** @defgroup RNGEx_Clock_Divider_Factor  Value used to configure an internal
   *            programmable divider acting on the incoming RNG clock
   * @{
   */
@@ -113,7 +115,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup RNGEX_NIST_Compliance  NIST Compliance configuration
+/** @defgroup RNGEx_NIST_Compliance  NIST Compliance configuration
   * @{
   */
 #define RNG_NIST_COMPLIANT     (0x00000000UL) /*!< NIST compliant configuration*/
@@ -122,7 +124,7 @@ typedef struct
 /**
   * @}
   */
-/** @defgroup RNGEX_Auto_Reset  Auto Reset configuration
+/** @defgroup RNGEx_Auto_Reset  Auto Reset configuration
   * @{
   */
 #define RNG_ARDIS_ENABLE     (0x00000000UL) /*!< automatic reset after seed error*/
@@ -212,14 +214,14 @@ typedef struct
   */
 
 /* Exported functions --------------------------------------------------------*/
-/** @defgroup RNGEx_Exported_Functions RNGEx Exported Functions
+/** @addtogroup RNGEx_Exported_Functions
   * @{
   */
 
 /** @addtogroup RNGEx_Exported_Functions_Group1
   * @{
   */
-HAL_StatusTypeDef HAL_RNGEx_SetConfig(RNG_HandleTypeDef *hrng, RNG_ConfigTypeDef *pConf);
+HAL_StatusTypeDef HAL_RNGEx_SetConfig(RNG_HandleTypeDef *hrng, const RNG_ConfigTypeDef *pConf);
 HAL_StatusTypeDef HAL_RNGEx_GetConfig(RNG_HandleTypeDef *hrng, RNG_ConfigTypeDef *pConf);
 HAL_StatusTypeDef HAL_RNGEx_LockConfig(RNG_HandleTypeDef *hrng);
 
@@ -260,4 +262,5 @@ HAL_StatusTypeDef HAL_RNGEx_RecoverSeedError(RNG_HandleTypeDef *hrng);
 #endif
 
 
-#endif /* STM32U5xx_HAL_RNGEX_H */
+#endif /* STM32U5xx_HAL_RNG_EX_H */
+

@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2021 STMicroelectronics.
+  * Copyright (c) 2021 - 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -179,6 +179,7 @@ typedef  void (*pRNG_ReadyDataCallbackTypeDef)(RNG_HandleTypeDef *hrng, uint32_t
 #define  HAL_RNG_ERROR_BUSY             0x00000004U    /*!< Busy error        */
 #define  HAL_RNG_ERROR_SEED             0x00000008U    /*!< Seed error        */
 #define  HAL_RNG_ERROR_CLOCK            0x00000010U    /*!< Clock error       */
+#define  HAL_RNG_ERROR_RECOVERSEED      0x00000020U    /*!< Recover Seed error */
 /**
   * @}
   */
@@ -318,7 +319,7 @@ HAL_StatusTypeDef HAL_RNG_UnRegisterReadyDataCallback(RNG_HandleTypeDef *hrng);
   */
 HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber(RNG_HandleTypeDef *hrng, uint32_t *random32bit);
 HAL_StatusTypeDef HAL_RNG_GenerateRandomNumber_IT(RNG_HandleTypeDef *hrng);
-uint32_t HAL_RNG_ReadLastRandomNumber(RNG_HandleTypeDef *hrng);
+uint32_t HAL_RNG_ReadLastRandomNumber(const RNG_HandleTypeDef *hrng);
 
 void HAL_RNG_IRQHandler(RNG_HandleTypeDef *hrng);
 void HAL_RNG_ErrorCallback(RNG_HandleTypeDef *hrng);
@@ -331,8 +332,8 @@ void HAL_RNG_ReadyDataCallback(RNG_HandleTypeDef *hrng, uint32_t random32bit);
 /** @defgroup RNG_Exported_Functions_Group3 Peripheral State functions
   * @{
   */
-HAL_RNG_StateTypeDef HAL_RNG_GetState(RNG_HandleTypeDef *hrng);
-uint32_t             HAL_RNG_GetError(RNG_HandleTypeDef *hrng);
+HAL_RNG_StateTypeDef HAL_RNG_GetState(const RNG_HandleTypeDef *hrng);
+uint32_t             HAL_RNG_GetError(const RNG_HandleTypeDef *hrng);
 /**
   * @}
   */
@@ -387,3 +388,4 @@ HAL_StatusTypeDef RNG_RecoverSeedError(RNG_HandleTypeDef *hrng);
 
 
 #endif /* STM32U5xx_HAL_RNG_H */
+
