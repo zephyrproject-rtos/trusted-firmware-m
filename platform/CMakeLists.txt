@@ -90,6 +90,7 @@ target_sources(platform_s
 target_sources(tfm_s
     PRIVATE
         ext/common/faults.c
+        ext/common/picolibc.c
 )
 
 target_link_libraries(platform_s
