@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -21,6 +21,11 @@ include(${STM_COMMON_DIR}/stm32wbaxx/CMakeLists.txt)
 target_sources(tfm_s
     PRIVATE
         ${STM_COMMON_DIR}/stm32wbaxx/Device/Source/startup_stm32wbaxx_s.c
+)
+
+target_sources(platform_s
+    PRIVATE
+        ${STM_COMMON_DIR}/hal/provision/otp_provision.c
 )
 
 if(NS)
@@ -63,9 +68,20 @@ install(DIRECTORY   ${STM_COMMON_DIR}/hal/accelerator/
         FILES_MATCHING PATTERN "*.h")
 
 install(FILES
-    ${STM32WBA65I_DK_DIR}/partition/flash_layout.h
     ${STM32WBA65I_DK_DIR}/partition/region_defs.h
     DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition
+)
+
+# Install a flash_layout.h header file that consider STM32_FLASH_LAYOUT_BEGIN_OFFSET
+# TF-M was built with.
+install(FILES
+    ${STM32WBA65I_DK_DIR}/partition/flash_layout.h
+    DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition/gen_layout
+)
+
+file(WRITE ${INSTALL_PLATFORM_NS_DIR}/partition/flash_layout.h
+  "#define STM32_FLASH_LAYOUT_BEGIN_OFFSET ${STM32_FLASH_LAYOUT_BEGIN_OFFSET}\n"
+  "#include \"gen_layout/flash_layout.h\"\n"
 )
 
 install(DIRECTORY   ${PLATFORM_DIR}/ext/common
@@ -75,3 +91,29 @@ install(DIRECTORY   ${PLATFORM_DIR}/ext/common
 # Install test configs
 install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Extract firmware and OTP binary image files
+get_target_property(tfm_s_bin_dir tfm_s RUNTIME_OUTPUT_DIRECTORY)
+
+set(tfm_s_split_out
+    ${tfm_s_bin_dir}/tfm_s_fmw.bin
+    ${tfm_s_bin_dir}/tfm_s_otp.bin
+)
+
+add_custom_target(tfm_s_fmw ALL SOURCES ${tfm_s_split_out})
+
+if(CMAKE_C_COMPILER STREQUAL "iccarm")
+add_custom_command(
+  OUTPUT ${tfm_s_split_out}
+  DEPENDS tfm_s_bin
+  COMMAND ielftool --silent --exclude=.BL2_OTP --bin $<TARGET_FILE:tfm_s> ${tfm_s_bin_dir}/tfm_s_fmw.bin
+  COMMAND ielftool --silent --only=.BL2_OTP --bin $<TARGET_FILE:tfm_s> ${tfm_s_bin_dir}/tfm_s_otp.bin
+)
+else()
+add_custom_command(
+  OUTPUT ${tfm_s_split_out}
+  DEPENDS tfm_s_bin
+  COMMAND ${CMAKE_OBJCOPY} --remove-section .BL2_OTP -O binary $<TARGET_FILE:tfm_s> ${tfm_s_bin_dir}/tfm_s_fmw.bin
+  COMMAND ${CMAKE_OBJCOPY} --only-section .BL2_OTP -O binary $<TARGET_FILE:tfm_s> ${tfm_s_bin_dir}/tfm_s_otp.bin
+)
+endif()
