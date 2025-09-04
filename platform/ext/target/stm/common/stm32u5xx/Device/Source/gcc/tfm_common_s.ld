@@ -129,7 +129,7 @@ SECTIONS
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA) / 4)
+        LONG ((SIZEOF(.TFM_DATA) + SIZEOF(.TFM_TDATA)) / 4)
 
         LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
@@ -142,8 +142,8 @@ SECTIONS
 
         . = ALIGN(4);
         __zero_table_start__ = .;
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS) / 4)
+        LONG (ADDR(.TFM_TBSS))
+        LONG ((SIZEOF(.TFM_BSS) + SIZEOF(.TFM_TBSS)) / 4)
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
@@ -320,8 +320,15 @@ SECTIONS
         . = ALIGN(4);
 
     } > RAM AT> FLASH
+
+    .TFM_TDATA : ALIGN_WITH_INPUT  {
+        *(.tdata .tdata.* .gnu.linkonce.td.*)
+        PROVIDE(__data_end = .);
+        PROVIDE(__tdata_end = .);
+    } > RAM AT> FLASH
+
     Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
-    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
+    Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_TDATA) + SIZEOF(.TFM_TDATA);
 
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
@@ -374,6 +381,20 @@ SECTIONS
     Image$$TFM_APP_ROT_LINKER$$Base = ADDR(.TFM_APP_ROT_LINKER);
     Image$$TFM_APP_ROT_LINKER$$Limit = ADDR(.TFM_APP_ROT_LINKER) + SIZEOF(.TFM_APP_ROT_LINKER);
 
+    .TFM_TBSS (NOLOAD) : {
+        __bss_start__ = .;
+
+        *(.tbss .tbss.* .gnu.linkonce.tb.*)
+        *(.tcommon)
+        PROVIDE( __tls_end = . );
+        PROVIDE( __tbss_end = . );
+    } > RAM AT> RAM
+
+    .TFM_TBSS_SPACE (NOLOAD) : {
+        . = ADDR(.TFM_TBSS);
+        . = . + SIZEOF(.TFM_TBSS);
+    } > RAM AT> RAM
+
     .TFM_BSS (NOLOAD): ALIGN(4)
     {
         __bss_start__ = .;
@@ -398,8 +419,9 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
+        __bss_end = .;
     } > RAM AT> RAM
-    Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
+    Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_TBSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
     Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
     Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
@@ -407,7 +429,16 @@ SECTIONS
     Image$$ER_SERV_RT_POOL$$ZI$$Limit = __service_runtime_end__;
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
-    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
+    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+
+    PROVIDE(__data_start = ADDR(.TFM_DATA));
+    PROVIDE(__data_source = LOADADDR(.TFM_DATA));
+    PROVIDE(__data_size = __data_end - __data_start );
+    PROVIDE( __bss_start = ADDR(.TFM_TBSS));
+    PROVIDE( __bss_size = __bss_end - __bss_start );
+    PROVIDE( __tls_base = SIZEOF(.TFM_TDATA) ? ADDR(.TFM_TDATA) : ADDR(.TFM_TBSS) );
+    PROVIDE( __tls_align = MAX(ALIGNOF(.TFM_TDATA), ALIGNOF(.TFM_TBSS)) );
+    PROVIDE(__arm32_tls_tcb_offset = MAX(8, __tls_align) );
 
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
     /* If a variable defined with __attribute__((section())) keyword the

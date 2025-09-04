@@ -210,20 +210,22 @@ SECTIONS
         . = ALIGN(4);
         /* preinit data */
         PROVIDE_HIDDEN (__preinit_array_start = .);
+        PROVIDE_HIDDEN (__bothinit_array_start = .);
         KEEP(*(.preinit_array))
         PROVIDE_HIDDEN (__preinit_array_end = .);
 
         . = ALIGN(4);
         /* init data */
         PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP(*(SORT(.init_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*)))
         KEEP(*(.init_array))
         PROVIDE_HIDDEN (__init_array_end = .);
+        PROVIDE_HIDDEN (__bothinit_array_end = .);
 
         . = ALIGN(4);
         /* finit data */
         PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP(*(SORT(.fini_array.*)))
+        KEEP(*(SORT_BY_INIT_PRIORITY(.fini_array.*)))
         KEEP(*(.fini_array))
         PROVIDE_HIDDEN (__fini_array_end = .);
 
@@ -251,6 +253,10 @@ SECTIONS
         LONG (ADDR(.ER_CODE_SRAM))
         LONG (SIZEOF(.ER_CODE_SRAM) / 4)
 #endif
+        LONG (LOADADDR(.TFM_TDATA))
+        LONG (ADDR(.TFM_TLS_BASE))
+        LONG (SIZEOF(.TFM_TDATA) / 4)
+
         __copy_table_end__ = .;
 
         /* .zero.table */
@@ -265,6 +271,10 @@ SECTIONS
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
+
+        LONG (ADDR(.TFM_TLS_BASE) + SIZEOF(.TFM_TDATA))
+        LONG ((SIZEOF(.TFM_TLS_BASE) - SIZEOF(.TFM_TDATA)) / 4)
+
         __zero_table_end__ = .;
 
         /* Capture all remaining code (except RAM code) in the privileged TF-M
@@ -326,6 +336,9 @@ SECTIONS
 #endif
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
+
+    /* Reset current position for subsequent sections */
+    . = LOADADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 
     ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 
@@ -549,6 +562,10 @@ SECTIONS
         . = ALIGN(4);
     } > RAM AT > FLASH
 
+    PROVIDE(__data_source = LOADADDR(.TFM_DATA));
+    PROVIDE(__data_start = ADDR(.TFM_DATA));
+    PROVIDE(__data_size = SIZEOF(.TFM_DATA));
+
     .TFM_BSS ALIGN(4) (NOLOAD) :
     {
         __bss_start__ = .;
@@ -574,6 +591,31 @@ SECTIONS
         . = ALIGN(4);
         __bss_end__ = .;
     } > RAM
+
+    PROVIDE(__bss_start = ADDR(.TFM_BSS));
+    PROVIDE(__bss_size = SIZEOF(.TFM_BSS));
+
+    .TFM_TDATA :
+    {
+	PROVIDE( __tls_start_addr = . );
+        *(.tdata .tdata.* .gnu.linkonce.td.*)
+    } > RAM
+
+    .TFM_TBSS :
+    {
+        *(.tbss .tbss.* .gnu.linkonce.tb.*)
+        *(.tcommon)
+	PROVIDE( __tls_end_addr = . );
+    } > RAM
+
+    .TFM_TLS_BASE : {
+	. = . + (__tls_end_addr - __tls_start_addr);
+    } > RAM
+    PROVIDE( __tls_base = ADDR(.TFM_TLS_BASE) );
+    PROVIDE( __tls_align = MAX(ALIGNOF(.TFM_TDATA), ALIGNOF(.TFM_TBSS)) );
+    PROVIDE( __arm32_tls_tcb_offset = MAX(8, __tls_align) );
+    PROVIDE( __arm64_tls_tcb_offset = MAX(16, __tls_align) );
+
     Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
     Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
     Image$$ER_SERV_RT_POOL$$ZI$$Base = __service_runtime_start__;
