@@ -1,18 +1,26 @@
 /*
- * Copyright (c) 2024, The TrustedFirmware-M Contributors. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "cc3xx_dcu.h"
-#include "cc3xx_dev.h"
+#ifndef CC3XX_CONFIG_FILE
+#include "cc3xx_config.h"
+#else
+#include CC3XX_CONFIG_FILE
+#endif
+
 #include <assert.h>
 #include <string.h>
+
+#include "cc3xx_dcu.h"
+#include "cc3xx_dev.h"
 
 /* FixMe: Remove this when CC3XX_INFO logging gets sorted */
 #define CC3XX_INFO(...)
 
+#ifdef CC3XX_CONFIG_DCU_ICV_RESTRICTION_MASK_CHECK
 /**
  * @brief Check that the requested permissions are in accordance with the
  *        hardware restriction mask
@@ -20,7 +28,7 @@
  * @param[in] val Sets of permissions, i.e. host_dcu_en to check as an array of 4 words
  * @return cc3xx_err_t CC3XX_ERR_SUCCESS or CC3XX_ERR_DCU_MASK_MISMATCH
  */
-static cc3xx_err_t check_dcu_restriction_mask(const uint32_t *val)
+static cc3xx_err_t check_dcu_icv_restriction_mask(const uint32_t *val)
 {
     size_t idx;
 
@@ -38,6 +46,7 @@ static cc3xx_err_t check_dcu_restriction_mask(const uint32_t *val)
 
     return CC3XX_ERR_SUCCESS;
 }
+#endif /* CC3XX_CONFIG_DCU_ICV_RESTRICTION_MASK_CHECK */
 
 /**
  * @brief Check that the requested permissions are in accordance with the
@@ -182,11 +191,13 @@ cc3xx_err_t cc3xx_dcu_set_enabled(const uint8_t *permissions_mask, size_t len)
         return err;
     }
 
+#ifdef CC3XX_CONFIG_DCU_ICV_RESTRICTION_MASK_CHECK
     /* Check the ICV restriction mask for the dcu_en */
-    err = check_dcu_restriction_mask(dcu_en_requested);
+    err = check_dcu_icv_restriction_mask(dcu_en_requested);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
+#endif /* CC3XX_CONFIG_DCU_ICV_RESTRICTION_MASK_CHECK */
 
     /* Check if any dcu_lock has been locked for the corresponding dcu_en */
     err = check_dcu_locks(dcu_en_requested);
