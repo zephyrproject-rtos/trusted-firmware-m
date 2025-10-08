@@ -41,7 +41,6 @@ static mbedtls_hmac_drbg_context hmac_drbg_ctx;
 int32_t bl1_trng_generate_random_init(void)
 {
     int error;
-    size_t hash_bytes_used = 0;
     uint8_t entropy_seed[64];
 
     const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
