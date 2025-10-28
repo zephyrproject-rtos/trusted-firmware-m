@@ -67,6 +67,7 @@ macro(create_provisioning_code_target target)
 
     target_sources(${target}_provisioning_code
         PRIVATE
+            $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
             $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
     )
 

@@ -254,6 +254,11 @@ install(DIRECTORY   $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Core/Include>
                     $<BUILD_INTERFACE:${CMSIS_PATH}/CMSIS/Driver/Include>
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/cmsis)
 
+if(CONFIG_PICOLIBC)
+    install(FILES       ${PLATFORM_DIR}/ext/common/picolibc.c
+            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
+endif()
+
 if(PLATFORM_DEFAULT_UART_STDOUT)
     install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
                         ${PLATFORM_DIR}/ext/common/uart_stdout.h
