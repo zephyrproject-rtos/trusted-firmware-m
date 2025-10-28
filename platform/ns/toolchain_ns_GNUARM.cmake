@@ -176,6 +176,8 @@ string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
 add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__=1>)
 
+set(CONFIG_PICOLIBC TRUE)
+
 add_compile_options(
     -specs=picolibc.specs
     -Wall

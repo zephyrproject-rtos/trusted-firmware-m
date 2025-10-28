@@ -144,6 +144,8 @@ if (CMAKE_GENERATOR STREQUAL "Ninja")
     )
 endif()
 
+set(CONFIG_PICOLIBC TRUE)
+
 add_link_options(
     --entry=Reset_Handler
     -specs=picolibc.specs
