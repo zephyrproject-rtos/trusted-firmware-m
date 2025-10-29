@@ -13,13 +13,16 @@
 
 /*
  * Picolibc's startup code only initializes a single data and bss
- * segment.  Augment that by initializing the remaining segments using
- * the lists provided by the linker script in a constructor which will
- * be called from _start
+ * segment. Replace that to initialize all of the segments using
+ * the lists provided by the linker script.
  */
 
-static void __attribute__((constructor))
-picolibc_startup(void)
+void __libc_init_array(void);
+void _start(void);
+int main(int, char **);
+
+void
+_start(void)
 {
   typedef struct __copy_table {
     uint32_t const* src;
@@ -44,45 +47,10 @@ picolibc_startup(void)
   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
     memset(pTable->dest, 0, pTable->wlen << 2);
   }
+
+  __libc_init_array();
+  main(0, NULL);
+  return;
 }
-
-/*
- * Create symbols for picolibc. These are used by the
- * startup code to initialize memory, but that work
- * is done by the function above
- */
-
-__asm__(".globl __data_source\n"
-        ".globl __data_start\n"
-        ".globl __data_size\n"
-        ".globl __bss_size\n"
-        ".globl __bss_start\n"
-        ".equ __data_source, 0\n"
-        ".equ __data_start, 0\n"
-        ".equ __data_size, 0\n"
-        ".equ __bss_size, 0\n"
-        ".equ __bss_start, 0");
-
-#ifdef __THREAD_LOCAL_STORAGE
-
-__asm__(".globl __tls_base\n"
-        ".equ __tls_base, 0");
-
-#include <picotls.h>
-
-/*
- * Picolibc's startup code wants to initialize the thread local
- * storage base address, but tf-m doesn't use any TLS variables.
- *
- * Stub out this function until TLS is required.
- */
-
-void
-_set_tls(void *tls_base)
-{
-    (void) tls_base;
-}
-
-#endif
 
 #endif /* __PICOLIBC__ */
