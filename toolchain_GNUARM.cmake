@@ -106,8 +106,32 @@ if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
     endif()
 endif()
 
+if(NOT DEFINED CONFIG_PICOLIBC)
+    set(CONFIG_PICOLIBC TRUE)
+endif()
+
+if (CONFIG_PICOLIBC)
+    set(LIBC_COMPILE_OPTIONS
+        -specs=picolibc.specs
+        )
+    set(LIBC_LINK_OPTIONS
+        -specs=picolibc.specs
+        -nostartfiles
+        -u main
+        )
+else()
+    set(LIBC_COMPILE_OPTIONS
+        -specs=nano.specs
+        -specs=nosys.specs
+        )
+    set(LIBC_LINK_OPTIONS
+        -specs=nano.specs
+        -specs=nosys.specs
+        )
+endif()
+
 add_compile_options(
-    -specs=picolibc.specs
+    ${LIBC_COMPILE_OPTIONS}
     -Wall
     -Wno-format
     -Wno-array-parameter
@@ -144,11 +168,9 @@ if (CMAKE_GENERATOR STREQUAL "Ninja")
     )
 endif()
 
-set(CONFIG_PICOLIBC TRUE)
-
 add_link_options(
     --entry=Reset_Handler
-    -specs=picolibc.specs
+    ${LIBC_LINK_OPTIONS}
     -mthumb
     LINKER:-check-sections
     LINKER:-fatal-warnings
