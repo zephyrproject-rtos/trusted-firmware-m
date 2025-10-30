@@ -65,6 +65,7 @@ target_sources(dm_provisioning_bundle
     PRIVATE
         dm_provisioning_code.c
         dm_provisioning_data.c
+        $<$<BOOL:${CONFIG_PICOLIBC}>:${CMAKE_SOURCE_DIR}/platform/ext/common/picolibc.c>
         $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 

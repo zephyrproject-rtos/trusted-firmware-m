@@ -150,6 +150,9 @@ SECTIONS
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
 
+    /* Reset current position for subsequent sections */
+    . = LOADADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+
     ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 
     Image$$ER_CODE_SRAM$$RO$$Base = ADDR(.ER_CODE_SRAM);
@@ -197,6 +200,7 @@ SECTIONS
         . = ALIGN(4);
         /* preinit data */
         PROVIDE_HIDDEN (__preinit_array_start = .);
+        PROVIDE(__bothinit_array_start = __preinit_array_start);
         KEEP(*(SORT(.preinit_array.*)))
         KEEP(*(.preinit_array))
         PROVIDE_HIDDEN (__preinit_array_end = .);
@@ -207,6 +211,7 @@ SECTIONS
         KEEP(*(SORT(.init_array.*)))
         KEEP(*(.init_array))
         PROVIDE_HIDDEN (__init_array_end = .);
+        PROVIDE(__bothinit_array_end = __init_array_end);
 
         . = ALIGN(4);
         /* finit data */
@@ -376,9 +381,11 @@ SECTIONS
         end = __end__;
         PROVIDE(end = .);
         __HeapBase = .;
+        PROVIDE(__heap_start = __HeapBase);
         KEEP(*(.heap*))
         . += __heap_size__;
         __HeapLimit = .;
+        PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .;
     } > RAM
 #else
