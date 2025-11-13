@@ -1,4 +1,4 @@
-From bcf2f9abed02420a553a6777298f8a03d066f1d6 Mon Sep 17 00:00:00 2001
+From 19ddd5c2ddbc0a4ee7c78dec4c04d005b2c5a400 Mon Sep 17 00:00:00 2001
 From: Benjamin Baratte <benjamin.baratte@st.com>
 Date: Thu, 9 Feb 2023 10:35:01 +0100
 Subject: [PATCH 3/7] Allow SE key to use key vendor id within PSA crypto
@@ -9,10 +9,10 @@ Signed-off-by: Benjamin Baratte <benjamin.baratte@st.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 2797900c1..8152ca9cb 100644
+index 7206bf588..c843ee03e 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -1732,7 +1732,11 @@ static psa_status_t psa_validate_key_attributes(
+@@ -1734,7 +1734,11 @@ static psa_status_t psa_validate_key_attributes(
              return PSA_ERROR_INVALID_ARGUMENT;
          }
      } else {
