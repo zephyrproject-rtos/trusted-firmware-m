@@ -24,7 +24,15 @@ endif()
 # At the time of writing there is no systematic way to identify which
 # NVM technology is used by the SoC from the Kconfig, so we just
 # hardcode this information here instead.
-if((NRF_SOC_VARIANT STREQUAL nrf54l15) OR (TFM_PLATFORM STREQUAL "nordic_nrf/nrf54l15dk_nrf54l15_cpuapp") OR (PSA_API_TEST_TARGET STREQUAL nrf54l15))
+if((NRF_SOC_VARIANT MATCHES "^nrf54l1[05]$") OR
+   (NRF_SOC_VARIANT MATCHES "^nrf54lv10a?$") OR
+   (NRF_SOC_VARIANT MATCHES "^nrf54lm20a?$") OR
+   (TFM_PLATFORM MATCHES "nordic_nrf/nrf54l15dk_nrf54l1[05]_cpuapp") OR
+   (TFM_PLATFORM MATCHES "nordic_nrf/nrf54lv10dk_nrf54lv10a?_cpuapp") OR
+   (TFM_PLATFORM MATCHES "nordic_nrf/nrf54lm20dk_nrf54lm20a?_cpuapp") OR
+   (PSA_API_TEST_TARGET MATCHES "^nrf54l1[05]$") OR
+   (PSA_API_TEST_TARGET MATCHES "^nrf54lv10a?$") OR
+   (PSA_API_TEST_TARGET MATCHES "^nrf54lm20a?$"))
   # Maybe we only need to check one of these options but these
   # variables keep changing so we check both to be future proof
   set(HAS_RRAMC 1)
@@ -136,7 +144,9 @@ if(TFM_SPM_LOG_RAW_ENABLED)
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
     )
+endif()
 
+if(TFM_SPM_LOG_RAW_ENABLED OR SECURE_UART1)
     target_compile_definitions(platform_s
         PUBLIC
             NRF_SECURE_UART_INSTANCE=${NRF_SECURE_UART_INSTANCE}
@@ -206,18 +216,52 @@ target_sources(tfm_spm
         tfm_hal_platform_common.c
         faults.c
         target_cfg.c
+        $<$<BOOL:${HAS_RRAMC}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg_54l.c>
+        $<$<BOOL:${HAS_NVMC}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg_53_91.c>
+        secure_peripherals_defs.c
 )
+
+# Determine the startup file based on SOC variant
+if((NRF_SOC_VARIANT MATCHES "^nrf54l1[05]$") OR
+   (TFM_PLATFORM MATCHES "nordic_nrf/nrf54l15dk_nrf54l1[05]_cpuapp"))
+    # nrf54l10 and nrf54l15 share the same startup file
+    set(startup_file "startup_nrf54lx.c")
+elseif((NRF_SOC_VARIANT MATCHES "^nrf54lm20a?$") OR
+       (TFM_PLATFORM MATCHES "nordic_nrf/nrf54lm20dk_nrf54lm20a?_cpuapp"))
+    # nrf54lm20 has its own startup file
+    set(startup_file "startup_nrf54lm.c")
+elseif((NRF_SOC_VARIANT MATCHES "^nrf54lv10a?$") OR
+       (TFM_PLATFORM MATCHES "nordic_nrf/nrf54lv10dk_nrf54lv10a?_cpuapp"))
+    # nrf54lv10 has its own startup file
+    set(startup_file "startup_nrf54lv.c")
+else()
+    # Default to the original startup file for other targets
+    set(startup_file "startup_${target}.c")
+endif()
 
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${startup_file}>
 )
+
+if(HAS_RRAMC)
+    target_sources(tfm_s
+        PRIVATE
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_nrf54l_common.c>
+    )
+endif()
 
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${startup_file}>
     )
+    if(HAS_RRAMC)
+        target_sources(bl2
+            PRIVATE
+                $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_nrf54l_common.c>
+        )
+    endif()
 endif()
 
 if(NRF_APPROTECT)
@@ -244,7 +288,7 @@ install(FILES       ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake
 )
 
 install(FILES       startup.c
-                    startup_${target}.c
+                    ${startup_file}
                     nrfx_glue.c
                     pal_plat_test.c
                     pal_plat_test.h
