@@ -21,8 +21,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief power driver version 1.0.0. */
-#define FSL_POWER_DRIVER_VERSION (MAKE_VERSION(1, 0, 0))
+/*! @brief power driver version 2.0.1. */
+#define FSL_POWER_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*@}*/
 
 /* Power mode configuration API parameter */
@@ -400,7 +400,7 @@ static inline void POWER_SetBodVbatLevel(power_bod_vbat_level_t level, power_bod
     PMC->BODVBAT = (PMC->BODVBAT & (~(PMC_BODVBAT_TRIGLVL_MASK | PMC_BODVBAT_HYST_MASK))) | PMC_BODVBAT_TRIGLVL(level) |
                    PMC_BODVBAT_HYST(hyst);
     PMC->RESETCTRL =
-        (PMC->RESETCTRL & (~PMC_RESETCTRL_BODVBATRESETENABLE_MASK)) | PMC_RESETCTRL_BODVBATRESETENABLE(enBodVbatReset);
+        (PMC->RESETCTRL & (~PMC_RESETCTRL_BODVBATRESETENABLE_MASK)) | PMC_RESETCTRL_BODVBATRESETENABLE(enBodVbatReset ? 1UL : 0UL);
 }
 
 #if defined(PMC_BODCORE_TRIGLVL_MASK)
@@ -416,7 +416,7 @@ static inline void POWER_SetBodCoreLevel(power_bod_core_level_t level, power_bod
     PMC->BODCORE = (PMC->BODCORE & (~(PMC_BODCORE_TRIGLVL_MASK | PMC_BODCORE_HYST_MASK))) | PMC_BODCORE_TRIGLVL(level) |
                    PMC_BODCORE_HYST(hyst);
     PMC->RESETCTRL =
-        (PMC->RESETCTRL & (~PMC_RESETCTRL_BODCORERESETENABLE_MASK)) | PMC_RESETCTRL_BODCORERESETENABLE(enBodCoreReset);
+        (PMC->RESETCTRL & (~PMC_RESETCTRL_BODCORERESETENABLE_MASK)) | PMC_RESETCTRL_BODCORERESETENABLE(enBodCoreReset ? 1UL : 0UL);
 }
 #endif
 
@@ -526,7 +526,6 @@ void POWER_EnterDeepPowerDown(uint32_t exclude_from_pd,
 
 /**
  * @brief   Configures and enters in SLEEP low power mode
- * @param   :
  * @return  Nothing
  */
 void POWER_EnterSleep(void);

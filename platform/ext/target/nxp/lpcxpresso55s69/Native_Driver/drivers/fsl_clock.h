@@ -76,9 +76,9 @@
         kCLOCK_Fmc \
     }
 /*! @brief Clock ip name array for INPUTMUX. */
-#define INPUTMUX_CLOCKS  \
-    {                    \
-        kCLOCK_InputMux0 \
+#define INPUTMUX_CLOCKS \
+    {                   \
+        kCLOCK_InputMux \
     }
 /*! @brief Clock ip name array for IOCON. */
 #define IOCON_CLOCKS \
@@ -542,7 +542,7 @@ typedef enum _clock_name
 #define GET_ID_ITEM(connection)      ((connection)&0xFFFU)
 #define GET_ID_NEXT_ITEM(connection) ((connection) >> 12U)
 #define GET_ID_ITEM_MUX(connection)  (((uint8_t)connection) & 0xFFU)
-#define GET_ID_ITEM_SEL(connection)  ((uint8_t)((((uint32_t)(connection)&0xF00U) >> 8U) - 1U))
+#define GET_ID_ITEM_SEL(connection)  ((uint8_t)(((((uint32_t)(connection)&0xF00U) >> 8U) - 1U) & 0xFFU))
 #define GET_ID_SELECTOR(connection)  ((connection)&0xF000000U)
 
 #define CM_SYSTICKCLKSEL0 0U
@@ -917,7 +917,7 @@ typedef enum _clock_attach_id
 
     kNONE_to_CTIMER4 = MUX_A(CM_CTIMERCLKSEL4, 7),           /*!< Attach NONE to CTIMER4. */
 
-    kNONE_to_NONE = (int)0x80000000U,                        /*!< Attach NONE to NONE. */
+    kNONE_to_NONE = (0xFFFFFFFFU),                           /*!< Attach NONE to NONE. */
 
 } clock_attach_id_t;
 
@@ -983,6 +983,7 @@ extern "C" {
 static inline void CLOCK_EnableClock(clock_ip_name_t clk)
 {
     uint32_t index               = CLK_GATE_ABSTRACT_REG_OFFSET(clk);
+    assert(index < SYSCON_AHBCLKCTRLSET_COUNT);
     SYSCON->AHBCLKCTRLSET[index] = (1UL << CLK_GATE_ABSTRACT_BITS_SHIFT(clk));
 }
 /**
@@ -993,6 +994,7 @@ static inline void CLOCK_EnableClock(clock_ip_name_t clk)
 static inline void CLOCK_DisableClock(clock_ip_name_t clk)
 {
     uint32_t index               = CLK_GATE_ABSTRACT_REG_OFFSET(clk);
+    assert(index < SYSCON_AHBCLKCTRLSET_COUNT);
     SYSCON->AHBCLKCTRLCLR[index] = (1UL << CLK_GATE_ABSTRACT_BITS_SHIFT(clk));
 }
 /**

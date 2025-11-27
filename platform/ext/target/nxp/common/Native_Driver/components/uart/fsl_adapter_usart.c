@@ -1,6 +1,5 @@
 /*
  * Copyright 2018 NXP
- * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -264,7 +263,7 @@ static void HAL_UartInterruptHandle(USART_Type *base, void *handle)
 #endif
 }
 
-static void HAL_UartInterruptHandle_Wapper(void *base, void *handle)
+static void HAL_UartInterruptHandle_Wrapper(void *base, void *handle)
 {
     HAL_UartInterruptHandle((USART_Type *)base, handle);
 }
@@ -355,7 +354,7 @@ hal_uart_status_t HAL_UartInit(hal_uart_handle_t handle, const hal_uart_config_t
                                (usart_transfer_callback_t)HAL_UartCallback, handle);
 #else
     /* Enable interrupt in NVIC. */
-    FLEXCOMM_SetIRQHandler(s_UsartAdapterBase[uart_config->instance], HAL_UartInterruptHandle_Wapper, handle);
+    FLEXCOMM_SetIRQHandler(s_UsartAdapterBase[uart_config->instance], HAL_UartInterruptHandle_Wrapper, handle);
     NVIC_SetPriority((IRQn_Type)s_UsartIRQ[uart_config->instance], HAL_UART_ISR_PRIORITY);
     (void)EnableIRQ(s_UsartIRQ[uart_config->instance]);
 #endif
@@ -818,6 +817,7 @@ hal_uart_dma_status_t HAL_UartDMAInit(hal_uart_handle_t handle,
 
     assert(handle);
     assert(dmaHandle);
+    assert(HAL_UART_DMA_HANDLE_SIZE >= sizeof(hal_uart_dma_state_t));
 
     /* DMA init process. */
     uartHandle    = (hal_uart_state_t *)handle;

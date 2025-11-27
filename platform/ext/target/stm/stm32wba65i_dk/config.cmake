@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2021 STMicroelectronics. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
@@ -32,8 +32,8 @@ set(TFM_OTP_DEFAULT_PROVIONNING            ON           CACHE BOOL      "OTP ARE
 set(DEFAULT_SHARED_DATA                    ON           CACHE BOOL       "SHARED_DATA provisionning by TFM")
 set(STM32_FLASH_LAYOUT_BEGIN_OFFSET        0            CACHE STRING    "Byte offset gap from flash begin TF-M resources are located")
 ################################## LOG LEVEL #############################################################
-set(TFM_SPM_LOG_LEVEL                      TFM_SPM_LOG_LEVEL_DEBUG         CACHE STRING    "Set default SPM log level as INFO level")
-set(TFM_PARTITION_LOG_LEVEL                TFM_PARTITION_LOG_LEVEL_DEBUG   CACHE STRING    "Set default Secure Partition log level as INFO level")
+set(TFM_SPM_LOG_LEVEL                      LOG_LEVEL_VERBOSE         CACHE STRING    "Set default SPM log level as INFO level")
+set(TFM_PARTITION_LOG_LEVEL                LOG_LEVEL_VERBOSE         CACHE STRING    "Set default Secure Partition log level as INFO level")
 ################################## FIRMWARE_UPDATE #############################################################
 set(TFM_PARTITION_FIRMWARE_UPDATE          ON          CACHE BOOL "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB                 "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,6 +14,9 @@
 #include <stddef.h>
 
 #include "tfm_vprintf.h"
+#include "tfm_vprintf_priv.h"
+
+#define LOG_RAW_VALUE UINT8_C(60)
 
 static inline const char *get_log_prefix(uint8_t log_level)
 {
@@ -40,10 +43,26 @@ static void output_char(tfm_log_output_str output_func, void *priv, char c)
     output_func(priv, &c, 1);
 }
 
-static void output_str(tfm_log_output_str output_func, void *priv,
-                        const char *str, uint32_t len, bool calculate_length)
+static inline void output_padding_chars(tfm_log_output_str output_func, void *priv,
+                                        uint16_t num_padding, char pad_char)
+{
+    uint16_t i;
+
+    for (i = 0; i < num_padding; i++) {
+        output_char(output_func, priv, pad_char);
+    }
+}
+
+static void output_str(tfm_log_output_str output_func, void *priv, const char *str, uint32_t len,
+                       uint16_t num_padding, bool left_aligned, char pad_char,
+                       bool calculate_length)
 {
     const char *str_ptr = str;
+
+    if (str_ptr == NULL) {
+        assert(false);
+        return;
+    }
 
     if (calculate_length) {
         len = 0;
@@ -52,22 +71,42 @@ static void output_str(tfm_log_output_str output_func, void *priv,
         }
     }
 
+    if (num_padding > len) {
+        num_padding -= len;
+    } else {
+        num_padding = 0;
+    }
+
+    if (!left_aligned) {
+        output_padding_chars(output_func, priv, num_padding, pad_char);
+    }
+
     output_func(priv, str, len);
+
+    if (left_aligned) {
+        output_padding_chars(output_func, priv, num_padding, pad_char);
+    }
+}
+
+static void output_str_not_formatted(tfm_log_output_str output_func, void *priv, const char *str)
+{
+    output_str(output_func, priv, str, 0, 0, false, 0, true);
 }
 
 static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
-                        uint16_t num_padding, bool zero_padding, uint8_t base, bool signed_specifier)
+                       uint16_t num_padding, bool zero_padding, bool left_aligned, uint8_t base,
+                       bool signed_specifier, bool hex_caps)
 {
-    uint8_t digit, chars_to_print;
-    uint16_t i;
+    uint8_t digit;
     /* uint32_t has maximum value of 4,294,967,295. Require enough space in buffer
-     * for 10 digits + null terminator + '-' */
-    char buf[12] = { 0 };
+     * for 10 digits + '-'. Note that the buffer does not need to be NULL terminated
+     * as we pass the string length to output_str */
+    char buf[11] = { 0 };
     char *const buf_end = &buf[sizeof(buf) - 1];
-    /* Leaving space for NULL terminator */
-    char *buf_ptr = buf_end - 1;
+    char *buf_ptr = buf_end;
     const char pad_char = zero_padding ? '0' : ' ';
     const char negative_char = '-';
+    const char start_hex_char = hex_caps ? 'A' : 'a';
     bool negative = false;
 
     if (signed_specifier && ((int32_t)val < 0)) {
@@ -81,7 +120,7 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
         if (digit < 10) {
             *buf_ptr-- = '0' + digit;
         } else {
-            *buf_ptr-- = 'a' + digit - 10;
+            *buf_ptr-- = start_hex_char + digit - 10;
         }
 
         val /= base;
@@ -95,18 +134,8 @@ static void output_val(tfm_log_output_str output_func, void *priv, uint32_t val,
         }
     }
 
-    chars_to_print = (buf_end - 1) - buf_ptr;
-    if (num_padding > chars_to_print) {
-        num_padding -= chars_to_print;
-    } else {
-        num_padding = 0;
-    }
-
-    for (i = 0; i < num_padding; i++) {
-        output_char(output_func, priv, pad_char);
-    }
-
-    output_str(output_func, priv, buf_ptr + 1, chars_to_print, false);
+    output_str(output_func, priv, buf_ptr + 1, buf_end - buf_ptr, num_padding, left_aligned,
+               pad_char, false);
 }
 
 /* Basic vprintf, understands:
@@ -122,12 +151,14 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
     bool formatting = false;
     uint16_t num_padding = 0;
     bool zero_padding = false;
+    bool left_aligned = false;
 
     while ((c = *fmt++) != '\0') {
         if (!formatting) {
             if (c == '%') {
                 zero_padding = false;
                 num_padding = 0;
+                left_aligned = false;
                 formatting = true;
             } else {
                 if (c == '\n') {
@@ -142,17 +173,29 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
         case 'l':
             continue;
         case 'u':
-            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 10, false);
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding,
+                       left_aligned, 10, false, false);
             break;
         case 'd':
-            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 10, true);
+        case 'i':
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding,
+                       left_aligned, 10, true, false);
             break;
         case 'x':
-            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding, 16, false);
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding,
+                       left_aligned, 16, false, false);
+            break;
+        case 'X':
+            output_val(output_func, priv, va_arg(args, uint32_t), num_padding, zero_padding,
+                       left_aligned, 16, false, true);
             break;
         case 's':
-            output_str(output_func, priv, va_arg(args, char *), 0, true);
+            output_str(output_func, priv, va_arg(args, char *), 0, num_padding, left_aligned, ' ',
+                       true);
             break;
+        case '-':
+            left_aligned = true;
+            continue;
         case '0':
             if (num_padding == 0) {
                 zero_padding = true;
@@ -175,24 +218,27 @@ static void tfm_vprintf_internal(tfm_log_output_str output_func,
             output_char(output_func, priv, '%');
             break;
         default:
-            output_str(output_func, priv, "[Unsupported]", 0, true);
+            output_str_not_formatted(output_func, priv, "[Unsupported]");
         }
 
         formatting = false;
     }
 }
 
-void tfm_vprintf(tfm_log_output_str output_func, void *priv, const char *fmt, va_list args)
+void tfm_vprintf(tfm_log_output_str output_func, void *priv, const char *fmt, va_list args,
+                 bool with_marker)
 {
-    uint8_t log_level;
+    uint8_t log_marker;
     const char spacer = ' ';
 
-    /* We expect the LOG_MARKER_* macro as the first character */
-    log_level = fmt[0];
-    fmt++;
-
-    output_str(output_func, priv, get_log_prefix(log_level), 0, true);
-    output_char(output_func, priv, spacer);
+    if (with_marker) {
+        log_marker = fmt[0];
+        fmt++;
+        if (log_marker != LOG_RAW_VALUE) {
+            output_str_not_formatted(output_func, priv, get_log_prefix(log_marker));
+            output_char(output_func, priv, spacer);
+        }
+    }
 
     tfm_vprintf_internal(output_func, priv, fmt, args);
 }
