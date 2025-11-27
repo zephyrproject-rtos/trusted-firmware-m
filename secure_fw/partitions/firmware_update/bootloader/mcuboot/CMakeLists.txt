@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,6 +31,7 @@ target_include_directories(tfm_fwu_mcuboot_util
 target_link_libraries(tfm_fwu_mcuboot_util
     INTERFACE
         platform_region_defs
+        tfm_log_headers
 )
 
 target_link_libraries(tfm_psa_rot_partition_fwu

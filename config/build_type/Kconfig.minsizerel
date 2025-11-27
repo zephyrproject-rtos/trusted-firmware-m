@@ -1,19 +1,19 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 if BL2
-config MCUBOOT_LOG_LEVEL
-    default "OFF"
+config BL2_LOG_LEVEL
+    default LOG_LEVEL_NONE
 endif
 
 choice SPM_LOG_LEVEL
-    default SPM_LOG_LEVEL_SILENCE
+    default LOG_LEVEL_NONE
 endchoice
 
 choice PARTITION_LOG_LEVEL
-    default PARTITION_LOG_LEVEL_SILENCE
+    default LOG_LEVEL_NONE
 endchoice
