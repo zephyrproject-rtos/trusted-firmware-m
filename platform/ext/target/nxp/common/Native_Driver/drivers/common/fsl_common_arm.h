@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -72,6 +72,13 @@
  * @def SDK_ATOMIC_LOCAL_CLEAR_AND_SET(addr, clearBits, setBits)
  * For the variable at address \a address, clear the bits specifiled by \a clearBits
  * and set the bits specifiled by \a setBits.
+
+ * @def SDK_ATOMIC_LOCAL_COMPARE_AND_SET(addr, expected, newValue)
+ * For the variable at address \a address, check whether the value equal to \a expected. If value same as \a expected
+ * then update \a newValue to address and return \b true , else return \b false .
+ *
+ * @def SDK_ATOMIC_LOCAL_TEST_AND_SET(addr, newValue)
+ * For the variable at address \a address, set as \a newValue value and return old value.
  */
 
 /* clang-format off */
@@ -267,6 +274,20 @@ static inline void _SDK_AtomicLocalClearAndSet4Byte(volatile uint32_t *addr, uin
          ((2UL == sizeof(*(addr))) ?                                                                                                       \
               _SDK_AtomicLocalClearAndSet2Byte((volatile uint16_t *)(volatile void *)(addr), (uint16_t)(clearBits), (uint16_t)(setBits)) : \
               _SDK_AtomicLocalClearAndSet4Byte((volatile uint32_t *)(volatile void *)(addr), (uint32_t)(clearBits), (uint32_t)(setBits))))
+
+#define SDK_ATOMIC_LOCAL_COMPARE_AND_SET(addr, expected, newValue)   \
+    ((1UL == sizeof(*(addr))) ?                                                                                                            \
+         _SDK_AtomicLocalCompareAndSet1Byte((volatile uint8_t *)(volatile void *)(addr), (uint8_t)(expected), (uint8_t)(newValue)) :         \
+         ((2UL == sizeof(*(addr))) ?                                                                                                       \
+              _SDK_AtomicLocalCompareAndSet2Byte((volatile uint16_t *)(volatile void *)(addr), (uint16_t)(expected), (uint16_t)(newValue)) : \
+              _SDK_AtomicLocalCompareAndSet4Byte((volatile uint32_t *)(volatile void *)(addr), (uint32_t)(expected), (uint32_t)(newValue))))
+
+#define SDK_ATOMIC_LOCAL_TEST_AND_SET(addr, newValue)                 \
+    ((1UL == sizeof(*(addr))) ?                                                                                                            \
+         _SDK_AtomicLocalTestAndSet1Byte((volatile uint8_t *)(volatile void *)(addr), (uint8_t)(newValue)) :         \
+         ((2UL == sizeof(*(addr))) ?                                                                                                       \
+              _SDK_AtomicLocalTestAndSet2Byte((volatile uint16_t *)(volatile void *)(addr), (uint16_t)(newValue)) : \
+              _SDK_AtomicLocalTestAndSet4Byte((volatile uint32_t *)(volatile void *)(addr), (uint32_t)(newValue))))
 #else
 
 #define SDK_ATOMIC_LOCAL_ADD(addr, val)      \
@@ -322,6 +343,12 @@ static inline void _SDK_AtomicLocalClearAndSet4Byte(volatile uint32_t *addr, uin
         *(addr)        = (*(addr) & ~(clearBits)) | (setBits);   \
         EnableGlobalIRQ(s_atomicOldInt);                         \
     } while (false)
+
+#define SDK_ATOMIC_LOCAL_COMPARE_AND_SET(addr, expected, newValue) \
+    _SDK_AtomicLocalCompareAndSet((uint32_t *)addr, (uint32_t)expected, (uint32_t)newValue)
+
+#define SDK_ATOMIC_LOCAL_TEST_AND_SET(addr, newValue)     \
+    _SDK_AtomicTestAndSet((uint32_t *)addr, (uint32_t)newValue)
 
 #endif
 /*! @} */
@@ -447,15 +474,21 @@ _Pragma("diag_suppress=Pm120")
 #endif
 
 #elif (defined(__GNUC__)) || defined(DOXYGEN_OUTPUT)
+#if defined(__ARM_ARCH_8A__) /* This macro is ARMv8-A specific */
+#define MCUX_CS "//"
+#else
+#define MCUX_CS "@"
+#endif
+
 /* For GCC, when the non-cacheable section is required, please define "__STARTUP_INITIALIZE_NONCACHEDATA"
  * in your projects to make sure the non-cacheable section variables will be initialized in system startup.
  */
 #define AT_NONCACHEABLE_SECTION_INIT(var) __attribute__((section("NonCacheable.init"))) var
 #define AT_NONCACHEABLE_SECTION_ALIGN_INIT(var, alignbytes) \
     __attribute__((section("NonCacheable.init"))) var __attribute__((aligned(alignbytes)))
-#define AT_NONCACHEABLE_SECTION(var) __attribute__((section("NonCacheable,\"aw\",%nobits @"))) var
+#define AT_NONCACHEABLE_SECTION(var) __attribute__((section("NonCacheable,\"aw\",%nobits " MCUX_CS))) var
 #define AT_NONCACHEABLE_SECTION_ALIGN(var, alignbytes) \
-    __attribute__((section("NonCacheable,\"aw\",%nobits @"))) var __attribute__((aligned(alignbytes)))
+    __attribute__((section("NonCacheable,\"aw\",%nobits " MCUX_CS))) var __attribute__((aligned(alignbytes)))
 #else
 #error Toolchain not supported.
 #endif
@@ -467,6 +500,55 @@ _Pragma("diag_suppress=Pm120")
 #define AT_NONCACHEABLE_SECTION_INIT(var)                   var
 #define AT_NONCACHEABLE_SECTION_ALIGN_INIT(var, alignbytes) SDK_ALIGN(var, alignbytes)
 
+#endif
+
+/*! @} */
+
+/*!
+ * @name Cache line region definition macros
+ *
+ * For initialized non-zero cache line variables, please use "AT_CACHE_LINE_SECTION_INIT(var) ={xx};"
+ * For zero-inited cache line variables, please use "AT_CACHE_LINE_SECTION(var);"
+ *
+ * @note This section is applicable to cached memory only, say external sdram, cached ocram, etc.
+ *       Please avoid to use this section for none-cached memory, say TCM.
+ *       So only those targets, which utilize the cached memory, say flexspi_nor_sdram_debug, support 
+ *       this kind of section.
+ * @{
+ */
+
+/*!
+ * @def AT_CACHE_LINE_SECTION(var)
+ * Define a variable \a var, which is cache line size aligned and be placed in CacheLineData section.
+ *
+ * @def AT_CACHE_LINE_SECTION_INIT(var)
+ * Define a variable \a var with initial value, which is cache line size aligned and be placed in CacheLineData.init section.
+ */
+
+#if defined(FSL_FEATURE_L1DCACHE_LINESIZE_BYTE)
+#define CACHE_LINE_DATA SDK_L1DCACHE_ALIGN
+#elif defined(FSL_FEATURE_L2CACHE_LINESIZE_BYTE)
+#define CACHE_LINE_DATA SDK_L2CACHE_ALIGN
+#endif
+
+#if (defined(__ICCARM__))
+#define AT_CACHE_LINE_SECTION(var)                   CACHE_LINE_DATA(var) @"CacheLineData"
+#define AT_CACHE_LINE_SECTION_INIT(var)              CACHE_LINE_DATA(var) @"CacheLineData.init"
+
+#elif (defined(__CC_ARM) || defined(__ARMCC_VERSION))
+#if (defined(__CC_ARM))
+#define AT_CACHE_LINE_SECTION(var)                   __attribute__((section("CacheLineData"), zero_init)) CACHE_LINE_DATA(var)
+#else
+#define AT_CACHE_LINE_SECTION(var)                   __attribute__((section("CacheLineData"))) CACHE_LINE_DATA(var)
+#endif
+#define AT_CACHE_LINE_SECTION_INIT(var)              __attribute__((section("CacheLineData.init"))) CACHE_LINE_DATA(var)
+
+#elif (defined(__GNUC__)) || defined(DOXYGEN_OUTPUT)
+#define AT_CACHE_LINE_SECTION(var)                   __attribute__((section("CacheLineData,\"aw\",%nobits @"))) CACHE_LINE_DATA(var)
+#define AT_CACHE_LINE_SECTION_INIT(var)              __attribute__((section("CacheLineData.init"))) CACHE_LINE_DATA(var)
+
+#else
+#error Toolchain not supported.
 #endif
 
 /*! @} */
@@ -487,7 +569,11 @@ _Pragma("diag_suppress=Pm120")
  * Place data in a section which can be accessed quickly by core, and the variable
  * address is set to align with \a alignbytes.
  */
-#if (defined(__ICCARM__))
+#if (defined(FSL_SDK_DRIVER_QUICK_ACCESS_DISABLE) && (FSL_SDK_DRIVER_QUICK_ACCESS_DISABLE + 0))
+#define AT_QUICKACCESS_SECTION_CODE(func) func
+#define AT_QUICKACCESS_SECTION_DATA(var) var
+#define AT_QUICKACCESS_SECTION_DATA_ALIGN(var, alignbytes) SDK_ALIGN(var, alignbytes)
+#elif (defined(__ICCARM__))
 #define AT_QUICKACCESS_SECTION_CODE(func) func @"CodeQuickAccess"
 #define AT_QUICKACCESS_SECTION_DATA(var)  var @"DataQuickAccess"
 #define AT_QUICKACCESS_SECTION_DATA_ALIGN(var, alignbytes) \
@@ -504,7 +590,7 @@ _Pragma("diag_suppress=Pm120")
     __attribute__((section("DataQuickAccess"))) var __attribute__((aligned(alignbytes)))
 #else
 #error Toolchain not supported.
-#endif /* defined(__ICCARM__) */
+#endif /* QuickAccess section macro */
 /*! @} */
 
 /*!
@@ -525,6 +611,36 @@ _Pragma("diag_suppress=Pm120")
 #endif /* defined(__ICCARM__) */
 /*! @} */
 
+/*!
+ * @def MSDK_REG_SECURE_ADDR(x)
+ * Convert the register address to the one used in secure mode.
+ *
+ * @def MSDK_REG_NONSECURE_ADDR(x)
+ * Convert the register address to the one used in non-secure mode.
+ */
+
+#if (defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE & 0x2))
+#define MSDK_REG_SECURE_ADDR(x) ((uintptr_t)(x) | (0x1UL << 28))
+#define MSDK_REG_NONSECURE_ADDR(x) ((uintptr_t)(x) & ~(0x1UL << 28))
+#else
+#define MSDK_REG_SECURE_ADDR(x) (x)
+#define MSDK_REG_NONSECURE_ADDR(x) (x)
+#endif
+
+/*!
+ * @brief The chip supports DWT CYCCNT or not.
+ */
+#if (defined(DWT) && defined(DWT_CTRL_CYCCNTENA_Msk))
+#define MSDK_HAS_DWT_CYCCNT 1
+#else
+#define MSDK_HAS_DWT_CYCCNT 0
+#endif
+
+/*!
+ * @brief Invalid IRQ handler address.
+ */
+#define MSDK_INVALID_IRQ_HANDLER UINT32_MAX
+
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
         void DefaultISR(void);
 #endif
@@ -541,6 +657,11 @@ _Pragma("diag_suppress=Pm120")
 #if ((defined(FSL_FEATURE_SOC_SYSCON_COUNT) && (FSL_FEATURE_SOC_SYSCON_COUNT > 0)) || \
      (defined(FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT) && (FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT > 0)))
 #include "fsl_reset.h"
+#endif
+
+#if defined(FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM) && (FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM > 0) && defined(FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) && (FSL_FEATURE_IRQSTEER_IRQ_START_INDEX > 0)
+void IRQSTEER_EnableInterrupt(int32_t instIdx, IRQn_Type irq);
+void IRQSTEER_DisableInterrupt(int32_t instIdx, IRQn_Type irq);
 #endif
 
 /*******************************************************************************
@@ -579,7 +700,13 @@ static inline status_t EnableIRQ(IRQn_Type interrupt)
 #if defined(FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS) && (FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS > 0)
     else if ((int32_t)interrupt >= (int32_t)FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
     {
+#if defined(FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM) && (FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM > 0) && defined(FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) && (FSL_FEATURE_IRQSTEER_IRQ_START_INDEX > 0)
+        int32_t irqsteerInstIdx = (int32_t)((interrupt + 1 - FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) / FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM);
+
+        IRQSTEER_EnableInterrupt(irqsteerInstIdx, interrupt);
+#else
         status = kStatus_Fail;
+#endif
     }
 #endif
 
@@ -623,7 +750,13 @@ static inline status_t DisableIRQ(IRQn_Type interrupt)
 #if defined(FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS) && (FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS > 0)
     else if ((int32_t)interrupt >= (int32_t)FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
     {
+#if defined(FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM) && (FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM > 0) && defined(FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) && (FSL_FEATURE_IRQSTEER_IRQ_START_INDEX > 0)
+        int32_t irqsteerInstIdx = (int32_t)((interrupt - FSL_FEATURE_IRQSTEER_IRQ_START_INDEX) / FSL_FEATURE_IRQSTEER_EXT_INT_MAX_NUM);
+
+        IRQSTEER_DisableInterrupt(irqsteerInstIdx, interrupt);
+#else
         status = kStatus_Fail;
+#endif
     }
 #endif
 
@@ -831,7 +964,8 @@ static inline void EnableGlobalIRQ(uint32_t primask)
  *
  * @param irq IRQ number
  * @param irqHandler IRQ handler address
- * @return The old IRQ handler address
+ * @return The old IRQ handler address, if the input @p irq is invalid, then
+ * return value is @ref MSDK_INVALID_IRQ_HANDLER.
  */
 uint32_t InstallIRQHandler(IRQn_Type irq, uint32_t irqHandler);
 #endif /* ENABLE_RAM_VECTOR_TABLE. */
@@ -875,7 +1009,7 @@ void DisableDeepSleepIRQ(IRQn_Type interrupt);
 #endif /* FSL_FEATURE_POWERLIB_EXTEND */
 #endif /* FSL_FEATURE_SOC_SYSCON_COUNT */
 
-#if defined(DWT)
+#if MSDK_HAS_DWT_CYCCNT
 /*!
  * @brief Enable the counter to get CPU cycles.
  */
@@ -887,6 +1021,172 @@ void MSDK_EnableCpuCycleCounter(void);
  * @return Current CPU cycle count.
  */
 uint32_t MSDK_GetCpuCycleCount(void);
+#endif
+
+#if defined(FSL_FEATURE_MEASURE_CRITICAL_SECTION) && (FSL_FEATURE_MEASURE_CRITICAL_SECTION != 0)
+typedef uint32_t (*getTimestamp_t)(void); /*!< Function to get the current time stamp. */
+
+/*!
+ * @rief Initialize the context of the critical section measurement and assign
+ * the function to get the current timestamp.
+ *
+ * @param getTimestamp The function to get the current timestamp.
+ */
+void InitCriticalSectionMeasurementContext(getTimestamp_t func);
+
+/*!
+ * @brief Disable the global IRQ with critical section ID
+ *
+ * Extended function of DisableGlobalIRQ. Apart from the standard operation, also check
+ * the id of the protected critical section and mark the begining for timer.
+ * User is required to provided the primask register for the EnableGlobalIRQEx.
+ *
+ * @param id The id for critical section.
+ * @return Current primask value.
+ */
+uint32_t DisableGlobalIRQEx(uint32_t id);
+
+/*!
+ * @brief Enable the global IRQ and calculate the execution time of critical section
+ *
+ * Extended function of EnableGlobalIRQ. Apart from the standard operation, also
+ * marks the exit of the critical section and calculate the execution time for the section.
+ * User is required to use the DisableGlobalIRQEx and EnableGlobalIRQEx in pair.
+ *
+ * @param primask value of primask register to be restored. The primask value is supposed to be provided by the
+ * DisableGlobalIRQEx().
+ */
+void EnableGlobalIRQEx(uint32_t primask);
+#endif
+
+
+/* clang-format off */
+#if ((defined(__ARM_ARCH_7M__     ) && (__ARM_ARCH_7M__      == 1)) || \
+     (defined(__ARM_ARCH_7EM__    ) && (__ARM_ARCH_7EM__     == 1)) || \
+     (defined(__ARM_ARCH_8M_MAIN__) && (__ARM_ARCH_8M_MAIN__ == 1)) || \
+     (defined(__ARM_ARCH_8M_BASE__) && (__ARM_ARCH_8M_BASE__ == 1)))
+/* clang-format on */
+static inline bool _SDK_AtomicLocalCompareAndSet1Byte(volatile uint8_t *addr, uint8_t expected, uint8_t newValue)
+{
+    uint8_t s_actual;
+
+    do
+    {
+        s_actual = __LDREXB(addr);
+        if (s_actual != expected)
+        {
+            __CLREX();
+            return false;
+        }
+    } while (__STREXB((newValue), (addr)));
+
+    return true;
+    
+}
+
+static inline bool _SDK_AtomicLocalCompareAndSet2Byte(volatile uint16_t *addr, uint16_t expected, uint16_t newValue)
+{
+    uint16_t s_actual;
+
+    do
+    {
+        s_actual = __LDREXH(addr);
+        if (s_actual != expected)
+        {
+            __CLREX();
+            return false;
+        }
+    } while (__STREXH((newValue), (addr)));
+
+    return true;
+}
+
+static inline bool _SDK_AtomicLocalCompareAndSet4Byte(volatile uint32_t *addr, uint32_t expected, uint32_t newValue)
+{
+    uint32_t s_actual;
+
+    do
+    {
+        s_actual = __LDREXW(addr);
+        if (s_actual != expected)
+        {
+            __CLREX();
+            return false;
+        }
+    } while (__STREXW((newValue), (addr)));
+
+    return true;
+}
+
+static inline uint8_t _SDK_AtomicLocalTestAndSet1Byte(volatile uint8_t *addr, uint8_t newValue)
+{
+    uint8_t s_old;
+
+    do
+    {
+        s_old = __LDREXB(addr);
+    } while (__STREXB((newValue), (addr)));
+
+    return s_old;
+}
+
+static inline uint16_t _SDK_AtomicLocalTestAndSet2Byte(volatile uint16_t *addr, uint16_t newValue)
+{
+    uint16_t s_old;
+
+    do
+    {
+        s_old = __LDREXH(addr);
+    } while (__STREXH((newValue), (addr)));
+
+    return s_old;
+}
+
+static inline uint32_t _SDK_AtomicLocalTestAndSet4Byte(volatile uint32_t *addr, uint32_t newValue)
+{
+    uint32_t s_old;
+
+    do
+    {
+        s_old = __LDREXW(addr);
+    } while (__STREXW((newValue), (addr)));
+
+    return s_old;
+}
+
+#else
+static inline bool _SDK_AtomicLocalCompareAndSet(uint32_t *addr, uint32_t expected, uint32_t newValue)
+{
+    uint32_t s_atomicOldInt;
+    uint32_t s_actual;
+
+    s_atomicOldInt = DisableGlobalIRQ();
+    
+    s_actual = *addr;
+    if (s_actual == expected)
+    {
+        *addr = newValue;
+        EnableGlobalIRQ(s_atomicOldInt);
+        return true;
+    }
+    else
+    {
+        EnableGlobalIRQ(s_atomicOldInt);
+        return false;
+    }
+}
+
+static inline uint32_t _SDK_AtomicTestAndSet(uint32_t *addr, uint32_t newValue)
+{
+    uint32_t s_atomicOldInt = DisableGlobalIRQ();
+
+    uint32_t oldValue = (uint32_t)(*addr);
+    *addr = newValue;
+
+    EnableGlobalIRQ(s_atomicOldInt);
+    return oldValue;
+}
+
 #endif
 
 #if defined(__cplusplus)

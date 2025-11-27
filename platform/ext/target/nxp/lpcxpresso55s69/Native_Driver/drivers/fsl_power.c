@@ -396,6 +396,30 @@ static void POWER_EnterLowPower(LPC_LOWPOWER_T *p_lowpower_cfg)
 }
 
 /**
+ * @brief
+ * @param
+ * @return
+ */
+static bool int32_MultiplyOverflow(int32_t a, int32_t b) {
+    if (a == 0 || b == 0) return false;
+    if (a > 0 && b > 0) return a > INT32_MAX / b;
+    if (a < 0 && b < 0) return a < INT32_MAX / b;
+    return a < INT32_MIN / b || b < INT32_MIN / a;
+}
+
+/**
+ * @brief
+ * @param
+ * @return
+ */
+static bool int32_AddOverflow(int32_t a, int32_t b) {
+    if ((b > 0) && (a > INT32_MAX - b)) return true;
+    if ((b < 0) && (a < INT32_MIN - b)) return true;
+    return false;
+}
+
+
+/**
  * @brief   Shut off the Flash and execute the _WFI(), then power up the Flash after wake-up event
  * @param   None
  * @return  Nothing
@@ -424,7 +448,7 @@ void POWER_EnterDeepSleep(uint32_t exclude_from_pd,
                           uint64_t wakeup_interrupts,
                           uint32_t hardware_wake_ctrl)
 {
-    LPC_LOWPOWER_T lv_low_power_mode_cfg; /* Low Power Mode configuration structure */
+    static LPC_LOWPOWER_T lv_low_power_mode_cfg; /* Low Power Mode configuration structure */
     uint32_t cpu0_nmi_enable;
     uint32_t cpu0_int_enable_0;
     uint32_t cpu0_int_enable_1;
@@ -782,6 +806,7 @@ static uint32_t lf_set_ldo_ao_ldo_mem_voltage(uint32_t p_lp_mode, uint32_t p_dcd
             {
                 /* Apply settings coming from Flash */
                 lv_v_ldo_pmu = (ldo_ao_trim & FLASH_NMPA_LDO_AO_DSLP_TRIM_MASK) >> FLASH_NMPA_LDO_AO_DSLP_TRIM_SHIFT;
+                assert(lv_v_ldo_pmu >= 2UL);
                 lv_v_ldo_pmu_boost = lv_v_ldo_pmu - 2UL; /* - 50 mV */
             }
             else
@@ -799,6 +824,7 @@ static uint32_t lf_set_ldo_ao_ldo_mem_voltage(uint32_t p_lp_mode, uint32_t p_dcd
             {
                 /* Apply settings coming from Flash */
                 lv_v_ldo_pmu = (ldo_ao_trim & FLASH_NMPA_LDO_AO_PDWN_TRIM_MASK) >> FLASH_NMPA_LDO_AO_PDWN_TRIM_SHIFT;
+                assert(lv_v_ldo_pmu >= 2UL);
                 lv_v_ldo_pmu_boost = lv_v_ldo_pmu - 2UL; /* - 50 mV */
             }
             else
@@ -816,6 +842,7 @@ static uint32_t lf_set_ldo_ao_ldo_mem_voltage(uint32_t p_lp_mode, uint32_t p_dcd
             {
                 /* Apply settings coming from Flash */
                 lv_v_ldo_pmu = (ldo_ao_trim & FLASH_NMPA_LDO_AO_DPDW_TRIM_MASK) >> FLASH_NMPA_LDO_AO_DPDW_TRIM_SHIFT;
+                assert(lv_v_ldo_pmu >= 2UL);
                 lv_v_ldo_pmu_boost = lv_v_ldo_pmu - 2UL; /* - 50 mV */
             }
             else
@@ -1066,6 +1093,8 @@ static uint32_t lf_wakeup_io_ctrl(uint32_t p_wakeup_io_ctrl)
  */
 static uint8_t CLOCK_u8OscCapConvert(uint8_t u8OscCap, uint8_t u8CapBankDiscontinuity)
 {
+    uint16_t uint16Tmp;
+
     /* Compensate for discontinuity in the capacitor banks */
     if (u8OscCap < 64U)
     {
@@ -1080,9 +1109,11 @@ static uint8_t CLOCK_u8OscCapConvert(uint8_t u8OscCap, uint8_t u8CapBankDisconti
     }
     else
     {
+        assert(u8CapBankDiscontinuity <= 127U);
         if (u8OscCap <= (127U - u8CapBankDiscontinuity))
         {
-            u8OscCap += u8CapBankDiscontinuity;
+            uint16Tmp = u8OscCap + u8CapBankDiscontinuity;
+            u8OscCap = (uint8_t)(uint16Tmp & 0xFFU);
         }
         else
         {
@@ -1494,6 +1525,7 @@ void POWER_Xtal16mhzCapabankTrim(int32_t pi32_16MfXtalIecLoadpF_x100,
     uint8_t u8XOCapInCtrl, u8XOCapOutCtrl;
     uint32_t u32RegVal;
     int32_t i32Tmp;
+    int64_t i64Tmp;
 
     /* Enable and set LDO, if not already done */
     POWER_SetXtal16mhzLdo();
@@ -1524,14 +1556,27 @@ void POWER_Xtal16mhzCapabankTrim(int32_t pi32_16MfXtalIecLoadpF_x100,
         u8XOSlave = 0;
     }
     /* In & out load cap calculation with derating */
-    iXOCapInpF_x100 = 2 * pi32_16MfXtalIecLoadpF_x100 - pi32_16MfXtalNPcbParCappF_x100 +
-                      39 * ((int32_t)XO_SLAVE_EN - (int32_t)u8XOSlave) - 15;
-    iXOCapOutpF_x100 = 2 * pi32_16MfXtalIecLoadpF_x100 - pi32_16MfXtalPPcbParCappF_x100 - 21;
+    i64Tmp = 2 * (int64_t)pi32_16MfXtalIecLoadpF_x100 - (int64_t)pi32_16MfXtalNPcbParCappF_x100 +
+             39 * ((int64_t)XO_SLAVE_EN - (int64_t)u8XOSlave) - 15;
+    assert((i64Tmp <= INT32_MAX) && (i64Tmp >= INT32_MIN));
+    iXOCapInpF_x100 = (int32_t)i64Tmp;
+    i64Tmp = 2 * (int64_t)pi32_16MfXtalIecLoadpF_x100 - (int64_t)pi32_16MfXtalPPcbParCappF_x100 - 21;
+    assert((i64Tmp <= INT32_MAX) && (i64Tmp >= INT32_MIN));    
+    iXOCapOutpF_x100 = (int32_t)i64Tmp;
+
     /* In & out XO_OSC_CAP_Code_CTRL calculation, with rounding */
+    assert(!int32_MultiplyOverflow(iXOCapInpF_x100, iaXin_x4));
+    assert(!int32_AddOverflow(iXOCapInpF_x100 * iaXin_x4, ibXin * 400));
     i32Tmp         = ((iXOCapInpF_x100 * iaXin_x4 + ibXin * 400) + 200) / 400;
+    assert((i32Tmp >= 0) && (i32Tmp <= UINT8_MAX));
     u8XOCapInCtrl  = (uint8_t)i32Tmp;
+
+    assert(!int32_MultiplyOverflow(iXOCapOutpF_x100, iaXout_x4));
+    assert(!int32_AddOverflow(iXOCapOutpF_x100 * iaXout_x4, ibXout * 400));
     i32Tmp         = ((iXOCapOutpF_x100 * iaXout_x4 + ibXout * 400) + 200) / 400;
+    assert((i32Tmp >= 0) && (i32Tmp <= UINT8_MAX));
     u8XOCapOutCtrl = (uint8_t)i32Tmp;
+
     /* Read register and clear fields to be written */
     u32RegVal = ANACTRL->XO32M_CTRL;
     u32RegVal &= ~(ANACTRL_XO32M_CTRL_OSC_CAP_IN_MASK | ANACTRL_XO32M_CTRL_OSC_CAP_OUT_MASK);
@@ -1559,6 +1604,7 @@ void POWER_Xtal32khzCapabankTrim(int32_t pi32_32kfXtalIecLoadpF_x100,
     uint8_t u8XOCapInCtrl, u8XOCapOutCtrl;
     uint32_t u32RegVal;
     int32_t i32Tmp;
+    int64_t i64Tmp;
     /* Get Cal values from Flash */
     u32XOTrimValue = GET_32KXO_TRIM();
     /* check validity and apply */
@@ -1584,13 +1630,24 @@ void POWER_Xtal32khzCapabankTrim(int32_t pi32_32kfXtalIecLoadpF_x100,
     }
 
     /* In & out load cap calculation with derating */
-    iXOCapInpF_x100  = 2 * pi32_32kfXtalIecLoadpF_x100 - pi32_32kfXtalNPcbParCappF_x100 - 130;
-    iXOCapOutpF_x100 = 2 * pi32_32kfXtalIecLoadpF_x100 - pi32_32kfXtalPPcbParCappF_x100 - 41;
+    i64Tmp = 2 * (int64_t)pi32_32kfXtalIecLoadpF_x100 - (int64_t)pi32_32kfXtalNPcbParCappF_x100 - 130;
+    assert((i64Tmp <= INT32_MAX) && (i64Tmp >= INT32_MIN));
+    iXOCapInpF_x100  = (int32_t)i64Tmp;
+    i64Tmp = 2 * (int64_t)pi32_32kfXtalIecLoadpF_x100 - (int64_t)pi32_32kfXtalPPcbParCappF_x100 - 41;
+    assert((i64Tmp <= INT32_MAX) && (i64Tmp >= INT32_MIN));
+    iXOCapOutpF_x100 = (int32_t)i64Tmp;
 
     /* In & out XO_OSC_CAP_Code_CTRL calculation, with rounding */
+    assert(!int32_MultiplyOverflow(iXOCapInpF_x100, iaXin_x4));
+    assert(!int32_AddOverflow(iXOCapInpF_x100 * iaXin_x4, ibXin * 400));
     i32Tmp         = ((iXOCapInpF_x100 * iaXin_x4 + ibXin * 400) + 200) / 400;
+    assert((i32Tmp >= 0) && (i32Tmp <= UINT8_MAX));
     u8XOCapInCtrl  = (uint8_t)i32Tmp;
+
+    assert(!int32_MultiplyOverflow(iXOCapOutpF_x100, iaXout_x4));
+    assert(!int32_AddOverflow(iXOCapOutpF_x100 * iaXout_x4, ibXout * 400));
     i32Tmp         = ((iXOCapOutpF_x100 * iaXout_x4 + ibXout * 400) + 200) / 400;
+    assert((i32Tmp >= 0) && (i32Tmp <= UINT8_MAX));
     u8XOCapOutCtrl = (uint8_t)i32Tmp;
 
     /* Read register and clear fields to be written */

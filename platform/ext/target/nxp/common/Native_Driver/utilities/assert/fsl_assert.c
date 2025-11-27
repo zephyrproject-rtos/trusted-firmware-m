@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017, 2022-2023 NXP
- * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -35,7 +34,12 @@ void __aeabi_assert(const char *failedExpr, const char *file, int line)
 
     for (;;)
     {
-        __BKPT(0);
+#ifdef CoreDebug_DHCSR_C_DEBUGEN_Msk
+        if (1U == (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk))
+#endif /* CoreDebug_DHCSR_C_DEBUGEN_Msk */
+        {
+            __BKPT(0);
+        }
     }
 }
 #elif (defined(__GNUC__))
@@ -51,7 +55,12 @@ void __assertion_failed(char *failedExpr)
 
     for (;;)
     {
-        __BKPT(0);
+#ifdef CoreDebug_DHCSR_C_DEBUGEN_Msk
+        if (1U == (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk))
+#endif /* CoreDebug_DHCSR_C_DEBUGEN_Msk */
+        {
+            __BKPT(0);
+        }
     }
 }
 #else
@@ -64,7 +73,12 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
 
     for (;;)
     {
-        __BKPT(0);
+#ifdef CoreDebug_DHCSR_C_DEBUGEN_Msk
+        if (1U == (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk))
+#endif /* CoreDebug_DHCSR_C_DEBUGEN_Msk */
+        {
+            __BKPT(0);
+        }
     }
 }
 #endif /* defined(__REDLIB__) */
@@ -79,7 +93,12 @@ void __msl_assertion_failed(char const *failedExpr, char const *file, char const
     PRINTF("  Function  : %s\r\n", func); /*compiler not support func name yet*/
     PRINTF("  Line      : %u\r\n", (uint32_t)line);
     PRINTF("  failedExpr: %s\r\n", failedExpr);
-    asm(DEBUGHLT);
+#ifdef CoreDebug_DHCSR_C_DEBUGEN_Msk
+    if (1U == (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk))
+#endif /* CoreDebug_DHCSR_C_DEBUGEN_Msk */
+    {
+        asm(DEBUGHLT);
+    }
 }
 
 #endif /* (defined(__DSC__) && defined (__CW__)) */

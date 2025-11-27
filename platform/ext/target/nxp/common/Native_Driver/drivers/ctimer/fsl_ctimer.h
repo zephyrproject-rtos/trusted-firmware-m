@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
- * All rights reserved.
+ * Copyright 2016-2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 1)) /*!< Version 2.3.1 */
+#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 3)) /*!< Version 2.3.3 */
 /*! @} */
 
 /*! @brief List of Timer capture channels */
@@ -238,6 +237,10 @@ void CTIMER_GetDefaultConfig(ctimer_config_t *config);
  * @param pulsePeriod      Pulse width match value
  * @param enableInt        Enable interrupt when the timer value reaches the match value of the PWM pulse,
  *                         if it is 0 then no interrupt will be generated.
+ *
+ * @return kStatus_Success on success
+ *         kStatus_Fail If matchChannel is equal to pwmPeriodChannel; this channel is reserved to set the PWM cycle
+ *                      If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
 status_t CTIMER_SetupPwmPeriod(CTIMER_Type *base,
                                const ctimer_match_t pwmPeriodChannel,
@@ -296,11 +299,13 @@ static inline void CTIMER_UpdatePwmPulsePeriod(CTIMER_Type *base, ctimer_match_t
  * @param pwmPeriodChannel Specify the channel to control the PWM period
  * @param matchChannel     Match pin to be used to output the PWM signal
  * @param dutyCyclePercent New PWM pulse width; the value should be between 0 to 100
+ * @return kStatus_Success on success
+ *         kStatus_Fail If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
-void CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
-                               const ctimer_match_t pwmPeriodChannel,
-                               ctimer_match_t matchChannel,
-                               uint8_t dutyCyclePercent);
+status_t CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
+                                   const ctimer_match_t pwmPeriodChannel,
+                                   ctimer_match_t matchChannel,
+                                   uint8_t dutyCyclePercent);
 
 /*! @}*/
 
@@ -358,8 +363,23 @@ static inline uint32_t CTIMER_GetTimerCountValue(CTIMER_Type *base)
 /*!
  * @brief Register callback.
  *
+ * This function configures CTimer Callback in following modes:
+ * - Single Callback:
+ * cb_func should be pointer to callback function pointer
+ * For example:
+ * ctimer_callback_t ctimer_callback = pwm_match_callback;
+ * CTIMER_RegisterCallBack(CTIMER, &ctimer_callback, kCTIMER_SingleCallback);
+ * 
+ * - Multiple Callback:
+ * cb_func should be pointer to array of callback function pointers
+ * Each element corresponds to Interrupt Flag in IR register.
+ * For example:
+ * ctimer_callback_t ctimer_callback_table[] = {
+ *   ctimer_match0_callback, NULL, NULL, ctimer_match3_callback, NULL, NULL, NULL, NULL};
+ * CTIMER_RegisterCallBack(CTIMER, &ctimer_callback_table[0], kCTIMER_MultipleCallback);
+ *
  * @param base      Ctimer peripheral base address
- * @param cb_func   callback function
+ * @param cb_func   Pointer to callback function pointer
  * @param cb_type   callback function type, singular or multiple
  */
 void CTIMER_RegisterCallBack(CTIMER_Type *base, ctimer_callback_t *cb_func, ctimer_callback_type_t cb_type);

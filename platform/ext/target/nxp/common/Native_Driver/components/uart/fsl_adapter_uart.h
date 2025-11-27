@@ -1,6 +1,5 @@
 /*
  * Copyright 2018-2020 NXP
- * All rights reserved.
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -96,7 +95,7 @@
 #if (defined(FSL_FEATURE_SOC_DMA_COUNT) && (FSL_FEATURE_SOC_DMA_COUNT > 0U))
 #define HAL_UART_DMA_HANDLE_SIZE (124U + HAL_UART_ADAPTER_LOWPOWER * 36U)
 #elif (defined(FSL_FEATURE_SOC_EDMA_COUNT) && (FSL_FEATURE_SOC_EDMA_COUNT > 0U))
-#define HAL_UART_DMA_HANDLE_SIZE (140U + HAL_UART_ADAPTER_LOWPOWER * 36U)
+#define HAL_UART_DMA_HANDLE_SIZE (144U + HAL_UART_ADAPTER_LOWPOWER * 36U)
 #else
 #error This SOC does not have DMA or EDMA available!
 #endif

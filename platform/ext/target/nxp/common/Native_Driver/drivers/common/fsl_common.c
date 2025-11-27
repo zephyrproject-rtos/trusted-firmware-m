@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2021, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -26,6 +26,11 @@ void *SDK_Malloc(size_t size, size_t alignbytes)
 {
     mem_align_cb_t *p_cb = NULL;
     uint32_t alignedsize;
+
+    if ((alignbytes == 0U) || (alignbytes >= SIZE_MAX))
+    {
+        return NULL;
+    }
 
     /* Check overflow. */
     alignedsize = (uint32_t)(unsigned int)SDK_SIZEALIGN(size, alignbytes);

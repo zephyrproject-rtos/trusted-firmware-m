@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022,2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -59,7 +59,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief common driver version. */
-#define FSL_COMMON_DRIVER_VERSION (MAKE_VERSION(2, 4, 0))
+#define FSL_COMMON_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
 /*! @} */
 
 /*! @name Debug console type definition. */
@@ -158,6 +158,10 @@ enum _status_groups
     kStatusGroup_PUF                   = 105, /*!< Group number for PUF status codes. */
     kStatusGroup_TOUCH_PANEL           = 106, /*!< Group number for touch panel status codes */
     kStatusGroup_VBAT                  = 107, /*!< Group number for VBAT status codes */
+    kStatusGroup_XSPI                  = 108, /*!< Group number for XSPI status codes */
+    kStatusGroup_PNGDEC                = 109, /*!< Group number for PNGDEC status codes */
+    kStatusGroup_JPEGDEC               = 110, /*!< Group number for JPEGDEC status codes */
+    kStatusGroup_AUDMIX                = 111, /*!< Group number for AUDMIX status codes */
 
     kStatusGroup_HAL_GPIO       = 121, /*!< Group number for HAL GPIO status codes. */
     kStatusGroup_HAL_UART       = 122, /*!< Group number for HAL UART status codes. */
@@ -202,6 +206,15 @@ enum _status_groups
     kStatusGroup_BMA            = 165, /*!< Group number for BMA status codes. */
     kStatusGroup_NETC           = 166, /*!< Group number for NETC status codes. */
     kStatusGroup_ELE            = 167, /*!< Group number for ELE status codes. */
+    kStatusGroup_GLIKEY         = 168, /*!< Group number for GLIKEY status codes. */
+    kStatusGroup_AON_POWER      = 169, /*!< Group number for AON_POWER status codes. */
+    kStatusGroup_AON_COMMON     = 170, /*!< Group number for AON_COMMON status codes. */
+    kStatusGroup_ENDAT3     	= 171, /*!< Group number for ENDAT3 status codes. */
+    kStatusGroup_HIPERFACE      = 172, /*!< Group number for HIPERFACE status codes. */
+    kStatusGroup_NPX            = 173, /*!< Group number for NPX status codes. */
+    kStatusGroup_ELA_CSEC       = 174, /*!< Group number for ELA_CSEC status codes. */
+    kStatusGroup_FLEXIO_T_FORMAT= 175, /*!< Group number for T-format status codes. */
+    kStatusGroup_FLEXIO_A_FORMAT= 176, /*!< Group number for A-format status codes. */
 };
 
 /*! \public
@@ -225,6 +238,9 @@ enum
 /*! @brief Type used for all status and error return values. */
 typedef int32_t status_t;
 
+#ifdef __ZEPHYR__
+#include <zephyr/sys/util.h>
+#else
 /*!
  * @name Min/max macros
  * @{
@@ -244,6 +260,7 @@ typedef int32_t status_t;
 #if !defined(ARRAY_SIZE)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
+#endif /* __ZEPHYR__ */
 
 /*! @name UINT16_MAX/UINT32_MAX value */
 /*! @{ */
@@ -257,6 +274,16 @@ typedef int32_t status_t;
 #define UINT32_MAX ((uint32_t)-1)
 #endif
 /*! @} */
+
+/*! Macro to get upper 32 bits of a 64-bit value */
+#if !defined(UINT64_H)
+#define UINT64_H(X)        ((uint32_t)((((uint64_t) (X)) >> 32U) & 0x0FFFFFFFFULL))
+#endif
+
+/*! Macro to get lower 32 bits of a 64-bit value */
+#if !defined(UINT64_L)
+#define UINT64_L(X)        ((uint32_t)(((uint64_t) (X)) & 0x0FFFFFFFFULL))
+#endif
 
 /*!
  * @def SUPPRESS_FALL_THROUGH_WARNING()
@@ -320,6 +347,8 @@ void SDK_DelayAtLeastUs(uint32_t delayTime_us, uint32_t coreClock_Hz);
 #include "fsl_common_dsc.h"
 #elif defined(__XTENSA__)
 #include "fsl_common_dsp.h"
+#elif defined(__riscv)
+#include "fsl_common_riscv.h"
 #else
 #include "fsl_common_arm.h"
 #endif

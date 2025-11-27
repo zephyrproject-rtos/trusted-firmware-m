@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022NXP
+ * Copyright 2016-2023, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#ifndef _FSL_USART_H_
-#define _FSL_USART_H_
+#ifndef FSL_USART_H_
+#define FSL_USART_H_
 
 #include "fsl_common.h"
 
@@ -20,10 +20,10 @@
  ******************************************************************************/
 
 /*! @name Driver version */
-/*@{*/
+/*! @{ */
 /*! @brief USART driver version. */
-#define FSL_USART_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
-/*@}*/
+#define FSL_USART_DRIVER_VERSION (MAKE_VERSION(2, 8, 5))
+/*! @} */
 
 #define USART_FIFOTRIG_TXLVL_GET(base) (((base)->FIFOTRIG & USART_FIFOTRIG_TXLVL_MASK) >> USART_FIFOTRIG_TXLVL_SHIFT)
 #define USART_FIFOTRIG_RXLVL_GET(base) (((base)->FIFOTRIG & USART_FIFOTRIG_RXLVL_MASK) >> USART_FIFOTRIG_RXLVL_SHIFT)
@@ -163,7 +163,7 @@ enum _usart_interrupt_enable
  */
 enum _usart_flags
 {
-    kUSART_TxError            = (USART_FIFOSTAT_TXERR_MASK),       /*!< TEERR bit, sets if TX buffer is error */
+    kUSART_TxError            = (USART_FIFOSTAT_TXERR_MASK),       /*!< TXERR bit, sets if TX buffer is error */
     kUSART_RxError            = (USART_FIFOSTAT_RXERR_MASK),       /*!< RXERR bit, sets if RX buffer is error */
     kUSART_TxFifoEmptyFlag    = (USART_FIFOSTAT_TXEMPTY_MASK),     /*!< TXEMPTY bit, sets if TX buffer is empty */
     kUSART_TxFifoNotFullFlag  = (USART_FIFOSTAT_TXNOTFULL_MASK),   /*!< TXNOTFULL bit, sets if TX buffer is not full */
@@ -349,7 +349,7 @@ void USART_CalcTimeoutConfig(uint32_t target_us,
  * @param base USART peripheral base address.
  * @param config pointer to receive timeout configuration structure.
  */
-void USART_SetRxTimeoutConfig(USART_Type *base, usart_rx_timeout_config *config);
+void USART_SetRxTimeoutConfig(USART_Type *base, const usart_rx_timeout_config *config);
 #endif
 /*!
  * @brief Deinitializes a USART instance.
@@ -466,7 +466,7 @@ static inline void USART_EnableMatchAddress(USART_Type *base, bool match)
     }
 }
 
-/* @} */
+/*! @} */
 
 /*!
  * @name Status
@@ -498,10 +498,8 @@ static inline uint32_t USART_GetStatusFlags(USART_Type *base)
 /*!
  * @brief Clear USART status flags.
  *
- * This function clear supported USART status flags
- * Flags that can be cleared or set are:
- *      kUSART_TxError
- *      kUSART_RxError
+ * This function clear supported USART status flags.
+ * The mask is a logical OR of enumeration members. See @ref kUSART_AllClearFlags.
  * For example:
  * @code
  *     USART_ClearStatusFlags(USART1, kUSART_TxError | kUSART_RxError)
@@ -519,7 +517,7 @@ static inline void USART_ClearStatusFlags(USART_Type *base, uint32_t mask)
     base->FIFOSTAT = mask & (USART_FIFOSTAT_TXERR_MASK | USART_FIFOSTAT_RXERR_MASK);
 }
 
-/* @} */
+/*! @} */
 
 /*!
  * @name Interrupts
@@ -582,6 +580,8 @@ static inline uint32_t USART_GetEnabledInterrupts(USART_Type *base)
  */
 static inline void USART_EnableTxDMA(USART_Type *base, bool enable)
 {
+    uint32_t globalMask = DisableGlobalIRQ();
+
     if (enable)
     {
         base->FIFOCFG |= USART_FIFOCFG_DMATX_MASK;
@@ -590,6 +590,8 @@ static inline void USART_EnableTxDMA(USART_Type *base, bool enable)
     {
         base->FIFOCFG &= ~(USART_FIFOCFG_DMATX_MASK);
     }
+
+    EnableGlobalIRQ(globalMask);
 }
 
 /*!
@@ -597,6 +599,8 @@ static inline void USART_EnableTxDMA(USART_Type *base, bool enable)
  */
 static inline void USART_EnableRxDMA(USART_Type *base, bool enable)
 {
+    uint32_t globalMask = DisableGlobalIRQ();
+
     if (enable)
     {
         base->FIFOCFG |= USART_FIFOCFG_DMARX_MASK;
@@ -605,6 +609,8 @@ static inline void USART_EnableRxDMA(USART_Type *base, bool enable)
     {
         base->FIFOCFG &= ~(USART_FIFOCFG_DMARX_MASK);
     }
+
+    EnableGlobalIRQ(globalMask);
 }
 
 /*!
@@ -690,7 +696,7 @@ static inline void USART_SetTxFifoWatermark(USART_Type *base, uint8_t water)
     assert(water <= (USART_FIFOTRIG_TXLVL_MASK >> USART_FIFOTRIG_TXLVL_SHIFT));
     base->FIFOTRIG = (base->FIFOTRIG & ~USART_FIFOTRIG_TXLVL_MASK) | USART_FIFOTRIG_TXLVL(water);
 }
-/* @} */
+/*! @} */
 
 /*!
  * @name Bus Operations
@@ -788,7 +794,7 @@ status_t USART_WriteBlocking(USART_Type *base, const uint8_t *data, size_t lengt
  */
 status_t USART_ReadBlocking(USART_Type *base, uint8_t *data, size_t length);
 
-/* @} */
+/*! @} */
 
 /*!
  * @name Transactional
@@ -960,7 +966,7 @@ status_t USART_TransferGetReceiveCount(USART_Type *base, usart_handle_t *handle,
  */
 void USART_TransferHandleIRQ(USART_Type *base, usart_handle_t *handle);
 
-/* @} */
+/*! @} */
 
 #if defined(__cplusplus)
 }
@@ -968,4 +974,4 @@ void USART_TransferHandleIRQ(USART_Type *base, usart_handle_t *handle);
 
 /*! @}*/
 
-#endif /* _FSL_USART_H_ */
+#endif /* FSL_USART_H_ */

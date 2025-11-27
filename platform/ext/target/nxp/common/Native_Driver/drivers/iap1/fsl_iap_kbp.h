@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Freescale Semiconductor, Inc.
+ * Copyright 2020-2021 NXP
  * All rights reserved.
  *
  *
