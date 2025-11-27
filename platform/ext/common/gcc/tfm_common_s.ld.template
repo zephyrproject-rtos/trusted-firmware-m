@@ -192,6 +192,9 @@ SECTIONS
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
 
+    /* Reset current position for subsequent sections */
+    . = LOADADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
+
     ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 
     Image$$ER_CODE_SRAM$$RO$$Base = ADDR(.ER_CODE_SRAM);
@@ -217,6 +220,7 @@ SECTIONS
         . = ALIGN(4);
         /* preinit data */
         PROVIDE_HIDDEN (__preinit_array_start = .);
+        PROVIDE(__bothinit_array_start = __preinit_array_start);
         KEEP(*(.preinit_array))
         PROVIDE_HIDDEN (__preinit_array_end = .);
 
@@ -226,6 +230,7 @@ SECTIONS
         KEEP(*(SORT(.init_array.*)))
         KEEP(*(.init_array))
         PROVIDE_HIDDEN (__init_array_end = .);
+        PROVIDE(__bothinit_array_end = __init_array_end);
 
         . = ALIGN(4);
         /* finit data */
@@ -265,6 +270,9 @@ SECTIONS
         /* .zero.table */
         . = ALIGN(4);
         __zero_table_start__ = .;
+        LONG (ADDR(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
+
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
@@ -383,8 +391,10 @@ SECTIONS
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
+        PROVIDE(__heap_start = __HeapBase);
         . += __heap_size__;
         __HeapLimit = .;
+        PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 #endif
