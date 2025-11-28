@@ -6,7 +6,6 @@
  */
 
 #include <stdint.h>
-#include "compiler_ext_defs.h"
 #include "config_spm.h"
 #include "runtime_defs.h"
 #include "svc_num.h"
@@ -15,6 +14,7 @@
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
+#include "compiler_ext_defs.h"
 
 __naked uint32_t psa_framework_version_svc(void)
 {

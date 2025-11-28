@@ -28,7 +28,7 @@ endif()
 
 target_sources(platform_s
     PRIVATE
-        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
+        ${HAL_NORDIC_PATH}/nrfx/bsp/stable/mdk/system_nrf91.c
 )
 
 target_compile_definitions(platform_s
@@ -46,7 +46,7 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
+            ${HAL_NORDIC_PATH}/nrfx/bsp/stable/mdk/system_nrf91.c
     )
 
     target_compile_definitions(platform_bl2
@@ -64,8 +64,7 @@ target_sources(tfm_spm
 
 #========================= Files for building NS side platform ================#
 
-install(FILES       nrfx_config_nrf91.h
-                    ns/CMakeLists.txt
+install(FILES       ns/CMakeLists.txt
                     config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
 )

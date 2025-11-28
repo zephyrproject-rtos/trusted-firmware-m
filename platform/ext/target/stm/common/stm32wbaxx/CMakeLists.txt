@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 # Copyright (c) 2021-2024 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -23,6 +23,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${TFM_OTP_DEFAULT_PROVIONNING}>:TFM_OTP_DEFAULT_PROVIONNING>
         $<$<BOOL:${DEFAULT_SHARED_DATA}>:DEFAULT_SHARED_DATA>
         $<$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>:FLASH_LAYOUT_FOR_TEST>
+        STM32_FLASH_LAYOUT_BEGIN_OFFSET=${STM32_FLASH_LAYOUT_BEGIN_OFFSET}
 )
 
 #========================= Platform common defs ===============================#
@@ -50,6 +51,7 @@ target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TFM_OTP_DEFAULT_PROVIONNING}>:TFM_OTP_DEFAULT_PROVIONNING>
         $<$<BOOL:${DEFAULT_SHARED_DATA}>:DEFAULT_SHARED_DATA>
+        STM32_FLASH_LAYOUT_BEGIN_OFFSET=${STM32_FLASH_LAYOUT_BEGIN_OFFSET}
 )
 
 target_sources(platform_s
@@ -60,7 +62,6 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
-        ${STM_COMMON_DIR}/hal/provision/otp_provision.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_flash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_flash_ex.c
@@ -89,14 +90,9 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_cryp_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_i2c.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_i2c_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32wbaxx_hal_icache.c
         ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
 )
-
-# To compile FWU support and test, should add mcuboot_config.h file in mcuboot_config folder
-file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/../build-spe/bl2/ext/mcuboot/mcuboot_config)
-configure_file(   ${CMAKE_CURRENT_SOURCE_DIR}/boards/mcuboot_config.h
-                  ${CMAKE_INSTALL_PREFIX}/../build-spe/bl2/ext/mcuboot/mcuboot_config
-                  @ONLY)
 
 target_compile_options(platform_s
     PUBLIC
@@ -233,6 +229,7 @@ else()
 endif()
 
 set(CONTENT_FOR_PREPROCESSING
+    "#define STM32_FLASH_LAYOUT_BEGIN_OFFSET (${STM32_FLASH_LAYOUT_BEGIN_OFFSET})\n\n"
     "#include \"flash_layout.h\"\n\n"
     "enum image_attributes {\n"
     "\tRE_IMAGE_FLASH_ADDRESS_SECURE = (FLASH_BASE_ADDRESS+FLASH_AREA_0_OFFSET),\n"
@@ -244,10 +241,12 @@ set(CONTENT_FOR_PREPROCESSING
     "#else\n"
     "\tRE_BL2_PROVISION_ADDRESS = 0x0,\n"
     "#endif\n"
-    "\tRE_BOOT_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_0_OFFSET),\n"
+    "\tRE_BOOT_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_0_OFFSET+BL2_HEADER_SIZE),\n"
     "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_OTP_NV_COUNTERS_AREA_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_PS = (FLASH_BASE_ADDRESS+FLASH_PS_AREA_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET),\n}\;"
+    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET),\n"
+    "\tRE_IMAGE_FLASH_SECURE_LAST_OFFSET = (FLASH_AREA_1_OFFSET-0x1),\n"
+    "}\;"
 )
 
 string(CONCAT BL2_PREPROCESSING ${FLAGS_FOR_BL2_PREPROCESSING}

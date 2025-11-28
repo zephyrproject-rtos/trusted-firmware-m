@@ -35,6 +35,9 @@
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
 
+#define NRF_UARTE_INSTANCE(id)	   NRF_UARTE##id
+#define NRF_UARTE_INSTANCE_GET(id) NRF_UARTE_INSTANCE(id)
+
 #ifndef NRF_SECURE_UART_INSTANCE
 #define TFM_DRIVER_STDIO    Driver_USART1
 #elif NRF_SECURE_UART_INSTANCE == 0
@@ -56,15 +59,21 @@
 /* Only UART20 and UART30 are supported for TF-M tests, which are the
  * Non-secure applications build via the TF-M build system
  */
-#ifdef NRF54L15_XXAA
+#if defined(NRF54L_SERIES)
 #if NRF_SECURE_UART_INSTANCE == 20
 #define NS_DRIVER_STDIO     Driver_USART30
 #else
 #define NS_DRIVER_STDIO     Driver_USART20
 #endif
+#elif defined(NRF71_SERIES)
+#if defined(NRF_SECURE_UART_INSTANCE) && (NRF_SECURE_UART_INSTANCE == 00)
+#define NS_DRIVER_STDIO     Driver_USART30
+#else
+#define NS_DRIVER_STDIO     Driver_USART00
+#endif
 #else
 #define NS_DRIVER_STDIO     Driver_USART0
-#endif /* NRF54L15_XXAA */
+#endif /* NRF54L_SERIES or NRF71_SERIES */
 
 /**
  * \brief Store the addresses of memory regions
