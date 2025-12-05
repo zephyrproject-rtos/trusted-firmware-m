@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,34 +30,54 @@
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_ERROR
-# define ERROR(...)    tfm_log(LOG_MARKER_ERROR __VA_ARGS__)
+# define ERROR(...)         tfm_log(LOG_MARKER_ERROR __VA_ARGS__)
+# define ERROR_RAW(...)     tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #else
-# define ERROR(...)    no_tfm_log(LOG_MARKER_ERROR __VA_ARGS__)
+# define ERROR(...)         no_tfm_log(LOG_MARKER_ERROR __VA_ARGS__)
+# define ERROR_RAW(...)     no_tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_NOTICE
-# define NOTICE(...)    tfm_log(LOG_MARKER_NOTICE __VA_ARGS__)
+# define NOTICE(...)        tfm_log(LOG_MARKER_NOTICE __VA_ARGS__)
+# define NOTICE_RAW(...)    tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #else
-# define NOTICE(...)    no_tfm_log(LOG_MARKER_NOTICE __VA_ARGS__)
+# define NOTICE(...)        no_tfm_log(LOG_MARKER_NOTICE __VA_ARGS__)
+# define NOTICE_RAW(...)    no_tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_WARNING
-# define WARN(...)    tfm_log(LOG_MARKER_WARNING __VA_ARGS__)
+# define WARN(...)      tfm_log(LOG_MARKER_WARNING __VA_ARGS__)
+# define WARN_RAW(...)  tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #else
-# define WARN(...)    no_tfm_log(LOG_MARKER_WARNING __VA_ARGS__)
+# define WARN(...)      no_tfm_log(LOG_MARKER_WARNING __VA_ARGS__)
+# define WARN_RAW(...)  no_tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #endif
 
 #if LOG_LEVEL >= LOG_LEVEL_INFO
-# define INFO(...)    tfm_log(LOG_MARKER_INFO __VA_ARGS__)
+# define INFO(...)      tfm_log(LOG_MARKER_INFO __VA_ARGS__)
+# define INFO_RAW(...)  tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #else
-# define INFO(...)    no_tfm_log(LOG_MARKER_INFO __VA_ARGS__)
+# define INFO(...)      no_tfm_log(LOG_MARKER_INFO __VA_ARGS__)
+# define INFO_RAW(...)  no_tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #endif
 
+/* FixMe: psa_arch_tests currently defines a VERBOSE macro in the build
+ * system to specify the verbosity of its logging. Usually this would be
+ * fine as the psa_arch_tests do not use tfm_log at all. However, because of
+ * the redefinition of 'assert.h' in the SPM, we end up indirectly including
+ * tfm_log.h via various system headers. This should be fixed by reworking
+ * the SPM 'assert.h' implementation but for now, avoid redefining the
+ * VERBOSE macro
+ */
+#ifndef VERBOSE
 #if LOG_LEVEL >= LOG_LEVEL_VERBOSE
-# define VERBOSE(...)    tfm_log(LOG_MARKER_VERBOSE __VA_ARGS__)
+# define VERBOSE(...)       tfm_log(LOG_MARKER_VERBOSE __VA_ARGS__)
+# define VERBOSE_RAW(...)   tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #else
-# define VERBOSE(...)    no_tfm_log(LOG_MARKER_VERBOSE __VA_ARGS__)
+# define VERBOSE(...)       no_tfm_log(LOG_MARKER_VERBOSE __VA_ARGS__)
+# define VERBOSE_RAW(...)   no_tfm_log(LOG_MARKER_RAW __VA_ARGS__)
 #endif
+#endif /* VERBOSE */
 
 #if defined(__ICCARM__)
 #pragma __printf_args

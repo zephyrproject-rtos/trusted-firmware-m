@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
- * Copyright 2020-2022 NXP. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ * Copyright 2020-2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,12 +14,21 @@
 #include "fih.h"
 #include "region_defs.h"
 #include "region.h"
-#include "tfm_spm_log.h"
+#include "tfm_log.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
+#ifdef TFM_WIFI_FLASH_REGION
+REGION_DECLARE(Load$$LR$$, LR_WIFI_FLASH_REGION, $$Base);
+#endif /* TFM_WIFI_FLASH_REGION */
+#ifdef TFM_EL2GO_DATA_IMPORT_REGION
+REGION_DECLARE(Load$$LR$$, LR_EL2GO_DATA_IMPORT_REGION, $$Base);
+#endif // TFM_EL2GO_DATA_IMPORT_REGION
+#ifdef TFM_EL2GO_CMPA_REGION
+REGION_DECLARE(Load$$LR$$, LR_EL2GO_CMPA_REGION, $$Base);
+#endif // TFM_EL2GO_CMPA_REGION
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
@@ -41,7 +50,24 @@ const struct memory_region_limits memory_regions = {
 
     .veneer_limit =
         (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
-
+#ifdef TFM_WIFI_FLASH_REGION
+    .wifi_flash_region_base   =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_WIFI_FLASH_REGION, $$Base),
+    .wifi_flash_region_limit  =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_WIFI_FLASH_REGION, $$Base) + WIFI_FLASH_REGION_SIZE - 1,
+#endif /* TFM_WIFI_FLASH_REGION */
+#ifdef TFM_EL2GO_DATA_IMPORT_REGION
+    .el2go_data_import_region_base   =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_EL2GO_DATA_IMPORT_REGION, $$Base),
+    .el2go_data_import_region_limit  =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_EL2GO_DATA_IMPORT_REGION, $$Base) + EL2GO_DATA_IMPORT_REGION_SIZE - 1,
+#endif // TFM_EL2GO_DATA_IMPORT_REGION
+#ifdef TFM_EL2GO_CMPA_REGION
+    .el2go_cmpa_region_base   =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_EL2GO_CMPA_REGION, $$Base),
+    .el2go_cmpa_region_limit  =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_EL2GO_CMPA_REGION, $$Base) + EL2GO_CMPA_REGION_SIZE - 1,
+#endif // TFM_EL2GO_CMPA_REGION
 #ifdef BL2
     .secondary_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
@@ -157,8 +183,10 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
         NVIC->ITNS[i] = 0xFFFFFFFF;
     }
 
+#if defined(SEC_VIO_IRQn)
     /* Make sure that MPC and PPC are targeted to S state */
     NVIC_ClearTargetState(SEC_VIO_IRQn);
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -166,8 +194,10 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/
 enum tfm_plat_err_t nvic_interrupt_enable(void)
 {
+#if defined(SEC_VIO_IRQn)
     /* MPC/PPC interrupt enabling */
     NVIC_EnableIRQ(SEC_VIO_IRQn);
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -193,13 +223,13 @@ static void fih_cdog_init(void)
     conf.address    = kCDOG_FaultCtrl_EnableInterrupt;
     conf.irq_pause  = kCDOG_IrqPauseCtrl_Pause;
     conf.debug_halt = kCDOG_DebugHaltCtrl_Pause;
-    conf.lock       = kCDOG_LockCtrl_Lock; /* Lock */ //kCDOG_LockCtrl_Unlock;
+    conf.lock       = kCDOG_LockCtrl_Lock; /* Lock */
 
     /* Clears pending FLAGS and sets CONTROL register */
     result = CDOG_Init(CDOG, &conf);
     if (result != kStatus_Success)
     {
-        SPMLOG_ERRMSG("[CDOG] Init error.\r\n");
+        ERROR_RAW("[CDOG] Init error.\n");
         FIH_PANIC;
     }
 
@@ -210,33 +240,33 @@ void CDOG_DriverIRQHandler(void)
 {
     NVIC_ClearPendingIRQ(CDOG_IRQn);
 
-    SPMLOG_ERRMSG("[CDOG IRQ] ");
+    ERROR_RAW("[CDOG IRQ] ");
 
     if ((CDOG->FLAGS & CDOG_FLAGS_TO_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("Timeout ");
+        ERROR_RAW("Timeout ");
     }
     if ((CDOG->FLAGS & CDOG_FLAGS_MISCOM_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("Miscompare ");
+        ERROR_RAW("Miscompare ");
     }
     if ((CDOG->FLAGS & CDOG_FLAGS_SEQ_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("Sequence ");
+        ERROR_RAW("Sequence ");
     }
     if ((CDOG->FLAGS & CDOG_FLAGS_CNT_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("Control ");
+        ERROR_RAW("Control ");
     }
     if ((CDOG->FLAGS & CDOG_FLAGS_STATE_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("State ");
+        ERROR_RAW("State ");
     }
     if ((CDOG->FLAGS & CDOG_FLAGS_ADDR_FLAG_MASK))
     {
-        SPMLOG_ERRMSG("Address ");
+        ERROR_RAW("Address ");
     }
-    SPMLOG_ERRMSG("fault occured\r\n");
+    ERROR_RAW("fault occured\n");
 
     FIH_PANIC;
 }
@@ -274,7 +304,7 @@ void fih_cfi_decrement(void)
 {
     /* HW */
     /* Start if in the IDLE state */
-    if((CDOG->STATUS & 0xF0000000) == 0x50000000) {
+    if((CDOG->STATUS & CDOG_STATUS_CURST_MASK) == CDOG_STATUS_CURST(0x5)) {
         CDOG_Start(CDOG, 0xFFFFFFFF, (fih_int_decode(_fih_cfi_ctr)));
     }
     CDOG_Sub1(CDOG);

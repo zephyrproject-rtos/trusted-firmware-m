@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2024, Arm Limited. All rights reserved.
+# SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -20,9 +20,12 @@ target_include_directories(tfm_log_headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 )
 
+target_link_libraries(tfm_log_headers
+    INTERFACE
+        tfm_vprintf_headers
+)
+
 target_link_libraries(tfm_log
     INTERFACE
         tfm_log_headers
-        tfm_vprintf
-        platform_common_interface
 )

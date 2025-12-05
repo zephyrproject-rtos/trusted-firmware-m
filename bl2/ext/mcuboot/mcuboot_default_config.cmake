@@ -17,7 +17,7 @@ set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     1           CACHE STRING    "ID of the f
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
 set(MCUBOOT_EXECUTION_SLOT              1           CACHE STRING    "Slot from which to execute the image, used for XIP mode")
-set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]")
+set(TFM_BL2_LOG_LEVEL                   LOG_LEVEL_INFO      CACHE STRING    "Level of logging to use for BL2: LOG_LEVEL_[NONE, ERROR, WARNING, INFO, VERBOSE]")
 set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
 set(MCUBOOT_BUILTIN_KEY                 OFF         CACHE BOOL      "Use builtin key(s) for validation, no public key data is embedded into the image metadata")
 set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
