@@ -1,0 +1,15 @@
+/*!
+@page driver_log Driver Change Log
+@section clock CLOCK
+  The current CLOCK driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+
+@section reset RESET
+  The current RESET driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+
+*/

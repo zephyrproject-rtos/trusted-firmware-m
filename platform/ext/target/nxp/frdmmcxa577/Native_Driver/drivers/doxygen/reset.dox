@@ -1,0 +1,5 @@
+/*!
+@defgroup reset Reset Driver
+@details Reset driver supports peripheral reset and system reset.
+
+*/

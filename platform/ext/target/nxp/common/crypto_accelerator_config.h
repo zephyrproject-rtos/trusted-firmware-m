@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
- * Copyright 0223 NXP. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ * Copyright 2023, 2026 NXP.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,6 +25,9 @@ extern "C" {
 //#define MBEDTLS_xxx_ALT
 //#endif /* PSA_WANT_ALG_xxx */
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "platform_psa_hw_accel.h"
+#endif
 
 #ifdef __cplusplus
 }

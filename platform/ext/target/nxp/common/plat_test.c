@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
- * Copyright 2019-2020, 2025 NXP
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
+ * Copyright 2019-2020, 2025-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -60,6 +60,10 @@ void tfm_plat_test_secure_timer_start(void)
     CLOCK_SetClkDiv(CTIMER_CLK_DIVIDE, 1u);
 #endif
 
+#if defined(MCXA577_SERIES)
+    CLOCK_SetClockDiv(CTIMER_CLK_DIVIDE, 1u);
+#endif
+
     CLOCK_AttachClk(CTIMER_CLK_ATTACH);
 
     CTIMER_GetDefaultConfig(&config);
@@ -105,8 +109,12 @@ void tfm_plat_test_non_secure_timer_start(void)
     ctimer_match_config_t matchConfig;
     ctimer_config_t config;
 
-#if defined(CPU_MCXN947VDF_cm33_core0)    
+#if defined(CPU_MCXN947VDF_cm33_core0)
     CLOCK_SetClkDiv(CTIMER_NS_CLK_DIVIDE, 1u);
+#endif
+
+#if defined(MCXA577_SERIES)
+    CLOCK_SetClockDiv(CTIMER_NS_CLK_DIVIDE, 1u);
 #endif
 
     /* Use 12 MHz clock for some of the Ctimer */

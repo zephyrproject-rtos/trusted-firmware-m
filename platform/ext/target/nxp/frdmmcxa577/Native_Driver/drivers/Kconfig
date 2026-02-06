@@ -1,0 +1,29 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+menu "Device specific drivers configuration"
+
+    rsource "romapi/Kconfig"
+
+    config MCUX_COMPONENT_driver.clock
+         bool "clock"
+         default y
+
+    config MCUX_COMPONENT_driver.edma_soc
+         bool "edma_soc"
+         default n
+
+    config MCUX_COMPONENT_driver.inputmux_connections
+         bool "inputmux_connections"
+         default y
+
+    config MCUX_COMPONENT_driver.reset
+         bool "reset"
+         default y
+
+    config MCUX_COMPONENT_driver.trdc_soc
+         bool "trdc_soc"
+         default n
+
+endmenu
