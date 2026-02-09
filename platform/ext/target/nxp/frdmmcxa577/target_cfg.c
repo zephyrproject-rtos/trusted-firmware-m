@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright 2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -306,6 +306,15 @@ int32_t mpc_init_cfg(void)
 
     enable_mem_rule_for_partition(memory_regions.non_secure_partition_base, memory_regions.non_secure_partition_limit);
 
+#ifdef BL2 /* Set secondary image region to NS, when BL2 is enabled */
+    /* The regions have to be alligned to 32 kB to cover the AHB Flash Region. */
+    assert(memory_regions.secondary_partition_base >= NS_ROM_ALIAS_BASE);
+    assert(((memory_regions.secondary_partition_base - NS_ROM_ALIAS_BASE) % FLASH_SUBREGION_SIZE) == 0);
+    assert(((memory_regions.secondary_partition_limit - NS_ROM_ALIAS_BASE + 1) % FLASH_SUBREGION_SIZE)
+               == 0);
+    enable_mem_rule_for_partition(memory_regions.secondary_partition_base, memory_regions.secondary_partition_limit);
+
+#endif
     /* == ROM region == */
     /* Each ROM sector is 1 kbytes. There are 32 ROM sectors in total. */
     /* Security control ROM memory configuration (0x3 = all regions set to secure and privileged user access). */

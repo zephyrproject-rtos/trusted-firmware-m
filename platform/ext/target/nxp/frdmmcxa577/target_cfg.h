@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright 2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

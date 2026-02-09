@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
  * Copyright 2026 NXP
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,8 @@
 #include "flash_layout.h"
 
 #ifdef BL2
-#define BL2_HEAP_SIZE           (0x0001000)
-#define BL2_MSP_STACK_SIZE      (0x0001800)
+#define BL2_HEAP_SIZE           (0x0000800)
+#define BL2_MSP_STACK_SIZE      (0x0001000)
 #endif
 
 #ifdef ENABLE_HEAP
@@ -105,6 +105,8 @@
 #define S_RAM_ALIAS(x)  (S_RAM_ALIAS_BASE + (x))
 #define NS_RAM_ALIAS(x) (NS_RAM_ALIAS_BASE + (x))
 
+#define S_DATA_OFFSET    0
+
 /* Secure regions */
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
@@ -112,7 +114,7 @@
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
-#define S_DATA_START    (S_RAM_ALIAS(0x0 + RESERVED_RAM_SIZE ))
+#define S_DATA_START                    (S_RAM_ALIAS(S_DATA_OFFSET + RESERVED_RAM_SIZE))
 
 /* 92 KB ram is for secure application and rest (640 - 112 - 128(sramx)) 400 KB Ram is available for non-secure apps*/
 #define S_DATA_SIZE                     (112 * 1024)
@@ -129,20 +131,20 @@
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-#define NS_DATA_START   (NS_RAM_ALIAS(S_DATA_SIZE + RESERVED_RAM_SIZE))
-#define NS_DATA_SIZE    (TOTAL_RAM_SIZE - S_DATA_SIZE)
-#define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
+#define NS_DATA_START                   (NS_RAM_ALIAS(S_DATA_OFFSET + RESERVED_RAM_SIZE + S_DATA_SIZE))
+#define NS_DATA_SIZE                    (TOTAL_RAM_SIZE - RESERVED_RAM_SIZE - S_DATA_SIZE - S_DATA_OFFSET)
+#define NS_DATA_LIMIT                   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* Flash is divided into 32 kB sub-regions. Each sub-region can be assigned individual
-security tier by programing corresponding registers in secure AHB controller.*/
+security tier by programming corresponding registers in secure AHB controller.*/
 #define FLASH_SUBREGION_SIZE    (0x8000)     /* 32 kB */
 
 #define FLASH_REGION0_SUBREGION_NUMBER          32
 #define FLASH_REGION0_SIZE                      (1024 * 1024)
-                          
+
 #define FLASH_REGION1_SUBREGION_NUMBER          32
-#define FLASH_REGION1_SIZE                      (1024 * 1024)    
-                          
+#define FLASH_REGION1_SIZE                      (1024 * 1024)
+
 /* RAM is divided into 4 kB sub-regions. Each sub-region can be assigned individual
 security tier by programing corresponding registers in secure AHB controller. */
 #define DATA_SUBREGION_SIZE 0x1000      /* 4 KB*/
@@ -171,7 +173,7 @@ security tier by programing corresponding registers in secure AHB controller. */
 /* Code SRAM area */
 #define S_RAM_CODE_SIZE          (0x4000) /* SRAM X region -  (SRAM A0(8KB), SRAM A1(4KB), SRAM A2 (4KB) - total 16 KB*/
 #define S_RAM_CODE_START         (0x14000000 + RESERVED_RAM_SIZE)
-#define NS_RAM_CODE_START        (0x04000000 + RESERVED_RAM_SIZE) 
+#define NS_RAM_CODE_START        (0x04000000 + RESERVED_RAM_SIZE)
 
 #ifdef BL2
 /* Bootloader regions */
@@ -179,8 +181,8 @@ security tier by programing corresponding registers in secure AHB controller. */
 #define BL2_CODE_SIZE     (FLASH_AREA_BL2_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
-#define BL2_DATA_START    (S_RAM_ALIAS(0x0))
-#define BL2_DATA_SIZE     (TOTAL_RAM_SIZE)
+#define BL2_DATA_START    (S_RAM_ALIAS(S_DATA_OFFSET + RESERVED_RAM_SIZE))
+#define BL2_DATA_SIZE     (S_DATA_SIZE) /* Same ram as of secure size*/
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 #endif /* BL2 */
 
