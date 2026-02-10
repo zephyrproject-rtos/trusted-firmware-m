@@ -34,7 +34,11 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
     uint8_t implementation_id[32];
     uint8_t cert_ref[32];
     uint8_t verification_service_url[32];
+#if PROFILE_DEFINITION_LARGE
+    uint8_t profile_definition[48];
+#else
     uint8_t profile_definition[32];
+#endif /* PROFILE_DEFINITION_LARGE */
 
     uint8_t entropy_seed[64];
 };

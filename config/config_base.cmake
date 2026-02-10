@@ -130,6 +130,7 @@ set(PLATFORM_DEFAULT_IMAGE_SIGNING      ON          CACHE BOOL      "Use default
 set(PLATFORM_DEFAULT_PROV_LINKER_SCRIPT ON          CACHE BOOL      "Use default provisioning linker script")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
+set(PROFILE_DEFINITION_LARGE            OFF         CACHE BOOL      "Use the 48 byte 'profile_definition' declaration used between v2.2.0 and v2.2.2")
 
 set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header size")
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
