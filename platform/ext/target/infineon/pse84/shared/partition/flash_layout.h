@@ -136,7 +136,7 @@
 #define TFM_HAL_ITS_BLOCK_SIZE          (0x0800) /* 2 KB */
 #endif /* TFM_HAL_ITS_BLOCK_SIZE */
 /* Number of physical erase sectors per logical FS block */
-#define TFM_HAL_ITS_SECTORS_PER_BLOCK  (2) 
+#define TFM_HAL_ITS_SECTORS_PER_BLOCK  (2)
 
 /* IFX_HAL_ITS_FLASH_RRAM_SECTOR_SIZE is set to TFM_HAL_ITS_BLOCK_SIZE, this way
  * erase_sector operation will be called only once for whole

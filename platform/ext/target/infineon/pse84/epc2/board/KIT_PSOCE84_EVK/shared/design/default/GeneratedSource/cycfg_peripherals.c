@@ -4,14 +4,14 @@
  * Description:
  * Analog configuration
  * This file was automatically generated and should not be modified.
- * Configurator Backend 3.60.0
- * device-db 4.33.0.9315
+ * Configurator Backend 3.70.0
+ * device-db 4.34.0.9502
  * ifx-mcuboot-pse84 1.1.0.349
  * ifx-tf-m 2.1.400.14138
- * mtb-dsl-pse8xxgp 1.1.1.824
+ * mtb-dsl-pse8xxgp 1.2.0.895
  *
  *******************************************************************************
- * Copyright 2025 Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2026 Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -42,21 +42,21 @@ cy_stc_autanalog_cfg_t autonomous_analog_cfg =
     .ac = &CYBSP_AUTONOMOUS_CONTROLLER_cfg,
     .ctb =
     {
-        NULL, 
-        NULL, 
+        NULL,
+        NULL,
     },
     .ptcomp =
     {
-        NULL, 
+        NULL,
     },
     .dac =
     {
-        NULL, 
-        NULL, 
+        NULL,
+        NULL,
     },
     .sar =
     {
-        &CYBSP_SAR_ADC_cfg, 
+        &CYBSP_SAR_ADC_cfg,
     },
 };
 cy_stc_autanalog_stt_t autonomous_analog_stt[] =
@@ -66,21 +66,21 @@ cy_stc_autanalog_stt_t autonomous_analog_stt[] =
         .prb = NULL,
         .ctb =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .ptcomp =
         {
-            NULL, 
+            NULL,
         },
         .dac =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .sar =
         {
-            &CYBSP_SAR_ADC_stt[0U], 
+            &CYBSP_SAR_ADC_stt[0U],
         },
     },
     {
@@ -88,21 +88,21 @@ cy_stc_autanalog_stt_t autonomous_analog_stt[] =
         .prb = NULL,
         .ctb =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .ptcomp =
         {
-            NULL, 
+            NULL,
         },
         .dac =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .sar =
         {
-            &CYBSP_SAR_ADC_stt[1U], 
+            &CYBSP_SAR_ADC_stt[1U],
         },
     },
     {
@@ -110,21 +110,21 @@ cy_stc_autanalog_stt_t autonomous_analog_stt[] =
         .prb = NULL,
         .ctb =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .ptcomp =
         {
-            NULL, 
+            NULL,
         },
         .dac =
         {
-            NULL, 
-            NULL, 
+            NULL,
+            NULL,
         },
         .sar =
         {
-            &CYBSP_SAR_ADC_stt[2U], 
+            &CYBSP_SAR_ADC_stt[2U],
         },
     },
 };
@@ -136,28 +136,29 @@ cy_stc_autanalog_t autonomous_analog_init =
 };
 cy_en_autanalog_ac_out_trigger_mask_t CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[] =
 {
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
-    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY, 
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
+    CY_AUTANALOG_AC_OUT_TRIG_MASK_EMPTY,
 };
 cy_stc_autanalog_ac_t CYBSP_AUTONOMOUS_CONTROLLER_cfg =
 {
-    .gpioOutEn =   CY_AUTANALOG_STT_AC_GPIO_OUT_DISABLED,
+    .gpioOutEn =
+ CY_AUTANALOG_STT_AC_GPIO_OUT_DISABLED,
     .mask =
     {
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[0U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[1U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[2U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[3U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[4U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[5U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[6U], 
-        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[7U], 
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[0U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[1U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[2U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[3U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[4U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[5U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[6U],
+        &CYBSP_AUTONOMOUS_CONTROLLER_out_trig_mask[7U],
     },
     .timer =
     {
@@ -221,23 +222,24 @@ cy_stc_autanalog_sar_sta_hs_t CYBSP_SAR_ADC_sta_hs_cfg =
     .hsVref = CY_AUTANALOG_SAR_VREF_VDDA,
     .hsSampleTime =
     {
-        31U, 
-        31U, 
-        31U, 
-        31U, 
+        31U,
+        31U,
+        31U,
+        31U,
     },
     .hsGpioChan =
     {
-        &CYBSP_SAR_ADC_gpio_ch_cfg[0U], 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
+        &CYBSP_SAR_ADC_gpio_ch_cfg[0U],
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     },
-    .hsGpioResultMask =   CY_AUTANALOG_SAR_CHAN_MASK_GPIO0,
+    .hsGpioResultMask =
+ CY_AUTANALOG_SAR_CHAN_MASK_GPIO0,
 };
 cy_stc_autanalog_sar_sta_t CYBSP_SAR_ADC_sta_cfg =
 {
@@ -251,32 +253,34 @@ cy_stc_autanalog_sar_sta_t CYBSP_SAR_ADC_sta_cfg =
     .shiftMode = false,
     .intMuxChan =
     {
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     },
     .limitCond =
     {
-        NULL, 
-        NULL, 
-        NULL, 
-        NULL, 
+        NULL,
+        NULL,
+        NULL,
+        NULL,
     },
-    .muxResultMask =   CY_AUTANALOG_SAR_CHAN_MASK_MUX_DISABLED,
-    .firResultMask =   CY_AUTANALOG_SAR_MASK_FIR_DISABLED,
+    .muxResultMask =
+ CY_AUTANALOG_SAR_CHAN_MASK_MUX_DISABLED,
+    .firResultMask =
+ CY_AUTANALOG_SAR_MASK_FIR_DISABLED,
 };
 cy_stc_autanalog_sar_seq_tab_hs_t CYBSP_SAR_ADC_seq_hs_cfg[] =
 {

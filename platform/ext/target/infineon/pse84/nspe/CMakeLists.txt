@@ -9,6 +9,7 @@
 cmake_minimum_required(VERSION 3.27.7)
 
 include(../cmake/remote_library)
+include(../cmake/utils.cmake)
 
 include(${IFX_COMMON_SOURCE_DIR}/cmake/utils.cmake)
 
@@ -57,4 +58,3 @@ target_link_libraries(platform_ns
     PUBLIC
         ifx_cmsis_lib
 )
-

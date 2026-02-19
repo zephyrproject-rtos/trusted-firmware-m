@@ -52,37 +52,10 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
        ro object *libtfm_spm*,
 };
 
-/* Unprivilege code covers area from TFM_NS_AGENT_TZ_CODE_START to TFM_UNPRIV_BASE_CODE_END */
-define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT, size = 0 { };
-
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-/*
- * NS Agent TZ unprivileged Secure code.
- *
- * This section should contain code and read-only data that can be used by NS Agent TZ.
- * It can be used by platforms with additional protection hardware to provide extra
- * isolation by separation of regular unprivileged code from NS Agent TZ partition.
- * This section should follow unprivilege code section to share a single MPU entry
- * to allow unprivilage access for both sections.
- */
-define block TFM_NS_AGENT_TZ_CODE_START with alignment = TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT {
-       ro object *libns_agent_tz*,
-       ro object *psa_api_veneers_v80m.*,
-       ro object *psa_api_veneers.*,
+define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
        section SFN,
-};
-
-define block TFM_NS_AGENT_TZ_CODE_END with alignment = TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT, size = 0 { };
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-
-define block TFM_UNPRIV_BASE_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-#ifndef CONFIG_TFM_USE_TRUSTZONE
-       section SFN,
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
        readonly
        };
-
-define block TFM_UNPRIV_BASE_CODE_END with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT, size = 0 { };
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -353,12 +326,6 @@ define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
 #endif
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE_START,
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-       block TFM_NS_AGENT_TZ_CODE_START,
-       block TFM_NS_AGENT_TZ_CODE_END,
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-       block TFM_UNPRIV_BASE_CODE_START,
-       block TFM_UNPRIV_BASE_CODE_END,
        block TFM_UNPRIV_CODE_END,
 
        block TFM_SP_LOAD_LIST,

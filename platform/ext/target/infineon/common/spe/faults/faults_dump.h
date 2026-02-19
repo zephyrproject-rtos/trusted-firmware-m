@@ -54,10 +54,35 @@ __STATIC_FORCEINLINE void ifx_faults_dump_peri_msx_ppc_vio_fault(FAULT_STRUCT_Ty
     ERROR_RAW("\tAddress of the violating transfer: 0x%08x\n", fault_addr);
 
     ERROR_RAW("\tAttributes of the violating transfer: 0x%08x\n", fault_attr);
-    ERROR_RAW("\t\tMaster ID: 0x%08x\n", (fault_attr >> 24) & 0xFFUL);
-    ERROR_RAW("\t\tType: 0x%08x\n", (fault_attr >> 16) & 0x7UL);
-    ERROR_RAW("\t\tTransaction PC: 0x%08x\n", (fault_attr >> 12) & 0xFUL);
-    ERROR_RAW("\t\tPeripheral #: 0x%08x\n", (fault_attr >> 0) & 0x3FFUL);
+    ERROR_RAW("\t\tMaster ID: 0x%08lx\n", (fault_attr >> 24) & 0xFFUL);
+    ERROR_RAW("\t\tType: 0x%08lx\n", (fault_attr >> 16) & 0x7UL);
+    uint32_t type = (fault_attr >> 16) & 0x7UL;
+    switch (type) {
+        case 0x0UL:
+            ERROR_RAW("\t\tNo violation\n");
+            break;
+        case 0x1UL:
+            ERROR_RAW("\t\tSecure/Non-Secure access mismatch\n");
+            break;
+        case 0x2UL:
+            ERROR_RAW("\t\tPrivilege/User access mismatch\n");
+            break;
+        case 0x3UL:
+            ERROR_RAW("\t\tPC access mismatch\n");
+            break;
+        case 0x5UL:
+            ERROR_RAW("\t\tAHB_ERROR response detected\n");
+            break;
+        default:
+            ERROR_RAW("\t\tReserved/Unknown type\n");
+            break;
+    }
+    ERROR_RAW("\t\tTransaction PC: 0x%08lx\n", (fault_attr >> 12) & 0xFUL);
+    if (type == 0x5UL) {
+        ERROR_RAW("\t\tPeripheral # field invalid for AHB_ERROR type\n");
+    } else {
+        ERROR_RAW("\t\tPeripheral #: 0x%08lx\n", (fault_attr >> 0) & 0x3FFUL);
+    }
 }
 
 /**
@@ -91,10 +116,20 @@ __STATIC_FORCEINLINE void ifx_faults_dump_peri_ppc_pc_mask_vio_fault(FAULT_STRUC
     ERROR_RAW("\tAddress of the violating transfer: 0x%08x\n", fault_addr);
 
     ERROR_RAW("\tAttributes of the violating transfer: 0x%08x\n", fault_attr);
-    ERROR_RAW("\t\tMaster ID: 0x%08x\n", (fault_attr >> 24) & 0xFFUL);
-    ERROR_RAW("\t\tType: 0x%08x\n", (fault_attr >> 16) & 0x7UL);
-    ERROR_RAW("\t\tTransaction PC: 0x%08x\n", (fault_attr >> 12) & 0xFUL);
-    ERROR_RAW("\t\tPeripheral #: 0x%08x\n", (fault_attr >> 0) & 0x3FFUL);
+    ERROR_RAW("\t\tMaster ID: 0x%08lx\n", (fault_attr >> 24) & 0xFFUL);
+    ERROR_RAW("\t\tType: 0x%08lx\n", (fault_attr >> 16) & 0x7UL);
+    uint32_t type = (fault_attr >> 16) & 0x7UL;
+    if (type == 0x4UL) {
+        ERROR_RAW("\t\tWrite to PC_MASK from locked PC\n");
+    } else {
+        ERROR_RAW("\t\tReserved/Unknown type\n");
+    }
+    ERROR_RAW("\t\tTransaction PC: 0x%08lx\n", (fault_attr >> 12) & 0xFUL);
+    if (type == 0x5UL) {
+        ERROR_RAW("\t\tPeripheral # field invalid for AHB_ERROR type\n");
+    } else {
+        ERROR_RAW("\t\tPeripheral #: 0x%08lx\n", (fault_attr >> 0) & 0x3FFUL);
+    }
 }
 
 /**
@@ -115,7 +150,7 @@ __STATIC_FORCEINLINE void ifx_faults_dump_peri_gpx_timeout_vio_fault(FAULT_STRUC
     ERROR_RAW("AHB timeout in peripheral group\n");
 
     ERROR_RAW("\tAttributes of the violating transfer: 0x%08x\n", fault_attr);
-    ERROR_RAW("\t\tSlave number: 0x%08x\n", (fault_attr >> 0) & 0xFUL);
+    ERROR_RAW("\t\tSlave number: 0x%08lx\n", (fault_attr >> 0) & 0x1FUL);
 }
 
 /**
@@ -151,9 +186,21 @@ __STATIC_FORCEINLINE void ifx_faults_dump_peri_gpx_ahb_vio_fault(FAULT_STRUCT_Ty
     ERROR_RAW("\tAddress of the violating transfer: 0x%08x\n", fault_addr);
 
     ERROR_RAW("\tAttributes of the violating transfer: 0x%08x\n", fault_attr);
-    ERROR_RAW("\t\tType: 0x%08x\n", (fault_attr >> 30) & 0x3UL);
-    ERROR_RAW("\t\tMaster ID: 0x%08x\n", (fault_attr >> 8) & 0xFFFFUL);
-    ERROR_RAW("\t\tTransaction PC: 0x%08x\n", (fault_attr >> 4) & 0xFUL);
+    ERROR_RAW("\t\tType: 0x%08lx\n", (fault_attr >> 30) & 0x3UL);
+    uint32_t type = (fault_attr >> 30) & 0x3UL;
+    switch (type) {
+        case 0x0UL:
+            ERROR_RAW("\t\tAHB ERROR response\n");
+            break;
+        case 0x1UL:
+            ERROR_RAW("\t\tAHB bus ERROR while peripheral group in reset\n");
+            break;
+        default:
+            ERROR_RAW("\t\tReserved/Unknown type\n");
+            break;
+    }
+    ERROR_RAW("\t\tMaster ID: 0x%08lx\n", (fault_attr >> 8) & 0xFFFFUL);
+    ERROR_RAW("\t\tTransaction PC: 0x%08lx\n", (fault_attr >> 4) & 0xFUL);
     if (fault_attr & (1UL << 2)) {
         ERROR_RAW("\t\tWrite\n");
     } else {
@@ -206,7 +253,7 @@ __STATIC_FORCEINLINE void ifx_faults_dump_mpc_fault(FAULT_STRUCT_Type *base)
     if (fault_attr & (1UL << 30)) {
         ERROR_RAW("\t\tSecurity access violation occurred\n");
     }
-    ERROR_RAW("\t\tTransaction PC: 0x%08x\n", (fault_attr >> 24) & 0xFUL);
+    ERROR_RAW("\t\tTransaction PC: 0x%08lx\n", (fault_attr >> 24) & 0xFUL);
     if (fault_attr & (1UL << 18)) {
         ERROR_RAW("\t\tWrite\n");
     } else {
@@ -222,7 +269,7 @@ __STATIC_FORCEINLINE void ifx_faults_dump_mpc_fault(FAULT_STRUCT_Type *base)
     } else {
         ERROR_RAW("\t\thnonsec clear\n");
     }
-    ERROR_RAW("\t\tMaster ID: 0x%08x\n", (fault_attr >> 0) & 0xFFFFUL);
+    ERROR_RAW("\t\tMaster ID: 0x%08lx\n", (fault_attr >> 0) & 0xFFFFUL);
 }
 
 /**

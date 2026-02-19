@@ -27,6 +27,18 @@
 #include IFX_BSP_CONFIG_HEADER_FILE
 #endif
 
+/* Define NR_MULTI_CALL_CHILD for tests where it is needed. */
+#if defined(IFX_MTB_SRF) && defined(TFM_MULTI_CORE_TEST) && !IFX_LINKER_SCRIPT
+#include "mtb_srf_config.h"
+
+/* NR_MULTI_CALL_CHILD: set to 2 * MTB_SRF_POOL_SIZE to produce a heavier
+ * multithreaded workload for tests. Doubling the pool size increases concurrent
+ * child threads per pool entry to better stress synchronization and resource
+ * handling in multi-core / multi-thread test scenarios.
+ */
+#define NR_MULTI_CALL_CHILD     (MTB_SRF_POOL_SIZE * 2)
+#endif /* defined(IFX_MTB_SRF) && defined(TFM_MULTI_CORE_TEST) && !IFX_LINKER_SCRIPT */
+
 /* Use MPC memory configuration provided by Memory Configurator */
 #define IFX_MEMORY_CONFIGURATOR_MPC_CONFIG
 
@@ -39,9 +51,21 @@
 #define ITS_BUF_SIZE                           ITS_MAX_ASSET_SIZE
 #endif
 
-#if defined(TFM_FIH_PROFILE_ON) && !defined(CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE)
+/* Multi core tests stack sizes */
+#ifndef MULTI_CALL_LIGHT_TEST_STACK_SIZE
+#define MULTI_CALL_LIGHT_TEST_STACK_SIZE      0x400
+#endif /* MULTI_CALL_LIGHT_TEST_STACK_SIZE */
+#ifndef MULTI_CALL_HEAVY_TEST_STACK_SIZE
+#define MULTI_CALL_HEAVY_TEST_STACK_SIZE      0x600
+#endif /* MULTI_CALL_HEAVY_TEST_STACK_SIZE */
+
+#ifndef CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE
+#if TEST_NS_IFX_CODE_COVERAGE
+#define CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE      0xF00
+#elif defined(TFM_FIH_PROFILE_ON)
 #define CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE      0xC00
-#endif
+#endif /* TEST_NS_IFX_CODE_COVERAGE */
+#endif /* CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE */
 
 #if !defined CONFIG_TFM_USE_TRUSTZONE
 #if !defined CONFIG_TFM_SPM_THREAD_STACK_SIZE
@@ -176,7 +200,7 @@ typedef enum
 #endif
 
 #ifndef LOG_PRIV_BUFFER_SIZE
-/* Buffer size used by tfm_log.h API. */
+/* Buffer size used by ifx_tfm_log_shim.h API. */
 #define LOG_PRIV_BUFFER_SIZE                    128U
 #endif
 

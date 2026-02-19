@@ -122,42 +122,9 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /**** APPLICATION RoT CODE + RO-data ends here */
 
     /**** Unprivileged Secure code + RO-data starts here */
-    /* Unprivilege code covers area from TFM_NS_AGENT_TZ_CODE_START to TFM_UNPRIV_BASE_CODE_END */
-    TFM_UNPRIV_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT EMPTY 0x0 {
-        /* Position tag */
-    }
-
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-    /*
-     * NS Agent TZ unprivileged Secure code.
-     *
-     * This section should contain code and read-only data that can be used by NS Agent TZ.
-     * It can be used by platforms with additional protection hardware to provide extra
-     * isolation by separation of regular unprivileged code from NS Agent TZ partition.
-     * This section should follow unprivilege code section to share a single MPU entry
-     * to allow unprivilage access for both sections.
-     */
-    TFM_NS_AGENT_TZ_CODE_START +0 ALIGN TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT {
-        *libns_agent_tz* (+RO-CODE, +RO-DATA)
-        *psa_api_veneers_v80m.* (+RO-CODE, +RO-DATA)
-        *psa_api_veneers.* (+RO-CODE, +RO-DATA)
-       *(SFN)
-    }
-
-    TFM_NS_AGENT_TZ_CODE_END +0 ALIGN TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT EMPTY 0x0 {
-        /* Position tag */
-    }
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-
-    TFM_UNPRIV_BASE_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-#ifndef CONFIG_TFM_USE_TRUSTZONE
+    TFM_UNPRIV_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
         *(SFN)
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
         * (+RO)
-    }
-
-    TFM_UNPRIV_BASE_CODE_END +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT EMPTY 0x0 {
-        /* Position tag */
     }
 
     /*

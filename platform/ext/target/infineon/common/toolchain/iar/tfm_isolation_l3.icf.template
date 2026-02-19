@@ -110,37 +110,10 @@ define block ER_{{partition.manifest.name}}_RO  with alignment = {{ 'TFM_LINKER_
 /**** blocks CODE + RO-data definition ends here*/
 
 /**** Block Unprivileged Secure code + RO-data definition starts here */
-/* Unprivilege code covers area from TFM_NS_AGENT_TZ_CODE_START to TFM_UNPRIV_BASE_CODE_END */
-define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT, size = 0 { };
-
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-/*
- * NS Agent TZ unprivileged Secure code.
- *
- * This section should contain code and read-only data that can be used by NS Agent TZ.
- * It can be used by platforms with additional protection hardware to provide extra
- * isolation by separation of regular unprivileged code from NS Agent TZ partition.
- * This section should follow unprivilege code section to share a single MPU entry
- * to allow unprivilage access for both sections.
- */
-define block TFM_NS_AGENT_TZ_CODE_START with alignment = TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT {
-    ro object *libns_agent_tz*,
-    ro object *psa_api_veneers_v80m.*,
-    ro object *psa_api_veneers.*,
+define block TFM_UNPRIV_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
     section SFN,
-};
-
-define block TFM_NS_AGENT_TZ_CODE_END with alignment = TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT, size = 0 { };
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-
-define block TFM_UNPRIV_BASE_CODE_START with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
-#ifndef CONFIG_TFM_USE_TRUSTZONE
-    section SFN,
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
     readonly
 };
-
-define block TFM_UNPRIV_BASE_CODE_END with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT, size = 0 { };
 
     /*
      * This empty, zero long execution region is here to mark the end address
@@ -149,7 +122,7 @@ define block TFM_UNPRIV_BASE_CODE_END with alignment = TFM_LINKER_UNPRIV_CODE_AL
 define block TFM_UNPRIV_CODE_END with alignment = TFM_LINKER_UNPRIV_CODE_ALIGNMENT, size = 0 { };
 
 /* position tag block : base address of secure data area ( S_DATA_START)*/
-define block PT_SECURE_DATA_START with alignment = TFM_LINKER_SECURE_DATA_ALIGNMENT, size = 0 { };
+define block PT_SECURE_DATA_START with alignment = 32, size = 0 { };
 define block PT_PRIV_RWZI_START with alignment = 32, size = 0 { };
 
 #if CONFIG_TFM_ALLOCATE_SHARED_DATA_SECTION
@@ -258,7 +231,7 @@ define block TFM_SPM_RW_OTHER_RO_END with alignment = TFM_LINKER_SP_META_PTR_ALI
 define block ER_RAM_VECTORS      with alignment = TFM_LINKER_RAM_VECTORS_ALIGNMENT { section .ramvec };
 #endif
 
-define block PT_SRAM_WATERMARK with alignment = TFM_LINKER_SECURE_DATA_ALIGNMENT, size = 0 { };
+define block PT_SRAM_WATERMARK with alignment = 32, size = 0 { };
 
 /* Define Flash content */
 define block LR_CODE with fixed order {
@@ -283,12 +256,6 @@ define block LR_CODE with fixed order {
     {% endif %}
 {% endfor %}
     block TFM_UNPRIV_CODE_START,
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-    block TFM_NS_AGENT_TZ_CODE_START,
-    block TFM_NS_AGENT_TZ_CODE_END,
-#endif /* CONFIG_TFM_USE_TRUSTZONE */
-    block TFM_UNPRIV_BASE_CODE_START,
-    block TFM_UNPRIV_BASE_CODE_END,
     block TFM_UNPRIV_CODE_END,
     block PT_RO_END,
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2023-2026 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -13,6 +13,7 @@
 #include "utilities.h"
 #include "config_impl.h"
 #include "platform_svc_api.h"
+#include "platform_svc_private.h"
 
 __naked int32_t ifx_call_platform_uart_log(const char *str, uint32_t len, uint32_t core_id)
 {

@@ -9,19 +9,6 @@
 
 include(${IFX_COMMON_SOURCE_DIR}/install.cmake)
 
-if (IFX_MTB_BUILD)
-    install(FILES       ${IFX_COMMON_SOURCE_DIR}/mtb/config/PSE84.mk
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/config)
-    if(EXISTS "${IFX_COMMON_SOURCE_DIR}/mtb/config/PSE84-EPC4.mk")
-        install(FILES   ${IFX_COMMON_SOURCE_DIR}/mtb/config/PSE84-EPC4.mk
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/config)
-    endif()
-    if(EXISTS "${IFX_COMMON_SOURCE_DIR}/mtb/config/PSE84-EPC2.mk")
-        install(FILES   ${IFX_COMMON_SOURCE_DIR}/mtb/config/PSE84-EPC2.mk
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/config)
-    endif()
-endif()
-
 if (NOT PLATFORM_DEFAULT_CRYPTO_KEYS)
     # Platform specific key IDs header
     install(FILES       ${IFX_PLATFORM_SOURCE_DIR}/spe/services/crypto/tfm_builtin_key_ids.h

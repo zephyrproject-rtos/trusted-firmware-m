@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2025 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2023-2026 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
@@ -48,13 +48,6 @@ if (TFM_PARTITION_CRYPTO)
         )
     endif()
 
-    if(DEFINED IFX_MBEDTLS_CONFIG_PATH)
-        target_compile_definitions(tfm_config
-            INTERFACE
-                $<BUILD_INTERFACE:IFX_MBEDTLS_CONFIG_PATH="${IFX_MBEDTLS_CONFIG_PATH}">
-        )
-    endif()
-
     target_compile_definitions(platform_crypto_keys
         PRIVATE
             $<$<BOOL:${MBEDTLS_PSA_CRYPTO_PLATFORM_FILE}>:MBEDTLS_PSA_CRYPTO_PLATFORM_FILE="${MBEDTLS_PSA_CRYPTO_PLATFORM_FILE}">
@@ -84,6 +77,11 @@ if (TFM_PARTITION_CRYPTO)
         target_sources(platform_crypto_keys
             PRIVATE
                 crypto/crypto_keys_flash.c
+        )
+
+        target_link_libraries(platform_crypto_keys
+            PRIVATE
+                tfm_helper_lib # For ARRAY_SIZE macro
         )
     endif()
 
@@ -137,10 +135,40 @@ if (TFM_PARTITION_CRYPTO)
         )
     endif()
 
-    target_sources(platform_s
-        PRIVATE
-            $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>>:${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/crypto_nv_seed.c>
+    if (IFX_MBEDTLS_ACCELERATION_ENABLED)
+        target_link_libraries(platform_crypto_keys
+            PUBLIC
+                ifx_mbedtls_acceleration
+        )
+
+        if (IFX_SE_IPC_SERVICE_TYPE STREQUAL "FULL")
+            # SE RT Services Utils provides additional PSA Crypto types. mbedTLS acceleration library
+            # provides PSA crypto API. Thus accelerator library is dependent on SE RT Services Utils.
+            target_link_libraries(ifx_mbedtls_acceleration
+                PUBLIC
+                    ${IFX_SE_RT_SERVICES_UTILS_S_TARGET}
+            )
+        endif()
+    endif()
+
+
+    target_compile_definitions(psa_crypto_config
+        INTERFACE
+            $<BUILD_INTERFACE:$<$<BOOL:${CRYPTO_HW_ACCELERATOR_CONFIG}>:CRYPTO_HW_ACCELERATOR_CONFIG="${CRYPTO_HW_ACCELERATOR_CONFIG}">>
     )
+
+    if (NOT PLATFORM_DEFAULT_NV_SEED)
+        target_sources(platform_s
+            PRIVATE
+                # Common nv seed functionality
+                ${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/crypto_nv_seed.c
+
+                # NV seed driver depending on acceleration type. Used regardless
+                # of IFX_MBEDTLS_ACCELERATION_ENABLED value.
+                $<$<STREQUAL:${IFX_MBEDTLS_ACCELERATOR_TYPE},MXCRYPTO>:${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/crypto_nv_seed_mxcrypto.c>
+                $<$<STREQUAL:${IFX_MBEDTLS_ACCELERATOR_TYPE},CRYPTOLITE>:${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/crypto_nv_seed_cryptolite.c>
+        )
+    endif()
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
@@ -183,12 +211,6 @@ if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
             ${IFX_COMMON_SOURCE_DIR}/drivers/flash/smif
             ${IFX_COMMON_SOURCE_DIR}/drivers/flash
             ${IFX_COMMON_SOURCE_DIR}/spe/services/its
-    )
-
-    target_link_libraries(tfm_psa_rot_partition_its
-        PRIVATE
-            psa_interface
-    	psa_crypto_config
     )
 endif()
 
@@ -258,6 +280,7 @@ if (TFM_PARTITION_PROTECTED_STORAGE)
             ${IFX_COMMON_SOURCE_DIR}/spe/services/ps/ps_hal.c
             "$<$<IN_LIST:SMIF_MMIO,${IFX_PS_VALID_TYPES}>:${IFX_COMMON_SOURCE_DIR}/spe/services/ps/drivers/ps_smif_driver.c>"
             "$<$<IN_LIST:RRAM,${IFX_PS_VALID_TYPES}>:${IFX_COMMON_SOURCE_DIR}/spe/services/ps/drivers/ps_rram_driver.c>"
+            "$<$<IN_LIST:FLASH,${IFX_PS_VALID_TYPES}>:${IFX_COMMON_SOURCE_DIR}/spe/services/ps/drivers/ps_flash_driver.c>"
     )
 endif()
 

@@ -17,7 +17,7 @@
   "version_major": 0,
   "version_minor": 1,
   "file_list": [
-    # IMPROVEMENT: Use secure linker files from common code, not infineon ones
+    # IMPROVEMENT: (TFM-4582) Use secure linker files from common code, not Infineon ones
     {
         "description": "isolation l3 scatter file",
         "template": "platform/ext/target/infineon/common/toolchain/armclang/tfm_isolation_l3.sct.template",

@@ -529,9 +529,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(const struct partition
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_post_partition_init_hook(void)
 {
     /* Call API to ensure that shared metadata section is RW accessible before
-     * changing it. Do this only if CONFIG_TFM_PARTITION_META is enabled.
-     * Otherwise (in Isolation Level 1) data from this section will be in normal
-     * TFM section which is everyone accessible as it is Isolation Level 1 anyway. */
+     * changing it. */
 #if CONFIG_TFM_PARTITION_META_DYNAMIC_ISOLATION == 1
     tfm_hal_shared_metadata_rw_enable();
 #endif /* CONFIG_TFM_PARTITION_META_DYNAMIC_ISOLATION == 1 */
@@ -540,9 +538,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_post_partition_init_hook(void)
     ifx_spm_state = IFX_SPM_STATE_RUNNING;
 
     /* Call API to ensure that shared metadata section is RO accessible after
-     * changing it. Do this only if CONFIG_TFM_PARTITION_META is enabled.
-     * Otherwise (in Isolation Level 1) data from this section will be in normal
-     * TFM section which is everyone accessible as it is Isolation Level 1 anyway. */
+     * changing it. */
 #if CONFIG_TFM_PARTITION_META_DYNAMIC_ISOLATION == 1
     tfm_hal_shared_metadata_rw_disable();
 #endif /* CONFIG_TFM_PARTITION_META_DYNAMIC_ISOLATION == 1 */

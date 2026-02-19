@@ -12,10 +12,8 @@
 #include "cyip_fault.h"
 #include "exception_info.h"
 #include "faults.h"
-#include "ifx_utils.h"
-#include "ifx_tfm_log_shim.h"
 #include "protection_regions_cfg.h"
-#include "utilities.h"
+#include "ifx_tfm_log_shim.h"
 
 /* Enables BUS, MEM, USG and Secure faults */
 #define SCB_SHCSR_ENABLED_FAULTS    (SCB_SHCSR_USGFAULTENA_Msk | \
@@ -72,7 +70,11 @@ FIH_RET_TYPE(enum tfm_plat_err_t) ifx_faults_cfg(void)
 
 #ifdef IFX_FAULTS_INFO_DUMP
     cy_en_SysFault_source_t fault_source = Cy_SysFault_GetErrorSource(FAULT_STRUCT0);
-    if ((uint8_t)fault_source != CY_SYSFAULT_NO_FAULT) {
+    /* Typecast is necessary because on some platforms CY_SYSFAULT_NO_FAULT is returned
+     * from Cy_SysFault_GetErrorSource() although it is not an enumeral in
+     * cy_en_SysFault_source_t but in others it is
+     */
+    if ((uint8_t)fault_source != (uint8_t)CY_SYSFAULT_NO_FAULT) {
         /* Dump faults captured before reset */
         ERROR_RAW("========================================\n"
                   "Platform Exceptions captured on reset...\n");
@@ -81,7 +83,7 @@ FIH_RET_TYPE(enum tfm_plat_err_t) ifx_faults_cfg(void)
         ERROR_RAW("========================================\n");
     }
 #else
-    while ((uint8_t)Cy_SysFault_GetErrorSource(FAULT_STRUCT0) != CY_SYSFAULT_NO_FAULT) {
+    while ((uint8_t)Cy_SysFault_GetErrorSource(FAULT_STRUCT0) != (uint8_t)CY_SYSFAULT_NO_FAULT) {
         Cy_SysFault_ClearStatus(FAULT_STRUCT0);
     }
 #endif

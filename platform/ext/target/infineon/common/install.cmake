@@ -53,6 +53,16 @@ if(DEFINED IFX_PROJECT_CONFIG_PATH)
                 $<INSTALL_INTERFACE:IFX_PROJECT_CONFIG_PATH="$<INSTALL_PREFIX>/${INSTALL_INTERFACE_INC_DIR}/ifx_project_config.h">)
 endif()
 
+# Install config files and remap psa_crypto_config definitions to point to them
+if(DEFINED CRYPTO_HW_ACCELERATOR_CONFIG)
+        install(FILES ${CRYPTO_HW_ACCELERATOR_CONFIG}
+                RENAME crypto_hw_accelerator_config.h
+                DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+        target_compile_definitions(psa_crypto_config
+                INTERFACE
+                $<INSTALL_INTERFACE:CRYPTO_HW_ACCELERATOR_CONFIG="$<INSTALL_PREFIX>/${INSTALL_INTERFACE_INC_DIR}/crypto_hw_accelerator_config.h">)
+endif()
+
 configure_file(${IFX_COMMON_SOURCE_DIR}/nspe/spe_config.cmake.in
                ${INSTALL_PLATFORM_NS_DIR}/ifx/spe_config.cmake @ONLY)
 
@@ -91,25 +101,6 @@ install(DIRECTORY   ${IFX_BOARD_PATH}/nspe
 
 ################################## Partitions ##################################
 
-if (TFM_PARTITION_CRYPTO)
-    # Install Crypto configuration for MTB non-secure interface
-    if (MBEDTLS_PSA_CRYPTO_PLATFORM_FILE)
-        install(FILES       ${MBEDTLS_PSA_CRYPTO_PLATFORM_FILE}
-                RENAME      tfm_mbedtls_psa_crypto_platform.h
-                DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-    endif()
-
-    if(DEFINED IFX_MBEDTLS_CONFIG_PATH)
-        install(FILES ${IFX_MBEDTLS_CONFIG_PATH}
-                RENAME ifx_mbedtls_config.h
-                DESTINATION ${INSTALL_INTERFACE_INC_DIR}/mbedtls)
-        target_compile_definitions(tfm_config
-            INTERFACE
-                $<INSTALL_INTERFACE:IFX_MBEDTLS_CONFIG_PATH="$<INSTALL_PREFIX>/${INSTALL_INTERFACE_INC_DIR}/mbedtls/ifx_mbedtls_config.h">
-        )
-    endif()
-endif()
-
 if (TFM_PARTITION_NS_AGENT_MAILBOX)
     install(FILES       ${CMAKE_CURRENT_LIST_DIR}/shared/mailbox/platform_multicore.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/multi_core)
@@ -146,12 +137,6 @@ if (TFM_PARTITION_PLATFORM)
                         ${CMAKE_CURRENT_LIST_DIR}/interface/src/ifx_platform_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
-
-# IMPROVEMENT: Ideally Driver_* Files should be used from upstream CMSIS folder
-# as they are installed there any way.
-install(FILES       ${CMSIS_PATH}/CMSIS/Driver/Include/Driver_Common.h
-                    ${CMSIS_PATH}/CMSIS/Driver/Include/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 
 #################################### Tests #####################################
 

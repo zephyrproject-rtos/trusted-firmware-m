@@ -49,3 +49,7 @@ if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/ifx_se_rt_services_utils
     # SE RT Services is used by TF-M secure code only
     add_subdirectory(ifx_se_rt_services_utils "${CMAKE_BINARY_DIR}/ifx_srt")
 endif()
+
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/ifx_mbedtls_acceleration AND TFM_PARTITION_CRYPTO AND IFX_MBEDTLS_ACCELERATION_ENABLED AND IFX_MBEDTLS_ACCELERATOR_TYPE)
+    add_subdirectory(ifx_mbedtls_acceleration "${CMAKE_BINARY_DIR}/ifx_acc")
+endif()

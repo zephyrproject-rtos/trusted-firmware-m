@@ -36,8 +36,7 @@ target_sources(ifx_pdl_ns
         $<$<BOOL:${RAM_VECTORS_SUPPORT}>:${IFX_PDL_LIB_PATH}/drivers/source/cy_sysint_v2.c>
         ${IFX_PDL_LIB_PATH}/drivers/source/cy_syslib.c
         ${IFX_PDL_LIB_PATH}/drivers/source/cy_syspm_${IFX_PDL_CY_SYSPM_VERSION}.c
-        # IMPROVEMENT: Make unconditional once BSP-7614 is fixed
-        $<$<NOT:$<BOOL:${IFX_PDL_EXCLUDE_SYSPM_PDCM}>>:${IFX_PDL_LIB_PATH}/drivers/source/cy_syspm_pdcm.c>
+        ${IFX_PDL_LIB_PATH}/drivers/source/cy_syspm_pdcm.c
         ${IFX_PDL_LIB_PATH}/drivers/source/cy_syspm_ppu.c
         ${IFX_PDL_LIB_PATH}/drivers/source/cy_tcpwm_counter.c
         ${IFX_PDL_LIB_PATH}/drivers/source/cy_trigmux.c
@@ -49,6 +48,8 @@ target_compile_definitions(ifx_pdl_ns
     PRIVATE
         # Align PDL and TFM RAM vector table names.
         $<$<BOOL:${RAM_VECTORS_SUPPORT}>:__ns_vector_table_rw=__vector_table_rw>
+        # Alias __Vectors to __vector_table
+        __Vectors=__vector_table
 )
 if(IFX_MTB_SRF) # MTB SRF specific PDL code
     target_sources(ifx_pdl_ns
@@ -86,7 +87,6 @@ target_compile_options(ifx_pdl_inc_ns
 
 target_link_libraries(ifx_pdl_inc_ns
     INTERFACE
-        # Use CMSIS library maintained by Infineon for NS image
         ifx_cmsis_lib
         ifx_core_lib
         tfm_config
@@ -107,7 +107,6 @@ else()
     target_sources(ifx_pdl_ns
         PRIVATE
             ${IFX_PDL_LIB_PATH}/devices/COMPONENT_${IFX_DEVICE_CATEGORY}/source/cy_device.c
-            ${IFX_PDL_LIB_PATH}/drivers/source/cy_syspm_v2.c
     )
 
     target_include_directories(ifx_pdl_inc_ns

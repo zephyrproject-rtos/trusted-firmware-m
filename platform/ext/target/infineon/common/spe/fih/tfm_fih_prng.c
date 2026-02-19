@@ -1,14 +1,12 @@
 /*
- * Copyright (c) 2023-2025 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2023-2026 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "tfm_fih_platform.h"
-#include "cy_device.h"
-#include "cy_crypto_core_trng.h"
+#include "tfm_fih_trng.h"
 
 #define PRNG_A   13
 #define PRNG_B   17
@@ -17,34 +15,6 @@
 static uint32_t ifx_prng_dwX;
 
 static bool ifx_prng_initialised = false;
-
-
-/*
- * Obtain a 32-bit number from the TRNG
- * Returns 0 on failure.
- */
-static uint32_t ifx_trng(void)
-{
-    cy_en_crypto_status_t status;
-    uint32_t random;
-
-    status = Cy_Crypto_Core_Enable(CRYPTO);
-    if (status != CY_CRYPTO_SUCCESS) {
-        return 0;
-    }
-
-    /* Use TRNG to generate a single random 32-bit number */
-    status = Cy_Crypto_Core_Trng_Ext(CRYPTO, 32, &random);
-    if (status != CY_CRYPTO_SUCCESS) {
-        return 0;
-    }
-
-    /* We're done with the TRNG and Crypto block */
-    Cy_Crypto_Core_Trng_DeInit(CRYPTO);
-    (void)Cy_Crypto_Core_Disable(CRYPTO);
-
-    return random;
-}
 
 /*
  * Return a 32-bit pseudo-random number
@@ -77,7 +47,7 @@ static void ifx_prng_init(void)
     ifx_prng_initialised = true;
 }
 
-int fih_delay_init(void)
+int32_t fih_delay_init(void)
 {
     ifx_prng_init();
 

@@ -9,7 +9,6 @@
 #include "psa/service.h"
 
 #include "ifx_ext_sp_defs.h"
-#include "tfm_log_unpriv.h"
 
 #ifdef IFX_MTB_SRF
 #include "cybsp.h"
@@ -19,8 +18,22 @@
 
 #include <stdio.h>
 
+#if IFX_EXT_SP_REGISTER_USER_SRF_MODULE
+/* User provided SRF module */
+extern mtb_srf_module_s_t ifx_user_srf_module;
+#endif /* IFX_EXT_SP_REGISTER_USER_SRF_MODULE */
+
 psa_status_t ifx_ext_sp_init(void)
 {
+#if IFX_EXT_SP_REGISTER_USER_SRF_MODULE
+    cy_rslt_t result;
+    /* Register the user SRF module */
+    result = mtb_srf_module_register(&cybsp_srf_context, &ifx_user_srf_module);
+    if (result != CY_RSLT_SUCCESS) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+#endif /* IFX_EXT_SP_REGISTER_USER_SRF_MODULE */
+
     /* Initialize the IFX_EXT_SP */
     return PSA_SUCCESS;
 }
