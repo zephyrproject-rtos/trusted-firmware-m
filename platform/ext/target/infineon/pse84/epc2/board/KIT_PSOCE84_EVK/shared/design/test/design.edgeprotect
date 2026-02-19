@@ -30,4 +30,12 @@
             <Param id="ENABLED" value="true"/>
         </Parameters>
     </Personality>
+    <Personality template="tfm.services.custom" version="1.0">
+        <Parameters>
+            <Param id="NAME" value="CUSTOM_PARTITION"/>
+            <Param id="ENABLED" value="true"/>
+            <Param id="CMAKE_VAR" value="TFM_PARTITION_CUSTOM_PARTITION"/>
+            <Param id="REMOVED" value="false"/>
+        </Parameters>
+    </Personality>
 </Configuration>

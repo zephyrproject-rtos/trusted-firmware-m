@@ -21,7 +21,7 @@
         "template": "platform/ext/target/infineon/common/spe/protection/partition_info.template",
         "output": "secure_fw/ifx/partition_info.c"
     },
-    # IMPROVEMENT: Use secure linker files from common code, not infineon ones
+    # IMPROVEMENT: (TFM-4582) Use secure linker files from common code, not Infineon ones
     {
         "description": "isolation l1/l2 scatter file",
         "template": "platform/ext/target/infineon/common/toolchain/armclang/tfm_common_s.sct.template",

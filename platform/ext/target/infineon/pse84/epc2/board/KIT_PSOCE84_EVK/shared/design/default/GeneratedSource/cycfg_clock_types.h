@@ -4,16 +4,23 @@
 
 #include "cy_sysclk.h"
 
+/**  HF Clock Configuration  */
 typedef struct
 {
+    /**  HF clock source  */
     cy_en_clkhf_in_sources_t source;
+    /**  HF clock divider  */
     cy_en_clkhf_dividers_t divider;
 } cycfg_clkhf_config_t;
 
+/**  HF Clock Supervisor Configuration  */
 typedef struct
 {
+    /**  HF Clock Supervisor reference clock  */
     cy_en_clkhf_csv_ref_clk_t refClk;
+    /**  HF Clock Supervisor accuracy  */
     uint32_t accuracy;
+    /**  HF Clock Supervisor action  */
     cy_en_clkhf_csv_action_t action;
 } cycfg_clkhf_csv_config_t;
 

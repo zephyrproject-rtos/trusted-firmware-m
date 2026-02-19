@@ -26,6 +26,7 @@ set(IFX_COMMON_SOURCE_DIR ${CONFIG_SPE_PATH}/platform/ifx)
 include(${IFX_FAMILY_SOURCE_DIR}/shared/cpuarch.cmake)
 
 if (IFX_CORE STREQUAL ${IFX_CM33})
+    # IMPROVEMENT: TFM-4613 Derive IFX_NS_INTERFACE_TZ
     # CM33 core uses TZ agent interface
     set(IFX_NS_INTERFACE_TZ ON)
     add_compile_definitions(IFX_NS_INTERFACE_TZ=1)

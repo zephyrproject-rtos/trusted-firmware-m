@@ -39,7 +39,7 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
 #endif
 {
     timer0_irq.p_ildi = p_ildi;
-    timer0_irq.p_pt = p_pt;
+    timer0_irq.p_pt = (struct partition_t*)p_pt;
 
     NVIC_SetPriority(TFM_TIMER0_IRQ, DEFAULT_IRQ_PRIORITY);
     (void)NVIC_ClearTargetState(TFM_TIMER0_IRQ);

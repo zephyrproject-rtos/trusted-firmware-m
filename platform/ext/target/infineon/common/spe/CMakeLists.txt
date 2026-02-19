@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2023-2025 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2023-2026 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 # SPDX-FileCopyrightText: Copyright The TrustedFirmware-M Contributors
 #
@@ -44,8 +44,6 @@ target_include_directories(platform_s
         $<$<BOOL:${IFX_UART_ENABLED}>:${IFX_COMMON_SOURCE_DIR}/drivers/stdio>
         ${IFX_COMMON_SOURCE_DIR}/utils
         ${MBEDCRYPTO_PATH}/target/infineon/mbedtls
-        ${CMAKE_SOURCE_DIR}/secure_fw/spm/include/boot
-        ${CMAKE_SOURCE_DIR}/secure_fw/spm/include/interface
 )
 
 target_sources(platform_s
@@ -78,6 +76,7 @@ target_link_libraries(platform_s
     PUBLIC
         ifx_pdl_s
         ${IFX_SHARED_RO_DATA_TARGET}
+        tfm_boot_status
 )
 
 # SPRT can be used by ARoT partitions
@@ -109,7 +108,7 @@ target_compile_definitions(tfm_config
     INTERFACE
         ${IFX_BOARD_NAME}
         $<BUILD_INTERFACE:IFX_BSP_CONFIG_HEADER_FILE="${IFX_CONFIG_BSP_PATH}/config_bsp.h">
-        TEST_NS_IFX_CODE_COVERAGE=$<BOOL:${TEST_NS_IFX_CODE_COVERAGE}>
+        $<$<BOOL:${TEST_NS_IFX_CODE_COVERAGE}>:TEST_NS_IFX_CODE_COVERAGE=1>
         $<$<BOOL:${IFX_PRINT_CORE_PREFIX}>:IFX_PRINT_CORE_PREFIX=1>
         $<$<BOOL:${IFX_MTB_SRF}>:IFX_MTB_SRF>
         TEST_NS_IFX_ISOLATION_TEST=$<BOOL:${TEST_NS_IFX_ISOLATION_TEST}>
@@ -165,7 +164,7 @@ configure_file(${IFX_COMMON_SOURCE_DIR}/config/ifx_spe_config.h.in
 # Use normal scatter file for L1 and L2 and generated one for L3
 # IAR is currently not supported in L3
 target_add_scatter_file(tfm_s
-    # IMPROVEMENT: Use secure linker files from common code, not infineon ones
+    # IMPROVEMENT: (TFM-4582) Use secure linker files from common code, not Infineon ones
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${IFX_GENERATED_DIR}/platform/ext/target/infineon/common/toolchain/armclang/tfm_common_s.sct>
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${IFX_GENERATED_DIR}/platform/ext/target/infineon/common/toolchain/gcc/tfm_common_s.ld>
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${IFX_GENERATED_DIR}/platform/ext/target/infineon/common/toolchain/iar/tfm_common_s.icf>
@@ -179,7 +178,6 @@ target_compile_definitions(tfm_s_scatter
     PRIVATE
         IFX_LINKER_SCRIPT=1
         $<$<C_COMPILER_ID:ARMClang>:IFX_ARM_CLANG_LINKER_SCRIPT>
-        TEST_NS_IFX_CODE_COVERAGE=$<BOOL:${TEST_NS_IFX_CODE_COVERAGE}>
 )
 
 ################################ tfm_spm #############################################
@@ -193,7 +191,6 @@ target_sources(tfm_spm
 target_compile_definitions(tfm_spm
     PRIVATE
         $<$<BOOL:${IFX_FAULTS_INFO_DUMP}>:IFX_FAULTS_INFO_DUMP>
-        $<$<BOOL:${TEST_NS_IFX_CODE_COVERAGE}>:TEST_NS_IFX_CODE_COVERAGE=1>
 )
 
 #################################### Shared data #####################################
@@ -215,14 +212,31 @@ target_link_libraries(${IFX_SHARED_RO_DATA_TARGET}
 
 ################################## FIH ###############################################
 
-target_sources(tfm_fih
-    INTERFACE
-        $<$<STREQUAL:${TFM_FIH_PROFILE},HIGH>:${IFX_COMMON_SOURCE_DIR}/spe/fih/tfm_fih_mxcrypto.c>
-)
+if (TFM_FIH_PROFILE STREQUAL "HIGH")
+    target_include_directories(tfm_fih
+        INTERFACE
+            ${IFX_COMMON_SOURCE_DIR}/spe/fih
+    )
+
+    target_sources(tfm_fih
+        INTERFACE
+            # PRNG is always used for FIH delay generation
+            ${IFX_COMMON_SOURCE_DIR}/spe/fih/tfm_fih_prng.c
+
+            # TRNG is used by PRNG and depends on acceleration type. Used
+            # regardless of IFX_MBEDTLS_ACCELERATION_ENABLED value
+            $<$<STREQUAL:${IFX_MBEDTLS_ACCELERATOR_TYPE},MXCRYPTO>:${IFX_COMMON_SOURCE_DIR}/spe/fih/tfm_fih_trng_mxcrypto.c>
+            $<$<STREQUAL:${IFX_MBEDTLS_ACCELERATOR_TYPE},CRYPTOLITE>:${IFX_COMMON_SOURCE_DIR}/spe/fih/tfm_fih_trng_cryptolite.c>
+    )
+
+    target_link_libraries(tfm_fih
+        INTERFACE
+            # FIH delay uses TRNG provided by PDL crypto acceleration driver
+            $<$<BOOL:${IFX_MBEDTLS_ACCELERATION_ENABLED}>:ifx_pdl_mbedtls_acceleration>
+    )
+endif()
 
 target_link_libraries(tfm_fih
     INTERFACE
         ifx_pdl_s
-        # FIH delay uses TRNG provided by PDL crypto acceleration driver
-        $<$<STREQUAL:${TFM_FIH_PROFILE},HIGH>:ifx_pdl_mbedtls_acceleration>
 )

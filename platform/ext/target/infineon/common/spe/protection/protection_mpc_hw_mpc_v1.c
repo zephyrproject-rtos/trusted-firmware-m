@@ -279,7 +279,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) ifx_mpc_verify_static_boundaries(void)
 #ifdef IFX_MEMORY_CONFIGURATOR_MPC_CONFIG
     /* Check violation response provided by Device Configurator */
     for (uint32_t idx = 0UL; idx < cy_mpc_unified_config_count; idx++) {
-        if (!IFX_MPC_IS_EXTERNAL(cy_mpc_unified_config[idx].base))) {
+        if (!IFX_MPC_IS_EXTERNAL(cy_mpc_unified_config[idx].base)) {
             uint32_t response = cy_mpc_unified_config[idx].response ? 1u : 0u;
             if (_FLD2VAL(RAMC_MPC_CFG_RESPONSE,
                          cy_mpc_unified_config[idx].base->CFG) != response) {
@@ -336,9 +336,11 @@ FIH_RET_TYPE(enum tfm_hal_status_t) ifx_mpc_memory_check(const struct ifx_partit
                                                          size_t size,
                                                          uint32_t access_type)
 {
-    const ifx_memory_config_t* mem_region_cfg;
+    ifx_memory_region_split_t splits[IFX_MAX_SPLIT_REGIONS_COUNT] = {0};
+    uint32_t split_count = ARRAY_SIZE(splits);
 #if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
-    const ifx_memory_config_t* mem_region_cfg2;
+    ifx_memory_region_split_t splits2[IFX_MAX_SPLIT_REGIONS_COUNT] = {0};
+    uint32_t split_count2 = ARRAY_SIZE(splits2);
 #endif
 
 #if CONFIG_TFM_PSA_CALL_ADDRESS_REMAP
@@ -378,155 +380,174 @@ FIH_RET_TYPE(enum tfm_hal_status_t) ifx_mpc_memory_check(const struct ifx_partit
     /* CM33 memory list is a comprehensive list of memory regions for the
      * device, protections applied to other memory lists are also applied to CM33
      * memory list so checking only CM 33 list is enough. */
-    mem_region_cfg = ifx_find_memory_config(base, size,
-                                            ifx_memory_cm33_config,
-                                            ifx_memory_cm33_config_count);
-
-#if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
-    (void)fih_delay();
-    mem_region_cfg2 = ifx_find_memory_config(base, size,
-                                            ifx_memory_cm33_config,
-                                            ifx_memory_cm33_config_count);
-    if (mem_region_cfg != mem_region_cfg2) {
-        FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-    }
-#endif
-
-    if (mem_region_cfg == NULL) {
+    enum tfm_hal_status_t res = ifx_split_memory_region_across_mpcs(base, size,
+                                                                    ifx_memory_cm33_config,
+                                                                    ifx_memory_cm33_config_count,
+                                                                    splits, &split_count);
+    if ((res != TFM_HAL_SUCCESS) || (split_count == 0U)) {
         FIH_RET(TFM_HAL_ERROR_INVALID_INPUT);
     }
 
-    uint32_t block_size      = IFX_MPC_BLOCK_SIZE_TO_BYTES(mem_region_cfg->mpc_block_size);
-    uint32_t offset          = IFX_S_ADDRESS_ALIAS(base) - mem_region_cfg->s_address;
-    uint32_t first_block_idx = offset / block_size;
-    uint32_t last_block_idx  = IFX_ROUND_UP_TO_MULTIPLE(offset + size, block_size) / block_size;
-    IFX_FIH_BOOL is_secure = ((access_type & TFM_HAL_ACCESS_NS) == 0U) ? IFX_FIH_TRUE : IFX_FIH_FALSE;
-    fih_int pc               = FIH_INVALID_VALUE;
-
-    pc = IFX_GET_PARTITION_PC(p_info, IFX_FIH_EQ(is_secure, IFX_FIH_TRUE));
-    fih_int_validate(pc);
-
-    cy_en_mpc_sec_attr_t expected_sec_attr = (IS_NS_AGENT(p_info->p_ldinfo) && IFX_FIH_EQ(is_secure, IFX_FIH_FALSE)) ? CY_MPC_NON_SECURE : CY_MPC_SECURE;
-
 #if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
     (void)fih_delay();
-    volatile uint32_t access_type_2 = access_type;
-    IFX_FIH_BOOL is_secure2 = ((access_type_2 & TFM_HAL_ACCESS_NS) == 0U) ? IFX_FIH_TRUE : IFX_FIH_FALSE;
-    if (!IFX_FIH_EQ(is_secure, is_secure2)) {
-        FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+    enum tfm_hal_status_t res2 = ifx_split_memory_region_across_mpcs(base, size,
+                                                                ifx_memory_cm33_config,
+                                                                ifx_memory_cm33_config_count,
+                                                                splits2, &split_count2);
+
+    if ((res2 != TFM_HAL_SUCCESS) || (split_count2 == 0U) || (split_count != split_count2)) {
+        FIH_RET(TFM_HAL_ERROR_INVALID_INPUT);
     }
 
-    volatile uint32_t validated_block_count = 0;
+    for (size_t i = 0; i < split_count2; i++) {
+        if ((splits[i].mpc_config != splits2[i].mpc_config) ||
+        (splits[i].region_address != splits2[i].region_address) ||
+        (splits[i].region_size != splits2[i].region_size)) {
+            FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+        }
+    }
 #endif
 
-    if (IFX_MPC_IS_EXTERNAL(mem_region_cfg->mpc)) {
+    for (size_t i = 0; i < split_count; i++) {
+        /* base and size are overwritten with splits values to ensure that the original
+         * base and size will not be mistakenly used when applying configuration */
+        const ifx_memory_config_t* mem_region_cfg = splits[i].mpc_config;
+        base = splits[i].region_address;
+        size = splits[i].region_size;
+
+        uint32_t block_size      = IFX_MPC_BLOCK_SIZE_TO_BYTES(mem_region_cfg->mpc_block_size);
+        uint32_t offset          = IFX_S_ADDRESS_ALIAS(base) - mem_region_cfg->s_address;
+        uint32_t first_block_idx = offset / block_size;
+        uint32_t last_block_idx  = IFX_ROUND_UP_TO_MULTIPLE(offset + size, block_size) / block_size;
+        IFX_FIH_BOOL is_secure = ((access_type & TFM_HAL_ACCESS_NS) == 0U) ? IFX_FIH_TRUE : IFX_FIH_FALSE;
+        fih_int pc               = FIH_INVALID_VALUE;
+
+        pc = IFX_GET_PARTITION_PC(p_info, IFX_FIH_EQ(is_secure, IFX_FIH_TRUE));
+        fih_int_validate(pc);
+
+        cy_en_mpc_sec_attr_t expected_sec_attr = (IS_NS_AGENT(p_info->p_ldinfo) && IFX_FIH_EQ(is_secure, IFX_FIH_FALSE)) ? CY_MPC_NON_SECURE : CY_MPC_SECURE;
+
+#if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
+        (void)fih_delay();
+        volatile uint32_t access_type_2 = access_type;
+        IFX_FIH_BOOL is_secure2 = ((access_type_2 & TFM_HAL_ACCESS_NS) == 0U) ? IFX_FIH_TRUE : IFX_FIH_FALSE;
+        
+        if (!IFX_FIH_EQ(is_secure, is_secure2)) {
+            FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+        }
+
+        volatile uint32_t validated_block_count = 0;
+#endif
+
+        if (IFX_MPC_IS_EXTERNAL(mem_region_cfg->mpc)) {
 #if IFX_SE_IPC_SERVICE_FULL || IFX_SE_IPC_SERVICE_BASE
-        FIH_RET_TYPE(enum tfm_hal_status_t) ret;
-        FIH_CALL(ifx_mpc_sert_memory_check,
-                ret, p_info, mem_region_cfg, base, size, access_type);
-        FIH_RET(ret);
+            FIH_RET_TYPE(enum tfm_hal_status_t) ret;
+            FIH_CALL(ifx_mpc_sert_memory_check,
+                    ret, p_info, mem_region_cfg, base, size, access_type);
+            FIH_RET(ret);
 #else /* IFX_SE_IPC_SERVICE_FULL || IFX_SE_IPC_SERVICE_BASE */
-        /* If MPC is not controlled by TFM neither by SE RT Services
-         * then the assumption is that partition has no access to it */
-        FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+            /* If MPC is not controlled by TFM neither by SE RT Services
+             * then the assumption is that partition has no access to it */
+            FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
 #endif /* IFX_SE_IPC_SERVICE_FULL || IFX_SE_IPC_SERVICE_BASE */
-    }
+        }
 
 #if IFX_MPC_DRIVER_HW_MPC_WITH_ROT && IFX_MPC_DRIVER_HW_MPC_WITHOUT_ROT
-    const bool rot_config = mem_region_cfg->is_rot;
+        const bool rot_config = mem_region_cfg->is_rot;
 #elif IFX_MPC_DRIVER_HW_MPC_WITH_ROT
-    const bool rot_config = true;
+        const bool rot_config = true;
 #elif IFX_MPC_DRIVER_HW_MPC_WITHOUT_ROT
-    const bool rot_config = false;
+        const bool rot_config = false;
 #endif /* IFX_MPC_DRIVER_HW_MPC_WITH_ROT && IFX_MPC_DRIVER_HW_MPC_WITHOUT_ROT */
 
-    for (uint32_t idx = first_block_idx; idx < last_block_idx; idx++) {
-        cy_stc_mpc_rot_block_attr_t mpc_settings;
-        cy_stc_mpc_block_attr_t mpc_settings_no_rot;
+        for (uint32_t idx = first_block_idx; idx < last_block_idx; idx++) {
+            cy_stc_mpc_rot_block_attr_t mpc_settings;
+            cy_stc_mpc_block_attr_t mpc_settings_no_rot;
 
-        if (rot_config) {
-            if (Cy_Mpc_GetRotBlockAttr(mem_region_cfg->mpc,
-                                       (cy_en_mpc_prot_context_t)fih_int_decode(pc),
-                                       idx,
-                                       &mpc_settings) != CY_MPC_SUCCESS) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+            if (rot_config) {
+                if (Cy_Mpc_GetRotBlockAttr(mem_region_cfg->mpc,
+                                        (cy_en_mpc_prot_context_t)fih_int_decode(pc),
+                                        idx,
+                                        &mpc_settings) != CY_MPC_SUCCESS) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
+            } else {
+                if (Cy_Mpc_GetBlockAttr(mem_region_cfg->mpc,
+                                        idx,
+                                        &mpc_settings_no_rot) != CY_MPC_SUCCESS) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
             }
-        } else {
-            if (Cy_Mpc_GetBlockAttr(mem_region_cfg->mpc,
-                                    idx,
-                                    &mpc_settings_no_rot) != CY_MPC_SUCCESS) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
-        }
 
 #if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
-        (void)fih_delay();
+            (void)fih_delay();
 
-        if (rot_config) {
-            cy_stc_mpc_rot_block_attr_t mpc_settings2;
-            if (Cy_Mpc_GetRotBlockAttr(mem_region_cfg->mpc,
-                                       (cy_en_mpc_prot_context_t)fih_int_decode(pc),
-                                       idx,
-                                       &mpc_settings2) != CY_MPC_SUCCESS) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+            if (rot_config) {
+                cy_stc_mpc_rot_block_attr_t mpc_settings2;
+                if (Cy_Mpc_GetRotBlockAttr(mem_region_cfg->mpc,
+                                        (cy_en_mpc_prot_context_t)fih_int_decode(pc),
+                                        idx,
+                                        &mpc_settings2) != CY_MPC_SUCCESS) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
+
+                (void)fih_delay();
+                if ((mpc_settings.access != mpc_settings2.access) ||
+                    (mpc_settings.secure != mpc_settings2.secure)) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
+            } else {
+                cy_stc_mpc_block_attr_t mpc_settings_no_rot2;
+                if (Cy_Mpc_GetBlockAttr(mem_region_cfg->mpc,
+                                        idx,
+                                        &mpc_settings_no_rot2) != CY_MPC_SUCCESS) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
+
+                (void)fih_delay();
+                if (mpc_settings_no_rot.secure != mpc_settings_no_rot2.secure) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
             }
 
             (void)fih_delay();
-            if ((mpc_settings.access != mpc_settings2.access) ||
-                (mpc_settings.secure != mpc_settings2.secure)) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
-        } else {
-            cy_stc_mpc_block_attr_t mpc_settings_no_rot2;
-            if (Cy_Mpc_GetBlockAttr(mem_region_cfg->mpc,
-                                    idx,
-                                    &mpc_settings_no_rot2) != CY_MPC_SUCCESS) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
-
-            (void)fih_delay();
-            if (mpc_settings_no_rot.secure != mpc_settings_no_rot2.secure) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
-        }
-
-        (void)fih_delay();
-        validated_block_count++;
+            validated_block_count++;
 #endif /* defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW) */
 
-        if (rot_config) {
-            if (mpc_settings.secure != expected_sec_attr) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
+            if (rot_config) {
+                if (mpc_settings.secure != expected_sec_attr) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
 
-            /* If MPC has RW access then any (R, W, RW) access is allowed, so no
-             * need for additional checks. */
-            if (mpc_settings.access == CY_MPC_ACCESS_RW) {
-                continue;
-            }
+                /* If MPC has RW access then any (R, W, RW) access is allowed, so no
+                 * need for additional checks. */
+                if (mpc_settings.access == CY_MPC_ACCESS_RW) {
+                    continue;
+                }
 
-            if (((access_type & TFM_HAL_ACCESS_READABLE) != 0U) &&
-                (mpc_settings.access != CY_MPC_ACCESS_R)) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
+                if (((access_type & TFM_HAL_ACCESS_READABLE) != 0U) &&
+                    (mpc_settings.access != CY_MPC_ACCESS_R)) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
 
-            if (((access_type & TFM_HAL_ACCESS_WRITABLE) != 0U) &&
-                (mpc_settings.access != CY_MPC_ACCESS_W)) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-            }
-        } else {
-            if (mpc_settings_no_rot.secure != expected_sec_attr) {
-                FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                if (((access_type & TFM_HAL_ACCESS_WRITABLE) != 0U) &&
+                    (mpc_settings.access != CY_MPC_ACCESS_W)) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
+            } else {
+                if (mpc_settings_no_rot.secure != expected_sec_attr) {
+                    FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+                }
             }
         }
-    }
 
 #if defined(TFM_FIH_PROFILE_ON) && !defined(TFM_FIH_PROFILE_LOW)
-    (void)fih_delay();
-    if (validated_block_count != (last_block_idx - first_block_idx)) {
-        FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
-    }
+        (void)fih_delay();
+        if (validated_block_count != (last_block_idx - first_block_idx)) {
+            FIH_RET(TFM_HAL_ERROR_MEM_FAULT);
+        }
 #endif
+    }
 
     FIH_RET(TFM_HAL_SUCCESS);
 }

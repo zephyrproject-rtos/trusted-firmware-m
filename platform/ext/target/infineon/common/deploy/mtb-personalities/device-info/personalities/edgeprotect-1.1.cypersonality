@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 
-<PersonalityTemplate id='edge_protect' name='Edge Protect' version='1.0'
+<PersonalityTemplate id='edge_protect' name='Edge Protect' version='1.1'
   xmlns='http://cypress.com/xsd/cyhwpersonality_v14'>
   <Constants>
     <!-- Memory -->
@@ -74,29 +74,39 @@
     </ParamCustom>
 
     <!-- Device specific information -->
-    <ParamBool id='isEPC2' default='`${toLower(getDeviceAttr("SECURITY")) eq "epc2"}`' />
-    <ParamBool id='isEPC4' default='`${toLower(getDeviceAttr("SECURITY")) eq "epc4"}`' />
+    <ParamString id='security' default='`${toLower(getDeviceAttr("SECURITY"))}`' />
+    <ParamBool id='isEPC2' default='`${security eq "epc2"}`' />
+    <ParamBool id='isEPC3' default='`${security eq "epc3"}`' />
+    <ParamBool id='isEPC4' default='`${security eq "epc4"}`' />
 
-    <!-- Standard Services -->
+    <!-- Standard partitions -->
     <ParamBool id='tfm_services_crypto_ENABLED' default='false' editable='true' />
     <ParamBool id='tfm_services_attestation_ENABLED' default='false' editable='true' />
     <ParamBool id='tfm_services_its_ENABLED' default='false' editable='true' />
     <ParamBool id='tfm_services_ps_ENABLED' default='false' editable='true' />
 
-    <!-- Custom Services -->
+    <!-- Custom partitions -->
     <ParamString id='tfm_general_CUSTOM_SERVICE_COUNT' default='0' editable='true' />
     <Repeat count='$MAX_CUSTOM_SERVICES'>
       <ParamString id='tfm_services_custom_$idx_NAME' default='' editable='true' />
+      <ParamString id='tfm_services_custom_$idx_PARTITION_TYPE' default='' editable='true' />
       <ParamString id='tfm_services_custom_$idx_DOMAIN_NAME' default='' editable='true' />
       <ParamBool id='tfm_services_custom_$idx_ENABLED' default='false' editable='true' />
       <ParamBool id='tfm_services_custom_$idx_REMOVED' default='false' editable='true' />
     </Repeat>
 
+    <!-- Builtin Protection Domains -->
+    <ParamString id='M33S_domain_id' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_root"), "")}`' />
+    <ParamString id='M33S_domain_location' default='`${getBlockFromInstance(M33S_domain_id)}`' />
+    <ParamString id='M33_M55_domain_id' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_unprotected"), "")}`' />
+    <ParamString id='M33_M55_domain_location' default='`${getBlockFromInstance(M33_M55_domain_id)}`' />
+    <ParamString id='reserved_domain_id' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_reserved"), "")}`' />
+    <ParamString id='reserved_domain_location' default='`${getBlockFromInstance(reserved_domain_id)}`' />
     <!-- Protection Domains -->
     <ParamBool id='show_detailed_configuration' name='Show Expert-Level Protection Domain Parameters' group='Protection Domains' default='false' visible='true' editable='true' desc='Toggles visibility of additional parameters for expert-level configuration.' />
 
     <!-- TFM_SP_CRYPTO -->
-    <ParamBool id='domain_crypto_PLACED' name='Enable Protection Domain TFM_SP_CRYPTO' group='Protection Domains' default='`${tfm_services_crypto_ENABLED}`' visible='`${tfm_services_crypto_ENABLED}`' editable='false' desc='Is the protection domain for the Crypto service enabled?' />
+    <ParamBool id='domain_crypto_PLACED' name='Enable Protection Domain TFM_SP_CRYPTO' group='Protection Domains' default='`${tfm_services_crypto_ENABLED}`' visible='`${tfm_services_crypto_ENABLED}`' editable='false' desc='Is the protection domain for the Crypto enabled?' />
     <ParamString templateId='domain_crypto' id='displayPath' default='Protection Domains/Enable Protection Domain TFM_SP_CRYPTO' />
     <ParamString templateId='domain_crypto' id='show_detailed_configuration' default='`${getParamValue("edge_protect", "tfm_services_crypto_ENABLED") &amp;&amp; getParamValue("edge_protect", "show_detailed_configuration")}`' />
     <ParamString templateId='domain_crypto' id='location' default='`${INST_LOC}`' />
@@ -196,7 +206,7 @@
     </Repeat>
 
     <!-- TFM_SP_INITIAL_ATTESTATION -->
-    <ParamBool id='domain_attestation_PLACED' name='Enable Protection Domain TFM_SP_INITIAL_ATTESTATION' group='Protection Domains' default='`${tfm_services_attestation_ENABLED}`' visible='`${tfm_services_attestation_ENABLED}`' editable='false' desc='Is the protection domain for the Initial Attestation service enabled?' />
+    <ParamBool id='domain_attestation_PLACED' name='Enable Protection Domain TFM_SP_INITIAL_ATTESTATION' group='Protection Domains' default='`${tfm_services_attestation_ENABLED}`' visible='`${tfm_services_attestation_ENABLED}`' editable='false' desc='Is the protection domain for the Initial Attestation enabled?' />
     <ParamString templateId='domain_attestation' id='displayPath' default='Protection Domains/Enable Protection Domain TFM_SP_INITIAL_ATTESTATION' />
     <ParamString templateId='domain_attestation' id='show_detailed_configuration' default='`${getParamValue("edge_protect", "tfm_services_attestation_ENABLED") &amp;&amp; getParamValue("edge_protect", "show_detailed_configuration")}`' />
     <ParamString templateId='domain_attestation' id='location' default='`${INST_LOC}`' />
@@ -296,7 +306,7 @@
     </Repeat>
 
     <!-- TFM_SP_ITS -->
-    <ParamBool id='domain_its_PLACED' name='Enable Protection Domain TFM_SP_ITS' group='Protection Domains' default='`${tfm_services_its_ENABLED}`' visible='`${tfm_services_its_ENABLED}`' editable='false' desc='Is the protection domain for the Internal Trusted Storage service enabled?' />
+    <ParamBool id='domain_its_PLACED' name='Enable Protection Domain TFM_SP_ITS' group='Protection Domains' default='`${tfm_services_its_ENABLED}`' visible='`${tfm_services_its_ENABLED}`' editable='false' desc='Is the protection domain for the Internal Trusted Storage enabled?' />
     <ParamString templateId='domain_its' id='displayPath' default='Protection Domains/Enable Protection Domain TFM_SP_ITS' />
     <ParamString templateId='domain_its' id='show_detailed_configuration' default='`${getParamValue("edge_protect", "tfm_services_its_ENABLED") &amp;&amp; getParamValue("edge_protect", "show_detailed_configuration")}`' />
     <ParamString templateId='domain_its' id='location' default='`${INST_LOC}`' />
@@ -396,7 +406,7 @@
     </Repeat>
 
     <!-- TFM_SP_PS -->
-    <ParamBool id='domain_ps_PLACED' name='Enable Protection Domain TFM_SP_PS' group='Protection Domains' default='`${tfm_services_its_ENABLED}`' visible='`${tfm_services_ps_ENABLED}`' editable='false' desc='Is the protection domain for the Protected Storage service enabled?' />
+    <ParamBool id='domain_ps_PLACED' name='Enable Protection Domain TFM_SP_PS' group='Protection Domains' default='`${tfm_services_its_ENABLED}`' visible='`${tfm_services_ps_ENABLED}`' editable='false' desc='Is the protection domain for the Protected Storage enabled?' />
     <ParamString templateId='domain_ps' id='displayPath' default='Protection Domains/Enable Protection Domain TFM_SP_PS' />
     <ParamString templateId='domain_ps' id='show_detailed_configuration' default='`${getParamValue("edge_protect", "domain_ps_PLACED") &amp;&amp; getParamValue("edge_protect", "show_detailed_configuration")}`' />
     <ParamString templateId='domain_ps' id='location' default='`${INST_LOC}`' />
@@ -595,66 +605,69 @@
       <ParamBool templateId='domain_spe' id='coreIsAccessible$idx' default='`${$idx &lt; vcore_count &amp;&amp; ((includeM33core &amp;&amp; vcoretype$idx eq "$CM33") || (includeM55core &amp;&amp; vcoretype$idx eq "$CM55"))}`' />
     </Repeat>
 
-    <!-- IFX_DOMAIN_CUSTOM -->
     <Repeat count='$MAX_CUSTOM_SERVICES' repeatId='domainIdx'>
       <ParamBool id='domain_custom_$idx_ENABLED' name='Enable Protection Domain `${tfm_services_custom_$idx_DOMAIN_NAME}`' group='Protection Domains' default='`${$idx &lt; tfm_general_CUSTOM_SERVICE_COUNT &amp;&amp; tfm_services_custom_$idx_ENABLED &amp;&amp; !tfm_services_custom_$idx_REMOVED}`' visible='`${$idx &lt; tfm_general_CUSTOM_SERVICE_COUNT &amp;&amp; !tfm_services_custom_$idx_REMOVED}`' editable='`${show_detailed_configuration}`' desc='$PROTECTION_DOMAIN_ENABLED_TOOLTIP' />
       <ParamString templateId='domain_custom_$idx{domainIdx}' id='displayPath' default='Protection Domains/Enable Protection Domain `${getParamValue("edge_protect", "tfm_services_custom_$idx_DOMAIN_NAME")}`' />
-      <ParamString templateId='domain_custom_$idx{domainIdx}' id='displayName' default='`${getParamValue("edge_protect", "tfm_services_custom_$idx_DOMAIN_NAME")}`' />
       <ParamString templateId='domain_custom_$idx{domainIdx}' id='show_detailed_configuration' default='`${getParamValue("edge_protect", "tfm_services_custom_$idx_ENABLED") &amp;&amp; getParamValue("edge_protect", "show_detailed_configuration")}`' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='is_psa_rot' default='`${toLower(getParamValue("edge_protect", "tfm_services_custom_$idx_PARTITION_TYPE")) eq "psa"}`' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='isEPC4' default='`${getParamValue("edge_protect", "isEPC4")}`' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='isEPC3' default='`${getParamValue("edge_protect", "isEPC3")}`' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='M33S_domain_location' default='`${getParamValue("edge_protect", "M33S_domain_location")}`' />
+      <ParamString templateId='domain_custom_$idx{domainIdx}' id='displayName' default='`${getParamValue("edge_protect", "tfm_services_custom_$idx_DOMAIN_NAME")}`' />
       <ParamString templateId='domain_custom_$idx{domainIdx}' id='location' default='`${INST_LOC}`' />
       <ParamString templateId='domain_custom_$idx{domainIdx}' id='domainId' default='`${INST_ID}`' />
-      <ParamChoice templateId='domain_custom_$idx{domainIdx}' id='cmseAttribute' name='Access' group='`${displayPath}`' default='SECURE' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_CMSE_TOOLTIP'>
+      <ParamChoice templateId='domain_custom_$idx{domainIdx}' id='cmseAttribute' name='Access' group='`${displayPath}`' default='`${is_psa_rot ? getExposedMember(M33S_domain_location, "cmseAttribute") : "SECURE"}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_CMSE_TOOLTIP'>
         <Entry name='Secure' value='SECURE' visible='true' />
         <Entry name='Non-Secure Callable' value='NON_SECURE_CALLABLE' visible='true' />
         <Entry name='Non-Secure' value='NON_SECURE' visible='true' />
       </ParamChoice>
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='unprivilegedAccess' name='Allow peripheral access in unprivileged mode' group='`${displayPath}`/Peripheral Protection' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_UNPRIV_ACCESS_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='unprivilegedAccess' name='Allow peripheral access in unprivileged mode' group='`${displayPath}`/Peripheral Protection' default='`${is_psa_rot ? getExposedMember(M33S_domain_location, "secureUnprivileged") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_UNPRIV_ACCESS_TOOLTIP' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0' name='PC 0' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0read' name='Allow reads' group='`${displayPath}`/Memory/PC 0' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0write' name='Allow writes' group='`${displayPath}`/Memory/PC 0' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0' name='PC 0' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc0") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0read' name='Allow reads' group='`${displayPath}`/Memory/PC 0' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc0read") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0write' name='Allow writes' group='`${displayPath}`/Memory/PC 0' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc0write") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0access' name='Secure?' group='`${displayPath}`/Memory/PC 0' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc0ns' default='`${!pc0access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1' name='PC 1' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1read' name='Allow reads' group='`${displayPath}`/Memory/PC 1' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1write' name='Allow writes' group='`${displayPath}`/Memory/PC 1' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1' name='PC 1' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc1") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1read' name='Allow reads' group='`${displayPath}`/Memory/PC 1' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc1read") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1write' name='Allow writes' group='`${displayPath}`/Memory/PC 1' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc1write") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1access' name='Secure?' group='`${displayPath}`/Memory/PC 1' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc1ns' default='`${!pc1access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2' name='PC 2' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2read' name='Allow reads' group='`${displayPath}`/Memory/PC 2' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2write' name='Allow writes' group='`${displayPath}`/Memory/PC 2' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2' name='PC 2' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? isEPC4 ? true : getExposedMember(M33S_domain_location, "pc2") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2read' name='Allow reads' group='`${displayPath}`/Memory/PC 2' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc2read") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2write' name='Allow writes' group='`${displayPath}`/Memory/PC 2' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc2write") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2access' name='Secure?' group='`${displayPath}`/Memory/PC 2' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc2ns' default='`${!pc2access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3' name='PC 3' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3read' name='Allow reads' group='`${displayPath}`/Memory/PC 3' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3write' name='Allow writes' group='`${displayPath}`/Memory/PC 3' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3' name='PC 3' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc3") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3read' name='Allow reads' group='`${displayPath}`/Memory/PC 3' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc3read") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3write' name='Allow writes' group='`${displayPath}`/Memory/PC 3' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc3write") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3access' name='Secure?' group='`${displayPath}`/Memory/PC 3' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc3ns' default='`${!pc3access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4' name='PC 4' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${getParamValue("edge_protect", "isEPC4")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4read' name='Allow reads' group='`${displayPath}`/Memory/PC 4' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4write' name='Allow writes' group='`${displayPath}`/Memory/PC 4' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4' name='PC 4' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc4") : isEPC4}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4read' name='Allow reads' group='`${displayPath}`/Memory/PC 4' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc4read") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4write' name='Allow writes' group='`${displayPath}`/Memory/PC 4' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc4write") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4access' name='Secure?' group='`${displayPath}`/Memory/PC 4' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc4ns' default='`${!pc4access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5' name='PC 5' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5read' name='Allow reads' group='`${displayPath}`/Memory/PC 5' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5write' name='Allow writes' group='`${displayPath}`/Memory/PC 5' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5' name='PC 5' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc5") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5read' name='Allow reads' group='`${displayPath}`/Memory/PC 5' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc5read") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5write' name='Allow writes' group='`${displayPath}`/Memory/PC 5' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc5write") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5access' name='Secure?' group='`${displayPath}`/Memory/PC 5' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc5ns' default='`${!pc5access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6' name='PC 6' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6read' name='Allow reads' group='`${displayPath}`/Memory/PC 6' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6write' name='Allow writes' group='`${displayPath}`/Memory/PC 6' default='false' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6' name='PC 6' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc6") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6read' name='Allow reads' group='`${displayPath}`/Memory/PC 6' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc6read") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6write' name='Allow writes' group='`${displayPath}`/Memory/PC 6' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc6write") : false}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6access' name='Secure?' group='`${displayPath}`/Memory/PC 6' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc6ns' default='`${!pc6access}`' />
 
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7' name='PC 7' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7read' name='Allow reads' group='`${displayPath}`/Memory/PC 7' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
-      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7write' name='Allow writes' group='`${displayPath}`/Memory/PC 7' default='true' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7' name='PC 7' group='`${displayPath}`/Peripheral Protection/Accessible by:' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc7") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_PC_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7read' name='Allow reads' group='`${displayPath}`/Memory/PC 7' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc7read") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_READ_TOOLTIP' />
+      <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7write' name='Allow writes' group='`${displayPath}`/Memory/PC 7' default='`${is_psa_rot || isEPC3 ? getExposedMember(M33S_domain_location, "pc7write") : true}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_WRITE_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7access' name='Secure?' group='`${displayPath}`/Memory/PC 7' default='`${!(cmseAttribute eq "NON_SECURE")}`' visible='`${show_detailed_configuration}`' editable='false' desc='$PROTECTION_DOMAIN_ACCESS_TOOLTIP' />
       <ParamBool templateId='domain_custom_$idx{domainIdx}' id='pc7ns' default='`${!pc7access}`' />
 
@@ -698,18 +711,6 @@
       </Repeat>
     </Repeat>
 
-    <!-- Standard Protection Domains -->
-    <ParamString id='M33S_domain_id_normal' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_root"), "")}`' />
-    <ParamString id='M33S_domain_id_fallback' default='`${getOrDefault(getInstanceFromBlock(getBlockFromAlias("M33S")), "")}`' />
-    <ParamString id='M33S_domain_id' default='`${M33S_domain_id_normal ne "" ? M33S_domain_id_normal : M33S_domain_id_fallback}`' />
-
-    <ParamString id='M33_M55_domain_id_normal' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_unprotected"), "")}`' />
-    <ParamString id='M33_M55_domain_id_fallback' default='`${getOrDefault(getInstanceFromBlock(getBlockFromAlias("M33_M55")), "")}`' />
-    <ParamString id='M33_M55_domain_id' default='`${M33_M55_domain_id_normal ne "" ? M33_M55_domain_id_normal : M33_M55_domain_id_fallback}`' />
-
-    <ParamString id='reserved_domain_id_normal' default='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "domain_reserved"), "")}`' />
-    <ParamString id='reserved_domain_id_fallback' default='`${getOrDefault(getInstanceFromBlock(getBlockFromAlias("reserved")), "")}`' />
-    <ParamString id='reserved_domain_id' default='`${reserved_domain_id_normal ne "" ? reserved_domain_id_normal : reserved_domain_id_fallback}`' />
 
     <!-- Protection Domains for PPC -->
     <ParamString id='crypto_domain_id' default='`${getParamValue("domain_crypto","domainId")}`' />
@@ -721,7 +722,8 @@
 
     <!-- Memory Regions -->
     <ParamString id='memories' default='`${memoryIds()}`' />
-    <ParamString id='first_available_smif_memory_or_rram' name='first_available_smif_memory_or_rram' default='`${
+    <ParamString id='default_memory' default='`${isEPC3 ? "FLASH" : "RRAM"}`' />
+    <ParamString id='smif_or_default' default='`${
       splitFind(memories, "SMIF0MEM0") != -1 ? "SMIF0MEM0" :
       splitFind(memories, "SMIF0MEM1") != -1 ? "SMIF0MEM1" :
       splitFind(memories, "SMIF0MEM2") != -1 ? "SMIF0MEM2" :
@@ -730,7 +732,7 @@
       splitFind(memories, "SMIF1MEM1") != -1 ? "SMIF1MEM1" :
       splitFind(memories, "SMIF1MEM2") != -1 ? "SMIF1MEM2" :
       splitFind(memories, "SMIF1MEM3") != -1 ? "SMIF1MEM3" :
-      "RRAM"
+      default_memory
     }`' />
 
     <!-- TFM_ITS -->
@@ -752,7 +754,7 @@
     <ParamBool templateId='reserved_memory_region_its' id='is_cores_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_its' id='cores' default='' editable='true' />
     <ParamBool templateId='reserved_memory_region_its' id='is_memory_user_editable' default='true' />
-    <ParamString templateId='reserved_memory_region_its' id='memory' default='RRAM' />
+    <ParamString templateId='reserved_memory_region_its' id='memory' default='`${getParamValue("edge_protect", "default_memory")}`' />
     <ParamString templateId='reserved_memory_region_its' id='required_memory_capabilities' default='Readable' />
     <ParamString templateId='reserved_memory_region_its' id='is_protection_user_editable' default='false' />
     <ParamString templateId='reserved_memory_region_its' id='protection' default='`${getParamValue("domain_its","domainId")}`' />
@@ -775,7 +777,7 @@
     <ParamBool templateId='reserved_memory_region_ps' id='is_cores_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_ps' id='cores' default='' editable='true' />
     <ParamBool templateId='reserved_memory_region_ps' id='is_memory_user_editable' default='true' />
-    <ParamString templateId='reserved_memory_region_ps' id='memory' default='RRAM' />
+    <ParamString templateId='reserved_memory_region_ps' id='memory' default='`${getParamValue("edge_protect", "default_memory")}`' />
     <ParamString templateId='reserved_memory_region_ps' id='required_memory_capabilities' default='Readable' />
     <ParamString templateId='reserved_memory_region_ps' id='is_protection_user_editable' default='false' />
     <ParamString templateId='reserved_memory_region_ps' id='protection' default='`${getParamValue("domain_ps","domainId")}`' />
@@ -798,7 +800,7 @@
     <ParamBool templateId='reserved_memory_region_platform_nv' id='is_cores_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_platform_nv' id='cores' default='' editable='true' />
     <ParamBool templateId='reserved_memory_region_platform_nv' id='is_memory_user_editable' default='true' />
-    <ParamString templateId='reserved_memory_region_platform_nv' id='memory' default='RRAM' />
+    <ParamString templateId='reserved_memory_region_platform_nv' id='memory' default='`${getParamValue("edge_protect", "default_memory")}`' />
     <ParamString templateId='reserved_memory_region_platform_nv' id='required_memory_capabilities' default='Readable' />
     <ParamString templateId='reserved_memory_region_platform_nv' id='is_protection_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_platform_nv' id='protection' default='`${getParamValue("edge_protect", "M33S_domain_id")}`' />
@@ -842,7 +844,7 @@
     <ParamBool templateId='reserved_memory_region_m33s_nvm' id='is_cores_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_m33s_nvm' id='cores' default='' editable='true' />
     <ParamBool templateId='reserved_memory_region_m33s_nvm' id='is_memory_user_editable' default='true' />
-    <ParamString templateId='reserved_memory_region_m33s_nvm' id='memory' default='`${getParamValue("edge_protect", "first_available_smif_memory_or_rram")}`' />
+    <ParamString templateId='reserved_memory_region_m33s_nvm' id='memory' default='`${getParamValue("edge_protect", "smif_or_default")}`' />
     <ParamString templateId='reserved_memory_region_m33s_nvm' id='required_memory_capabilities' default='Readable' />
     <ParamString templateId='reserved_memory_region_m33s_nvm' id='is_protection_user_editable' default='true' />
     <ParamString templateId='reserved_memory_region_m33s_nvm' id='protection' default='`${getParamValue("domain_spe","domainId")}`' />
@@ -2261,8 +2263,8 @@
     <Variable id='is_protection_enabled' value='`${isBlockUsed("$PROTECTION_LOC")}`' />
     <Variable id='is_protection_custom' value='`${getOrDefault(getExposedMember("$PROTECTION_LOC", "protectionLevel"), "") eq "SECURE_CUSTOM"}`' />
     <Variable id='is_context_switching_enabled' value='`${getExposedMember("$PROTECTION_LOC", "pcSwitch")}`' />
-    <Variable id='peri0Enabled' value='`${isBlockUsed("peri[0]")}`' />
-    <Variable id='peri1Enabled' value='`${isBlockUsed("peri[1]")}`' />
+    <Variable id='peri0_needs_configuring' value='`${hasBlock("peri[0]") &amp;&amp; !isBlockUsed("peri[0]")}`' />
+    <Variable id='peri1_needs_configuring' value='`${hasBlock("peri[1]") &amp;&amp; !isBlockUsed("peri[1]")}`' />
   </Variables>
   <DRCs>
     <!-- SAU -->
@@ -2299,8 +2301,8 @@
     <DRC type='WARNING' text='Memory region "TFM_ITS" domain "`${TFM_ITS_domain_name}`" is not supported by TF-M.' condition='`${TFM_ITS_domain_id ne IFX_DOMAIN_ITS_domain_id}`'>
       <FixIt action='SET_PARAM' target='`${TFM_ITS_location}`.domain' value='`${IFX_DOMAIN_ITS_domain_id}`' valid='true' description='Change memory region "TFM_ITS" domain to "TFM_SP_ITS"' />
     </DRC>
-    <DRC type='WARNING' text='Memory region "TFM_ITS" memory "`${TFM_ITS_memory}`" is not supported by TF-M.' condition='`${TFM_ITS_memory ne "RRAM"}`'>
-      <FixIt action='SET_PARAM' target='`${TFM_ITS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_ITS" memory to "RRAM"' />
+    <DRC type='WARNING' text='Memory region "TFM_ITS" memory "`${TFM_ITS_memory}`" is not supported by TF-M.' condition='`${TFM_ITS_memory ne default_memory}`'>
+      <FixIt action='SET_PARAM' target='`${TFM_ITS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_ITS" memory to "`${default_memory}`"' />
     </DRC>
 
     <!-- Protected Storage  -->
@@ -2321,8 +2323,8 @@
     <DRC type='INFO' text='Memory region "TFM_PS" domain "`${TFM_PS_domain_name}`" is not supported by TF-M.' condition='`${TFM_PS_domain_id ne IFX_DOMAIN_PS_domain_id}`'>
       <FixIt action='SET_PARAM' target='`${TFM_PS_location}`.domain' value='`${IFX_DOMAIN_PS_domain_id}`' valid='true' description='Change memory region "TFM_PS" domain to "TFM_SP_PS"' />
     </DRC>
-    <DRC type='INFO' text='Memory region "TFM_PS" memory "`${TFM_PS_memory}`" is not supported by TF-M.' condition='`${TFM_PS_memory ne "RRAM"}`'>
-      <FixIt action='SET_PARAM' target='`${TFM_PS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_PS" memory to "RRAM"' />
+    <DRC type='INFO' text='Memory region "TFM_PS" memory "`${TFM_PS_memory}`" is not supported by TF-M.' condition='`${TFM_PS_memory ne default_memory}`'>
+      <FixIt action='SET_PARAM' target='`${TFM_PS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_PS" memory to "`${default_memory}`"' />
     </DRC>
 
     <!-- TFM_NV_COUNTERS -->
@@ -2342,8 +2344,8 @@
     <DRC type='INFO' text='Memory region "TFM_NV_COUNTERS" domain "`${TFM_NV_COUNTERS_domain_name}`" is not supported by TF-M.' condition='`${TFM_NV_COUNTERS_domain_id ne M33S_domain_id}`'>
       <FixIt action='SET_PARAM' target='`${TFM_NV_COUNTERS_location}`.domain' value='`${M33S_domain_id}`' valid='true' description='Change memory region "TFM_NV_COUNTERS" domain to "M33S"' />
     </DRC>
-    <DRC type='INFO' text='Memory region "TFM_NV_COUNTERS" memory "`${TFM_NV_COUNTERS_memory}`" is not supported by TF-M.' condition='`${TFM_NV_COUNTERS_memory ne "RRAM"}`'>
-      <FixIt action='SET_PARAM' target='`${TFM_NV_COUNTERS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_NV_COUNTERS" memory to "RRAM"' />
+    <DRC type='INFO' text='Memory region "TFM_NV_COUNTERS" memory "`${TFM_NV_COUNTERS_memory}`" is not supported by TF-M.' condition='`${TFM_NV_COUNTERS_memory ne default_memory}`'>
+      <FixIt action='SET_PARAM' target='`${TFM_NV_COUNTERS_location}`.memoryId' value='RRAM' valid='true' description='Change "TFM_NV_COUNTERS" memory to "`${default_memory}`"' />
     </DRC>
 
     <!-- m33s_data -->
@@ -2373,9 +2375,9 @@
     <DRC type='INFO' text='Memory region "m33s_nvm" domain "`${m33s_nvm_domain_name}`" is not supported by TF-M.' condition='`${m33s_nvm_domain_id ne IFX_DOMAIN_SPE_domain_id}`'>
       <FixIt action='SET_PARAM' target='`${m33s_nvm_location}`.domain' value='`${IFX_DOMAIN_SPE_domain_id}`' valid='true' description='Change memory region "m33s_nvm" domain to "M33S_CODE"' />
     </DRC>
-    <DRC type='INFO' text='Memory region "m33s_nvm" memory "`${m33s_nvm_memory}`" is not supported by TF-M.' condition='`${m33s_nvm_memory ne first_available_smif_memory_or_rram &amp;&amp; m33s_nvm_memory ne "RRAM"}`'>
-      <FixIt action='SET_PARAM' target='`${m33s_nvm_location}`.memoryId' value='`${first_available_smif_memory_or_rram}`' valid='true' description='Change "m33s_nvm" memory to "`${first_available_smif_memory_or_rram}`"' />
-      <FixIt action='SET_PARAM' target='`${m33s_nvm_location}`.memoryId' value='RRAM' valid='`${first_available_smif_memory_or_rram ne "RRAM"}`' description='Change "m33s_nvm" memory to "RRAM"' />
+    <DRC type='INFO' text='Memory region "m33s_nvm" memory "`${m33s_nvm_memory}`" is not supported by TF-M.' condition='`${m33s_nvm_memory ne smif_or_default &amp;&amp; m33s_nvm_memory ne default_memory}`'>
+      <FixIt action='SET_PARAM' target='`${m33s_nvm_location}`.memoryId' value='`${smif_or_default}`' valid='true' description='Change "m33s_nvm" memory to "`${smif_or_default}`"' />
+      <FixIt action='SET_PARAM' target='`${m33s_nvm_location}`.memoryId' value='RRAM' valid='`${smif_or_default ne default_memory}`' description='Change "m33s_nvm" memory to "`${default_memory}`"' />
     </DRC>
     <DRC type='INFO' text='Allow to execute TF-M image from m33s_code should be enabled for EPC4 devices to satisfy PSA Level 3 requirements.' condition='`${isEPC4 &amp;&amp; !use_separate_execute_region}`' paramId='use_separate_execute_region'>
       <FixIt action='SET_PARAM' target='use_separate_execute_region' value='true' valid='`${!use_separate_execute_region}`' description='Allow to execute TF-M image from m33s_code' />
@@ -2401,7 +2403,7 @@
     </DRC>
 
     <!-- Custom Services -->
-    <DRC type='INFO' text='Custom service "`${tfm_services_custom_$idx_NAME}`" needs Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`" for operation.' condition='`${
+    <DRC type='INFO' text='Custom partition "`${tfm_services_custom_$idx_NAME}`" needs Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`" for operation.' condition='`${
       $idx &lt; tfm_general_CUSTOM_SERVICE_COUNT &amp;&amp;
       tfm_services_custom_$idx_ENABLED &amp;&amp;
       !tfm_services_custom_$idx_REMOVED &amp;&amp;
@@ -2409,14 +2411,14 @@
     }`' repeatCount='$MAX_CUSTOM_SERVICES'>
       <FixIt action='SET_PARAM' target='domain_custom_$idx_ENABLED' value='true' valid='true' description='Enable Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`"' />
     </DRC>
-    <DRC type='INFO' text='Custom service "`${tfm_services_custom_$idx_NAME}`" is disabled so hardware resources can be removed.' condition='`${
+    <DRC type='INFO' text='Custom partition "`${tfm_services_custom_$idx_NAME}`" is disabled so hardware resources can be removed.' condition='`${
       $idx &lt; tfm_general_CUSTOM_SERVICE_COUNT &amp;&amp;
       !tfm_services_custom_$idx_ENABLED &amp;&amp;
       domain_custom_$idx_ENABLED
     }`' repeatCount='$MAX_CUSTOM_SERVICES'>
       <FixIt action='SET_PARAM' target='domain_custom_$idx_ENABLED' value='false' valid='true' description='Disable Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`"' />
     </DRC>
-    <DRC type='INFO' text='Custom service "`${tfm_services_custom_$idx_NAME}`" is removed so Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`" must be removed.' condition='`${
+    <DRC type='INFO' text='Custom partition "`${tfm_services_custom_$idx_NAME}`" is removed so Protection Domain "`${tfm_services_custom_$idx_DOMAIN_NAME}`" must be removed.' condition='`${
       $idx &lt; tfm_general_CUSTOM_SERVICE_COUNT &amp;&amp;
       tfm_services_custom_$idx_REMOVED &amp;&amp;
       domain_custom_$idx_ENABLED
@@ -2434,10 +2436,10 @@
         <FixIt action='SET_PARAM' target='$PROTECTION_LOC.pcSwitch' value='true' valid='`${isEPC4 &amp;&amp; !is_context_switching_enabled}`' />
       </FixItBatch>
     </DRC>
-    <DRC type='ERROR' condition='`${!peri0Enabled || !peri1Enabled}`' text='TF-M requires configuring PPCs'>
-      <FixItBatch description='Enable PPCs'>
-        <FixIt action='ENABLE_BLOCK' target='peri[0]' valid='`${!peri0Enabled}`' />
-        <FixIt action='ENABLE_BLOCK' target='peri[1]' valid='`${!peri1Enabled}`' />
+    <DRC type='ERROR' condition='`${peri0_needs_configuring || peri1_needs_configuring}`' text='TF-M requires configuring PPC(s)'>
+      <FixItBatch description='Enable PPC(s)'>
+        <FixIt action='ENABLE_BLOCK' target='peri[0]' valid='`${peri0_needs_configuring}`' />
+        <FixIt action='ENABLE_BLOCK' target='peri[1]' valid='`${peri1_needs_configuring}`' />
       </FixItBatch>
     </DRC>
   </DRCs>
@@ -2638,8 +2640,8 @@
   <PersonalityTemplate id='security_mpu_tfm' valid='`${getParamValue("edge_protect","security_mpu_tfm_PLACED")}`'>
     <FittingRules>
       <MappingRules>
-        <IpBlock name='m33syscpuss' />
-        <Resource name='m33syscpuss.cm33.mpu_s' />
+        <IpBlock name='m33syscpuss,cpuss,appcpuss' />
+        <Resource name='(m33syscpuss|cpuss|appcpuss).cm33.mpu_s' />
         <OperatingMode value='MCU' />
       </MappingRules>
     </FittingRules>
@@ -2672,8 +2674,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 
@@ -2701,8 +2702,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 
@@ -2730,8 +2730,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 
@@ -2759,8 +2758,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 
@@ -2788,8 +2786,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 
@@ -2821,8 +2818,7 @@
       </Implements>
     </BehaviorImplementation>
     <Parameters>
-      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true'
-      />
+      <ParamDoc id='doc' name='Configuration Help' group='Overview' default='' linkText='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' desc='Defines Protection Domain. Do not configure the domain because it is controlled by TF-M.' visible='true' />
     </Parameters>
   </PersonalityTemplate>
 </PersonalityTemplate>

@@ -38,7 +38,7 @@ target_include_directories(platform_region_defs
 target_compile_definitions(tfm_config
     INTERFACE
         $<$<BOOL:${IFX_CM33_NS_PRESENT}>:IFX_CM33_NS_PRESENT=1>
-        $<$<BOOL:${IFX_CM55_NS_PRESENT}>:IFX_CM55_NS_PRESENT=0>
+        $<$<BOOL:${IFX_CM55_NS_PRESENT}>:IFX_CM55_NS_PRESENT=1>
 )
 
 target_include_directories(tfm_config

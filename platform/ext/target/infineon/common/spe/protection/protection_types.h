@@ -36,7 +36,7 @@
 #define IFX_IS_PARTITION_PRIVILEGED(p_info) (IFX_FIH_EQ((p_info)->ifx_ldinfo->privileged, \
                                                         IFX_FIH_TRUE))
 
-#define IFX_SPM_BOUNDARY                        ((uintptr_t)0U)
+#define IFX_SPM_BOUNDARY                        ((uintptr_t)0xFFFFFFFFU)
 
 /* SPM domain used to implement \brief tfm_hal_boundary_need_switch */
 #define IFX_PROTECT_SPM_DOMAIN                  ((uintptr_t)0xC273706DU)

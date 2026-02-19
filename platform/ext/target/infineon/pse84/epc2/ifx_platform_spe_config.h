@@ -60,4 +60,8 @@
 /* Defines whether device has multiple types of IAK keys*/
 #define IFX_MULTIPLE_IAK_KEY_TYPES                          0
 
+/* Maximum number of MPC regions a memory region can span.
+ * It is 2 for PSE84, as SRAM0 and SRAM1 are two consecutive memories. */
+#define IFX_MAX_SPLIT_REGIONS_COUNT                         (2U)
+
 #endif /* IFX_PLATFORM_SPE_CONFIG_H */

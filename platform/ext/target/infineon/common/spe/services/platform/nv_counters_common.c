@@ -8,7 +8,9 @@
 
 #include <stddef.h>
 
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "psa_manifest/pid.h"
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 #include "tfm_plat_nv_counters.h"
 
 enum tfm_plat_err_t tfm_plat_nv_counter_permissions_check(int32_t client_id,
@@ -44,12 +46,11 @@ enum tfm_plat_err_t tfm_plat_nv_counter_permissions_check(int32_t client_id,
 enum tfm_plat_err_t tfm_plat_ns_counter_idx_to_nv_counter(uint32_t ns_counter_idx,
                                                           enum tfm_nv_counter_t *counter_id)
 {
-    if ((ns_counter_idx > (PLAT_NV_COUNTER_NS_MAX - PLAT_NV_COUNTER_NS_0))
-        || (counter_id == NULL)) {
+    if ((ns_counter_idx > (((uint32_t)PLAT_NV_COUNTER_NS_MAX) - ((uint32_t)PLAT_NV_COUNTER_NS_0))) || (counter_id == NULL)) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
-    *counter_id = PLAT_NV_COUNTER_NS_0 + ns_counter_idx;
+    *counter_id = (enum tfm_nv_counter_t)(((uint32_t)PLAT_NV_COUNTER_NS_0) + ns_counter_idx);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

@@ -24,7 +24,7 @@ set(PLATFORM_HAS_ISOLATION_L3_SUPPORT       ON)
 set(IFX_DEV_SUPPORT_LIB_PATH        "DOWNLOAD"        CACHE PATH "Path to Infineon device support library (or DOWNLOAD to fetch automatically)")
 set(IFX_DEV_SUPPORT_LIB_GIT_REMOTE  "https://github.com/Infineon/mtb-dsl-pse8xxgp.git" CACHE STRING "Infineon device support library repo URL")
 set(IFX_DEV_SUPPORT_LIB_PATCH_DIR   "${IFX_FAMILY_SOURCE_DIR}/libs/ifx_dev_support/patch" CACHE STRING "Path to device support library patches")
-set(IFX_DEV_SUPPORT_LIB_VERSION     "release-v1.1.0"  CACHE STRING "The version of Infineon device support library to use")
+set(IFX_DEV_SUPPORT_LIB_VERSION     "release-v1.2.0"  CACHE STRING "The version of Infineon device support library to use")
 
 set(IFX_MTB_SRF_LIB_PATH            "DOWNLOAD"  CACHE PATH "Path to Infineon MTB SRF library (or DOWNLOAD to fetch automatically)")
 set(IFX_MTB_SRF_LIB_GIT_REMOTE      "https://github.com/Infineon/mtb-srf.git" CACHE STRING "Infineon MTB SRF library repo URL")

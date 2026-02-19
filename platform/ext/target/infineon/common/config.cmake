@@ -59,7 +59,7 @@ endif()
 
 if (IFX_ISOLATION_PC_SWITCHING)
     # Protection Context switching uses platform arch hooks
-    set(PLATFORM_ARCH_HOOKS                 OFF)
+    set(PLATFORM_ARCH_HOOKS                 ON)
 endif()
 
 ################################### Drivers ####################################
@@ -100,6 +100,7 @@ set(PLATFORM_EXCEPTION_INFO                 ${IFX_FAULTS_INFO_DUMP} CACHE BOOL  
 
 ################################# Dependencies #################################
 
+set(IFX_MBEDTLS_ACCELERATION_ENABLED         OFF        CACHE BOOL      "Enable crypto accelerator")
 
 ############################# Platform services ################################
 
@@ -114,6 +115,13 @@ list(APPEND TFM_EXTRA_MANIFEST_LIST_FILES   "${IFX_EXT_SP_PATH}/ifx_ext_sp_top_l
 
 ################################# Advanced options #############################
 
+if (IFX_MBEDTLS_ACCELERATION_ENABLED)
+    if (IFX_MBEDTLS_ACCELERATOR_TYPE STREQUAL "CRYPTOLITE")
+        set(CRYPTO_HW_ACCELERATOR_CONFIG "${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/mbedtls_accel_configs/crypto_hw_cryptolite_config.h" CACHE PATH "Mbed-TLS acceleration library config")
+    elseif(IFX_MBEDTLS_ACCELERATOR_TYPE STREQUAL "MXCRYPTO")
+        set(CRYPTO_HW_ACCELERATOR_CONFIG "${IFX_COMMON_SOURCE_DIR}/spe/services/crypto/mbedtls_accel_configs/crypto_hw_mxcrypto_config.h" CACHE PATH "Mbed-TLS acceleration library config")
+    endif()
+endif()
 
 ################################################################################
 

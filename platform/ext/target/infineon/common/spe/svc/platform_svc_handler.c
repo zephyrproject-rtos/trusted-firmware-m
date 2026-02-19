@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2023-2026 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -10,7 +10,7 @@
 #include "cmsis.h"
 #include "cy_device_headers.h"
 #include "ifx_fih.h"
-#include "platform_svc_api.h"
+#include "platform_svc_private.h"
 #include "spm.h"
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"

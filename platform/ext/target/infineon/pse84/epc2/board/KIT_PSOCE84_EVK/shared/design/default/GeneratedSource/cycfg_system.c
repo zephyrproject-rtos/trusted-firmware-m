@@ -4,14 +4,14 @@
  * Description:
  * System configuration
  * This file was automatically generated and should not be modified.
- * Configurator Backend 3.60.0
- * device-db 4.33.0.9315
+ * Configurator Backend 3.70.0
+ * device-db 4.34.0.9502
  * ifx-mcuboot-pse84 1.1.0.349
  * ifx-tf-m 2.1.400.14138
- * mtb-dsl-pse8xxgp 1.1.1.824
+ * mtb-dsl-pse8xxgp 1.2.0.895
  *
  *******************************************************************************
- * Copyright 2025 Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2026 Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -449,7 +449,6 @@ const mtb_srf_memory_protection_s_t mtb_srf_memory_protection_s[] =
 const uint8_t mtb_srf_protection_range_s_count = sizeof(mtb_srf_memory_protection_s) / sizeof(mtb_srf_memory_protection_s_t);
 #endif /* defined (COMPONENT_SECURE_DEVICE) && defined(COMPONENT_MW_MTB_SRF) */
 
-#if (CY_SYSTEM_CPU_M33) && defined(COMPONENT_SECURE_DEVICE) && defined(CY_PDL_TZ_ENABLED)
 const cy_en_prot_region_t M33S_ppc_0_regions[] =
 {
     PROT_PERI0_M33SYSCPUSS,
@@ -978,8 +977,6 @@ const cy_stc_ppc_cfg_t cycfg_ppc_1_domains_config[] =
     },
 };
 const size_t cycfg_ppc_1_domains_count = sizeof(cycfg_ppc_1_domains_config) / sizeof(cy_stc_ppc_cfg_t);
-
-#endif //#if (CY_SYSTEM_CPU_M33) && defined(COMPONENT_SECURE_DEVICE) && defined(CY_PDL_TZ_ENABLED)
 
 #if defined(CY_PDL_TZ_ENABLED)
 const cy_stc_sau_config_t SAU_config[4] =

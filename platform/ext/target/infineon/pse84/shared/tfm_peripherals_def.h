@@ -124,6 +124,11 @@ extern "C" {
 #define IFX_TEST_PERIPHERAL_2_BASE          GPIO_PRT1
 #define IFX_TEST_PERIPHERAL_2_SIZE          0x40U
 
+/* Free peripheral that does not require configuration is used */
+#define IFX_TEST_PERIPHERAL_3               PROT_PERI0_GPIO_PRT2_PRT
+#define IFX_TEST_PERIPHERAL_3_BASE          GPIO_PRT2
+#define IFX_TEST_PERIPHERAL_3_SIZE          0x40U
+
 #ifdef __cplusplus
 }
 #endif

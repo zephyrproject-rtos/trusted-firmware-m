@@ -25,12 +25,14 @@ enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_NS_0,      /* Used by NS */
     PLAT_NV_COUNTER_NS_1,      /* Used by NS */
     PLAT_NV_COUNTER_NS_2,      /* Used by NS */
-    PLAT_NV_COUNTER_NS_MAX = PLAT_NV_COUNTER_NS_2,
 
     PLAT_NV_COUNTER_MAX,
     PLAT_NV_COUNTER_BOUNDARY = UINT32_MAX  /* Fix  tfm_nv_counter_t size
                                               to 4 bytes */
 };
+
+/* Max NS counter */
+#define PLAT_NV_COUNTER_NS_MAX PLAT_NV_COUNTER_NS_2
 
 #ifdef __cplusplus
 }

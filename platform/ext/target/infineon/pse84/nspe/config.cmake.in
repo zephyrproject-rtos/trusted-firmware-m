@@ -96,7 +96,7 @@ set(IFX_ABSTRACTION_RTOS_LIB_VERSION     "release-v1.12.0" CACHE STRING "The ver
 set(IFX_MTB_IPC_LIB_PATH                 "DOWNLOAD"  CACHE PATH "Path to Infineon MTB IPC library (or DOWNLOAD to fetch automatically)")
 set(IFX_MTB_IPC_LIB_GIT_REMOTE           "https://github.com/Infineon/mtb-ipc.git" CACHE STRING "Infineon MTB IPC library repo URL")
 set(IFX_MTB_IPC_LIB_PATCH_DIR            "${IFX_FAMILY_SOURCE_DIR}/libs/ifx_mtb_ipc/patch" CACHE STRING "Path to MTB IPC library patches")
-set(IFX_MTB_IPC_LIB_VERSION              "release-v1.1.0" CACHE STRING "The version of Infineon MTB IPC library to use")
+set(IFX_MTB_IPC_LIB_VERSION              "release-v1.2.0" CACHE STRING "The version of Infineon MTB IPC library to use")
 
 ###################################### Common #####################################
 

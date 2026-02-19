@@ -8,11 +8,11 @@
 
 #include "config_tfm.h"
 #include "cy_ppc.h"
-#include "ifx_tfm_log_shim.h"
 #include "utilities.h"
 #include "protection_types.h"
 #include "protection_regions_cfg.h"
 #include "protection_ppc_api.h"
+#include "ifx_tfm_log_shim.h"
 
 /* IMPROVEMENT: move Cy_Ppc_GetPcMask(), Cy_Ppc_GetAttrib() and Function Description to PDL (DRIVERS-10521)*/
 

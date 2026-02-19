@@ -23,11 +23,6 @@
  * S_CODE_VECTOR_TABLE_SIZE is defined as a value */
 #define S_CODE_VECTOR_TABLE_SIZE            (0x354)
 
-/* Define missing linker alignment constants */
-#ifndef TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT
-#define TFM_LINKER_NS_AGENT_TZ_CODE_ALIGNMENT   32
-#endif
-
 #define S_MSP_STACK_SIZE            (0x0002000)
 #ifdef ENABLE_HEAP
     #define S_HEAP_SIZE             (0x0000100)

@@ -16,21 +16,6 @@
 #include "ifx_tfm_log_shim.h"
 #include "utilities.h"
 
-/* IMPROVEMENT: DRIVERS-23062 */
-#undef CY_SYSFAULT_NO_FAULT
-#define CY_SYSFAULT_NO_FAULT ((uint8_t)PERI_0_PERI_GP4_AHB_VIO + 1U)
-
-/* IMPROVEMENT: Remove these stubs when cy_sysfault.c is available - BSP-7614 */
-cy_en_SysFault_status_t Cy_SysFault_Init(FAULT_STRUCT_Type *base,
-                                         cy_stc_SysFault_t *config) {return CY_SYSFAULT_SUCCESS;}
-void Cy_SysFault_ClearStatus(FAULT_STRUCT_Type *base) {}
-cy_en_SysFault_source_t Cy_SysFault_GetErrorSource(FAULT_STRUCT_Type *base) {return 0;}
-uint32_t Cy_SysFault_GetFaultData(FAULT_STRUCT_Type *base, cy_en_SysFault_Data_t dataSet) {return 0;}
-void Cy_SysFault_SetMaskByIdx(FAULT_STRUCT_Type *base, cy_en_SysFault_source_t idx) {}
-void Cy_SysFault_ClearInterrupt(FAULT_STRUCT_Type *base) {}
-void Cy_SysFault_SetInterruptMask(FAULT_STRUCT_Type *base) {}
-
-
 void c_m33syscpuss_interrupt_msc_IRQn_Handler(void)
 {
     /* Print fault message and block execution */
@@ -123,7 +108,7 @@ void ifx_faults_dump(void)
 {
     while (true) {
         cy_en_SysFault_source_t fault_source = Cy_SysFault_GetErrorSource(FAULT_STRUCT0);
-        if ((uint8_t)fault_source == CY_SYSFAULT_NO_FAULT) {
+        if (fault_source == CY_SYSFAULT_NO_FAULT) {
             break;
         }
 

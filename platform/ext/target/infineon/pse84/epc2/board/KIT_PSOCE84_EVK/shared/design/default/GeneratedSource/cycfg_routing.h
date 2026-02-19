@@ -4,14 +4,14 @@
  * Description:
  * Establishes all necessary connections between hardware elements.
  * This file was automatically generated and should not be modified.
- * Configurator Backend 3.60.0
- * device-db 4.33.0.9315
+ * Configurator Backend 3.70.0
+ * device-db 4.34.0.9502
  * ifx-mcuboot-pse84 1.1.0.349
  * ifx-tf-m 2.1.400.14138
- * mtb-dsl-pse8xxgp 1.1.1.824
+ * mtb-dsl-pse8xxgp 1.2.0.895
  *
  *******************************************************************************
- * Copyright 2025 Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2026 Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -38,19 +38,7 @@ extern "C" {
 #endif /* defined(__cplusplus) */
 
 #define ioss_0_port_0_pin_1_HSIOM P0_1_SMIF1_SMIF0_SPIHB_SELECT2
-#define ioss_0_port_1_pin_0_AUX SMIF0_SPIHB_DATA0_SMIF0_SMIF0_SPIHB_DATA0_PAD
-#define ioss_0_port_1_pin_1_AUX SMIF0_SPIHB_DATA1_SMIF0_SMIF0_SPIHB_DATA1_PAD
-#define ioss_0_port_1_pin_2_AUX SMIF0_SPIHB_DATA2_SMIF0_SMIF0_SPIHB_DATA2_PAD
-#define ioss_0_port_1_pin_3_AUX SMIF0_SPIHB_DATA3_SMIF0_SMIF0_SPIHB_DATA3_PAD
 #define ioss_0_port_2_pin_0_HSIOM P2_0_SMIF0_SMIF0_SPIHB_SELECT1
-#define ioss_0_port_4_pin_0_AUX SMIF1_SPIHB_DATA0_SMIF1_SMIF0_SPIHB_DATA0_PAD
-#define ioss_0_port_4_pin_1_AUX SMIF1_SPIHB_DATA1_SMIF1_SMIF0_SPIHB_DATA1_PAD
-#define ioss_0_port_4_pin_2_AUX SMIF1_SPIHB_DATA2_SMIF1_SMIF0_SPIHB_DATA2_PAD
-#define ioss_0_port_4_pin_3_AUX SMIF1_SPIHB_DATA3_SMIF1_SMIF0_SPIHB_DATA3_PAD
-#define ioss_0_port_4_pin_4_AUX SMIF1_SPIHB_DATA4_SMIF1_SMIF0_SPIHB_DATA4_PAD
-#define ioss_0_port_4_pin_5_AUX SMIF1_SPIHB_DATA5_SMIF1_SMIF0_SPIHB_DATA5_PAD
-#define ioss_0_port_4_pin_6_AUX SMIF1_SPIHB_DATA6_SMIF1_SMIF0_SPIHB_DATA6_PAD
-#define ioss_0_port_4_pin_7_AUX SMIF1_SPIHB_DATA7_SMIF1_SMIF0_SPIHB_DATA7_PAD
 #define ioss_0_port_6_pin_5_HSIOM P6_5_SCB2_UART_RX
 #define ioss_0_port_6_pin_7_HSIOM P6_7_SCB2_UART_TX
 #define ioss_0_port_7_pin_0_HSIOM P7_0_SDHC1_CARD_CMD
@@ -77,7 +65,6 @@ extern "C" {
 #define ioss_0_port_12_pin_3_HSIOM P12_3_TDM_TDM_TX_FSYNC0
 #define ioss_0_port_12_pin_4_HSIOM P12_4_SDHC0_CARD_DAT_3TO02
 #define ioss_0_port_12_pin_5_HSIOM P12_5_SDHC0_CARD_DAT_3TO03
-#define ioss_0_port_15_pin_1_ANALOG P15_1_IOSS_ADFT1_NET0
 #define ioss_0_port_16_pin_0_HSIOM P16_0_SCB10_SPI_CLK
 #define ioss_0_port_16_pin_1_HSIOM P16_1_SCB10_SPI_MOSI
 #define ioss_0_port_16_pin_2_HSIOM P16_2_SCB10_SPI_MISO
@@ -85,10 +72,6 @@ extern "C" {
 #define ioss_0_port_16_pin_5_HSIOM P16_5_TCPWM0_LINE5
 #define ioss_0_port_17_pin_0_HSIOM P17_0_SCB5_I2C_SCL
 #define ioss_0_port_17_pin_1_HSIOM P17_1_SCB5_I2C_SDA
-#define ioss_0_port_18_pin_0_ANALOG P18_0_SRSS_WCO_OUT
-#define ioss_0_port_18_pin_1_ANALOG P18_1_SRSS_WCO_IN
-#define ioss_0_port_19_pin_0_ANALOG P19_0_SRSS_ECO_IN
-#define ioss_0_port_19_pin_1_ANALOG P19_1_SRSS_ECO_OUT
 #define ioss_0_port_21_pin_0_HSIOM P21_0_SDHC0_CARD_CMD
 #define ioss_0_port_21_pin_1_HSIOM P21_1_TDM_TDM_TX_SD0
 #define ioss_0_port_21_pin_2_HSIOM P21_2_TDM_TDM_TX_SCK0

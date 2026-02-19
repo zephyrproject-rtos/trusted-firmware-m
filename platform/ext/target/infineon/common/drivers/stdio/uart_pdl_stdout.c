@@ -12,7 +12,6 @@
 
 #include "config_tfm.h"
 #if DOMAIN_S
-#include "cmsis.h"
 #include "platform_svc_api.h"
 #endif
 #include "uart_stdout.h"
@@ -65,7 +64,7 @@ static bool is_stdio_initialized = false;
 #if IFX_PRINT_CORE_PREFIX
 #ifndef IFX_PRINT_CORE_PREFIX_LIMIT
 /* How much bytes is printed without adding a core prefix */
-#define IFX_PRINT_CORE_PREFIX_LIMIT         512
+#define IFX_PRINT_CORE_PREFIX_LIMIT         512u
 #endif /* IFX_PRINT_CORE_PREFIX_LIMIT */
 
 /* Last core id used to optimize core prefix output */
@@ -163,21 +162,38 @@ int stdio_output_string(const char *str, uint32_t len)
 
 /* __ARMCC_VERSION is only defined starting from Arm compiler version 6 */
 #if defined(__ARMCC_VERSION)
-/* Struct FILE is implemented in stdio.h. Used to redirect printf to
- * STDIO_DRIVER
- */
-FILE __stdout;
+#include <rt_misc.h>
+#include <rt_sys.h>
+
 /* Redirects printf to STDIO_DRIVER in case of ARMCLANG */
 int fputc(int ch, FILE *f)
 {
     (void)f;
 
     /* Send byte to USART */
-    (void)stdio_output_string((const uint8_t *)&ch, 1);
+    (void)stdio_output_string((const char *)&ch, 1);
 
     /* Return character written */
     return ch;
 }
+
+void _ttywrch(int ch)
+{
+    /* Arm C runtime may call this low-level debug character hook.
+     * TF-M does not use semihosting/host console here, so provide a
+     * dummy definition to satisfy the runtime without extra dependencies. */
+    (void)ch;
+ for (;;);
+}
+
+void _sys_exit(int returncode)
+{
+    /* Required by Arm C runtime as process-exit hook.
+     * Bare-metal TF-M has no process to return to, so trap execution. */
+    (void)returncode;
+    while(1) {};
+}
+
 #elif defined(__GNUC__)
 /* Redirects printf to STDIO_DRIVER in case of GNUARM */
 int _write(int fd, char *str, int len)
@@ -191,7 +207,7 @@ int _write(int fd, char *str, int len)
 int putchar(int ch)
 {
     /* Send byte to USART */
-    (void)stdio_output_string((const uint8_t *)&ch, 1);
+    (void)stdio_output_string((const char *)&ch, 1);
 
     /* Return character written */
     return ch;

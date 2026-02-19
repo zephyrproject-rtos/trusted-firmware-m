@@ -12,7 +12,6 @@
 #include "region_defs.h"
 #include "protection_types.h"
 #include "protection_utils.h"
-#include "protection_regions_cfg.h"
 #if IFX_SE_IPC_SERVICE_FULL || IFX_SE_IPC_SERVICE_BASE
 #include "protection_mpc_sert.h"
 #endif /* IFX_SE_IPC_SERVICE_FULL || IFX_SE_IPC_SERVICE_BASE */

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration app="BACKEND" formatVersion="15" lastSavedWith="Configurator Backend" lastSavedWithVersion="3.60.0" toolsPackage="ModusToolbox 3.6.0" xmlns="http://cypress.com/xsd/cydesignfile_v6">
+<Configuration app="BACKEND" formatVersion="15" lastSavedWith="Configurator Backend" lastSavedWithVersion="3.70.0" toolsPackage="ModusToolbox 3.7.0" xmlns="http://cypress.com/xsd/cydesignfile_v7">
     <Devices>
         <Device mpn="PSE846GPS2DBZC4A">
             <BlockConfig>
@@ -971,7 +971,7 @@
                         <Param id="extended_drive_sel" value="false"/>
                         <Param id="inFlash" value="true"/>
                         <Param id="initialState" value="1"/>
-                        <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
+                        <Param id="isrTrigger" value="CY_GPIO_INTR_RISING"/>
                         <Param id="nonSec" value="1"/>
                         <Param id="pullUpRes" value="CY_GPIO_PULLUP_RES_DISABLE"/>
                         <Param id="sioOutputBuffer" value="true"/>
@@ -2005,7 +2005,12 @@
                         <Param id="is_receiver_3_used" value="true"/>
                         <Param id="is_receiver_4_used" value="false"/>
                         <Param id="is_receiver_5_used" value="false"/>
-                        <Param id="routeCtl" value="4"/>
+                        <Param id="routeCtl_0_1_int1" value="0"/>
+                        <Param id="routeCtl_0_1_int2" value="1"/>
+                        <Param id="routeCtl_2_3_int1" value="0"/>
+                        <Param id="routeCtl_2_3_int2" value="4"/>
+                        <Param id="routeCtl_4_5_int1" value="0"/>
+                        <Param id="routeCtl_4_5_int2" value="16"/>
                         <Param id="rxDmaTrigger" value="false"/>
                         <Param id="rxFifoTriggerLevel_0" value="10"/>
                         <Param id="rxFifoTriggerLevel_1" value="10"/>
@@ -2233,12 +2238,12 @@
                         <Param id="reg145" value="Rj_rAX1eb8U"/>
                         <Param id="reg146" value="7cPl230VJyc"/>
                         <Param id="reg147" value="7cPl230VJyc"/>
-                        <Param id="reg148" value="ZzpucwkPLfo"/>
+                        <Param id="reg148" value="d1hyLIr_gpk"/>
                         <Param id="reg149" value="Rj_rAX1eb8U"/>
                         <Param id="reg15" value="kTqxq_31FkI"/>
                         <Param id="reg150" value="7cPl230VJyc"/>
                         <Param id="reg151" value="Rj_rAX1eb8U"/>
-                        <Param id="reg152" value="ZzpucwkPLfo"/>
+                        <Param id="reg152" value="d1hyLIr_gpk"/>
                         <Param id="reg153" value="kTqxq_31FkI"/>
                         <Param id="reg154" value="Rj_rAX1eb8U"/>
                         <Param id="reg155" value="Rj_rAX1eb8U"/>
@@ -2252,13 +2257,13 @@
                         <Param id="reg162" value="Rj_rAX1eb8U"/>
                         <Param id="reg163" value="Rj_rAX1eb8U"/>
                         <Param id="reg164" value="Rj_rAX1eb8U"/>
-                        <Param id="reg165" value="_62rFWryBLA"/>
-                        <Param id="reg166" value="_62rFWryBLA"/>
-                        <Param id="reg167" value="_62rFWryBLA"/>
-                        <Param id="reg168" value="_62rFWryBLA"/>
-                        <Param id="reg169" value="_62rFWryBLA"/>
+                        <Param id="reg165" value="8edNIY9JUCw"/>
+                        <Param id="reg166" value="8edNIY9JUCw"/>
+                        <Param id="reg167" value="8edNIY9JUCw"/>
+                        <Param id="reg168" value="8edNIY9JUCw"/>
+                        <Param id="reg169" value="8edNIY9JUCw"/>
                         <Param id="reg17" value="Rj_rAX1eb8U"/>
-                        <Param id="reg170" value="_62rFWryBLA"/>
+                        <Param id="reg170" value="8edNIY9JUCw"/>
                         <Param id="reg171" value="Rj_rAX1eb8U"/>
                         <Param id="reg172" value="Rj_rAX1eb8U"/>
                         <Param id="reg173" value="Rj_rAX1eb8U"/>
@@ -2312,7 +2317,7 @@
                         <Param id="reg216" value="Rj_rAX1eb8U"/>
                         <Param id="reg217" value="Rj_rAX1eb8U"/>
                         <Param id="reg218" value="Rj_rAX1eb8U"/>
-                        <Param id="reg219" value="Rj_rAX1eb8U"/>
+                        <Param id="reg219" value="UQssO8c-KxM"/>
                         <Param id="reg22" value="Rj_rAX1eb8U"/>
                         <Param id="reg220" value="Rj_rAX1eb8U"/>
                         <Param id="reg221" value="Rj_rAX1eb8U"/>
@@ -3727,6 +3732,7 @@
                     <Parameters>
                         <Param id="mode" value="Device"/>
                         <Param id="timerEnable" value="true"/>
+                        <Param id="usbCounter#inFlash" value="false"/>
                         <Param id="usbCounter#usbCounter" value="AUTOPLACEDtcpwm[0].group[0].cnt[1]"/>
                     </Parameters>
                     <Personality template="usbCounter" instance="jZetNzFzV3U">
@@ -3735,14 +3741,27 @@
                                 <Alias value="CYBSP_USB_OS_TIMER_COUNTER"/>
                             </Aliases>
                         </Block>
-                        <Parameters>
-                            <Param id="inFlash" value="false"/>
-                        </Parameters>
                     </Personality>
                 </Personality>
-                <Personality template="edge_protect" version="1.0" instance="XKB8GOvfWuo">
+                <Personality template="edge_protect" version="1.1" instance="oJgIspwkkEw">
                     <Block location="vres[0].edge_protect[0]" locked="true"/>
                     <Parameters>
+                        <Param id="domain_custom_0_ENABLED" value="true"/>
+                        <Param id="domain_custom_10_ENABLED" value="false"/>
+                        <Param id="domain_custom_11_ENABLED" value="false"/>
+                        <Param id="domain_custom_12_ENABLED" value="false"/>
+                        <Param id="domain_custom_13_ENABLED" value="false"/>
+                        <Param id="domain_custom_14_ENABLED" value="false"/>
+                        <Param id="domain_custom_1_ENABLED" value="false"/>
+                        <Param id="domain_custom_2_ENABLED" value="false"/>
+                        <Param id="domain_custom_3_ENABLED" value="false"/>
+                        <Param id="domain_custom_4_ENABLED" value="false"/>
+                        <Param id="domain_custom_5_ENABLED" value="false"/>
+                        <Param id="domain_custom_6_ENABLED" value="false"/>
+                        <Param id="domain_custom_7_ENABLED" value="false"/>
+                        <Param id="domain_custom_8_ENABLED" value="false"/>
+                        <Param id="domain_custom_9_ENABLED" value="false"/>
+                        <Param id="domain_spe_PLACED" value="true"/>
                         <Param id="m33s_code_MEMORY_PLACED" value="false"/>
                         <Param id="m33s_data_MEMORY_PLACED" value="false"/>
                         <Param id="m33s_nvm_MEMORY_PLACED" value="true"/>
@@ -3758,69 +3777,84 @@
                         <Param id="reserved_memory_region_ps#cores" value=""/>
                         <Param id="reserved_memory_region_ps#offset" value="0x00000000"/>
                         <Param id="reserved_memory_region_ps#size" value="0x00004000"/>
-                        <Param id="show_detailed_configuration" value="false"/>
-                        <Param id="tfm_general_CUSTOM_SERVICE_COUNT" value="0"/>
+                        <Param id="show_detailed_configuration" value="true"/>
+                        <Param id="tfm_general_CUSTOM_SERVICE_COUNT" value="1"/>
                         <Param id="tfm_services_attestation_ENABLED" value="true"/>
                         <Param id="tfm_services_crypto_ENABLED" value="true"/>
-                        <Param id="tfm_services_custom_0_DOMAIN_NAME" value=""/>
-                        <Param id="tfm_services_custom_0_ENABLED" value="false"/>
-                        <Param id="tfm_services_custom_0_NAME" value=""/>
+                        <Param id="tfm_services_custom_0_DOMAIN_NAME" value="CUSTOM_PARTITION"/>
+                        <Param id="tfm_services_custom_0_ENABLED" value="true"/>
+                        <Param id="tfm_services_custom_0_NAME" value="CUSTOM_PARTITION"/>
+                        <Param id="tfm_services_custom_0_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_0_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_10_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_10_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_10_NAME" value=""/>
+                        <Param id="tfm_services_custom_10_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_10_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_11_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_11_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_11_NAME" value=""/>
+                        <Param id="tfm_services_custom_11_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_11_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_12_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_12_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_12_NAME" value=""/>
+                        <Param id="tfm_services_custom_12_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_12_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_13_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_13_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_13_NAME" value=""/>
+                        <Param id="tfm_services_custom_13_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_13_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_14_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_14_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_14_NAME" value=""/>
+                        <Param id="tfm_services_custom_14_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_14_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_1_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_1_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_1_NAME" value=""/>
+                        <Param id="tfm_services_custom_1_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_1_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_2_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_2_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_2_NAME" value=""/>
+                        <Param id="tfm_services_custom_2_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_2_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_3_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_3_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_3_NAME" value=""/>
+                        <Param id="tfm_services_custom_3_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_3_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_4_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_4_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_4_NAME" value=""/>
+                        <Param id="tfm_services_custom_4_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_4_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_5_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_5_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_5_NAME" value=""/>
+                        <Param id="tfm_services_custom_5_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_5_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_6_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_6_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_6_NAME" value=""/>
+                        <Param id="tfm_services_custom_6_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_6_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_7_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_7_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_7_NAME" value=""/>
+                        <Param id="tfm_services_custom_7_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_7_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_8_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_8_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_8_NAME" value=""/>
+                        <Param id="tfm_services_custom_8_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_8_REMOVED" value="false"/>
                         <Param id="tfm_services_custom_9_DOMAIN_NAME" value=""/>
                         <Param id="tfm_services_custom_9_ENABLED" value="false"/>
                         <Param id="tfm_services_custom_9_NAME" value=""/>
+                        <Param id="tfm_services_custom_9_PARTITION_TYPE" value=""/>
                         <Param id="tfm_services_custom_9_REMOVED" value="false"/>
                         <Param id="tfm_services_its_ENABLED" value="true"/>
                         <Param id="tfm_services_its_MEMORY_PLACED" value="true"/>
@@ -3829,35 +3863,38 @@
                         <Param id="tfm_services_ps_MEMORY_PLACED" value="true"/>
                         <Param id="use_separate_execute_region" value="false"/>
                     </Parameters>
-                    <Personality template="reserved_memory_region_its" instance="0XS13zgoyOU">
+                    <Personality template="reserved_memory_region_its" instance="03jVxCagaPQ">
                         <Block location="vres[0].reserved_memory_region[1]" locked="false"/>
                     </Personality>
-                    <Personality template="reserved_memory_region_ps" instance="vxQuPWWw7n4">
+                    <Personality template="reserved_memory_region_ps" instance="Pfc9OEjYm7M">
                         <Block location="vres[0].reserved_memory_region[3]" locked="false"/>
                     </Personality>
-                    <Personality template="reserved_memory_region_platform_nv" instance="b9fCxUOBXEU">
+                    <Personality template="reserved_memory_region_platform_nv" instance="m0Yl-r1Mfzs">
                         <Block location="vres[0].reserved_memory_region[2]" locked="false"/>
                     </Personality>
-                    <Personality template="reserved_memory_region_m33s_nvm" instance="jDRRuum7hQM">
+                    <Personality template="reserved_memory_region_m33s_nvm" instance="9DyPe6taoNE">
                         <Block location="vres[0].reserved_memory_region[0]" locked="false"/>
                     </Personality>
-                    <Personality template="security_mpu_tfm" instance="J7XHzGzJwzQ">
+                    <Personality template="security_mpu_tfm" instance="D2Tff77oPqw">
                         <Block location="m33syscpuss[0].cm33[0].mpu_s[0]" locked="false"/>
                     </Personality>
-                    <Personality template="domain_crypto" instance="_62rFWryBLA">
+                    <Personality template="domain_crypto" instance="8edNIY9JUCw">
                         <Block location="vres[0].protection[0].domain[7]" locked="false"/>
                     </Personality>
-                    <Personality template="domain_attestation" instance="ZzpucwkPLfo">
+                    <Personality template="domain_attestation" instance="d1hyLIr_gpk">
                         <Block location="vres[0].protection[0].domain[6]" locked="false"/>
                     </Personality>
-                    <Personality template="domain_its" instance="c7FMajV4ImQ">
+                    <Personality template="domain_its" instance="dgnb_EemTog">
                         <Block location="vres[0].protection[0].domain[8]" locked="false"/>
                     </Personality>
-                    <Personality template="domain_ps" instance="oR_zgThrkZU">
+                    <Personality template="domain_ps" instance="cy8tHQDSxc0">
                         <Block location="vres[0].protection[0].domain[9]" locked="false"/>
                     </Personality>
-                    <Personality template="domain_spe" instance="ebYG9b7wL84">
+                    <Personality template="domain_spe" instance="Wcex0LiiwNQ">
                         <Block location="vres[0].protection[0].domain[10]" locked="false"/>
+                    </Personality>
+                    <Personality template="domain_custom_0" instance="UQssO8c-KxM">
+                        <Block location="vres[0].protection[0].domain[11]" locked="false"/>
                     </Personality>
                 </Personality>
                 <Personality template="memory" version="2.0" instance="6N2tM2roWpA">
@@ -3908,7 +3945,7 @@
                         <Param id="offset" value="0x00002000"/>
                         <Param id="regionId" value="m33s_data"/>
                         <Param id="reservedGuid" value="USER_DEFINED"/>
-                        <Param id="size" value="0x000F8000"/>
+                        <Param id="size" value="0x000F7000"/>
                     </Parameters>
                 </Personality>
                 <Personality template="memory_region_data" version="1.0" instance="iYwufaRbAgI">
@@ -3999,7 +4036,7 @@
                     <Block location="vres[0].memory_region_data[11]" locked="true"/>
                     <Parameters>
                         <Param id="description" value=""/>
-                        <Param id="domain" value="ebYG9b7wL84"/>
+                        <Param id="domain" value="Wcex0LiiwNQ"/>
                         <Param id="memoryId" value="SOCMEM_RAM"/>
                         <Param id="offset" value="0x00000000"/>
                         <Param id="regionId" value="m33s_nvm"/>
@@ -4011,7 +4048,7 @@
                     <Block location="vres[0].memory_region_data[12]" locked="true"/>
                     <Parameters>
                         <Param id="description" value=""/>
-                        <Param id="domain" value="c7FMajV4ImQ"/>
+                        <Param id="domain" value="dgnb_EemTog"/>
                         <Param id="memoryId" value="RRAM"/>
                         <Param id="offset" value="0x00035000"/>
                         <Param id="regionId" value="TFM_ITS"/>
@@ -4023,7 +4060,7 @@
                     <Block location="vres[0].memory_region_data[13]" locked="true"/>
                     <Parameters>
                         <Param id="description" value=""/>
-                        <Param id="domain" value="oR_zgThrkZU"/>
+                        <Param id="domain" value="cy8tHQDSxc0"/>
                         <Param id="memoryId" value="RRAM"/>
                         <Param id="offset" value="0x00037000"/>
                         <Param id="regionId" value="TFM_PS"/>
@@ -4087,6 +4124,18 @@
                         <Param id="memoryId" value="SRAM"/>
                         <Param id="offset" value="0x000FF000"/>
                         <Param id="regionId" value="m55_allocatable_shared"/>
+                        <Param id="reservedGuid" value="USER_DEFINED"/>
+                        <Param id="size" value="0x00001000"/>
+                    </Parameters>
+                </Personality>
+                <Personality template="memory_region_data" version="1.0" instance="4w72h4hwqXc">
+                    <Block location="vres[0].memory_region_data[19]" locked="true"/>
+                    <Parameters>
+                        <Param id="description" value="CUSTOM_PARTITION_MEMORY_ASSET_REGION"/>
+                        <Param id="domain" value="UQssO8c-KxM"/>
+                        <Param id="memoryId" value="SRAM"/>
+                        <Param id="offset" value="0x000F9000"/>
+                        <Param id="regionId" value="CUSTOM_PARTITION_MEMORY"/>
                         <Param id="reservedGuid" value="USER_DEFINED"/>
                         <Param id="size" value="0x00001000"/>
                     </Parameters>

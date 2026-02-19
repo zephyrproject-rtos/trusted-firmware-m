@@ -14,7 +14,6 @@
 #include "protection_sau.h"
 #include "protection_regions_cfg.h"
 #include "region.h"
-#include "utilities.h"
 
 #if CONFIG_TFM_USE_TRUSTZONE
 /* Number of additional SAU regions for Veneer regions */

@@ -5,14 +5,14 @@
  * Contains warnings and errors that occurred while generating code for the
  * design.
  * This file was automatically generated and should not be modified.
- * Configurator Backend 3.60.0
- * device-db 4.33.0.9315
+ * Configurator Backend 3.70.0
+ * device-db 4.34.0.9502
  * ifx-mcuboot-pse84 1.1.0.349
  * ifx-tf-m 2.1.400.14138
- * mtb-dsl-pse8xxgp 1.1.1.824
+ * mtb-dsl-pse8xxgp 1.2.0.895
  *
  *******************************************************************************
- * Copyright 2025 Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2026 Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -50,6 +50,8 @@ extern "C" {
 #error "Unexpected MPN; expected DEVICE:=PSE846GPS2DBZC4A, ADDITIONAL_DEVICES:=CYW55513IUBG. There may be an inconsistency between the *.modus file and the makefile target configuration device sets."
 #endif /* !defined(CYW55513IUBG) */
 #endif /* defined(CY_SUPPORTS_COMPLETE_DEVICE_VALIDATION) */
+
+#warning "(PSE846GPS2DBZC4A: P11[4] (CYBSP_WIFI_HOST_WAKE)) Block 'P11[4] (CYBSP_WIFI_HOST_WAKE)' does not satisfy constraint imposed by param 'Host Device Interrupt Pin' on 'Wi-Fi'. The pin must be configured to generate interrupts on rising or falling edge."
 
 #if defined(__cplusplus)
 }

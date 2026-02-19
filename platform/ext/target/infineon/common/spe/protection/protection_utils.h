@@ -9,9 +9,71 @@
 #ifndef PROTECTION_UTILS_H
 #define PROTECTION_UTILS_H
 
+#include <stddef.h>
+
 #include "protection_types.h"
 
 #if IFX_MPC_DRIVER_HW_MPC
+/**
+ * \def IFX_MAX_SPLIT_REGIONS_COUNT
+ * \brief Maximum number of MPC regions a memory region can span across.
+ *
+ * This define specifies the upper limit on the number of Memory Protection
+ * Controller (MPC) regions that a single memory region can span across. A
+ * memory region may span across multiple MPC regions when it crosses boundaries
+ * between different memory segments managed by separate MPCs (e.g., a region
+ * that starts in SRAM0 and ends in SRAM1).
+ *
+ * This constant is used to allocate sufficient space for arrays that store
+ * information about the split regions when a memory region is divided across
+ * multiple MPC controllers.
+ * The value of this define should be chosen based on the maximum number of
+ * consecutive memory segments with distinct MPC configurations in the target
+ * system.
+ *
+ * \see ifx_split_memory_region_across_mpcs()
+ * \see ifx_memory_region_split_t
+ */
+#ifndef IFX_MAX_SPLIT_REGIONS_COUNT
+#error IFX_MAX_SPLIT_REGIONS_COUNT must be defined
+#endif
+
+/**
+ * \brief Structure representing a memory region split across different MPCs.
+ */
+typedef struct {
+    const ifx_memory_config_t* mpc_config;    /**< MPC configuration for this split region */
+    uint32_t region_address;                  /**< Start address of this split region */
+    uint32_t region_size;                     /**< Size of this split region */
+} ifx_memory_region_split_t;
+
+/**
+ * \brief Split a memory region across multiple MPC configurations.
+ *
+ * This function finds all MPC configurations that overlap with the specified
+ * memory region and creates separate sub-regions for each overlapping MPC config.
+ * This is useful when a memory region spans across multiple MPCs.
+ *
+ * \param[in] mem_address     Start address of the memory region to split.
+ * \param[in] mem_size        Size of the memory region to split.
+ * \param[in] configs         Array of MPC configuration pointers to check.
+ * \param[in] config_count    Number of elements in configs array.
+ * \param[out] splits         Output array to store the split regions.
+ * \param[in,out] split_count Size of the splits array on input, actual count on output.
+ *
+ * \return    TFM_HAL_SUCCESS                  - Memory region successfully split.
+ *            TFM_HAL_ERROR_INVALID_INPUT      - Invalid input parameters.
+ *            TFM_HAL_ERROR_GENERIC            - No overlapping MPC configs found or
+ *                                               splits don't cover entire region.
+ */
+enum tfm_hal_status_t ifx_split_memory_region_across_mpcs(
+                                        uint32_t mem_address,
+                                        uint32_t mem_size,
+                                        const ifx_memory_config_t* const configs[],
+                                        const size_t config_count,
+                                        ifx_memory_region_split_t* splits,
+                                        uint32_t* split_count);
+
 /**
  * \brief Returns configuration of the memory in which provided region is located.
  *

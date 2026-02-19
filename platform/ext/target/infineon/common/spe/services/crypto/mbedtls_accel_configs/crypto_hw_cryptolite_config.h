@@ -51,7 +51,16 @@
 #if defined(PSA_WANT_ALG_HKDF) && (PSA_WANT_ALG_HKDF == 1)
 //#define MBEDTLS_PSA_ACCEL_ALG_HKDF (not supported)
 #endif
-#if defined(PSA_WANT_ALG_HMAC) && (PSA_WANT_ALG_HMAC == 1)
+/* Cryptolite HMAC implementation is SHA-256 only.
+ * Do not advertise generic HMAC acceleration when other hash algorithms
+ * are requested, otherwise Mbed TLS disables software builtin HMAC fallback
+ * and HMAC-SHA224/384/512 paths fail.
+ */
+#if defined(PSA_WANT_ALG_HMAC) && (PSA_WANT_ALG_HMAC == 1) && \
+	defined(PSA_WANT_ALG_SHA_256) && (PSA_WANT_ALG_SHA_256 == 1) && \
+	(!defined(PSA_WANT_ALG_SHA_224) || (PSA_WANT_ALG_SHA_224 != 1)) && \
+	(!defined(PSA_WANT_ALG_SHA_384) || (PSA_WANT_ALG_SHA_384 != 1)) && \
+	(!defined(PSA_WANT_ALG_SHA_512) || (PSA_WANT_ALG_SHA_512 != 1))
 #define MBEDTLS_PSA_ACCEL_ALG_HMAC
 #endif
 #if defined(PSA_WANT_ALG_MD5) && (PSA_WANT_ALG_MD5 == 1)

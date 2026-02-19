@@ -21,6 +21,17 @@ endif()
 
 set(IFX_EXT_SP_STACK_SIZE   "0x600"   CACHE STRING  "IFX Extensions Partition stack size")
 
+# When enabled, IFX Extensions Partition will make a call to register the user
+# SRF module during its initialization. User module implementation can be
+# provided in ifx_user_srf_module.c in the same directory as this
+# CMakeLists.txt. Alternatively, user module implementation can be integrated
+# through other means, such as modifying the partition sources directly or
+# including the file in the build system elsewhere.
+set(IFX_EXT_SP_REGISTER_USER_SRF_MODULE OFF CACHE BOOL "Whether to register the user SRF module in the IFX Extensions Partition.")
+
+# Registering the user SRF module requires MTB SRF to be enabled
+tfm_invalid_config(IFX_EXT_SP_REGISTER_USER_SRF_MODULE AND NOT IFX_MTB_SRF)
+
 ################################## Partition ###################################
 
 add_library(tfm_psa_rot_partition_ifx_ext_sp STATIC EXCLUDE_FROM_ALL)
@@ -34,6 +45,13 @@ target_sources(tfm_psa_rot_partition_ifx_ext_sp
         # The generated sources
         ${IFX_GENERATED_DIR}/secure_fw/partitions/ifx_ext_sp/auto_generated/intermedia_ifx_ext_sp.c
 )
+
+if(IFX_EXT_SP_REGISTER_USER_SRF_MODULE AND (EXISTS ${CMAKE_CURRENT_LIST_DIR}/ifx_user_srf_module.c))
+    target_sources(tfm_psa_rot_partition_ifx_ext_sp
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/ifx_user_srf_module.c
+    )
+endif()
 
 target_include_directories(tfm_psa_rot_partition_ifx_ext_sp
     INTERFACE
@@ -82,6 +100,7 @@ target_compile_definitions(tfm_config
     INTERFACE
         TFM_PARTITION_IFX_EXT_SP
         IFX_EXT_SP_STACK_SIZE=${IFX_EXT_SP_STACK_SIZE}
+        $<$<BOOL:${IFX_EXT_SP_REGISTER_USER_SRF_MODULE}>:IFX_EXT_SP_REGISTER_USER_SRF_MODULE=1>
 )
 
 #################################### install ###################################
