@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2024-2026 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -99,9 +99,5 @@
 /* Use buffered privileged output to minimize number of SVC calls by partitions */
 #define LOG_PRIV_BUFFER_SIZE                                32
 #endif
-
-#ifdef IFX_MTB_SRF
-#define CONFIG_TFM_VECTOR_ACCESS                            1
-#endif /* IFX_MTB_SRF */
 
 #endif /* IFX_SPE_CONFIG_H */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2025-2026 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -12,8 +12,8 @@
 
 #ifdef IFX_MTB_SRF
 #include "cybsp.h"
-#include "ffm/original_vector_api.h"
 #include "mtb_srf.h"
+#include "platform_svc_api.h"
 #endif /* IFX_MTB_SRF */
 
 #include <stdio.h>
@@ -68,10 +68,10 @@ psa_status_t ifx_mtb_srf_handler(const psa_msg_t *msg)
 {
 #ifdef IFX_MTB_SRF
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
-    tfm_original_iovec_t io_vec;
+    ifx_original_iovec_t io_vec;
     memset(&io_vec, 0, sizeof(io_vec));
 
-    psa_ret = original_iovec(msg->handle, &io_vec);
+    psa_ret = ifx_call_platform_original_iovec(msg->handle, &io_vec);
     if (psa_ret != PSA_SUCCESS) {
         return psa_ret;
     }

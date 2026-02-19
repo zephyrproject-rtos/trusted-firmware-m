@@ -10,6 +10,7 @@
 #include "cmsis.h"
 #include "cy_device_headers.h"
 #include "ifx_fih.h"
+#include "platform_svc_api.h"
 #include "platform_svc_private.h"
 #include "spm.h"
 #include "target_cfg.h"
@@ -75,6 +76,71 @@ static int32_t ifx_svc_platform_system_reset(void)
 #endif
 }
 
+static int32_t ifx_svc_platform_original_vectors(psa_handle_t msg_handle, ifx_original_iovec_t *io_vec)
+{
+    struct connection_t *handle = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    handle = spm_msg_handle_to_connection(msg_handle);
+    if (handle == NULL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message
+     */
+    if (handle->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    IFX_FIH_DECLARE(enum tfm_hal_status_t, fih_rc, TFM_HAL_ERROR_GENERIC);
+    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+
+    /* Check that the partition can write to io_vec */
+    FIH_CALL(tfm_hal_memory_check,
+             fih_rc,
+             curr_partition->boundary,
+             (uintptr_t)io_vec,
+             sizeof(*io_vec),
+             (uint32_t)TFM_HAL_ACCESS_READWRITE);
+    if (FIH_NOT_EQ(fih_rc, PSA_SUCCESS)) {
+        return (int32_t)PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    size_t invec_num = PSA_MAX_IOVEC;
+    size_t outvec_num = PSA_MAX_IOVEC;
+
+    /* Count number of in and out vectors */
+    while ((invec_num > 0u) && (handle->msg.in_size[invec_num - 1u] == 0u)) {
+        invec_num--;
+    }
+    while ((outvec_num > 0u) && (handle->msg.out_size[outvec_num - 1u] == 0u)) {
+        outvec_num--;
+    }
+
+    if ((invec_num > PSA_MAX_IOVEC) || (outvec_num > PSA_MAX_IOVEC)) {
+        return (int32_t)PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    for (size_t i = 0; i < invec_num; i++) {
+        /* Copy the original invec data */
+        io_vec->invec[i].base = handle->invec_base[i];
+        io_vec->invec[i].len = handle->msg.in_size[i];
+    }
+
+    for (size_t i = 0; i < outvec_num; i++) {
+        /* Copy the original outvec data */
+        io_vec->outvec[i].base = handle->outvec_base[i];
+        io_vec->outvec[i].len = handle->msg.out_size[i];
+    }
+
+    io_vec->invec_count = invec_num;
+    io_vec->outvec_count = outvec_num;
+
+    return (int32_t)PSA_SUCCESS;
+}
+
 int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                                 uint32_t lr)
 {
@@ -94,6 +160,10 @@ int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
 
         case IFX_SVC_PLATFORM_SYSTEM_RESET:
             retval = ifx_svc_platform_system_reset();
+            break;
+
+        case IFX_SVC_PLATFORM_ORIGINAL_IOVEC:
+            retval = ifx_svc_platform_original_vectors(svc_args[0], (ifx_original_iovec_t *)svc_args[1]);
             break;
 
         default:
