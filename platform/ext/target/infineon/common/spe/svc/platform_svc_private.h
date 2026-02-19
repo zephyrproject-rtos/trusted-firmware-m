@@ -20,4 +20,7 @@
 /* SVC request for system reset to reset the MCU */
 #define IFX_SVC_PLATFORM_SYSTEM_RESET       TFM_SVC_NUM_PLATFORM_THREAD(0x2U)
 
+/* SVC request for vectors as passed to psa_call() */
+#define IFX_SVC_PLATFORM_ORIGINAL_IOVEC     TFM_SVC_NUM_PLATFORM_THREAD(0x3U)
+
 #endif /* PLATFORM_SVC_PRIVATE_H */

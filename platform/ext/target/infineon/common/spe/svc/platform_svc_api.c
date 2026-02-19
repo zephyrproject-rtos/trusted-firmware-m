@@ -37,3 +37,10 @@ __naked void ifx_call_platform_system_reset(void)
     __asm volatile("svc     "M2S(IFX_SVC_PLATFORM_SYSTEM_RESET)"     \n"
                    "bx      lr                                       \n");
 }
+
+__naked psa_status_t ifx_call_platform_original_iovec(psa_handle_t msg_handle,
+                                                      ifx_original_iovec_t *io_vec)
+{
+    __asm volatile("svc     "M2S(IFX_SVC_PLATFORM_ORIGINAL_IOVEC)"   \n"
+                   "bx      lr                                       \n");
+}
