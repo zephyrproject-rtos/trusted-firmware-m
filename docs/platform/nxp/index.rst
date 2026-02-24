@@ -11,8 +11,9 @@ This document contains SOC and boards supported by NXP.
 
     LPCXpresso55S69 <lpcxpresso55s69/README.rst>
     FRDM-MCXN947 <frdmmcxn947/README.rst>
+    FRDM-MCXA577 <frdmmcxa577/README.rst>
 
 --------------
 
-*Copyright 2025 NXP*
+*Copyright 2025-2026 NXP*
 *SPDX-License-Identifier: BSD-3-Clause*
