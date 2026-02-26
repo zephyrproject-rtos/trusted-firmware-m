@@ -66,7 +66,8 @@
 #define CHIP_ERASE_SUPPORTED        (1u)
 
 /* ARM FLASH device structure */
-struct arm_flash_dev_t {
+struct arm_flash_dev_t
+{
     ARM_FLASH_INFO *data;         /*!< FLASH data */
 };
 
@@ -74,19 +75,22 @@ struct arm_flash_dev_t {
 static ARM_FLASH_STATUS FlashStatus = {0, 0, 0};
 
 /* Driver Version */
-static const ARM_DRIVER_VERSION DriverVersion = {
+static const ARM_DRIVER_VERSION DriverVersion =
+{
     ARM_FLASH_API_VERSION,
     ARM_FLASH_DRV_VERSION
 };
 
 /* Driver Capabilities */
-static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
+static const ARM_FLASH_CAPABILITIES DriverCapabilities =
+{
     EVENT_READY_NOT_AVAILABLE,
     DATA_WIDTH_8BIT,
     CHIP_ERASE_SUPPORTED
 };
 
-static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
+static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA =
+{
     .sector_info  = NULL,                  /* Uniform sector layout */
     .sector_count = FLASH0_SIZE / FLASH0_SECTOR_SIZE,
     .sector_size  = FLASH0_SECTOR_SIZE,
@@ -94,8 +98,10 @@ static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
     .program_unit = FLASH0_PROGRAM_UNIT,
     .erased_value = 0xFF};
 
-static struct arm_flash_dev_t ARM_FLASH0_DEV = {
-    .data        = &(ARM_FLASH0_DEV_DATA)};
+static struct arm_flash_dev_t ARM_FLASH0_DEV =
+{
+    .data        = &(ARM_FLASH0_DEV_DATA)
+};
 
 static struct arm_flash_dev_t *FLASH0_DEV = &ARM_FLASH0_DEV;
 
@@ -125,7 +131,8 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 
     if (flash_init_is_done == false)
     {
-        if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE)
+        {
             return ARM_DRIVER_ERROR;
         }
 
@@ -139,7 +146,6 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
         /* Disable Error Detection functionality*/
         flash_init_is_done = true;
     }
-
     return ARM_DRIVER_OK;
 }
 
@@ -152,7 +158,8 @@ static int32_t ARM_Flash_Uninitialize(void)
 
 static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
 {
-    switch (state) {
+    switch (state)
+    {
     case ARM_POWER_FULL:
         /* Nothing to be done */
         return ARM_DRIVER_OK;
@@ -321,7 +328,8 @@ static ARM_FLASH_INFO * ARM_Flash_GetInfo(void)
     return FLASH0_DEV->data;
 }
 
-ARM_DRIVER_FLASH Driver_FLASH0 = {
+ARM_DRIVER_FLASH Driver_FLASH0 =
+{
     .GetVersion = ARM_Flash_GetVersion,
     .GetCapabilities = ARM_Flash_GetCapabilities,
     .Initialize = ARM_Flash_Initialize,

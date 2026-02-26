@@ -66,7 +66,7 @@ static uint32_t APP_GetMbc0Mem0BlockIdx(const void* mem_ptr)
   return idx;
 }
 
-void enable_mem_rule_for_partition(uint32_t memory_region_base, uint32_t memory_region_limit)
+static void enable_mem_rule_for_partition(uint32_t memory_region_base, uint32_t memory_region_limit)
 {
     uint32_t ns_region_id       = 0;
     uint32_t ns_region_start_id = 0;
@@ -198,7 +198,6 @@ static void trdc_configs(void)
     mbcBlockConfig.mbcIdx                    = 0U; /* Only have one MBC */
     mbcBlockConfig.domainIdx                 = 0U; /* Only have one domain */
     mbcBlockConfig.slaveMemoryIdx            = MBC_SLAVE_FLASH;
-    //mbcBlockConfig.memoryBlockIdx            = APP_GetMbc0Mem0BlockIdx((void*)g_mbc_mem);
 
     for (uint8_t i = 0U; i < 64U; i++)
     {
