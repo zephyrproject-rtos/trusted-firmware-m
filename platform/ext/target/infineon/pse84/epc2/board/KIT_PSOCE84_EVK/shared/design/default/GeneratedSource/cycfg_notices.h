@@ -51,8 +51,6 @@ extern "C" {
 #endif /* !defined(CYW55513IUBG) */
 #endif /* defined(CY_SUPPORTS_COMPLETE_DEVICE_VALIDATION) */
 
-#warning "(PSE846GPS2DBZC4A: P11[4] (CYBSP_WIFI_HOST_WAKE)) Block 'P11[4] (CYBSP_WIFI_HOST_WAKE)' does not satisfy constraint imposed by param 'Host Device Interrupt Pin' on 'Wi-Fi'. The pin must be configured to generate interrupts on rising or falling edge."
-
 #if defined(__cplusplus)
 }
 #endif /* defined(__cplusplus) */
