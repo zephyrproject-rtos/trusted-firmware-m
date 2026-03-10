@@ -31,3 +31,9 @@ set(PS_TEST_NV_COUNTERS           OFF          CACHE BOOL      "Use the test NV 
 set(IFX_BSP_DESIGN_DIR_PATH       "${CMAKE_CURRENT_LIST_DIR}/shared/design/${IFX_BSP_DESIGN_FILE_NAME}" CACHE FILEPATH "Path to directory with BSP design files. Is used for install.")
 set(IFX_BSP_DESIGN_FILE_PATH      "${IFX_BSP_DESIGN_DIR_PATH}/design.modus"  CACHE FILEPATH "Path to design.modus file to use for BSP code generation by Device Configurator.")
 set(IFX_BSP_QSPI_DESIGN_FILE_PATH "${IFX_BSP_DESIGN_DIR_PATH}/design.cyqspi" CACHE FILEPATH "Path to design.cyqspi file to use for BSP code generation by QSPI Configurator.")
+
+if(IFX_BSP_DESIGN_FILE_NAME STREQUAL "default")
+    # Default BSP design file uses pregenerated sources
+    set(IFX_GENERATE_BSP_SOURCES   OFF CACHE BOOL "Whether to generate BSP sources")
+    set(IFX_BSP_GENERATED_FILES_OUTPUT_PATH "${IFX_BSP_DESIGN_DIR_PATH}/GeneratedSource" CACHE PATH "BSP code generation output directory.")
+endif()
