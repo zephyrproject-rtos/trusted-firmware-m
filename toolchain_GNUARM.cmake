@@ -155,7 +155,7 @@ add_library(bl2_build_flags INTERFACE)
 add_library(bl1_build_flags INTERFACE)
 
 if (CONFIG_TFM_INCLUDE_STDLIBC)
-    add_link_options(-specs=nano.specs -specs=nosys.specs)
+    add_link_options(${LIBC_LINK_OPTIONS})
     add_compile_definitions(CONFIG_TFM_INCLUDE_STDLIBC)
 else()
     add_link_options(-nostdlib)
