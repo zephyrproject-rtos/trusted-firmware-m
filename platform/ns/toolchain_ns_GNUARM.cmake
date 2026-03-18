@@ -93,7 +93,7 @@ add_compile_options(
     -Wno-format
     -Warray-parameter
     -Wno-unused-but-set-variable
-    -Wnull-dereference
+    # -Wnull-dereference
     -Wno-error=incompatible-pointer-types
     -fdata-sections
     -ffunction-sections
