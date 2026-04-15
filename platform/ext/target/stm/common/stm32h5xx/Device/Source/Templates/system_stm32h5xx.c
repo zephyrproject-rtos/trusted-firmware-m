@@ -322,6 +322,10 @@ static void SetSysClock(void)
 
   /* Enable the HSI48 oscillator (HSI48) for RNG peripheral */
   RCC->CR |= RCC_CR_HSI48ON;
+  /* Wait for HSI48 to be stable: RNG_Init() requires a running HSI48 clock.
+   * Without this wait, HAL_RNG_Init() conditioning reset (CONDRST) can time
+   * out if HSI48 hasn't stabilised, returning HAL_ERROR → Error_Handler(). */
+  while (!(RCC->CR & RCC_CR_HSI48RDY)) {}
 }
 
 /**
