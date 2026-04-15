@@ -20,7 +20,7 @@ if(DEFINED ETHOSU_ARCH)
     add_subdirectory(ethos_u_core_driver)
 endif()
 
-add_subdirectory(tf-m-extras)
+# add_subdirectory(tf-m-extras)
 
 if (${TFM_PARTITION_DTPM_CLIENT})
     add_subdirectory(eventlog)
