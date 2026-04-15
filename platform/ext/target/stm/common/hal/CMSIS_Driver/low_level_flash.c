@@ -252,8 +252,20 @@ static uint32_t bank_number(struct arm_flash_dev_t *flash_dev,
 static uint32_t page_number(struct arm_flash_dev_t *flash_dev,
                             uint32_t param)
 {
-  uint32_t page = param / flash_dev->data->page_size ;
-  page = ((page > (flash_dev->data->sector_count))) ? page - ((flash_dev->data->sector_count)) : page;
+  uint32_t page = param / flash_dev->data->page_size;
+  /*
+   * Return the page number relative to the bank (0-based within each bank).
+   * On dual-bank devices, absolute page numbers in Bank 2 must be reduced by
+   * half the total sector count so HAL_FLASHEx_Erase() receives a valid
+   * intra-bank page index.  Without this subtraction, Bank 2 pages above the
+   * total sector_count/2 boundary would produce an out-of-range page number
+   * that the STM32H5 HAL silently ignores, preventing erase/program.
+   */
+  uint32_t half_sectors = flash_dev->data->sector_count / 2;
+  if (page >= half_sectors)
+  {
+    page -= half_sectors;
+  }
 #ifdef DEBUG_FLASH_ACCESS
   printf("page = %x \r\n", page);
 #endif /* DEBUG_FLASH_ACCESS */
