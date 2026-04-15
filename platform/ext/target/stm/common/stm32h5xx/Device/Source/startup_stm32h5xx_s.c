@@ -246,9 +246,9 @@ extern const pFunc __VECTOR_TABLE[];
   (pFunc)(&__MSP_INITIAL_SP),       /*      Initial Stack Pointer */
   Reset_Handler,                    /*      Reset Handler */
   NMI_Handler,                      /* -14: NMI Handler */
-  Error_Handler,                    /* -13: Hard Fault Handler */
-  Error_Handler,                    /* -12: MPU Fault Handler */
-  Error_Handler,                    /* -11: Bus Fault Handler */
+  HardFault_Handler,                /* -13: Hard Fault Handler */
+  MemManage_Handler,                /* -12: MPU Fault Handler */
+  BusFault_Handler,                 /* -11: Bus Fault Handler */
   UsageFault_Handler,               /* -10: Usage Fault Handler */
   SecureFault_Handler,              /*  -9: Secure Fault Handler */
   0,                                /*      Reserved */
