@@ -198,6 +198,9 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     },
 };
 
+/* STM32H563: mpu_init is only called from tfm_hal_set_up_static_boundaries,
+ * which is excluded for STM32H563xx. Guard here to suppress -Wunused-function. */
+#ifndef STM32H563xx
 static enum tfm_hal_status_t mpu_init(void)
 {
     uint32_t i;
@@ -284,6 +287,7 @@ static enum tfm_hal_status_t mpu_init(void)
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* !STM32H563xx */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 #if !defined(BL2)
@@ -347,6 +351,11 @@ static void SetSysClock(void)
 }
 #endif
 
+/* STM32H563: tfm_hal_set_up_static_boundaries is provided in the
+ * stm32h563-specific platform port (src/tfm_hal_isolation.c), which calls
+ * our H563-specific gtzc_init() for peripheral security attributes.
+ * Exclude this H573 version to avoid a duplicate symbol at link time. */
+#ifndef STM32H563xx
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
@@ -378,6 +387,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
 
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
+#endif /* !STM32H563xx */
 
 
 /*
