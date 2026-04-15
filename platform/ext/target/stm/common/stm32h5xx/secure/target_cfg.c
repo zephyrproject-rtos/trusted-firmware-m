@@ -170,17 +170,23 @@ const struct sau_cfg_t sau_init_cfg[] = {
     },
 };
 #ifdef TFM_DEV_MODE
-static __IO int once=0;
-void Error_Handler(void)
+__attribute__((noreturn)) void Error_Handler(void)
 {
-	/* Reset the system */
-    while(once==0);
+    /* Spin here so a SWD debugger can attach, read LR, and identify the
+     * caller.  Do NOT use while(once==0): -Os infers 'once' is always 0
+     * and emits a recursive self-call instead of a loop, which overflows
+     * the MSP stack → LockUp → silent reset, defeating the diagnostic.
+     *
+     * To resume execution from a debugger: write 1 to r0 or set a
+     * breakpoint here and step past.  The noreturn attribute prevents
+     * the compiler from saving LR, so no stack frame is pushed. */
+    for (;;) {}
 }
 #else
-void Error_Handler(void)
+__attribute__((noreturn)) void Error_Handler(void)
 {
-	/* Reset the system */
     NVIC_SystemReset();
+    for (;;) {}  /* suppress noreturn warning; NVIC_SystemReset never returns */
 }
 #endif
 
