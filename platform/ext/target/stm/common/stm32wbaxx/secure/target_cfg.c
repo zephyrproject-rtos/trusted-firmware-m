@@ -75,6 +75,7 @@ const struct memory_region_limits memory_regions =
 #define TFM_NS_REGION_VENEER    3
 #define TFM_NS_REGION_PERIPH_1  4
 #define TFM_NS_REGION_PERIPH_2  5
+#define TFM_NS_REGION_PERIPH_3  6
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START (PERIPH_BASE_NS)
@@ -119,6 +120,13 @@ const struct sau_cfg_t sau_init_cfg[] = {
         TFM_NS_REGION_PERIPH_2,
         PACKAGE_BASE,
         (PACKAGE_BASE + 0xfff),
+        TFM_FALSE,
+    },
+    /* Configure the peripherals space 3 to access package information */
+    {
+        TFM_NS_REGION_PERIPH_3,
+        FLASH_OTP_BASE,
+        (FLASH_OTP_BASE + FLASH_OTP_SIZE - 1),
         TFM_FALSE,
     },
 };
