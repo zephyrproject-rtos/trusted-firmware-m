@@ -75,7 +75,8 @@ add_compile_options(
     -Wno-format
     -Warray-parameter
     -Wno-unused-but-set-variable
-    -Wnull-dereference
+    # That's required on some Zephyr's HALs
+    # -Wnull-dereference
     -Wno-error=incompatible-pointer-types
     -fdata-sections
     -ffunction-sections
