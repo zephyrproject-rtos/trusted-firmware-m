@@ -132,6 +132,7 @@ configure_file(include/mcuboot_config/mcuboot_config.h.in
 
 ############################### IMAGE SIGNING ##################################
 
+# This block is NEVER executed in Zephyr.
 if (PLATFORM_DEFAULT_IMAGE_SIGNING)
     find_package(Python3)
     if(MCUBOOT_GENERATE_SIGNING_KEYPAIR)
@@ -315,5 +316,70 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
         INCLUDE_BL2_HEADER  TRUE
         MIRROR_FILE         $<TARGET_PROPERTY:tfm_s,LINK_DEPENDS>
         OUTPUT_FILE         ${bin_dir}/tfm_s_signed.hex
+    )
+endif()
+
+# This is a custom Zephyr addition. The reason is that in Zephyr we're calling
+# the signing script directly and to do that we need these layout files to be
+# present in the build directory.
+# At the same time in Zephyr we cannot enable PLATFORM_DEFAULT_IMAGE_SIGNING
+# because that requires to install a set of new Python packages which wouldn't
+# be required anywhere else.
+# Therefore the following if() block copies only what's strictly needed from
+# the above one.
+if(TFM_CREATE_SIGNING_LAYOUT_OBJECTS)
+    set(IMAGE_TYPE "S_IMAGE")
+    set(FLASH_AREA_NUM ${MCUBOOT_S_IMAGE_FLASH_AREA_NUM})
+    if (MCUBOOT_IMAGE_NUMBER GREATER 1)
+        configure_file(signing_layout.c.in signing_layout_s.c @ONLY)
+        add_library(signing_layout_s OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_s.c)
+    else()
+        # Imgtool script requires the s_ns sufix. Since only one sigining layout is
+        # used in this mode the signing_layout_s target's source file is renamed.
+        configure_file(signing_layout.c.in signing_layout_s_ns.c @ONLY)
+        add_library(signing_layout_s OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_s_ns.c)
+    endif()
+
+    target_compile_options(signing_layout_s
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU,Clang>:-E\;-xc>
+            $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
+            $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_s>>
+    )
+    target_compile_definitions(signing_layout_s
+        PRIVATE
+            $<$<BOOL:${BL2}>:BL2>
+            $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+            $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},DIRECT_XIP>:IMAGE_ROM_FIXED>
+    )
+    target_link_libraries(signing_layout_s
+        PRIVATE
+            platform_bl2
+    )
+
+    set(IMAGE_TYPE "NS_IMAGE")
+    set(FLASH_AREA_NUM ${MCUBOOT_NS_IMAGE_FLASH_AREA_NUM})
+    configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
+
+    add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
+    target_compile_options(signing_layout_ns
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU,Clang>:-E\;-xc>
+            $<$<C_COMPILER_ID:ARMClang>:-E\;-xc>
+            $<$<C_COMPILER_ID:IAR>:--preprocess=ns\;$<TARGET_OBJECTS:signing_layout_ns>>
+    )
+    target_compile_definitions(signing_layout_ns
+        PRIVATE
+            $<$<BOOL:${BL2}>:BL2>
+            $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+            $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},DIRECT_XIP>:IMAGE_ROM_FIXED>
+    )
+    target_link_libraries(signing_layout_ns
+        PRIVATE
+            platform_bl2
+    )
+
+    add_dependencies(bl2
+        signing_layout_s signing_layout_ns
     )
 endif()

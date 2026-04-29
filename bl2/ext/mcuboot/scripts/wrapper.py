@@ -23,7 +23,7 @@ import imgtool.main
 
 parser_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(parser_path)
-import bl2.macro_parser as macro_parser
+import macro_parser
 
 sign_bin_size_re = re.compile(r"^\s*RE_SIGN_BIN_SIZE\s*=\s*(.*)")
 load_addr_re = re.compile(r"^\s*RE_IMAGE_LOAD_ADDRESS\s*=\s*(.*)")
