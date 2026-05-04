@@ -14,7 +14,7 @@
 
 extern int main(int argc, char **argv);
 
-#if defined(__clang_major__)  /* effectively ATfE */
+#if defined(__clang_major__) || defined(CONFIG_PICOLIBC) /* effectively ATfE */
 /*
  * We can not use CMSIS support for ATfE toolchain because it's incompatible
  * with it. That's why we manually implement the startup routine below.

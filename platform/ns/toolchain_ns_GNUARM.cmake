@@ -63,7 +63,18 @@ include(mcpu_features)
 
 file(REAL_PATH "${CMAKE_SOURCE_DIR}/../" TOP_LEVEL_PROJECT_DIR)
 
+if (NOT CONFIG_TFM_INCLUDE_STDLIBC)
+    set(LIBC_COMPILE_OPTIONS
+        -specs=picolibc.specs
+        -DCONFIG_PICOLIBC
+    )
+    set(LIBC_LINK_OPTIONS
+        -specs=picolibc.specs
+    )
+endif()
+
 add_compile_options(
+    ${LIBC_COMPILE_OPTIONS}
     -Wall
     -Wno-format
     -Warray-parameter
@@ -86,8 +97,7 @@ add_compile_options(
 
 add_link_options(
     -mcpu=${TFM_SYSTEM_PROCESSOR_FEATURED}
-    -specs=nano.specs
-    -specs=nosys.specs
+    ${LIBC_LINK_OPTIONS}
     LINKER:-check-sections
     LINKER:-fatal-warnings
     LINKER:--gc-sections
