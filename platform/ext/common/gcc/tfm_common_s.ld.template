@@ -607,6 +607,9 @@ SECTIONS
         . = ALIGN(4);
 
     } > RAM AT> FLASH
+    __data_start = .;
+    __data_source = LOADADDR(.TFM_DATA);
+    __data_size = SIZEOF(.TFM_DATA);
     Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
 
@@ -627,8 +630,12 @@ SECTIONS
         *(SORT_BY_ALIGNMENT(.bss*))
         *(COMMON)
         . = ALIGN(4);
+        __tls_base = . ;                /* to satisfy crt0 */
+        __arm32_tls_tcb_offset = . ;   /* to satisfy crt0 */
         __bss_end__ = .;
     } > RAM AT> RAM
+    __bss_start = ADDR(.TFM_BSS);
+    __bss_size = SIZEOF(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
     Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;

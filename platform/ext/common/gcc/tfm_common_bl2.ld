@@ -175,6 +175,9 @@ SECTIONS
 
     } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
+    __data_start  = ADDR(.data);
+    __data_source = LOADADDR(.data);
+    __data_size   = SIZEOF(.data);
 
     .bss : ALIGN(4)
     {
@@ -185,6 +188,9 @@ SECTIONS
         . = ALIGN(4);
         __bss_end__ = .;
     } > RAM
+    __bss_start = ADDR(.bss);
+    __bss_end = ADDR(.bss) + SIZEOF(.bss);
+    __bss_size = SIZEOF(.bss);
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
     .msp_stack (NOLOAD) : ALIGN(32)
@@ -221,6 +227,8 @@ SECTIONS
         __HeapLimit = .;
         PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
+        __tls_base = .;                /* dummy. for picolib crt0 only */
+        __arm32_tls_tcb_offset = .;    /* dummy. for picolib crt0 only */
     } > RAM
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 

@@ -134,6 +134,9 @@ SECTIONS
         __data_end__ = .;
 
     } > RAM
+    __data_start = ADDR(.data);
+    __data_source = LOADADDR(.data);
+    __data_size = SIZEOF(.data);
 
     .bss :
     {
@@ -142,8 +145,12 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
+        __tls_base = . ;                /* to satisfy crt0 */
+        __arm32_tls_tcb_offset = . ;   /* to satisfy crt0 */
         __bss_end__ = .;
     } > RAM
+    __bss_start = ADDR(.bss);
+    __bss_size = SIZEOF(.bss);
 
     bss_size = __bss_end__ - __bss_start__;
 
