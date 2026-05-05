@@ -36,7 +36,7 @@ endif()
 
 # Device DB is only used for sources generation and sources generation is only
 # done in non-MTB builds thus Device DB is only needed for non-MTB builds
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/ifx_device_db AND NOT IFX_MTB_BUILD)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/ifx_device_db AND NOT IFX_MTB_BUILD AND IFX_GENERATE_BSP_SOURCES)
     add_subdirectory(ifx_device_db "${CMAKE_BINARY_DIR}/ifx_db")
 endif()
 

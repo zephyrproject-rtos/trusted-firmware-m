@@ -11,7 +11,7 @@
 
 #include "config_tfm.h"
 
-#include "cmsis.h"
+// #include "cmsis.h"
 #include "ifx_ext_sp_api.h"
 #include "mtb_srf.h"
 #include "psa_manifest/sid.h"
