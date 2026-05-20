@@ -15,6 +15,7 @@ target_include_directories(platform_ns
         ${IFX_COMMON_SOURCE_DIR}/interface/src
     PUBLIC
         ${IFX_COMMON_SOURCE_DIR}/device/include
+        ${IFX_COMMON_SOURCE_DIR}/shared
         $<$<BOOL:${TEST_NS_FPU}>:${IFX_COMMON_SOURCE_DIR}/tests>
 )
 
@@ -115,4 +116,9 @@ target_compile_definitions(tfm_config
 target_include_directories(tfm_config
     INTERFACE
         ${IFX_COMMON_SOURCE_DIR}/utils
+)
+
+target_include_directories(platform_region_defs
+    INTERFACE
+        ${IFX_COMMON_SOURCE_DIR}/shared/partition
 )
