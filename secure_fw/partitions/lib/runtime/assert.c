@@ -11,6 +11,7 @@
 #include "tfm_log_unpriv.h"
 #include "uart_stdout.h"
 #include "tfm_arch.h"
+#include <psa/service.h>
 
 #ifndef __ARMCC_VERSION
 void __assert_func(const char *file, int line, const char *func, const char *reason)
@@ -44,9 +45,9 @@ void __assert_puts(const char *msg)
  * NDEBUG and ASSERT_VERBOSE are not defined. The TF-M secure image is linked with -nostdlib
  * (since it defaults to TFM_INCLUDE_STDLIBC=n), so  in some configurations this results
  * to undefined reference to __assert_no_args() when assert() is used in the TF-M secure image.
- * Make it weak so that that acts a fallback implementation.
+ * Make it weak so that that it acts a fallback implementation.
  */
 __WEAK __NO_RETURN void __assert_no_args(void)
 {
-	tfm_core_panic();
+	psa_panic();
 }
