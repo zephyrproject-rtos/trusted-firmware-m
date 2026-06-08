@@ -155,6 +155,10 @@ static enum tfm_plat_err_t read_from_input(enum tfm_otp_element_id_t id,
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
+    if (in_len > sizeof(buffer)) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
     /* Check that we are not attempting to write any bits from 1 to 0 */
     err = read_otp_nv_counters_flash(offset, buffer, in_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
