@@ -379,6 +379,15 @@ if(TFM_CREATE_SIGNING_LAYOUT_OBJECTS)
             platform_bl2
     )
 
+    # Export the generated object files to a stable location to bypass Windows path hashing/flattening
+    add_custom_command(TARGET signing_layout_s POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:signing_layout_s> "${CMAKE_CURRENT_BINARY_DIR}/signing_layout_s_exported.o"
+    )
+
+    add_custom_command(TARGET signing_layout_ns POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:signing_layout_ns> "${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns_exported.o"
+    )
+
     add_dependencies(bl2
         signing_layout_s signing_layout_ns
     )
