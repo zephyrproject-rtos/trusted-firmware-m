@@ -148,6 +148,10 @@ SECTIONS
 
     } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
+    /* Symbols required by picolibc's crt0 (_start). */
+    __data_start = ADDR(.data);
+    __data_source = LOADADDR(.data);
+    __data_size = SIZEOF(.data);
 
     .bss :
     {
@@ -157,7 +161,12 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
+        __tls_base = . ;                /* to satisfy picolibc crt0 */
+        __arm32_tls_tcb_offset = . ;    /* to satisfy picolibc crt0 */
     } > RAM
+    /* Symbols required by picolibc's crt0 (_start). */
+    __bss_start = ADDR(.bss);
+    __bss_size = SIZEOF(.bss);
 
     bss_size = __bss_end__ - __bss_start__;
 
