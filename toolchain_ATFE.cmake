@@ -43,8 +43,8 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extension
 
 # CMAKE_C_COMPILER_VERSION is not initialised at this moment so do it manually
 EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION )
-if (CMAKE_C_COMPILER_VERSION VERSION_LESS 20.1.0)
-    message(FATAL_ERROR "Please use newer ATfE toolchain version starting from 20.1.0")
+if (CMAKE_C_COMPILER_VERSION VERSION_LESS 19.1.0)
+    message(FATAL_ERROR "Please use newer ATfE toolchain version starting from 19.1.0")
 endif()
 
 include(mcpu_features)
