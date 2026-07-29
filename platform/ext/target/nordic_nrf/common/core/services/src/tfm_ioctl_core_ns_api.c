@@ -5,6 +5,7 @@
  */
 
 #include <nrfx.h>
+#include <helpers/nrfx_gppi.h>
 #include <stdint.h>
 #include <tfm_platform_api.h>
 #include <tfm_ioctl_core_api.h>
@@ -116,6 +117,71 @@ enum tfm_platform_err_t tfm_platform_mramc_set_wen(uint32_t write_mode)
 	return tfm_platform_ioctl(TFM_PLATFORM_IOCTL_MRAMC_SET_WEN_SERVICE, &in_vec,
 				NULL);
 }
+#endif
+
+#if defined(CONFIG_NRF_TFM_SYS_EVENT_SERVICE)
+static enum tfm_platform_err_t sys_event_service(const struct tfm_sys_event_service_args_t *args_in,
+						   int32_t *result)
+{
+	psa_invec in_vec;
+	psa_outvec out_vec;
+	struct tfm_sys_event_service_args_t args;
+	struct tfm_sys_event_service_out_t out;
+	enum tfm_platform_err_t err;
+
+	args = *args_in;
+
+	in_vec.base = &args;
+	in_vec.len = sizeof(args);
+	out_vec.base = &out;
+	out_vec.len = sizeof(out);
+
+	err = tfm_platform_ioctl(TFM_PLATFORM_IOCTL_SYS_EVENT_SERVICE, &in_vec, &out_vec);
+	if (result != NULL) {
+		*result = out.result;
+	}
+
+	return err;
+}
+
+enum tfm_platform_err_t tfm_platform_sys_event_manual_register(int32_t *result)
+{
+	struct tfm_sys_event_service_args_t args = {
+		.op = TFM_SYS_EVENT_OP_REGISTER,
+	};
+
+	return sys_event_service(&args, result);
+}
+
+enum tfm_platform_err_t tfm_platform_sys_event_manual_unregister(int32_t *result)
+{
+	struct tfm_sys_event_service_args_t args = {
+		.op = TFM_SYS_EVENT_OP_UNREGISTER,
+	};
+
+	return sys_event_service(&args, result);
+}
+
+enum tfm_platform_err_t tfm_platform_sys_event_gppi_conn_alloc(uint32_t evt, uint32_t tsk,
+							       uint32_t ppi_handle,
+							       int32_t *result)
+{
+	int ch = nrfx_gppi_domain_channel_get(ppi_handle, nrfx_gppi_domain_id_get(tsk));
+	struct tfm_sys_event_service_args_t args;
+
+	if (ch < 0) {
+		return TFM_PLATFORM_ERR_INVALID_PARAM;
+	}
+
+	args.op = TFM_SYS_EVENT_OP_GPPI_CONN_ALLOC;
+	args.evt = evt;
+	args.tsk = tsk;
+	args.ppi_handle = ppi_handle;
+	args.flash_dppi_channel = (uint32_t)ch;
+
+	return sys_event_service(&args, result);
+}
+
 #endif
 
 #if defined(CONFIG_NRF_TFM_RAM_CTRL_SERVICE)

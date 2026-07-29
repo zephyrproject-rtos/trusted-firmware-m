@@ -172,6 +172,17 @@ if(SOC_NRF7120_TFM_MRAMC_SERVICE)
     )
 endif()
 
+if(NRF_TFM_SYS_EVENT_SERVICE)
+    target_compile_definitions(platform_s
+        PUBLIC
+            NRF_TFM_SYS_EVENT_SERVICE
+    )
+    target_sources(platform_s
+        PRIVATE
+            ${ZEPHYR_BASE}/soc/nordic/common/nrf_sys_event_manual.c
+    )
+endif()
+
 # RAM-control service (set by zephyr's -DNRF_RAM_CTRL_SERVICE=ON).
 if(NRF_RAM_CTRL_SERVICE)
     target_sources(platform_s

@@ -32,6 +32,12 @@
 #include "region_defs.h"
 #endif
 
+#if NRF_TFM_SYS_EVENT_SERVICE
+#include <nrf_sys_event_manual.h>
+// #include <hal/nrf_mramc.h>
+#include <hal/nrf_rramc.h>
+#endif
+
 #include "handle_attr.h"
 
 enum tfm_platform_err_t
@@ -278,6 +284,53 @@ enum tfm_platform_err_t tfm_platform_hal_mramc_set_wen_service(const psa_invec *
 	return TFM_PLATFORM_ERR_SUCCESS;
 }
 #endif /* SOC_NRF7120_TFM_MRAMC_SERVICE */
+
+#if NRF_TFM_SYS_EVENT_SERVICE
+
+enum tfm_platform_err_t tfm_platform_hal_sys_event_service(const psa_invec *in_vec,
+							   const psa_outvec *out_vec)
+{
+	struct tfm_sys_event_service_args_t *args;
+	struct tfm_sys_event_service_out_t *out;
+	int result = 0;
+
+	if (in_vec == NULL || in_vec->len != sizeof(struct tfm_sys_event_service_args_t) ||
+	    out_vec == NULL || out_vec->len != sizeof(struct tfm_sys_event_service_out_t)) {
+		return TFM_PLATFORM_ERR_INVALID_PARAM;
+	}
+
+	args = (struct tfm_sys_event_service_args_t *)in_vec->base;
+	out = (struct tfm_sys_event_service_out_t *)out_vec->base;
+
+	switch (args->op) {
+	case TFM_SYS_EVENT_OP_REGISTER:
+		nrf_sys_event_manual_register(false);
+		break;
+	case TFM_SYS_EVENT_OP_UNREGISTER:
+		nrf_sys_event_manual_unregister(false);
+		break;
+	case TFM_SYS_EVENT_OP_GPPI_CONN_ALLOC:
+		if (args->tsk != (uint32_t)nrf_rramc_task_address_get(NRF_RRAMC,
+								     NRF_RRAMC_TASK_WAKEUP) ||
+		    args->flash_dppi_channel > UINT8_MAX) {
+			return TFM_PLATFORM_ERR_INVALID_PARAM;
+		}
+		nrf_rramc_subscribe_set(NRF_RRAMC, NRF_RRAMC_TASK_WAKEUP,
+					(uint8_t)args->flash_dppi_channel);
+		break;
+	default:
+		return TFM_PLATFORM_ERR_INVALID_PARAM;
+	}
+
+	if (result < 0) {
+		return (result == -EINVAL) ? TFM_PLATFORM_ERR_INVALID_PARAM :
+					   TFM_PLATFORM_ERR_SYSTEM_ERROR;
+	}
+
+	return TFM_PLATFORM_ERR_SUCCESS;
+}
+
+#endif /* NRF_TFM_SYS_EVENT_SERVICE */
 
 #if TFM_NRF_RAM_CTRL_SERVICE
 

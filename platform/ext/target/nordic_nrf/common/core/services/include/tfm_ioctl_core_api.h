@@ -35,6 +35,7 @@ enum tfm_platform_ioctl_core_reqest_types_t {
 	TFM_PLATFORM_IOCTL_GPIO_SERVICE,
 	TFM_PLATFORM_IOCTL_MRAMC_INIT_SERVICE,
 	TFM_PLATFORM_IOCTL_MRAMC_SET_WEN_SERVICE,
+	TFM_PLATFORM_IOCTL_SYS_EVENT_SERVICE,
 	TFM_PLATFORM_IOCTL_RAM_CTRL_SERVICE,
 	/* Last core service, start platform specific from this value. */
 	TFM_PLATFORM_IOCTL_CORE_LAST
@@ -93,6 +94,32 @@ struct tfm_gpio_service_args {
 struct tfm_gpio_service_out {
 	uint32_t result;
 };
+
+#if defined(CONFIG_NRF_TFM_SYS_EVENT_SERVICE)
+/** @brief nRF sys event secure-side operation selector. */
+enum tfm_sys_event_op {
+	/** Refcounted manual NVM low-latency register. */
+	TFM_SYS_EVENT_OP_REGISTER,
+	/** Refcounted manual NVM low-latency unregister. */
+	TFM_SYS_EVENT_OP_UNREGISTER,
+	/** Secure half of nrfx_gppi_conn_alloc() for flash wakeup. */
+	TFM_SYS_EVENT_OP_GPPI_CONN_ALLOC,
+};
+
+/** @brief Argument list for the nRF sys event service. */
+struct tfm_sys_event_service_args_t {
+	uint32_t op; /* enum tfm_sys_event_op */
+	uint32_t evt;
+	uint32_t tsk;
+	uint32_t ppi_handle;
+	uint32_t flash_dppi_channel;
+};
+
+/** @brief Output for the nRF sys event service. */
+struct tfm_sys_event_service_out_t {
+	int32_t result;
+};
+#endif
 
 #if defined(CONFIG_SOC_NRF7120_TFM_MRAMC_SERVICE)
 struct tfm_mramc_set_wen_service_args_t {
@@ -210,6 +237,32 @@ enum tfm_platform_err_t tfm_platform_mramc_init(void);
  */
 enum tfm_platform_err_t tfm_platform_mramc_set_wen(uint32_t write_mode);
 #endif /* SOC_NRF7120_TFM_MRAMC_SERVICE */
+
+#if defined(CONFIG_NRF_TFM_SYS_EVENT_SERVICE)
+/**
+ * @brief Register manual NVM low-latency mode in the secure domain.
+ *
+ * @note PSA latency applies. Not suitable inside zero-latency ISRs.
+ */
+enum tfm_platform_err_t tfm_platform_sys_event_manual_register(int32_t *handle);
+
+/**
+ * @brief Unregister manual NVM low-latency mode in the secure domain.
+ */
+enum tfm_platform_err_t tfm_platform_sys_event_manual_unregister(int32_t *result);
+
+/**
+ * @brief Secure half of nrfx_gppi_conn_alloc() for flash wakeup.
+ *
+ * NS must first call nrfx_gppi_domain_conn_alloc() and
+ * nrfx_gppi_ep_attach(evt, ppi_handle). This wires the secure flash task
+ * endpoint (equivalent to nrfx_gppi_ep_attach(tsk, ppi_handle)).
+ */
+enum tfm_platform_err_t tfm_platform_sys_event_gppi_conn_alloc(uint32_t evt, uint32_t tsk,
+							       uint32_t ppi_handle,
+							       int32_t *result);
+
+#endif /* CONFIG_NRF_TFM_SYS_EVENT_SERVICE */
 
 #if defined(CONFIG_NRF_TFM_RAM_CTRL_SERVICE)
 /**
