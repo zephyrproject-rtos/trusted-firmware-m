@@ -238,8 +238,6 @@ SECTIONS
         __HeapLimit = .;
         PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
-        __tls_base = .;                /* dummy. for picolib crt0 only */
-        __arm32_tls_tcb_offset = .;    /* dummy. for picolib crt0 only */
     } > RAM
     /* Heap bounds picolibc's malloc expects. */
     __heap_start = ADDR(.heap);
