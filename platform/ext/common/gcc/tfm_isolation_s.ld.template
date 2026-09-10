@@ -567,12 +567,14 @@ SECTIONS
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
-        PROVIDE(__heap_start = __HeapBase);
         . += __heap_size__;
         __HeapLimit = .;
-        PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
+    /* Heap bounds picolibc's malloc expects. */
+    __heap_start = ADDR(.heap);
+    __heap_end = ADDR(.heap) + SIZEOF(.heap);
+    __heap_size = SIZEOF(.heap);
 #endif
 
 {% for partition in partitions %}
@@ -632,6 +634,10 @@ SECTIONS
         KEEP(*(.jcr*))
         . = ALIGN(TFM_LINKER_TFM_DATA_ALIGNMENT);
     } > RAM AT > FLASH :tfm_data
+    /* Symbols required by picolibc's crt0 (_start). */
+    __data_start  = ADDR(.TFM_DATA);
+    __data_source = LOADADDR(.TFM_DATA);
+    __data_size   = SIZEOF(.TFM_DATA);
 
 #ifdef S_RUNTIME_ITCM_START
     .ER_ITCM_CODE :
@@ -680,8 +686,15 @@ SECTIONS
         *(SORT_BY_ALIGNMENT(.cy_sharedmem*)) /* Cypress shared memory */
 
         . = ALIGN(TFM_LINKER_TFM_BSS_ALIGNMENT);
+        . = ALIGN(4);
+        __tls_base = . ;                /* to satisfy picolibc crt0 */
         __bss_end__ = .;
     } > RAM
+    /* picolibc puts the thread pointer this far below the TLS block */
+    PROVIDE(__arm32_tls_tcb_offset = 8);
+    /* Symbols required by picolibc's crt0 (_start). */
+    __bss_start = ADDR(.TFM_BSS);
+    __bss_size  = SIZEOF(.TFM_BSS);
     Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
     Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
     Image$$ER_SERV_RT_POOL$$ZI$$Base = __service_runtime_start__;

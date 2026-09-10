@@ -175,9 +175,16 @@ SECTIONS
 
     } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
+    /* Symbols required by picolibc's crt0 (_start). */
+#ifdef CODE_SHARING
+    __data_start  = ADDR(.tfm_shared_symbols);
+    __data_source = LOADADDR(.tfm_shared_symbols);
+    __data_size   = SIZEOF(.tfm_shared_symbols) + SIZEOF(.tfm_bl2_shared_data) + SIZEOF(.data);
+#else
     __data_start  = ADDR(.data);
     __data_source = LOADADDR(.data);
     __data_size   = SIZEOF(.data);
+#endif
 
     .bss : ALIGN(4)
     {
@@ -186,8 +193,12 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
+        __tls_base = . ;                /* to satisfy picolibc crt0 */
         __bss_end__ = .;
     } > RAM
+    /* picolibc puts the thread pointer this far below the TLS block */
+    PROVIDE(__arm32_tls_tcb_offset = 8);
+    /* Symbols required by picolibc's crt0 (_start). */
     __bss_start = ADDR(.bss);
     __bss_end = ADDR(.bss) + SIZEOF(.bss);
     __bss_size = SIZEOF(.bss);
@@ -227,9 +238,10 @@ SECTIONS
         __HeapLimit = .;
         PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
-        __tls_base = .;                /* dummy. for picolib crt0 only */
-        __arm32_tls_tcb_offset = .;    /* dummy. for picolib crt0 only */
     } > RAM
+    /* Heap bounds picolibc's malloc expects. */
+    __heap_start = ADDR(.heap);
+    __heap_end = ADDR(.heap) + SIZEOF(.heap);
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);

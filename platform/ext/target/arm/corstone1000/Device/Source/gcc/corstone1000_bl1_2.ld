@@ -152,6 +152,10 @@ SECTIONS
 
     } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
+    /* Symbols required by picolibc's crt0 (_start). */
+    __data_start = ADDR(.data);
+    __data_source = LOADADDR(.data);
+    __data_size = SIZEOF(.data);
 
     .bss :
     {
@@ -160,8 +164,14 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
+        __tls_base = . ;                /* to satisfy picolibc crt0 */
         __bss_end__ = .;
     } > RAM
+    /* picolibc puts the thread pointer this far below the TLS block */
+    PROVIDE(__arm32_tls_tcb_offset = 8);
+    /* Symbols required by picolibc's crt0 (_start). */
+    __bss_start = ADDR(.bss);
+    __bss_size = SIZEOF(.bss);
 
     bss_size = __bss_end__ - __bss_start__;
 
@@ -184,6 +194,9 @@ SECTIONS
         PROVIDE(__heap_end = __HeapLimit);
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
+    /* Heap bounds picolibc's malloc expects. */
+    __heap_start = ADDR(.heap);
+    __heap_end = ADDR(.heap) + SIZEOF(.heap);
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
