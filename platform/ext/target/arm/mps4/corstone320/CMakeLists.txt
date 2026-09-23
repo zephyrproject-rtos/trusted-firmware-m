@@ -33,7 +33,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_PPC.c
         device/source/platform_s_device_definition.c
         native_drivers/ppc_corstone320_drv.c
-        ${ETHOS_DRIVER_PATH}/src/ethosu_device_u85.c
+        ${ETHOS_DRIVER_PATH}/src/ethosu_backend_$<LOWER_CASE:${ETHOSU_ARCH}>.c
 )
 
 target_compile_definitions(platform_s
