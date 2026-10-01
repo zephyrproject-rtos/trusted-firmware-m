@@ -8,10 +8,15 @@
 #include <errno.h>
 #include <nrfx.h>
 #include <helpers/nrfx_ram_ctrl.h>
+#include <hal/nrf_lfxo.h>
 
 #include "wicr_setup.h"
 #if defined(CONFIG_SOC_NRF7120_APPROTECT_BOOT_WORKAROUND)
 #include "approtect_setup.h"
+#endif
+
+#ifdef DT_NODELABEL
+#define LFXO_NODE DT_NODELABEL(lfxo)
 #endif
 
 #ifndef BIT_MASK
