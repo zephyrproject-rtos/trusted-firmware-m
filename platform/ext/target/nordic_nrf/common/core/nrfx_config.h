@@ -34,53 +34,9 @@
 
 #include <RTE_Device.h>
 
-#if RTE_FLASH0
-
-#if defined(NRF5340_XXAA_APPLICATION) || defined(NRF91_SERIES)
-#define NRFX_NVMC_ENABLED 1
-#elif defined(NRF54L_SERIES)
-#define NRFX_RRAMC_ENABLED 1
-#elif defined(NRF71_SERIES)
-#define NRFX_MRAMC_ENABLED 1
-#else
-#error "Unrecognized platform"
-#endif
-
-#endif /* RTE_FLASH0 */
-
-#if RTE_USART0 || RTE_USART1 || RTE_USART2 || RTE_USART3 || \
-    RTE_USART00 || RTE_USART20 || RTE_USART21 || RTE_USART22 || RTE_USART30
-#define NRFX_UARTE_ENABLED 1
-#endif
-#if RTE_USART0
-#define NRFX_UARTE0_ENABLED 1
-#endif
-#if RTE_USART1
-#define NRFX_UARTE1_ENABLED 1
-#endif
-#if RTE_USART2
-#define NRFX_UARTE2_ENABLED 1
-#endif
-#if RTE_USART3
-#define NRFX_UARTE3_ENABLED 1
-#endif
-
-/* 54L15 has different UART instances */
-#if RTE_USART00
-#define NRFX_UARTE00_ENABLED 1
-#endif
-#if RTE_USART20
-#define NRFX_UARTE20_ENABLED 1
-#endif
-#if RTE_USART21
-#define NRFX_UARTE21_ENABLED 1
-#endif
-#if RTE_USART22
-#define NRFX_UARTE22_ENABLED 1
-#endif
-#if RTE_USART30
-#define NRFX_UARTE30_ENABLED 1
-#endif
+#define NRFX_CONFIG_API_VER_MAJOR 4
+#define NRFX_CONFIG_API_VER_MINOR 7
+#define NRFX_CONFIG_API_VER_MICRO 1
 
 /*
  * For chips with TrustZone support, MDK provides CMSIS-Core peripheral
