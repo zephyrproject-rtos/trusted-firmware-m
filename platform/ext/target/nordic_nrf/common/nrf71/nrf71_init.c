@@ -8,8 +8,16 @@
 #include <errno.h>
 #include <nrfx.h>
 #include <helpers/nrfx_ram_ctrl.h>
+#include <hal/nrf_lfxo.h>
 
 #include "wicr_setup.h"
+#if defined(CONFIG_SOC_NRF7120_APPROTECT_BOOT_WORKAROUND)
+#include "approtect_setup.h"
+#endif
+
+#ifdef DT_NODELABEL
+#define LFXO_NODE DT_NODELABEL(lfxo)
+#endif
 
 #ifndef BIT_MASK
 /* Use Zephyr BIT_MASK for unasigned integers */
@@ -46,6 +54,10 @@ void __attribute__((weak)) wifi_setup(void){
 int nordicsemi_nrf71_init(void){
 	nrfx_ram_ctrl_retention_enable_all_set(false);
 
+#if defined(CONFIG_SOC_NRF7120_APPROTECT_BOOT_WORKAROUND)
+	approtect_setup();
+#endif
+
 #if defined (CONFIG_SOC_NRF7120_WICR_SETUP)
 	if (wicr_setup() != 0) {
 		return -EIO;
@@ -61,6 +73,23 @@ int nordicsemi_nrf71_init(void){
 	*(volatile uint32_t *)PWR_ANTSWC_REG |= PWR_ANTSWC_ENABLE;
 #endif /* DT_HAS_COMPAT_STATUS_OKAY(nordic_nrf_pwr_antswc) */
 #endif /* DT_HAS_COMPAT_STATUS_OKAY */
+
+	/* Power P4 on or off explicitly, as the boards disagree on its initial state.
+	 * This should be turned off when not using P4 as it can draw roughly 40 uA of
+	 * current, even in System OFF.
+	 *
+	 * The selected voltage mode must match what actually drives the port's VDDIO
+	 * pin on the board; mismatching them can damage the port.
+	 */
+#ifdef DT_NODE_HAS_STATUS_OKAY
+#if !DT_NODE_HAS_STATUS_OKAY(DT_NODELABEL(gpio4))
+	NRF_P4->PWRCTRL = P4_PWRCTRL_OFF;
+#elif DT_ENUM_HAS_VALUE(DT_NODELABEL(gpio4), nordic_pad_voltage, 1v8)
+	NRF_P4->PWRCTRL = P4_PWRCTRL_1V8;
+#else
+	NRF_P4->PWRCTRL = P4_PWRCTRL_3V3;
+#endif
+#endif /* DT_NODE_HAS_STATUS_OKAY */
 
 	/* Configure LFXO capacitive load if internal load capacitors are used */
 #ifdef DT_ENUM_HAS_VALUE
